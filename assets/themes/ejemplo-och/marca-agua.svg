@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <defs>
+    <linearGradient id="ghost" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset=".55" stop-color="#d8b96c" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".03"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#ghost)">
+    <text x="48" y="190" font-family="Georgia, serif" font-size="142" font-weight="900">Orgullo</text>
+    <text x="48" y="320" font-family="Georgia, serif" font-size="142" font-weight="900">Charro</text>
+  </g>
+  <g opacity=".18" fill="none" stroke="#d7b866" stroke-width="5">
+    <circle cx="728" cy="210" r="100"/>
+    <path d="M728 110c15 33 41 59 74 78-33 19-59 45-74 78-15-33-41-59-74-78 33-19 59-45 74-78Z"/>
+  </g>
+</svg>

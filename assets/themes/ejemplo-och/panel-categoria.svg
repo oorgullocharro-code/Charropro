@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="170" viewBox="0 0 760 170">
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1">
+      <stop offset="0" stop-color="#06130b"/>
+      <stop offset=".55" stop-color="#17521f"/>
+      <stop offset="1" stop-color="#06130b"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#fff0aa"/>
+      <stop offset=".5" stop-color="#98702b"/>
+      <stop offset="1" stop-color="#fff0aa"/>
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-45%" width="120%" height="190%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#f4d76f" flood-opacity=".42"/>
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".58"/>
+    </filter>
+  </defs>
+  <g filter="url(#glow)">
+    <path d="M38 28h684l20 56-20 56H38L18 84Z" fill="url(#panel)" stroke="url(#gold)" stroke-width="4"/>
+    <text x="380" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="900" fill="#e7d08b">CATEGORIA</text>
+    <text x="380" y="119" text-anchor="middle" font-family="Georgia, serif" font-size="42" font-weight="900" fill="#fff8cf">LIBRE</text>
+  </g>
+</svg>

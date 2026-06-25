@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="96" viewBox="0 0 860 96">
+  <defs>
+    <linearGradient id="bar" x1="0" x2="1">
+      <stop offset="0" stop-color="#092414"/>
+      <stop offset=".52" stop-color="#226b20"/>
+      <stop offset="1" stop-color="#08170d"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" x2="1">
+      <stop offset="0" stop-color="#fff1ad"/>
+      <stop offset=".5" stop-color="#9a7028"/>
+      <stop offset="1" stop-color="#fff1ad"/>
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-80%" width="120%" height="260%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#f9dc75" flood-opacity=".6"/>
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".5"/>
+    </filter>
+  </defs>
+  <g filter="url(#glow)">
+    <path d="M32 16h790l22 32-22 32H32L12 48 32 16Z" fill="url(#bar)" stroke="url(#edge)" stroke-width="4"/>
+    <path d="M45 30h738" stroke="#fff7c9" stroke-opacity=".26" stroke-width="3"/>
+    <path d="M45 67h738" stroke="#000" stroke-opacity=".5" stroke-width="4"/>
+    <rect x="728" y="17" width="92" height="62" fill="#051208" opacity=".35"/>
+  </g>
+</svg>

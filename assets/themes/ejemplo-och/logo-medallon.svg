@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420" viewBox="0 0 420 420">
+  <defs>
+    <radialGradient id="gold" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#f7e7a6"/>
+      <stop offset="0.42" stop-color="#b99045"/>
+      <stop offset="1" stop-color="#3b2712"/>
+    </radialGradient>
+    <linearGradient id="green" x1="0" x2="1">
+      <stop offset="0" stop-color="#082515"/>
+      <stop offset="0.5" stop-color="#1e6f23"/>
+      <stop offset="1" stop-color="#07160d"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <circle cx="210" cy="210" r="184" fill="#0b120d"/>
+    <circle cx="210" cy="210" r="174" fill="url(#gold)"/>
+    <circle cx="210" cy="210" r="151" fill="url(#green)"/>
+    <circle cx="210" cy="210" r="132" fill="url(#gold)"/>
+    <circle cx="210" cy="210" r="112" fill="#2d1c0d" opacity=".22"/>
+    <g fill="none" stroke="#f9e8ae" stroke-width="2.5" opacity=".75">
+      <path d="M210 93c19 38 48 69 87 93-39 24-68 55-87 93-19-38-48-69-87-93 39-24 68-55 87-93Z"/>
+      <path d="M139 139c47 2 95 2 142 0-2 47-2 95 0 142-47-2-95-2-142 0 2-47 2-95 0-142Z"/>
+      <circle cx="210" cy="210" r="62"/>
+    </g>
+    <text x="210" y="200" text-anchor="middle" font-family="Georgia, serif" font-size="44" font-weight="900" fill="#fff8cf">OCH</text>
+    <text x="210" y="237" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" font-weight="900" letter-spacing="3" fill="#fff8cf">CHARROPRO</text>
+  </g>
+</svg>
