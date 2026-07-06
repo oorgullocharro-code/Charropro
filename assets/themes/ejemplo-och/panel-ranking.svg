@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="330" viewBox="0 0 900 330">
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1">
+      <stop offset="0" stop-color="#07140d" stop-opacity=".92"/>
+      <stop offset=".6" stop-color="#10291a" stop-opacity=".82"/>
+      <stop offset="1" stop-color="#030604" stop-opacity=".92"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#f6e7a7"/>
+      <stop offset=".5" stop-color="#8d6525"/>
+      <stop offset="1" stop-color="#f6e7a7"/>
+    </linearGradient>
+    <filter id="glow" x="-8%" y="-20%" width="116%" height="150%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#dcb955" flood-opacity=".34"/>
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+  </defs>
+  <g filter="url(#glow)">
+    <rect x="20" y="20" width="860" height="290" rx="12" fill="url(#panel)" stroke="url(#gold)" stroke-width="3"/>
+    <text x="42" y="61" font-family="Arial, sans-serif" font-size="22" font-weight="900" fill="#e7d08b">TABLA GENERAL POR EQUIPOS</text>
+    <path d="M40 83h820" stroke="#f7e8ad" stroke-opacity=".32" stroke-width="2"/>
+    <path d="M40 132h820M40 181h820M40 230h820M40 279h820" stroke="#b8c2bb" stroke-opacity=".22" stroke-width="2"/>
+    <text x="60" y="113" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#d8c17c">#</text>
+    <text x="132" y="113" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#d8c17c">EQUIPO</text>
+    <text x="625" y="113" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#d8c17c">PROM.</text>
+    <text x="770" y="113" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#d8c17c">TOTAL</text>
+  </g>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="330" viewBox="0 0 900 330">
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1">
+      <stop offset="0" stop-color="#07140d" stop-opacity=".95"/>
+      <stop offset=".58" stop-color="#10291a" stop-opacity=".86"/>
+      <stop offset="1" stop-color="#030604" stop-opacity=".95"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#fff0aa"/>
+      <stop offset=".52" stop-color="#8f6828"/>
+      <stop offset="1" stop-color="#fff0aa"/>
+    </linearGradient>
+    <filter id="shadow" x="-8%" y="-25%" width="116%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#d9ba5c" flood-opacity=".25"/>
+      <feDropShadow dx="0" dy="15" stdDeviation="18" flood-color="#000" flood-opacity=".58"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <rect x="20" y="20" width="860" height="290" rx="12" fill="url(#panel)" stroke="url(#gold)" stroke-width="3"/>
+    <path d="M40 83h820" stroke="#f7e8ad" stroke-opacity=".24" stroke-width="2"/>
+    <path d="M40 292h820" stroke="#000" stroke-opacity=".42" stroke-width="4"/>
+  </g>
+</svg>

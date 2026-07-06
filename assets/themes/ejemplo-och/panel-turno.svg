@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="150" viewBox="0 0 920 150">
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1">
+      <stop offset="0" stop-color="#07140d"/>
+      <stop offset=".62" stop-color="#10281a"/>
+      <stop offset="1" stop-color="#020604"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#f6e7a7"/>
+      <stop offset=".52" stop-color="#98702c"/>
+      <stop offset="1" stop-color="#f6e7a7"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-60%" width="120%" height="220%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".62"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M22 18h724l34 114H22Z" fill="url(#panel)" stroke="url(#gold)" stroke-width="3"/>
+    <path d="M786 18h112v114H786Z" fill="#07140d" stroke="url(#gold)" stroke-width="3"/>
+    <path d="M44 42h675" stroke="#f7e8ad" stroke-opacity=".18" stroke-width="2"/>
+    <path d="M44 108h675" stroke="#000" stroke-opacity=".6" stroke-width="4"/>
+    <text x="44" y="58" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#dcc27a">CHARRO EN TURNO</text>
+    <text x="842" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="900" fill="#dcc27a">PASADA</text>
+  </g>
+</svg>
