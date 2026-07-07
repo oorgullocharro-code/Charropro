@@ -1,12 +1,18 @@
 # Despliegue CharroPro
 
-## Version RESULTADOS-004
+## Version RESULTADOS-005
 
 Version actual de cache:
 
 ```text
-v=20260707-resultados-004-phase-selector-sync1
+v=20260707-resultados-005-general-phase-only1
 ```
+
+Esta base simplifica la pantalla interna de Resultados. La tabla general del torneo queda fija como resumen por fases/rondas y ya no cambia a columnas por charreada al seleccionar una fase. El selector de fase queda aplicado a la sabana: `Todas` muestra resumen general por fases y una fase especifica muestra el detalle solo de sus equipos participantes y sus charreadas. No modifica scores, calculos, calificador, pagina publica, snapshot publico ni Firebase Rules.
+
+Esta base convierte la pestana oficial `Programa` en un tablero operativo de produccion. Cada charreada conserva la misma coleccion existente, pero ahora puede guardar datos logisticos opcionales: lienzo/sede, locutor asignado, jueces asignados, hora real de inicio, hora real de termino, estado operativo, notas internas y responsable de produccion. Si un campo no existe, la vista muestra `—` sin romper torneos anteriores.
+
+La tarjeta de Programa ahora muestra hora programada, fecha, charreada, fase, equipos, estado deportivo, estado operativo, inicio real, termino real, duracion calculada, responsables y acciones rapidas a Juez, Locutores, Graficos y OBS. No modifica calificador, reglas deportivas, puntajes, Firebase Rules ni estructura de scores.
 
 Esta base conecta el selector de fase/ronda de Resultados con el resumen y la sabana. En `Todas`, Resultados muestra resumen por fases. Al elegir una fase, muestra solo equipos participantes o con score registrado en esa fase, abre el desglose por charreada, agrega `Total {fase}` y conserva el `Total` general. La sabana tambien cambia: en `Todas` muestra resumen por fases y en una fase muestra solo el detalle de esa fase. No modifica scores, totales oficiales, calificador, snapshot publico ni reglas.
 
@@ -189,7 +195,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260707-resultados-004-phase-selector-sync1
+https://orgullocharro.com/charropro/?v=20260707-resultados-005-general-phase-only1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

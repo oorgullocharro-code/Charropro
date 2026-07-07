@@ -2087,6 +2087,12 @@ th.num {
   line-height: 1;
 }
 
+.official-program-time small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .official-program-main {
   min-width: 0;
   display: grid;
@@ -2106,6 +2112,42 @@ th.num {
   line-height: 1.1;
 }
 
+.official-program-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 8px;
+}
+
+.official-program-meta-grid div,
+.official-program-notes {
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 8px;
+  padding: 8px 9px;
+  background: rgba(255, 255, 255, .03);
+  min-width: 0;
+}
+
+.official-program-meta-grid span,
+.official-program-notes span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.official-program-meta-grid strong,
+.official-program-notes strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
 .official-program-teams {
   display: flex;
   flex-wrap: wrap;
@@ -2123,9 +2165,9 @@ th.num {
 }
 
 .official-program-actions {
-  min-width: 230px;
+  min-width: 300px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+  grid-template-columns: repeat(2, minmax(90px, 1fr));
   gap: 8px;
   align-content: center;
 }

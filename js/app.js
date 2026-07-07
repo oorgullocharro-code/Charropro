@@ -1,9 +1,9 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260706-release22d-active-charreada-source2";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260707-resultados-005-general-phase-only1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260706-release22d-active-charreada-source2";
+} from "./data/defaultScoringButtonLayouts.js?v=20260707-resultados-005-general-phase-only1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -11,14 +11,14 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260706-release22d-active-charreada-source2";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260706-release22d-active-charreada-source2";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260706-release22d-active-charreada-source2";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260706-release22d-active-charreada-source2";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260706-release22d-active-charreada-source2";
-import { getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260706-release22d-active-charreada-source2";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260706-release22d-active-charreada-source2";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260706-release22d-active-charreada-source2";
+} from "./data/calaRules.js?v=20260707-resultados-005-general-phase-only1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260707-resultados-005-general-phase-only1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260707-resultados-005-general-phase-only1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260707-resultados-005-general-phase-only1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260707-resultados-005-general-phase-only1";
+import { getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260707-resultados-005-general-phase-only1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260707-resultados-005-general-phase-only1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260707-resultados-005-general-phase-only1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -30,7 +30,7 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/scoring.js?v=20260707-resultados-005-general-phase-only1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -40,7 +40,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/sync.js?v=20260707-resultados-005-general-phase-only1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -69,16 +69,16 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/firebaseSync.js?v=20260707-resultados-005-general-phase-only1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260707-resultados-005-general-phase-only1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260706-release22d-active-charreada-source2";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/tournamentContext.js?v=20260707-resultados-005-general-phase-only1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260707-resultados-005-general-phase-only1";
 import {
   createRoster,
   emptyAttempt,
@@ -105,10 +105,10 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/state.js?v=20260707-resultados-005-general-phase-only1";
 
 const app = document.getElementById("app");
-const OBS_PAGE_VERSION = "20260706-release22d-active-charreada-source2";
+const OBS_PAGE_VERSION = "20260707-resultados-005-general-phase-only1";
 const APP_MODE = window.CHARROPRO_APP_MODE === "tournament" ? "tournament" : "portal";
 const IS_TOURNAMENT_APP = APP_MODE === "tournament";
 const scoringScrollSelectors = [".score-workspace", ".scoring-main", ".turn-panel", ".suertes-strip", ".scoring-shell", ".cp-scoring-shell"];
@@ -149,6 +149,16 @@ const CHARREADA_STATUS_OPTIONS = [
   ["en_vivo", "En vivo"],
   ["finalizada", "Finalizada"],
   ["congelada", "Congelada"]
+];
+const OPERATIONAL_STATUS_OPTIONS = [
+  ["", "Sin estado operativo"],
+  ["programada", "Programada"],
+  ["preparando", "Preparando"],
+  ["en_vivo", "En vivo"],
+  ["pausada", "Pausada"],
+  ["terminada", "Terminada"],
+  ["suspendida", "Suspendida"],
+  ["cancelada", "Cancelada"]
 ];
 const CHARREADA_PHASE_OPTIONS = [
   ["", "Sin fase"],
@@ -1090,6 +1100,14 @@ function getPageHref(fileName, options = {}) {
     return `./${fileName}?${params.toString()}`;
   }
   return getGraphicHref(fileName);
+}
+
+function getProgramQuickHref(fileName, charreadaId = "") {
+  const params = shouldIncludeLiveChannel(fileName)
+    ? buildLiveUrlParams()
+    : new URLSearchParams({ v: OBS_PAGE_VERSION });
+  if (charreadaId) params.set("charreadaId", charreadaId);
+  return `./${fileName}?${params.toString()}`;
 }
 
 function getAbsolutePageHref(fileName, options = {}) {
@@ -3363,17 +3381,27 @@ function renderOfficialProgramDayGroup(group, activeCharreadaId = state.activeCh
 function renderOfficialProgramCard(charreada, activeCharreadaId = state.activeCharreadaId) {
   const isActive = charreada.id === activeCharreadaId;
   const displayStatus = getCanonicalCharreadaStatus(charreada, activeCharreadaId);
-  const statusClass = getCharreadaStatusClass(displayStatus);
+  const operationalStatus = getCharreadaOperationalStatus(charreada);
+  const statusClass = operationalStatus ? getOperationalStatusClass(operationalStatus) : getCharreadaStatusClass(displayStatus);
   const teams = (charreada.teamIds || []).map((teamId) => getTeam(teamId)).filter(Boolean);
   const locked = isCharreadaFrozen(charreada);
   const canManage = roleCan(firebaseAccess.role, "manage");
   const canOperate = roleCan(firebaseAccess.role, "operate");
+  const venue = getCharreadaProductionValue(charreada, ["venue", "sede", "lienzo", "productionVenue"]);
+  const announcer = getCharreadaProductionValue(charreada, ["announcer", "locutor", "assignedAnnouncer"]);
+  const judges = getCharreadaProductionValue(charreada, ["judges", "jueces", "assignedJudges"]);
+  const productionLead = getCharreadaProductionValue(charreada, ["productionLead", "responsableProduccion", "productionManager"]);
+  const realStartTime = getCharreadaProductionValue(charreada, ["realStartTime", "actualStartTime", "horaRealInicio"]);
+  const realEndTime = getCharreadaProductionValue(charreada, ["realEndTime", "actualEndTime", "horaRealTermino"]);
+  const duration = getCharreadaRealDuration(charreada);
+  const notes = getCharreadaProductionValue(charreada, ["internalNotes", "notasInternas", "productionNotes"]);
 
   return html`
     <article class="official-program-card ${statusClass} ${isActive ? "active" : ""}">
       <div class="official-program-time">
-        <span>Hora</span>
-        <strong>${escapeHTML(formatTimeLabel(charreada.startTime) || "Por confirmar")}</strong>
+        <span>Hora programada</span>
+        <strong>${escapeHTML(formatTimeLabel(charreada.startTime) || "—")}</strong>
+        <small>${escapeHTML(formatDateLabel(charreada.date) || "Fecha por confirmar")}</small>
       </div>
       <div class="official-program-main">
         <div class="official-program-card-head">
@@ -3385,8 +3413,18 @@ function renderOfficialProgramCard(charreada, activeCharreadaId = state.activeCh
             <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
             <span class="pill">${teams.length} equipo${teams.length === 1 ? "" : "s"}</span>
             <span class="pill ${statusClass}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
+            <span class="pill ${statusClass}">Operativo: ${escapeHTML(formatOperationalStatus(operationalStatus))}</span>
             ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
           </div>
+        </div>
+        <div class="official-program-meta-grid">
+          <div><span>Lienzo / sede</span><strong>${escapeHTML(venue || "—")}</strong></div>
+          <div><span>Inicio real</span><strong>${escapeHTML(formatTimeLabel(realStartTime) || "—")}</strong></div>
+          <div><span>Termino real</span><strong>${escapeHTML(formatTimeLabel(realEndTime) || "—")}</strong></div>
+          <div><span>Duracion</span><strong>${escapeHTML(duration)}</strong></div>
+          <div><span>Locutor</span><strong>${escapeHTML(announcer || "—")}</strong></div>
+          <div><span>Jueces</span><strong>${escapeHTML(judges || "—")}</strong></div>
+          <div><span>Produccion</span><strong>${escapeHTML(productionLead || "—")}</strong></div>
         </div>
         <div class="official-program-teams">
           ${
@@ -3395,11 +3433,19 @@ function renderOfficialProgramCard(charreada, activeCharreadaId = state.activeCh
               : html`<span>Sin equipos asignados</span>`
           }
         </div>
+        <div class="official-program-notes">
+          <span>Notas internas</span>
+          <strong>${escapeHTML(notes || "—")}</strong>
+        </div>
       </div>
       <div class="official-program-actions">
         <button class="button small" data-action="open-program-charreada" data-id="${escapeHTML(charreada.id)}">Abrir</button>
         ${canManage ? html`<button class="button small" data-action="edit-charreada" data-id="${escapeHTML(charreada.id)}" ${locked ? "disabled" : ""}>Editar</button>` : ""}
         ${canOperate ? html`<button class="button primary small" data-action="set-active-charreada" data-id="${escapeHTML(charreada.id)}" ${isActive ? "disabled" : ""}>Activar</button>` : ""}
+        <a class="button small" href="${escapeHTML(getProgramQuickHref("jueces.html", charreada.id))}" target="_blank" rel="noopener">Juez</a>
+        <a class="button small" href="${escapeHTML(getProgramQuickHref("locutores.html", charreada.id))}" target="_blank" rel="noopener">Locutores</a>
+        <a class="button small" href="${escapeHTML(getProgramQuickHref("graficos.html", charreada.id))}" target="_blank" rel="noopener">Graficos</a>
+        <a class="button small" href="${escapeHTML(getProgramQuickHref("obs.html", charreada.id))}" target="_blank" rel="noopener">OBS</a>
       </div>
     </article>
   `;
@@ -3620,6 +3666,7 @@ function openProgramCharreada(charreadaId = "") {
   const isActive = activeResolution.id === charreada.id;
   const displayStatus = getCanonicalCharreadaStatus(charreada, activeResolution.id || state.activeCharreadaId || "");
   const teams = (charreada.teamIds || []).map((teamId) => getTeam(teamId)).filter(Boolean);
+  const operationalStatus = getCharreadaOperationalStatus(charreada);
   showModal({
     title: charreada.name || "Charreada",
     body: html`
@@ -3629,7 +3676,22 @@ function openProgramCharreada(charreadaId = "") {
           <span class="pill">${escapeHTML(formatTimeLabel(charreada.startTime) || "Hora por confirmar")}</span>
           <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
           <span class="pill ${getCharreadaStatusClass(displayStatus)}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
+          <span class="pill ${getOperationalStatusClass(operationalStatus)}">Operativo: ${escapeHTML(formatOperationalStatus(operationalStatus))}</span>
           ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
+        </div>
+        <div class="official-program-meta-grid">
+          <div><span>Lienzo / sede</span><strong>${escapeHTML(getCharreadaProductionValue(charreada, ["venue", "sede", "lienzo", "productionVenue"]) || "—")}</strong></div>
+          <div><span>Hora programada</span><strong>${escapeHTML(formatTimeLabel(charreada.startTime) || "—")}</strong></div>
+          <div><span>Inicio real</span><strong>${escapeHTML(formatTimeLabel(getCharreadaProductionValue(charreada, ["realStartTime", "actualStartTime", "horaRealInicio"])) || "—")}</strong></div>
+          <div><span>Termino real</span><strong>${escapeHTML(formatTimeLabel(getCharreadaProductionValue(charreada, ["realEndTime", "actualEndTime", "horaRealTermino"])) || "—")}</strong></div>
+          <div><span>Duracion</span><strong>${escapeHTML(getCharreadaRealDuration(charreada))}</strong></div>
+          <div><span>Locutor</span><strong>${escapeHTML(getCharreadaProductionValue(charreada, ["announcer", "locutor", "assignedAnnouncer"]) || "—")}</strong></div>
+          <div><span>Jueces</span><strong>${escapeHTML(getCharreadaProductionValue(charreada, ["judges", "jueces", "assignedJudges"]) || "—")}</strong></div>
+          <div><span>Produccion</span><strong>${escapeHTML(getCharreadaProductionValue(charreada, ["productionLead", "responsableProduccion", "productionManager"]) || "—")}</strong></div>
+        </div>
+        <div class="official-program-notes">
+          <span>Notas internas</span>
+          <strong>${escapeHTML(getCharreadaProductionValue(charreada, ["internalNotes", "notasInternas", "productionNotes"]) || "—")}</strong>
         </div>
         <div class="official-program-teams">
           ${
@@ -3728,6 +3790,58 @@ function formatTimeLabel(value) {
   return `${hour}:${String(minuteRaw).padStart(2, "0")} ${suffix}`;
 }
 
+function getCharreadaProductionValue(charreada = {}, keys = []) {
+  for (const key of keys) {
+    const value = charreada?.[key];
+    if (value !== undefined && value !== null && String(value).trim()) return String(value).trim();
+  }
+  return "";
+}
+
+function getCharreadaOperationalStatus(charreada = {}) {
+  return getCharreadaProductionValue(charreada, ["operationalStatus", "estadoOperativo", "productionStatus"]);
+}
+
+function formatOperationalStatus(status) {
+  const normalized = String(status || "").trim();
+  const option = OPERATIONAL_STATUS_OPTIONS.find(([value]) => value === normalized);
+  return option?.[1] || "—";
+}
+
+function getOperationalStatusClass(status) {
+  if (status === "en_vivo" || status === "terminada") return "green";
+  if (status === "preparando" || status === "pausada" || status === "suspendida") return "amber";
+  if (status === "cancelada") return "red";
+  return "blue";
+}
+
+function getCharreadaRealDuration(charreada = {}) {
+  const explicitDuration = getCharreadaProductionValue(charreada, ["realDuration", "durationReal", "duracionReal"]);
+  if (explicitDuration) return explicitDuration;
+  const start = getCharreadaProductionValue(charreada, ["realStartTime", "actualStartTime", "horaRealInicio"]);
+  const end = getCharreadaProductionValue(charreada, ["realEndTime", "actualEndTime", "horaRealTermino"]);
+  const minutes = getTimeDifferenceMinutes(start, end);
+  if (!Number.isFinite(minutes)) return "—";
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours && rest) return `${hours} h ${rest} min`;
+  if (hours) return `${hours} h`;
+  return `${rest} min`;
+}
+
+function getTimeDifferenceMinutes(start, end) {
+  const startParts = String(start || "").split(":").map(Number);
+  const endParts = String(end || "").split(":").map(Number);
+  if (startParts.length < 2 || endParts.length < 2) return NaN;
+  const [startHour, startMinute] = startParts;
+  const [endHour, endMinute] = endParts;
+  if (![startHour, startMinute, endHour, endMinute].every(Number.isFinite)) return NaN;
+  const startTotal = startHour * 60 + startMinute;
+  let endTotal = endHour * 60 + endMinute;
+  if (endTotal < startTotal) endTotal += 24 * 60;
+  return endTotal - startTotal;
+}
+
 function formatCharreadaStatus(status) {
   if (status === "en_vivo") return "En vivo";
   if (status === "terminada" || status === "finalizada") return "Terminada";
@@ -3765,7 +3879,6 @@ function renderResults() {
   const phaseColumns = buildResultsPhaseColumns(charreadas);
   const selectedPhaseId = getSelectedResultsPhaseId(phaseColumns);
   const selectedPhase = phaseColumns.find((column) => column.id === selectedPhaseId) || null;
-  const visiblePhaseColumns = selectedPhase ? buildResultsPhaseDetailColumns(selectedPhase) : phaseColumns;
   const standings = buildTournamentTeamStandings(tournament.id);
   const visibleStandings = selectedPhase ? filterResultsStandingsByPhase(standings, selectedPhase) : standings;
   const visibleTeamIds = new Set(visibleStandings.map((row) => row.team?.id).filter(Boolean));
@@ -3795,8 +3908,8 @@ function renderResults() {
     ? selectedPhase.sourceCharreadas.map((charreada) => ({ id: charreada.id, name: charreada.name }))
     : phaseColumns.map((column) => ({ phase: column.label, charreadas: column.charreadaIds.length })));
   console.info("[resultados-004] summary by phase rendered", {
-    mode: selectedPhase ? "phase" : "all",
-    columns: visiblePhaseColumns.map((column) => column.label)
+    mode: "all",
+    columns: phaseColumns.map((column) => column.label)
   });
   console.info("[resultados-004] phase detail rendered", selectedPhase ? {
     phase: selectedPhase.label,
@@ -3805,6 +3918,14 @@ function renderResults() {
   console.info("[resultados-004] visible teams by phase", {
     phase: selectedPhase?.label || "Todas",
     teams: visibleStandings.map((row) => getEntryDisplayName(row.team))
+  });
+  console.info("[resultados-005] general table by phase rendered", {
+    columns: phaseColumns.map((column) => column.label),
+    rows: standings.length
+  });
+  console.info("[resultados-005] sabana phase selector rendered", {
+    selected: selectedPhase?.label || "Todas",
+    options: phaseColumns.map((column) => column.label)
   });
 
   return html`
@@ -3833,30 +3954,25 @@ function renderResults() {
       <article class="card">
         <div class="card-header">
           <div>
-	            <h2 class="card-title">${selectedPhase ? `Desglose de ${escapeHTML(selectedPhase.label)}` : `Resumen general por fases`}</h2>
+	            <h2 class="card-title">Tabla general del torneo</h2>
             <p class="card-subtitle">
-              ${selectedPhase
-                ? html`Charreadas incluidas: ${escapeHTML(formatResultsPhaseCharreadas(selectedPhase))}. Total general visible a la derecha.`
-                : html`Solo torneo activo. Desempate: promedio, total, menos negativos, mejor fase y nombre.`}
+              Vista rapida por fase/ronda. Las charreadas individuales se consultan en la sabana o en Programa.
             </p>
           </div>
         </div>
         <div class="card-body">
-          ${renderResultsPhaseSelector(phaseColumns, selectedPhaseId)}
-          ${selectedPhase ? renderResultsPhaseDetail(selectedPhase) : ""}
-          ${visibleStandings.length
-            ? renderTournamentStandingsTable(visiblePhaseColumns, visibleStandings, {
-                phaseTotalColumn: selectedPhase,
-                showMetrics: !selectedPhase
+          ${standings.length
+            ? renderTournamentStandingsTable(phaseColumns, standings, {
+                showMetrics: false
               })
-            : html`<div class="empty">Sin resultados en esta fase.</div>`}
+            : html`<div class="empty">Sin resultados en este torneo.</div>`}
         </div>
       </article>
 
       <article class="card">
         <div class="card-header">
           <div>
-            <h2 class="card-title">${selectedPhase ? `Sabana de ${escapeHTML(selectedPhase.label)}` : "Sabana - Resumen general por fases"}</h2>
+            <h2 class="card-title">${selectedPhase ? `Sabana - ${escapeHTML(selectedPhase.label)}` : "Sabana - Resumen general por fases"}</h2>
 	            <p class="card-subtitle">
 	              ${selectedPhase
                   ? html`Desglose por charreada y suerte solo de ${escapeHTML(selectedPhase.label)}.`
@@ -3865,6 +3981,8 @@ function renderResults() {
           </div>
         </div>
         <div class="card-body">
+          ${renderResultsPhaseSelector(phaseColumns, selectedPhaseId)}
+          ${selectedPhase ? renderResultsPhaseDetail(selectedPhase) : ""}
           ${
             charreadas.length
               ? renderResultsScoreSheet({
@@ -4761,6 +4879,7 @@ function selectResultsPhase(phaseId = "") {
   state.resultsPhaseFilter = String(phaseId || "").trim();
   console.info("[resultados-003] selector phase changed", state.resultsPhaseFilter || "Todas");
   console.info("[resultados-004] selector phase changed", state.resultsPhaseFilter || "Todas");
+  console.info("[resultados-005] sabana phase changed", state.resultsPhaseFilter || "Todas");
   saveState({ silent: true });
   render();
 }
@@ -7294,6 +7413,7 @@ function showCharreadaModal(charreadaId = null) {
   const selectedTeamIds = charreada?.teamIds || [];
   const labels = getEntityLabels();
   const phaseState = getCharreadaPhaseFormState(charreada);
+  const operationalStatus = getCharreadaOperationalStatus(charreada || {});
   const orderedTeams = teams
     .map((team, index) => ({
       team,
@@ -7344,6 +7464,42 @@ function showCharreadaModal(charreadaId = null) {
           <div>
             <label>Fase personalizada</label>
             <input name="phaseOther" value="${escapeHTML(phaseState.customValue)}" placeholder="Usar solo si elegiste Otro">
+          </div>
+          <div>
+            <label>Lienzo / sede</label>
+            <input name="venue" value="${escapeHTML(getCharreadaProductionValue(charreada || {}, ["venue", "sede", "lienzo", "productionVenue"]))}" placeholder="Lienzo principal">
+          </div>
+          <div>
+            <label>Locutor asignado</label>
+            <input name="announcer" value="${escapeHTML(getCharreadaProductionValue(charreada || {}, ["announcer", "locutor", "assignedAnnouncer"]))}" placeholder="Nombre del locutor">
+          </div>
+          <div>
+            <label>Jueces asignados</label>
+            <input name="judges" value="${escapeHTML(getCharreadaProductionValue(charreada || {}, ["judges", "jueces", "assignedJudges"]))}" placeholder="Juez 1, Juez 2">
+          </div>
+          <div>
+            <label>Responsable de produccion</label>
+            <input name="productionLead" value="${escapeHTML(getCharreadaProductionValue(charreada || {}, ["productionLead", "responsableProduccion", "productionManager"]))}" placeholder="Responsable operativo">
+          </div>
+          <div>
+            <label>Hora real de inicio</label>
+            <input name="realStartTime" type="time" value="${escapeHTML(getCharreadaProductionValue(charreada || {}, ["realStartTime", "actualStartTime", "horaRealInicio"]))}">
+          </div>
+          <div>
+            <label>Hora real de termino</label>
+            <input name="realEndTime" type="time" value="${escapeHTML(getCharreadaProductionValue(charreada || {}, ["realEndTime", "actualEndTime", "horaRealTermino"]))}">
+          </div>
+          <div>
+            <label>Estado operativo</label>
+            <select name="operationalStatus">
+              ${OPERATIONAL_STATUS_OPTIONS.map(([value, label]) => html`
+                <option value="${escapeHTML(value)}" ${operationalStatus === value ? "selected" : ""}>${escapeHTML(label)}</option>
+              `).join("")}
+            </select>
+          </div>
+          <div class="wide">
+            <label>Notas internas</label>
+            <textarea name="internalNotes" rows="3" placeholder="Notas para produccion, jueces o logistica">${escapeHTML(getCharreadaProductionValue(charreada || {}, ["internalNotes", "notasInternas", "productionNotes"]))}</textarea>
           </div>
 	        </div>
 	        <div>
@@ -8568,6 +8724,14 @@ function saveCharreada() {
     startTime: data.get("startTime"),
     status: data.get("status"),
     phase,
+    venue: String(data.get("venue") || "").trim(),
+    announcer: String(data.get("announcer") || "").trim(),
+    judges: String(data.get("judges") || "").trim(),
+    productionLead: String(data.get("productionLead") || "").trim(),
+    realStartTime: String(data.get("realStartTime") || "").trim(),
+    realEndTime: String(data.get("realEndTime") || "").trim(),
+    operationalStatus: String(data.get("operationalStatus") || "").trim(),
+    internalNotes: String(data.get("internalNotes") || "").trim(),
     teamIds
   };
   console.info("[program-fase-001] phase saved", { charreadaId: id, phase: phase || "Sin fase" });
