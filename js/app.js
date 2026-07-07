@@ -149,6 +149,20 @@ const CHARREADA_STATUS_OPTIONS = [
   ["finalizada", "Finalizada"],
   ["congelada", "Congelada"]
 ];
+const CHARREADA_PHASE_OPTIONS = [
+  ["", "Sin fase"],
+  ["Preparación", "Preparación"],
+  ["Fase 1", "Fase 1"],
+  ["Fase 2", "Fase 2"],
+  ["Fase 3", "Fase 3"],
+  ["Repechaje", "Repechaje"],
+  ["Semifinal", "Semifinal"],
+  ["Final", "Final"],
+  ["Caladero", "Caladero"],
+  ["Coleadero", "Coleadero"],
+  ["Exhibición", "Exhibición"],
+  ["__other", "Otro"]
+];
 const TOURNAMENT_STATUS_OPTIONS = [
   ["preparacion", "Preparacion"],
   ["en_vivo", "En vivo"],
@@ -3282,6 +3296,7 @@ function renderCharreadaProgramCard(charreada, activeCharreadaId = state.activeC
             <h3>${escapeHTML(charreada.name)}</h3>
           </div>
           <div class="program-card-badges">
+            <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
             ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
             <span class="pill ${statusClass}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
           </div>
@@ -3324,6 +3339,7 @@ function renderCharreadasSummaryList(charreadas) {
               <div>
                 <span class="program-card-kicker">${escapeHTML(formatCharreadaDateTime(charreada))}</span>
                 <strong>${escapeHTML(charreada.name)}</strong>
+                <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
               </div>
               <div class="program-summary-teams">
                 ${
@@ -3348,6 +3364,30 @@ function formatCharreadaDateTime(charreada) {
   const date = formatDateLabel(charreada.date);
   const time = formatTimeLabel(charreada.startTime);
   return [date, time].filter(Boolean).join(" / ") || "Sin fecha";
+}
+
+function getCharreadaPhase(charreada = {}) {
+  return String(charreada.phase || charreada.fase || "").trim();
+}
+
+function formatCharreadaPhase(charreada = {}) {
+  return getCharreadaPhase(charreada) || "Sin fase";
+}
+
+function getCharreadaPhaseFormState(charreada = null) {
+  const phase = getCharreadaPhase(charreada || {});
+  const optionValues = new Set(CHARREADA_PHASE_OPTIONS.map(([value]) => value));
+  if (!charreada) return { selectValue: "Fase 1", customValue: "" };
+  if (!phase) return { selectValue: "", customValue: "" };
+  if (optionValues.has(phase)) return { selectValue: phase, customValue: "" };
+  return { selectValue: "__other", customValue: phase };
+}
+
+function normalizeCharreadaPhaseInput(value, customValue) {
+  const selected = String(value || "").trim();
+  const custom = String(customValue || "").trim();
+  if (selected === "__other") return custom || "Otro";
+  return selected;
 }
 
 function formatDateLabel(value) {
@@ -3403,6 +3443,16 @@ function renderResults() {
   const awardPlaces = getIndividualAwardPlaces(tournament);
   const labels = getEntityLabels(tournament);
   const locked = isTournamentFrozen(tournament);
+  const phaseHeaders = buildResultsPhaseHeaders(standingColumns);
+  console.info("[resultados-001] phase headers built", phaseHeaders.map((header) => ({
+    id: header.id,
+    label: header.label,
+    phase: header.phase
+  })));
+  console.info("[resultados-001] results rendered by phase", {
+    columns: standingColumns.length,
+    phases: [...new Set(phaseHeaders.map((header) => header.phase))]
+  });
 
   return html`
     <section class="content">
@@ -3434,7 +3484,7 @@ function renderResults() {
             <p class="card-subtitle">Solo torneo activo. Desempate: promedio, total, menos negativos, mejor fase y nombre.</p>
           </div>
         </div>
-        <div class="card-body">${standings.length ? renderTournamentStandingsTable(standingColumns, standings) : html`<div class="empty">Sin resultados.</div>`}</div>
+        <div class="card-body">${standings.length ? renderTournamentStandingsTable(phaseHeaders, standings) : html`<div class="empty">Sin resultados.</div>`}</div>
       </article>
 
       <article class="card">
@@ -4192,8 +4242,8 @@ function renderTournamentStandingsTable(columns, standings) {
               <th>#</th>
 	              <th>${escapeHTML(labels.nameHeader)}</th>
             ${columns.map((column, index) => html`
-              <th class="num standings-phase-header" title="${escapeHTML(column.name || `Fase ${index + 1}`)}">
-                ${escapeHTML(getCharreadaColumnLabel(column, index))}
+              <th class="num standings-phase-header" title="${escapeHTML(column.title || column.label)}">
+                ${escapeHTML(column.label)}
               </th>
             `).join("")}
             <th class="num">Prom.</th>
@@ -4227,8 +4277,29 @@ function renderTournamentStandingsTable(columns, standings) {
   `;
 }
 
-function getCharreadaColumnLabel(charreada, index) {
-  return String(charreada?.name || `Charreada ${index + 1}`).trim();
+function buildResultsPhaseHeaders(columns = []) {
+  const phaseCounts = columns.reduce((counts, column) => {
+    const phase = getResultsPhaseName(column);
+    counts.set(phase, Number(counts.get(phase) || 0) + 1);
+    return counts;
+  }, new Map());
+
+  return columns.map((column, index) => {
+    const phase = getResultsPhaseName(column);
+    const name = String(column?.name || `Charreada ${index + 1}`).trim();
+    const hasMultipleInPhase = Number(phaseCounts.get(phase) || 0) > 1;
+    const label = hasMultipleInPhase ? `${phase} · ${name}` : phase;
+    return {
+      ...column,
+      phase,
+      label,
+      title: `${phase} · ${name}`
+    };
+  });
+}
+
+function getResultsPhaseName(charreada = {}) {
+  return getCharreadaPhase(charreada) || "Sin fase";
 }
 
 function renderScoreSheet(charreadas) {
@@ -6640,6 +6711,7 @@ function showCharreadaModal(charreadaId = null) {
   if (charreada && !guardUnlockedCharreada(charreada)) return;
   const selectedTeamIds = charreada?.teamIds || [];
   const labels = getEntityLabels();
+  const phaseState = getCharreadaPhaseFormState(charreada);
   const orderedTeams = teams
     .map((team, index) => ({
       team,
@@ -6678,6 +6750,18 @@ function showCharreadaModal(charreadaId = null) {
                 <option value="${value}" ${charreada?.status === value ? "selected" : ""}>${escapeHTML(label)}</option>
               `).join("")}
             </select>
+          </div>
+          <div>
+            <label>Fase/Ronda</label>
+            <select name="phase">
+              ${CHARREADA_PHASE_OPTIONS.map(([value, label]) => html`
+                <option value="${escapeHTML(value)}" ${phaseState.selectValue === value ? "selected" : ""}>${escapeHTML(label)}</option>
+              `).join("")}
+            </select>
+          </div>
+          <div>
+            <label>Fase personalizada</label>
+            <input name="phaseOther" value="${escapeHTML(phaseState.customValue)}" placeholder="Usar solo si elegiste Otro">
           </div>
 	        </div>
 	        <div>
@@ -7889,6 +7973,7 @@ function saveCharreada() {
   if (existing && !guardUnlockedCharreada(existing, "Esta charreada esta congelada; no se puede modificar.")) return;
   const id = existing?.id || uid("charreada");
   const wasActive = state.activeCharreadaId === id;
+  const phase = normalizeCharreadaPhaseInput(data.get("phase"), data.get("phaseOther"));
   const payload = {
     id,
     tournamentId: state.activeTournamentId,
@@ -7896,8 +7981,10 @@ function saveCharreada() {
     date: data.get("date"),
     startTime: data.get("startTime"),
     status: data.get("status"),
+    phase,
     teamIds
   };
+  console.info("[program-fase-001] phase saved", { charreadaId: id, phase: phase || "Sin fase" });
 
   if (existing) {
     const removedTeamIds = existing.teamIds.filter((teamId) => !teamIds.includes(teamId));
@@ -8243,6 +8330,7 @@ function compactPublishedCharreada(charreada) {
     name: charreada.name || "",
     date: charreada.date || "",
     startTime: charreada.startTime || "",
+    phase: getCharreadaPhase(charreada),
     teamIds: charreada.teamIds || []
   };
 }

@@ -992,7 +992,7 @@ function normalizePublicCharreadas(tournamentState = {}, teams = []) {
       nombre: publicReadString(row.name, row.nombre, row.displayName, row.title, row.label, `Charreada ${index + 1}`),
       fecha: publicReadString(row.fecha, row.date, row.scheduledAt, row.startAt),
       hora: publicReadString(row.hora, row.startTime, row.time),
-      fase: publicReadString(row.fase, row.phaseName, row.phase?.name, row.phase?.nombre),
+      phase: publicReadString(row.phase, row.fase, row.phaseName, row.phase?.name, row.phase?.nombre),
       status: publicReadString(row.status, row.estado),
       teamIds,
       equipos,
@@ -1177,7 +1177,7 @@ function buildActiveCharreadaPublic({ charreada, source = {}, normalizedScores =
     nombre: charreada.nombre,
     fecha: charreada.fecha,
     hora: charreada.hora,
-    fase: charreada.fase,
+    phase: charreada.phase || "",
     equipos: charreada.equipos.map((team) => ({
       ...team,
       total: sumPublicScores(normalizedScores.filter((score) => score.charreadaId === charreada.charreadaId && score.teamId === team.teamId))
@@ -1303,16 +1303,22 @@ function buildLeadersPublic({ normalizedScores = [] } = {}) {
 
 function buildSchedulePublic({ charreadas = [] } = {}) {
   return charreadas.slice()
-    .sort((a, b) => publicDateValue(`${a.fecha || ""} ${a.hora || ""}`) - publicDateValue(`${b.fecha || ""} ${b.hora || ""}`) || String(a.fase || "").localeCompare(String(b.fase || ""), "es") || Number(a.order || 0) - Number(b.order || 0))
-    .map((charreada) => ({
-      charreadaId: charreada.charreadaId,
-      nombre: charreada.nombre,
-      fecha: charreada.fecha,
-      hora: charreada.hora,
-      fase: charreada.fase,
-      equipos: charreada.equipos,
-      status: charreada.status
-    }));
+    .sort((a, b) => publicDateValue(`${a.fecha || ""} ${a.hora || ""}`) - publicDateValue(`${b.fecha || ""} ${b.hora || ""}`) || String(a.phase || "").localeCompare(String(b.phase || ""), "es") || Number(a.order || 0) - Number(b.order || 0))
+    .map((charreada) => {
+      console.info("[program-fase-001] schedule phase included", {
+        charreadaId: charreada.charreadaId,
+        phase: charreada.phase || null
+      });
+      return {
+        charreadaId: charreada.charreadaId,
+        nombre: charreada.nombre,
+        fecha: charreada.fecha,
+        hora: charreada.hora,
+        phase: charreada.phase || null,
+        equipos: charreada.equipos,
+        status: charreada.status
+      };
+    });
 }
 
 function buildLastScoresPublic({ normalizedScores = [] } = {}) {
@@ -2431,11 +2437,13 @@ function compactStoredTeam(team = {}) {
 }
 
 function compactStoredCharreada(charreada = {}) {
+  const phase = publicReadString(charreada.phase, charreada.fase);
   return {
     ...charreada,
     id: charreada.id || "",
     tournamentId: charreada.tournamentId || "",
     name: charreada.name || "",
+    phase,
     status: charreada.status || "programada",
     teamIds: charreada.teamIds || []
   };
@@ -2474,6 +2482,7 @@ function compactCharreada(charreada) {
     name: charreada.name || "",
     date: charreada.date || "",
     startTime: charreada.startTime || "",
+    phase: publicReadString(charreada.phase, charreada.fase),
     status: charreada.status || "",
     teamIds: charreada.teamIds || []
   };

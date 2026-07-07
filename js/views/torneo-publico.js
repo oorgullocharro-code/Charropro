@@ -1,29 +1,16 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260706-release22d-active-charreada-source2";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260706-public-ui-001-snapshot-render1";
 import {
   getLiveChannelFromUrl,
-  subscribeFirebaseLiveCurrent,
   subscribePublicTournamentSnapshot
-} from "../core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
+} from "../core/firebaseSync.js?v=20260706-public-ui-001-snapshot-render1";
 
 const UNAVAILABLE_MESSAGE = "Información pública no disponible todavía";
-const SCORE_SHEET_COLUMNS = [
-  ["cala", "Cala"],
-  ["piales", "Piales"],
-  ["colas", "Colas"],
-  ["jineteoToro", "Jineteo de Toro"],
-  ["terna", "Terna"],
-  ["jineteoYegua", "Jineteo de Yegua"],
-  ["manganasPie", "Manganas a Pie"],
-  ["manganasCaballo", "Manganas a Caballo"],
-  ["paso", "Paso de la Muerte"]
-];
+const OFFICIAL_SCORESHEET_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 
 const state = {
   tournamentId: "",
   publicSnapshot: null,
-  liveCurrent: null,
   publicStatus: null,
-  liveStatus: null,
   activeTab: "resumen"
 };
 
@@ -39,34 +26,22 @@ function initPublicTournamentPage() {
     return;
   }
 
-  const renderFromState = () => {
-    renderPublicTournamentPage(normalizePublicTournamentData({
-      tournamentId: state.tournamentId,
-      publicSnapshot: state.publicSnapshot,
-      liveCurrent: state.liveCurrent,
-      publicStatus: state.publicStatus,
-      liveStatus: state.liveStatus
-    }));
-  };
-
   subscribePublicTournamentSnapshot(state.tournamentId, (snapshot, status) => {
     state.publicSnapshot = snapshot;
     state.publicStatus = status;
-    console.info("[public-c001] public snapshot loaded", {
-      exists: Boolean(snapshot),
-      status
+    console.info("[public-ui-001] snapshot keys", snapshot ? Object.keys(snapshot) : []);
+    console.info("[public-ui-001] scoresheet columns", snapshot?.scoresheetColumns || []);
+    console.info("[public-ui-001] scoresheet sample", objectToArray(snapshot?.scoresheet)[0] || null);
+    console.info("[public-ui-001] live sample", {
+      activeCharreada: snapshot?.activeCharreada || null,
+      lastScore: objectToArray(snapshot?.lastScores)[0] || null,
+      currentScoreboard: objectToArray(snapshot?.currentScoreboard).slice(0, 3)
     });
-    renderFromState();
-  });
-
-  subscribeFirebaseLiveCurrent(state.tournamentId, (current, status) => {
-    state.liveCurrent = current;
-    state.liveStatus = status;
-    console.info("[public-c001] live/current loaded", {
-      exists: Boolean(current),
-      status
-    });
-    renderFromState();
+    renderPublicTournamentPage(normalizePublicTournamentData({
+      tournamentId: state.tournamentId,
+      publicSnapshot: state.publicSnapshot,
+      publicStatus: state.publicStatus
+    }));
   });
 }
 
@@ -75,172 +50,146 @@ function getTournamentIdFromUrl() {
 }
 
 function normalizePublicTournamentData(raw = {}) {
-  const publicSnapshot = raw.publicSnapshot || null;
-  const liveCurrent = raw.liveCurrent || null;
-  const hasPublic = hasObjectData(publicSnapshot);
-  const hasLive = hasObjectData(liveCurrent);
-  const source = hasPublic ? "publicTournaments" : hasLive ? "live/current" : "none";
-
-  if (!hasPublic && !hasLive) {
+  const snapshot = raw.publicSnapshot || null;
+  if (!hasObjectData(snapshot)) {
     console.info("[public-c001] public data unavailable");
     return {
-      source,
+      source: "publicTournaments",
       tournamentId: raw.tournamentId || "",
       unavailable: true,
       message: UNAVAILABLE_MESSAGE,
       summary: {},
-      live: {},
-      teams: [],
-      scoreboardTeams: [],
+      activeCharreada: null,
+      currentScoreboard: [],
       ranking: [],
-      scoreSheet: []
+      scoreSheet: [],
+      scoreSheetColumns: OFFICIAL_SCORESHEET_COLUMNS,
+      teams: [],
+      lastScores: [],
+      readWarning: raw.publicStatus?.reason || ""
     };
   }
 
-  const publicLive = publicSnapshot?.live || {};
-  const live = hasObjectData(publicLive) ? publicLive : liveCurrent || {};
-  const summary = normalizeSummary(publicSnapshot?.summary || {}, live, raw.tournamentId);
-  const teams = normalizeTeams(publicSnapshot, live);
-  const scoreboardTeams = normalizeScoreboard(publicSnapshot, live);
-  const ranking = buildRanking(publicSnapshot, live, teams);
-  const scoreSheet = buildTournamentScoreSheet({ publicSnapshot, live, teams, ranking });
+  const info = snapshot.info || {};
+  const activeCharreada = snapshot.activeCharreada || null;
+  const currentScoreboard = objectToArray(snapshot.currentScoreboard).map(normalizeScoreboardRow);
+  const ranking = objectToArray(snapshot.generalRanking).map(normalizeRankingRow);
+  const scoreSheet = objectToArray(snapshot.scoresheet).map(normalizeScoreSheetRow);
+  const scoreSheetColumns = normalizeScoreSheetColumns(snapshot.scoresheetColumns);
+  const teams = objectToArray(snapshot.teams).map(normalizeTeamRow);
+  const lastScores = objectToArray(snapshot.lastScores).map(normalizeLastScoreRow);
+  const lastScore = lastScores[0] || null;
+  const currentTeam = activeCharreada?.currentTeam || currentScoreboard.find((row) => row.active) || null;
+  const currentSuerte = activeCharreada?.currentSuerte || null;
+
+  const summary = {
+    tournamentId: info.id || raw.tournamentId || "",
+    tournamentName: info.nombre || info.name || "CharroPro",
+    venue: info.sede || "",
+    date: [info.fechaInicio, info.fechaFin].filter(Boolean).join(" - "),
+    status: info.estado || (activeCharreada ? "EN VIVO" : ""),
+    activeCharreadaName: activeCharreada?.nombre || "",
+    currentTeamName: currentTeam?.teamName || currentTeam?.name || "",
+    currentSuerte: currentSuerte?.nombre || currentSuerte?.name || currentSuerte?.key || "",
+    totalTeams: teams.length,
+    lastUpdated: snapshot.generatedAt ? formatDate(snapshot.generatedAt) : ""
+  };
 
   console.info("[public-c001] data normalized", {
-    source,
+    source: "publicTournaments",
     teams: teams.length,
-    scoreboardTeams: scoreboardTeams.length,
+    currentScoreboard: currentScoreboard.length,
     ranking: ranking.length,
-    scoreSheet: scoreSheet.length
+    scoreSheet: scoreSheet.length,
+    lastScore: lastScore?.score ?? null
   });
 
   return {
-    source,
+    source: "publicTournaments",
     tournamentId: raw.tournamentId || summary.tournamentId || "",
     unavailable: false,
     message: "",
     summary,
-    live,
-    teams,
-    scoreboardTeams,
+    activeCharreada,
+    currentScoreboard,
     ranking,
     scoreSheet,
-    readWarning: raw.publicStatus?.reason || raw.liveStatus?.reason || ""
+    scoreSheetColumns,
+    teams,
+    lastScores,
+    lastScore,
+    readWarning: raw.publicStatus?.reason || ""
   };
 }
 
-function normalizeSummary(summary = {}, live = {}, tournamentId = "") {
-  const tournament = live.tournament || {};
-  const charreada = live.charreada || {};
-  const turn = live.turn || {};
-  const updatedAt = summary.lastUpdated || summary.updatedAt || live.timestamp || live.firebaseUpdatedAt || "";
-
+function normalizeScoreboardRow(row = {}, index = 0) {
   return {
-    tournamentId: summary.tournamentId || tournament.id || tournamentId || "",
-    tournamentName: summary.tournamentName || summary.name || tournament.name || "CharroPro",
-    venue: summary.venue || tournament.venue || "",
-    date: summary.date || tournament.date || "",
-    status: summary.status || (live ? "EN VIVO" : ""),
-    activeCharreadaName: summary.activeCharreadaName || charreada.name || "",
-    currentTeamName: summary.currentTeamName || turn.team?.name || turn.teamName || "",
-    currentSuerte: summary.currentSuerte || turn.suerte?.name || turn.suerteName || live.published?.suerte?.name || "",
-    totalTeams: Number(summary.totalTeams || 0),
-    lastUpdated: updatedAt ? formatDate(updatedAt) : ""
+    position: Number(row.position || index + 1),
+    teamId: row.teamId || "",
+    teamName: row.teamName || row.name || "Equipo",
+    total: numberOrZero(row.total),
+    lastSuerte: row.lastSuerte || "",
+    updatedAt: row.updatedAt || "",
+    active: Boolean(row.active)
   };
 }
 
-function normalizeTeams(publicSnapshot = {}, live = {}) {
-  const publicTeams = objectToArray(publicSnapshot?.teams);
-  const standingsRows = objectToArray(publicSnapshot?.teamStandings?.rows || publicSnapshot?.standings?.rows || live.teamStandings?.rows);
-  const scoreboardTeams = objectToArray(publicSnapshot?.scoreboardTeams || publicSnapshot?.live?.scoreboardTeams || live.scoreboardTeams);
-  const rankingRows = objectToArray(publicSnapshot?.ranking?.rows || live.leaderboard);
-  const records = new Map();
-
-  publicTeams.forEach((team) => addTeamRecord(records, team));
-  standingsRows.forEach((row) => addTeamRecord(records, row.team || row));
-  scoreboardTeams.forEach((team) => addTeamRecord(records, team));
-  rankingRows.forEach((row) => addTeamRecord(records, row.team || row));
-
-  return [...records.values()].map((team, index) => ({
-    position: Number(team.position || index + 1),
-    teamId: team.teamId || team.id || "",
-    teamName: team.teamName || team.name || `Equipo ${index + 1}`,
-    categoryName: team.categoryName || team.category || "",
-    total: numberOrZero(team.total ?? team.score ?? team.points),
-    active: Boolean(team.active)
-  }));
-}
-
-function normalizeScoreboard(publicSnapshot = {}, live = {}) {
-  const rows = objectToArray(publicSnapshot?.live?.scoreboardTeams || publicSnapshot?.scoreboardTeams || live.scoreboardTeams);
-  return rows.map((team, index) => ({
-    position: Number(team.position || index + 1),
-    teamId: team.teamId || team.id || "",
-    teamName: team.teamName || team.name || `Equipo ${index + 1}`,
-    total: numberOrZero(team.total ?? team.score ?? team.points),
-    active: Boolean(team.active)
-  }));
-}
-
-function buildRanking(publicSnapshot = {}, live = {}, teams = []) {
-  const rows = objectToArray(
-    publicSnapshot?.stats?.generalTop10 ||
-      publicSnapshot?.ranking?.rows ||
-      publicSnapshot?.teamStandings?.rows ||
-      live.leaderboard ||
-      live.teamStandings?.rows ||
-      teams
-  );
-
-  return rows
-    .map((row) => {
-      const team = row.team || row;
-      return {
-        teamId: team.teamId || team.id || row.teamId || "",
-        teamName: team.teamName || team.name || row.teamName || "Equipo",
-        total: numberOrZero(row.total ?? row.score ?? team.total ?? team.score),
-        position: Number(row.rank || row.position || 0)
-      };
-    })
-    .filter((row) => row.teamName)
-    .sort((a, b) => b.total - a.total)
-    .map((row, index) => ({ ...row, position: row.position || index + 1 }));
-}
-
-function buildTournamentScoreSheet(data = {}) {
-  const scoreSheets = data.publicSnapshot?.scoreSheets;
-  const rows = objectToArray(scoreSheets?.rows || scoreSheets);
-  const rankingByTeam = new Map((data.ranking || []).map((row) => [row.teamId || row.teamName, row]));
-
-  if (rows.length) {
-    return rows.map((row, index) => normalizeScoreSheetRow(row, index, rankingByTeam));
-  }
-
-  return (data.teams || []).map((team, index) => normalizeScoreSheetRow({
-    teamId: team.teamId,
-    teamName: team.teamName,
-    total: team.total
-  }, index, rankingByTeam));
-}
-
-function normalizeScoreSheetRow(row = {}, index = 0, rankingByTeam = new Map()) {
-  const suertes = row.suertes || row.scores || {};
-  const teamId = row.teamId || row.team?.id || row.id || "";
-  const ranking = rankingByTeam.get(teamId) || rankingByTeam.get(row.teamName || row.team?.name || "");
+function normalizeRankingRow(row = {}, index = 0) {
   return {
-    position: Number(row.position || ranking?.position || index + 1),
-    teamId,
-    teamName: row.teamName || row.team?.name || row.name || ranking?.teamName || `Equipo ${index + 1}`,
-    cala: scoreValue(suertes.cala ?? row.cala),
-    piales: scoreValue(suertes.piales ?? row.piales),
-    colas: scoreValue(suertes.colas ?? row.colas),
-    jineteoToro: scoreValue(suertes.jineteoToro ?? suertes.toro ?? row.jineteoToro),
-    terna: scoreValue(suertes.terna ?? suertes.lazo ?? row.terna),
-    jineteoYegua: scoreValue(suertes.jineteoYegua ?? suertes.yegua ?? row.jineteoYegua),
-    manganasPie: scoreValue(suertes.manganasPie ?? suertes.mangPie ?? row.manganasPie),
-    manganasCaballo: scoreValue(suertes.manganasCaballo ?? suertes.mangCaballo ?? row.manganasCaballo),
-    paso: scoreValue(suertes.paso ?? row.paso),
-    total: scoreValue(row.total ?? ranking?.total)
+    position: Number(row.position || index + 1),
+    teamId: row.teamId || "",
+    teamName: row.teamName || row.name || "Equipo",
+    total: numberOrZero(row.total),
+    charreadasTerminadas: Number(row.charreadasTerminadas || 0),
+    updatedAt: row.updatedAt || ""
   };
+}
+
+function normalizeScoreSheetRow(row = {}, index = 0) {
+  return {
+    position: Number(row.position || index + 1),
+    teamId: row.teamId || "",
+    teamName: row.teamName || row.name || "Equipo",
+    CC: nullableScore(row.CC),
+    P: nullableScore(row.P),
+    C: nullableScore(row.C),
+    JT: nullableScore(row.JT),
+    LC: nullableScore(row.LC),
+    PR: nullableScore(row.PR),
+    JY: nullableScore(row.JY),
+    MP: nullableScore(row.MP),
+    MC: nullableScore(row.MC),
+    PM: nullableScore(row.PM),
+    TOTAL: nullableScore(row.TOTAL)
+  };
+}
+
+function normalizeTeamRow(row = {}, index = 0) {
+  return {
+    position: Number(row.position || index + 1),
+    teamId: row.teamId || row.id || "",
+    teamName: row.teamName || row.name || `Equipo ${index + 1}`,
+    categoryName: row.category || row.categoryName || "",
+    abbreviation: row.abbreviation || "",
+    logo: row.logo || "",
+    total: numberOrZero(row.total)
+  };
+}
+
+function normalizeLastScoreRow(row = {}) {
+  return {
+    team: row.team || null,
+    charro: row.charro || "Charro no registrado",
+    suerte: row.suerte || null,
+    score: nullableScore(row.score),
+    timestamp: row.timestamp || ""
+  };
+}
+
+function normalizeScoreSheetColumns(columns = []) {
+  const values = Array.isArray(columns) ? columns.filter(Boolean).map(String) : [];
+  const official = values.length ? values : OFFICIAL_SCORESHEET_COLUMNS;
+  return official.filter((column) => OFFICIAL_SCORESHEET_COLUMNS.includes(column));
 }
 
 function renderPublicTournamentPage(data) {
@@ -249,7 +198,7 @@ function renderPublicTournamentPage(data) {
 
   if (data.unavailable) {
     root.innerHTML = renderUnavailable(data);
-    console.info("[public-c001] render complete", { unavailable: true });
+    console.info("[public-ui-001] render completed", { unavailable: true });
     return;
   }
 
@@ -276,7 +225,12 @@ function renderPublicTournamentPage(data) {
     </section>
   `;
   setupTabs();
-  console.info("[public-c001] render complete", { source: data.source });
+  console.info("[public-ui-001] render completed", {
+    source: data.source,
+    scoreboardRows: data.currentScoreboard.length,
+    rankingRows: data.ranking.length,
+    scoresheetRows: data.scoreSheet.length
+  });
 }
 
 function renderUnavailable(data) {
@@ -303,7 +257,7 @@ function renderHero(data) {
       </div>
       <div class="public-hero-status">
         <span class="public-badge">${escapeHTML(summary.status || "EN VIVO")}</span>
-        <small>${escapeHTML(data.source === "publicTournaments" ? "Datos publicos" : "Respaldo live/current")}</small>
+        <small>Datos publicos oficiales</small>
         <small>${escapeHTML(summary.lastUpdated ? `Actualizado: ${summary.lastUpdated}` : "")}</small>
       </div>
     </section>
@@ -348,12 +302,12 @@ function renderSummaryCards(data) {
 }
 
 function renderLiveScoreboard(data) {
-  const rows = data.scoreboardTeams.length ? data.scoreboardTeams : data.teams.slice(0, 6);
+  const rows = data.currentScoreboard || [];
   return html`
     <section class="public-panel">
       <div class="public-panel-head">
         <h2>Marcador actual</h2>
-        <span>Orden de turno</span>
+        <span>Snapshot publico</span>
       </div>
       ${rows.length ? html`
         <div class="public-scoreboard-list">
@@ -387,7 +341,10 @@ function renderRanking(data) {
 
 function renderCurrentTurn(data) {
   const summary = data.summary || {};
-  const turn = data.live?.turn || {};
+  const activeCharreada = data.activeCharreada || {};
+  const currentTeam = activeCharreada.currentTeam || {};
+  const currentSuerte = activeCharreada.currentSuerte || {};
+  const lastScore = data.lastScores?.[0] || null;
   return html`
     <section class="public-panel">
       <div class="public-panel-head">
@@ -395,28 +352,28 @@ function renderCurrentTurn(data) {
         <span>${escapeHTML(summary.activeCharreadaName || "Charreada actual")}</span>
       </div>
       <div class="public-live-grid">
-        <div><span>Equipo</span><strong>${escapeHTML(summary.currentTeamName || turn.team?.name || "-")}</strong></div>
-        <div><span>Suerte</span><strong>${escapeHTML(summary.currentSuerte || "-")}</strong></div>
-        <div><span>Tiempo</span><strong>${escapeHTML(data.live?.timer?.display || data.live?.timer?.label || "-")}</strong></div>
-        <div><span>Ultima calificacion</span><strong>${escapeHTML(data.live?.published?.total ?? data.live?.publishedScore?.total ?? "-")}</strong></div>
+        <div><span>Equipo</span><strong>${escapeHTML(currentTeam.teamName || currentTeam.name || summary.currentTeamName || "-")}</strong></div>
+        <div><span>Suerte</span><strong>${escapeHTML(currentSuerte.nombre || currentSuerte.name || summary.currentSuerte || "-")}</strong></div>
+        <div><span>Tiempo</span><strong>${escapeHTML(activeCharreada.timer?.formatted || activeCharreada.timer?.stateLabel || "-")}</strong></div>
+        <div><span>Ultima calificacion</span><strong>${escapeHTML(formatScore(lastScore?.score))}</strong></div>
       </div>
     </section>
   `;
 }
 
 function renderScoreSheet(data) {
-  const headers = ["Pos.", "Equipo", ...SCORE_SHEET_COLUMNS.map(([, label]) => label), "Total"];
+  const columns = data.scoreSheetColumns || OFFICIAL_SCORESHEET_COLUMNS;
+  const headers = ["Pos.", "Equipo", ...columns];
   const rows = data.scoreSheet.map((row) => [
     row.position,
     row.teamName,
-    ...SCORE_SHEET_COLUMNS.map(([key]) => moneylessNumber(row[key])),
-    moneylessNumber(row.total)
+    ...columns.map((column) => formatScore(row[column]))
   ]);
   return html`
     <section class="public-panel">
       <div class="public-panel-head">
         <h2>Sabana del torneo</h2>
-        <span>Lectura publica</span>
+        <span>Snapshot publico</span>
       </div>
       <div class="public-table-scroll">${renderSimpleTable(headers, rows)}</div>
     </section>
@@ -428,7 +385,6 @@ function renderTeams(data) {
     index + 1,
     team.teamName,
     team.categoryName || "-",
-    team.active ? "En turno" : "",
     moneylessNumber(team.total)
   ]);
   return html`
@@ -437,7 +393,7 @@ function renderTeams(data) {
         <h2>Equipos participantes</h2>
         <span>${moneylessNumber(data.teams.length)} equipos</span>
       </div>
-      ${renderSimpleTable(["#", "Equipo", "Categoria", "Estado", "Total"], rows)}
+      ${renderSimpleTable(["#", "Equipo", "Categoria", "Total"], rows)}
     </section>
   `;
 }
@@ -465,9 +421,7 @@ function setupTabs() {
       renderPublicTournamentPage(normalizePublicTournamentData({
         tournamentId: state.tournamentId,
         publicSnapshot: state.publicSnapshot,
-        liveCurrent: state.liveCurrent,
-        publicStatus: state.publicStatus,
-        liveStatus: state.liveStatus
+        publicStatus: state.publicStatus
       }));
     });
   });
@@ -479,29 +433,26 @@ function objectToArray(value) {
   return [];
 }
 
-function addTeamRecord(records, team = {}) {
-  const id = team.teamId || team.id || team.name || team.teamName || "";
-  if (!id) return;
-  records.set(id, {
-    ...(records.get(id) || {}),
-    ...team,
-    teamId: team.teamId || team.id || id,
-    teamName: team.teamName || team.name || id
-  });
-}
-
 function hasObjectData(value) {
   return Boolean(value && typeof value === "object" && Object.keys(value).length);
 }
 
-function scoreValue(value) {
-  if (value && typeof value === "object") return numberOrZero(value.total ?? value.score ?? value.points);
-  return numberOrZero(value);
+function nullableScore(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
 function numberOrZero(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+function formatScore(value) {
+  if (value === null || value === undefined) return "—";
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "—";
+  return moneylessNumber(number);
 }
 
 function formatDate(value) {

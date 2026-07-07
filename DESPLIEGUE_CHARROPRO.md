@@ -1,16 +1,18 @@
 # Despliegue CharroPro
 
-## Version PUBLIC-CORE-003
+## Version RESULTADOS-001
 
 Version actual de cache:
 
 ```text
-v=20260706-public-core-003-normalized-snapshot1
+v=20260706-resultados-001-phase-headers1
 ```
 
-Esta base unifica el Snapshot Publico alrededor de `normalizedScores`. El Core normaliza equipos, charreadas y calificaciones reales una sola vez, y desde esa fuente construye `currentScoreboard`, `generalRanking`, `scoresheet`, `leaders`, `lastScores`, `teams.total` y `stats` en `charropro/publicTournaments/{tournamentId}`.
+Esta base actualiza la vista interna de Resultados para presentar las columnas por fase/ronda configurada en cada charreada. Si una fase tiene una sola charreada, la columna muestra solo la fase; si tiene varias, muestra `Fase · Charreada`.
 
-La pagina publica y clientes futuros solo consumen el snapshot; no calculan ranking, marcador ni sabana.
+Tambien conserva `phase` como campo canonico de fase/ronda por charreada. La fase se captura al crear o editar una charreada, se conserva en el estado local/Firebase y se publica en el Snapshot Publico dentro de `activeCharreada` y `schedule`.
+
+Tambien conserva el Snapshot Publico alrededor de `normalizedScores`: el Core normaliza equipos, charreadas y calificaciones reales una sola vez, y desde esa fuente construye `currentScoreboard`, `generalRanking`, `scoresheet`, `leaders`, `lastScores`, `teams.total` y `stats` en `charropro/publicTournaments/{tournamentId}`.
 
 El snapshot publico contiene:
 

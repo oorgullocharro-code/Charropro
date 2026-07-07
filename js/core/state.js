@@ -376,8 +376,11 @@ function normalizeTeam(team = {}) {
 }
 
 function normalizeCharreada(charreada = {}) {
+  const phase = String(charreada.phase || charreada.fase || "").trim();
+  if (phase) console.info("[program-fase-001] phase restored", { charreadaId: charreada.id || "", phase });
   return {
     ...charreada,
+    phase,
     status: normalizeCharreadaStatus(charreada.status)
   };
 }
