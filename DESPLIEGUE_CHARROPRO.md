@@ -1,14 +1,40 @@
 # Despliegue CharroPro
 
-## Version comercial 22D
+## Version PUBLIC-CORE-002
 
 Version actual de cache:
 
 ```text
-v=20260706-release22d-active-charreada-source2
+v=20260706-public-core-002-score-engine1
 ```
 
-Esta base unifica la fuente de verdad de la charreada activa. La tarjeta superior, la lista de charreadas, jueces y el estado sincronizado usan el mismo `activeCharreadaId`, evitando que dos charreadas aparezcan como `EN VIVO`.
+Esta base fortalece el Motor Oficial de Estadisticas v1 del Snapshot Publico. El Core normaliza equipos, charreadas y calificaciones reales antes de generar `currentScoreboard`, `generalRanking`, `scoresheet`, `leaders` y `stats` en `charropro/publicTournaments/{tournamentId}`.
+
+La pagina publica y clientes futuros solo consumen el snapshot; no calculan ranking, marcador ni sabana.
+
+El snapshot publico contiene:
+
+```text
+info
+activeCharreada
+currentScoreboard
+generalRanking
+scoresheet
+leaders
+schedule
+lastScores
+teams
+stats
+generatedAt
+generatedAtMs
+version
+```
+
+El nodo raiz ya no conserva `summary`, `teamStandings`, `scoreSheets`, `charreadas`, `charreadaSummaries` ni `live`.
+
+La ruta publica nunca contiene usuarios, permisos, auditorias, configuraciones internas ni datos privados.
+
+El snapshot se reconstruye desde el Core cuando se actualiza el estado del torneo, scores, publishedScores o publicaciones oficiales. Antes de escribir se compara contra el snapshot anterior y se omite la escritura si no hubo cambios reales en el contenido publico.
 
 Tambien conserva el fortalecimiento del flujo Preparar CharroPro sobre el aislamiento local por torneo. Antes de operar, el dispositivo limpia caches locales del sandbox, sincroniza Firebase y restaura solo el estado autorizado del torneo.
 
@@ -25,6 +51,7 @@ graficos OBS
 Firebase Rules
 Cloud Functions
 Google Sheets
+pagina publica
 ```
 
 Rutas oficiales activas en esta base:
@@ -39,10 +66,11 @@ charropro/live/{tournamentId}/current
 charropro/live/{tournamentId}/timer
 charropro/live/{tournamentId}/turn
 charropro/live/{tournamentId}/ranking
+charropro/publicTournaments/{tournamentId}
 charropro/audit/publishedScores/{tournamentId}
 ```
 
-`publicTournaments` queda tratado como modulo publico/futuro si no esta completo en esta base. `torneo-publico.html` intenta leer `charropro/publicTournaments/{tournamentId}` cuando exista y usa `charropro/live/{tournamentId}/current` como respaldo real de broadcast. Si no hay datos publicos disponibles, muestra `Informacion publica no disponible todavia` en vez de datos demo.
+`publicTournaments` queda como snapshot publico oficial generado por el Core. `torneo-publico.html` puede leer esa ruta cuando exista y usar `charropro/live/{tournamentId}/current` solo como respaldo operativo.
 
 ## 1. Archivos del sitio web
 

@@ -26,11 +26,27 @@ const JUDGE_SESSIONS_PATH = "charropro/judges/sessions";
 const JUDGE_EVENTS_PATH = "charropro/judges/events";
 const AUDIT_PUBLISHED_SCORES_PATH = "charropro/audit/publishedScores";
 const HISTORY_STATISTICS_PATH = "charropro/history/statistics";
+const PUBLIC_SNAPSHOT_VERSION = 1;
+const PUBLIC_SUERTES = [
+  { key: "CC", aliases: ["cc", "cala", "calaCaballo", "cala_de_caballo"], label: "Cala" },
+  { key: "P", aliases: ["p", "pial", "piales", "pialesLienza", "pialesLienzo"], label: "Piales" },
+  { key: "C", aliases: ["c", "colas", "coleadero"], label: "Colas" },
+  { key: "JT", aliases: ["jt", "toro", "jineteoToro"], label: "Jineteo de Toro" },
+  { key: "LC", aliases: ["lc", "lazo", "lazoCabecero"], label: "Lazo Cabecero" },
+  { key: "PR", aliases: ["pr", "pialRuedo", "pial_de_ruedo"], label: "Pial de Ruedo" },
+  { key: "JY", aliases: ["jy", "yegua", "jineteoYegua"], label: "Jineteo de Yegua" },
+  { key: "MP", aliases: ["mp", "manganasPie", "manganasAPie"], label: "Manganas a Pie" },
+  { key: "MC", aliases: ["mc", "manganasCaballo", "manganasACaballo"], label: "Manganas a Caballo" },
+  { key: "PM", aliases: ["pm", "paso", "pasoMuerte", "pasoDeLaMuerte"], label: "Paso de la Muerte" }
+];
 
 let appInstance = null;
 let databaseInstance = null;
 let authInstance = null;
 let functionsInstance = null;
+let publicSnapshotBuildCount = 0;
+let publicSnapshotPublishCount = 0;
+let publicSnapshotSetCount = 0;
 
 export function isFirebaseLiveConfigured() {
   return Boolean(FIREBASE_CONFIG.databaseURL);
@@ -143,13 +159,15 @@ export async function publishFirebasePublishedScore(tournamentId, publishedScore
     console.info(`[publishedScore] auditando ruta: ${auditPath}`);
 
     await update(ref(getFirebaseDatabase()), cleanUndefined(updates));
+    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, null, { source: "publishedScore" });
     console.info("[publishedScore] publicado en CharroPro", {
       tournamentId: cleanTournamentId,
       publishedScoreId,
       path: tournamentPath,
-      auditPath
+      auditPath,
+      publicSnapshot
     });
-    return { ok: true, id: publishedScoreId, path: tournamentPath, auditPath };
+    return { ok: true, id: publishedScoreId, path: tournamentPath, auditPath, publicSnapshot };
   } catch (error) {
     console.error("[publishedScore] error al publicar", {
       tournamentId: cleanTournamentId,
@@ -213,10 +231,12 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
     if (options.livePayload) console.info("[publish-atomic-c003] live path:", livePath);
 
     await update(ref(getFirebaseDatabase()), cleanUndefined(updates));
+    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, null, { source: "officialScoreAtomic" });
     console.info("[publish-atomic-c003] multipath update exitoso", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
-      publishedScoreId
+      publishedScoreId,
+      publicSnapshot
     });
     return {
       ok: true,
@@ -225,7 +245,8 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       path: publishedPath,
       publishedPath,
       auditPath,
-      livePath: options.livePayload ? livePath : ""
+      livePath: options.livePayload ? livePath : "",
+      publicSnapshot
     };
   } catch (error) {
     console.error("[publish-atomic-c003] error firebase update", {
@@ -720,6 +741,702 @@ export function subscribePublicTournamentSnapshot(tournamentId, callback) {
   }
 }
 
+export function buildPublicTournamentSnapshot(tournamentState = {}) {
+  publicSnapshotBuildCount += 1;
+  console.log("[public-core] build start");
+  console.log("[public-core] build count", publicSnapshotBuildCount);
+  console.info("[public-core] snapshot build");
+  const source = normalizePublicTournamentState(tournamentState);
+  const info = buildPublicInfo(source);
+  let teams = normalizePublicTeams(source);
+  const charreadas = normalizePublicCharreadas(source, teams);
+  const activeCharreadaId = resolvePublicActiveCharreadaId(source);
+  const activeCharreadaSource = activeCharreadaId
+    ? charreadas.find((charreada) => charreada.charreadaId === activeCharreadaId) || null
+    : null;
+  const scores = normalizePublicScores(source, teams);
+  teams = mergePublicTeamsWithScores(teams, scores);
+  const activeCharreada = buildActiveCharreadaPublic(activeCharreadaSource, source, scores);
+  const currentScoreboard = buildCurrentScoreboardPublic(activeCharreadaSource, teams, scores);
+  const generalRanking = buildGeneralRankingPublic(teams, scores);
+  const scoresheet = buildScoreSheetPublic(teams, scores, generalRanking);
+  const leaders = buildLeadersPublic(scores);
+  const schedule = buildSchedulePublic(charreadas);
+  const lastScores = buildPublicLastScores(scores);
+  const stats = {
+    teams: teams.length,
+    charreadas: charreadas.length,
+    scores: countStoredRecords(source.scores),
+    publishedScores: countStoredRecords(source.publishedScores),
+    normalizedScores: scores.length,
+    updatedAt: publicReadString(source.meta.updatedAt)
+  };
+
+  console.info("[public-core] ranking built", { rows: generalRanking.length });
+  console.info("[public-core] scoresheet built", { rows: scoresheet.length });
+  console.info("[public-core] leaders built", { keys: Object.keys(leaders).length });
+  console.info("[public-core] schedule built", { rows: schedule.length });
+  console.info("[public-core-002] score sample", scores[0] || null);
+  console.info("[public-core-002] normalized scores count", scores.length);
+  console.info("[public-core-002] current scoreboard totals", currentScoreboard.map((row) => ({ teamId: row.teamId, total: row.total })));
+  console.info("[public-core-002] general ranking totals", generalRanking.map((row) => ({ teamId: row.teamId, total: row.total })));
+  console.info("[public-core-002] scoresheet totals", scoresheet.map((row) => ({ teamId: row.teamId, total: row.TOTAL })));
+  console.info("[public-core-002] leaders built", Object.keys(leaders).filter((key) => leaders[key]).length);
+
+  const snapshot = cleanUndefined({
+    info,
+    activeCharreada,
+    currentScoreboard,
+    generalRanking,
+    scoresheet,
+    leaders,
+    schedule,
+    lastScores,
+    teams,
+    stats,
+    generatedAt: new Date().toISOString(),
+    generatedAtMs: Date.now(),
+    version: PUBLIC_SNAPSHOT_VERSION
+  });
+
+  console.log("[public-core] snapshot keys", Object.keys(snapshot));
+  console.log("[public-core] build finished");
+  return snapshot;
+}
+
+export async function publishPublicTournamentSnapshot(tournamentId, tournamentState = null, options = {}) {
+  publicSnapshotPublishCount += 1;
+  console.log("[public-core] publish start", tournamentId);
+  console.log("[public-core] publish count", publicSnapshotPublishCount);
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  if (!cleanTournamentId) {
+    console.log("[public-core] skipped:", { reason: "missing tournamentId" });
+    console.log("[public-core] publish finished", tournamentId);
+    return { ok: false, reason: "missing-tournament" };
+  }
+  if (!isFirebaseLiveConfigured()) {
+    console.log("[public-core] skipped:", { reason: "missing firebase" });
+    console.log("[public-core] publish finished", cleanTournamentId);
+    return { ok: false, reason: "missing-firebase" };
+  }
+
+  const path = `${PUBLIC_TOURNAMENTS_PATH}/${cleanTournamentId}`;
+  try {
+    let source = tournamentState;
+    if (!source) {
+      const privateSnapshot = await get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${cleanTournamentId}`));
+      source = privateSnapshot.val() || null;
+    }
+    if (!source) {
+      console.log("[public-core] skipped:", { reason: "tournament undefined", path });
+      console.log("[public-core] publish finished", cleanTournamentId);
+      return { ok: false, reason: "missing-tournament-data", path };
+    }
+
+    const snapshot = buildPublicTournamentSnapshot(source);
+    const existingSnapshot = await get(ref(getFirebaseDatabase(), path));
+    const existing = existingSnapshot.val() || null;
+    const nextSignature = buildPublicSnapshotSignature(snapshot);
+    const previousSignature = buildPublicSnapshotSignature(existing);
+    if (existing && previousSignature === nextSignature) {
+      console.log("[public-core] skipped:", {
+        reason: "snapshot unchanged",
+        path
+      });
+      console.info("[public-core] snapshot published", {
+        path,
+        skipped: true,
+        source: options.source || ""
+      });
+      console.log("[public-core] publish finished", cleanTournamentId);
+      return { ok: true, skipped: true, path, source: options.source || "" };
+    }
+
+    console.log("[public-core] set start", path);
+    await set(ref(getFirebaseDatabase(), path), cleanUndefined(snapshot));
+    publicSnapshotSetCount += 1;
+    console.log("[public-core] set finished", {
+      path,
+      setCount: publicSnapshotSetCount
+    });
+    console.info("[public-core] snapshot published", {
+      path,
+      skipped: false,
+      source: options.source || ""
+    });
+    console.log("[public-core] publish finished", cleanTournamentId);
+    return { ok: true, skipped: false, path, source: options.source || "" };
+  } catch (error) {
+    console.error("[public-core] snapshot publish failed", {
+      path,
+      source: options.source || "",
+      error
+    });
+    console.log("[public-core] skipped:", {
+      reason: normalizeFirebaseFailureReason(error),
+      path
+    });
+    console.log("[public-core] publish finished", cleanTournamentId);
+    return { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }), path };
+  }
+}
+
+function normalizePublicTournamentState(tournamentState = {}) {
+  const statePayload = tournamentState.state || {};
+  const info = statePayload.tournament || tournamentState.info || tournamentState.tournament || {};
+  const meta = {
+    ...(tournamentState.meta || {}),
+    activeCharreadaId: publicReadString(
+      tournamentState.meta?.activeCharreadaId,
+      statePayload.activeCharreadaId,
+      tournamentState.tournamentState?.activeCharreadaId,
+      info.activeCharreadaId
+    ),
+    updatedAt: publicReadString(tournamentState.meta?.updatedAt, tournamentState.updatedAt, statePayload.updatedAt)
+  };
+
+  return {
+    info,
+    tournamentState: tournamentState.tournamentState || {},
+    meta,
+    teams: statePayload.teams || tournamentState.teams || tournamentState.equipos || [],
+    charreadas: statePayload.charreadas || tournamentState.charreadas || tournamentState.program || tournamentState.schedule || [],
+    scores: statePayload.scores || tournamentState.scores || {},
+    publishedScores: statePayload.publishedScores || tournamentState.publishedScores || [],
+    settings: statePayload.settings || tournamentState.settings || {}
+  };
+}
+
+function buildPublicInfo(source = {}) {
+  const info = source.info || {};
+  return {
+    id: publicReadString(info.id, info.tournamentId),
+    nombre: publicReadString(info.nombre, info.name, "Torneo"),
+    temporada: publicReadString(info.temporada, info.season, getTournamentSeason(info)),
+    estado: publicReadString(info.estado, info.status),
+    logo: publicReadString(info.logo, info.logoUrl),
+    sede: publicReadString(info.sede, info.venue, info.location),
+    fechaInicio: publicReadString(info.fechaInicio, info.startDate, info.date),
+    fechaFin: publicReadString(info.fechaFin, info.endDate),
+    categoria: publicReadString(info.categoria, info.category, info.categoryName)
+  };
+}
+
+function normalizePublicTeams(tournamentState = {}) {
+  return publicEntries(tournamentState.teams).map(([mapKey, team], index) => {
+    const row = team && typeof team === "object" ? team : { name: team };
+    const teamId = publicReadString(row.id, row.teamId, row.equipoId, row._id, row.key, mapKey, `team_${index + 1}`);
+    return {
+      teamId,
+      teamName: publicReadString(row.name, row.nombre, row.teamName, row.equipo, teamId, `Equipo ${index + 1}`),
+      name: publicReadString(row.name, row.nombre, row.teamName, row.equipo, teamId, `Equipo ${index + 1}`),
+      abbreviation: publicReadString(row.abbreviation, row.abreviatura, row.abbr, row.shortName, row.teamShortName),
+      logo: publicReadString(row.logo, row.logoUrl)
+    };
+  });
+}
+
+function mergePublicTeamsWithScores(teams = [], scores = []) {
+  const byId = new Map(teams.map((team) => [team.teamId, team]));
+  scores.forEach((score) => {
+    if (!score.teamId || byId.has(score.teamId)) return;
+    byId.set(score.teamId, {
+      teamId: score.teamId,
+      teamName: score.teamName || score.teamId,
+      name: score.teamName || score.teamId,
+      abbreviation: "",
+      logo: ""
+    });
+  });
+  return [...byId.values()];
+}
+
+function normalizePublicCharreadas(tournamentState = {}, teams = []) {
+  const teamsById = new Map(teams.map((team) => [team.teamId, team]));
+  return publicEntries(tournamentState.charreadas).map(([mapKey, charreada], index) => {
+    const row = charreada && typeof charreada === "object" ? charreada : { name: charreada };
+    const teamIds = extractPublicTeamIds(row.teamIds || row.equipoIds || row.teams || row.equipos || row.scoreboardTeams);
+    const equipos = teamIds.map((teamId) => {
+      const team = teamsById.get(teamId);
+      return {
+        teamId,
+        teamName: team?.teamName || team?.name || teamId,
+        name: team?.teamName || team?.name || teamId
+      };
+    });
+    return {
+      charreadaId: publicReadString(row.id, row.charreadaId, row._id, row.key, mapKey, `charreada_${index + 1}`),
+      nombre: publicReadString(row.name, row.nombre, row.displayName, row.title, row.label, `Charreada ${index + 1}`),
+      fecha: publicReadString(row.fecha, row.date, row.scheduledAt, row.startAt),
+      hora: publicReadString(row.hora, row.startTime, row.time),
+      fase: publicReadString(row.fase, row.phaseName, row.phase?.name, row.phase?.nombre),
+      status: publicReadString(row.status, row.estado),
+      teamIds,
+      equipos,
+      order: publicReadNumber(row.charreadaOrder, row.order, row.orden, index + 1)
+    };
+  });
+}
+
+function normalizePublicScores(tournamentState = {}, teams = []) {
+  const teamsById = new Map(teams.map((team) => [team.teamId, team]));
+  const publishedScores = publicEntries(tournamentState.publishedScores)
+    .filter(([, score]) => score && typeof score === "object" && !score.superseded)
+    .map(([mapKey, score], index) => normalizePublicScoreRecord(score, {
+      mapKey,
+      index,
+      teamsById,
+      source: "publishedScores"
+    }))
+    .filter(isPublicScoreUsable);
+
+  const rawScores = publishedScores.length ? [] : normalizePublicRawScores(tournamentState.scores, teamsById);
+  const selected = publishedScores.length ? publishedScores : rawScores;
+  return dedupePublicScores(selected)
+    .sort((a, b) => publicDateValue(a.updatedAt) - publicDateValue(b.updatedAt) || a._order - b._order);
+}
+
+function normalizePublicRawScores(scores = {}, teamsById = new Map()) {
+  return publicEntries(scores).flatMap(([scoreKey, payload], scoreIndex) => {
+    const compound = parsePublicCompoundScoreId(scoreKey);
+    if (!compound.charreadaId || !compound.teamId || !compound.suerteRaw) {
+      return [normalizePublicScoreRecord(payload, {
+        mapKey: scoreKey,
+        index: scoreIndex,
+        teamsById,
+        source: "scores",
+        compound
+      })].filter(isPublicScoreUsable);
+    }
+
+    return flattenPublicAttempts(payload).map(({ attempt, attemptIndex, opportunity }) => normalizePublicScoreRecord({
+      ...attempt,
+      id: `${scoreKey}__${opportunity}__${attemptIndex}`,
+      charreadaId: compound.charreadaId,
+      teamId: compound.teamId,
+      suerteId: compound.suerteRaw,
+      attemptIndex,
+      opportunity,
+      coleadorIndex: opportunity
+    }, {
+      mapKey: scoreKey,
+      index: scoreIndex + attemptIndex,
+      teamsById,
+      source: "scores",
+      compound
+    })).filter(isPublicScoreUsable);
+  });
+}
+
+function normalizePublicScoreRecord(score = {}, context = {}) {
+  if (!score || typeof score !== "object") return null;
+  const compound = context.compound || parsePublicCompoundScoreId(context.mapKey || score.id || score.attemptKey || "");
+  const teamObject = score.team && typeof score.team === "object" ? score.team : {};
+  const charreadaObject = score.charreada && typeof score.charreada === "object" ? score.charreada : {};
+  const suerteObject = score.suerte && typeof score.suerte === "object" ? score.suerte : {};
+  const charroObject = score.charro && typeof score.charro === "object" ? score.charro : {};
+  const teamId = publicReadString(
+    teamObject.id,
+    teamObject.teamId,
+    score.teamId,
+    score.equipoId,
+    typeof score.team === "string" ? score.team : "",
+    compound.teamId
+  );
+  const team = context.teamsById?.get(teamId);
+  const suerteRaw = publicReadString(
+    suerteObject.key,
+    suerteObject.id,
+    suerteObject.name,
+    score.suerteKey,
+    score.suerteId,
+    typeof score.suerte === "string" ? score.suerte : "",
+    compound.suerteRaw
+  );
+  const suerteAbbr = normalizeSuerteAbbr(suerteRaw);
+  const attempt = publicReadNumber(score.attempt, score.attemptIndex, score.attempt?.index, compound.attempt, 0);
+  const opportunity = publicReadNumber(score.opportunity, score.opportunityIndex, score.oportunidad, score.coleadorIndex, score.attempt?.opportunity, compound.opportunity, 0);
+  const total = publicReadNumberOrNull(
+    score.total,
+    score.score,
+    score.points,
+    score.result,
+    score.breakdown?.total,
+    score.breakdown?.final,
+    score.totalPoints
+  );
+
+  return {
+    id: publicReadString(score.id, score.attemptKey, context.mapKey, `${compound.charreadaId || ""}__${teamId}__${suerteAbbr}__${attempt}__${opportunity}`),
+    charreadaId: publicReadString(
+      charreadaObject.id,
+      score.charreadaId,
+      typeof score.charreada === "string" ? score.charreada : "",
+      score.tournament?.charreadaId,
+      compound.charreadaId
+    ),
+    teamId,
+    teamName: publicReadString(teamObject.name, teamObject.nombre, score.teamName, score.equipo, team?.teamName, team?.name, teamId),
+    suerteKey: suerteAbbr,
+    suerteAbbr,
+    total,
+    charroName: publicReadString(
+      charroObject.name,
+      typeof score.charro === "string" ? score.charro : "",
+      score.charroName,
+      score.participantName,
+      score.athleteName,
+      score.competidor,
+      score.ejecutante,
+      score.riderName,
+      score.coleadorName,
+      score.manganadorName,
+      "Charro no registrado"
+    ),
+    attempt,
+    opportunity,
+    updatedAt: publicReadString(score.updatedAt, score.timestamp, score.createdAt, score.publishedAt),
+    source: context.source || "",
+    _order: Number(context.index || 0),
+    _revision: publicReadNumber(score.revision, 1)
+  };
+}
+
+function isPublicScoreUsable(score) {
+  return Boolean(score && score.charreadaId && score.teamId && score.suerteAbbr && score.total !== null && score.total !== undefined);
+}
+
+function dedupePublicScores(scores = []) {
+  const byKey = new Map();
+  scores.forEach((score) => {
+    const key = [
+      score.charreadaId,
+      score.teamId,
+      score.suerteAbbr,
+      score.attempt,
+      score.opportunity
+    ].join("__");
+    const previous = byKey.get(key);
+    if (!previous || comparePublicScoreFreshness(score, previous) >= 0) byKey.set(key, score);
+  });
+  return [...byKey.values()];
+}
+
+function resolvePublicActiveCharreadaId(source = {}) {
+  return publicReadString(
+    source.meta?.activeCharreadaId,
+    source.info?.activeCharreadaId,
+    source.tournamentState?.activeCharreadaId
+  );
+}
+
+function buildActiveCharreadaPublic(charreada, source, scores) {
+  if (!charreada) return null;
+  const meta = source.meta || {};
+  const currentTeam = charreada.equipos[publicReadNumber(meta.scoringTeamIdx, 0)] || null;
+  const currentSuerte = PUBLIC_SUERTES[publicReadNumber(meta.scoringSuerteIdx, 0)] || null;
+  return {
+    id: charreada.charreadaId,
+    nombre: charreada.nombre,
+    fecha: charreada.fecha,
+    hora: charreada.hora,
+    fase: charreada.fase,
+    equipos: charreada.equipos.map((team) => ({
+      ...team,
+      total: sumPublicScores(scores.filter((score) => score.charreadaId === charreada.charreadaId && score.teamId === team.teamId))
+    })),
+    status: charreada.status,
+    currentSuerte: currentSuerte ? { key: currentSuerte.key, nombre: currentSuerte.label } : null,
+    currentTeam,
+    currentAttempt: publicReadNumber(meta.scoringAttemptIdx, 0) + 1,
+    timer: meta.liveTimer || null
+  };
+}
+
+function buildCurrentScoreboardPublic(activeCharreada, teams = [], scores = []) {
+  if (!activeCharreada) return [];
+  const teamsById = new Map(teams.map((team) => [team.teamId, team]));
+  const scoreTeamIds = [...new Set(scores
+    .filter((score) => score.charreadaId === activeCharreada.charreadaId)
+    .map((score) => score.teamId)
+    .filter(Boolean))];
+  const teamIds = activeCharreada.teamIds.length ? activeCharreada.teamIds : scoreTeamIds;
+  return teamIds.map((teamId, order) => {
+    const team = teamsById.get(teamId) || activeCharreada.equipos.find((item) => item.teamId === teamId) || { teamId, teamName: teamId, name: teamId };
+    const teamScores = scores.filter((score) => score.charreadaId === activeCharreada.charreadaId && score.teamId === team.teamId);
+    const lastScore = teamScores.slice().sort((a, b) => publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))[0] || null;
+    return {
+      teamId: team.teamId,
+      teamName: team.teamName || team.name,
+      total: sumPublicScores(teamScores),
+      lastSuerte: lastScore?.suerteAbbr || "",
+      updatedAt: lastScore?.updatedAt || "",
+      _order: order
+    };
+  })
+    .sort((a, b) => b.total - a.total || a._order - b._order)
+    .map((row, index) => cleanUndefined({
+      position: index + 1,
+      teamId: row.teamId,
+      teamName: row.teamName,
+      total: row.total,
+      lastSuerte: row.lastSuerte,
+      updatedAt: row.updatedAt
+    }));
+}
+
+function buildGeneralRankingPublic(teams = [], scores = []) {
+  return teams.map((team, order) => {
+    const teamScores = scores.filter((score) => score.teamId === team.teamId);
+    const charreadasTerminadas = new Set(teamScores.map((score) => score.charreadaId).filter(Boolean)).size;
+    const lastScore = teamScores.slice().sort((a, b) => publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))[0] || null;
+    return {
+      teamId: team.teamId,
+      teamName: team.teamName || team.name,
+      total: sumPublicScores(teamScores),
+      charreadasTerminadas,
+      updatedAt: lastScore?.updatedAt || "",
+      _order: order
+    };
+  })
+    .sort((a, b) => b.total - a.total || a._order - b._order)
+    .map((row, index) => cleanUndefined({
+      position: index + 1,
+      teamId: row.teamId,
+      teamName: row.teamName,
+      total: row.total,
+      charreadasTerminadas: row.charreadasTerminadas,
+      updatedAt: row.updatedAt
+    }));
+}
+
+function buildScoreSheetPublic(teams = [], scores = [], ranking = []) {
+  const rankByTeam = new Map(ranking.map((row) => [row.teamId, row.position]));
+  return teams.map((team) => {
+    const row = {
+      position: rankByTeam.get(team.teamId) || 0,
+      teamId: team.teamId,
+      teamName: team.teamName || team.name,
+      CC: null,
+      P: null,
+      C: null,
+      JT: null,
+      LC: null,
+      PR: null,
+      JY: null,
+      MP: null,
+      MC: null,
+      PM: null,
+      TOTAL: null
+    };
+    scores
+      .filter((score) => score.teamId === team.teamId)
+      .forEach((score) => {
+        if (row[score.suerteAbbr] === null) row[score.suerteAbbr] = 0;
+        row[score.suerteAbbr] += Number(score.total || 0);
+      });
+    row.TOTAL = PUBLIC_SUERTES.reduce((total, suerte) => total + (row[suerte.key] === null ? 0 : Number(row[suerte.key] || 0)), 0);
+    if (!scores.some((score) => score.teamId === team.teamId)) row.TOTAL = null;
+    return row;
+  }).sort((a, b) => Number(a.position || 9999) - Number(b.position || 9999));
+}
+
+function buildLeadersPublic(scores = []) {
+  return Object.fromEntries(PUBLIC_SUERTES.map((suerte) => {
+    const leader = scores
+      .filter((score) => score.suerteAbbr === suerte.key)
+      .sort((a, b) => Number(b.total || 0) - Number(a.total || 0) || publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))[0];
+    return [suerte.key, leader ? {
+      suerte: suerte.key,
+      label: suerte.label,
+      charro: leader.charroName || "Charro no registrado",
+      team: {
+        teamId: leader.teamId,
+        name: leader.teamName
+      },
+      score: Number(leader.total || 0),
+      updatedAt: leader.updatedAt || ""
+    } : null];
+  }));
+}
+
+function buildSchedulePublic(charreadas = []) {
+  return charreadas.slice()
+    .sort((a, b) => publicDateValue(`${a.fecha || ""} ${a.hora || ""}`) - publicDateValue(`${b.fecha || ""} ${b.hora || ""}`) || String(a.fase || "").localeCompare(String(b.fase || ""), "es") || Number(a.order || 0) - Number(b.order || 0))
+    .map((charreada) => ({
+      charreadaId: charreada.charreadaId,
+      nombre: charreada.nombre,
+      fecha: charreada.fecha,
+      hora: charreada.hora,
+      fase: charreada.fase,
+      equipos: charreada.equipos,
+      status: charreada.status
+    }));
+}
+
+function buildPublicLastScores(scores = []) {
+  return scores.slice()
+    .sort((a, b) => publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))
+    .slice(0, 30)
+    .map((score) => ({
+      team: {
+        teamId: score.teamId,
+        name: score.teamName
+      },
+      charro: score.charroName || "Charro no registrado",
+      suerte: {
+        key: score.suerteAbbr,
+        nombre: getPublicSuerteLabel(score.suerteAbbr)
+      },
+      score: Number(score.total || 0),
+      timestamp: score.updatedAt || ""
+    }));
+}
+
+function buildPublicSnapshotSignature(snapshot) {
+  return JSON.stringify(stripVolatilePublicSnapshotFields(snapshot || null));
+}
+
+function stripVolatilePublicSnapshotFields(value) {
+  if (Array.isArray(value)) return value.map(stripVolatilePublicSnapshotFields);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value)
+    .filter(([key]) => key !== "generatedAt" && key !== "generatedAtMs")
+    .map(([key, entry]) => [key, stripVolatilePublicSnapshotFields(entry)]));
+}
+
+function flattenPublicAttempts(payload) {
+  if (!payload) return [];
+  if (Array.isArray(payload)) {
+    if (payload.some(Array.isArray)) {
+      return payload.flatMap((attempts, coleadorIndex) => publicArray(attempts).map((attempt, attemptIndex) => ({
+        attempt,
+        attemptIndex,
+        opportunity: coleadorIndex
+      })));
+    }
+    return payload.map((attempt, attemptIndex) => ({ attempt, attemptIndex, opportunity: 0 }));
+  }
+  if (typeof payload === "object") {
+    const nested = payload.attempts || payload.intentos || payload.rows || payload.coleadores;
+    if (nested) return flattenPublicAttempts(nested);
+    return [{ attempt: payload, attemptIndex: publicReadNumber(payload.attemptIndex, 0), opportunity: publicReadNumber(payload.opportunity, payload.opportunityIndex, payload.coleadorIndex, 0) }];
+  }
+  return [];
+}
+
+function parsePublicCompoundScoreId(value) {
+  const parts = String(value || "").split("__");
+  return {
+    charreadaId: parts[0] || "",
+    teamId: parts[1] || "",
+    suerteRaw: parts[2] || "",
+    attempt: publicReadNumber(parts[3], 0),
+    opportunity: publicReadNumber(parts[4], 0)
+  };
+}
+
+function extractPublicTeamIds(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map(extractPublicTeamId).filter(Boolean);
+  if (typeof value === "object") return Object.entries(value).map(([key, item]) => extractPublicTeamId(item, key)).filter(Boolean);
+  return [String(value)];
+}
+
+function extractPublicTeamId(item, fallback = "") {
+  if (!item) return "";
+  if (typeof item === "string" || typeof item === "number") return String(item);
+  return publicReadString(item.teamId, item.id, item.equipoId, fallback);
+}
+
+function normalizeSuerteAbbr(value) {
+  const clean = publicCleanKey(value);
+  if (!clean) return "";
+  if (clean.includes("pialderuedo") || clean.includes("pialruedo") || clean.includes("pialr")) return "PR";
+  if (clean.includes("manganascaballo") || clean.includes("manganasacaballo")) return "MC";
+  if (clean.includes("manganaspie") || clean.includes("manganasapie")) return "MP";
+  if (clean.includes("jineteotoro")) return "JT";
+  if (clean.includes("jineteoyegua")) return "JY";
+  if (clean.includes("pasomuerte") || clean.includes("pasodelamuerte")) return "PM";
+  if (clean.includes("lazocabecero")) return "LC";
+  const match = PUBLIC_SUERTES.find((suerte) => suerte.aliases.some((alias) => publicCleanKey(alias) === clean || clean.includes(publicCleanKey(alias))));
+  return match?.key || "";
+}
+
+function normalizePublicSuerteKey(value) {
+  return normalizeSuerteAbbr(value);
+}
+
+function getPublicSuerteLabel(key) {
+  return PUBLIC_SUERTES.find((suerte) => suerte.key === key)?.label || key || "";
+}
+
+function comparePublicScoreFreshness(a, b) {
+  const revisionDiff = Number(a._revision || 0) - Number(b._revision || 0);
+  if (revisionDiff) return revisionDiff;
+  const dateDiff = publicDateValue(a.updatedAt) - publicDateValue(b.updatedAt);
+  if (dateDiff) return dateDiff;
+  return Number(a._order || 0) - Number(b._order || 0);
+}
+
+function sumPublicScores(scores = []) {
+  return scores.reduce((sum, score) => sum + Number(score.total || 0), 0);
+}
+
+function publicEntries(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item, index) => [publicReadString(item?.key, item?.id, item?.teamId, item?.charreadaId, index), item])
+      .filter(([, item]) => item !== null && item !== undefined);
+  }
+  if (value && typeof value === "object") return Object.entries(value).filter(([, item]) => item !== null && item !== undefined);
+  return [];
+}
+
+function publicArray(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (value && typeof value === "object") return Object.values(value).filter(Boolean);
+  return [];
+}
+
+function publicReadString(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined) continue;
+    if (typeof value === "object") continue;
+    const text = String(value).trim();
+    if (text) return text;
+  }
+  return "";
+}
+
+function publicReadNumber(...values) {
+  const value = publicReadNumberOrNull(...values);
+  return value === null ? 0 : value;
+}
+
+function publicReadNumberOrNull(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+    const number = Number(value);
+    if (Number.isFinite(number)) return number;
+  }
+  return null;
+}
+
+function publicDateValue(value) {
+  if (!value) return 0;
+  const date = new Date(String(value));
+  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+}
+
+function publicCleanKey(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
 function resolveLiveChannel(payload = null, options = {}) {
   if (typeof options === "string") return normalizeLiveChannel(options);
   return normalizeLiveChannel(options.channel || options.liveChannel || payload?.liveChannel || payload?.tournament?.liveChannel || payload?.tournament?.id);
@@ -1076,12 +1793,14 @@ export async function publishFirebaseScore(tournamentId, scoreId, scorePayload, 
       "meta/updatedBy": meta.updatedBy,
       "meta/updatedByName": meta.updatedByName
     }));
+    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, null, { source: "score" });
     console.info("[score] guardado en CharroPro por nodo individual", {
       path: `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}`,
       tournamentId: cleanTournamentId,
-      scoreId: cleanScoreId
+      scoreId: cleanScoreId,
+      publicSnapshot
     });
-    return { ok: true, path: `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}` };
+    return { ok: true, path: `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}`, publicSnapshot };
   } catch (error) {
     console.error("[CharroPro] publishFirebaseScore failed", {
       tournamentId: cleanTournamentId,
@@ -1120,7 +1839,8 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
 
     await update(ref(getFirebaseDatabase(), path), payload);
     await update(ref(getFirebaseDatabase(), `${TOURNAMENT_INDEX_PATH}/${cleanTournamentId}`), compactTournamentIndex(payload));
-    return { ok: true, version };
+    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, payload, { source: "tournamentState" });
+    return { ok: true, version, publicSnapshot };
   } catch (error) {
     console.error("[CharroPro] publishFirebaseTournamentState failed", {
       tournamentId,

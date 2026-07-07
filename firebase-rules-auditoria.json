@@ -96,6 +96,12 @@
           }
         }
       },
+      "publicTournaments": {
+        "$tournamentId": {
+          ".read": true,
+          ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'admin' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador') && newData.exists()"
+        }
+      },
       "settings": {
         ".read": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true",
         "globalRuleOverrides": {
