@@ -1,9 +1,9 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260707-resultados-005-general-phase-only1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260706-release22d-active-charreada-source2";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260707-resultados-005-general-phase-only1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260706-release22d-active-charreada-source2";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -11,14 +11,14 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260707-resultados-005-general-phase-only1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260707-resultados-005-general-phase-only1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260707-resultados-005-general-phase-only1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260707-resultados-005-general-phase-only1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260707-resultados-005-general-phase-only1";
-import { getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260707-resultados-005-general-phase-only1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260707-resultados-005-general-phase-only1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260707-resultados-005-general-phase-only1";
+} from "./data/calaRules.js?v=20260706-release22d-active-charreada-source2";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260706-release22d-active-charreada-source2";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260706-release22d-active-charreada-source2";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260706-release22d-active-charreada-source2";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260706-release22d-active-charreada-source2";
+import { getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260706-release22d-active-charreada-source2";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260706-release22d-active-charreada-source2";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260706-release22d-active-charreada-source2";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -30,7 +30,7 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260707-resultados-005-general-phase-only1";
+} from "./core/scoring.js?v=20260706-release22d-active-charreada-source2";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -40,7 +40,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260707-resultados-005-general-phase-only1";
+} from "./core/sync.js?v=20260706-release22d-active-charreada-source2";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -69,16 +69,16 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260707-resultados-005-general-phase-only1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260707-resultados-005-general-phase-only1";
+} from "./core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260706-release22d-active-charreada-source2";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260707-resultados-005-general-phase-only1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260707-resultados-005-general-phase-only1";
+} from "./core/tournamentContext.js?v=20260706-release22d-active-charreada-source2";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260706-release22d-active-charreada-source2";
 import {
   createRoster,
   emptyAttempt,
@@ -105,7 +105,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260707-resultados-005-general-phase-only1";
+} from "./core/state.js?v=20260706-release22d-active-charreada-source2";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = "20260707-resultados-005-general-phase-only1";
@@ -4901,6 +4901,16 @@ function normalizeResultsPhaseKey(value) {
 
 function getStandingPhaseResult(row = {}, column = {}) {
   const teamId = row.team?.id || "";
+  const resultRows = getStandingResultsForPhase(row, column);
+  if (resultRows.length) {
+    const participatedRows = resultRows.filter((result) => result.participated);
+    if (!participatedRows.length) return { participated: false, total: null };
+    const total = participatedRows.reduce((sum, result) => (
+      sum + (Number.isFinite(Number(result.total)) ? Number(result.total) : 0)
+    ), 0);
+    return { participated: true, total };
+  }
+
   const phaseCharreadas = (column.sourceCharreadas || []).filter((charreada) =>
     (Array.isArray(charreada.teamIds) && charreada.teamIds.includes(teamId)) ||
     hasTeamScoreInCharreada(teamId, charreada.id)
@@ -4915,6 +4925,15 @@ function getStandingPhaseResult(row = {}, column = {}) {
   ), 0);
 
   return { participated: true, total };
+}
+
+function getStandingResultsForPhase(row = {}, column = {}) {
+  const targetIds = new Set((column.charreadaIds || []).filter(Boolean));
+  if (!targetIds.size || !Array.isArray(row.results)) return [];
+  return row.results.filter((result) => {
+    const resultIds = result?.charreada?.charreadaIds || [];
+    return resultIds.some((charreadaId) => targetIds.has(charreadaId));
+  });
 }
 
 function hasTeamScoreInCharreada(teamId = "", charreadaId = "") {
