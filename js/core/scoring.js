@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260706-release22d-active-charreada-source2";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260706-release22d-active-charreada-source2";
-import { getTeam, scoreKey, state } from "./state.js?v=20260706-release22d-active-charreada-source2";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260707-core-infra-001-versioning1";
+import { getTeam, scoreKey, state } from "./state.js?v=20260707-core-infra-001-versioning1";
 
 export function calculateAttemptTotal(attempt) {
   if (!attempt) return 0;

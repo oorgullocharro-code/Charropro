@@ -4,7 +4,7 @@ import {
   CALA_DESC_RULES,
   CALA_INFR_RULES,
   normalizeCalaRuleOverrideCatalog
-} from "./calaRules.js?v=20260706-release22d-active-charreada-source2";
+} from "./calaRules.js?v=20260707-core-infra-001-versioning1";
 
 export const SUERTES = [
   {

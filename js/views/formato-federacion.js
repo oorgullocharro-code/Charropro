@@ -1,6 +1,6 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260706-release22d-active-charreada-source2";
-import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260706-release22d-active-charreada-source2";
-import { getActiveCharreada, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260706-release22d-active-charreada-source2";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
+import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260707-core-infra-001-versioning1";
+import { getActiveCharreada, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260707-core-infra-001-versioning1";
 
 const root = document.getElementById("official-format-root");
 let selectedTeamId = new URLSearchParams(window.location.search).get("team") || "";

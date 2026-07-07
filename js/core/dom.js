@@ -1,3 +1,7 @@
+import { logCharroProVersion } from "./version.js?v=20260707-core-infra-001-versioning1";
+
+logCharroProVersion("runtime");
+
 export function html(strings, ...values) {
   return strings.reduce((result, part, index) => result + part + (values[index] ?? ""), "");
 }

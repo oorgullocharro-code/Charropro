@@ -1,5 +1,5 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260706-release22d-active-charreada-source2";
-import { getActiveCharreada, getActiveTournament, saveState, state } from "./state.js?v=20260706-release22d-active-charreada-source2";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
+import { getActiveCharreada, getActiveTournament, saveState, state } from "./state.js?v=20260707-core-infra-001-versioning1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

@@ -1,20 +1,21 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260706-release22d-active-charreada-source2";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
 import {
   DEFAULT_GRAPHICS_CONFIG,
   applyGraphicsConfig,
   normalizeGraphicsConfig,
   readLocalGraphicsConfig,
   writeLocalGraphicsConfig
-} from "../core/graphicsConfig.js?v=20260706-release22d-active-charreada-source2";
-import { loadState, saveState, state } from "../core/state.js?v=20260706-release22d-active-charreada-source2";
+} from "../core/graphicsConfig.js?v=20260707-core-infra-001-versioning1";
+import { loadState, saveState, state } from "../core/state.js?v=20260707-core-infra-001-versioning1";
 import {
   getLiveChannelFromUrl,
   publishFirebaseGraphicsConfig,
   signInFirebaseUser,
   signOutFirebaseUser,
   subscribeFirebaseAuthSession
-} from "../core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260706-release22d-active-charreada-source2";
+} from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260707-core-infra-001-versioning1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260707-core-infra-001-versioning1";
 
 const root = document.getElementById("graphics-control-root");
 let liveChannel = "";
@@ -362,7 +363,7 @@ async function sendGraphicsConfig() {
 }
 
 function buildGraphicUrl(fileName) {
-  const params = new URLSearchParams({ v: "20260706-release22d-active-charreada-source2" });
+  const params = new URLSearchParams({ v: CHARROPRO_APP_VERSION });
   if (liveChannel) params.set("tournamentId", liveChannel);
   return new URL(`./${fileName}?${params.toString()}`, window.location.href).href;
 }

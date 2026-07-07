@@ -1,7 +1,7 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260706-release22d-active-charreada-source2";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260706-release22d-active-charreada-source2";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260706-release22d-active-charreada-source2";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260706-release22d-active-charreada-source2";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260707-core-infra-001-versioning1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260707-core-infra-001-versioning1";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260707-core-infra-001-versioning1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -14,7 +14,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260706-release22d-active-charreada-source2";
+} from "./localCache.js?v=20260707-core-infra-001-versioning1";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());

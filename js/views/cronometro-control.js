@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260706-release22d-active-charreada-source2";
-import { LIVE_TIMER_KEY, getScopedLocalStorageKey, loadState, saveState, state } from "../core/state.js?v=20260706-release22d-active-charreada-source2";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
+import { LIVE_TIMER_KEY, getScopedLocalStorageKey, loadState, saveState, state } from "../core/state.js?v=20260707-core-infra-001-versioning1";
 import {
   getLiveChannelFromUrl,
   publishFirebaseTimer,
@@ -7,9 +7,9 @@ import {
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive
-} from "../core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
-import { getTimerScopeKey, getTimerView } from "../core/timerRules.js?v=20260706-release22d-active-charreada-source2";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260706-release22d-active-charreada-source2";
+} from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
+import { getTimerScopeKey, getTimerView } from "../core/timerRules.js?v=20260707-core-infra-001-versioning1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260707-core-infra-001-versioning1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();

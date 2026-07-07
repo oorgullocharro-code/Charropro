@@ -1,7 +1,7 @@
-import { escapeHTML, html } from "../core/dom.js?v=20260706-release22d-active-charreada-source2";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260706-release22d-active-charreada-source2";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
-import { getTimerView } from "../core/timerRules.js?v=20260706-release22d-active-charreada-source2";
+import { escapeHTML, html } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260707-core-infra-001-versioning1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
+import { getTimerView } from "../core/timerRules.js?v=20260707-core-infra-001-versioning1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();

@@ -6,7 +6,7 @@ import {
   getTeamSuerteTotal,
   hasAttemptActivity
 } from "../js/core/scoring.js";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260706-release22d-active-charreada-source2";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260707-core-infra-001-versioning1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

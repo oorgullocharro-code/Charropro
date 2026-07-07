@@ -1,12 +1,12 @@
-import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260706-release22d-active-charreada-source2";
-import { loadState, state } from "../core/state.js?v=20260706-release22d-active-charreada-source2";
+import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
+import { loadState, state } from "../core/state.js?v=20260707-core-infra-001-versioning1";
 import {
   signInAuditUser,
   signOutAuditUser,
   subscribeAuditAuth,
   subscribeFirebaseAuditScores
-} from "../core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
-import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260706-release22d-active-charreada-source2";
+} from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
+import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260707-core-infra-001-versioning1";
 
 const root = document.getElementById("supervision-root");
 

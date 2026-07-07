@@ -1,4 +1,4 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260706-release22d-active-charreada-source2";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
@@ -9,8 +9,8 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260706-release22d-active-charreada-source2";
-import { getTeam, scoreKey, state, uid } from "./state.js?v=20260706-release22d-active-charreada-source2";
+} from "./scoring.js?v=20260707-core-infra-001-versioning1";
+import { getTeam, scoreKey, state, uid } from "./state.js?v=20260707-core-infra-001-versioning1";
 
 export function buildStatisticalHistorySnapshot(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

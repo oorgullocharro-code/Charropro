@@ -1,9 +1,10 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260706-release22d-active-charreada-source2";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260707-core-infra-001-versioning1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260707-core-infra-001-versioning1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260706-release22d-active-charreada-source2";
+} from "./data/defaultScoringButtonLayouts.js?v=20260707-core-infra-001-versioning1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -11,14 +12,14 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260706-release22d-active-charreada-source2";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260706-release22d-active-charreada-source2";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260706-release22d-active-charreada-source2";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260706-release22d-active-charreada-source2";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260706-release22d-active-charreada-source2";
-import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260706-release22d-active-charreada-source2";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260706-release22d-active-charreada-source2";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260706-release22d-active-charreada-source2";
+} from "./data/calaRules.js?v=20260707-core-infra-001-versioning1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260707-core-infra-001-versioning1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260707-core-infra-001-versioning1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260707-core-infra-001-versioning1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260707-core-infra-001-versioning1";
+import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260707-core-infra-001-versioning1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260707-core-infra-001-versioning1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260707-core-infra-001-versioning1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -30,7 +31,7 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/scoring.js?v=20260707-core-infra-001-versioning1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -40,7 +41,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/sync.js?v=20260707-core-infra-001-versioning1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -69,16 +70,16 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260707-colas-001-best-coleador-modal1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260707-core-infra-001-versioning1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260706-release22d-active-charreada-source2";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/tournamentContext.js?v=20260707-core-infra-001-versioning1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260707-core-infra-001-versioning1";
 import {
   createRoster,
   emptyAttempt,
@@ -105,10 +106,10 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/state.js?v=20260707-core-infra-001-versioning1";
 
 const app = document.getElementById("app");
-const OBS_PAGE_VERSION = "20260707-colas-001-best-coleador-modal1";
+const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
 const APP_MODE = window.CHARROPRO_APP_MODE === "tournament" ? "tournament" : "portal";
 const IS_TOURNAMENT_APP = APP_MODE === "tournament";
 const scoringScrollSelectors = [".score-workspace", ".scoring-main", ".turn-panel", ".suertes-strip", ".scoring-shell", ".cp-scoring-shell"];
