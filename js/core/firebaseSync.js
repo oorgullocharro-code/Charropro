@@ -2534,8 +2534,23 @@ function compactAttempt(attempt) {
     note: attempt.note || "",
     attempted: Boolean(attempt.attempted),
     notAchieved: Boolean(attempt.notAchieved),
+    timeEvidence: compactTimeEvidence(attempt.timeEvidence),
     teamPenalties: compactPublishedItems(attempt.teamPenalties)
   };
+}
+
+function compactTimeEvidence(items = []) {
+  return Array.isArray(items)
+    ? items.map((item) => ({
+        id: item.id || "",
+        label: item.label || "",
+        timeMs: Number(item.timeMs || 0),
+        timeText: item.timeText || "",
+        capturedAt: item.capturedAt || "",
+        timerRunning: Boolean(item.timerRunning),
+        source: item.source || ""
+      }))
+    : [];
 }
 
 function compactTimer(timer) {

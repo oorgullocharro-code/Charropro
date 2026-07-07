@@ -2464,6 +2464,61 @@ th.num {
   flex-wrap: wrap;
 }
 
+.best-coleador-modal {
+  display: grid;
+  gap: 14px;
+}
+
+.best-coleador-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(201, 162, 39, .45);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(201, 162, 39, .16), rgba(17, 17, 17, .7));
+}
+
+.best-coleador-hero > span {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.best-coleador-hero strong {
+  display: block;
+  color: var(--gold);
+  font-size: 22px;
+}
+
+.best-coleador-hero em {
+  display: block;
+  color: var(--muted);
+  font-style: normal;
+  margin-top: 4px;
+}
+
+.best-coleador-list {
+  display: grid;
+  gap: 8px;
+}
+
+.best-coleador-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .04);
+}
+
+.best-coleador-row span {
+  color: var(--gold);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .toast-root {
   position: fixed;
   top: 14px;
@@ -3626,6 +3681,62 @@ th.num {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) repeat(4, minmax(78px, .25fr));
   gap: 10px;
+}
+
+.time-evidence-card .card-header {
+  align-items: center;
+}
+
+.time-evidence-list {
+  display: grid;
+  gap: 8px;
+}
+
+.time-evidence-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  background: rgba(255, 255, 255, .035);
+}
+
+.time-evidence-row strong,
+.time-evidence-preview strong {
+  display: block;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.time-evidence-row span,
+.time-evidence-preview span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.time-evidence-row em,
+.time-evidence-preview em {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.time-evidence-empty,
+.time-evidence-preview {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, .025);
 }
 
 .summary-box {
@@ -7245,6 +7356,7 @@ html.graphic-page #graphic-root {
   .rule-editor-row,
   .rule-add-row,
   .score-summary,
+  .time-evidence-row,
   .cala-punta-grid,
   .desc-grid,
   .timer-control-main-actions {

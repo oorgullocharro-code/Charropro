@@ -1,12 +1,16 @@
 # Despliegue CharroPro
 
-## Version RESULTADOS-005
+## Version COLAS-001
 
 Version actual de cache:
 
 ```text
-v=20260707-resultados-005-general-phase-only1
+v=20260707-colas-001-best-coleador-modal1
 ```
+
+Esta base agrega una ventana informativa al terminar la captura de Colas para el equipo actual. Cuando el flujo esta por salir del ultimo coleador del ultimo intento de Colas, el sistema suma los puntos ya capturados por coleador, identifica al mejor o a los empatados, muestra equipo y puntos, y continua el flujo normal al tocar `Aceptar`. No guarda scores nuevos, no cambia puntos, no altera reglas deportivas, no toca publicacion, pagina publica, snapshot publico, cronometro, OBS ni graficos.
+
+Esta base agrega en el calificador el boton manual `Tomar tiempo` dentro de la tarjeta de evidencia de tiempo. El juez decide cuando capturar el cronometro, selecciona una etiqueta rapida o personalizada, y el tiempo queda guardado temporalmente en el intento actual dentro del arreglo `timeEvidence`. La evidencia puede eliminarse antes de guardar/publicar. No se captura automaticamente al usar `Guardar y siguiente`, no cambia puntajes, no cambia reglas deportivas, no modifica cronometro ni Firebase Rules.
 
 Esta base simplifica la pantalla interna de Resultados. La tabla general del torneo queda fija como resumen por fases/rondas y ya no cambia a columnas por charreada al seleccionar una fase. El selector de fase queda aplicado a la sabana: `Todas` muestra resumen general por fases y una fase especifica muestra el detalle solo de sus equipos participantes y sus charreadas. No modifica scores, calculos, calificador, pagina publica, snapshot publico ni Firebase Rules.
 
@@ -195,7 +199,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260707-resultados-005-general-phase-only1
+https://orgullocharro.com/charropro/?v=20260707-colas-001-best-coleador-modal1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

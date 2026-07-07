@@ -16,7 +16,7 @@ import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } f
 import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260706-release22d-active-charreada-source2";
 import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260706-release22d-active-charreada-source2";
 import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260706-release22d-active-charreada-source2";
-import { getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260706-release22d-active-charreada-source2";
+import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260706-release22d-active-charreada-source2";
 import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260706-release22d-active-charreada-source2";
 import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260706-release22d-active-charreada-source2";
 import {
@@ -69,7 +69,7 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260706-release22d-active-charreada-source2";
+} from "./core/firebaseSync.js?v=20260707-colas-001-best-coleador-modal1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260706-release22d-active-charreada-source2";
 import {
   buildTournamentUrl,
@@ -108,7 +108,7 @@ import {
 } from "./core/state.js?v=20260706-release22d-active-charreada-source2";
 
 const app = document.getElementById("app");
-const OBS_PAGE_VERSION = "20260707-resultados-005-general-phase-only1";
+const OBS_PAGE_VERSION = "20260707-colas-001-best-coleador-modal1";
 const APP_MODE = window.CHARROPRO_APP_MODE === "tournament" ? "tournament" : "portal";
 const IS_TOURNAMENT_APP = APP_MODE === "tournament";
 const scoringScrollSelectors = [".score-workspace", ".scoring-main", ".turn-panel", ".suertes-strip", ".scoring-shell", ".cp-scoring-shell"];
@@ -172,6 +172,13 @@ const CHARREADA_PHASE_OPTIONS = [
   ["Caladero", "Caladero"],
   ["Coleadero", "Coleadero"],
   ["Exhibición", "Exhibición"],
+  ["__other", "Otro"]
+];
+const TIME_EVIDENCE_LABEL_OPTIONS = [
+  ["Tiempo oficial", "Tiempo oficial"],
+  ["Jineteo", "Jineteo"],
+  ["Terna", "Terna"],
+  ["Devolución de sombreros", "Devolución de sombreros"],
   ["__other", "Otro"]
 ];
 const TOURNAMENT_STATUS_OPTIONS = [
@@ -249,6 +256,10 @@ const ACTION_CAPABILITIES = {
   "toggle-rule": "score",
   "toggle-team-penalty": "score",
   "toggle-attempt-zero": "score",
+  "capture-time-evidence": "score",
+  "save-time-evidence": "score",
+  "remove-time-evidence": "score",
+  "continue-best-coleador-modal": "score",
   "toggle-desc": "score",
   "add-custom": "score",
   "remove-custom": "score",
@@ -298,6 +309,10 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "toggle-rule",
   "toggle-team-penalty",
   "toggle-attempt-zero",
+  "capture-time-evidence",
+  "save-time-evidence",
+  "remove-time-evidence",
+  "continue-best-coleador-modal",
   "toggle-desc",
   "add-custom",
   "remove-custom",
@@ -518,6 +533,8 @@ let suppressNextSharedAppStatePublish = false;
 let isScoringDirty = false;
 let activeScoringDraft = null;
 let officialPublishInProgress = false;
+let pendingTimeEvidenceCapture = null;
+let pendingBestColeadorModal = null;
 let lastScoreSaveStatus = {
   state: "connected",
   label: "Conectado",
@@ -5920,6 +5937,7 @@ function renderScoring({ preserveScroll = false } = {}) {
         <section class="score-workspace cp-scoring-main">
           ${context.attempt.desc ? renderDescState(context.attempt) : ""}
           ${renderScoringMainPanel(charreada, context, charroName)}
+          ${renderTimeNoteSection(context)}
           <section class="cp-botonera-panel">
             ${renderScoringActionAccordions(charreada, context, charroName, leaderboard)}
           </section>
@@ -7237,8 +7255,16 @@ function renderDescSection(context) {
 }
 
 function renderTimeNoteSection(context) {
+  const evidence = normalizeTimeEvidenceList(context.attempt.timeEvidence);
   return html`
-    <article class="card">
+    <article class="card time-evidence-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Evidencia de tiempo</h2>
+          <p class="card-subtitle">Captura manualmente el cronometro cuando el juez lo decida.</p>
+        </div>
+        <button class="button primary" data-action="capture-time-evidence" type="button">Tomar tiempo</button>
+      </div>
       <div class="card-body form-grid">
         <div>
           <label>Tiempo observado</label>
@@ -7248,9 +7274,129 @@ function renderTimeNoteSection(context) {
           <label>Nota de juez</label>
           <input value="${escapeHTML(context.attempt.note || "")}" data-action="attempt-field" data-field="note" placeholder="Observacion breve">
         </div>
+        <div class="wide">
+          ${evidence.length
+            ? html`
+                <div class="time-evidence-list">
+                  ${evidence.map((item) => html`
+                    <div class="time-evidence-row">
+                      <div>
+                        <strong>${escapeHTML(item.label || "Tiempo")}</strong>
+                        <span>${escapeHTML(item.timeText || formatMilliseconds(item.timeMs || 0))}</span>
+                        <em>${escapeHTML(formatEvidenceCapturedAt(item.capturedAt))} / ${item.timerRunning ? "corriendo" : "detenido"}</em>
+                      </div>
+                      <button class="button small red" data-action="remove-time-evidence" data-id="${escapeHTML(item.id)}" type="button">Eliminar</button>
+                    </div>
+                  `).join("")}
+                </div>
+              `
+            : html`<div class="time-evidence-empty">Sin tiempos capturados.</div>`}
+        </div>
       </div>
     </article>
   `;
+}
+
+function normalizeTimeEvidenceList(value) {
+  return Array.isArray(value) ? value.filter((item) => item && typeof item === "object") : [];
+}
+
+function captureTimeEvidence() {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt) return;
+  const timerView = getTimerView(
+    {
+      running: timerRunning,
+      startedAt: timerRunning ? timerStartedAt : null,
+      elapsedMs: timerElapsedMs
+    },
+    getTimerSource()
+  );
+  pendingTimeEvidenceCapture = {
+    id: uid("tiempo"),
+    timeMs: Number(timerView.displayMs || 0),
+    timeText: timerView.formatted || formatTimerMs(timerView.displayMs || 0),
+    capturedAt: new Date().toISOString(),
+    timerRunning: Boolean(timerRunning),
+    source: "calificador-manual"
+  };
+
+  showModal({
+    title: "Tomar tiempo",
+    body: html`
+      <form id="time-evidence-form" class="grid">
+        <div class="time-evidence-preview">
+          <span>Tiempo capturado</span>
+          <strong>${escapeHTML(pendingTimeEvidenceCapture.timeText)}</strong>
+          <em>${pendingTimeEvidenceCapture.timerRunning ? "Cronometro corriendo" : "Cronometro detenido"}</em>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>Etiqueta</label>
+            <select name="label">
+              ${TIME_EVIDENCE_LABEL_OPTIONS.map(([value, label]) => html`
+                <option value="${escapeHTML(value)}">${escapeHTML(label)}</option>
+              `).join("")}
+            </select>
+          </div>
+          <div>
+            <label>Otro</label>
+            <input name="labelOther" placeholder="Etiqueta personalizada">
+          </div>
+        </div>
+      </form>
+    `,
+    actions: html`
+      <button class="button" data-action="close-modal">Cancelar</button>
+      <button class="button primary" data-action="save-time-evidence">Guardar tiempo</button>
+    `
+  });
+}
+
+function saveTimeEvidence() {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  const form = document.getElementById("time-evidence-form");
+  if (!context?.attempt || !pendingTimeEvidenceCapture || !form) return;
+  const data = new FormData(form);
+  const selectedLabel = String(data.get("label") || "").trim();
+  const customLabel = String(data.get("labelOther") || "").trim();
+  const label = selectedLabel === "__other" ? customLabel || "Otro" : selectedLabel || "Tiempo oficial";
+  const evidence = {
+    ...pendingTimeEvidenceCapture,
+    label
+  };
+  context.attempt.timeEvidence = normalizeTimeEvidenceList(context.attempt.timeEvidence).concat(evidence);
+  pendingTimeEvidenceCapture = null;
+  closeModal();
+  console.info("[calificador-001] time captured", {
+    label: evidence.label,
+    timeMs: evidence.timeMs,
+    timeText: evidence.timeText,
+    timerRunning: evidence.timerRunning
+  });
+  persistScoreChange();
+}
+
+function removeTimeEvidence(evidenceId = "") {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !evidenceId) return;
+  const before = normalizeTimeEvidenceList(context.attempt.timeEvidence);
+  context.attempt.timeEvidence = before.filter((item) => item.id !== evidenceId);
+  console.info("[calificador-001] time removed", { id: evidenceId });
+  persistScoreChange();
+}
+
+function formatMilliseconds(value) {
+  return formatTimerMs(Number(value || 0));
+}
+
+function formatEvidenceCapturedAt(value) {
+  const date = new Date(value || "");
+  if (Number.isNaN(date.getTime())) return "Sin fecha";
+  return date.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 function renderRosterFields(team = { roster: createRoster("") }) {
@@ -7655,12 +7801,20 @@ function wireGlobalEvents() {
   });
 }
 
+function closeActiveModal() {
+  if (pendingBestColeadorModal) {
+    continueAfterBestColeadorModal();
+    return;
+  }
+  closeModal();
+}
+
 function handleAction(action, target) {
   if (!canUseAction(action)) return;
   if (target?.dataset?.confirmMessage && !window.confirm(target.dataset.confirmMessage)) return;
 
   const handlers = {
-    "close-modal": closeModal,
+    "close-modal": closeActiveModal,
     "show-access-login": showAccessLoginModal,
     "sign-in-access": signInAccess,
     "sign-out-access": signOutAccess,
@@ -7745,6 +7899,10 @@ function handleAction(action, target) {
     "add-team-penalty": addTeamPenalty,
     "remove-team-penalty": () => removeTeamPenalty(target.dataset.id),
     "toggle-attempt-zero": toggleAttemptZero,
+    "capture-time-evidence": captureTimeEvidence,
+    "save-time-evidence": saveTimeEvidence,
+    "remove-time-evidence": () => removeTimeEvidence(target.dataset.id),
+    "continue-best-coleador-modal": continueAfterBestColeadorModal,
     "toggle-desc": () => toggleDesc(target.dataset.label),
     "add-custom": () => addCustomScore(target.dataset.type),
     "remove-custom": () => removeCustomScore(target.dataset.type, target.dataset.id),
@@ -9045,6 +9203,14 @@ function markAttemptZeroIfBlank(attempt = {}) {
 
 function buildPublishedScoreSnapshot(context) {
   const attempt = cloneAttempt(context.attempt || emptyAttempt());
+  if (Array.isArray(attempt.timeEvidence) && attempt.timeEvidence.length) {
+    console.info("[calificador-001] time evidence saved", {
+      count: attempt.timeEvidence.length,
+      teamId: context.team?.id || "",
+      suerteId: context.suerte?.id || "",
+      attemptIndex: context.attemptIndex || 0
+    });
+  }
   return {
     id: uid("publicado"),
     publishedAt: new Date().toISOString(),
@@ -9323,6 +9489,7 @@ function resetAttempt() {
   const context = getCurrentContext();
   if (!context?.attempt) return;
   Object.assign(context.attempt, emptyAttempt());
+  context.attempt.timeEvidence = [];
   persistScoreChange();
 }
 
@@ -9629,6 +9796,148 @@ async function publishOfficialScoreForContext(context) {
   return { ...result, published, scoreId: scoreNode.id };
 }
 
+function continueOfficialScoreFlowAfterPublish() {
+  suppressNextSharedAppStatePublish = true;
+  stopTimer(true);
+  advanceScoringPointer();
+  syncCurrentLiveState({ repeat: true });
+  officialPublishInProgress = false;
+  render();
+}
+
+function isColasContext(context = {}) {
+  return context?.suerte?.id === "colas" || context?.suerte?.type === "coleadero";
+}
+
+function getColeadorCountForContext(context = {}, collection = null) {
+  if (context?.tournament?.type === "coleadero") return 1;
+  return Math.max(3, Array.isArray(collection) ? collection.length : 0);
+}
+
+function isCompletingColasForTeam(context = {}) {
+  if (!isColasContext(context)) return false;
+  const collection = getScoreCollectionForContext(context);
+  const coleadorCount = getColeadorCountForContext(context, collection);
+  const attempts = Math.max(1, Number(context.suerte?.attempts || 1));
+  return Number(context.coleadorIndex || 0) >= coleadorCount - 1
+    && Number(context.attemptIndex || 0) >= attempts - 1;
+}
+
+function readColeadorNameFromAttempt(attempt = {}) {
+  const fields = [
+    "coleadorName",
+    "charroName",
+    "participantName",
+    "athleteName",
+    "charro",
+    "competidor",
+    "ejecutante",
+    "name"
+  ];
+  for (const field of fields) {
+    const value = attempt?.[field];
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (value && typeof value === "object") {
+      const nested = value.name || value.nombre || value.fullName || value.displayName;
+      if (typeof nested === "string" && nested.trim()) return nested.trim();
+    }
+  }
+  return "";
+}
+
+function resolveColeadorName(context = {}, coleadorIndex = 0, attempts = []) {
+  const attemptName = attempts.map(readColeadorNameFromAttempt).find(Boolean);
+  if (attemptName) return attemptName;
+  const rosterName = context.team?.roster?.colas?.[coleadorIndex] || "";
+  if (rosterName) return rosterName;
+  if (coleadorIndex === 0 && context.team?.participantName) return context.team.participantName;
+  return "Coleador no registrado";
+}
+
+function buildBestColeadorSummary(context = {}) {
+  if (!isCompletingColasForTeam(context)) return null;
+  const collection = getScoreCollectionForContext(context);
+  const coleadorCount = getColeadorCountForContext(context, collection);
+  const entries = Array.from({ length: coleadorCount }, (_, index) => {
+    const attempts = Array.isArray(collection?.[index]) ? collection[index] : [];
+    const total = attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
+    return {
+      index,
+      name: resolveColeadorName(context, index, attempts),
+      total,
+      hasScores: attempts.some((attempt) => hasAttemptVisibleResult(attempt))
+    };
+  }).filter((entry) => entry.hasScores);
+
+  if (!entries.length) return null;
+
+  const bestTotal = Math.max(...entries.map((entry) => Number(entry.total || 0)));
+  const winners = entries.filter((entry) => Number(entry.total || 0) === bestTotal);
+  const summary = {
+    teamName: getEntryDisplayName(context.team) || context.team?.name || "—",
+    bestTotal,
+    winners,
+    entries
+  };
+  console.info("[colas-001] best coleador calculated", {
+    team: summary.teamName,
+    bestTotal,
+    winners: winners.map((entry) => entry.name)
+  });
+  return summary;
+}
+
+function maybeShowBestColeadorModal(context = {}) {
+  const summary = buildBestColeadorSummary(context);
+  if (!summary) return false;
+  const title = summary.winners.length > 1 ? "Mejores coleadores" : "Mejor coleador";
+  pendingBestColeadorModal = summary;
+  showModal({
+    title,
+    body: html`
+      <div class="best-coleador-modal">
+        <div class="best-coleador-hero">
+          <span aria-hidden="true">🏆</span>
+          <div>
+            <strong>${escapeHTML(title)}</strong>
+            <em>Equipo: ${escapeHTML(summary.teamName || "—")}</em>
+          </div>
+        </div>
+        <div class="best-coleador-list">
+          ${summary.winners.map((entry) => html`
+            <article class="best-coleador-row">
+              <strong>${escapeHTML(entry.name || "Coleador no registrado")}</strong>
+              <span>${moneylessNumber(entry.total)} pts</span>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    `,
+    actions: html`<button class="button primary" data-action="continue-best-coleador-modal">Aceptar</button>`
+  });
+  console.info("[colas-001] best coleador modal shown", {
+    team: summary.teamName,
+    winners: summary.winners.length,
+    bestTotal: summary.bestTotal
+  });
+  return true;
+}
+
+function continueAfterBestColeadorModal() {
+  if (!pendingBestColeadorModal) {
+    closeModal();
+    return;
+  }
+  const summary = pendingBestColeadorModal;
+  pendingBestColeadorModal = null;
+  closeModal();
+  console.info("[colas-001] best coleador modal closed", {
+    team: summary.teamName,
+    winners: summary.winners?.map((entry) => entry.name) || []
+  });
+  continueOfficialScoreFlowAfterPublish();
+}
+
 async function nextScore() {
   if (!guardUnlockedCharreada()) return;
   if (officialPublishInProgress) {
@@ -9686,12 +9995,8 @@ async function nextScore() {
 
       releaseActiveScoringDraft(scoreKey(context.charreada.id, context.team.id, context.suerte.id));
     }
-    suppressNextSharedAppStatePublish = true;
-    stopTimer(true);
-    advanceScoringPointer();
-    syncCurrentLiveState({ repeat: true });
-    officialPublishInProgress = false;
-    render();
+    if (maybeShowBestColeadorModal(context)) return;
+    continueOfficialScoreFlowAfterPublish();
   } catch (error) {
     officialPublishInProgress = false;
     setLastFirebaseError("official-publish-exception", error?.message || "");
