@@ -1917,6 +1917,10 @@ th.num {
   gap: 20px;
 }
 
+.official-program-page {
+  gap: 18px;
+}
+
 .program-hero {
   border: 1px solid rgba(76, 141, 255, .28);
   border-radius: var(--radius);
@@ -1929,6 +1933,10 @@ th.num {
     radial-gradient(circle at 12% 10%, rgba(76, 141, 255, .16), transparent 32%),
     linear-gradient(135deg, rgba(23, 28, 38, .98), rgba(13, 17, 24, .96));
   box-shadow: var(--shadow);
+}
+
+.official-program-hero .scope-card-metrics {
+  min-width: 360px;
 }
 
 .program-hero span,
@@ -2012,6 +2020,119 @@ th.num {
   color: #cfe0ff;
   font-size: 12px;
   font-weight: 950;
+}
+
+.official-program-day-list {
+  display: grid;
+  gap: 14px;
+}
+
+.official-program-day {
+  display: grid;
+  gap: 10px;
+}
+
+.official-program-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.official-program-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+  background: linear-gradient(135deg, rgba(23, 28, 38, .98), rgba(15, 20, 29, .98));
+}
+
+.official-program-card.green,
+.official-program-card.active {
+  border-color: rgba(49, 196, 141, .45);
+}
+
+.official-program-card.amber {
+  border-color: rgba(244, 183, 64, .42);
+}
+
+.official-program-card.red {
+  border-color: rgba(239, 91, 91, .42);
+}
+
+.official-program-card.blue {
+  border-color: rgba(76, 141, 255, .28);
+}
+
+.official-program-time {
+  border-right: 1px solid var(--line);
+  padding-right: 12px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+}
+
+.official-program-time span,
+.official-program-card-head span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.official-program-time strong {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.official-program-main {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.official-program-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.official-program-card h3 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.official-program-teams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.official-program-teams span {
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, .035);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.official-program-actions {
+  min-width: 230px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+  gap: 8px;
+  align-content: center;
+}
+
+.official-program-modal {
+  display: grid;
+  gap: 14px;
 }
 
 .program-card {
@@ -6891,6 +7012,7 @@ html.graphic-page #graphic-root {
   .judge-grid,
   .judge-live-state,
   .judge-charreada-card,
+  .official-program-card,
   .program-card {
     grid-template-columns: 1fr;
   }
@@ -6921,6 +7043,21 @@ html.graphic-page #graphic-root {
 
   .program-card-actions {
     min-width: 0;
+  }
+
+  .official-program-hero .scope-card-metrics,
+  .official-program-actions {
+    min-width: 0;
+  }
+
+  .official-program-time {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0 0 10px;
+  }
+
+  .official-program-card-head {
+    flex-direction: column;
   }
 
   .program-day-meta {

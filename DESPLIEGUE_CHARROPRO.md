@@ -1,12 +1,16 @@
 # Despliegue CharroPro
 
-## Version PROGRAM-FASE-002
+## Version RESULTADOS-004
 
 Version actual de cache:
 
 ```text
-v=20260706-program-fase-002-group-by-day1
+v=20260707-resultados-004-phase-selector-sync1
 ```
+
+Esta base conecta el selector de fase/ronda de Resultados con el resumen y la sabana. En `Todas`, Resultados muestra resumen por fases. Al elegir una fase, muestra solo equipos participantes o con score registrado en esa fase, abre el desglose por charreada, agrega `Total {fase}` y conserva el `Total` general. La sabana tambien cambia: en `Todas` muestra resumen por fases y en una fase muestra solo el detalle de esa fase. No modifica scores, totales oficiales, calificador, snapshot publico ni reglas.
+
+Esta base agrega el modulo oficial de consulta `Programa` como una pestana separada de la pantalla operativa de `Programacion`. El modulo oficial reutiliza las charreadas existentes del torneo, las agrupa por fecha/dia, permite contraer/desplegar cada dia en la sesion, y muestra hora, nombre, fase, estado, numero de equipos, equipos participantes y acciones `Abrir`, `Editar` y `Activar` segun permisos. No crea colecciones nuevas ni modifica activacion, calificador, Firebase Rules, Snapshot publico ni calculos deportivos.
 
 Esta base agrega agrupacion por dia en la vista Programa. Las charreadas se ordenan por fecha/hora, se agrupan por fecha, cada grupo muestra dia/fecha, numero de charreadas, fases incluidas y puede desplegarse o colapsarse. No cambia activacion, calificador, Firebase Rules ni datos guardados.
 
@@ -26,6 +30,13 @@ La correccion agrega logs de diagnostico:
 [resultados-003] selector phase changed
 [program-fase-002] day groups built
 [program-fase-002] day group toggled
+[programa-001] grouped by day
+[programa-001] collapse restored
+[programa-001] program rendered
+[resultados-004] selector phase changed
+[resultados-004] summary by phase rendered
+[resultados-004] phase detail rendered
+[resultados-004] visible teams by phase
 ```
 
 Tambien conserva `phase` como campo canonico de fase/ronda por charreada. La fase se captura al crear o editar una charreada, se conserva en el estado local/Firebase y se publica en el Snapshot Publico dentro de `activeCharreada` y `schedule`.
@@ -178,7 +189,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260706-program-fase-002-group-by-day1
+https://orgullocharro.com/charropro/?v=20260707-resultados-004-phase-selector-sync1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

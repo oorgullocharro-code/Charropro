@@ -28,7 +28,8 @@ import {
   calculateAttemptTotal,
   getTeamCharreadaResta,
   getTeamCharreadaTotal,
-  getTeamSuerteTotal
+  getTeamSuerteTotal,
+  hasAttemptActivity
 } from "./core/scoring.js?v=20260706-release22d-active-charreada-source2";
 import {
   claimGoogleSyncControl,
@@ -115,6 +116,7 @@ const SIDEBAR_STORAGE_KEY = "sidebar_collapsed";
 const TURN_PANEL_STORAGE_KEY = "turn_panel_collapsed";
 const TEAMS_TAB_STORAGE_KEY = "teams_tab";
 const SCORING_ACCORDION_STORAGE_KEY = "scoring_accordion_state";
+const OFFICIAL_PROGRAM_COLLAPSE_STORAGE_KEY = "official_program_collapsed_days";
 const FIREBASE_CLIENT_ID_KEY = "firebase_client_id";
 const APP_CACHE_VERSION_STORAGE_KEY = "cache_version";
 const PREPARE_STORAGE_KEY = "prepare_status_v1";
@@ -169,11 +171,11 @@ const TOURNAMENT_STATUS_OPTIONS = [
   ["congelado", "Congelado"]
 ];
 const ROLE_MENU_VIEWS = {
-  [ROLES.JUEZ]: ["dashboard", "program", "results"],
-  [ROLES.LOCUTOR]: ["dashboard", "program", "results"],
-  [ROLES.GRAFICOS]: ["dashboard", "results", "graphicsAccess"],
-  [ROLES.ORGANIZADOR]: ["dashboard", "program", "results", "stats", "settings"],
-  [ROLES.LECTURA]: ["dashboard", "program", "results", "stats", "settings"]
+  [ROLES.JUEZ]: ["dashboard", "officialProgram", "results"],
+  [ROLES.LOCUTOR]: ["dashboard", "officialProgram", "results"],
+  [ROLES.GRAFICOS]: ["dashboard", "officialProgram", "results", "graphicsAccess"],
+  [ROLES.ORGANIZADOR]: ["dashboard", "officialProgram", "program", "results", "stats", "settings"],
+  [ROLES.LECTURA]: ["dashboard", "officialProgram", "program", "results", "stats", "settings"]
 };
 const READ_ACTIONS = new Set([
   "close-modal",
@@ -186,6 +188,8 @@ const READ_ACTIONS = new Set([
   "sign-out-access",
   "open-tournament",
   "open-tournament-program",
+  "open-program-charreada",
+  "toggle-official-program-day",
   "select-teams-tab",
   "toggle-program-day",
   "select-results-phase",
@@ -304,7 +308,8 @@ const routeMeta = {
   tournaments: ["Torneos", "Crea uno nuevo o abre un torneo existente."],
   dashboard: ["Panel", "Estado general del torneo activo."],
   teams: ["Equipos", "Alta de equipos y alineaciones."],
-  program: ["Programa", "Charreadas y equipos participantes."],
+  officialProgram: ["Programa", "Consulta oficial del orden del torneo."],
+  program: ["Programacion", "Crear y administrar charreadas y equipos participantes."],
   results: ["Resultados del torneo", "Tabla, sabana y exportacion del torneo activo."],
   stats: ["Estadisticas del torneo", "Analisis del torneo activo."],
   globalStats: ["Estadisticas globales", "Analisis general de temporadas, torneos e historiales."],
@@ -315,7 +320,7 @@ const routeMeta = {
   rulesAdmin: ["Botoneras generales", "Reglamento base oculto del sistema."],
   settings: ["Conexion", "Google Sheets, OBS y respaldos."]
 };
-const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "program", "results", "stats", "graphicsAccess", "rules", "settings"]);
+const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "officialProgram", "program", "results", "stats", "graphicsAccess", "rules", "settings"]);
 
 function isIndividualTournament(tournament = getActiveTournament()) {
   return INDIVIDUAL_TOURNAMENT_TYPES.includes(tournament?.type);
@@ -926,8 +931,9 @@ function getVisibleGeneralNavItems() {
 function getVisibleTournamentNavItems(labels) {
   const items = [
     ["dashboard", "Panel", "home"],
+    ["officialProgram", "Programa", "calendar"],
     ["teams", labels.nav, "users"],
-    ["program", "Programa", "calendar"],
+    ["program", "Programacion", "calendar"],
     ["results", "Resultados", "trophy"],
     ["stats", "Est. torneo", "chart"],
     ["graphicsAccess", "Graficos", "monitor"],
@@ -951,12 +957,12 @@ function canShowNavView(view) {
   if (role === ROLES.SUPERVISOR) return true;
   if (role === ROLES.OPERADOR) return view !== "users";
   if (role === ROLES.ORGANIZADOR) {
-    return ["tournaments", "globalStats", "history", "dashboard", "program", "results", "stats", "settings"].includes(view);
+    return ["tournaments", "globalStats", "history", "dashboard", "officialProgram", "program", "results", "stats", "settings"].includes(view);
   }
   if (role === ROLES.LECTURA) {
-    return ["tournaments", "globalStats", "history", "dashboard", "program", "results", "stats", "settings"].includes(view);
+    return ["tournaments", "globalStats", "history", "dashboard", "officialProgram", "program", "results", "stats", "settings"].includes(view);
   }
-  if (role === ROLES.GRAFICOS) return ["tournaments", "globalStats", "graphicsAccess"].includes(view);
+  if (role === ROLES.GRAFICOS) return ["tournaments", "globalStats", "officialProgram", "graphicsAccess"].includes(view);
   return false;
 }
 
@@ -2529,6 +2535,7 @@ function renderCurrentView() {
   if (state.view === "graphicsAccess") return renderGraphicsAccess();
 
   if (state.view === "teams") return renderTeams();
+  if (state.view === "officialProgram") return renderOfficialProgram();
   if (state.view === "program") return renderProgram();
   if (state.view === "results") return renderResults();
   if (state.view === "stats") return renderTournamentStatsCenter();
@@ -2552,6 +2559,7 @@ function renderTournamentAppView() {
 
   if (state.view === "graphicsAccess") return renderGraphicsAccess();
   if (state.view === "teams") return renderTeams();
+  if (state.view === "officialProgram") return renderOfficialProgram();
   if (state.view === "program") return renderProgram();
   if (state.view === "results") return renderResults();
   if (state.view === "stats") return renderTournamentStatsCenter();
@@ -2601,11 +2609,11 @@ function canAccessCurrentView() {
     return !["users", "graphicsAccess", "rules", "rulesAdmin"].includes(state.view);
   }
   if (role === ROLES.LECTURA) {
-    return ["tournaments", "globalStats", "dashboard", "program", "results", "stats", "history", "settings"].includes(state.view);
+    return ["tournaments", "globalStats", "dashboard", "officialProgram", "program", "results", "stats", "history", "settings"].includes(state.view);
   }
-  if (role === ROLES.LOCUTOR) return ["tournaments", "dashboard", "program", "results"].includes(state.view);
+  if (role === ROLES.LOCUTOR) return ["tournaments", "dashboard", "officialProgram", "results"].includes(state.view);
   if (role === ROLES.JUEZ) return ["tournaments"].includes(state.view);
-  if (role === ROLES.GRAFICOS) return ["tournaments", "globalStats", "graphicsAccess"].includes(state.view);
+  if (role === ROLES.GRAFICOS) return ["tournaments", "globalStats", "officialProgram", "graphicsAccess"].includes(state.view);
   return false;
 }
 
@@ -3065,7 +3073,7 @@ function renderDashboard() {
             <h2 class="card-title">Programa activo</h2>
             <p class="card-subtitle">Charreadas del torneo seleccionado.</p>
           </div>
-          <button class="button small" data-view="program">Ver programa</button>
+          <button class="button small" data-view="officialProgram">Ver programa</button>
         </div>
         <div class="card-body">
           ${charreadas.length ? renderCharreadasSummaryList(charreadas) : html`<div class="empty">Crea una charreada para iniciar el programa.</div>`}
@@ -3269,6 +3277,134 @@ function renderProgram() {
   `;
 }
 
+function renderOfficialProgram() {
+  const tournament = getActiveTournament();
+  const charreadas = getTournamentCharreadas();
+  const teams = getTournamentTeams();
+  const labels = getEntityLabels(tournament);
+  const groups = groupProgramCharreadasByDay(charreadas);
+  const collapsedDays = readOfficialProgramCollapsedDays();
+  const activeCharreadaResolution = resolveActiveScoringCharreada(charreadas, tournament);
+
+  console.info("[programa-001] grouped by day", groups.map((group) => ({
+    key: group.key,
+    label: group.label,
+    charreadas: group.charreadas.length
+  })));
+  console.info("[programa-001] collapse restored", {
+    collapsedDays: Object.keys(collapsedDays).filter((key) => collapsedDays[key])
+  });
+  console.info("[programa-001] program rendered", {
+    tournamentId: tournament?.id || state.activeTournamentId || "",
+    days: groups.length,
+    charreadas: charreadas.length
+  });
+
+  return html`
+    <section class="content official-program-page">
+      <article class="program-hero official-program-hero">
+        <div>
+          <span>Programa oficial</span>
+          <h2>${escapeHTML(tournament?.name || "Torneo")}</h2>
+          <p>${charreadas.length ? `${charreadas.length} charreada${charreadas.length === 1 ? "" : "s"} / ${teams.length} ${labels.plural}` : "Aun no hay charreadas programadas."}</p>
+        </div>
+        <div class="scope-card-metrics">
+          <div><span>Dias</span><strong>${groups.length}</strong></div>
+          <div><span>Charreadas</span><strong>${charreadas.length}</strong></div>
+          <div><span>${escapeHTML(labels.title)}</span><strong>${teams.length}</strong></div>
+        </div>
+      </article>
+      ${
+        groups.length
+          ? html`
+              <div class="official-program-day-list">
+                ${groups.map((group) => renderOfficialProgramDayGroup(group, activeCharreadaResolution.id || "", collapsedDays)).join("")}
+              </div>
+            `
+          : html`
+              <div class="empty program-empty">
+                <h2>Programa sin charreadas</h2>
+                <p>Cuando se programen charreadas, apareceran aqui agrupadas por fecha.</p>
+              </div>
+            `
+      }
+    </section>
+  `;
+}
+
+function renderOfficialProgramDayGroup(group, activeCharreadaId = state.activeCharreadaId, collapsedDays = {}) {
+  const collapsed = Boolean(collapsedDays[group.key]);
+  return html`
+    <section class="official-program-day ${collapsed ? "collapsed" : ""}">
+      <button class="program-day-header official-program-day-header" data-action="toggle-official-program-day" data-id="${escapeHTML(group.key)}" type="button" aria-expanded="${collapsed ? "false" : "true"}">
+        <div>
+          <span>Dia de competencia</span>
+          <strong>${escapeHTML(group.label)}</strong>
+        </div>
+        <div class="program-day-meta">
+          <span class="pill">${group.charreadas.length} charreada${group.charreadas.length === 1 ? "" : "s"}</span>
+          <span class="pill">${escapeHTML(formatProgramDayPhases(group.charreadas))}</span>
+          <b>${collapsed ? "Mostrar" : "Ocultar"}</b>
+        </div>
+      </button>
+      ${
+        collapsed
+          ? ""
+          : html`
+              <div class="official-program-grid">
+                ${group.charreadas.map((charreada) => renderOfficialProgramCard(charreada, activeCharreadaId)).join("")}
+              </div>
+            `
+      }
+    </section>
+  `;
+}
+
+function renderOfficialProgramCard(charreada, activeCharreadaId = state.activeCharreadaId) {
+  const isActive = charreada.id === activeCharreadaId;
+  const displayStatus = getCanonicalCharreadaStatus(charreada, activeCharreadaId);
+  const statusClass = getCharreadaStatusClass(displayStatus);
+  const teams = (charreada.teamIds || []).map((teamId) => getTeam(teamId)).filter(Boolean);
+  const locked = isCharreadaFrozen(charreada);
+  const canManage = roleCan(firebaseAccess.role, "manage");
+  const canOperate = roleCan(firebaseAccess.role, "operate");
+
+  return html`
+    <article class="official-program-card ${statusClass} ${isActive ? "active" : ""}">
+      <div class="official-program-time">
+        <span>Hora</span>
+        <strong>${escapeHTML(formatTimeLabel(charreada.startTime) || "Por confirmar")}</strong>
+      </div>
+      <div class="official-program-main">
+        <div class="official-program-card-head">
+          <div>
+            <span class="program-card-kicker">${escapeHTML(formatDateLabel(charreada.date) || "Sin fecha")}</span>
+            <h3>${escapeHTML(charreada.name || "Charreada")}</h3>
+          </div>
+          <div class="program-card-badges">
+            <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
+            <span class="pill">${teams.length} equipo${teams.length === 1 ? "" : "s"}</span>
+            <span class="pill ${statusClass}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
+            ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
+          </div>
+        </div>
+        <div class="official-program-teams">
+          ${
+            teams.length
+              ? teams.map((team, index) => html`<span>${index + 1}. ${escapeHTML(getEntryDisplayName(team))}</span>`).join("")
+              : html`<span>Sin equipos asignados</span>`
+          }
+        </div>
+      </div>
+      <div class="official-program-actions">
+        <button class="button small" data-action="open-program-charreada" data-id="${escapeHTML(charreada.id)}">Abrir</button>
+        ${canManage ? html`<button class="button small" data-action="edit-charreada" data-id="${escapeHTML(charreada.id)}" ${locked ? "disabled" : ""}>Editar</button>` : ""}
+        ${canOperate ? html`<button class="button primary small" data-action="set-active-charreada" data-id="${escapeHTML(charreada.id)}" ${isActive ? "disabled" : ""}>Activar</button>` : ""}
+      </div>
+    </article>
+  `;
+}
+
 function renderCharreadasCards(charreadas, activeCharreadaId = state.activeCharreadaId) {
   const groups = groupProgramCharreadasByDay(charreadas);
   return html`
@@ -3356,7 +3492,10 @@ function renderCharreadaProgramCard(charreada, activeCharreadaId = state.activeC
 
 function groupProgramCharreadasByDay(charreadas = []) {
   const groups = new Map();
-  const sorted = charreadas.slice().sort(compareProgramCharreadas);
+  const sorted = charreadas
+    .map((charreada, index) => ({ charreada, index }))
+    .sort((a, b) => compareProgramCharreadas(a.charreada, b.charreada, a.index, b.index))
+    .map((item) => item.charreada);
 
   sorted.forEach((charreada) => {
     const key = getProgramDayKey(charreada);
@@ -3379,12 +3518,20 @@ function groupProgramCharreadasByDay(charreadas = []) {
   return [...groups.values()];
 }
 
-function compareProgramCharreadas(a = {}, b = {}) {
+function compareProgramCharreadas(a = {}, b = {}, aIndex = 0, bIndex = 0) {
   const dateCompare = getProgramDaySortValue(a).localeCompare(getProgramDaySortValue(b), "es");
   if (dateCompare) return dateCompare;
   const timeCompare = String(a.startTime || "").localeCompare(String(b.startTime || ""), "es");
   if (timeCompare) return timeCompare;
+  const orderCompare = getProgramCharreadaOrder(a, aIndex) - getProgramCharreadaOrder(b, bIndex);
+  if (orderCompare) return orderCompare;
   return String(a.name || "").localeCompare(String(b.name || ""), "es");
+}
+
+function getProgramCharreadaOrder(charreada = {}, fallbackIndex = 0) {
+  const raw = charreada.order ?? charreada.orden ?? charreada.charreadaOrder ?? charreada.programOrder;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : fallbackIndex + 1;
 }
 
 function getProgramDayKey(charreada = {}) {
@@ -3435,6 +3582,68 @@ function toggleProgramDay(dayKey = "") {
   console.info("[program-fase-002] day group toggled", { dayKey, collapsed: state.programCollapsedDays[dayKey] });
   saveState({ silent: true });
   render();
+}
+
+function readOfficialProgramCollapsedDays() {
+  try {
+    const saved = sessionStorage.getItem(scopedStorageKey(OFFICIAL_PROGRAM_COLLAPSE_STORAGE_KEY));
+    return saved ? JSON.parse(saved) || {} : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveOfficialProgramCollapsedDays(collapsedDays = {}) {
+  try {
+    sessionStorage.setItem(scopedStorageKey(OFFICIAL_PROGRAM_COLLAPSE_STORAGE_KEY), JSON.stringify(collapsedDays));
+  } catch {
+    // La preferencia visual no debe bloquear la consulta del programa.
+  }
+}
+
+function toggleOfficialProgramDay(dayKey = "") {
+  if (!dayKey) return;
+  const collapsedDays = readOfficialProgramCollapsedDays();
+  collapsedDays[dayKey] = !Boolean(collapsedDays[dayKey]);
+  saveOfficialProgramCollapsedDays(collapsedDays);
+  console.info("[programa-001] collapse restored", {
+    toggled: dayKey,
+    collapsed: collapsedDays[dayKey]
+  });
+  render();
+}
+
+function openProgramCharreada(charreadaId = "") {
+  const charreada = state.charreadas.find((item) => item.id === charreadaId);
+  if (!charreada) return;
+  const activeResolution = resolveActiveScoringCharreada(getTournamentCharreadas(charreada.tournamentId), getActiveTournament());
+  const isActive = activeResolution.id === charreada.id;
+  const displayStatus = getCanonicalCharreadaStatus(charreada, activeResolution.id || state.activeCharreadaId || "");
+  const teams = (charreada.teamIds || []).map((teamId) => getTeam(teamId)).filter(Boolean);
+  showModal({
+    title: charreada.name || "Charreada",
+    body: html`
+      <div class="official-program-modal">
+        <div class="program-card-badges">
+          <span class="pill">${escapeHTML(formatDateLabel(charreada.date) || "Sin fecha")}</span>
+          <span class="pill">${escapeHTML(formatTimeLabel(charreada.startTime) || "Hora por confirmar")}</span>
+          <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
+          <span class="pill ${getCharreadaStatusClass(displayStatus)}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
+          ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
+        </div>
+        <div class="official-program-teams">
+          ${
+            teams.length
+              ? teams.map((team, index) => html`<span>${index + 1}. ${escapeHTML(getEntryDisplayName(team))}</span>`).join("")
+              : html`<span>Sin equipos asignados</span>`
+          }
+        </div>
+      </div>
+    `,
+    actions: html`
+      <button class="button primary" data-action="close-modal">Cerrar</button>
+    `
+  });
 }
 
 function renderCharreadasSummaryList(charreadas) {
@@ -3521,15 +3730,18 @@ function formatTimeLabel(value) {
 
 function formatCharreadaStatus(status) {
   if (status === "en_vivo") return "En vivo";
-  if (status === "finalizada") return "Finalizada";
+  if (status === "terminada" || status === "finalizada") return "Terminada";
+  if (status === "suspendida") return "Suspendida";
+  if (status === "cancelada") return "Cancelada";
   if (status === "congelada") return "Congelada";
   return "Programada";
 }
 
 function getCharreadaStatusClass(status) {
   if (status === "en_vivo") return "green";
-  if (status === "finalizada") return "amber";
-  if (status === "congelada") return "red";
+  if (status === "terminada" || status === "finalizada") return "amber";
+  if (status === "congelada" || status === "cancelada") return "red";
+  if (status === "suspendida") return "amber";
   return "blue";
 }
 
@@ -3555,6 +3767,8 @@ function renderResults() {
   const selectedPhase = phaseColumns.find((column) => column.id === selectedPhaseId) || null;
   const visiblePhaseColumns = selectedPhase ? buildResultsPhaseDetailColumns(selectedPhase) : phaseColumns;
   const standings = buildTournamentTeamStandings(tournament.id);
+  const visibleStandings = selectedPhase ? filterResultsStandingsByPhase(standings, selectedPhase) : standings;
+  const visibleTeamIds = new Set(visibleStandings.map((row) => row.team?.id).filter(Boolean));
   const awards = buildIndividualAwards(tournament.id);
   const awardPlaces = getIndividualAwardPlaces(tournament);
   const labels = getEntityLabels(tournament);
@@ -3580,6 +3794,18 @@ function renderResults() {
   console.info("[resultados-003] phase detail charreadas", selectedPhase
     ? selectedPhase.sourceCharreadas.map((charreada) => ({ id: charreada.id, name: charreada.name }))
     : phaseColumns.map((column) => ({ phase: column.label, charreadas: column.charreadaIds.length })));
+  console.info("[resultados-004] summary by phase rendered", {
+    mode: selectedPhase ? "phase" : "all",
+    columns: visiblePhaseColumns.map((column) => column.label)
+  });
+  console.info("[resultados-004] phase detail rendered", selectedPhase ? {
+    phase: selectedPhase.label,
+    charreadas: selectedPhase.sourceCharreadas.map((charreada) => charreada.name)
+  } : { phase: "Todas" });
+  console.info("[resultados-004] visible teams by phase", {
+    phase: selectedPhase?.label || "Todas",
+    teams: visibleStandings.map((row) => getEntryDisplayName(row.team))
+  });
 
   return html`
     <section class="content">
@@ -3618,18 +3844,38 @@ function renderResults() {
         <div class="card-body">
           ${renderResultsPhaseSelector(phaseColumns, selectedPhaseId)}
           ${selectedPhase ? renderResultsPhaseDetail(selectedPhase) : ""}
-          ${standings.length ? renderTournamentStandingsTable(visiblePhaseColumns, standings) : html`<div class="empty">Sin resultados.</div>`}
+          ${visibleStandings.length
+            ? renderTournamentStandingsTable(visiblePhaseColumns, visibleStandings, {
+                phaseTotalColumn: selectedPhase,
+                showMetrics: !selectedPhase
+              })
+            : html`<div class="empty">Sin resultados en esta fase.</div>`}
         </div>
       </article>
 
       <article class="card">
         <div class="card-header">
           <div>
-            <h2 class="card-title">Sabana por charreada</h2>
-	            <p class="card-subtitle">Totales por suerte y ${escapeHTML(labels.singular)}.</p>
+            <h2 class="card-title">${selectedPhase ? `Sabana de ${escapeHTML(selectedPhase.label)}` : "Sabana - Resumen general por fases"}</h2>
+	            <p class="card-subtitle">
+	              ${selectedPhase
+                  ? html`Desglose por charreada y suerte solo de ${escapeHTML(selectedPhase.label)}.`
+                  : html`Resumen general por fases y total del torneo.`}
+	            </p>
           </div>
         </div>
-        <div class="card-body">${charreadas.length ? renderScoreSheet(charreadas) : html`<div class="empty">Sin charreadas.</div>`}</div>
+        <div class="card-body">
+          ${
+            charreadas.length
+              ? renderResultsScoreSheet({
+                  selectedPhase,
+                  phaseColumns,
+                  standings: visibleStandings,
+                  visibleTeamIds
+                })
+              : html`<div class="empty">Sin charreadas.</div>`
+          }
+        </div>
       </article>
 
       <article class="card">
@@ -4367,8 +4613,10 @@ function clampAwardPlaces(value) {
   return Math.max(1, Math.min(20, places));
 }
 
-function renderTournamentStandingsTable(columns, standings) {
+function renderTournamentStandingsTable(columns, standings, options = {}) {
   const labels = getEntityLabels();
+  const showMetrics = options.showMetrics !== false;
+  const phaseTotalColumn = options.phaseTotalColumn || null;
   return html`
     <div class="table-wrap">
       <table>
@@ -4381,9 +4629,10 @@ function renderTournamentStandingsTable(columns, standings) {
                 ${escapeHTML(column.label)}
               </th>
             `).join("")}
-            <th class="num">Prom.</th>
-            <th class="num">Neg.</th>
-            <th class="num">Mejor</th>
+            ${phaseTotalColumn ? html`<th class="num">Total ${escapeHTML(phaseTotalColumn.label)}</th>` : ""}
+            ${showMetrics ? html`<th class="num">Prom.</th>` : ""}
+            ${showMetrics ? html`<th class="num">Neg.</th>` : ""}
+            ${showMetrics ? html`<th class="num">Mejor</th>` : ""}
             <th class="num">Total</th>
           </tr>
         </thead>
@@ -4399,9 +4648,10 @@ function renderTournamentStandingsTable(columns, standings) {
                     return html`<td class="num">${result.participated ? moneylessNumber(result.total) : "-"}</td>`;
                   })
                   .join("")}
-                <td class="num"><strong>${formatAverage(row.average)}</strong></td>
-                <td class="num negative-points"><strong>${formatNegativePoints(row.negativePoints ?? row.infr)}</strong></td>
-                <td class="num"><strong>${moneylessNumber(row.bestResult || 0)}</strong></td>
+                ${phaseTotalColumn ? html`<td class="num"><strong>${moneylessNumber(getStandingPhaseResult(row, phaseTotalColumn).total || 0)}</strong></td>` : ""}
+                ${showMetrics ? html`<td class="num"><strong>${formatAverage(row.average)}</strong></td>` : ""}
+                ${showMetrics ? html`<td class="num negative-points"><strong>${formatNegativePoints(row.negativePoints ?? row.infr)}</strong></td>` : ""}
+                ${showMetrics ? html`<td class="num"><strong>${moneylessNumber(row.bestResult || 0)}</strong></td>` : ""}
                 <td class="num"><strong>${moneylessNumber(row.total)}</strong></td>
               </tr>
             `)
@@ -4447,6 +4697,11 @@ function renderResultsPhaseDetail(column = null) {
   `;
 }
 
+function filterResultsStandingsByPhase(standings = [], column = null) {
+  if (!column) return standings;
+  return standings.filter((row) => getStandingPhaseResult(row, column).participated);
+}
+
 function buildResultsPhaseDetailColumns(column = {}) {
   return (column.sourceCharreadas || []).map((charreada, index) => ({
     id: `${column.id}_${charreada.id || index + 1}`,
@@ -4469,7 +4724,8 @@ function buildResultsPhaseColumns(charreadas = []) {
       id: charreadaId,
       name: String(charreada?.name || `Charreada ${index + 1}`).trim() || `Charreada ${index + 1}`,
       phase,
-      teamIds: Array.isArray(charreada?.teamIds) ? charreada.teamIds : []
+      teamIds: Array.isArray(charreada?.teamIds) ? charreada.teamIds : [],
+      restas: charreada?.restas || {}
     };
 
     if (!columns.has(key)) {
@@ -4504,6 +4760,7 @@ function getSelectedResultsPhaseId(columns = []) {
 function selectResultsPhase(phaseId = "") {
   state.resultsPhaseFilter = String(phaseId || "").trim();
   console.info("[resultados-003] selector phase changed", state.resultsPhaseFilter || "Todas");
+  console.info("[resultados-004] selector phase changed", state.resultsPhaseFilter || "Todas");
   saveState({ silent: true });
   render();
 }
@@ -4526,7 +4783,8 @@ function normalizeResultsPhaseKey(value) {
 function getStandingPhaseResult(row = {}, column = {}) {
   const teamId = row.team?.id || "";
   const phaseCharreadas = (column.sourceCharreadas || []).filter((charreada) =>
-    Array.isArray(charreada.teamIds) && charreada.teamIds.includes(teamId)
+    (Array.isArray(charreada.teamIds) && charreada.teamIds.includes(teamId)) ||
+    hasTeamScoreInCharreada(teamId, charreada.id)
   );
 
   if (!teamId || !phaseCharreadas.length) {
@@ -4538,6 +4796,17 @@ function getStandingPhaseResult(row = {}, column = {}) {
   ), 0);
 
   return { participated: true, total };
+}
+
+function hasTeamScoreInCharreada(teamId = "", charreadaId = "") {
+  if (!teamId || !charreadaId) return false;
+  return getActiveTournamentSuertes().some((suerte) => hasScoreCollectionActivity(state.scores[scoreKey(charreadaId, teamId, suerte.id)]));
+}
+
+function hasScoreCollectionActivity(collection) {
+  if (!collection) return false;
+  const attempts = Array.isArray(collection) ? collection.flat(Infinity) : [collection];
+  return attempts.some((attempt) => hasAttemptActivity(attempt));
 }
 
 function buildResultsPhaseGroupedTotals(standings = [], columns = []) {
@@ -4555,11 +4824,56 @@ function buildResultsPhaseGroupedTotals(standings = [], columns = []) {
 }
 
 function renderScoreSheet(charreadas) {
+  return renderDetailedScoreSheet(charreadas);
+}
+
+function renderResultsScoreSheet({ selectedPhase = null, phaseColumns = [], standings = [], visibleTeamIds = new Set() } = {}) {
+  if (!selectedPhase) return renderPhaseSummaryScoreSheet(phaseColumns, standings);
+  return renderDetailedScoreSheet(selectedPhase.sourceCharreadas || [], { visibleTeamIds });
+}
+
+function renderPhaseSummaryScoreSheet(columns = [], standings = []) {
+  const labels = getEntityLabels();
+  return html`
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>${escapeHTML(labels.nameHeader)}</th>
+            ${columns.map((column) => html`<th class="num">${escapeHTML(column.label)}</th>`).join("")}
+            <th class="num">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${standings.map((row) => html`
+            <tr>
+              <td><strong>${escapeHTML(getEntryDisplayName(row.team))}</strong></td>
+              ${columns.map((column) => {
+                const result = getStandingPhaseResult(row, column);
+                return html`<td class="num">${result.participated ? moneylessNumber(result.total) : "-"}</td>`;
+              }).join("")}
+              <td class="num"><strong>${moneylessNumber(row.total)}</strong></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderDetailedScoreSheet(charreadas, options = {}) {
   const suertes = getActiveTournamentSuertes();
   const labels = getEntityLabels();
+  const visibleTeamIds = options.visibleTeamIds instanceof Set ? options.visibleTeamIds : null;
   const showRestas = charreadas.some((charreada) =>
     Object.values(charreada.restas || {}).some((value) => Number(value || 0) !== 0)
   );
+  const rows = charreadas.flatMap((charreada) =>
+    getScoreSheetTeamIds(charreada, visibleTeamIds).map((teamId) => ({ charreada, teamId }))
+  );
+
+  if (!rows.length) return html`<div class="empty">Sin equipos en esta fase.</div>`;
+
   return html`
     <div class="table-wrap">
       <table>
@@ -4573,9 +4887,8 @@ function renderScoreSheet(charreadas) {
           </tr>
         </thead>
         <tbody>
-          ${charreadas
-            .flatMap((charreada) =>
-              charreada.teamIds.map((teamId) => {
+          ${rows
+            .map(({ charreada, teamId }) => {
                 const team = getTeam(teamId);
                 return html`
                   <tr>
@@ -4587,12 +4900,29 @@ function renderScoreSheet(charreadas) {
                   </tr>
                 `;
               })
-            )
             .join("")}
         </tbody>
       </table>
     </div>
   `;
+}
+
+function getScoreSheetTeamIds(charreada = {}, visibleTeamIds = null) {
+  const ids = new Set(Array.isArray(charreada.teamIds) ? charreada.teamIds : []);
+  getScoreTeamIdsForCharreada(charreada.id).forEach((teamId) => ids.add(teamId));
+  return [...ids].filter((teamId) => !visibleTeamIds || visibleTeamIds.has(teamId));
+}
+
+function getScoreTeamIdsForCharreada(charreadaId = "") {
+  if (!charreadaId) return [];
+  const prefix = `${charreadaId}__`;
+  const teamIds = new Set();
+  Object.entries(state.scores || {}).forEach(([key, collection]) => {
+    if (!key.startsWith(prefix) || !hasScoreCollectionActivity(collection)) return;
+    const [, teamId] = key.split("__");
+    if (teamId) teamIds.add(teamId);
+  });
+  return [...teamIds];
 }
 
 function renderRules(scope = "tournament") {
@@ -7169,7 +7499,9 @@ function handleAction(action, target) {
     "new-tournament": showTournamentModal,
     "save-tournament": saveTournament,
     "open-tournament": () => openTournament(target.dataset.id, "dashboard"),
-    "open-tournament-program": () => openTournament(target.dataset.id, "program"),
+    "open-tournament-program": () => openTournament(target.dataset.id, "officialProgram"),
+    "open-program-charreada": () => openProgramCharreada(target.dataset.id),
+    "toggle-official-program-day": () => toggleOfficialProgramDay(target.dataset.id),
     "toggle-program-day": () => toggleProgramDay(target.dataset.id),
     "set-tournament-status": () => setTournamentStatus(target.dataset.id, target.dataset.status),
     "confirm-freeze-tournament": () => confirmFreezeTournament(target.dataset.id),
