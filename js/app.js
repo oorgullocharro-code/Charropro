@@ -24,7 +24,6 @@ import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
   buildLeaderboard,
-  buildTournamentStandingColumns,
   buildTournamentTeamStandings,
   calculateAttemptTotal,
   getTeamCharreadaResta,
@@ -3437,22 +3436,29 @@ function getTournamentStatusClass(status) {
 function renderResults() {
   const tournament = getActiveTournament();
   const charreadas = getTournamentCharreadas();
-  const standingColumns = buildTournamentStandingColumns(tournament.id);
+  const phaseColumns = buildResultsPhaseColumns(charreadas);
   const standings = buildTournamentTeamStandings(tournament.id);
   const awards = buildIndividualAwards(tournament.id);
   const awardPlaces = getIndividualAwardPlaces(tournament);
   const labels = getEntityLabels(tournament);
   const locked = isTournamentFrozen(tournament);
-  const phaseHeaders = buildResultsPhaseHeaders(standingColumns);
-  console.info("[resultados-001] phase headers built", phaseHeaders.map((header) => ({
-    id: header.id,
-    label: header.label,
-    phase: header.phase
+  console.info("[resultados-002B] charreadas source sample", charreadas.slice(0, 4).map((charreada, index) => ({
+    id: charreada?.id || "",
+    name: charreada?.name || `Charreada ${index + 1}`,
+    phase: charreada?.phase || "",
+    fase: charreada?.fase || ""
   })));
-  console.info("[resultados-001] results rendered by phase", {
-    columns: standingColumns.length,
-    phases: [...new Set(phaseHeaders.map((header) => header.phase))]
-  });
+  console.info("[resultados-002B] phase by charreada", charreadas.map((charreada, index) => ({
+    charreadaId: charreada?.id || "",
+    charreadaName: charreada?.name || `Charreada ${index + 1}`,
+    phase: getResultsPhaseName(charreada)
+  })));
+  console.info("[resultados-002B] phase columns built", phaseColumns.map((column) => ({
+    id: column.id,
+    label: column.label,
+    charreadaIds: column.charreadaIds
+  })));
+  console.info("[resultados-002B] scores grouped by phase", buildResultsPhaseGroupedTotals(standings, phaseColumns));
 
   return html`
     <section class="content">
@@ -3465,7 +3471,7 @@ function renderResults() {
         <div class="scope-card-metrics">
           <div><span>${escapeHTML(labels.title)}</span><strong>${getTournamentTeams(tournament.id).length}</strong></div>
           <div><span>Charreadas</span><strong>${charreadas.length}</strong></div>
-          <div><span>Columnas</span><strong>${standingColumns.length}</strong></div>
+          <div><span>Fases</span><strong>${phaseColumns.length}</strong></div>
         </div>
       </article>
 
@@ -3484,7 +3490,7 @@ function renderResults() {
             <p class="card-subtitle">Solo torneo activo. Desempate: promedio, total, menos negativos, mejor fase y nombre.</p>
           </div>
         </div>
-        <div class="card-body">${standings.length ? renderTournamentStandingsTable(phaseHeaders, standings) : html`<div class="empty">Sin resultados.</div>`}</div>
+        <div class="card-body">${standings.length ? renderTournamentStandingsTable(phaseColumns, standings) : html`<div class="empty">Sin resultados.</div>`}</div>
       </article>
 
       <article class="card">
@@ -4260,8 +4266,8 @@ function renderTournamentStandingsTable(columns, standings) {
 	                <td><strong>${escapeHTML(getEntryDisplayName(row.team))}</strong></td>
                 ${columns
                   .map((column) => {
-                    const result = row.results.find((item) => item.charreada.id === column.id);
-                    return html`<td class="num">${result?.participated ? moneylessNumber(result.total) : "-"}</td>`;
+                    const result = getStandingPhaseResult(row, column);
+                    return html`<td class="num">${result.participated ? moneylessNumber(result.total) : "-"}</td>`;
                   })
                   .join("")}
                 <td class="num"><strong>${formatAverage(row.average)}</strong></td>
@@ -4277,29 +4283,82 @@ function renderTournamentStandingsTable(columns, standings) {
   `;
 }
 
-function buildResultsPhaseHeaders(columns = []) {
-  const phaseCounts = columns.reduce((counts, column) => {
-    const phase = getResultsPhaseName(column);
-    counts.set(phase, Number(counts.get(phase) || 0) + 1);
-    return counts;
-  }, new Map());
+function buildResultsPhaseColumns(charreadas = []) {
+  const columns = new Map();
 
-  return columns.map((column, index) => {
-    const phase = getResultsPhaseName(column);
-    const name = String(column?.name || `Charreada ${index + 1}`).trim();
-    const hasMultipleInPhase = Number(phaseCounts.get(phase) || 0) > 1;
-    const label = hasMultipleInPhase ? `${phase} · ${name}` : phase;
-    return {
-      ...column,
+  charreadas.forEach((charreada, index) => {
+    const phase = getResultsPhaseName(charreada);
+    const key = normalizeResultsPhaseKey(phase);
+    const charreadaId = charreada?.id || `charreada_${index + 1}`;
+    const sourceCharreada = {
+      id: charreadaId,
+      name: String(charreada?.name || `Charreada ${index + 1}`).trim() || `Charreada ${index + 1}`,
       phase,
-      label,
-      title: `${phase} · ${name}`
+      teamIds: Array.isArray(charreada?.teamIds) ? charreada.teamIds : []
     };
+
+    if (!columns.has(key)) {
+      columns.set(key, {
+        id: key,
+        phase,
+        label: phase,
+        title: phase,
+        charreadaIds: [],
+        sourceCharreadas: []
+      });
+    }
+
+    const column = columns.get(key);
+    column.charreadaIds.push(charreadaId);
+    column.sourceCharreadas.push(sourceCharreada);
   });
+
+  return [...columns.values()];
 }
 
 function getResultsPhaseName(charreada = {}) {
-  return getCharreadaPhase(charreada) || "Sin fase";
+  return getCharreadaPhase(charreada) || "Ronda única";
+}
+
+function normalizeResultsPhaseKey(value) {
+  const key = String(value || "Ronda única")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-MX")
+    .replace(/\s+/g, " ");
+  return key || "ronda unica";
+}
+
+function getStandingPhaseResult(row = {}, column = {}) {
+  const teamId = row.team?.id || "";
+  const phaseCharreadas = (column.sourceCharreadas || []).filter((charreada) =>
+    Array.isArray(charreada.teamIds) && charreada.teamIds.includes(teamId)
+  );
+
+  if (!teamId || !phaseCharreadas.length) {
+    return { participated: false, total: null };
+  }
+
+  const total = phaseCharreadas.reduce((sum, charreada) => (
+    sum + Number(getTeamCharreadaTotal(charreada.id, teamId) || 0)
+  ), 0);
+
+  return { participated: true, total };
+}
+
+function buildResultsPhaseGroupedTotals(standings = [], columns = []) {
+  return standings.slice(0, 5).map((row) => ({
+    teamId: row.team?.id || "",
+    teamName: getEntryDisplayName(row.team),
+    phases: columns.map((column) => {
+      const result = getStandingPhaseResult(row, column);
+      return {
+        phase: column.phase,
+        total: result.participated ? result.total : null
+      };
+    })
+  }));
 }
 
 function renderScoreSheet(charreadas) {

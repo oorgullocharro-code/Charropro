@@ -1,14 +1,23 @@
 # Despliegue CharroPro
 
-## Version RESULTADOS-001
+## Version RESULTADOS-002B
 
 Version actual de cache:
 
 ```text
-v=20260706-resultados-001-phase-headers1
+v=20260706-resultados-002b-read-real-phase1
 ```
 
-Esta base actualiza la vista interna de Resultados para presentar las columnas por fase/ronda configurada en cada charreada. Si una fase tiene una sola charreada, la columna muestra solo la fase; si tiene varias, muestra `Fase · Charreada`.
+Esta base corrige la vista interna de Resultados para leer la fase real desde las charreadas actuales, la misma fuente que usa Programa. Si varias charreadas pertenecen a `Fase 1`, Resultados muestra una sola columna `Fase 1` y suma ahi los resultados de esas charreadas por equipo. Si una charreada no tiene fase, la vista usa `Ronda unica` como agrupacion visual sin modificar los datos guardados.
+
+La correccion agrega logs de diagnostico:
+
+```text
+[resultados-002B] charreadas source sample
+[resultados-002B] phase by charreada
+[resultados-002B] phase columns built
+[resultados-002B] scores grouped by phase
+```
 
 Tambien conserva `phase` como campo canonico de fase/ronda por charreada. La fase se captura al crear o editar una charreada, se conserva en el estado local/Firebase y se publica en el Snapshot Publico dentro de `activeCharreada` y `schedule`.
 
@@ -160,7 +169,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260706-release22d-active-charreada-source2
+https://orgullocharro.com/charropro/?v=20260706-resultados-002b-read-real-phase1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
