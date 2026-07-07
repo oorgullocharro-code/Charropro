@@ -2519,6 +2519,30 @@ th.num {
   white-space: nowrap;
 }
 
+.recovery-center-card {
+  border-color: rgba(201, 162, 39, .42);
+}
+
+.recovery-center-body {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.recovery-center-body strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+@media (max-width: 760px) {
+  .recovery-center-body {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 .toast-root {
   position: fixed;
   top: 14px;

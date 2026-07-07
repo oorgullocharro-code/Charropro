@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260707-core-infra-001-versioning1";
+export const CHARROPRO_APP_VERSION = "20260707-recovery-001-manual-backup1";
 
 let versionLogged = false;
 

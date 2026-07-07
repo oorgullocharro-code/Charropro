@@ -1,10 +1,10 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260707-core-infra-001-versioning1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260707-core-infra-001-versioning1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260707-recovery-001-manual-backup1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260707-recovery-001-manual-backup1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260707-core-infra-001-versioning1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260707-recovery-001-manual-backup1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -12,14 +12,14 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260707-core-infra-001-versioning1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260707-core-infra-001-versioning1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260707-core-infra-001-versioning1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260707-core-infra-001-versioning1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260707-core-infra-001-versioning1";
-import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260707-core-infra-001-versioning1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260707-core-infra-001-versioning1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260707-core-infra-001-versioning1";
+} from "./data/calaRules.js?v=20260707-recovery-001-manual-backup1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260707-recovery-001-manual-backup1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260707-recovery-001-manual-backup1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260707-recovery-001-manual-backup1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260707-recovery-001-manual-backup1";
+import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260707-recovery-001-manual-backup1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260707-recovery-001-manual-backup1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260707-recovery-001-manual-backup1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -31,7 +31,7 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260707-core-infra-001-versioning1";
+} from "./core/scoring.js?v=20260707-recovery-001-manual-backup1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -41,7 +41,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260707-core-infra-001-versioning1";
+} from "./core/sync.js?v=20260707-recovery-001-manual-backup1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -70,16 +70,16 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260707-core-infra-001-versioning1";
+} from "./core/firebaseSync.js?v=20260707-recovery-001-manual-backup1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260707-recovery-001-manual-backup1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260707-core-infra-001-versioning1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260707-core-infra-001-versioning1";
+} from "./core/tournamentContext.js?v=20260707-recovery-001-manual-backup1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260707-recovery-001-manual-backup1";
 import {
   createRoster,
   emptyAttempt,
@@ -106,7 +106,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260707-core-infra-001-versioning1";
+} from "./core/state.js?v=20260707-recovery-001-manual-backup1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -216,6 +216,7 @@ const READ_ACTIONS = new Set([
   "export-csv",
   "export-official-xlsx",
   "export-json",
+  "create-full-backup",
   "clear-local-cache",
   "prepare-clear-cache",
   "prepare-sync",
@@ -278,6 +279,7 @@ const ACTION_CAPABILITIES = {
   "delete-rule-editor": "rules",
   "reset-rule-editor": "rules",
   "save-settings": "settings",
+  "create-full-backup": "settings",
   "new-user-profile": "users",
   "edit-user-profile": "users",
   "save-user-profile": "users",
@@ -5304,6 +5306,22 @@ function renderSettings() {
         </div>
       </article>
 
+      <article class="card recovery-center-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">🛡️ Recovery Center</h2>
+            <p class="card-subtitle">Genera un respaldo completo descargable del torneo activo.</p>
+          </div>
+        </div>
+        <div class="card-body recovery-center-body">
+          <div>
+            <strong>Respaldo manual completo</strong>
+            <p class="card-subtitle">Incluye torneo, equipos, charreadas, calificaciones, publicaciones, configuracion publica y diagnostico disponible.</p>
+          </div>
+          <button class="button primary" data-action="create-full-backup">Crear respaldo completo</button>
+        </div>
+      </article>
+
       <article class="card">
         <div class="card-header">
           <div>
@@ -5324,6 +5342,153 @@ function renderSettings() {
 
 function renderPermissionPill(label, enabled) {
   return html`<span class="pill ${enabled ? "green" : "red"}">${enabled ? "SI" : "NO"} ${escapeHTML(label)}</span>`;
+}
+
+function createRecoveryFullBackup() {
+  const tournament = getActiveTournament();
+  if (!tournament?.id) {
+    showToast("No hay torneo activo para respaldar.");
+    return;
+  }
+
+  console.info("[recovery-001] backup started", { tournamentId: tournament.id });
+  const backup = buildRecoveryFullBackup(tournament);
+  const filename = buildRecoveryBackupFilename(tournament.id);
+  downloadJsonFile(filename, backup);
+  console.info("[recovery-001] backup downloaded", {
+    tournamentId: tournament.id,
+    filename
+  });
+  showToast("Respaldo generado correctamente.");
+}
+
+function buildRecoveryFullBackup(tournament) {
+  const tournamentId = tournament.id;
+  const teams = getTournamentTeams(tournamentId).map(cloneJson);
+  const charreadas = getTournamentCharreadas(tournamentId).map(cloneJson);
+  const charreadaIds = new Set(charreadas.map((charreada) => charreada.id));
+  const teamIds = new Set(teams.map((team) => team.id));
+  const scores = Object.fromEntries(
+    Object.entries(state.scores || {})
+      .filter(([key]) => scoreKeyBelongsToTournament(key, charreadaIds, teamIds))
+      .map(([key, value]) => [key, cloneJson(value)])
+  );
+  const publishedScores = (state.publishedScores || [])
+    .filter((score) => (score.tournament?.id || score.tournamentId || "") === tournamentId)
+    .map(cloneJson);
+  const users = buildRecoveryTournamentUsers(tournamentId);
+  const createdAt = new Date().toISOString();
+  const backup = {
+    manifest: {
+      app: "CharroPro",
+      backupVersion: 1,
+      createdAt,
+      tournamentId,
+      tournamentName: tournament.name || "",
+      teamsCount: teams.length,
+      charreadasCount: charreadas.length,
+      scoresCount: Object.keys(scores).length,
+      publishedScoresCount: publishedScores.length,
+      appVersion: CHARROPRO_APP_VERSION
+    },
+    tournament: cloneJson(tournament),
+    teams,
+    charreadas,
+    scores,
+    publishedScores,
+    publicSnapshot: getLocalRecoveryPublicSnapshot(tournamentId),
+    settings: buildRecoveryPublicSettings(tournament),
+    users,
+    roles: users.map((user) => ({
+      uid: user.uid || "",
+      role: user.role || "",
+      active: Boolean(user.active),
+      tournamentAccess: user.tournamentAccess || "",
+      tournamentIds: user.tournamentIds || []
+    })),
+    audit: buildRecoveryAuditBasic(tournamentId),
+    version: CHARROPRO_APP_VERSION
+  };
+  console.info("[recovery-001] backup built", {
+    tournamentId,
+    teamsCount: backup.manifest.teamsCount,
+    charreadasCount: backup.manifest.charreadasCount,
+    scoresCount: backup.manifest.scoresCount,
+    publishedScoresCount: backup.manifest.publishedScoresCount
+  });
+  return backup;
+}
+
+function buildRecoveryTournamentUsers(tournamentId = "") {
+  return (firebaseUsers || [])
+    .filter((user) => {
+      const access = normalizeTournamentAccess(user);
+      return access.tournamentAccess !== "selected" || access.tournamentIds.includes(tournamentId);
+    })
+    .map((user) => ({
+      uid: user.uid || "",
+      name: user.name || "",
+      email: user.email || "",
+      role: user.role || "",
+      active: Boolean(user.active),
+      tournamentAccess: normalizeTournamentAccess(user).tournamentAccess,
+      tournamentIds: normalizeTournamentAccess(user).tournamentIds || []
+    }));
+}
+
+function buildRecoveryPublicSettings(tournament = {}) {
+  return {
+    graphicsConfig: cloneJson(state.settings?.graphicsConfig || null),
+    ruleOverrides: cloneJson(tournament.ruleOverrides || {}),
+    globalRuleOverrides: cloneJson(state.settings?.globalRuleOverrides || {}),
+    scoringButtonLayouts: cloneJson(tournament.scoringButtonLayouts || state.settings?.scoringButtonLayouts || {}),
+    globalRuleOverridesUpdatedAt: state.settings?.globalRuleOverridesUpdatedAt || null
+  };
+}
+
+function buildRecoveryAuditBasic(tournamentId = "") {
+  const lastPublished = firebaseDiagnostics.lastPublishedScore || {};
+  return {
+    localCounts: getLocalTournamentDiagnostics(tournamentId),
+    remoteCounts: cloneJson(firebaseDiagnostics.remoteCounts?.[tournamentId] || {}),
+    localVersion: Number(firebaseDiagnostics.localVersions?.[tournamentId] || 0),
+    remoteVersion: Number(firebaseDiagnostics.remoteVersions?.[tournamentId] || 0),
+    activeCharreadaId: firebaseDiagnostics.activeCharreadaIds?.[tournamentId] || state.activeCharreadaId || "",
+    lastPublishedScore: lastPublished.tournamentId === tournamentId ? cloneJson(lastPublished) : null,
+    lastPublishedScoreError: firebaseDiagnostics.lastPublishedScoreError || "",
+    scoresListener: cloneJson(firebaseDiagnostics.scoresListener || null)
+  };
+}
+
+function getLocalRecoveryPublicSnapshot(tournamentId = "") {
+  const snapshots = state.publicSnapshots || state.publicTournaments || null;
+  if (snapshots && typeof snapshots === "object") return cloneJson(snapshots[tournamentId] || null);
+  return null;
+}
+
+function buildRecoveryBackupFilename(tournamentId = "") {
+  const stamp = new Date().toISOString().replace(/\.\d{3}Z$/, "").replace(/[:T]/g, "-");
+  return `CharroPro_Backup_${sanitizeFilenamePart(tournamentId || "sin_torneo")}_${stamp}.json`;
+}
+
+function sanitizeFilenamePart(value = "") {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]+/g, "_")
+    .replace(/^_+|_+$/g, "") || "sin_dato";
+}
+
+function downloadJsonFile(filename, payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function renderFirebaseDiagnosticsPanel() {
@@ -7926,6 +8091,7 @@ function handleAction(action, target) {
     "export-csv": () => exportCurrentTournamentCsv(state.activeTournamentId),
     "export-official-xlsx": () => downloadOfficialFormatXlsx(state.activeCharreadaId),
     "export-json": exportBackupJson,
+    "create-full-backup": createRecoveryFullBackup,
     "clear-local-cache": clearLocalCacheAndReload,
     "copy-live-url": () => copyLiveUrl(target.dataset.target),
     "reset-data": confirmReset,
