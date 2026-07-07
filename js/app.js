@@ -187,6 +187,8 @@ const READ_ACTIONS = new Set([
   "open-tournament",
   "open-tournament-program",
   "select-teams-tab",
+  "toggle-program-day",
+  "select-results-phase",
   "select-rule-suerte",
   "copy-live-url",
   "export-csv",
@@ -3268,10 +3270,39 @@ function renderProgram() {
 }
 
 function renderCharreadasCards(charreadas, activeCharreadaId = state.activeCharreadaId) {
+  const groups = groupProgramCharreadasByDay(charreadas);
   return html`
-    <div class="program-card-grid">
-      ${charreadas.map((charreada) => renderCharreadaProgramCard(charreada, activeCharreadaId)).join("")}
+    <div class="program-day-list">
+      ${groups.map((group) => renderProgramDayGroup(group, activeCharreadaId)).join("")}
     </div>
+  `;
+}
+
+function renderProgramDayGroup(group, activeCharreadaId = state.activeCharreadaId) {
+  const collapsed = isProgramDayCollapsed(group.key);
+  return html`
+    <section class="program-day-group ${collapsed ? "collapsed" : ""}">
+      <button class="program-day-header" data-action="toggle-program-day" data-id="${escapeHTML(group.key)}" type="button" aria-expanded="${collapsed ? "false" : "true"}">
+        <div>
+          <span>Fecha / dia</span>
+          <strong>${escapeHTML(group.label)}</strong>
+        </div>
+        <div class="program-day-meta">
+          <span class="pill">${group.charreadas.length} charreada${group.charreadas.length === 1 ? "" : "s"}</span>
+          <span class="pill">${escapeHTML(formatProgramDayPhases(group.charreadas))}</span>
+          <b>${collapsed ? "Mostrar" : "Ocultar"}</b>
+        </div>
+      </button>
+      ${
+        collapsed
+          ? ""
+          : html`
+              <div class="program-card-grid">
+                ${group.charreadas.map((charreada) => renderCharreadaProgramCard(charreada, activeCharreadaId)).join("")}
+              </div>
+            `
+      }
+    </section>
   `;
 }
 
@@ -3321,6 +3352,89 @@ function renderCharreadaProgramCard(charreada, activeCharreadaId = state.activeC
       </div>
     </article>
   `;
+}
+
+function groupProgramCharreadasByDay(charreadas = []) {
+  const groups = new Map();
+  const sorted = charreadas.slice().sort(compareProgramCharreadas);
+
+  sorted.forEach((charreada) => {
+    const key = getProgramDayKey(charreada);
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        label: formatProgramDayLabel(charreada),
+        charreadas: []
+      });
+    }
+    groups.get(key).charreadas.push(charreada);
+  });
+
+  console.info("[program-fase-002] day groups built", [...groups.values()].map((group) => ({
+    key: group.key,
+    label: group.label,
+    count: group.charreadas.length
+  })));
+
+  return [...groups.values()];
+}
+
+function compareProgramCharreadas(a = {}, b = {}) {
+  const dateCompare = getProgramDaySortValue(a).localeCompare(getProgramDaySortValue(b), "es");
+  if (dateCompare) return dateCompare;
+  const timeCompare = String(a.startTime || "").localeCompare(String(b.startTime || ""), "es");
+  if (timeCompare) return timeCompare;
+  return String(a.name || "").localeCompare(String(b.name || ""), "es");
+}
+
+function getProgramDayKey(charreada = {}) {
+  const date = String(charreada.date || "").trim();
+  return date || "sin-fecha";
+}
+
+function getProgramDaySortValue(charreada = {}) {
+  const date = String(charreada.date || "").trim();
+  return date || "9999-99-99";
+}
+
+function formatProgramDayLabel(charreada = {}) {
+  const date = String(charreada.date || "").trim();
+  if (!date) return "Sin fecha programada";
+  const parsed = parseLocalDate(date);
+  if (!parsed) return formatDateLabel(date);
+  const label = parsed.toLocaleDateString("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+  return label ? `${label.charAt(0).toLocaleUpperCase("es-MX")}${label.slice(1)}` : formatDateLabel(date);
+}
+
+function parseLocalDate(value) {
+  const [year, month, day] = String(value || "").split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
+}
+
+function formatProgramDayPhases(charreadas = []) {
+  const phases = [...new Set(charreadas.map((charreada) => formatCharreadaPhase(charreada)).filter(Boolean))];
+  return phases.length ? phases.join(" / ") : "Sin fase";
+}
+
+function isProgramDayCollapsed(dayKey) {
+  return Boolean(state.programCollapsedDays?.[dayKey]);
+}
+
+function toggleProgramDay(dayKey = "") {
+  if (!dayKey) return;
+  state.programCollapsedDays = {
+    ...(state.programCollapsedDays || {}),
+    [dayKey]: !isProgramDayCollapsed(dayKey)
+  };
+  console.info("[program-fase-002] day group toggled", { dayKey, collapsed: state.programCollapsedDays[dayKey] });
+  saveState({ silent: true });
+  render();
 }
 
 function renderCharreadasSummaryList(charreadas) {
@@ -3437,6 +3551,9 @@ function renderResults() {
   const tournament = getActiveTournament();
   const charreadas = getTournamentCharreadas();
   const phaseColumns = buildResultsPhaseColumns(charreadas);
+  const selectedPhaseId = getSelectedResultsPhaseId(phaseColumns);
+  const selectedPhase = phaseColumns.find((column) => column.id === selectedPhaseId) || null;
+  const visiblePhaseColumns = selectedPhase ? buildResultsPhaseDetailColumns(selectedPhase) : phaseColumns;
   const standings = buildTournamentTeamStandings(tournament.id);
   const awards = buildIndividualAwards(tournament.id);
   const awardPlaces = getIndividualAwardPlaces(tournament);
@@ -3459,6 +3576,10 @@ function renderResults() {
     charreadaIds: column.charreadaIds
   })));
   console.info("[resultados-002B] scores grouped by phase", buildResultsPhaseGroupedTotals(standings, phaseColumns));
+  console.info("[resultados-003] selected phase", selectedPhase?.label || "Todas");
+  console.info("[resultados-003] phase detail charreadas", selectedPhase
+    ? selectedPhase.sourceCharreadas.map((charreada) => ({ id: charreada.id, name: charreada.name }))
+    : phaseColumns.map((column) => ({ phase: column.label, charreadas: column.charreadaIds.length })));
 
   return html`
     <section class="content">
@@ -3486,11 +3607,19 @@ function renderResults() {
       <article class="card">
         <div class="card-header">
           <div>
-	            <h2 class="card-title">Tabla general por ${escapeHTML(labels.plural)}</h2>
-            <p class="card-subtitle">Solo torneo activo. Desempate: promedio, total, menos negativos, mejor fase y nombre.</p>
+	            <h2 class="card-title">${selectedPhase ? `Desglose de ${escapeHTML(selectedPhase.label)}` : `Resumen general por fases`}</h2>
+            <p class="card-subtitle">
+              ${selectedPhase
+                ? html`Charreadas incluidas: ${escapeHTML(formatResultsPhaseCharreadas(selectedPhase))}. Total general visible a la derecha.`
+                : html`Solo torneo activo. Desempate: promedio, total, menos negativos, mejor fase y nombre.`}
+            </p>
           </div>
         </div>
-        <div class="card-body">${standings.length ? renderTournamentStandingsTable(phaseColumns, standings) : html`<div class="empty">Sin resultados.</div>`}</div>
+        <div class="card-body">
+          ${renderResultsPhaseSelector(phaseColumns, selectedPhaseId)}
+          ${selectedPhase ? renderResultsPhaseDetail(selectedPhase) : ""}
+          ${standings.length ? renderTournamentStandingsTable(visiblePhaseColumns, standings) : html`<div class="empty">Sin resultados.</div>`}
+        </div>
       </article>
 
       <article class="card">
@@ -4283,6 +4412,52 @@ function renderTournamentStandingsTable(columns, standings) {
   `;
 }
 
+function renderResultsPhaseSelector(columns = [], selectedPhaseId = "") {
+  if (!columns.length) return "";
+  return html`
+    <div class="results-phase-toolbar">
+      <div class="segmented results-phase-selector" aria-label="Seleccionar fase de resultados">
+        <button data-action="select-results-phase" data-id="" class="${selectedPhaseId ? "" : "active"}" type="button">Todas</button>
+        ${columns.map((column) => html`
+          <button
+            data-action="select-results-phase"
+            data-id="${escapeHTML(column.id)}"
+            class="${column.id === selectedPhaseId ? "active" : ""}"
+            type="button"
+          >
+            ${escapeHTML(column.label)}
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderResultsPhaseDetail(column = null) {
+  if (!column) return "";
+  return html`
+    <section class="results-phase-detail" aria-label="Charreadas de la fase seleccionada">
+      <strong>Charreadas de ${escapeHTML(column.label)}</strong>
+      <div>
+        ${column.sourceCharreadas.map((charreada, index) => html`
+          <span class="pill blue">${index + 1}. ${escapeHTML(charreada.name)}</span>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function buildResultsPhaseDetailColumns(column = {}) {
+  return (column.sourceCharreadas || []).map((charreada, index) => ({
+    id: `${column.id}_${charreada.id || index + 1}`,
+    phase: column.phase,
+    label: charreada.name || `Charreada ${index + 1}`,
+    title: `${column.phase} · ${charreada.name || `Charreada ${index + 1}`}`,
+    charreadaIds: [charreada.id],
+    sourceCharreadas: [charreada]
+  }));
+}
+
 function buildResultsPhaseColumns(charreadas = []) {
   const columns = new Map();
 
@@ -4318,6 +4493,24 @@ function buildResultsPhaseColumns(charreadas = []) {
 
 function getResultsPhaseName(charreada = {}) {
   return getCharreadaPhase(charreada) || "Ronda única";
+}
+
+function getSelectedResultsPhaseId(columns = []) {
+  const selected = String(state.resultsPhaseFilter || "").trim();
+  if (!selected) return "";
+  return columns.some((column) => column.id === selected) ? selected : "";
+}
+
+function selectResultsPhase(phaseId = "") {
+  state.resultsPhaseFilter = String(phaseId || "").trim();
+  console.info("[resultados-003] selector phase changed", state.resultsPhaseFilter || "Todas");
+  saveState({ silent: true });
+  render();
+}
+
+function formatResultsPhaseCharreadas(column = {}) {
+  const names = (column.sourceCharreadas || []).map((charreada) => charreada.name).filter(Boolean);
+  return names.length ? names.join(", ") : "sin charreadas";
 }
 
 function normalizeResultsPhaseKey(value) {
@@ -6977,13 +7170,15 @@ function handleAction(action, target) {
     "save-tournament": saveTournament,
     "open-tournament": () => openTournament(target.dataset.id, "dashboard"),
     "open-tournament-program": () => openTournament(target.dataset.id, "program"),
+    "toggle-program-day": () => toggleProgramDay(target.dataset.id),
     "set-tournament-status": () => setTournamentStatus(target.dataset.id, target.dataset.status),
     "confirm-freeze-tournament": () => confirmFreezeTournament(target.dataset.id),
     "freeze-tournament": () => freezeTournament(target.dataset.id),
     "confirm-delete-tournament": () => confirmDeleteTournament(target.dataset.id),
     "delete-tournament-permanent": () => deleteTournamentPermanent(target.dataset.id),
     "new-team": () => showTeamModal(),
-	    "select-teams-tab": () => selectTeamsTab(target.dataset.tab),
+    "select-teams-tab": () => selectTeamsTab(target.dataset.tab),
+	    "select-results-phase": () => selectResultsPhase(target.dataset.id),
 	    "select-rule-suerte": () => selectRuleEditorSuerte(target.dataset.id),
 	    "save-rule-editor": saveRuleEditor,
 	    "add-rule-editor": () => addRuleEditorItem(target.dataset.group),

@@ -1360,6 +1360,38 @@ label {
   color: var(--text);
 }
 
+.results-phase-toolbar {
+  margin-bottom: 12px;
+}
+
+.results-phase-selector {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.results-phase-detail {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.results-phase-detail strong {
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.results-phase-detail > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .table-wrap {
   overflow: auto;
 }
@@ -1922,9 +1954,64 @@ th.num {
   font-weight: 750;
 }
 
+.program-day-list,
 .program-card-grid {
   display: grid;
   gap: 12px;
+}
+
+.program-day-group {
+  display: grid;
+  gap: 10px;
+}
+
+.program-day-header {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #0d1118;
+  color: var(--text);
+  text-align: left;
+}
+
+.program-day-header span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.program-day-header strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 18px;
+}
+
+.program-day-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.program-day-meta b {
+  min-height: 30px;
+  border: 1px solid rgba(76, 141, 255, .35);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: inline-grid;
+  place-items: center;
+  color: #cfe0ff;
+  font-size: 12px;
+  font-weight: 950;
 }
 
 .program-card {
@@ -6809,6 +6896,7 @@ html.graphic-page #graphic-root {
   }
 
   .program-hero,
+  .program-day-header,
   .tournament-entry-hero,
   .scope-card,
   .program-card-top,
@@ -6833,6 +6921,10 @@ html.graphic-page #graphic-root {
 
   .program-card-actions {
     min-width: 0;
+  }
+
+  .program-day-meta {
+    justify-content: flex-start;
   }
 
   .program-summary-row {

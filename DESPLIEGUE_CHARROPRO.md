@@ -1,12 +1,16 @@
 # Despliegue CharroPro
 
-## Version RESULTADOS-002B
+## Version PROGRAM-FASE-002
 
 Version actual de cache:
 
 ```text
-v=20260706-resultados-002b-read-real-phase1
+v=20260706-program-fase-002-group-by-day1
 ```
+
+Esta base agrega agrupacion por dia en la vista Programa. Las charreadas se ordenan por fecha/hora, se agrupan por fecha, cada grupo muestra dia/fecha, numero de charreadas, fases incluidas y puede desplegarse o colapsarse. No cambia activacion, calificador, Firebase Rules ni datos guardados.
+
+Esta base agrega en la pantalla interna de Resultados un selector de fase/ronda: `Todas`, `Fase 1`, `Semifinal`, `Final`, `Ronda unica`, segun las fases reales configuradas en las charreadas. Al elegir una fase se muestra el titulo `Desglose de {fase}`, las charreadas incluidas en esa fase como columnas internas y la tabla conserva el total general visible. El selector solo cambia la vista; no modifica calificaciones, scores ni calculos.
 
 Esta base corrige la vista interna de Resultados para leer la fase real desde las charreadas actuales, la misma fuente que usa Programa. Si varias charreadas pertenecen a `Fase 1`, Resultados muestra una sola columna `Fase 1` y suma ahi los resultados de esas charreadas por equipo. Si una charreada no tiene fase, la vista usa `Ronda unica` como agrupacion visual sin modificar los datos guardados.
 
@@ -17,6 +21,11 @@ La correccion agrega logs de diagnostico:
 [resultados-002B] phase by charreada
 [resultados-002B] phase columns built
 [resultados-002B] scores grouped by phase
+[resultados-003] selected phase
+[resultados-003] phase detail charreadas
+[resultados-003] selector phase changed
+[program-fase-002] day groups built
+[program-fase-002] day group toggled
 ```
 
 Tambien conserva `phase` como campo canonico de fase/ronda por charreada. La fase se captura al crear o editar una charreada, se conserva en el estado local/Firebase y se publica en el Snapshot Publico dentro de `activeCharreada` y `schedule`.
@@ -169,7 +178,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260706-resultados-002b-read-real-phase1
+https://orgullocharro.com/charropro/?v=20260706-program-fase-002-group-by-day1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
