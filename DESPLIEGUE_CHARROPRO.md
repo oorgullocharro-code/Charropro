@@ -1,14 +1,14 @@
 # Despliegue CharroPro
 
-## Version PUBLIC-CORE-002
+## Version PUBLIC-CORE-003
 
 Version actual de cache:
 
 ```text
-v=20260706-public-core-002-score-engine1
+v=20260706-public-core-003-normalized-snapshot1
 ```
 
-Esta base fortalece el Motor Oficial de Estadisticas v1 del Snapshot Publico. El Core normaliza equipos, charreadas y calificaciones reales antes de generar `currentScoreboard`, `generalRanking`, `scoresheet`, `leaders` y `stats` en `charropro/publicTournaments/{tournamentId}`.
+Esta base unifica el Snapshot Publico alrededor de `normalizedScores`. El Core normaliza equipos, charreadas y calificaciones reales una sola vez, y desde esa fuente construye `currentScoreboard`, `generalRanking`, `scoresheet`, `leaders`, `lastScores`, `teams.total` y `stats` en `charropro/publicTournaments/{tournamentId}`.
 
 La pagina publica y clientes futuros solo consumen el snapshot; no calculan ranking, marcador ni sabana.
 
@@ -20,6 +20,7 @@ activeCharreada
 currentScoreboard
 generalRanking
 scoresheet
+scoresheetColumns
 leaders
 schedule
 lastScores
