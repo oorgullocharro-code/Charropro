@@ -1,12 +1,16 @@
 # Despliegue CharroPro
 
-## Version COMPETITIONS-001
+## Version PROGRAM-003
 
 Version actual de cache:
 
 ```text
-v=20260708-competitions-001-catalog1
+v=20260708-program-003-competition-program1
 ```
+
+Esta base actualiza el modulo Programa para presentar visualmente `Programa de Competencias`. Al crear o editar una charreada/jornada se puede elegir `Tipo de competencia` desde el catalogo interno: Competencia por equipos, Charro Completo, Caladero, Coleadero, Pialadero o Exhibicion. El guardado agrega `competitionType`, `competitionScope`, `competitionId` y `suerteIds` a la charreada, con compatibilidad por defecto a `Competencia por equipos` cuando no exista seleccion previa. No conecta todavia estos campos al calificador, resultados, pagina publica, OBS, graficos, ranking, estadisticas, Recovery, Event Engine ni Firebase Rules.
+
+Por ahora `competitionId` se mantiene igual a `competitionType` como compatibilidad. La separacion operativa de Caladero Juvenil, Caladero Libre, Caladero Femenil, etc. se manejara por categoria y fase/ronda, sin modificar la mecanica de calificacion. En el futuro, si se requiere manejar varias competencias independientes del mismo tipo dentro de un torneo, se podra evolucionar a `competitionId` unico por instancia.
 
 Esta base agrega el catalogo de competencias internas en `js/data/competitionTypes.js`, siguiendo `ARCH_INTERNAL_COMPETITIONS.md`. El catalogo define `equipos_completo`, `charro_completo`, `caladero`, `coleadero`, `pialadero` y `exhibicion`, junto con `scope`, `suerteIds`, `rankingMode`, `awardGroup`, `affectsTeamRanking`, `affectsGeneralStatistics` y `statsScope`. Tambien expone helpers para resolver tipos, suertes, compatibilidad legacy desde `tournament.type` y validacion basica. No agrega selector UI, no cambia creacion de charreada, no modifica calificador profundo, resultados profundos, pagina publica visual, snapshot publico, Firebase Rules, Recovery ni Event Engine.
 
@@ -209,7 +213,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260708-competitions-001-catalog1
+https://orgullocharro.com/charropro/?v=20260708-program-003-competition-program1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

@@ -1,5 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260708-tournament-types-001-pialadero1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260708-program-003-competition-program1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260708-program-003-competition-program1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -3306,7 +3307,7 @@ function renderProgram() {
     <section class="content program-page">
       <article class="program-hero">
         <div>
-          <span>Programa</span>
+          <span>Programa de Competencias</span>
           <h2>${escapeHTML(activeCharreada?.name || "Sin charreada activa")}</h2>
           <p>${charreadas.length ? `${charreadas.length} charreada${charreadas.length === 1 ? "" : "s"} programada${charreadas.length === 1 ? "" : "s"} / ${teams.length} ${labels.plural}` : "Arma el orden de participacion para empezar a calificar."}</p>
         </div>
@@ -3354,7 +3355,7 @@ function renderOfficialProgram() {
     <section class="content official-program-page">
       <article class="program-hero official-program-hero">
         <div>
-          <span>Programa oficial</span>
+          <span>Programa de Competencias</span>
           <h2>${escapeHTML(tournament?.name || "Torneo")}</h2>
           <p>${charreadas.length ? `${charreadas.length} charreada${charreadas.length === 1 ? "" : "s"} / ${teams.length} ${labels.plural}` : "Aun no hay charreadas programadas."}</p>
         </div>
@@ -3416,6 +3417,7 @@ function renderOfficialProgramCard(charreada, activeCharreadaId = state.activeCh
   const operationalStatus = getCharreadaOperationalStatus(charreada);
   const statusClass = operationalStatus ? getOperationalStatusClass(operationalStatus) : getCharreadaStatusClass(displayStatus);
   const teams = (charreada.teamIds || []).map((teamId) => getTeam(teamId)).filter(Boolean);
+  const competitionLabel = formatCharreadaCompetition(charreada);
   const locked = isCharreadaFrozen(charreada);
   const canManage = roleCan(firebaseAccess.role, "manage");
   const canOperate = roleCan(firebaseAccess.role, "operate");
@@ -3443,7 +3445,8 @@ function renderOfficialProgramCard(charreada, activeCharreadaId = state.activeCh
           </div>
           <div class="program-card-badges">
             <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
-            <span class="pill">${teams.length} equipo${teams.length === 1 ? "" : "s"}</span>
+            <span class="pill">${escapeHTML(competitionLabel)}</span>
+            <span class="pill">${teams.length} participante${teams.length === 1 ? "" : "s"}</span>
             <span class="pill ${statusClass}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
             <span class="pill ${statusClass}">Operativo: ${escapeHTML(formatOperationalStatus(operationalStatus))}</span>
             ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
@@ -3525,6 +3528,7 @@ function renderCharreadaProgramCard(charreada, activeCharreadaId = state.activeC
   const displayStatus = getCanonicalCharreadaStatus(charreada, activeCharreadaId);
   const statusClass = getCharreadaStatusClass(displayStatus);
   const teams = (charreada.teamIds || []).map((teamId) => getTeam(teamId)).filter(Boolean);
+  const competitionLabel = formatCharreadaCompetition(charreada);
   const labels = getEntityLabels();
   const locked = isCharreadaFrozen(charreada);
   const canManage = roleCan(firebaseAccess.role, "manage");
@@ -3541,6 +3545,8 @@ function renderCharreadaProgramCard(charreada, activeCharreadaId = state.activeC
           </div>
           <div class="program-card-badges">
             <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
+            <span class="pill">${escapeHTML(competitionLabel)}</span>
+            <span class="pill">${teams.length} participante${teams.length === 1 ? "" : "s"}</span>
             ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
             <span class="pill ${statusClass}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
           </div>
@@ -3707,6 +3713,8 @@ function openProgramCharreada(charreadaId = "") {
           <span class="pill">${escapeHTML(formatDateLabel(charreada.date) || "Sin fecha")}</span>
           <span class="pill">${escapeHTML(formatTimeLabel(charreada.startTime) || "Hora por confirmar")}</span>
           <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
+          <span class="pill">${escapeHTML(formatCharreadaCompetition(charreada))}</span>
+          <span class="pill">${teams.length} participante${teams.length === 1 ? "" : "s"}</span>
           <span class="pill ${getCharreadaStatusClass(displayStatus)}">${escapeHTML(formatCharreadaStatus(displayStatus))}</span>
           <span class="pill ${getOperationalStatusClass(operationalStatus)}">Operativo: ${escapeHTML(formatOperationalStatus(operationalStatus))}</span>
           ${isActive ? html`<span class="pill blue">Activa</span>` : ""}
@@ -3756,6 +3764,7 @@ function renderCharreadasSummaryList(charreadas) {
                 <span class="program-card-kicker">${escapeHTML(formatCharreadaDateTime(charreada))}</span>
                 <strong>${escapeHTML(charreada.name)}</strong>
                 <span class="pill">${escapeHTML(formatCharreadaPhase(charreada))}</span>
+                <span class="pill">${escapeHTML(formatCharreadaCompetition(charreada))}</span>
               </div>
               <div class="program-summary-teams">
                 ${
@@ -3788,6 +3797,24 @@ function getCharreadaPhase(charreada = {}) {
 
 function formatCharreadaPhase(charreada = {}) {
   return getCharreadaPhase(charreada) || "Sin fase";
+}
+
+function getCharreadaCompetition(charreada = {}) {
+  return getCompetitionType(charreada?.competitionType || charreada?.competitionId || "equipos_completo");
+}
+
+function formatCharreadaCompetition(charreada = {}) {
+  return getCharreadaCompetition(charreada).label || "Competencia por equipos";
+}
+
+function buildCharreadaCompetitionFields(competitionType = "") {
+  const competition = getCompetitionType(competitionType || "equipos_completo");
+  return {
+    competitionType: competition.type,
+    competitionScope: competition.scope,
+    competitionId: competition.type,
+    suerteIds: [...competition.suerteIds]
+  };
 }
 
 function getCharreadaPhaseFormState(charreada = null) {
@@ -8088,6 +8115,7 @@ function showCharreadaModal(charreadaId = null) {
   const labels = getEntityLabels();
   const phaseState = getCharreadaPhaseFormState(charreada);
   const operationalStatus = getCharreadaOperationalStatus(charreada || {});
+  const selectedCompetition = getCharreadaCompetition(charreada || {});
   const orderedTeams = teams
     .map((team, index) => ({
       team,
@@ -8124,6 +8152,14 @@ function showCharreadaModal(charreadaId = null) {
             <select name="status">
               ${CHARREADA_STATUS_OPTIONS.map(([value, label]) => html`
                 <option value="${value}" ${charreada?.status === value ? "selected" : ""}>${escapeHTML(label)}</option>
+              `).join("")}
+            </select>
+          </div>
+          <div>
+            <label>Tipo de competencia</label>
+            <select name="competitionType">
+              ${COMPETITION_TYPES.map((competition) => html`
+                <option value="${escapeHTML(competition.type)}" ${selectedCompetition.type === competition.type ? "selected" : ""}>${escapeHTML(competition.label)}</option>
               `).join("")}
             </select>
           </div>
@@ -9404,6 +9440,7 @@ function saveCharreada() {
   const id = existing?.id || uid("charreada");
   const wasActive = state.activeCharreadaId === id;
   const phase = normalizeCharreadaPhaseInput(data.get("phase"), data.get("phaseOther"));
+  const competitionFields = buildCharreadaCompetitionFields(data.get("competitionType"));
   const payload = {
     id,
     tournamentId: state.activeTournamentId,
@@ -9412,6 +9449,7 @@ function saveCharreada() {
     startTime: data.get("startTime"),
     status: data.get("status"),
     phase,
+    ...competitionFields,
     venue: String(data.get("venue") || "").trim(),
     announcer: String(data.get("announcer") || "").trim(),
     judges: String(data.get("judges") || "").trim(),
@@ -9423,6 +9461,12 @@ function saveCharreada() {
     teamIds
   };
   console.info("[program-fase-001] phase saved", { charreadaId: id, phase: phase || "Sin fase" });
+  console.info("[program-003] competition saved", {
+    charreadaId: id,
+    competitionType: payload.competitionType,
+    competitionScope: payload.competitionScope,
+    suerteIds: payload.suerteIds
+  });
 
   if (existing) {
     const removedTeamIds = existing.teamIds.filter((teamId) => !teamIds.includes(teamId));

@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260708-tournament-types-001-pialadero1";
+export const CHARROPRO_APP_VERSION = "20260708-program-003-competition-program1";
 
 let versionLogged = false;
 
