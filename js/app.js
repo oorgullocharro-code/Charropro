@@ -14,6 +14,7 @@ import {
   sumTeamPenalties
 } from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260708-recovery-001b-panel-status1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
 import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260708-recovery-001b-panel-status1";
 import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260708-recovery-001b-panel-status1";
 import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260708-recovery-001b-panel-status1";
@@ -5684,6 +5685,18 @@ function createRecoveryFullBackup() {
   downloadJsonFile(filename, backup);
   saveRecoveryLastBackupAt(tournament.id, backup.manifest?.createdAt || new Date().toISOString());
   saveRecoveryBackupHistoryRecord(backup, filename);
+  registerEvent(buildEvent(EVENT_TYPES.BACKUP_CREATED, {
+    fileName: filename,
+    tournamentId: backup.manifest?.tournamentId || tournament.id,
+    tournamentName: backup.manifest?.tournamentName || tournament.name || "",
+    teamsCount: backup.manifest?.teamsCount || 0,
+    charreadasCount: backup.manifest?.charreadasCount || 0,
+    scoresCount: backup.manifest?.scoresCount || 0,
+    publishedScoresCount: backup.manifest?.publishedScoresCount || 0
+  }, {
+    tournamentId: backup.manifest?.tournamentId || tournament.id,
+    source: "recovery-center"
+  }));
   console.info("[recovery-001] backup downloaded", {
     tournamentId: tournament.id,
     filename

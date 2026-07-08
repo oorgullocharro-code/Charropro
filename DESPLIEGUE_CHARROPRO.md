@@ -1,16 +1,18 @@
 # Despliegue CharroPro
 
-## Version RECOVERY-001E
+## Version EVENT-001B
 
 Version actual de cache:
 
 ```text
-v=20260708-recovery-001e-snapshot-status1
+v=20260708-event-001b-engine-architecture1
 ```
 
-Esta base aclara el indicador de `Snapshot publico` dentro de `Recovery Center`. Cuando no hay snapshot cargado localmente, ahora muestra `Snapshot publico no detectado en esta sesion` y explica que puede existir en Firebase porque la revision solo valida datos cargados localmente. Si existe `publicSnapshot` o `publicTournaments` en memoria local, el indicador sigue en verde; si no existe localmente, queda en amarillo, nunca en rojo. No consulta Firebase directamente, no escribe en Firebase, no cambia el JSON de respaldo, no implementa restauracion, no modifica calificador, jueces, resultados ni pagina publica.
+Esta base fortalece el motor de eventos en memoria `js/core/events.js`. El modulo expone `EVENT_TYPES`, `EVENT_CATEGORIES`, `buildEvent`, `normalizeEvent`, `registerEvent`, `getEvents` y `clearEvents`; cada evento queda normalizado con `eventId`, `sequence`, `timestamp`, `type`, `category`, `tournamentId`, `charreadaId`, `teamId`, `suerteId`, `phase`, `source`, `actor` y `payload`. La secuencia vive solo en memoria, se reinicia con `clearEvents()` y `getEvents()` permite filtrar por tipo, categoria, torneo, charreada, equipo, suerte y fuente.
 
-Esta base mantiene el versionado/cache-buster centralizado por `js/core/version.js` mediante `CHARROPRO_APP_VERSION` y actualiza la entrada principal de `index.html` a `v=20260708-recovery-001e-snapshot-status1` para refrescar `app.js` y `styles.css`. Al iniciar se registra un unico log `[core-infra-001] app version`.
+Como integracion minima, `Recovery Center` registra un evento `BACKUP_CREATED` con `source: "recovery-center"` cuando se genera un respaldo manual completo. La categoria se infiere como `RECOVERY`, el payload se clona para no mutar el objeto original y no se inventa actor. No muestra interfaz de eventos, no escribe en Firebase, no usa `localStorage`, no cambia el JSON del respaldo, no implementa restauracion y no modifica reglas deportivas.
+
+Esta base mantiene el versionado/cache-buster centralizado por `js/core/version.js` mediante `CHARROPRO_APP_VERSION`. Al iniciar se registra un unico log `[core-infra-001] app version`.
 
 Esta base agrega una ventana informativa al terminar la captura de Colas para el equipo actual. Cuando el flujo esta por salir del ultimo coleador del ultimo intento de Colas, el sistema suma los puntos ya capturados por coleador, identifica al mejor o a los empatados, muestra equipo y puntos, y continua el flujo normal al tocar `Aceptar`. No guarda scores nuevos, no cambia puntos, no altera reglas deportivas, no toca publicacion, pagina publica, snapshot publico, cronometro, OBS ni graficos.
 
@@ -203,7 +205,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260708-recovery-001e-snapshot-status1
+https://orgullocharro.com/charropro/?v=20260708-event-001b-engine-architecture1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
