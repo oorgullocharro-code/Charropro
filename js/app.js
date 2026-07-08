@@ -5299,7 +5299,44 @@ function renderRecoveryCenterCard({ compact = false } = {}) {
           <button class="button primary" data-action="create-full-backup" ${tournamentId ? "" : "disabled"}>Crear respaldo completo</button>
           <button class="button" disabled>Restaurar respaldo — Proximamente</button>
         </div>
+        ${renderRecoveryHealthPanel(tournamentId, summary)}
         ${renderRecoveryBackupHistory(tournamentId)}
+      </div>
+    </article>
+  `;
+}
+
+function renderRecoveryHealthPanel(tournamentId = "", summary = buildRecoveryCenterSummary(getActiveTournament())) {
+  const health = buildRecoveryHealthStatus(tournamentId, summary);
+  console.info("[recovery-001d] health panel rendered", {
+    tournamentId,
+    status: health.status,
+    indicators: health.indicators.map((indicator) => `${indicator.key}:${indicator.level}`)
+  });
+
+  return html`
+    <section class="recovery-health">
+      <div class="recovery-health-header">
+        <div>
+          <h3>🛡 Salud del torneo</h3>
+          <p class="card-subtitle">Revision local de respaldo, datos, snapshot y actividad de scores.</p>
+        </div>
+        <span class="recovery-overall recovery-overall-${health.level}">${escapeHTML(health.status)}</span>
+      </div>
+      <div class="recovery-health-grid">
+        ${health.indicators.map(renderRecoveryHealthIndicator).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderRecoveryHealthIndicator(indicator = {}) {
+  return html`
+    <article class="recovery-health-card recovery-health-${escapeHTML(indicator.level)}">
+      <span aria-hidden="true">${escapeHTML(indicator.icon)}</span>
+      <div>
+        <strong>${escapeHTML(indicator.title)}</strong>
+        <p>${escapeHTML(indicator.message)}</p>
       </div>
     </article>
   `;
@@ -5517,6 +5554,64 @@ function readRecoveryBackupHistory(tournamentId = "") {
   } catch {
     return [];
   }
+}
+
+function buildRecoveryHealthStatus(tournamentId = "", summary = buildRecoveryCenterSummary(getActiveTournament())) {
+  const backupHistory = readRecoveryBackupHistory(tournamentId);
+  const latestBackup = backupHistory[0] || null;
+  const backupTimestamp = latestBackup?.createdAt ? new Date(latestBackup.createdAt).getTime() : NaN;
+  const backupAgeMs = Number.isFinite(backupTimestamp) ? Date.now() - backupTimestamp : Infinity;
+  const hasTournament = Boolean(tournamentId && getActiveTournament()?.id === tournamentId);
+  const missingData = !summary.teamsCount || !summary.charreadasCount || !summary.scoresCount;
+  const hasSnapshot = Boolean(getLocalRecoveryPublicSnapshot(tournamentId));
+  const indicators = [
+    {
+      key: "backup",
+      level: !latestBackup ? "red" : backupAgeMs > 24 * 60 * 60 * 1000 ? "yellow" : "green",
+      icon: !latestBackup ? "🔴" : backupAgeMs > 24 * 60 * 60 * 1000 ? "🟡" : "🟢",
+      title: !latestBackup ? "Sin respaldo local" : backupAgeMs > 24 * 60 * 60 * 1000 ? "Respaldo local antiguo" : "Respaldo reciente",
+      message: latestBackup
+        ? `Ultimo respaldo: ${formatRecoveryDateTime(latestBackup.createdAt)}`
+        : "No hay respaldo registrado en este navegador."
+    },
+    {
+      key: "data",
+      level: !hasTournament ? "red" : missingData ? "yellow" : "green",
+      icon: !hasTournament ? "🔴" : missingData ? "🟡" : "🟢",
+      title: !hasTournament ? "Sin torneo activo" : missingData ? "Datos incompletos" : "Torneo con datos",
+      message: hasTournament
+        ? `${summary.teamsCount} equipos / ${summary.charreadasCount} charreadas / ${summary.scoresCount} scores`
+        : "No se detecto torneo activo."
+    },
+    {
+      key: "snapshot",
+      level: hasSnapshot ? "green" : "yellow",
+      icon: hasSnapshot ? "🟢" : "🟡",
+      title: hasSnapshot ? "Snapshot publico local detectado" : "Snapshot no detectado localmente",
+      message: hasSnapshot
+        ? "Hay snapshot publico cargado en memoria local."
+        : "No se encontro publicSnapshot/publicTournaments localmente."
+    },
+    {
+      key: "scores",
+      level: summary.scoresCount ? "green" : "yellow",
+      icon: summary.scoresCount ? "🟢" : "🟡",
+      title: summary.scoresCount ? `${summary.scoresCount} scores registrados` : "Sin scores registrados",
+      message: summary.scoresCount
+        ? "Hay actividad de calificacion local en el torneo."
+        : "Aun no hay scores detectados localmente."
+    }
+  ];
+  const level = indicators.some((indicator) => indicator.level === "red")
+    ? "risk"
+    : indicators.some((indicator) => indicator.level === "yellow") ? "warning" : "protected";
+  const status = level === "risk" ? "RIESGO" : level === "warning" ? "ADVERTENCIA" : "PROTEGIDO";
+  console.info("[recovery-001d] health status calculated", {
+    tournamentId,
+    status,
+    levels: indicators.map((indicator) => indicator.level)
+  });
+  return { level, status, indicators };
 }
 
 function saveRecoveryBackupHistoryRecord(backup = {}, fileName = "") {

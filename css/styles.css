@@ -2569,6 +2569,101 @@ th.num {
   min-width: 220px;
 }
 
+.recovery-health {
+  grid-column: 1 / -1;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .028);
+  padding: 12px;
+}
+
+.recovery-health-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.recovery-health-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.recovery-overall {
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.recovery-overall-protected {
+  background: rgba(49, 196, 141, .14);
+  color: var(--green);
+}
+
+.recovery-overall-warning {
+  background: rgba(244, 183, 64, .14);
+  color: var(--amber);
+}
+
+.recovery-overall-risk {
+  background: rgba(239, 91, 91, .14);
+  color: var(--red);
+}
+
+.recovery-health-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.recovery-health-card {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .035);
+  padding: 11px;
+}
+
+.recovery-health-card > span {
+  flex: 0 0 auto;
+}
+
+.recovery-health-card strong,
+.recovery-health-card p {
+  margin: 0;
+}
+
+.recovery-health-card strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.recovery-health-card p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.recovery-health-green {
+  border-color: rgba(49, 196, 141, .42);
+}
+
+.recovery-health-yellow {
+  border-color: rgba(244, 183, 64, .44);
+}
+
+.recovery-health-red {
+  border-color: rgba(239, 91, 91, .48);
+}
+
 .recovery-history {
   grid-column: 1 / -1;
   border: 1px solid var(--line);
@@ -2647,6 +2742,10 @@ th.num {
   .recovery-actions {
     min-width: 0;
   }
+
+  .recovery-health-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -2654,14 +2753,20 @@ th.num {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .recovery-health-header,
   .recovery-history-header,
   .recovery-history-item {
     grid-template-columns: 1fr;
   }
 
+  .recovery-health-header,
   .recovery-history-header {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .recovery-health-grid {
+    grid-template-columns: 1fr;
   }
 
   .recovery-history-meta {
