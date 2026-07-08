@@ -5587,10 +5587,10 @@ function buildRecoveryHealthStatus(tournamentId = "", summary = buildRecoveryCen
       key: "snapshot",
       level: hasSnapshot ? "green" : "yellow",
       icon: hasSnapshot ? "🟢" : "🟡",
-      title: hasSnapshot ? "Snapshot publico local detectado" : "Snapshot no detectado localmente",
+      title: hasSnapshot ? "Snapshot publico local detectado" : "Snapshot publico no detectado en esta sesion",
       message: hasSnapshot
         ? "Hay snapshot publico cargado en memoria local."
-        : "No se encontro publicSnapshot/publicTournaments localmente."
+        : "Puede existir en Firebase; esta revision solo valida datos cargados localmente."
     },
     {
       key: "scores",

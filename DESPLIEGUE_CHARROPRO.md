@@ -1,16 +1,16 @@
 # Despliegue CharroPro
 
-## Version RECOVERY-001D
+## Version RECOVERY-001E
 
 Version actual de cache:
 
 ```text
-v=20260708-recovery-001d-health-panel1
+v=20260708-recovery-001e-snapshot-status1
 ```
 
-Esta base agrega en `Recovery Center` el panel `Salud del torneo`, con indicadores locales tipo semaforo para respaldo local, datos del torneo, snapshot publico local y ultimo score/conteo de scores. El estado general se calcula como `PROTEGIDO`, `ADVERTENCIA` o `RIESGO`: cualquier rojo marca riesgo, sin rojos pero con amarillos marca advertencia, y todo verde marca protegido. No consulta Firebase directamente, no borra archivos descargados, no escribe en Firebase, no cambia el JSON de respaldo, no implementa restauracion, no modifica publicacion, snapshot publico, calificador, jueces, cronometro ni reglas deportivas.
+Esta base aclara el indicador de `Snapshot publico` dentro de `Recovery Center`. Cuando no hay snapshot cargado localmente, ahora muestra `Snapshot publico no detectado en esta sesion` y explica que puede existir en Firebase porque la revision solo valida datos cargados localmente. Si existe `publicSnapshot` o `publicTournaments` en memoria local, el indicador sigue en verde; si no existe localmente, queda en amarillo, nunca en rojo. No consulta Firebase directamente, no escribe en Firebase, no cambia el JSON de respaldo, no implementa restauracion, no modifica calificador, jueces, resultados ni pagina publica.
 
-Esta base mantiene el versionado/cache-buster centralizado por `js/core/version.js` mediante `CHARROPRO_APP_VERSION` y actualiza la entrada principal de `index.html` a `v=20260708-recovery-001d-health-panel1` para refrescar `app.js` y `styles.css`. Al iniciar se registra un unico log `[core-infra-001] app version`.
+Esta base mantiene el versionado/cache-buster centralizado por `js/core/version.js` mediante `CHARROPRO_APP_VERSION` y actualiza la entrada principal de `index.html` a `v=20260708-recovery-001e-snapshot-status1` para refrescar `app.js` y `styles.css`. Al iniciar se registra un unico log `[core-infra-001] app version`.
 
 Esta base agrega una ventana informativa al terminar la captura de Colas para el equipo actual. Cuando el flujo esta por salir del ultimo coleador del ultimo intento de Colas, el sistema suma los puntos ya capturados por coleador, identifica al mejor o a los empatados, muestra equipo y puntos, y continua el flujo normal al tocar `Aceptar`. No guarda scores nuevos, no cambia puntos, no altera reglas deportivas, no toca publicacion, pagina publica, snapshot publico, cronometro, OBS ni graficos.
 
@@ -203,7 +203,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260708-recovery-001d-health-panel1
+https://orgullocharro.com/charropro/?v=20260708-recovery-001e-snapshot-status1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
