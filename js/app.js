@@ -119,6 +119,7 @@ const TEAMS_TAB_STORAGE_KEY = "teams_tab";
 const SCORING_ACCORDION_STORAGE_KEY = "scoring_accordion_state";
 const OFFICIAL_PROGRAM_COLLAPSE_STORAGE_KEY = "official_program_collapsed_days";
 const RECOVERY_LAST_BACKUP_STORAGE_KEY = "recovery_last_backup_v1";
+const RECOVERY_BACKUP_HISTORY_STORAGE_KEY = "recovery_backup_history_v1";
 const FIREBASE_CLIENT_ID_KEY = "firebase_client_id";
 const APP_CACHE_VERSION_STORAGE_KEY = "cache_version";
 const PREPARE_STORAGE_KEY = "prepare_status_v1";
@@ -218,6 +219,7 @@ const READ_ACTIONS = new Set([
   "export-official-xlsx",
   "export-json",
   "create-full-backup",
+  "clear-recovery-history",
   "clear-local-cache",
   "prepare-clear-cache",
   "prepare-sync",
@@ -5297,6 +5299,54 @@ function renderRecoveryCenterCard({ compact = false } = {}) {
           <button class="button primary" data-action="create-full-backup" ${tournamentId ? "" : "disabled"}>Crear respaldo completo</button>
           <button class="button" disabled>Restaurar respaldo — Proximamente</button>
         </div>
+        ${renderRecoveryBackupHistory(tournamentId)}
+      </div>
+    </article>
+  `;
+}
+
+function renderRecoveryBackupHistory(tournamentId = "") {
+  const history = readRecoveryBackupHistory(tournamentId);
+  console.info("[recovery-001c] backup history rendered", {
+    tournamentId,
+    count: history.length
+  });
+
+  return html`
+    <section class="recovery-history">
+      <div class="recovery-history-header">
+        <div>
+          <h3>📜 Historial de respaldos</h3>
+          <p class="card-subtitle">Ultimos 10 respaldos generados en este navegador para este torneo.</p>
+        </div>
+        <button class="button small" data-action="clear-recovery-history" ${history.length ? "" : "disabled"}>Limpiar historial local</button>
+      </div>
+      ${history.length
+        ? html`
+          <div class="recovery-history-list">
+            ${history.map(renderRecoveryBackupHistoryItem).join("")}
+          </div>
+        `
+        : html`<div class="empty compact">Aún no hay respaldos registrados en este navegador.</div>`}
+    </section>
+  `;
+}
+
+function renderRecoveryBackupHistoryItem(record = {}) {
+  return html`
+    <article class="recovery-history-item">
+      <div>
+        <strong>${escapeHTML(formatRecoveryDateTime(record.createdAt) || "Sin fecha")}</strong>
+        <span>Tipo: ${escapeHTML(record.type === "manual" ? "Manual" : record.type || "Manual")}</span>
+      </div>
+      <div class="recovery-history-file">
+        <span>Archivo</span>
+        <strong>${escapeHTML(record.fileName || "—")}</strong>
+      </div>
+      <div class="recovery-history-meta">
+        <span>Equipos ${Number(record.teamsCount || 0)}</span>
+        <span>Charreadas ${Number(record.charreadasCount || 0)}</span>
+        <span>Scores ${Number(record.scoresCount || 0)}</span>
       </div>
     </article>
   `;
@@ -5428,6 +5478,10 @@ function getRecoveryLastBackupStorageKey(tournamentId = "") {
   return scopedStorageKey(`${RECOVERY_LAST_BACKUP_STORAGE_KEY}_${tournamentId || "sin_torneo"}`);
 }
 
+function getRecoveryBackupHistoryStorageKey(tournamentId = "") {
+  return scopedStorageKey(`${RECOVERY_BACKUP_HISTORY_STORAGE_KEY}_${tournamentId || "sin_torneo"}`);
+}
+
 function readRecoveryLastBackupAt(tournamentId = "") {
   if (!tournamentId) return "";
   try {
@@ -5448,6 +5502,68 @@ function saveRecoveryLastBackupAt(tournamentId = "", createdAt = "") {
     tournamentId,
     lastBackupAt: createdAt
   });
+}
+
+function readRecoveryBackupHistory(tournamentId = "") {
+  if (!tournamentId) return [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(getRecoveryBackupHistoryStorageKey(tournamentId)) || "[]");
+    return Array.isArray(parsed)
+      ? parsed
+        .filter((record) => record && typeof record === "object")
+        .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .slice(0, 10)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecoveryBackupHistoryRecord(backup = {}, fileName = "") {
+  const manifest = backup.manifest || {};
+  const tournamentId = manifest.tournamentId || "";
+  if (!tournamentId) return;
+  const record = {
+    id: uid("backup_history"),
+    createdAt: manifest.createdAt || new Date().toISOString(),
+    fileName,
+    tournamentId,
+    tournamentName: manifest.tournamentName || "",
+    teamsCount: Number(manifest.teamsCount || 0),
+    charreadasCount: Number(manifest.charreadasCount || 0),
+    scoresCount: Number(manifest.scoresCount || 0),
+    publishedScoresCount: Number(manifest.publishedScoresCount || 0),
+    appVersion: manifest.appVersion || CHARROPRO_APP_VERSION,
+    type: "manual"
+  };
+  const nextHistory = [record, ...readRecoveryBackupHistory(tournamentId)]
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+    .slice(0, 10);
+  try {
+    localStorage.setItem(getRecoveryBackupHistoryStorageKey(tournamentId), JSON.stringify(nextHistory));
+  } catch {
+    // El historial local no debe bloquear la descarga del respaldo.
+  }
+  console.info("[recovery-001c] backup history saved", {
+    tournamentId,
+    count: nextHistory.length
+  });
+}
+
+function clearRecoveryBackupHistory() {
+  const tournamentId = getActiveTournament()?.id || "";
+  if (!tournamentId) {
+    showToast("No hay torneo activo para limpiar historial.");
+    return;
+  }
+  try {
+    localStorage.removeItem(getRecoveryBackupHistoryStorageKey(tournamentId));
+  } catch {
+    // Si el navegador bloquea localStorage, solo se refresca la vista.
+  }
+  console.info("[recovery-001c] backup history cleared", { tournamentId });
+  showToast("Historial local de respaldos limpiado.");
+  if (["recovery", "settings"].includes(state.view)) render();
 }
 
 function formatRecoveryDateTime(value = "") {
@@ -5472,6 +5588,7 @@ function createRecoveryFullBackup() {
   const filename = buildRecoveryBackupFilename(tournament.id);
   downloadJsonFile(filename, backup);
   saveRecoveryLastBackupAt(tournament.id, backup.manifest?.createdAt || new Date().toISOString());
+  saveRecoveryBackupHistoryRecord(backup, filename);
   console.info("[recovery-001] backup downloaded", {
     tournamentId: tournament.id,
     filename
@@ -8210,6 +8327,7 @@ function handleAction(action, target) {
     "export-official-xlsx": () => downloadOfficialFormatXlsx(state.activeCharreadaId),
     "export-json": exportBackupJson,
     "create-full-backup": createRecoveryFullBackup,
+    "clear-recovery-history": clearRecoveryBackupHistory,
     "clear-local-cache": clearLocalCacheAndReload,
     "copy-live-url": () => copyLiveUrl(target.dataset.target),
     "reset-data": confirmReset,
