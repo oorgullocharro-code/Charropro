@@ -1,10 +1,10 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260707-recovery-001-manual-backup1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260707-recovery-001-manual-backup1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260708-recovery-001b-panel-status1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260707-recovery-001-manual-backup1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -12,14 +12,14 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260707-recovery-001-manual-backup1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260707-recovery-001-manual-backup1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260707-recovery-001-manual-backup1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260707-recovery-001-manual-backup1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260707-recovery-001-manual-backup1";
-import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260707-recovery-001-manual-backup1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260707-recovery-001-manual-backup1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260707-recovery-001-manual-backup1";
+} from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260708-recovery-001b-panel-status1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260708-recovery-001b-panel-status1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260708-recovery-001b-panel-status1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260708-recovery-001b-panel-status1";
+import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260708-recovery-001b-panel-status1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260708-recovery-001b-panel-status1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -31,7 +31,7 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260707-recovery-001-manual-backup1";
+} from "./core/scoring.js?v=20260708-recovery-001b-panel-status1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -41,7 +41,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260707-recovery-001-manual-backup1";
+} from "./core/sync.js?v=20260708-recovery-001b-panel-status1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -70,16 +70,16 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260707-recovery-001-manual-backup1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260707-recovery-001-manual-backup1";
+} from "./core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260707-recovery-001-manual-backup1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260707-recovery-001-manual-backup1";
+} from "./core/tournamentContext.js?v=20260708-recovery-001b-panel-status1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260708-recovery-001b-panel-status1";
 import {
   createRoster,
   emptyAttempt,
@@ -106,7 +106,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260707-recovery-001-manual-backup1";
+} from "./core/state.js?v=20260708-recovery-001b-panel-status1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -118,6 +118,7 @@ const TURN_PANEL_STORAGE_KEY = "turn_panel_collapsed";
 const TEAMS_TAB_STORAGE_KEY = "teams_tab";
 const SCORING_ACCORDION_STORAGE_KEY = "scoring_accordion_state";
 const OFFICIAL_PROGRAM_COLLAPSE_STORAGE_KEY = "official_program_collapsed_days";
+const RECOVERY_LAST_BACKUP_STORAGE_KEY = "recovery_last_backup_v1";
 const FIREBASE_CLIENT_ID_KEY = "firebase_client_id";
 const APP_CACHE_VERSION_STORAGE_KEY = "cache_version";
 const PREPARE_STORAGE_KEY = "prepare_status_v1";
@@ -192,8 +193,8 @@ const ROLE_MENU_VIEWS = {
   [ROLES.JUEZ]: ["dashboard", "officialProgram", "results"],
   [ROLES.LOCUTOR]: ["dashboard", "officialProgram", "results"],
   [ROLES.GRAFICOS]: ["dashboard", "officialProgram", "results", "graphicsAccess"],
-  [ROLES.ORGANIZADOR]: ["dashboard", "officialProgram", "program", "results", "stats", "settings"],
-  [ROLES.LECTURA]: ["dashboard", "officialProgram", "program", "results", "stats", "settings"]
+  [ROLES.ORGANIZADOR]: ["dashboard", "officialProgram", "program", "results", "stats", "recovery", "settings"],
+  [ROLES.LECTURA]: ["dashboard", "officialProgram", "program", "results", "stats", "recovery", "settings"]
 };
 const READ_ACTIONS = new Set([
   "close-modal",
@@ -340,6 +341,7 @@ const routeMeta = {
   program: ["Programacion", "Crear y administrar charreadas y equipos participantes."],
   results: ["Resultados del torneo", "Tabla, sabana y exportacion del torneo activo."],
   stats: ["Estadisticas del torneo", "Analisis del torneo activo."],
+  recovery: ["Recovery Center", "Respaldo manual del torneo activo."],
   globalStats: ["Estadisticas globales", "Analisis general de temporadas, torneos e historiales."],
   history: ["Historial", "Archivo por temporadas de torneos guardados."],
   users: ["Usuarios", "Alta de permisos y roles del sistema."],
@@ -348,7 +350,7 @@ const routeMeta = {
   rulesAdmin: ["Botoneras generales", "Reglamento base oculto del sistema."],
   settings: ["Conexion", "Google Sheets, OBS y respaldos."]
 };
-const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "officialProgram", "program", "results", "stats", "graphicsAccess", "rules", "settings"]);
+const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "officialProgram", "program", "results", "stats", "recovery", "graphicsAccess", "rules", "settings"]);
 
 function isIndividualTournament(tournament = getActiveTournament()) {
   return INDIVIDUAL_TOURNAMENT_TYPES.includes(tournament?.type);
@@ -966,6 +968,7 @@ function getVisibleTournamentNavItems(labels) {
     ["program", "Programacion", "calendar"],
     ["results", "Resultados", "trophy"],
     ["stats", "Est. torneo", "chart"],
+    ["recovery", "Recovery Center", "shield"],
     ["graphicsAccess", "Graficos", "monitor"],
     ["rules", "Botoneras", "sliders"],
     ["settings", "Conexion", "link"]
@@ -987,10 +990,10 @@ function canShowNavView(view) {
   if (role === ROLES.SUPERVISOR) return true;
   if (role === ROLES.OPERADOR) return view !== "users";
   if (role === ROLES.ORGANIZADOR) {
-    return ["tournaments", "globalStats", "history", "dashboard", "officialProgram", "program", "results", "stats", "settings"].includes(view);
+    return ["tournaments", "globalStats", "history", "dashboard", "officialProgram", "program", "results", "stats", "recovery", "settings"].includes(view);
   }
   if (role === ROLES.LECTURA) {
-    return ["tournaments", "globalStats", "history", "dashboard", "officialProgram", "program", "results", "stats", "settings"].includes(view);
+    return ["tournaments", "globalStats", "history", "dashboard", "officialProgram", "program", "results", "stats", "recovery", "settings"].includes(view);
   }
   if (role === ROLES.GRAFICOS) return ["tournaments", "globalStats", "officialProgram", "graphicsAccess"].includes(view);
   return false;
@@ -1060,6 +1063,10 @@ function renderUiIcon(name) {
 	      <path d="M10 8h4"></path>
 	      <path d="M18 16h4"></path>
 	    `,
+    shield: html`
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
+      <path d="m9 12 2 2 4-5"></path>
+    `,
     link: html`
       <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93"></path>
       <path d="M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07L13 19.07"></path>
@@ -2577,6 +2584,7 @@ function renderCurrentView() {
   if (state.view === "program") return renderProgram();
   if (state.view === "results") return renderResults();
   if (state.view === "stats") return renderTournamentStatsCenter();
+  if (state.view === "recovery") return renderRecoveryCenter();
   if (state.view === "rules") return renderRules();
   if (state.view === "settings") return renderSettings();
   return renderDashboard();
@@ -2601,6 +2609,7 @@ function renderTournamentAppView() {
   if (state.view === "program") return renderProgram();
   if (state.view === "results") return renderResults();
   if (state.view === "stats") return renderTournamentStatsCenter();
+  if (state.view === "recovery") return renderRecoveryCenter();
   if (state.view === "rules") return renderRules();
   if (state.view === "settings") return renderSettings();
   return renderDashboard();
@@ -5227,6 +5236,72 @@ function getActiveTournamentSuertes() {
   return getTournamentSuertes(getActiveTournament(), state.settings.globalRuleOverrides);
 }
 
+function renderRecoveryCenter() {
+  return html`
+    <section class="content recovery-center-page">
+      ${renderRecoveryCenterCard()}
+    </section>
+  `;
+}
+
+function renderRecoveryCenterCard({ compact = false } = {}) {
+  const tournament = getActiveTournament();
+  const tournamentId = tournament?.id || "";
+  const summary = buildRecoveryCenterSummary(tournament);
+  const lastBackupAt = readRecoveryLastBackupAt(tournamentId);
+  const hasRecentBackup = Boolean(lastBackupAt);
+  const statusLabel = hasRecentBackup ? "Protegido" : "En riesgo";
+  const statusMessage = hasRecentBackup
+    ? "Ultimo respaldo generado hace unos momentos."
+    : "Este torneo no tiene respaldo reciente.";
+
+  console.info("[recovery-001b] recovery panel rendered", {
+    tournamentId,
+    status: statusLabel,
+    compact
+  });
+
+  return html`
+    <article class="card recovery-center-card ${hasRecentBackup ? "is-protected" : "is-risk"}">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🛡 Recovery Center</h2>
+          <p class="card-subtitle">Respaldo manual del torneo activo.</p>
+        </div>
+        <span class="pill ${hasRecentBackup ? "green" : "red"}">Estado: ${escapeHTML(statusLabel)}</span>
+      </div>
+      <div class="card-body recovery-center-body">
+        <div class="recovery-status-panel">
+          <strong>${escapeHTML(statusMessage)}</strong>
+          <p class="card-subtitle">Ultimo respaldo: ${lastBackupAt ? escapeHTML(formatRecoveryDateTime(lastBackupAt)) : "—"}</p>
+        </div>
+        <div class="recovery-summary-grid">
+          <div class="stat">
+            <span>Torneo actual</span>
+            <strong>${escapeHTML(summary.tournamentName || "Sin torneo activo")}</strong>
+          </div>
+          <div class="stat">
+            <span>Equipos</span>
+            <strong>${summary.teamsCount}</strong>
+          </div>
+          <div class="stat">
+            <span>Charreadas</span>
+            <strong>${summary.charreadasCount}</strong>
+          </div>
+          <div class="stat">
+            <span>Scores</span>
+            <strong>${summary.scoresCount}</strong>
+          </div>
+        </div>
+        <div class="recovery-actions">
+          <button class="button primary" data-action="create-full-backup" ${tournamentId ? "" : "disabled"}>Crear respaldo completo</button>
+          <button class="button" disabled>Restaurar respaldo — Proximamente</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
 function renderSettings() {
   const liveScreenGroups = getLiveScreenGroups();
   const role = firebaseAccess.role;
@@ -5306,21 +5381,7 @@ function renderSettings() {
         </div>
       </article>
 
-      <article class="card recovery-center-card">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">🛡️ Recovery Center</h2>
-            <p class="card-subtitle">Genera un respaldo completo descargable del torneo activo.</p>
-          </div>
-        </div>
-        <div class="card-body recovery-center-body">
-          <div>
-            <strong>Respaldo manual completo</strong>
-            <p class="card-subtitle">Incluye torneo, equipos, charreadas, calificaciones, publicaciones, configuracion publica y diagnostico disponible.</p>
-          </div>
-          <button class="button primary" data-action="create-full-backup">Crear respaldo completo</button>
-        </div>
-      </article>
+      ${renderRecoveryCenterCard({ compact: true })}
 
       <article class="card">
         <div class="card-header">
@@ -5344,6 +5405,61 @@ function renderPermissionPill(label, enabled) {
   return html`<span class="pill ${enabled ? "green" : "red"}">${enabled ? "SI" : "NO"} ${escapeHTML(label)}</span>`;
 }
 
+function buildRecoveryCenterSummary(tournament = {}) {
+  const tournamentId = tournament?.id || "";
+  const teams = tournamentId ? getTournamentTeams(tournamentId) : [];
+  const charreadas = tournamentId ? getTournamentCharreadas(tournamentId) : [];
+  const charreadaIds = new Set(charreadas.map((charreada) => charreada.id));
+  const teamIds = new Set(teams.map((team) => team.id));
+  const scoresCount = Object.keys(state.scores || {})
+    .filter((key) => scoreKeyBelongsToTournament(key, charreadaIds, teamIds))
+    .length;
+
+  return {
+    tournamentId,
+    tournamentName: tournament?.name || "",
+    teamsCount: teams.length,
+    charreadasCount: charreadas.length,
+    scoresCount
+  };
+}
+
+function getRecoveryLastBackupStorageKey(tournamentId = "") {
+  return scopedStorageKey(`${RECOVERY_LAST_BACKUP_STORAGE_KEY}_${tournamentId || "sin_torneo"}`);
+}
+
+function readRecoveryLastBackupAt(tournamentId = "") {
+  if (!tournamentId) return "";
+  try {
+    return sessionStorage.getItem(getRecoveryLastBackupStorageKey(tournamentId)) || "";
+  } catch {
+    return "";
+  }
+}
+
+function saveRecoveryLastBackupAt(tournamentId = "", createdAt = "") {
+  if (!tournamentId || !createdAt) return;
+  try {
+    sessionStorage.setItem(getRecoveryLastBackupStorageKey(tournamentId), createdAt);
+  } catch {
+    // El respaldo ya se descargo; si sessionStorage falla, no debe bloquear al juez/operador.
+  }
+  console.info("[recovery-001b] backup status updated", {
+    tournamentId,
+    lastBackupAt: createdAt
+  });
+}
+
+function formatRecoveryDateTime(value = "") {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("es-MX", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  });
+}
+
 function createRecoveryFullBackup() {
   const tournament = getActiveTournament();
   if (!tournament?.id) {
@@ -5355,10 +5471,12 @@ function createRecoveryFullBackup() {
   const backup = buildRecoveryFullBackup(tournament);
   const filename = buildRecoveryBackupFilename(tournament.id);
   downloadJsonFile(filename, backup);
+  saveRecoveryLastBackupAt(tournament.id, backup.manifest?.createdAt || new Date().toISOString());
   console.info("[recovery-001] backup downloaded", {
     tournamentId: tournament.id,
     filename
   });
+  if (["recovery", "settings"].includes(state.view)) render();
   showToast("Respaldo generado correctamente.");
 }
 

@@ -2523,11 +2523,20 @@ th.num {
   border-color: rgba(201, 162, 39, .42);
 }
 
+.recovery-center-card.is-risk {
+  box-shadow: inset 4px 0 0 rgba(244, 183, 64, .86), 0 8px 26px rgba(0, 0, 0, .16);
+}
+
+.recovery-center-card.is-protected {
+  border-color: rgba(49, 196, 141, .46);
+  box-shadow: inset 4px 0 0 rgba(49, 196, 141, .78), 0 8px 26px rgba(0, 0, 0, .16);
+}
+
 .recovery-center-body {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(220px, .9fr) minmax(320px, 1.7fr) auto;
+  gap: 14px;
+  align-items: stretch;
 }
 
 .recovery-center-body strong {
@@ -2536,10 +2545,43 @@ th.num {
   margin-bottom: 4px;
 }
 
-@media (max-width: 760px) {
+.recovery-status-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .035);
+  padding: 12px;
+}
+
+.recovery-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.recovery-summary-grid .stat strong {
+  overflow-wrap: anywhere;
+}
+
+.recovery-actions {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-width: 220px;
+}
+
+@media (max-width: 1180px) {
   .recovery-center-body {
-    align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: 1fr;
+  }
+
+  .recovery-actions {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .recovery-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

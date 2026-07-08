@@ -1,16 +1,16 @@
 # Despliegue CharroPro
 
-## Version RECOVERY-001
+## Version RECOVERY-001B
 
 Version actual de cache:
 
 ```text
-v=20260707-recovery-001-manual-backup1
+v=20260708-recovery-001b-panel-status1
 ```
 
-Esta base agrega en Configuracion el modulo `Recovery Center` con el boton `Crear respaldo completo`. El respaldo se descarga como JSON local con manifest, torneo activo, equipos, charreadas, scores, publishedScores, configuracion publica disponible, usuarios/roles ya cargados en memoria, auditoria basica local y version. No borra datos, no escribe en Firebase, no modifica publicacion, snapshot publico, calificador, jueces, cronometro ni reglas deportivas.
+Esta base destaca `Recovery Center` como modulo propio dentro del menu del torneo activo y conserva el acceso existente desde `Conexion`. El panel muestra estado `En riesgo` o `Protegido`, ultimo respaldo de la sesion, torneo actual, conteo de equipos, charreadas y scores, ademas del boton `Crear respaldo completo`. La fecha del ultimo respaldo se guarda solo en `sessionStorage` por torneo. El JSON de respaldo no cambia: sigue descargandose localmente con manifest, torneo activo, equipos, charreadas, scores, publishedScores, configuracion publica disponible, usuarios/roles ya cargados en memoria, auditoria basica local y version. No borra datos, no escribe en Firebase, no implementa restauracion, no modifica publicacion, snapshot publico, calificador, jueces, cronometro ni reglas deportivas.
 
-Esta base centraliza el versionado/cache-buster de CharroPro en `js/core/version.js` mediante `CHARROPRO_APP_VERSION`. Todos los imports y entradas HTML usan `v=20260707-recovery-001-manual-backup1` para evitar mezclar grafos de modulos, especialmente `state.js`, `sync.js` y `firebaseSync.js`. Al iniciar se registra un unico log `[core-infra-001] app version`.
+Esta base centraliza el versionado/cache-buster de CharroPro en `js/core/version.js` mediante `CHARROPRO_APP_VERSION`. Todos los imports y entradas HTML usan `v=20260708-recovery-001b-panel-status1` para evitar mezclar grafos de modulos, especialmente `state.js`, `sync.js` y `firebaseSync.js`. Al iniciar se registra un unico log `[core-infra-001] app version`.
 
 Esta base agrega una ventana informativa al terminar la captura de Colas para el equipo actual. Cuando el flujo esta por salir del ultimo coleador del ultimo intento de Colas, el sistema suma los puntos ya capturados por coleador, identifica al mejor o a los empatados, muestra equipo y puntos, y continua el flujo normal al tocar `Aceptar`. No guarda scores nuevos, no cambia puntos, no altera reglas deportivas, no toca publicacion, pagina publica, snapshot publico, cronometro, OBS ni graficos.
 
@@ -203,7 +203,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260707-recovery-001-manual-backup1
+https://orgullocharro.com/charropro/?v=20260708-recovery-001b-panel-status1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
