@@ -1,4 +1,4 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
@@ -9,8 +9,8 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260708-recovery-001b-panel-status1";
-import { getTeam, scoreKey, state, uid } from "./state.js?v=20260708-recovery-001b-panel-status1";
+} from "./scoring.js?v=20260708-tournament-types-001-pialadero1";
+import { getTeam, scoreKey, state, uid } from "./state.js?v=20260708-tournament-types-001-pialadero1";
 
 export function buildStatisticalHistorySnapshot(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

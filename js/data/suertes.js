@@ -315,6 +315,13 @@ export const TOURNAMENT_TYPES = [
     shortName: "Coleadero",
     description: "Solo Coleadero.",
     suerteIds: ["colas"]
+  },
+  {
+    id: "pialadero",
+    name: "Pialadero",
+    shortName: "Pialadero",
+    description: "Solo Piales.",
+    suerteIds: ["piales"]
   }
 ];
 

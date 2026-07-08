@@ -1,5 +1,5 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
-import { getActiveCharreada, getActiveTournament, saveState, state } from "./state.js?v=20260708-recovery-001b-panel-status1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
+import { getActiveCharreada, getActiveTournament, saveState, state } from "./state.js?v=20260708-tournament-types-001-pialadero1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

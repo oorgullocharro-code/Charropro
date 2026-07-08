@@ -1,5 +1,5 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-recovery-001b-panel-status1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260708-recovery-001b-panel-status1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260708-tournament-types-001-pialadero1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -15,12 +15,12 @@ import {
 } from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260708-recovery-001b-panel-status1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260708-recovery-001b-panel-status1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260708-recovery-001b-panel-status1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260708-recovery-001b-panel-status1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260708-tournament-types-001-pialadero1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260708-tournament-types-001-pialadero1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260708-tournament-types-001-pialadero1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260708-recovery-001b-panel-status1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260708-recovery-001b-panel-status1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260708-tournament-types-001-pialadero1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260708-tournament-types-001-pialadero1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -32,7 +32,7 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260708-recovery-001b-panel-status1";
+} from "./core/scoring.js?v=20260708-tournament-types-001-pialadero1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -42,7 +42,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260708-recovery-001b-panel-status1";
+} from "./core/sync.js?v=20260708-tournament-types-001-pialadero1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -107,7 +107,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260708-recovery-001b-panel-status1";
+} from "./core/state.js?v=20260708-tournament-types-001-pialadero1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -136,7 +136,7 @@ const TEAM_CATEGORIES = [
 function scopedStorageKey(suffix) {
   return getScopedLocalStorageKey(suffix);
 }
-const INDIVIDUAL_TOURNAMENT_TYPES = ["caladero", "coleadero"];
+const INDIVIDUAL_TOURNAMENT_TYPES = ["caladero", "coleadero", "pialadero"];
 const RULE_GROUPS = [
   { id: "base", title: "Base", color: "blue", hasPoints: true },
   { id: "adic", title: "Adicionales", color: "green", hasPoints: true },

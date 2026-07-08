@@ -1,8 +1,8 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260708-recovery-001b-panel-status1";
-import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260708-recovery-001b-panel-status1";
-import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260708-recovery-001b-panel-status1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260708-tournament-types-001-pialadero1";
+import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260708-tournament-types-001-pialadero1";
+import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260708-tournament-types-001-pialadero1";
 import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260708-recovery-001b-panel-status1";
 import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
 
@@ -12,7 +12,7 @@ const SYNC_OWNER_KEY = "sync_owner_v1";
 const SYNC_CLIENT_ID = getSyncClientId();
 
 function isIndividualTournament(tournament = getActiveTournament()) {
-  return ["caladero", "coleadero"].includes(tournament?.type);
+  return ["caladero", "coleadero", "pialadero"].includes(tournament?.type);
 }
 
 export function buildLivePayload(options = {}) {

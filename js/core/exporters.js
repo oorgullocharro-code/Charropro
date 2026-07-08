@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260708-recovery-001b-panel-status1";
-import { getTeam, state } from "./state.js?v=20260708-recovery-001b-panel-status1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260708-tournament-types-001-pialadero1";
+import { getTeam, state } from "./state.js?v=20260708-tournament-types-001-pialadero1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);
   if (!tournament) return;
   const suertes = getTournamentSuertes(tournament, state.settings.globalRuleOverrides);
-  const isIndividual = ["caladero", "coleadero"].includes(tournament.type);
+  const isIndividual = ["caladero", "coleadero", "pialadero"].includes(tournament.type);
   const tournamentCharreadas = state.charreadas.filter((charreada) => charreada.tournamentId === tournamentId);
   const showRestas = tournamentCharreadas.some((charreada) =>
     Object.values(charreada.restas || {}).some((value) => Number(value || 0) !== 0)

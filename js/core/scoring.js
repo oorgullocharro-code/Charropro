@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260708-recovery-001b-panel-status1";
-import { getTeam, scoreKey, state } from "./state.js?v=20260708-recovery-001b-panel-status1";
+import { getTeam, scoreKey, state } from "./state.js?v=20260708-tournament-types-001-pialadero1";
 
 export function calculateAttemptTotal(attempt) {
   if (!attempt) return 0;

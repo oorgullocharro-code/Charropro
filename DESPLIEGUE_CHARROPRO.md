@@ -1,12 +1,14 @@
 # Despliegue CharroPro
 
-## Version EVENT-001B
+## Version TOURNAMENT-TYPES-001
 
 Version actual de cache:
 
 ```text
-v=20260708-event-001b-engine-architecture1
+v=20260708-tournament-types-001-pialadero1
 ```
+
+Esta base agrega `Pialadero` como tipo de torneo especializado con valor interno `pialadero`. El catalogo de tipos lo muestra al crear torneo, guarda `type: "pialadero"` y limita la estructura deportiva a la unica suerte `Piales` mediante `suerteIds: ["piales"]`. El calificador usa la botonera y reglas existentes de Piales, el flujo recorre solo esa suerte, y resultados/ranking/exportaciones se calculan desde el mismo catalogo reducido. No se modifican reglas deportivas, calculos de Piales, Firebase Rules, Recovery, Event Engine, pagina publica visual ni graficos.
 
 Esta base fortalece el motor de eventos en memoria `js/core/events.js`. El modulo expone `EVENT_TYPES`, `EVENT_CATEGORIES`, `buildEvent`, `normalizeEvent`, `registerEvent`, `getEvents` y `clearEvents`; cada evento queda normalizado con `eventId`, `sequence`, `timestamp`, `type`, `category`, `tournamentId`, `charreadaId`, `teamId`, `suerteId`, `phase`, `source`, `actor` y `payload`. La secuencia vive solo en memoria, se reinicia con `clearEvents()` y `getEvents()` permite filtrar por tipo, categoria, torneo, charreada, equipo, suerte y fuente.
 
@@ -205,7 +207,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260708-event-001b-engine-architecture1
+https://orgullocharro.com/charropro/?v=20260708-tournament-types-001-pialadero1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

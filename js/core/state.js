@@ -1,4 +1,4 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
