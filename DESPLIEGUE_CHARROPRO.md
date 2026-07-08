@@ -1,12 +1,14 @@
 # Despliegue CharroPro
 
-## Version TOURNAMENT-TYPES-001
+## Version COMPETITIONS-001
 
 Version actual de cache:
 
 ```text
-v=20260708-tournament-types-001-pialadero1
+v=20260708-competitions-001-catalog1
 ```
+
+Esta base agrega el catalogo de competencias internas en `js/data/competitionTypes.js`, siguiendo `ARCH_INTERNAL_COMPETITIONS.md`. El catalogo define `equipos_completo`, `charro_completo`, `caladero`, `coleadero`, `pialadero` y `exhibicion`, junto con `scope`, `suerteIds`, `rankingMode`, `awardGroup`, `affectsTeamRanking`, `affectsGeneralStatistics` y `statsScope`. Tambien expone helpers para resolver tipos, suertes, compatibilidad legacy desde `tournament.type` y validacion basica. No agrega selector UI, no cambia creacion de charreada, no modifica calificador profundo, resultados profundos, pagina publica visual, snapshot publico, Firebase Rules, Recovery ni Event Engine.
 
 Esta base agrega `Pialadero` como tipo de torneo especializado con valor interno `pialadero`. El catalogo de tipos lo muestra al crear torneo, guarda `type: "pialadero"` y limita la estructura deportiva a la unica suerte `Piales` mediante `suerteIds: ["piales"]`. El calificador usa la botonera y reglas existentes de Piales, el flujo recorre solo esa suerte, y resultados/ranking/exportaciones se calculan desde el mismo catalogo reducido. No se modifican reglas deportivas, calculos de Piales, Firebase Rules, Recovery, Event Engine, pagina publica visual ni graficos.
 
@@ -207,7 +209,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260708-tournament-types-001-pialadero1
+https://orgullocharro.com/charropro/?v=20260708-competitions-001-catalog1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
