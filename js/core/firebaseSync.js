@@ -2,8 +2,8 @@ import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.13
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { get, getDatabase, onValue, push, ref, set, update } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-functions.js";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260707-core-infra-001-versioning1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260707-core-infra-001-versioning1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260708-recovery-001b-panel-status1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD1GjI5EJYAMhe1JRM7nETHQSqHceiBBD8",

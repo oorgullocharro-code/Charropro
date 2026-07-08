@@ -1,21 +1,21 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
 import {
   DEFAULT_GRAPHICS_CONFIG,
   applyGraphicsConfig,
   normalizeGraphicsConfig,
   readLocalGraphicsConfig,
   writeLocalGraphicsConfig
-} from "../core/graphicsConfig.js?v=20260707-core-infra-001-versioning1";
-import { loadState, saveState, state } from "../core/state.js?v=20260707-core-infra-001-versioning1";
+} from "../core/graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
+import { loadState, saveState, state } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
 import {
   getLiveChannelFromUrl,
   publishFirebaseGraphicsConfig,
   signInFirebaseUser,
   signOutFirebaseUser,
   subscribeFirebaseAuthSession
-} from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260707-core-infra-001-versioning1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260707-core-infra-001-versioning1";
+} from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("graphics-control-root");
 let liveChannel = "";

@@ -1,10 +1,10 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
-import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260707-core-infra-001-versioning1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260707-core-infra-001-versioning1";
-import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260707-core-infra-001-versioning1";
-import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260707-core-infra-001-versioning1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260707-core-infra-001-versioning1";
-import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260707-core-infra-001-versioning1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260708-recovery-001b-panel-status1";
+import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260708-recovery-001b-panel-status1";
+import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260708-recovery-001b-panel-status1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;

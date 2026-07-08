@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260707-recovery-001-manual-backup1";
+export const CHARROPRO_APP_VERSION = "20260708-recovery-001b-panel-status1";
 
 let versionLogged = false;
 

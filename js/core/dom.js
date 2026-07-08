@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260707-core-infra-001-versioning1";
+import { logCharroProVersion } from "./version.js?v=20260708-recovery-001b-panel-status1";
 
 logCharroProVersion("runtime");
 

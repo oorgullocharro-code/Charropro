@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260707-core-infra-001-versioning1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260708-recovery-001b-panel-status1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

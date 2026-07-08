@@ -10,7 +10,7 @@ import {
 assert.equal(getTournamentIdFromUrl("?id=torneo_a"), "torneo_a");
 assert.equal(getTournamentIdFromUrl("?tournamentId=torneo_b"), "torneo_b");
 assert.equal(getTournamentIdFromUrl("?canal=torneo_c"), "torneo_c");
-assert.equal(getTournamentIdFromUrl("?v=20260707-core-infra-001-versioning1"), "");
+assert.equal(getTournamentIdFromUrl("?v=20260708-recovery-001b-panel-status1"), "");
 
 setTournamentContext("torneo_a", "test");
 assert.deepEqual(getTournamentContext(), { tournamentId: "torneo_a", source: "test" });

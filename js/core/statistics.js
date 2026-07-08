@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
   buildTournamentTeamStandings,
   calculateAttemptTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260707-core-infra-001-versioning1";
-import { scoreKey, state } from "./state.js?v=20260707-core-infra-001-versioning1";
+} from "./scoring.js?v=20260708-recovery-001b-panel-status1";
+import { scoreKey, state } from "./state.js?v=20260708-recovery-001b-panel-status1";
 
 export function buildCharroProStatsCenter(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

@@ -1,8 +1,8 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
 import {
   getLiveChannelFromUrl,
   subscribePublicTournamentSnapshot
-} from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
+} from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
 
 const UNAVAILABLE_MESSAGE = "Información pública no disponible todavía";
 const OFFICIAL_SCORESHEET_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];

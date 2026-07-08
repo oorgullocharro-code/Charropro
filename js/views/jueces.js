@@ -1,14 +1,14 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
-import { loadState, state } from "../core/state.js?v=20260707-core-infra-001-versioning1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
+import { loadState, state } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
 import {
   signInFirebaseUser,
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState
-} from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260707-core-infra-001-versioning1";
-import { getTournamentIdFromUrl } from "../core/tournamentContext.js?v=20260707-core-infra-001-versioning1";
+} from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
+import { getTournamentIdFromUrl } from "../core/tournamentContext.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("jueces-root");
 let accessSession = {

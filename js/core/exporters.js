@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260707-core-infra-001-versioning1";
-import { getTeam, state } from "./state.js?v=20260707-core-infra-001-versioning1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260708-recovery-001b-panel-status1";
+import { getTeam, state } from "./state.js?v=20260708-recovery-001b-panel-status1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);

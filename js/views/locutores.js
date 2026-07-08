@@ -1,20 +1,20 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260707-core-infra-001-versioning1";
-import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260707-core-infra-001-versioning1";
-import { getCharroName } from "../core/sync.js?v=20260707-core-infra-001-versioning1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260708-recovery-001b-panel-status1";
+import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
+import { getCharroName } from "../core/sync.js?v=20260708-recovery-001b-panel-status1";
 import {
   calculateAttemptTotal,
   getTeamCharreadaTotal,
   getTeamSuerteTotal
-} from "../core/scoring.js?v=20260707-core-infra-001-versioning1";
-import { loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260707-core-infra-001-versioning1";
+} from "../core/scoring.js?v=20260708-recovery-001b-panel-status1";
+import { loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
 import {
   getLiveChannelFromUrl,
   signInFirebaseUser,
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLiveCurrent
-} from "../core/firebaseSync.js?v=20260707-core-infra-001-versioning1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260707-core-infra-001-versioning1";
+} from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("locutores-root");
 const liveChannel = getLiveChannelFromUrl();
