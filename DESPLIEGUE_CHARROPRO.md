@@ -1,12 +1,16 @@
 # Despliegue CharroPro
 
-## Version COMPETITIONS-003
+## Version RESULTS-COMPETITIONS-001
 
 Version actual de cache:
 
 ```text
-v=20260709-competitions-003-scoring-by-competition1
+v=20260709-results-competitions-001-separated1
 ```
+
+Esta base separa los Resultados internos por competencia. La pantalla de Resultados agrega selector `Competencia` y solo muestra competencias existentes en el torneo. Ranking, sabana y top se calculan desde las jornadas de la competencia seleccionada, usando `competitionType`, `competitionScope`, `competitionId`, `phase`, `category`, `suerteIds` y la lista de participantes/equipos correspondiente.
+
+Cuando la competencia es por equipos, el ranking se muestra por equipos y usa `teamIds`. Cuando la competencia es individual, el ranking y la premiacion usan `individualParticipants`. Charro Completo muestra solo Cala, Piales, Colas, Toro, Manganas Pie, Manganas Caballo y Paso; no incluye Terna ni Yegua. Caladero, Coleadero y Pialadero quedan limitados a su suerte correspondiente. No se modifica pagina publica, OBS, graficos, Recovery, Event Engine, Firebase Rules ni reglas deportivas.
 
 Esta base conecta el calificador con el modelo de competencias internas. La jornada activa resuelve `competitionType`, `competitionScope`, `competitionId` y `suerteIds`; si la competencia es individual, el calificador usa `individualParticipants` como lista de turnos. Charro Completo, Caladero, Coleadero y Pialadero dejan de depender de equipos para el flujo del juez y conservan sus suertes configuradas. Competencia por equipos mantiene `teamIds` y el comportamiento anterior.
 
@@ -221,7 +225,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260709-competitions-003-scoring-by-competition1
+https://orgullocharro.com/charropro/?v=20260709-results-competitions-001-separated1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

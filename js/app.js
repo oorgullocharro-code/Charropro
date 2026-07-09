@@ -25,12 +25,11 @@ import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260709-compe
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
-  buildIndividualAwards,
   buildLeaderboard,
-  buildTournamentTeamStandings,
   calculateAttemptTotal,
   getTeamCharreadaResta,
   getTeamCharreadaTotal,
+  getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
 } from "./core/scoring.js?v=20260709-competitions-003-scoring-by-competition1";
@@ -89,6 +88,7 @@ import {
   recordPublishedScore,
   getActiveCharreada,
   getActiveTournament,
+  getCharreadaCompetitionContext,
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getCurrentContext,
@@ -217,6 +217,7 @@ const READ_ACTIONS = new Set([
   "select-teams-tab",
   "toggle-program-day",
   "select-results-phase",
+  "select-results-competition",
   "select-rule-suerte",
   "copy-live-url",
   "export-csv",
@@ -4062,23 +4063,40 @@ function getTournamentStatusClass(status) {
 
 function renderResults() {
   const tournament = getActiveTournament();
-  const charreadas = getTournamentCharreadas();
+  const tournamentCharreadas = getTournamentCharreadas();
+  const competitions = buildResultsCompetitionOptions(tournament, tournamentCharreadas);
+  const selectedCompetition = getSelectedResultsCompetition(competitions);
+  const charreadas = selectedCompetition?.charreadas || [];
   const phaseColumns = buildResultsPhaseColumns(charreadas);
   const selectedPhaseId = getSelectedResultsPhaseId(phaseColumns);
   const selectedPhase = phaseColumns.find((column) => column.id === selectedPhaseId) || null;
-  const standings = buildTournamentTeamStandings(tournament.id);
+  const standings = buildResultsCompetitionStandings(tournament, selectedCompetition, phaseColumns);
   const visibleStandings = selectedPhase ? filterResultsStandingsByPhase(standings, selectedPhase) : standings;
   const visibleTeamIds = new Set(visibleStandings.map((row) => row.team?.id).filter(Boolean));
-  const awards = buildIndividualAwards(tournament.id);
+  const awards = buildResultsCompetitionAwards(tournament, selectedCompetition);
   const awardPlaces = getIndividualAwardPlaces(tournament);
-  const labels = getEntityLabels(tournament);
+  const labels = getResultsCompetitionLabels(selectedCompetition, tournament);
   const locked = isTournamentFrozen(tournament);
   console.info("[resultados-002B] charreadas source sample", charreadas.slice(0, 4).map((charreada, index) => ({
     id: charreada?.id || "",
     name: charreada?.name || `Charreada ${index + 1}`,
     phase: charreada?.phase || "",
-    fase: charreada?.fase || ""
+    fase: charreada?.fase || "",
+    competitionType: charreada?.competitionType || "",
+    competitionScope: charreada?.competitionScope || ""
   })));
+  console.info("[results-competitions-001] competition options", competitions.map((competition) => ({
+    id: competition.id,
+    label: competition.label,
+    scope: competition.scope,
+    charreadas: competition.charreadas.length
+  })));
+  console.info("[results-competitions-001] selected competition", selectedCompetition ? {
+    id: selectedCompetition.id,
+    label: selectedCompetition.label,
+    scope: selectedCompetition.scope,
+    charreadas: selectedCompetition.charreadas.length
+  } : null);
   console.info("[resultados-002B] phase by charreada", charreadas.map((charreada, index) => ({
     charreadaId: charreada?.id || "",
     charreadaName: charreada?.name || `Charreada ${index + 1}`,
@@ -4121,12 +4139,25 @@ function renderResults() {
         <div>
           <span>Vista del torneo activo</span>
           <h2>${escapeHTML(tournament.name)}</h2>
-          <p>Esta pagina es operativa: muestra tabla, sabana, premiacion y exportaciones solo del torneo seleccionado.</p>
+          <p>Esta pagina es operativa: muestra tabla, sabana y premiacion de la competencia seleccionada.</p>
         </div>
         <div class="scope-card-metrics">
-          <div><span>${escapeHTML(labels.title)}</span><strong>${getTournamentTeams(tournament.id).length}</strong></div>
-          <div><span>Charreadas</span><strong>${charreadas.length}</strong></div>
+          <div><span>${escapeHTML(labels.title)}</span><strong>${standings.length}</strong></div>
+          <div><span>Jornadas</span><strong>${charreadas.length}</strong></div>
           <div><span>Fases</span><strong>${phaseColumns.length}</strong></div>
+          <div><span>Competencias</span><strong>${competitions.length}</strong></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Competencia</h2>
+            <p class="card-subtitle">Selecciona el bloque competitivo. Ranking, sabana y top no mezclan equipos con participantes individuales.</p>
+          </div>
+        </div>
+        <div class="card-body">
+          ${renderResultsCompetitionSelector(competitions, selectedCompetition?.id || "")}
         </div>
       </article>
 
@@ -4141,18 +4172,19 @@ function renderResults() {
       <article class="card">
         <div class="card-header">
           <div>
-	            <h2 class="card-title">Tabla general del torneo</h2>
+	            <h2 class="card-title">${selectedCompetition?.scope === "individual" ? "Ranking individual" : "Ranking por equipos"}</h2>
             <p class="card-subtitle">
-              Vista rapida por fase/ronda. Las charreadas individuales se consultan en la sabana o en Programa.
+              ${escapeHTML(selectedCompetition?.label || "Competencia por equipos")} · Vista rapida por fase/ronda.
             </p>
           </div>
         </div>
         <div class="card-body">
           ${standings.length
             ? renderTournamentStandingsTable(phaseColumns, standings, {
-                showMetrics: false
+                showMetrics: false,
+                labels
               })
-            : html`<div class="empty">Sin resultados en este torneo.</div>`}
+            : html`<div class="empty">Sin resultados en esta competencia.</div>`}
         </div>
       </article>
 
@@ -4176,9 +4208,10 @@ function renderResults() {
                   selectedPhase,
                   phaseColumns,
                   standings: visibleStandings,
-                  visibleTeamIds
+                  visibleTeamIds,
+                  labels
                 })
-              : html`<div class="empty">Sin charreadas.</div>`
+              : html`<div class="empty">Sin jornadas para esta competencia.</div>`
           }
         </div>
       </article>
@@ -4186,8 +4219,8 @@ function renderResults() {
       <article class="card">
         <div class="card-header">
           <div>
-            <h2 class="card-title">Premiacion individual</h2>
-            <p class="card-subtitle">Primeros lugares por suerte segun la configuracion del torneo.</p>
+            <h2 class="card-title">Top ${escapeHTML(selectedCompetition?.label || "competencia")}</h2>
+            <p class="card-subtitle">Primeros lugares por suerte solo de la competencia seleccionada.</p>
           </div>
           <div class="award-control">
             <label for="individual-award-places">Lugares</label>
@@ -4202,6 +4235,246 @@ function renderResults() {
       </article>
     </section>
   `;
+}
+
+function buildResultsCompetitionOptions(tournament = getActiveTournament(), charreadas = getTournamentCharreadas()) {
+  const records = new Map();
+  const tournamentId = tournament?.id || state.activeTournamentId || "";
+
+  (Array.isArray(charreadas) ? charreadas : [])
+    .filter((charreada) => charreada?.tournamentId === tournamentId)
+    .forEach((charreada) => {
+      const context = getCharreadaCompetitionContext(charreada, tournament);
+      const typeConfig = getCompetitionType(context.competitionType);
+      const id = context.competitionId || context.competitionType || typeConfig.type;
+      const existing = records.get(id) || {
+        id,
+        type: context.competitionType || typeConfig.type,
+        scope: context.competitionScope || typeConfig.scope,
+        label: typeConfig.label || formatCompetitionTypeLabel(context.competitionType),
+        category: charreada.category || charreada.categoria || "",
+        phases: new Set(),
+        charreadas: []
+      };
+      existing.charreadas.push(charreada);
+      existing.phases.add(getResultsPhaseName(charreada));
+      records.set(id, existing);
+    });
+
+  if (!records.size && tournamentId) {
+    const typeConfig = getCompetitionType(tournament?.type === "caladero" || tournament?.type === "coleadero" || tournament?.type === "pialadero"
+      ? tournament.type
+      : "equipos_completo");
+    records.set(typeConfig.type, {
+      id: typeConfig.type,
+      type: typeConfig.type,
+      scope: typeConfig.scope,
+      label: typeConfig.label,
+      category: "",
+      phases: new Set(),
+      charreadas: []
+    });
+  }
+
+  const order = new Map(COMPETITION_TYPES.map((competition, index) => [competition.type, index]));
+  return [...records.values()]
+    .map((competition) => ({
+      ...competition,
+      phases: [...competition.phases]
+    }))
+    .sort((left, right) =>
+      (order.get(left.type) ?? 99) - (order.get(right.type) ?? 99) ||
+      String(left.label || "").localeCompare(String(right.label || ""), "es")
+    );
+}
+
+function getSelectedResultsCompetition(competitions = []) {
+  if (!competitions.length) return null;
+  const selected = String(state.resultsCompetitionFilter || "").trim();
+  return competitions.find((competition) => competition.id === selected) || competitions[0];
+}
+
+function selectResultsCompetition(competitionId = "") {
+  state.resultsCompetitionFilter = String(competitionId || "").trim();
+  state.resultsPhaseFilter = "";
+  console.info("[results-competitions-001] selector competition changed", state.resultsCompetitionFilter || "default");
+  saveState({ silent: true });
+  render();
+}
+
+function renderResultsCompetitionSelector(competitions = [], selectedId = "") {
+  if (!competitions.length) return html`<div class="empty compact">Sin competencias programadas.</div>`;
+  return html`
+    <label class="results-competition-selector">
+      <span>Competencia</span>
+      <select data-action="select-results-competition">
+        ${competitions.map((competition) => html`
+          <option value="${escapeHTML(competition.id)}" ${competition.id === selectedId ? "selected" : ""}>
+            ${escapeHTML(competition.label)}
+          </option>
+        `).join("")}
+      </select>
+    </label>
+  `;
+}
+
+function getResultsCompetitionLabels(competition = null, tournament = getActiveTournament()) {
+  const labels = getEntityLabels(tournament);
+  if (competition?.scope !== "individual") return labels;
+  return {
+    ...labels,
+    singular: "participante",
+    plural: "participantes",
+    title: "Participantes",
+    nameHeader: "Participante"
+  };
+}
+
+function formatCompetitionTypeLabel(type = "") {
+  const competition = getCompetitionType(type || "equipos_completo");
+  return competition.label || "Competencia por equipos";
+}
+
+function buildResultsCompetitionStandings(tournament = getActiveTournament(), competition = null, phaseColumns = []) {
+  if (!competition) return [];
+  const entries = buildResultsCompetitionEntryMap(competition);
+  const rows = [...entries.values()].map((entry) => {
+    const results = phaseColumns.map((column, index) => {
+      const phaseCharreadas = (competition.charreadas || []).filter((charreada) => column.charreadaIds.includes(charreada.id));
+      const participatedCharreadas = phaseCharreadas.filter((charreada) => hasCompetitionEntryInCharreada(charreada, entry.id));
+      const participated = participatedCharreadas.length > 0;
+      const total = participated
+        ? participatedCharreadas.reduce((sum, charreada) => sum + getTeamCharreadaTotal(charreada.id, entry.id), 0)
+        : null;
+      const infr = participated
+        ? participatedCharreadas.reduce((sum, charreada) => sum + getTeamInfrTotal(charreada.id, entry.id), 0)
+        : 0;
+      return {
+        charreada: {
+          id: column.id || `fase_${index + 1}`,
+          name: column.label || column.phase || `Fase ${index + 1}`,
+          charreadaIds: column.charreadaIds || []
+        },
+        participated,
+        total,
+        infr
+      };
+    });
+    const played = results.filter((result) => result.participated);
+    const total = played.reduce((sum, result) => sum + Number(result.total || 0), 0);
+    const infr = played.reduce((sum, result) => sum + Number(result.infr || 0), 0);
+    const average = played.length ? total / played.length : 0;
+    const bestResult = played.length
+      ? Math.max(...played.map((result) => Number(result.total || 0)))
+      : 0;
+
+    return {
+      team: entry,
+      results,
+      total,
+      average,
+      charreadasCount: played.length,
+      infr,
+      negativePoints: infr,
+      bestResult,
+      competitionId: competition.id,
+      competitionType: competition.type,
+      competitionScope: competition.scope,
+      category: entry.category || competition.category || "",
+      tieBreakCriteria: {
+        average,
+        total,
+        negativePoints: infr,
+        bestResult,
+        name: getEntryDisplayName(entry)
+      }
+    };
+  });
+
+  return rows
+    .filter((row) => row.charreadasCount || competition.scope === "team")
+    .sort(compareResultsCompetitionRows);
+}
+
+function buildResultsCompetitionEntryMap(competition = null) {
+  const entries = new Map();
+  (competition?.charreadas || []).forEach((charreada) => {
+    getCharreadaScoringEntries(charreada).forEach((entry) => {
+      if (!entry?.id || entries.has(entry.id)) return;
+      entries.set(entry.id, {
+        ...entry,
+        competitionId: competition.id,
+        competitionType: competition.type,
+        competitionScope: competition.scope
+      });
+    });
+    getScoreTeamIdsForCharreada(charreada.id).forEach((entryId) => {
+      if (entries.has(entryId)) return;
+      const entry = resolveScoreSheetEntry(charreada, entryId);
+      if (entry?.id) entries.set(entry.id, entry);
+    });
+  });
+  return entries;
+}
+
+function compareResultsCompetitionRows(left, right) {
+  return Number(right.total || 0) - Number(left.total || 0) ||
+    Number(left.negativePoints ?? left.infr ?? 0) - Number(right.negativePoints ?? right.infr ?? 0) ||
+    Number(right.bestResult || 0) - Number(left.bestResult || 0) ||
+    String(getEntryDisplayName(left.team) || "").localeCompare(String(getEntryDisplayName(right.team) || ""), "es");
+}
+
+function hasCompetitionEntryInCharreada(charreada = {}, entryId = "") {
+  if (!charreada?.id || !entryId) return false;
+  const scoringEntries = getCharreadaScoringEntries(charreada);
+  if (scoringEntries.some((entry) => entry.id === entryId)) return true;
+  return getScoreTeamIdsForCharreada(charreada.id).includes(entryId);
+}
+
+function buildResultsCompetitionAwards(tournament = getActiveTournament(), competition = null) {
+  if (!competition) return [];
+  const suertes = buildResultsSuerteColumns(competition.charreadas);
+  return suertes.map((suerte) => {
+    const results = [];
+    (competition.charreadas || []).forEach((charreada) => {
+      getCharreadaScoringEntries(charreada).forEach((entry) => {
+        const collection = state.scores[scoreKey(charreada.id, entry.id, suerte.id)];
+        if (!collection) return;
+
+        if (suerte.type === "coleadero") {
+          const coleadores = entry.isIndividualParticipant || entry.participantName ? collection.slice(0, 1) : collection;
+          coleadores.forEach((coleadorAttempts, index) => {
+            const attempts = Array.isArray(coleadorAttempts) ? coleadorAttempts : [];
+            const total = attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
+            const active = attempts.some((attempt) => hasAttemptActivity(attempt));
+            if (!active) return;
+            results.push({
+              suerte,
+              team: entry,
+              charreada,
+              charro: entry.participantName || entry.roster?.colas?.[index] || `Coleador ${index + 1}`,
+              total
+            });
+          });
+          return;
+        }
+
+        const attempts = Array.isArray(collection) ? collection : [];
+        const total = attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
+        const active = attempts.some((attempt) => hasAttemptActivity(attempt));
+        if (!active) return;
+        results.push({
+          suerte,
+          team: entry,
+          charreada,
+          charro: entry.participantName || getRosterNameForSuerte(entry, suerte) || "Sin registrar",
+          total
+        });
+      });
+    });
+    results.sort((left, right) => Number(right.total || 0) - Number(left.total || 0) || String(left.charro || "").localeCompare(String(right.charro || ""), "es"));
+    return { suerte, results };
+  });
 }
 
 function renderGlobalStatsCenter() {
@@ -4919,7 +5192,7 @@ function clampAwardPlaces(value) {
 }
 
 function renderTournamentStandingsTable(columns, standings, options = {}) {
-  const labels = getEntityLabels();
+  const labels = options.labels || getEntityLabels();
   const showMetrics = options.showMetrics !== false;
   const phaseTotalColumn = options.phaseTotalColumn || null;
   return html`
@@ -5026,10 +5299,15 @@ function buildResultsPhaseColumns(charreadas = []) {
     const key = normalizeResultsPhaseKey(phase);
     const charreadaId = charreada?.id || `charreada_${index + 1}`;
     const sourceCharreada = {
+      ...charreada,
       id: charreadaId,
       name: String(charreada?.name || `Charreada ${index + 1}`).trim() || `Charreada ${index + 1}`,
       phase,
       teamIds: Array.isArray(charreada?.teamIds) ? charreada.teamIds : [],
+      entryIds: getCharreadaScoringEntries(charreada).map((entry) => entry.id).filter(Boolean),
+      competitionType: charreada?.competitionType || "",
+      competitionScope: charreada?.competitionScope || "",
+      competitionId: charreada?.competitionId || "",
       restas: charreada?.restas || {}
     };
 
@@ -5099,6 +5377,7 @@ function getStandingPhaseResult(row = {}, column = {}) {
   }
 
   const phaseCharreadas = (column.sourceCharreadas || []).filter((charreada) =>
+    (Array.isArray(charreada.entryIds) && charreada.entryIds.includes(teamId)) ||
     (Array.isArray(charreada.teamIds) && charreada.teamIds.includes(teamId)) ||
     hasTeamScoreInCharreada(teamId, charreada.id)
   );
@@ -5125,7 +5404,9 @@ function getStandingResultsForPhase(row = {}, column = {}) {
 
 function hasTeamScoreInCharreada(teamId = "", charreadaId = "") {
   if (!teamId || !charreadaId) return false;
-  return getActiveTournamentSuertes().some((suerte) => hasScoreCollectionActivity(state.scores[scoreKey(charreadaId, teamId, suerte.id)]));
+  const charreada = state.charreadas.find((item) => item.id === charreadaId) || null;
+  const tournament = state.tournaments.find((item) => item.id === charreada?.tournamentId) || getActiveTournament();
+  return getCharreadaScoringSuertes(charreada, tournament).some((suerte) => hasScoreCollectionActivity(state.scores[scoreKey(charreadaId, teamId, suerte.id)]));
 }
 
 function hasScoreCollectionActivity(collection) {
@@ -5152,13 +5433,13 @@ function renderScoreSheet(charreadas) {
   return renderDetailedScoreSheet(charreadas);
 }
 
-function renderResultsScoreSheet({ selectedPhase = null, phaseColumns = [], standings = [], visibleTeamIds = new Set() } = {}) {
-  if (!selectedPhase) return renderPhaseSummaryScoreSheet(phaseColumns, standings);
-  return renderDetailedScoreSheet(selectedPhase.sourceCharreadas || [], { visibleTeamIds });
+function renderResultsScoreSheet({ selectedPhase = null, phaseColumns = [], standings = [], visibleTeamIds = new Set(), labels = getEntityLabels() } = {}) {
+  if (!selectedPhase) return renderPhaseSummaryScoreSheet(phaseColumns, standings, { labels });
+  return renderDetailedScoreSheet(selectedPhase.sourceCharreadas || [], { visibleTeamIds, labels });
 }
 
-function renderPhaseSummaryScoreSheet(columns = [], standings = []) {
-  const labels = getEntityLabels();
+function renderPhaseSummaryScoreSheet(columns = [], standings = [], options = {}) {
+  const labels = options.labels || getEntityLabels();
   return html`
     <div class="table-wrap">
       <table>
@@ -5187,17 +5468,17 @@ function renderPhaseSummaryScoreSheet(columns = [], standings = []) {
 }
 
 function renderDetailedScoreSheet(charreadas, options = {}) {
-  const suertes = getActiveTournamentSuertes();
-  const labels = getEntityLabels();
+  const suertes = options.suertes || buildResultsSuerteColumns(charreadas);
+  const labels = options.labels || getEntityLabels();
   const visibleTeamIds = options.visibleTeamIds instanceof Set ? options.visibleTeamIds : null;
   const showRestas = charreadas.some((charreada) =>
     Object.values(charreada.restas || {}).some((value) => Number(value || 0) !== 0)
   );
   const rows = charreadas.flatMap((charreada) =>
-    getScoreSheetTeamIds(charreada, visibleTeamIds).map((teamId) => ({ charreada, teamId }))
+    getScoreSheetTeamIds(charreada, visibleTeamIds).map((teamId) => ({ charreada, teamId, entry: resolveScoreSheetEntry(charreada, teamId) }))
   );
 
-  if (!rows.length) return html`<div class="empty">Sin equipos en esta fase.</div>`;
+  if (!rows.length) return html`<div class="empty">Sin ${escapeHTML(labels.plural)} en esta fase.</div>`;
 
   return html`
     <div class="table-wrap">
@@ -5213,12 +5494,11 @@ function renderDetailedScoreSheet(charreadas, options = {}) {
         </thead>
         <tbody>
           ${rows
-            .map(({ charreada, teamId }) => {
-                const team = getTeam(teamId);
+            .map(({ charreada, teamId, entry }) => {
                 return html`
                   <tr>
                     <td>${escapeHTML(charreada.name)}</td>
-	                    <td><strong>${escapeHTML(team ? getEntryDisplayName(team) : "")}</strong></td>
+	                    <td><strong>${escapeHTML(entry ? getEntryDisplayName(entry) : "")}</strong></td>
                     ${suertes.map((suerte) => html`<td class="num">${moneylessNumber(getTeamSuerteTotal(charreada.id, teamId, suerte.id))}</td>`).join("")}
                     ${showRestas ? html`<td class="num">${moneylessNumber(getTeamCharreadaResta(charreada.id, teamId))}</td>` : ""}
                     <td class="num"><strong>${moneylessNumber(getTeamCharreadaTotal(charreada.id, teamId))}</strong></td>
@@ -5233,9 +5513,34 @@ function renderDetailedScoreSheet(charreadas, options = {}) {
 }
 
 function getScoreSheetTeamIds(charreada = {}, visibleTeamIds = null) {
-  const ids = new Set(Array.isArray(charreada.teamIds) ? charreada.teamIds : []);
+  const ids = new Set(getCharreadaScoringEntries(charreada).map((entry) => entry.id).filter(Boolean));
   getScoreTeamIdsForCharreada(charreada.id).forEach((teamId) => ids.add(teamId));
   return [...ids].filter((teamId) => !visibleTeamIds || visibleTeamIds.has(teamId));
+}
+
+function resolveScoreSheetEntry(charreada = {}, entryId = "") {
+  if (!entryId) return null;
+  return getCharreadaScoringEntries(charreada).find((entry) => entry.id === entryId) ||
+    getTeam(entryId) ||
+    {
+      id: entryId,
+      name: "Participante no registrado",
+      participantName: "Participante no registrado"
+    };
+}
+
+function buildResultsSuerteColumns(charreadas = []) {
+  const suertes = [];
+  const seen = new Set();
+  (Array.isArray(charreadas) ? charreadas : []).forEach((charreada) => {
+    const tournament = state.tournaments.find((item) => item.id === charreada?.tournamentId) || getActiveTournament();
+    getCharreadaScoringSuertes(charreada, tournament).forEach((suerte) => {
+      if (!suerte?.id || seen.has(suerte.id)) return;
+      seen.add(suerte.id);
+      suertes.push(suerte);
+    });
+  });
+  return suertes;
 }
 
 function getScoreTeamIdsForCharreada(charreadaId = "") {
@@ -8459,6 +8764,10 @@ function wireGlobalEvents() {
     if (target.dataset.action === "individual-awards-places") {
       if (!canUseAction(target.dataset.action)) return;
       saveIndividualAwardPlaces(target.value);
+    }
+
+    if (target.dataset.action === "select-results-competition") {
+      selectResultsCompetition(target.value);
     }
 
     if (target.dataset.action === "punta-input") {
