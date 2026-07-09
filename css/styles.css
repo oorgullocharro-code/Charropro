@@ -7975,6 +7975,44 @@ html.graphic-page #graphic-root {
   background: rgba(148, 163, 184, .08);
 }
 
+.public-competition-selector {
+  border: 1px solid rgba(244, 183, 64, .2);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, .68);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.public-competition-selector label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.public-competition-selector select {
+  min-width: 240px;
+  border: 1px solid rgba(244, 183, 64, .34);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, .76);
+  color: var(--text);
+  padding: 10px 12px;
+  font-weight: 900;
+}
+
+.public-competition-selector p {
+  margin: 0;
+  color: var(--amber);
+  font-weight: 950;
+}
+
 .public-tabs {
   display: flex;
   gap: 8px;
@@ -8058,12 +8096,16 @@ html.graphic-page #graphic-root {
 }
 
 .public-scoreboard-list,
-.public-live-grid {
+.public-live-grid,
+.public-program-list,
+.public-list {
   display: grid;
   gap: 8px;
 }
 
-.public-scoreboard-row {
+.public-scoreboard-row,
+.public-list-row,
+.public-program-row {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) auto;
   gap: 10px;
@@ -8072,6 +8114,35 @@ html.graphic-page #graphic-root {
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(2, 6, 23, .42);
+}
+
+.public-program-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.public-program-row div,
+.public-list-row {
+  min-width: 0;
+}
+
+.public-program-row span,
+.public-program-row small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.public-program-row strong,
+.public-list-row strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-program-row b,
+.public-list-row b {
+  color: var(--amber);
 }
 
 .public-scoreboard-row.active {
@@ -8134,7 +8205,8 @@ html.graphic-page #graphic-root {
 
 @media (max-width: 820px) {
   .public-hero,
-  .public-panel-head {
+  .public-panel-head,
+  .public-competition-selector {
     display: grid;
   }
 
@@ -8147,5 +8219,14 @@ html.graphic-page #graphic-root {
   .public-grid.two,
   .public-live-grid {
     grid-template-columns: 1fr;
+  }
+
+  .public-competition-selector label {
+    display: grid;
+  }
+
+  .public-competition-selector select {
+    min-width: 0;
+    width: 100%;
   }
 }

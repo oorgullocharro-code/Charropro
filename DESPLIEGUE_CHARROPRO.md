@@ -1,12 +1,14 @@
 # Despliegue CharroPro
 
-## Version RESULTS-COMPETITIONS-001
+## Version PUBLIC-COMPETITIONS-001
 
 Version actual de cache:
 
 ```text
-v=20260709-results-competitions-001-separated1
+v=20260709-public-competitions-001
 ```
+
+Esta base adapta `torneo-publico.html` al modelo de competencias internas desde el snapshot publico. La pagina lee solo `charropro/publicTournaments/{tournamentId}`, agrega selector `Competencia`, acepta `?competition=` en la URL y actualiza Programa, Ranking, Sabana, Top y Premiacion sin recargar. Si el snapshot aun no trae metadatos por competencia, mantiene compatibilidad legacy mostrando `Competencia por equipos` sin leer rutas privadas ni inventar resultados.
 
 Esta base separa los Resultados internos por competencia. La pantalla de Resultados agrega selector `Competencia` y solo muestra competencias existentes en el torneo. Ranking, sabana y top se calculan desde las jornadas de la competencia seleccionada, usando `competitionType`, `competitionScope`, `competitionId`, `phase`, `category`, `suerteIds` y la lista de participantes/equipos correspondiente.
 
@@ -225,7 +227,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260709-results-competitions-001-separated1
+https://orgullocharro.com/charropro/torneo-publico.html?v=20260709-public-competitions-001
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
