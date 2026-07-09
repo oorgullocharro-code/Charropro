@@ -114,6 +114,7 @@ import {
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
+const PUBLIC_LINKS_PAGE_VERSION = "20260709-public-links-001";
 const APP_MODE = window.CHARROPRO_APP_MODE === "tournament" ? "tournament" : "portal";
 const IS_TOURNAMENT_APP = APP_MODE === "tournament";
 const scoringScrollSelectors = [".score-workspace", ".scoring-main", ".turn-panel", ".suertes-strip", ".scoring-shell", ".cp-scoring-shell"];
@@ -220,6 +221,7 @@ const READ_ACTIONS = new Set([
   "select-results-competition",
   "select-rule-suerte",
   "copy-live-url",
+  "copy-public-url",
   "export-csv",
   "export-official-xlsx",
   "export-json",
@@ -1160,6 +1162,19 @@ function getProgramQuickHref(fileName, charreadaId = "") {
 
 function getAbsolutePageHref(fileName, options = {}) {
   return new URL(getPageHref(fileName, options), window.location.href).href;
+}
+
+function getPublicTournamentHref(competitionType = "") {
+  const params = new URLSearchParams();
+  const tournamentId = getTournamentContext().tournamentId || state.activeTournamentId || "";
+  if (tournamentId) params.set("tournamentId", tournamentId);
+  if (competitionType) params.set("competition", competitionType);
+  params.set("v", PUBLIC_LINKS_PAGE_VERSION);
+  return `./torneo-publico.html?${params.toString()}`;
+}
+
+function getAbsolutePublicTournamentHref(competitionType = "") {
+  return new URL(getPublicTournamentHref(competitionType), window.location.href).href;
 }
 
 function buildLiveUrlParams() {
@@ -5914,6 +5929,8 @@ function renderSettings() {
         </div>
       </article>
 
+      ${renderPublicPageLinksCard()}
+
       <article class="card">
         <div class="card-header">
           <div>
@@ -6668,6 +6685,127 @@ function getLiveScreenGroups() {
       screens: screens.filter((screen) => screen.group === "operation")
     }
   ].filter((group) => group.screens.length);
+}
+
+function renderPublicPageLinksCard() {
+  const tournament = getActiveTournament();
+  const links = buildPublicPageLinks(tournament);
+  const futurePath = buildFuturePublicFriendlyPath(tournament);
+  return html`
+    <article class="card public-links-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Pagina publica</h2>
+          <p class="card-subtitle">Enlaces de consulta para clientes, publico y produccion.</p>
+        </div>
+        <div class="topbar-actions">
+          <a class="button primary small" href="${escapeHTML(links.general.href)}" target="_blank" rel="noreferrer">Abrir pagina publica</a>
+          <button class="button small" data-action="copy-public-url" data-target="${escapeHTML(links.general.inputId)}" type="button">Copiar enlace publico</button>
+        </div>
+      </div>
+      <div class="card-body grid">
+        ${renderPublicLinkRow(links.general)}
+        ${links.competitions.length ? html`
+          <div class="public-links-list">
+            <h3>Accesos por competencia</h3>
+            ${links.competitions.map(renderPublicLinkRow).join("")}
+          </div>
+        ` : html`<p class="card-subtitle">Este torneo aun no tiene competencias internas detectables; se muestra solo el enlace general.</p>`}
+        <p class="card-subtitle">
+          URL amigable futura: ${escapeHTML(futurePath || "requiere slug publico del torneo")}. Pendiente de rewrites del servidor.
+        </p>
+      </div>
+    </article>
+  `;
+}
+
+function renderPublicLinkRow(link) {
+  return html`
+    <label class="public-link-field">
+      <span>${escapeHTML(link.label)}</span>
+      <div class="copy-row public-link-row">
+        <input id="${escapeHTML(link.inputId)}" readonly value="${escapeHTML(link.absoluteHref)}" onclick="this.select()">
+        <a class="button small" href="${escapeHTML(link.href)}" target="_blank" rel="noreferrer">Abrir</a>
+        <button class="button small" data-action="copy-public-url" data-target="${escapeHTML(link.inputId)}" type="button">Copiar</button>
+      </div>
+    </label>
+  `;
+}
+
+function buildPublicPageLinks(tournament = getActiveTournament()) {
+  const tournamentId = tournament?.id || state.activeTournamentId || "";
+  const general = {
+    id: "general",
+    label: "Enlace general",
+    inputId: "public-url-general",
+    href: getPublicTournamentHref(),
+    absoluteHref: getAbsolutePublicTournamentHref()
+  };
+  if (!tournamentId) return { general, competitions: [] };
+
+  const competitions = detectTournamentPublicCompetitions(tournament).map((competition) => ({
+    id: competition.type,
+    label: competition.label,
+    inputId: `public-url-${sanitizeDomId(competition.type)}`,
+    href: getPublicTournamentHref(competition.type),
+    absoluteHref: getAbsolutePublicTournamentHref(competition.type),
+    competitionType: competition.type
+  }));
+
+  return { general, competitions };
+}
+
+function detectTournamentPublicCompetitions(tournament = getActiveTournament()) {
+  if (!tournament?.id) return [];
+  const records = new Map();
+  getTournamentCharreadas(tournament.id).forEach((charreada) => {
+    if (!hasExplicitCompetitionMetadata(charreada)) return;
+    const context = getCharreadaCompetitionContext(charreada, tournament);
+    const competition = getCompetitionType(context.competitionType || context.competitionId || "equipos_completo");
+    if (!records.has(competition.type)) records.set(competition.type, competition);
+  });
+  const order = new Map(COMPETITION_TYPES.map((competition, index) => [competition.type, index]));
+  return [...records.values()].sort((left, right) =>
+    (order.get(left.type) ?? 99) - (order.get(right.type) ?? 99) ||
+    String(left.label || "").localeCompare(String(right.label || ""), "es")
+  );
+}
+
+function hasExplicitCompetitionMetadata(charreada = {}) {
+  return Boolean(
+    charreada.competitionType ||
+    charreada.competitionScope ||
+    charreada.competitionId ||
+    Array.isArray(charreada.suerteIds) && charreada.suerteIds.length
+  );
+}
+
+function buildFuturePublicFriendlyPath(tournament = getActiveTournament(), competitionType = "") {
+  const slug = normalizePublicSlug(tournament?.slug || tournament?.publicSlug || "");
+  if (!slug) return "";
+  const segmentByType = {
+    equipos_completo: "equipos",
+    charro_completo: "charro-completo",
+    caladero: "caladero",
+    coleadero: "coleadero",
+    pialadero: "pialadero"
+  };
+  const segment = segmentByType[competitionType] || "";
+  return `/evento/${slug}${segment ? `/${segment}` : ""}`;
+}
+
+function normalizePublicSlug(value = "") {
+  return String(value || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function sanitizeDomId(value = "") {
+  return String(value || "item").replace(/[^a-z0-9_-]/gi, "-");
 }
 
 function getLiveScreens() {
@@ -8952,6 +9090,7 @@ function handleAction(action, target) {
     "clear-recovery-history": clearRecoveryBackupHistory,
     "clear-local-cache": clearLocalCacheAndReload,
     "copy-live-url": () => copyLiveUrl(target.dataset.target),
+    "copy-public-url": () => copyLiveUrl(target.dataset.target),
     "reset-data": confirmReset,
     "confirm-reset": () => {
       resetAllData();

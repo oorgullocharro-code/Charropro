@@ -1,12 +1,14 @@
 # Despliegue CharroPro
 
-## Version PUBLIC-COMPETITIONS-001
+## Version PUBLIC-LINKS-001
 
 Version actual de cache:
 
 ```text
-v=20260709-public-competitions-001
+v=20260709-public-links-001
 ```
+
+Esta base agrega en `Conexion` una seccion `Pagina publica` con acciones para abrir y copiar el enlace publico del torneo activo. Si las jornadas tienen metadatos de competencia (`competitionType`, `competitionScope`, `competitionId` o `suerteIds`), muestra accesos por competencia hacia `torneo-publico.html?tournamentId={tournamentId}&competition={competitionType}`. Tambien deja preparado el helper/documentacion para rutas futuras `/evento/{slug}` sin implementar rewrites reales del servidor.
 
 Esta base adapta `torneo-publico.html` al modelo de competencias internas desde el snapshot publico. La pagina lee solo `charropro/publicTournaments/{tournamentId}`, agrega selector `Competencia`, acepta `?competition=` en la URL y actualiza Programa, Ranking, Sabana, Top y Premiacion sin recargar. Si el snapshot aun no trae metadatos por competencia, mantiene compatibilidad legacy mostrando `Competencia por equipos` sin leer rutas privadas ni inventar resultados.
 
@@ -227,7 +229,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/torneo-publico.html?v=20260709-public-competitions-001
+https://orgullocharro.com/charropro/?v=20260709-public-links-001
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

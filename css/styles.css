@@ -6974,6 +6974,39 @@ html.graphic-page #graphic-root {
   gap: 8px;
 }
 
+.public-links-list {
+  display: grid;
+  gap: 12px;
+}
+
+.public-links-list h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.public-link-field {
+  display: grid;
+  gap: 8px;
+}
+
+.public-link-field > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.public-link-row {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+@media (max-width: 720px) {
+  .public-link-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .live-url-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
