@@ -1,5 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
-import { getActiveCharreada, getActiveTournament, saveState, state } from "./state.js?v=20260708-tournament-types-001-pialadero1";
+import {
+  getActiveCharreada,
+  getActiveTournament,
+  getCharreadaCompetitionContext,
+  getCharreadaScoringEntries,
+  getCharreadaScoringSuertes,
+  saveState,
+  state
+} from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;
@@ -9,41 +16,15 @@ export function resetScoringPointer() {
 }
 
 export function advanceScoringPointer() {
-  const charreada = getActiveCharreada();
-  if (!charreada) return { finished: true };
+  const sequence = buildScoringSequence();
+  if (!sequence.length) return { finished: true };
 
-  const suertes = getActiveTournamentSuertes();
-  if (state.scoringSuerteIdx >= suertes.length) state.scoringSuerteIdx = 0;
-  const suerte = suertes[state.scoringSuerteIdx];
-  if (!suerte) return { finished: true };
-  const teamCount = charreada.teamIds.length;
-
-  if (suerte.id === "colas") {
-    const coleadorCount = getColeadorCount();
-    if (state.scoringColeadorIdx < coleadorCount - 1) {
-      state.scoringColeadorIdx += 1;
-    } else {
-      state.scoringColeadorIdx = 0;
-      if (state.scoringTeamIdx < teamCount - 1) {
-        state.scoringTeamIdx += 1;
-      } else {
-        state.scoringTeamIdx = 0;
-        if (state.scoringAttemptIdx < suerte.attempts - 1) {
-          state.scoringAttemptIdx += 1;
-        } else {
-          state.scoringAttemptIdx = 0;
-          advanceSuerte();
-        }
-      }
-    }
-  } else if (["toro", "lazo", "pial_ruedo"].includes(suerte.id)) {
-    advanceTerna(teamCount, suerte.id);
-  } else if (["yegua", "manganas_pie", "manganas_caballo"].includes(suerte.id)) {
-    advanceManganas(teamCount, suerte.id);
-  } else if (suerte.attempts > 1) {
-    advanceByTeamThenAttempt(teamCount, suerte.attempts);
+  const currentIndex = findCurrentSequenceIndex(sequence);
+  const nextIndex = currentIndex >= 0 ? currentIndex + 1 : 0;
+  if (nextIndex >= sequence.length) {
+    state.view = "results";
   } else {
-    advanceByTeamThenSuerte(teamCount);
+    applyScoringPosition(sequence[nextIndex]);
   }
 
   saveState({ silent: true });
@@ -151,11 +132,17 @@ export function advanceSuerte() {
 }
 
 function getActiveTournamentSuertes() {
-  return getTournamentSuertes(getActiveTournament(), state.settings.globalRuleOverrides);
+  return getCharreadaScoringSuertes(getActiveCharreada(), getActiveTournament(), state.settings.globalRuleOverrides);
 }
 
 function getColeadorCount() {
-  return getActiveTournament()?.type === "coleadero" ? 1 : 3;
+  const charreada = getActiveCharreada();
+  const context = getCharreadaCompetitionContext(charreada, getActiveTournament());
+  return getActiveTournament()?.type === "coleadero" || context.isIndividualCompetition ? 1 : 3;
+}
+
+function getActiveScoringEntryCount() {
+  return getCharreadaScoringEntries(getActiveCharreada()).length;
 }
 
 function setSuerteById(suerteId) {
@@ -172,30 +159,30 @@ function buildScoringSequence() {
   if (!charreada) return [];
 
   const suertes = getActiveTournamentSuertes();
-  const teamCount = charreada.teamIds.length;
+  const teamCount = getActiveScoringEntryCount();
   const sequence = [];
 
   for (let suerteIdx = 0; suerteIdx < suertes.length; suerteIdx += 1) {
     const suerte = suertes[suerteIdx];
     if (!suerte || teamCount <= 0) continue;
 
-    if (suerte.id === "toro") {
+    if (["toro", "lazo", "pial_ruedo"].includes(suerte.id)) {
       const group = getSuerteGroup(suertes, ["toro", "lazo", "pial_ruedo"]);
-      addGroupedTeamSequence(sequence, group, teamCount);
-      suerteIdx = Math.max(suerteIdx, ...group.map((item) => item.index));
+      if (group[0]?.index === suerteIdx) {
+        addGroupedTeamSequence(sequence, group, teamCount);
+        suerteIdx = Math.max(suerteIdx, ...group.map((item) => item.index));
+      }
       continue;
     }
 
-    if (["lazo", "pial_ruedo"].includes(suerte.id)) continue;
-
-    if (suerte.id === "yegua") {
+    if (["yegua", "manganas_pie", "manganas_caballo"].includes(suerte.id)) {
       const group = getSuerteGroup(suertes, ["yegua", "manganas_pie", "manganas_caballo"]);
-      addGroupedTeamSequence(sequence, group, teamCount);
-      suerteIdx = Math.max(suerteIdx, ...group.map((item) => item.index));
+      if (group[0]?.index === suerteIdx) {
+        addGroupedTeamSequence(sequence, group, teamCount);
+        suerteIdx = Math.max(suerteIdx, ...group.map((item) => item.index));
+      }
       continue;
     }
-
-    if (["manganas_pie", "manganas_caballo"].includes(suerte.id)) continue;
 
     if (suerte.id === "colas") {
       const attempts = Math.max(1, Number(suerte.attempts || 1));

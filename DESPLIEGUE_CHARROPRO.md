@@ -1,12 +1,16 @@
 # Despliegue CharroPro
 
-## Version PARTICIPANTS-001
+## Version COMPETITIONS-003
 
 Version actual de cache:
 
 ```text
-v=20260709-participants-001-individual-scope1
+v=20260709-competitions-003-scoring-by-competition1
 ```
+
+Esta base conecta el calificador con el modelo de competencias internas. La jornada activa resuelve `competitionType`, `competitionScope`, `competitionId` y `suerteIds`; si la competencia es individual, el calificador usa `individualParticipants` como lista de turnos. Charro Completo, Caladero, Coleadero y Pialadero dejan de depender de equipos para el flujo del juez y conservan sus suertes configuradas. Competencia por equipos mantiene `teamIds` y el comportamiento anterior.
+
+El avance de `Guardar y siguiente` ahora usa una secuencia construida desde las suertes reales de la jornada, por lo que Charro Completo puede recorrer `cala`, `piales`, `colas`, `toro`, `manganas_pie`, `manganas_caballo` y `paso` sin cargar terna ni yegua. No se modifican reglas deportivas, calculos oficiales, Resultados generales, pagina publica, OBS, graficos, Recovery, Event Engine ni Firebase Rules.
 
 Esta base prepara participantes individuales por jornada/competencia cuando `competitionScope` es `individual`. En el formulario de crear o editar charreada/jornada, al elegir Charro Completo, Caladero, Coleadero o Pialadero se muestra la seccion `Participantes`, con alta local de nombre, asociacion, categoria, caballo y orden de participacion. El modelo temporal se guarda dentro de la jornada como `individualParticipants` y no crea todavia `charroId`, `horseId` ni `ownerId`; esos campos pertenecen a MASTER-DATA-001.
 
@@ -217,7 +221,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260709-participants-001-individual-scope1
+https://orgullocharro.com/charropro/?v=20260709-competitions-003-scoring-by-competition1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:

@@ -1,6 +1,12 @@
 import { getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260708-recovery-001b-panel-status1";
-import { getTeam, scoreKey, state } from "./state.js?v=20260708-tournament-types-001-pialadero1";
+import {
+  getCharreadaScoringEntries,
+  getCharreadaScoringSuertes,
+  getTeam,
+  scoreKey,
+  state
+} from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
 
 export function calculateAttemptTotal(attempt) {
   if (!attempt) return 0;
@@ -200,11 +206,11 @@ export function buildCharreadaLeaderboard(charreadaId) {
   const charreada = state.charreadas.find((item) => item.id === charreadaId);
   if (!charreada) return [];
 
-  return charreada.teamIds
-    .map((teamId) => ({
-      team: getTeam(teamId),
-      total: getTeamCharreadaTotal(charreada.id, teamId),
-      infr: getTeamInfrTotal(charreada.id, teamId)
+  return getCharreadaScoringEntries(charreada)
+    .map((entry) => ({
+      team: entry,
+      total: getTeamCharreadaTotal(charreada.id, entry.id),
+      infr: getTeamInfrTotal(charreada.id, entry.id)
     }))
     .filter((item) => item.team)
     .sort((a, b) => b.total - a.total || a.infr - b.infr || a.team.name.localeCompare(b.team.name));
@@ -329,5 +335,5 @@ function normalizeStandingColumnKey(value, index) {
 
 function getCharreadaSuertes(charreada) {
   const tournament = state.tournaments.find((item) => item.id === charreada?.tournamentId) || null;
-  return getTournamentSuertes(tournament, state.settings.globalRuleOverrides);
+  return getCharreadaScoringSuertes(charreada, tournament, state.settings.globalRuleOverrides);
 }

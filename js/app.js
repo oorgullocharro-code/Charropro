@@ -1,5 +1,5 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260709-participants-001-individual-scope1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260709-competitions-003-scoring-by-competition1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260708-program-003-competition-program1";
 import {
   SCORING_BUTTON_GROUPS,
@@ -16,12 +16,12 @@ import {
 } from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260708-recovery-001b-panel-status1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260708-tournament-types-001-pialadero1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260708-tournament-types-001-pialadero1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260708-tournament-types-001-pialadero1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260709-competitions-003-scoring-by-competition1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260709-competitions-003-scoring-by-competition1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260709-competitions-003-scoring-by-competition1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260708-tournament-types-001-pialadero1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260708-tournament-types-001-pialadero1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260709-competitions-003-scoring-by-competition1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260709-competitions-003-scoring-by-competition1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -33,7 +33,7 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260708-tournament-types-001-pialadero1";
+} from "./core/scoring.js?v=20260709-competitions-003-scoring-by-competition1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -43,7 +43,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260708-tournament-types-001-pialadero1";
+} from "./core/sync.js?v=20260709-competitions-003-scoring-by-competition1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -89,6 +89,8 @@ import {
   recordPublishedScore,
   getActiveCharreada,
   getActiveTournament,
+  getCharreadaScoringEntries,
+  getCharreadaScoringSuertes,
   getCurrentContext,
   getLatestStatHistorySnapshot,
   getTeam,
@@ -108,7 +110,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260708-tournament-types-001-pialadero1";
+} from "./core/state.js?v=20260709-competitions-003-scoring-by-competition1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -471,6 +473,20 @@ function getEntityLabels(tournament = getActiveTournament()) {
     scoreEntityLabel: "Equipo",
     pointsSuffix: "pts equipo",
     deleteDataText: "Esto elimina torneos, equipos, charreadas y calificaciones guardadas en este navegador."
+  };
+}
+
+function getScoringEntityLabels(context = {}) {
+  const labels = getEntityLabels(context.tournament);
+  if (!context.competitionContext?.isIndividualCompetition) return labels;
+  return {
+    ...labels,
+    singular: "participante",
+    plural: "participantes",
+    nameHeader: "Participante",
+    scoreTurnHelp: "Participante en turno y oportunidad actual.",
+    scoreEntityLabel: "Participante",
+    pointsSuffix: "pts participante"
   };
 }
 
@@ -6554,7 +6570,38 @@ function renderScoring({ preserveScroll = false } = {}) {
   else exitSupervisorScoringReviewMode();
 
   ensureScoresForCharreada(charreada.id);
-  const suertes = getActiveTournamentSuertes();
+  const scoringEntries = getCharreadaScoringEntries(charreada);
+  if (!scoringEntries.length) {
+    app.innerHTML = html`
+      <main class="content">
+        <section class="card">
+          <div class="card-body empty">
+            <h2>Sin participantes para calificar</h2>
+            <p>${isIndividualCompetition(charreada)
+              ? "Esta competencia requiere participantes individuales antes de poder calificarse."
+              : "Esta charreada requiere equipos participantes antes de poder calificarse."}</p>
+            <button class="button primary" data-action="go-view" data-view="program" type="button">Volver al programa</button>
+          </div>
+        </section>
+      </main>
+    `;
+    return;
+  }
+  const suertes = getCharreadaScoringSuertes(charreada, tournament);
+  if (!suertes.length) {
+    app.innerHTML = html`
+      <main class="content">
+        <section class="card">
+          <div class="card-body empty">
+            <h2>Sin suertes calificables</h2>
+            <p>Esta competencia no tiene suertes configuradas para el calificador.</p>
+            <button class="button primary" data-action="go-view" data-view="program" type="button">Volver al programa</button>
+          </div>
+        </section>
+      </main>
+    `;
+    return;
+  }
   if (state.scoringSuerteIdx >= suertes.length) state.scoringSuerteIdx = 0;
   const context = getCurrentContext();
   if (!context) {
@@ -6564,8 +6611,8 @@ function renderScoring({ preserveScroll = false } = {}) {
   }
   const charroName = getCharroName(context);
   const leaderboard = buildCharreadaLeaderboard(charreada.id);
-  const labels = getEntityLabels(context.tournament);
-  const showColeadorSelector = context.suerte.type === "coleadero" && !isIndividualTournament(context.tournament);
+  const labels = getScoringEntityLabels(context);
+  const showColeadorSelector = context.suerte.type === "coleadero" && !context.competitionContext?.isIndividualCompetition && !isIndividualTournament(context.tournament);
 
   app.innerHTML = html`
     <div class="scoring-shell cp-scoring-shell scoring-shell-classic ${turnPanelCollapsed ? "turn-panel-collapsed" : ""}">
@@ -6610,6 +6657,7 @@ function renderScoringMainPanel(charreada, context, charroName) {
 }
 
 function renderClassicTurnPanel(charreada, context, labels, showColeadorSelector, leaderboard) {
+  const scoringEntries = getCharreadaScoringEntries(charreada);
   return html`
     <aside class="turn-panel">
       <div class="turn-panel-head">
@@ -6629,13 +6677,12 @@ function renderClassicTurnPanel(charreada, context, labels, showColeadorSelector
       </div>
       <div class="turn-panel-body">
         <div class="turn-list">
-          ${charreada.teamIds
-            .map((teamId, index) => {
-              const team = getTeam(teamId);
+          ${scoringEntries
+            .map((entry, index) => {
               return html`
                 <button class="turn-button ${index === state.scoringTeamIdx ? "active" : ""}" data-action="select-team" data-index="${index}">
-                  <strong>${escapeHTML(team ? getEntryDisplayName(team) : labels.nameHeader)}</strong>
-                  <span>${moneylessNumber(getTeamCharreadaTotal(charreada.id, teamId))} pts</span>
+                  <strong>${escapeHTML(entry ? getEntryDisplayName(entry) : labels.nameHeader)}</strong>
+                  <span>${moneylessNumber(getTeamCharreadaTotal(charreada.id, entry.id))} pts</span>
                 </button>
               `;
             })
@@ -6760,7 +6807,7 @@ function renderAttemptMainPanel(context) {
 function renderColeaderoMainPanel(context) {
   const coleadorName = getCharroName(context);
   const collection = getScoreCollectionForContext(context);
-  const coleadorCount = context.tournament?.type === "coleadero"
+  const coleadorCount = context.tournament?.type === "coleadero" || context.competitionContext?.isIndividualCompetition
     ? 1
     : Math.max(3, Array.isArray(collection) ? collection.length : 0);
   const activeAttempts = getAttemptsForContext(context);
@@ -7062,6 +7109,7 @@ function renderContextCard(icon, label, value, subvalue = "", highlight = false)
 }
 
 function renderScoringTurnSelector(charreada, context, labels, showColeadorSelector) {
+  const scoringEntries = getCharreadaScoringEntries(charreada);
   return html`
     <section class="cp-turn-selector">
       <div class="cp-turn-selector-head">
@@ -7075,14 +7123,13 @@ function renderScoringTurnSelector(charreada, context, labels, showColeadorSelec
         </div>
       </div>
       <div class="cp-turn-scroll" aria-label="Turnos y puntuaciones">
-        ${charreada.teamIds
-          .map((teamId, index) => {
-            const team = getTeam(teamId);
+        ${scoringEntries
+          .map((entry, index) => {
             return html`
               <button class="cp-turn-chip ${index === state.scoringTeamIdx ? "active" : ""}" data-action="select-team" data-index="${index}">
                 <span>${index + 1}</span>
-                <strong>${escapeHTML(team ? getEntryDisplayName(team) : labels.nameHeader)}</strong>
-                <em>${moneylessNumber(getTeamCharreadaTotal(charreada.id, teamId))} pts</em>
+                <strong>${escapeHTML(entry ? getEntryDisplayName(entry) : labels.nameHeader)}</strong>
+                <em>${moneylessNumber(getTeamCharreadaTotal(charreada.id, entry.id))} pts</em>
               </button>
             `;
           })
@@ -7430,7 +7477,8 @@ function renderCpIcon(name) {
 function renderScoringHeader(charreada, context, charroName) {
   const attemptTotal = calculateAttemptTotal(context.attempt);
   const teamTotal = getTeamCharreadaTotal(charreada.id, context.team.id);
-  const labels = getEntityLabels(context.tournament);
+  const labels = getScoringEntityLabels(context);
+  const scoringEntries = getCharreadaScoringEntries(charreada);
 
   return html`
     <header class="scoring-header">
@@ -7466,14 +7514,13 @@ function renderScoringHeader(charreada, context, charroName) {
           </div>
         </div>
         <div class="header-turn-strip" aria-label="Turnos y puntuaciones">
-          ${charreada.teamIds
-            .map((teamId, index) => {
-              const team = getTeam(teamId);
+          ${scoringEntries
+            .map((entry, index) => {
               return html`
                 <button class="header-turn-chip ${index === state.scoringTeamIdx ? "active" : ""}" data-action="select-team" data-index="${index}">
                   <span>${index + 1}</span>
-	                  <strong>${escapeHTML(team ? getEntryDisplayName(team) : labels.nameHeader)}</strong>
-                  <em>${moneylessNumber(getTeamCharreadaTotal(charreada.id, teamId))} pts</em>
+	                  <strong>${escapeHTML(entry ? getEntryDisplayName(entry) : labels.nameHeader)}</strong>
+                  <em>${moneylessNumber(getTeamCharreadaTotal(charreada.id, entry.id))} pts</em>
                 </button>
               `;
             })
@@ -9982,6 +10029,7 @@ function buildPublishedScoreSnapshot(context) {
     tournament: compactPublishedTournament(context.tournament),
     charreada: compactPublishedCharreada(context.charreada),
     team: compactPublishedTeam(context.team),
+    competition: context.competitionContext || null,
     suerte: compactPublishedSuerte(context.suerte),
     attemptIndex: context.attemptIndex || 0,
     coleadorIndex: context.coleadorIndex || 0,
@@ -10030,6 +10078,10 @@ function compactPublishedCharreada(charreada) {
     date: charreada.date || "",
     startTime: charreada.startTime || "",
     phase: getCharreadaPhase(charreada),
+    competitionType: charreada.competitionType || "",
+    competitionScope: charreada.competitionScope || "",
+    competitionId: charreada.competitionId || charreada.competitionType || "",
+    suerteIds: Array.isArray(charreada.suerteIds) ? charreada.suerteIds : [],
     teamIds: charreada.teamIds || []
   };
 }

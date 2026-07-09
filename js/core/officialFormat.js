@@ -5,8 +5,8 @@ import {
   getTeamCharreadaResta,
   getTeamCharreadaTotal,
   getTeamSuerteTotal
-} from "./scoring.js?v=20260708-tournament-types-001-pialadero1";
-import { getTeam, scoreKey, state } from "./state.js?v=20260708-tournament-types-001-pialadero1";
+} from "./scoring.js?v=20260709-competitions-003-scoring-by-competition1";
+import { getTeam, scoreKey, state } from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
 import { createXlsxBlob } from "./xlsx.js?v=20260708-recovery-001b-panel-status1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";

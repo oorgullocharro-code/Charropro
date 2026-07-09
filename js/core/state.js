@@ -1,4 +1,5 @@
 import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
+import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260709-participants-001-individual-scope1";
 import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
@@ -375,12 +376,43 @@ function normalizeTeam(team = {}) {
   };
 }
 
+function normalizeIndividualParticipant(participant = {}, index = 0) {
+  const id = String(participant.id || uid("participante")).trim();
+  const name = String(participant.name || participant.participantName || participant.nombre || "").trim();
+  const horseName = String(participant.horseName || participant.caballo || participant.horse || "").trim();
+  const order = Math.max(1, Math.round(Number(participant.order || index + 1) || index + 1));
+  return {
+    id,
+    name,
+    association: String(participant.association || participant.asociacion || "").trim(),
+    category: cleanCategory(participant.category || participant.categoria),
+    horseName,
+    order
+  };
+}
+
+function normalizeIndividualParticipants(participants = []) {
+  return (Array.isArray(participants) ? participants : [])
+    .map(normalizeIndividualParticipant)
+    .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
+}
+
 function normalizeCharreada(charreada = {}) {
   const phase = String(charreada.phase || charreada.fase || "").trim();
   if (phase) console.info("[program-fase-001] phase restored", { charreadaId: charreada.id || "", phase });
+  const selectedCompetitionType = String(charreada.competitionType || charreada.competitionId || "").trim();
+  const competition = selectedCompetitionType ? getCompetitionType(selectedCompetitionType) : null;
+  const competitionType = selectedCompetitionType || "";
+  const competitionScope = charreada.competitionScope || competition?.scope || "";
+  const competitionId = charreada.competitionId || competitionType;
   return {
     ...charreada,
     phase,
+    competitionType,
+    competitionScope,
+    competitionId,
+    suerteIds: Array.isArray(charreada.suerteIds) ? charreada.suerteIds.map(String).filter(Boolean) : [...(competition?.suerteIds || [])],
+    individualParticipants: normalizeIndividualParticipants(charreada.individualParticipants),
     status: normalizeCharreadaStatus(charreada.status)
   };
 }
@@ -716,15 +748,126 @@ export function getTournamentCharreadas(tournamentId = state.activeTournamentId)
   return state.charreadas.filter((charreada) => charreada.tournamentId === tournamentId);
 }
 
+function expandScoringSuerteIds(suerteIds = []) {
+  const expanded = [];
+  (Array.isArray(suerteIds) ? suerteIds : []).forEach((suerteId) => {
+    const clean = String(suerteId || "").trim();
+    if (!clean) return;
+    if (clean === "terna") {
+      expanded.push("lazo", "pial_ruedo");
+      return;
+    }
+    expanded.push(clean);
+  });
+  return Array.from(new Set(expanded));
+}
+
+export function getCharreadaCompetitionContext(charreada = getActiveCharreada(), tournament = getActiveTournament()) {
+  const legacyCompetitionType = getCompetitionTypeFromTournamentType(tournament?.type);
+  const selectedType = charreada?.competitionType || charreada?.competitionId || legacyCompetitionType;
+  const competition = getCompetitionType(selectedType);
+  const competitionType = charreada?.competitionType || competition.type;
+  const competitionScope = charreada?.competitionScope || competition.scope;
+  const competitionId = charreada?.competitionId || competitionType;
+  const rawSuerteIds = Array.isArray(charreada?.suerteIds) && charreada.suerteIds.length
+    ? charreada.suerteIds
+    : competition.suerteIds;
+  const suerteIds = expandScoringSuerteIds(rawSuerteIds);
+  const context = {
+    competitionType,
+    competitionScope,
+    competitionId,
+    suerteIds,
+    isIndividualCompetition: competitionScope === "individual",
+    isTeamCompetition: competitionScope === "team"
+  };
+  return context;
+}
+
+export function getCharreadaScoringSuertes(charreada = getActiveCharreada(), tournament = getActiveTournament(), ruleOverrides = state.settings?.globalRuleOverrides) {
+  const competitionContext = getCharreadaCompetitionContext(charreada, tournament);
+  const baseTournament = tournament || getActiveTournament();
+  if (!competitionContext.suerteIds.length) return [];
+  const fullSuertes = getTournamentSuertes({ ...(baseTournament || {}), type: "completo" }, ruleOverrides);
+  const suertesById = new Map(fullSuertes.map((suerte) => [suerte.id, suerte]));
+  const suertes = competitionContext.suerteIds.map((suerteId) => suertesById.get(suerteId)).filter(Boolean);
+  if (suertes.length) return suertes;
+  return getTournamentSuertes(baseTournament, ruleOverrides);
+}
+
+function buildIndividualParticipantEntry(participant = {}, index = 0, charreada = {}) {
+  const normalized = normalizeIndividualParticipant(participant, index);
+  const participantName = normalized.name || `Participante ${index + 1}`;
+  const displayName = [participantName, normalized.horseName].filter(Boolean).join(" / ");
+  const roster = createRoster("");
+  Object.keys(roster).forEach((key) => {
+    if (Array.isArray(roster[key])) return;
+    roster[key] = participantName;
+  });
+  roster.colas = [participantName, "", ""];
+  roster.terna = [participantName, participantName, participantName];
+  return {
+    id: normalized.id,
+    name: displayName || participantName,
+    participantName,
+    horseName: normalized.horseName,
+    association: normalized.association,
+    category: normalized.category,
+    roster,
+    tournamentId: charreada.tournamentId || state.activeTournamentId || "",
+    source: "individualParticipants",
+    competitionParticipant: true,
+    isIndividualParticipant: true,
+    order: normalized.order
+  };
+}
+
+export function getCharreadaScoringEntries(charreada = getActiveCharreada()) {
+  if (!charreada) return [];
+  const tournament = state.tournaments.find((item) => item.id === charreada.tournamentId) || getActiveTournament();
+  const competitionContext = getCharreadaCompetitionContext(charreada, tournament);
+  if (competitionContext.isIndividualCompetition) {
+    const participants = normalizeIndividualParticipants(charreada.individualParticipants);
+    if (participants.length) {
+      return participants.map((participant, index) =>
+        buildIndividualParticipantEntry(participant, index, charreada)
+      );
+    }
+    if (["caladero", "coleadero", "pialadero"].includes(tournament?.type) && Array.isArray(charreada.teamIds) && charreada.teamIds.length) {
+      return charreada.teamIds
+        .map((teamId, index) => {
+          const team = getTeam(teamId);
+          return team ? {
+            ...team,
+            source: "legacyTeamParticipants",
+            competitionParticipant: true,
+            isIndividualParticipant: true,
+            order: index + 1
+          } : null;
+        })
+        .filter(Boolean);
+    }
+    return [];
+  }
+  return (charreada.teamIds || [])
+    .map((teamId, index) => getTeam(teamId) || {
+      id: teamId,
+      name: `Equipo ${index + 1}`,
+      tournamentId: charreada.tournamentId || state.activeTournamentId || ""
+    })
+    .filter((entry) => entry?.id);
+}
+
 export function ensureScoresForCharreada(charreadaId) {
   const charreada = state.charreadas.find((item) => item.id === charreadaId);
   if (!charreada) return;
   const tournament = state.tournaments.find((item) => item.id === charreada.tournamentId) || null;
-  const suertes = getTournamentSuertes(tournament, state.settings.globalRuleOverrides);
+  const suertes = getCharreadaScoringSuertes(charreada, tournament, state.settings.globalRuleOverrides);
+  const scoringEntries = getCharreadaScoringEntries(charreada);
 
-  charreada.teamIds.forEach((teamId) => {
+  scoringEntries.forEach((entry) => {
     suertes.forEach((suerte) => {
-      const key = scoreKey(charreadaId, teamId, suerte.id);
+      const key = scoreKey(charreadaId, entry.id, suerte.id);
       if (state.scores[key]) return;
       state.scores[key] = createScoreCollection(suerte);
     });
@@ -752,17 +895,20 @@ export function getCurrentAttempt() {
   if (!charreada) return null;
 
   const tournament = state.tournaments.find((item) => item.id === charreada.tournamentId) || null;
-  const suertes = getTournamentSuertes(tournament, state.settings.globalRuleOverrides);
+  const suertes = getCharreadaScoringSuertes(charreada, tournament, state.settings.globalRuleOverrides);
+  const scoringEntries = getCharreadaScoringEntries(charreada);
   if (state.scoringSuerteIdx >= suertes.length) state.scoringSuerteIdx = 0;
-  const teamId = charreada.teamIds[state.scoringTeamIdx];
+  if (state.scoringTeamIdx >= scoringEntries.length) state.scoringTeamIdx = 0;
+  const entry = scoringEntries[state.scoringTeamIdx];
   const suerte = suertes[state.scoringSuerteIdx];
-  if (!suerte) return null;
-  const key = scoreKey(charreada.id, teamId, suerte.id);
+  if (!suerte || !entry) return null;
+  const key = scoreKey(charreada.id, entry.id, suerte.id);
   const collection = state.scores[key] || createScoreCollection(suerte);
   state.scores[key] = collection;
 
   if (suerte.type === "coleadero") {
-    if (tournament?.type === "coleadero") state.scoringColeadorIdx = 0;
+    const competitionContext = getCharreadaCompetitionContext(charreada, tournament);
+    if (tournament?.type === "coleadero" || competitionContext.isIndividualCompetition) state.scoringColeadorIdx = 0;
     return collection[state.scoringColeadorIdx][state.scoringAttemptIdx];
   }
 
@@ -774,12 +920,15 @@ export function getCurrentContext() {
   const tournament = getActiveTournament();
   if (!charreada) return null;
 
-  const suertes = getTournamentSuertes(tournament, state.settings.globalRuleOverrides);
+  const competitionContext = getCharreadaCompetitionContext(charreada, tournament);
+  const suertes = getCharreadaScoringSuertes(charreada, tournament, state.settings.globalRuleOverrides);
+  const scoringEntries = getCharreadaScoringEntries(charreada);
   if (state.scoringSuerteIdx >= suertes.length) state.scoringSuerteIdx = 0;
+  if (state.scoringTeamIdx >= scoringEntries.length) state.scoringTeamIdx = 0;
   const suerte = suertes[state.scoringSuerteIdx];
   if (!suerte) return null;
-  const teamId = charreada.teamIds[state.scoringTeamIdx];
-  const team = getTeam(teamId);
+  const team = scoringEntries[state.scoringTeamIdx] || null;
+  if (!team) return null;
   const attempt = getCurrentAttempt();
 
   return {
@@ -788,6 +937,8 @@ export function getCurrentContext() {
     suerte,
     team,
     attempt,
+    competitionContext,
+    participant: competitionContext.isIndividualCompetition ? team : null,
     teamIndex: state.scoringTeamIdx,
     attemptIndex: state.scoringAttemptIdx,
     coleadorIndex: state.scoringColeadorIdx
