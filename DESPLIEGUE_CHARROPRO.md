@@ -1,12 +1,16 @@
 # Despliegue CharroPro
 
-## Version PROGRAM-003
+## Version PARTICIPANTS-001
 
 Version actual de cache:
 
 ```text
-v=20260708-program-003-competition-program1
+v=20260709-participants-001-individual-scope1
 ```
+
+Esta base prepara participantes individuales por jornada/competencia cuando `competitionScope` es `individual`. En el formulario de crear o editar charreada/jornada, al elegir Charro Completo, Caladero, Coleadero o Pialadero se muestra la seccion `Participantes`, con alta local de nombre, asociacion, categoria, caballo y orden de participacion. El modelo temporal se guarda dentro de la jornada como `individualParticipants` y no crea todavia `charroId`, `horseId` ni `ownerId`; esos campos pertenecen a MASTER-DATA-001.
+
+Las competencias por equipos conservan el comportamiento actual con `teamIds`. Las competencias individuales usan `individualParticipants` y no convierten automaticamente equipos en participantes. Si una competencia individual queda sin participantes, la interfaz muestra la advertencia `Esta competencia requiere participantes individuales antes de poder calificarse`, pero no bloquea el guardado. COMPETITIONS-003 debera leer `individualParticipants` para construir el flujo del juez sin modificar reglas deportivas ni calculos oficiales.
 
 Esta base actualiza el modulo Programa para presentar visualmente `Programa de Competencias`. Al crear o editar una charreada/jornada se puede elegir `Tipo de competencia` desde el catalogo interno: Competencia por equipos, Charro Completo, Caladero, Coleadero, Pialadero o Exhibicion. El guardado agrega `competitionType`, `competitionScope`, `competitionId` y `suerteIds` a la charreada, con compatibilidad por defecto a `Competencia por equipos` cuando no exista seleccion previa. No conecta todavia estos campos al calificador, resultados, pagina publica, OBS, graficos, ranking, estadisticas, Recovery, Event Engine ni Firebase Rules.
 
@@ -213,7 +217,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260708-program-003-competition-program1
+https://orgullocharro.com/charropro/?v=20260709-participants-001-individual-scope1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
