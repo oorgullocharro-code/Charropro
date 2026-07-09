@@ -2,6 +2,7 @@ import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.13
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { get, getDatabase, onValue, push, ref, set, update } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-functions.js";
+import { COMPETITION_TYPES, getCompetitionType } from "../data/competitionTypes.js?v=20260709-public-core-004-competition-snapshot1";
 import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260708-recovery-001b-panel-status1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 
@@ -40,6 +41,17 @@ const PUBLIC_SUERTES = [
   { key: "PM", aliases: ["pm", "paso", "pasoMuerte", "pasoDeLaMuerte"], label: "Paso de la Muerte" }
 ];
 const PUBLIC_SCORESHEET_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
+const PUBLIC_SUERTE_ID_COLUMNS = Object.freeze({
+  cala: ["CC"],
+  piales: ["P"],
+  colas: ["C"],
+  toro: ["JT"],
+  terna: ["LC", "PR"],
+  yegua: ["JY"],
+  manganas_pie: ["MP"],
+  manganas_caballo: ["MC"],
+  paso: ["PM"]
+});
 
 let appInstance = null;
 let databaseInstance = null;
@@ -749,33 +761,34 @@ export function buildPublicTournamentSnapshot(tournamentState = {}) {
   console.info("[public-core] snapshot build");
   const source = normalizePublicTournamentState(tournamentState);
   const info = buildPublicInfo(source);
-  let teams = normalizePublicTeams(source);
+  const teams = normalizePublicTeams(source);
   const charreadas = normalizePublicCharreadas(source, teams);
+  const competitions = buildPublicCompetitionsList(charreadas);
   const activeCharreadaId = resolvePublicActiveCharreadaId(source);
   const activeCharreadaSource = activeCharreadaId
     ? charreadas.find((charreada) => charreada.charreadaId === activeCharreadaId) || null
     : null;
   const normalizedScores = normalizePublicScores(source, teams, charreadas);
-  teams = mergePublicTeamsWithScores(teams, normalizedScores);
-  const publicTeams = buildPublicTeamsList({ teams, normalizedScores });
+  const publicEntries = buildPublicCompetitionEntries({ teams, charreadas, normalizedScores });
+  const publicTeams = buildPublicTeamsList({ teams: publicEntries, normalizedScores });
   const activeCharreada = buildActiveCharreadaPublic({
     charreada: activeCharreadaSource,
     source,
     normalizedScores
   });
   const currentScoreboard = buildCurrentScoreboardPublic({
-    teams,
+    teams: publicEntries,
     charreadas,
     activeCharreadaId,
     normalizedScores
   });
   const generalRanking = buildGeneralRankingPublic({
-    teams,
+    teams: publicEntries,
     charreadas,
     normalizedScores
   });
   const scoresheet = buildScoreSheetPublic({
-    teams,
+    teams: publicEntries,
     normalizedScores,
     generalRanking
   });
@@ -784,6 +797,8 @@ export function buildPublicTournamentSnapshot(tournamentState = {}) {
   const lastScores = buildLastScoresPublic({ normalizedScores });
   const stats = {
     teams: teams.length,
+    publicEntries: publicEntries.length,
+    competitions: competitions.length,
     charreadas: charreadas.length,
     scores: countStoredRecords(source.scores),
     publishedScores: countStoredRecords(source.publishedScores),
@@ -794,7 +809,7 @@ export function buildPublicTournamentSnapshot(tournamentState = {}) {
   logPublicCore003Diagnostics({
     activeCharreadaId,
     activeCharreada: activeCharreadaSource,
-    teams,
+    teams: publicEntries,
     normalizedScores,
     currentScoreboard,
     generalRanking,
@@ -809,11 +824,12 @@ export function buildPublicTournamentSnapshot(tournamentState = {}) {
     currentScoreboard,
     generalRanking,
     scoresheet,
-    scoresheetColumns: PUBLIC_SCORESHEET_COLUMNS,
+    scoresheetColumns: buildPublicScoreSheetColumnsByCompetition(competitions),
     leaders,
     schedule,
     lastScores,
     teams: publicTeams,
+    competitions,
     stats,
     generatedAt: new Date().toISOString(),
     generatedAtMs: Date.now(),
@@ -978,6 +994,7 @@ function normalizePublicCharreadas(tournamentState = {}, teams = []) {
   const teamsById = new Map(teams.map((team) => [team.teamId, team]));
   return publicEntries(tournamentState.charreadas).map(([mapKey, charreada], index) => {
     const row = charreada && typeof charreada === "object" ? charreada : { name: charreada };
+    const competition = resolvePublicCompetitionContext(row);
     const teamIds = extractPublicTeamIds(row.teamIds || row.equipoIds || row.teams || row.equipos || row.scoreboardTeams);
     const equipos = teamIds.map((teamId) => {
       const team = teamsById.get(teamId);
@@ -987,6 +1004,9 @@ function normalizePublicCharreadas(tournamentState = {}, teams = []) {
         name: team?.teamName || team?.name || teamId
       };
     });
+    const individualParticipants = normalizePublicIndividualParticipants(
+      row.individualParticipants || row.participants || row.participantes
+    );
     return {
       charreadaId: publicReadString(row.id, row.charreadaId, row._id, row.key, mapKey, `charreada_${index + 1}`),
       nombre: publicReadString(row.name, row.nombre, row.displayName, row.title, row.label, `Charreada ${index + 1}`),
@@ -996,30 +1016,246 @@ function normalizePublicCharreadas(tournamentState = {}, teams = []) {
       status: publicReadString(row.status, row.estado),
       teamIds,
       equipos,
+      individualParticipants,
+      competitionType: competition.competitionType,
+      competitionScope: competition.competitionScope,
+      competitionId: competition.competitionId,
+      category: publicReadString(row.category, row.categoria),
+      suerteIds: competition.suerteIds,
+      participantScope: competition.competitionScope === "individual" ? "individual" : "team",
+      participantsCount: competition.competitionScope === "individual" ? individualParticipants.length : 0,
+      teamsCount: competition.competitionScope === "team" ? equipos.length : 0,
       order: publicReadNumber(row.charreadaOrder, row.order, row.orden, index + 1)
     };
   });
 }
 
-function normalizePublicScores(tournamentState = {}, teams = []) {
+function resolvePublicCompetitionContext(row = {}) {
+  const rawType = publicReadString(row.competitionType, row.competitionId) || "equipos_completo";
+  const config = getCompetitionType(rawType);
+  const competitionType = config.type || "equipos_completo";
+  const competitionScope = publicReadString(row.competitionScope, config.scope, "team");
+  const competitionId = publicReadString(row.competitionId, competitionType);
+  const suerteIds = normalizePublicSuerteIds(row.suerteIds, config.suerteIds);
+  return {
+    competitionType,
+    competitionScope,
+    competitionId,
+    suerteIds
+  };
+}
+
+function normalizePublicSuerteIds(value, fallback = []) {
+  const source = Array.isArray(value) ? value : fallback;
+  return source.map((item) => String(item || "").trim()).filter(Boolean);
+}
+
+function normalizePublicIndividualParticipants(value) {
+  return publicEntries(value).map(([mapKey, participant], index) => {
+    const row = participant && typeof participant === "object" ? participant : { name: participant };
+    const participantId = publicReadString(row.id, row.participantId, row.charroId, row._id, row.key, mapKey, `participant_${index + 1}`);
+    const participantName = publicReadString(row.name, row.nombre, row.participantName, row.charroName, row.charro, participantId, `Participante ${index + 1}`);
+    return {
+      participantId,
+      participantName,
+      name: participantName,
+      association: publicReadString(row.association, row.asociacion),
+      category: publicReadString(row.category, row.categoria),
+      horseName: publicReadString(row.horseName, row.caballo, row.horse?.name),
+      order: publicReadNumber(row.order, row.orden, index + 1)
+    };
+  }).sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+}
+
+function buildPublicCompetitionsList(charreadas = []) {
+  const records = new Map();
+  charreadas.forEach((charreada) => {
+    const competitionType = charreada.competitionType || "equipos_completo";
+    const config = getCompetitionType(competitionType);
+    const competitionId = charreada.competitionId || competitionType;
+    if (!records.has(competitionId)) {
+      records.set(competitionId, {
+        competitionId,
+        competitionType,
+        competitionScope: charreada.competitionScope || config.scope,
+        label: config.label,
+        category: charreada.category || "",
+        suerteIds: normalizePublicSuerteIds(charreada.suerteIds, config.suerteIds),
+        charreadasCount: 0
+      });
+    }
+    const record = records.get(competitionId);
+    record.charreadasCount += 1;
+  });
+  const order = new Map(COMPETITION_TYPES.map((competition, index) => [competition.type, index]));
+  return [...records.values()].sort((left, right) =>
+    (order.get(left.competitionType) ?? 99) - (order.get(right.competitionType) ?? 99) ||
+    String(left.label || "").localeCompare(String(right.label || ""), "es")
+  );
+}
+
+function buildPublicScoreSheetColumnsByCompetition(competitions = []) {
+  if (!competitions.length) return { equipos_completo: PUBLIC_SCORESHEET_COLUMNS };
+  return Object.fromEntries(competitions.map((competition) => [
+    competition.competitionId || competition.competitionType,
+    publicSuerteIdsToColumns(competition.suerteIds)
+  ]));
+}
+
+function publicSuerteIdsToColumns(suerteIds = []) {
+  const columns = [];
+  suerteIds.forEach((suerteId) => {
+    const mappedColumns = PUBLIC_SUERTE_ID_COLUMNS[suerteId] || [normalizeSuerteAbbr(suerteId)];
+    mappedColumns.forEach((column) => {
+      if (column && !columns.includes(column)) columns.push(column);
+    });
+  });
+  if (!columns.includes("TOTAL")) columns.push("TOTAL");
+  return columns.length > 1 ? columns : PUBLIC_SCORESHEET_COLUMNS;
+}
+
+function buildPublicCompetitionEntries({ teams = [], charreadas = [], normalizedScores = [] } = {}) {
   const teamsById = new Map(teams.map((team) => [team.teamId, team]));
+  const entries = new Map();
+  charreadas.forEach((charreada) => {
+    const competition = publicCompetitionFields(charreada);
+    if (competition.competitionScope === "individual") {
+      charreada.individualParticipants.forEach((participant) => {
+        const entry = publicEntryFromParticipant(participant, charreada, competition);
+        if (entry.teamId) entries.set(publicEntryKey(entry), entry);
+      });
+      return;
+    }
+    charreada.teamIds.forEach((teamId, index) => {
+      const team = teamsById.get(teamId) || charreada.equipos[index] || { teamId, teamName: teamId };
+      const entry = publicEntryFromTeam(team, charreada, competition);
+      if (entry.teamId) entries.set(publicEntryKey(entry), entry);
+    });
+  });
+
+  if (!entries.size) {
+    teams.forEach((team) => {
+      const competition = {
+        competitionType: "equipos_completo",
+        competitionScope: "team",
+        competitionId: "equipos_completo",
+        category: team.category || "",
+        participantScope: "team"
+      };
+      const entry = publicEntryFromTeam(team, {}, competition);
+      if (entry.teamId) entries.set(publicEntryKey(entry), entry);
+    });
+  }
+
+  normalizedScores.forEach((score) => {
+    const key = publicEntryKey(score);
+    if (entries.has(key)) return;
+    entries.set(key, publicEntryFromScore(score));
+  });
+
+  return [...entries.values()];
+}
+
+function publicEntryFromTeam(team = {}, charreada = {}, competition = {}) {
+  return cleanUndefined({
+    ...competition,
+    teamId: publicReadString(team.teamId, team.id),
+    teamName: publicReadString(team.teamName, team.name, team.nombre, team.teamId, team.id),
+    name: publicReadString(team.teamName, team.name, team.nombre, team.teamId, team.id),
+    category: publicReadString(charreada.category, team.category, team.categoria, competition.category),
+    abbreviation: publicReadString(team.abbreviation, team.abreviatura),
+    logo: publicReadString(team.logo, team.logoUrl)
+  });
+}
+
+function publicEntryFromParticipant(participant = {}, charreada = {}, competition = {}) {
+  const participantId = publicReadString(participant.participantId, participant.id);
+  const participantName = publicReadString(participant.participantName, participant.name, participantId);
+  return cleanUndefined({
+    ...competition,
+    participantScope: "individual",
+    teamId: participantId,
+    teamName: participantName,
+    name: participantName,
+    participantId,
+    participantName,
+    association: participant.association || "",
+    category: publicReadString(participant.category, charreada.category, competition.category),
+    horseName: participant.horseName || ""
+  });
+}
+
+function publicEntryFromScore(score = {}) {
+  return cleanUndefined({
+    competitionType: score.competitionType || "equipos_completo",
+    competitionScope: score.competitionScope || "team",
+    competitionId: score.competitionId || score.competitionType || "equipos_completo",
+    category: score.category || "",
+    participantScope: score.participantScope || "team",
+    teamId: score.teamId,
+    teamName: score.teamName,
+    name: score.teamName,
+    participantId: score.participantId || "",
+    participantName: score.participantName || "",
+    association: score.association || "",
+    horseName: score.horseName || ""
+  });
+}
+
+function publicEntryKey(entry = {}) {
+  return `${entry.competitionId || entry.competitionType || "equipos_completo"}__${entry.teamId || entry.participantId || ""}`;
+}
+
+function getPublicCharreadaEntries(charreada = {}) {
+  const competition = publicCompetitionFields(charreada);
+  if (competition.competitionScope === "individual") {
+    return (charreada.individualParticipants || []).map((participant) => publicEntryFromParticipant(participant, charreada, competition));
+  }
+  return (charreada.equipos || []).map((team) => publicEntryFromTeam(team, charreada, competition));
+}
+
+function publicScoreMatchesEntry(score = {}, entry = {}) {
+  const scoreCompetitionId = score.competitionId || score.competitionType || "equipos_completo";
+  const entryCompetitionId = entry.competitionId || entry.competitionType || "equipos_completo";
+  const scoreEntryId = score.teamId || score.participantId || "";
+  const entryId = entry.teamId || entry.participantId || "";
+  return scoreCompetitionId === entryCompetitionId && scoreEntryId === entryId;
+}
+
+function publicCompetitionFields(source = {}) {
+  const config = getCompetitionType(source.competitionType || source.competitionId || "equipos_completo");
+  const competitionType = source.competitionType || config.type;
+  const competitionScope = source.competitionScope || config.scope;
+  return {
+    competitionType,
+    competitionScope,
+    competitionId: source.competitionId || competitionType,
+    category: source.category || "",
+    participantScope: competitionScope === "individual" ? "individual" : "team"
+  };
+}
+
+function normalizePublicScores(tournamentState = {}, teams = [], charreadas = []) {
+  const teamsById = new Map(teams.map((team) => [team.teamId, team]));
+  const charreadasById = new Map(charreadas.map((charreada) => [charreada.charreadaId, charreada]));
   const publishedScores = publicEntries(tournamentState.publishedScores)
     .filter(([, score]) => score && typeof score === "object" && !score.superseded)
     .map(([mapKey, score], index) => normalizePublicScoreRecord(score, {
       mapKey,
       index,
       teamsById,
+      charreadasById,
       source: "publishedScores"
     }))
     .filter(isPublicScoreUsable);
 
-  const rawScores = publishedScores.length ? [] : normalizePublicRawScores(tournamentState.scores, teamsById);
+  const rawScores = publishedScores.length ? [] : normalizePublicRawScores(tournamentState.scores, teamsById, charreadasById);
   const selected = publishedScores.length ? publishedScores : rawScores;
   return dedupePublicScores(selected)
     .sort((a, b) => publicDateValue(a.updatedAt) - publicDateValue(b.updatedAt) || a._order - b._order);
 }
 
-function normalizePublicRawScores(scores = {}, teamsById = new Map()) {
+function normalizePublicRawScores(scores = {}, teamsById = new Map(), charreadasById = new Map()) {
   return publicEntries(scores).flatMap(([scoreKey, payload], scoreIndex) => {
     const compound = parsePublicCompoundScoreId(scoreKey);
     if (!compound.charreadaId || !compound.teamId || !compound.suerteRaw) {
@@ -1027,6 +1263,7 @@ function normalizePublicRawScores(scores = {}, teamsById = new Map()) {
         mapKey: scoreKey,
         index: scoreIndex,
         teamsById,
+        charreadasById,
         source: "scores",
         compound
       })].filter(isPublicScoreUsable);
@@ -1045,6 +1282,7 @@ function normalizePublicRawScores(scores = {}, teamsById = new Map()) {
       mapKey: scoreKey,
       index: scoreIndex + attemptIndex,
       teamsById,
+      charreadasById,
       source: "scores",
       compound
     })).filter(isPublicScoreUsable);
@@ -1088,18 +1326,31 @@ function normalizePublicScoreRecord(score = {}, context = {}) {
     score.breakdown?.final,
     score.totalPoints
   );
+  const charreadaId = publicReadString(
+    charreadaObject.id,
+    score.charreadaId,
+    typeof score.charreada === "string" ? score.charreada : "",
+    score.tournament?.charreadaId,
+    compound.charreadaId
+  );
+  const charreada = context.charreadasById?.get(charreadaId) || null;
+  const scoreCompetition = resolvePublicScoreCompetition(score, charreada);
+  const publicEntry = resolvePublicScoreEntry({ score, teamId, team, charreada, scoreCompetition });
 
   return {
     id: publicReadString(score.id, score.attemptKey, context.mapKey, `${compound.charreadaId || ""}__${teamId}__${suerteAbbr}__${attempt}__${opportunity}`),
-    charreadaId: publicReadString(
-      charreadaObject.id,
-      score.charreadaId,
-      typeof score.charreada === "string" ? score.charreada : "",
-      score.tournament?.charreadaId,
-      compound.charreadaId
-    ),
-    teamId,
-    teamName: publicReadString(teamObject.name, teamObject.nombre, score.teamName, score.equipo, team?.teamName, team?.name, teamId),
+    charreadaId,
+    competitionType: scoreCompetition.competitionType,
+    competitionScope: scoreCompetition.competitionScope,
+    competitionId: scoreCompetition.competitionId,
+    category: scoreCompetition.category,
+    participantScope: scoreCompetition.participantScope,
+    participantId: publicEntry.participantId,
+    participantName: publicEntry.participantName,
+    association: publicEntry.association,
+    horseName: publicEntry.horseName,
+    teamId: publicEntry.teamId,
+    teamName: publicEntry.teamName,
     suerteKey: suerteAbbr,
     suerteAbbr,
     total,
@@ -1107,6 +1358,7 @@ function normalizePublicScoreRecord(score = {}, context = {}) {
       charroObject.name,
       typeof score.charro === "string" ? score.charro : "",
       score.charroName,
+      publicEntry.participantName,
       score.participantName,
       score.athleteName,
       score.competidor,
@@ -1123,6 +1375,69 @@ function normalizePublicScoreRecord(score = {}, context = {}) {
     _order: Number(context.index || 0),
     _revision: publicReadNumber(score.revision, 1)
   };
+}
+
+function resolvePublicScoreCompetition(score = {}, charreada = null) {
+  const fromCharreada = charreada ? publicCompetitionFields(charreada) : null;
+  if (fromCharreada) return fromCharreada;
+  const context = resolvePublicCompetitionContext(score);
+  return {
+    competitionType: context.competitionType,
+    competitionScope: context.competitionScope,
+    competitionId: context.competitionId,
+    category: publicReadString(score.category, score.categoria),
+    participantScope: context.competitionScope === "individual" ? "individual" : "team"
+  };
+}
+
+function resolvePublicScoreEntry({ score = {}, teamId = "", team = null, charreada = null, scoreCompetition = {} } = {}) {
+  const teamObject = score.team && typeof score.team === "object" ? score.team : {};
+  const participant = scoreCompetition.competitionScope === "individual"
+    ? findPublicParticipant(charreada, teamId, score)
+    : null;
+
+  if (scoreCompetition.competitionScope === "individual") {
+    const participantId = publicReadString(
+      score.participantId,
+      teamObject.participantId,
+      participant?.participantId,
+      teamId
+    );
+    const participantName = publicReadString(
+      score.participantName,
+      teamObject.participantName,
+      participant?.participantName,
+      score.charroName,
+      typeof score.charro === "string" ? score.charro : "",
+      participantId
+    );
+    return {
+      teamId: participantId,
+      teamName: participantName,
+      participantId,
+      participantName,
+      association: publicReadString(score.association, teamObject.association, participant?.association),
+      horseName: publicReadString(score.horseName, teamObject.horseName, participant?.horseName)
+    };
+  }
+
+  return {
+    teamId,
+    teamName: publicReadString(teamObject.name, teamObject.nombre, score.teamName, score.equipo, team?.teamName, team?.name, teamId),
+    participantId: "",
+    participantName: "",
+    association: "",
+    horseName: ""
+  };
+}
+
+function findPublicParticipant(charreada = null, entryId = "", score = {}) {
+  const candidates = charreada?.individualParticipants || [];
+  const participantId = publicReadString(score.participantId, score.teamId, entryId);
+  const participantName = publicReadString(score.participantName, score.charroName, typeof score.charro === "string" ? score.charro : "");
+  return candidates.find((participant) => participant.participantId === participantId) ||
+    candidates.find((participant) => participant.participantName === participantName) ||
+    null;
 }
 
 function isPublicScoreUsable(score) {
@@ -1155,13 +1470,22 @@ function resolvePublicActiveCharreadaId(source = {}) {
 
 function buildPublicTeamsList({ teams = [], normalizedScores = [] } = {}) {
   return teams.map((team) => {
-    const teamScores = normalizedScores.filter((score) => score.teamId === team.teamId);
+    const teamScores = normalizedScores.filter((score) => publicScoreMatchesEntry(score, team));
     return cleanUndefined({
+      competitionType: team.competitionType || "equipos_completo",
+      competitionScope: team.competitionScope || "team",
+      competitionId: team.competitionId || team.competitionType || "equipos_completo",
+      category: team.category || "",
+      participantScope: team.participantScope || "team",
       teamId: team.teamId,
       name: team.teamName || team.name || team.teamId,
+      teamName: team.teamName || team.name || team.teamId,
+      participantId: team.participantId || "",
+      participantName: team.participantName || "",
+      association: team.association || "",
+      horseName: team.horseName || "",
       abbreviation: team.abbreviation || "",
       logo: team.logo || "",
-      category: team.category || "",
       total: sumPublicScores(teamScores)
     });
   });
@@ -1170,17 +1494,26 @@ function buildPublicTeamsList({ teams = [], normalizedScores = [] } = {}) {
 function buildActiveCharreadaPublic({ charreada, source = {}, normalizedScores = [] } = {}) {
   if (!charreada) return null;
   const meta = source.meta || {};
-  const currentTeam = charreada.equipos[publicReadNumber(meta.scoringTeamIdx, 0)] || null;
-  const currentSuerte = PUBLIC_SUERTES[publicReadNumber(meta.scoringSuerteIdx, 0)] || null;
+  const activeEntries = getPublicCharreadaEntries(charreada);
+  const currentTeam = activeEntries[publicReadNumber(meta.scoringTeamIdx, 0)] || null;
+  const currentSuerte = getPublicCharreadaSuerte(charreada, publicReadNumber(meta.scoringSuerteIdx, 0));
   return {
     id: charreada.charreadaId,
     nombre: charreada.nombre,
     fecha: charreada.fecha,
     hora: charreada.hora,
     phase: charreada.phase || "",
-    equipos: charreada.equipos.map((team) => ({
-      ...team,
-      total: sumPublicScores(normalizedScores.filter((score) => score.charreadaId === charreada.charreadaId && score.teamId === team.teamId))
+    competitionType: charreada.competitionType,
+    competitionScope: charreada.competitionScope,
+    competitionId: charreada.competitionId,
+    category: charreada.category || "",
+    suerteIds: charreada.suerteIds,
+    participantScope: charreada.participantScope,
+    participantsCount: charreada.participantsCount,
+    teamsCount: charreada.teamsCount,
+    equipos: activeEntries.map((entry) => cleanUndefined({
+      ...entry,
+      total: sumPublicScores(normalizedScores.filter((score) => score.charreadaId === charreada.charreadaId && publicScoreMatchesEntry(score, entry)))
     })),
     status: charreada.status,
     currentSuerte: currentSuerte ? { key: currentSuerte.key, nombre: currentSuerte.label } : null,
@@ -1195,19 +1528,31 @@ function buildCurrentScoreboardPublic({ teams = [], charreadas = [], activeCharr
     ? charreadas.find((charreada) => charreada.charreadaId === activeCharreadaId) || null
     : null;
   if (!activeCharreada) return [];
-  const teamsById = new Map(teams.map((team) => [team.teamId, team]));
+  const teamsByKey = new Map(teams.map((team) => [publicEntryKey(team), team]));
   const scoreTeamIds = [...new Set(normalizedScores
     .filter((score) => score.charreadaId === activeCharreada.charreadaId)
     .map((score) => score.teamId)
     .filter(Boolean))];
-  const teamIds = activeCharreada.teamIds.length ? activeCharreada.teamIds : scoreTeamIds;
-  return teamIds.map((teamId, order) => {
-    const team = teamsById.get(teamId) || activeCharreada.equipos.find((item) => item.teamId === teamId) || { teamId, teamName: teamId, name: teamId };
-    const teamScores = normalizedScores.filter((score) => score.charreadaId === activeCharreada.charreadaId && score.teamId === team.teamId);
+  const activeEntries = getPublicCharreadaEntries(activeCharreada);
+  const entries = activeEntries.length
+    ? activeEntries
+    : scoreTeamIds.map((teamId) => publicEntryFromScore({
+      teamId,
+      teamName: teamId,
+      ...publicCompetitionFields(activeCharreada)
+    }));
+  return entries.map((entry, order) => {
+    const team = teamsByKey.get(publicEntryKey(entry)) || entry;
+    const teamScores = normalizedScores.filter((score) => score.charreadaId === activeCharreada.charreadaId && publicScoreMatchesEntry(score, team));
     const lastScore = teamScores.slice().sort((a, b) => publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))[0] || null;
     return {
+      ...publicCompetitionFields(team),
       teamId: team.teamId,
       teamName: team.teamName || team.name,
+      participantId: team.participantId || "",
+      participantName: team.participantName || "",
+      association: team.association || "",
+      horseName: team.horseName || "",
       total: sumPublicScores(teamScores),
       lastSuerte: lastScore?.suerteAbbr || "",
       updatedAt: lastScore?.updatedAt || "",
@@ -1217,8 +1562,17 @@ function buildCurrentScoreboardPublic({ teams = [], charreadas = [], activeCharr
     .sort((a, b) => b.total - a.total || a._order - b._order)
     .map((row, index) => cleanUndefined({
       position: index + 1,
+      competitionType: row.competitionType,
+      competitionScope: row.competitionScope,
+      competitionId: row.competitionId,
+      category: row.category,
+      participantScope: row.participantScope,
       teamId: row.teamId,
       teamName: row.teamName,
+      participantId: row.participantId,
+      participantName: row.participantName,
+      association: row.association,
+      horseName: row.horseName,
       total: row.total,
       lastSuerte: row.lastSuerte,
       updatedAt: row.updatedAt
@@ -1227,12 +1581,17 @@ function buildCurrentScoreboardPublic({ teams = [], charreadas = [], activeCharr
 
 function buildGeneralRankingPublic({ teams = [], normalizedScores = [] } = {}) {
   return teams.map((team, order) => {
-    const teamScores = normalizedScores.filter((score) => score.teamId === team.teamId);
+    const teamScores = normalizedScores.filter((score) => publicScoreMatchesEntry(score, team));
     const charreadasTerminadas = new Set(teamScores.map((score) => score.charreadaId).filter(Boolean)).size;
     const lastScore = teamScores.slice().sort((a, b) => publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))[0] || null;
     return {
       teamId: team.teamId,
       teamName: team.teamName || team.name,
+      participantId: team.participantId || "",
+      participantName: team.participantName || "",
+      association: team.association || "",
+      horseName: team.horseName || "",
+      ...publicCompetitionFields(team),
       total: sumPublicScores(teamScores),
       charreadasTerminadas,
       updatedAt: lastScore?.updatedAt || "",
@@ -1242,8 +1601,17 @@ function buildGeneralRankingPublic({ teams = [], normalizedScores = [] } = {}) {
     .sort((a, b) => b.total - a.total || a._order - b._order)
     .map((row, index) => cleanUndefined({
       position: index + 1,
+      competitionType: row.competitionType,
+      competitionScope: row.competitionScope,
+      competitionId: row.competitionId,
+      category: row.category,
+      participantScope: row.participantScope,
       teamId: row.teamId,
       teamName: row.teamName,
+      participantId: row.participantId,
+      participantName: row.participantName,
+      association: row.association,
+      horseName: row.horseName,
       total: row.total,
       charreadasTerminadas: row.charreadasTerminadas,
       updatedAt: row.updatedAt
@@ -1251,12 +1619,21 @@ function buildGeneralRankingPublic({ teams = [], normalizedScores = [] } = {}) {
 }
 
 function buildScoreSheetPublic({ teams = [], normalizedScores = [], generalRanking = [] } = {}) {
-  const rankByTeam = new Map(generalRanking.map((row) => [row.teamId, row.position]));
+  const rankByTeam = new Map(generalRanking.map((row) => [publicEntryKey(row), row.position]));
   return teams.map((team) => {
     const row = {
-      position: rankByTeam.get(team.teamId) || 0,
+      position: rankByTeam.get(publicEntryKey(team)) || 0,
+      competitionType: team.competitionType || "equipos_completo",
+      competitionScope: team.competitionScope || "team",
+      competitionId: team.competitionId || team.competitionType || "equipos_completo",
+      category: team.category || "",
+      participantScope: team.participantScope || "team",
       teamId: team.teamId,
       teamName: team.teamName || team.name,
+      participantId: team.participantId || "",
+      participantName: team.participantName || "",
+      association: team.association || "",
+      horseName: team.horseName || "",
       CC: null,
       P: null,
       C: null,
@@ -1269,9 +1646,8 @@ function buildScoreSheetPublic({ teams = [], normalizedScores = [], generalRanki
       PM: null,
       TOTAL: null
     };
-    const teamScores = normalizedScores.filter((score) => score.teamId === team.teamId);
+    const teamScores = normalizedScores.filter((score) => publicScoreMatchesEntry(score, team));
     teamScores
-      .filter((score) => score.teamId === team.teamId)
       .forEach((score) => {
         if (row[score.suerteAbbr] === null) row[score.suerteAbbr] = 0;
         row[score.suerteAbbr] += Number(score.total || 0);
@@ -1283,22 +1659,40 @@ function buildScoreSheetPublic({ teams = [], normalizedScores = [], generalRanki
 }
 
 function buildLeadersPublic({ normalizedScores = [] } = {}) {
-  return Object.fromEntries(PUBLIC_SUERTES.map((suerte) => {
-    const leader = normalizedScores
-      .filter((score) => score.suerteAbbr === suerte.key)
-      .sort((a, b) => Number(b.total || 0) - Number(a.total || 0) || publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))[0];
-    return [suerte.key, leader ? {
-      suerte: suerte.key,
-      label: suerte.label,
-      charro: leader.charroName || "Charro no registrado",
-      team: {
-        teamId: leader.teamId,
-        name: leader.teamName
-      },
-      score: Number(leader.total || 0),
-      updatedAt: leader.updatedAt || ""
-    } : null];
-  }));
+  const scoresByCompetition = new Map();
+  normalizedScores.forEach((score) => {
+    const competitionId = score.competitionId || score.competitionType || "equipos_completo";
+    if (!scoresByCompetition.has(competitionId)) scoresByCompetition.set(competitionId, []);
+    scoresByCompetition.get(competitionId).push(score);
+  });
+
+  return Object.fromEntries([...scoresByCompetition.entries()].map(([competitionId, scores]) => [
+    competitionId,
+    Object.fromEntries(PUBLIC_SUERTES.map((suerte) => {
+      const leader = scores
+        .filter((score) => score.suerteAbbr === suerte.key)
+        .sort((a, b) => Number(b.total || 0) - Number(a.total || 0) || publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))[0];
+      return [suerte.key, leader ? cleanUndefined({
+        competitionType: leader.competitionType,
+        competitionScope: leader.competitionScope,
+        competitionId: leader.competitionId,
+        category: leader.category,
+        suerte: suerte.key,
+        label: suerte.label,
+        charro: leader.charroName || leader.participantName || "Charro no registrado",
+        team: {
+          teamId: leader.teamId,
+          name: leader.teamName
+        },
+        participantId: leader.participantId || "",
+        participantName: leader.participantName || "",
+        association: leader.association || "",
+        horseName: leader.horseName || "",
+        score: Number(leader.total || 0),
+        updatedAt: leader.updatedAt || ""
+      }) : null];
+    }))
+  ]));
 }
 
 function buildSchedulePublic({ charreadas = [] } = {}) {
@@ -1314,8 +1708,17 @@ function buildSchedulePublic({ charreadas = [] } = {}) {
         nombre: charreada.nombre,
         fecha: charreada.fecha,
         hora: charreada.hora,
+        competitionType: charreada.competitionType,
+        competitionScope: charreada.competitionScope,
+        competitionId: charreada.competitionId,
+        category: charreada.category || "",
+        participantScope: charreada.participantScope,
+        suerteIds: charreada.suerteIds,
         phase: charreada.phase || null,
         equipos: charreada.equipos,
+        individualParticipants: charreada.individualParticipants,
+        participantsCount: charreada.participantsCount,
+        teamsCount: charreada.teamsCount,
         status: charreada.status
       };
     });
@@ -1325,11 +1728,20 @@ function buildLastScoresPublic({ normalizedScores = [] } = {}) {
   return normalizedScores.slice()
     .sort((a, b) => publicDateValue(b.updatedAt) - publicDateValue(a.updatedAt))
     .slice(0, 30)
-    .map((score) => ({
+    .map((score) => cleanUndefined({
+      competitionType: score.competitionType,
+      competitionScope: score.competitionScope,
+      competitionId: score.competitionId,
+      category: score.category,
+      participantScope: score.participantScope,
       team: {
         teamId: score.teamId,
         name: score.teamName
       },
+      participantId: score.participantId || "",
+      participantName: score.participantName || "",
+      association: score.association || "",
+      horseName: score.horseName || "",
       charro: score.charroName || "Charro no registrado",
       suerte: {
         key: score.suerteAbbr,
@@ -1410,7 +1822,10 @@ function summarizePublicScores(scores = []) {
   return scores.map((score) => ({
     id: score.id,
     charreadaId: score.charreadaId,
+    competitionId: score.competitionId,
+    competitionType: score.competitionType,
     teamId: score.teamId,
+    participantId: score.participantId,
     suerteAbbr: score.suerteAbbr,
     total: score.total,
     attempt: score.attempt,
@@ -1496,6 +1911,16 @@ function normalizePublicSuerteKey(value) {
 
 function getPublicSuerteLabel(key) {
   return PUBLIC_SUERTES.find((suerte) => suerte.key === key)?.label || key || "";
+}
+
+function getPublicCharreadaSuerte(charreada = {}, index = 0) {
+  const suerteIds = Array.isArray(charreada.suerteIds) && charreada.suerteIds.length
+    ? charreada.suerteIds
+    : getCompetitionType(charreada.competitionType || "equipos_completo").suerteIds;
+  const suerteId = suerteIds[Math.max(0, Number(index || 0))] || suerteIds[0] || "";
+  const columns = publicSuerteIdsToColumns([suerteId]).filter((column) => column !== "TOTAL");
+  const key = columns[0] || normalizeSuerteAbbr(suerteId);
+  return key ? { key, nombre: getPublicSuerteLabel(key) } : null;
 }
 
 function comparePublicScoreFreshness(a, b) {

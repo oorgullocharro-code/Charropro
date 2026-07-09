@@ -1,12 +1,14 @@
 # Despliegue CharroPro
 
-## Version PUBLIC-LINKS-001
+## Version PUBLIC-CORE-004
 
 Version actual de cache:
 
 ```text
-v=20260709-public-links-001
+v=20260709-public-core-004-competition-snapshot1
 ```
+
+Esta base agrega metadata de competencias al Snapshot Publico en `charropro/publicTournaments/{tournamentId}`. `schedule`, `activeCharreada`, `currentScoreboard`, `generalRanking`, `scoresheet`, `leaders`, `lastScores`, `teams` y `competitions` publican `competitionType`, `competitionScope`, `competitionId`, `category`, `participantScope` y `suerteIds` cuando aplica. En competencias individuales se agregan `participantId`, `participantName`, `association` y `horseName`; en competencias por equipos se conservan `teamId` y `teamName`. Las charreadas legacy sin metadata caen a `equipos_completo` con scope `team`.
 
 Esta base agrega en `Conexion` una seccion `Pagina publica` con acciones para abrir y copiar el enlace publico del torneo activo. Si las jornadas tienen metadatos de competencia (`competitionType`, `competitionScope`, `competitionId` o `suerteIds`), muestra accesos por competencia hacia `torneo-publico.html?tournamentId={tournamentId}&competition={competitionType}`. Tambien deja preparado el helper/documentacion para rutas futuras `/evento/{slug}` sin implementar rewrites reales del servidor.
 
@@ -229,7 +231,7 @@ firebase deploy --only functions --project charropro-e8a68
 Despues de subir archivos, abre una vez:
 
 ```text
-https://orgullocharro.com/charropro/?v=20260709-public-links-001
+https://orgullocharro.com/charropro/?v=20260709-public-core-004-competition-snapshot1
 ```
 
 Si un dispositivo sigue mostrando datos viejos:
