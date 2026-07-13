@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260713-broadcast-state-001-state-v1";
+export const CHARROPRO_APP_VERSION = "20260713-broadcast-output-001-output-v1";
 
 let versionLogged = false;
 

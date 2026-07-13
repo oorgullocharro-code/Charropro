@@ -1,5 +1,19 @@
 # Despliegue CharroPro
 
+## Version BROADCAST-OUTPUT-001
+
+Version actual de cache:
+
+```text
+v=20260713-broadcast-output-001-output-v1
+```
+
+Esta version agrega Broadcast Output v1 (`1.0.0`) como motor universal y aditivo de salidas para Broadcast Studio. El modulo `js/broadcast/broadcastOutput.js` administra un registro exclusivamente en memoria, tipos y estados de Output, revision optimista, capabilities, heartbeat, deteccion stale, resolucion, orientacion, safe area, layers, Theme y aislamiento por tenant, organizacion, torneo, competencia y sesion.
+
+`buildBroadcastOutputProjection()` consume solamente Broadcast State y Broadcast Data Contract. Genera una proyeccion serializable y segura que separa estrictamente Preview de Program, filtra layers y graficos por Output y sanitiza el contrato segun `public`, `production`, `operational` o `restricted`; una llamada nunca puede elevar la visibilidad maxima configurada. El motor no abre conexiones, no crea adaptadores, no persiste datos y no publica nodos nuevos en Firebase.
+
+La implementacion se documenta en `BROADCAST_OUTPUT_V1.md` y se valida con `tests/broadcast-output.test.mjs`. No modifica Firebase Rules, Core deportivo, reglas o calculos oficiales, calificador, Resultados, Recovery, Event Engine, pagina publica, OBS V1 ni graficos V1. `broadcastContext`, `broadcastContract`, `broadcastState` y el respaldo `pre-broadcast-studio-v1` permanecen intactos.
+
 ## Version BROADCAST-STATE-001
 
 Version actual de cache:

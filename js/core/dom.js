@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260713-broadcast-state-001-state-v1";
+import { logCharroProVersion } from "./version.js?v=20260713-broadcast-output-001-output-v1";
 
 logCharroProVersion("runtime");
 
