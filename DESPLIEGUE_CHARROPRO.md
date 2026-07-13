@@ -1,5 +1,23 @@
 # Despliegue CharroPro
 
+## Version BROADCAST-DATA-001
+
+Version actual de cache:
+
+```text
+v=20260712-broadcast-data-001-contract-v1
+```
+
+Esta base incorpora el Broadcast Data Contract v1 bajo `live/current.broadcastContract`, generado exclusivamente desde el `broadcastContext` actual. El contrato `1.0.0` es independiente de Firebase, HTML y diseño visual; normaliza torneo, organizacion, competencia, jornada, participante/equipo, charro, caballo, suerte, score oficial, detalle tecnico, ranking, cronometro, patrocinadores, branding, produccion, sistema y campos personalizados.
+
+La integracion es aditiva: `broadcastContext`, campos planos legacy y todos los graficos V1 siguen funcionando sin cambios. Las futuras plantillas, componentes y salidas V2 deberan consumir solamente `broadcastContract`. El contrato conserva cero como valor valido, no recalcula puntajes, separa competencias `team` e `individual`, mantiene `scoreDetail` anidado y ofrece filtrado declarativo `public`, `production`, `operational` y `restricted`.
+
+El builder elimina funciones, referencias circulares y claves peligrosas; limita profundidad y arreglos; no muta la fuente; y expone validacion, advertencias, lectura segura por rutas e inventario de campos disponibles. Los aliases temporales se publican solo bajo `legacyAliases` cuando se solicitan. No se modifican reglas deportivas, calculos oficiales, Firebase Rules, calificador, Resultados, pagina publica, Recovery, Event Engine, OBS ni graficos V1.
+
+### Correccion BROADCAST-DATA-001B
+
+Antes de publicar la primera version del contrato se reemplazo el filtrado manual incompleto por una matriz declarativa con precedencia `public < production < operational < restricted`. La vista publica elimina ahora `scoreDetail`, roster interno, IDs operativos, datos privados de organizacion/caballo, produccion, operador, juez y diagnosticos; los custom fields respetan su visibilidad exacta. Esta correccion conserva el mismo contrato `1.0.0` y el mismo cache-buster de BROADCAST-DATA-001 porque forma parte de su cierre previo al primer commit.
+
 ## Version PRODUCTION-COMPETITIONS-001
 
 Version actual de cache:

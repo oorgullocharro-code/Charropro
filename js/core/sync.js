@@ -1,11 +1,13 @@
 import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260712-broadcast-data-001-contract-v1";
 import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import { buildOfficialPackage } from "./officialFormat.js?v=20260709-competitions-003-scoring-by-competition1";
 import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260709-competitions-003-scoring-by-competition1";
 import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260712-production-competitions-001-broadcast-context1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260712-broadcast-data-001-contract-v1";
 import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260712-broadcast-data-001-contract-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -33,6 +35,12 @@ export function buildLivePayload(options = {}) {
     published,
     timer
   });
+  const broadcastContract = buildBroadcastDataContract(broadcastContext, {
+    visibility: "production",
+    outputType: "program",
+    includeLegacyAliases: true,
+    appVersion: CHARROPRO_APP_VERSION
+  });
   const tournamentColumns = tournament ? buildTournamentStandingColumns(tournament.id) : [];
   const individualTournament = isIndividualTournament(tournament);
   const teamStandings = tournament
@@ -58,6 +66,7 @@ export function buildLivePayload(options = {}) {
     charreada: charreada || null,
     ...buildBroadcastFlatFields(broadcastContext),
     broadcastContext,
+    broadcastContract,
     turn: context
       ? {
           team: context.team,

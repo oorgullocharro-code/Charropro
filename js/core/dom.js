@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260712-production-competitions-001-broadcast-context1";
+import { logCharroProVersion } from "./version.js?v=20260712-broadcast-data-001-contract-v1";
 
 logCharroProVersion("runtime");
 
