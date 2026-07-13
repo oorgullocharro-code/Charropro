@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260713-broadcast-output-001-output-v1";
+import { logCharroProVersion } from "./version.js?v=20260713-asset-manager-001-assets-v1";
 
 logCharroProVersion("runtime");
 

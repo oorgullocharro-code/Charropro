@@ -1,14 +1,14 @@
 import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260713-broadcast-output-001-output-v1";
-import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260713-asset-manager-001-assets-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260713-asset-manager-001-assets-v1";
 import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import { buildOfficialPackage } from "./officialFormat.js?v=20260709-competitions-003-scoring-by-competition1";
 import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260709-competitions-003-scoring-by-competition1";
 import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260713-broadcast-output-001-output-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260713-asset-manager-001-assets-v1";
 import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260713-broadcast-output-001-output-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260713-asset-manager-001-assets-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;

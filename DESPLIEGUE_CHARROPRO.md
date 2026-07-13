@@ -1,8 +1,24 @@
 # Despliegue CharroPro
 
-## Version BROADCAST-OUTPUT-001
+## Version ASSET-MANAGER-001
 
 Version actual de cache:
+
+```text
+v=20260713-asset-manager-001-assets-v1
+```
+
+Esta version agrega Broadcast Asset Manager v1 (`1.0.0`) como catalogo universal, puro y exclusivamente en memoria para recursos de Broadcast Studio. `js/broadcast/assetManager.js` modela identidad, version, revision, tipos, estados, visibilidad, scopes, variantes, resolucion determinista, fallback, derechos, ciclo de vida, aislamiento multi-tenant y manifiestos serializables.
+
+No se integra almacenamiento, Firebase, Firebase Storage, uploads, descargas, listeners, rutas nuevas ni recursos legacy. El modulo opera en paralelo y no modifica Broadcast Data Contract, Broadcast State, Broadcast Output, graficos V1 u OBS V1. La referencia tecnica completa esta en `BROADCAST_ASSET_MANAGER_V1.md` y la matriz automatizada en `tests/broadcast-asset-manager.test.mjs`.
+
+### Correccion ASSET-MANAGER-001B
+
+Antes del primer commit se agrego `assetFamilyId` como identidad logica inmutable, conservada entre versiones y publicada en manifiestos. La variante `original` queda protegida contra eliminacion o duplicado. Los manifiestos eliminan por defecto `localDevelopmentRef`, `file://`, `signedUrl` y metadata sensible anidada; el modo local solo se permite de forma explicita para desarrollo no exportable y nunca para un manifest production-ready. La validacion rechaza familias inconsistentes, assets sin familia, originales duplicados y referencias o secretos no autorizados.
+
+## Version BROADCAST-OUTPUT-001
+
+Version de cierre del ticket:
 
 ```text
 v=20260713-broadcast-output-001-output-v1
