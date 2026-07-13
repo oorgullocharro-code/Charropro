@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260713-asset-manager-001-assets-v1";
+export const CHARROPRO_APP_VERSION = "20260713-broadcast-playground-001-visual-test1";
 
 let versionLogged = false;
 

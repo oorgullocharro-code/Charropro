@@ -314,3 +314,28 @@ Si un dispositivo sigue mostrando datos viejos:
 2. Abre `Conexion`.
 3. Presiona `Limpiar cache local`.
 4. Inicia sesion otra vez.
+
+## BROADCAST-PLAYGROUND-001
+
+Versión:
+
+    v=20260713-broadcast-playground-001-visual-test1
+
+Se agregó broadcast-playground.html como banco visual aislado para probar Broadcast Data Contract v1, Broadcast State v1, Broadcast Output v1 y Asset Manager v1 con fixtures locales.
+
+El Playground:
+
+- funciona solo en memoria;
+- mantiene Preview y Program separados;
+- deja Program vacío al recargar;
+- registra cinco outputs de prueba;
+- registra siete assets controlados;
+- permite probar layers, geometría, animaciones, heartbeat, stale y visibilidad;
+- no consulta Firebase, state.js, live/current, gráficos V1 ni OBS V1;
+- no es la consola ni el renderer final de Broadcast Studio.
+
+Para abrirlo:
+
+    https://orgullocharro.com/charropro/broadcast-playground.html?v=20260713-broadcast-playground-001-visual-test1
+
+La especificación operativa está en BROADCAST_PLAYGROUND_V1.md.
