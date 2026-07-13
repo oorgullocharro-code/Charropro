@@ -1,15 +1,17 @@
 import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import { buildOfficialPackage } from "./officialFormat.js?v=20260709-competitions-003-scoring-by-competition1";
 import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260709-competitions-003-scoring-by-competition1";
 import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260712-production-competitions-001-broadcast-context1";
 import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
 const SYNC_OWNER_KEY = "sync_owner_v1";
 const SYNC_CLIENT_ID = getSyncClientId();
+let lastBroadcastLogFingerprint = "";
 
 function isIndividualTournament(tournament = getActiveTournament()) {
   return ["caladero", "coleadero", "pialadero"].includes(tournament?.type);
@@ -21,6 +23,16 @@ export function buildLivePayload(options = {}) {
   const tournament = context?.tournament || getActiveTournament();
   const tournamentPayload = tournament ? { ...tournament, globalRuleOverrides: state.settings.globalRuleOverrides || {} } : null;
   const leaderboard = charreada ? buildCharreadaLeaderboard(charreada.id) : [];
+  const timer = buildTimerPayload();
+  const published = state.lastPublishedScore || null;
+  const broadcastContext = buildBroadcastContext({
+    context,
+    charreada,
+    tournament,
+    leaderboard,
+    published,
+    timer
+  });
   const tournamentColumns = tournament ? buildTournamentStandingColumns(tournament.id) : [];
   const individualTournament = isIndividualTournament(tournament);
   const teamStandings = tournament
@@ -44,9 +56,16 @@ export function buildLivePayload(options = {}) {
     liveChannel: getActiveLiveChannel(tournament),
     tournament: tournamentPayload,
     charreada: charreada || null,
+    ...buildBroadcastFlatFields(broadcastContext),
+    broadcastContext,
     turn: context
       ? {
           team: context.team,
+          participant: broadcastContext.participant,
+          competition: broadcastContext.competition,
+          participantScope: broadcastContext.competition.participantScope,
+          currentTurnId: broadcastContext.production.currentTurnId,
+          currentTurnName: broadcastContext.production.currentTurnName,
           suerte: context.suerte,
           attemptIndex: context.attemptIndex,
           coleadorIndex: context.coleadorIndex,
@@ -54,13 +73,15 @@ export function buildLivePayload(options = {}) {
           charro: getCharroName(context)
         }
       : null,
-    timer: buildTimerPayload(),
+    timer,
     graphicsConfig: normalizeGraphicsConfig(state.settings.graphicsConfig || readLocalGraphicsConfig()),
-	    leaderboard,
-	    coleadero: buildColeaderoGraphicData(charreada, context, options),
-	    teamStandings,
-	    published: state.lastPublishedScore || null
-		  };
+	  leaderboard,
+	  coleadero: buildColeaderoGraphicData(charreada, context, options),
+	  teamStandings,
+	  published
+  };
+
+  logBroadcastContext(broadcastContext);
 
   if (options.includeOfficial === false) return payload;
 
@@ -70,6 +91,275 @@ export function buildLivePayload(options = {}) {
     details: buildDetails(charreada),
     formatoFederacion: buildOfficialPackage(charreada?.id)
   };
+}
+
+export function buildBroadcastContext(source = {}) {
+  const context = source.context || null;
+  const charreada = source.charreada || context?.charreada || null;
+  const tournament = source.tournament || context?.tournament || null;
+  const competitionContext = context?.competitionContext || {};
+  const competitionType = charreada?.competitionType || competitionContext.competitionType || legacyCompetitionTypeFromTournament(tournament);
+  const competitionConfig = getCompetitionType(competitionType);
+  const competitionScope = charreada?.competitionScope || competitionContext.competitionScope || competitionConfig.scope || "team";
+  const competitionId = charreada?.competitionId || competitionContext.competitionId || competitionType;
+  const participantScope = competitionScope === "individual" ? "individual" : "team";
+  const suerteIds = normalizeBroadcastSuerteIds(
+    Array.isArray(charreada?.suerteIds) && charreada.suerteIds.length
+      ? charreada.suerteIds
+      : competitionConfig.suerteIds
+  );
+  const currentEntry = context?.team || null;
+  const participant = buildBroadcastParticipant(currentEntry, context, participantScope);
+  const team = participantScope === "team" ? buildBroadcastTeam(currentEntry) : null;
+  const horseName = participant?.horseName || currentEntry?.horseName || "";
+  const published = publishedBelongsToActiveCharreada(source.published, charreada) ? source.published : null;
+  const score = buildBroadcastScore(published);
+  const scoreDetail = buildBroadcastScoreDetail(published);
+  const currentTurnId = participantScope === "individual" ? participant?.id || "" : team?.id || "";
+  const currentTurnName = participantScope === "individual" ? participant?.name || "" : team?.name || "";
+  const competitionName = charreada?.competitionName || competitionConfig.label || competitionType;
+  const category = charreada?.category || participant?.category || team?.category || tournament?.category || "";
+  const phase = charreada?.phase || charreada?.fase || "";
+
+  return cloneBroadcastValue({
+    tournament: tournament
+      ? {
+          id: tournament.id || "",
+          name: tournament.name || "",
+          type: tournament.type || "",
+          venue: tournament.venue || ""
+        }
+      : null,
+    competition: {
+      type: competitionType,
+      scope: competitionScope,
+      id: competitionId,
+      name: competitionName,
+      category,
+      phase,
+      suerteIds,
+      participantScope
+    },
+    charreada: charreada
+      ? {
+          id: charreada.id || "",
+          name: charreada.name || "",
+          date: charreada.date || "",
+          startTime: charreada.startTime || "",
+          status: charreada.status || ""
+        }
+      : null,
+    participant,
+    team,
+    horse: horseName ? { name: horseName } : null,
+    suerte: context?.suerte
+      ? {
+          id: context.suerte.id || "",
+          name: context.suerte.fullName || context.suerte.name || "",
+          type: context.suerte.type || "",
+          suerteIds
+        }
+      : null,
+    score,
+    scoreDetail,
+    ranking: buildBroadcastRanking(source.leaderboard, participantScope),
+    timer: source.timer || null,
+    production: {
+      liveChannel: getActiveLiveChannel(tournament),
+      currentTurnId,
+      currentTurnName,
+      updatedAt: new Date().toISOString()
+    }
+  });
+}
+
+function buildBroadcastFlatFields(broadcast = {}) {
+  const individual = broadcast.competition?.participantScope === "individual";
+  return {
+    tournamentId: broadcast.tournament?.id || "",
+    tournamentName: broadcast.tournament?.name || "",
+    activeCharreadaId: broadcast.charreada?.id || "",
+    charreadaId: broadcast.charreada?.id || "",
+    charreadaName: broadcast.charreada?.name || "",
+    competitionType: broadcast.competition?.type || "equipos_completo",
+    competitionScope: broadcast.competition?.scope || "team",
+    competitionId: broadcast.competition?.id || "equipos_completo",
+    competitionName: broadcast.competition?.name || "Competencia por equipos",
+    category: broadcast.competition?.category || "",
+    phase: broadcast.competition?.phase || "",
+    participantScope: broadcast.competition?.participantScope || "team",
+    participantId: individual ? broadcast.participant?.id || "" : undefined,
+    participantName: broadcast.participant?.name || "",
+    teamId: individual ? undefined : broadcast.team?.id || "",
+    teamName: individual ? undefined : broadcast.team?.name || "",
+    association: broadcast.participant?.association || broadcast.team?.association || "",
+    horseName: broadcast.horse?.name || "",
+    suerteId: broadcast.suerte?.id || "",
+    suerteName: broadcast.suerte?.name || "",
+    suerteIds: broadcast.competition?.suerteIds || [],
+    currentTurnId: broadcast.production?.currentTurnId || "",
+    currentTurnName: broadcast.production?.currentTurnName || "",
+    scoreId: broadcast.score?.scoreId || "",
+    basePoints: broadcast.score?.basePoints ?? null,
+    additionalPoints: broadcast.score?.additionalPoints ?? null,
+    infractions: broadcast.score?.infractions ?? null,
+    penalties: broadcast.score?.penalties ?? null,
+    totalPoints: broadcast.score?.totalPoints ?? null,
+    time: broadcast.score?.time ?? null,
+    attempts: broadcast.score?.attempts ?? null,
+    scoreStatus: broadcast.score?.status ?? null,
+    scoreTimestamp: broadcast.score?.timestamp ?? null,
+    scoreDetail: broadcast.scoreDetail || null
+  };
+}
+
+function buildBroadcastParticipant(entry, context, participantScope) {
+  if (!entry) return null;
+  const currentCharro = getCharroName(context);
+  const name = participantScope === "individual"
+    ? entry.participantName || entry.name || currentCharro
+    : currentCharro;
+  if (!name && participantScope !== "individual") return null;
+  return {
+    id: participantScope === "individual" ? entry.id || "" : null,
+    name: name || "",
+    association: entry.association || "",
+    category: entry.category || "",
+    horseName: entry.horseName || "",
+    scope: participantScope
+  };
+}
+
+function buildBroadcastTeam(entry) {
+  if (!entry) return null;
+  return {
+    id: entry.id || "",
+    name: entry.name || "",
+    logo: entry.logo || entry.logoUrl || "",
+    association: entry.association || "",
+    category: entry.category || ""
+  };
+}
+
+function buildBroadcastRanking(leaderboard = [], participantScope = "team") {
+  return (Array.isArray(leaderboard) ? leaderboard : []).map((row, index) => {
+    const entry = row?.team || {};
+    const identity = participantScope === "individual"
+      ? {
+          participant: {
+            id: entry.id || "",
+            name: entry.participantName || entry.name || "",
+            association: entry.association || "",
+            category: entry.category || "",
+            horseName: entry.horseName || ""
+          },
+          participantId: entry.id || "",
+          participantName: entry.participantName || entry.name || ""
+        }
+      : {
+          team: buildBroadcastTeam(entry),
+          teamId: entry.id || "",
+          teamName: entry.name || ""
+        };
+    return {
+      position: index + 1,
+      ...identity,
+      total: Number(row?.total || 0),
+      infractions: Number(row?.infr || 0)
+    };
+  });
+}
+
+function buildBroadcastScore(published) {
+  if (!published) return null;
+  const attempt = published.attempt || {};
+  const breakdown = published.breakdown || {};
+  const scoreCompetitionScope = published.competition?.competitionScope || published.competition?.scope || published.charreada?.competitionScope || "team";
+  const individual = scoreCompetitionScope === "individual";
+  return {
+    scoreId: published.id || "",
+    participantScope: individual ? "individual" : "team",
+    participantId: individual ? published.team?.id || "" : undefined,
+    participantName: individual ? published.team?.participantName || published.charro || published.team?.name || "" : undefined,
+    teamId: individual ? undefined : published.team?.id || "",
+    teamName: individual ? undefined : published.team?.name || "",
+    suerteId: published.suerte?.id || "",
+    suerteName: published.suerte?.fullName || published.suerte?.name || "",
+    basePoints: numberOrNull(breakdown.base ?? attempt.base),
+    additionalPoints: numberOrNull(breakdown.adic ?? attempt.adic),
+    infractions: numberOrNull(breakdown.infr ?? attempt.infr),
+    penalties: cloneBroadcastValue(breakdown.teamPenalties ?? attempt.teamPenalties ?? null),
+    totalPoints: numberOrNull(published.total ?? breakdown.total),
+    time: attempt.tiempo || attempt.tiempoTendido || null,
+    attempts: numberOrNull(published.suerte?.attempts),
+    status: published.status || attempt.status || breakdown.status || attempt.desc || null,
+    timestamp: published.publishedAt || published.timestamp || null
+  };
+}
+
+function buildBroadcastScoreDetail(published) {
+  if (!published) return null;
+  const detail = {};
+  if (published.attempt && typeof published.attempt === "object") detail.attempt = cloneBroadcastValue(published.attempt);
+  if (published.breakdown && typeof published.breakdown === "object") detail.breakdown = cloneBroadcastValue(published.breakdown);
+  return Object.keys(detail).length ? detail : null;
+}
+
+function publishedBelongsToActiveCharreada(published, charreada) {
+  if (!published || !charreada?.id) return false;
+  const scoreCharreadaId = published.charreada?.id || published.charreadaId || "";
+  return String(scoreCharreadaId) === String(charreada.id);
+}
+
+function normalizeBroadcastSuerteIds(values = []) {
+  return Array.from(new Set((Array.isArray(values) ? values : []).map((value) => String(value || "").trim()).filter(Boolean)));
+}
+
+function legacyCompetitionTypeFromTournament(tournament) {
+  if (["caladero", "coleadero", "pialadero"].includes(tournament?.type)) return tournament.type;
+  return "equipos_completo";
+}
+
+function numberOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function cloneBroadcastValue(value) {
+  if (value === undefined) return undefined;
+  return JSON.parse(JSON.stringify(value));
+}
+
+function logBroadcastContext(broadcast = {}) {
+  const fingerprint = [
+    broadcast.tournament?.id,
+    broadcast.charreada?.id,
+    broadcast.competition?.id,
+    broadcast.production?.currentTurnId,
+    broadcast.suerte?.id,
+    broadcast.score?.scoreId,
+    broadcast.timer?.revision
+  ].join("|");
+  if (fingerprint === lastBroadcastLogFingerprint) return;
+  lastBroadcastLogFingerprint = fingerprint;
+  console.info("[production-competitions-001] competition context", broadcast.competition);
+  console.info("[production-competitions-001] participant context", {
+    participant: broadcast.participant,
+    team: broadcast.team,
+    horse: broadcast.horse
+  });
+  console.info("[production-competitions-001] active score detail", {
+    score: broadcast.score,
+    hasScoreDetail: Boolean(broadcast.scoreDetail)
+  });
+  console.info("[production-competitions-001] broadcast payload", {
+    tournamentId: broadcast.tournament?.id || "",
+    charreadaId: broadcast.charreada?.id || "",
+    competitionId: broadcast.competition?.id || "",
+    currentTurnId: broadcast.production?.currentTurnId || "",
+    suerteId: broadcast.suerte?.id || ""
+  });
 }
 
 export function getActiveLiveChannel(tournament = getActiveTournament()) {

@@ -1,12 +1,20 @@
 # Despliegue CharroPro
 
-## Version PUBLIC-CORE-004
+## Version PRODUCTION-COMPETITIONS-001
 
 Version actual de cache:
 
 ```text
-v=20260709-public-core-004-competition-snapshot1
+v=20260712-production-competitions-001-broadcast-context1
 ```
+
+Esta base agrega un contrato normalizado de Produccion dentro de `charropro/live/{tournamentId}/current` bajo `broadcastContext`. El contexto resuelve la competencia desde la charreada activa, su metadata, el catalogo de competencias y el fallback legacy por `tournament.type`. Incluye torneo, competencia, jornada, participante o equipo, caballo, suerte, score publicado, detalle tecnico, ranking, cronometro y datos de produccion. Tambien conserva campos planos de compatibilidad para integraciones existentes.
+
+Las competencias individuales publican `participantId`, `participantName`, asociacion, categoria y caballo sin inventar `teamId`; las competencias por equipos conservan `teamId`, `teamName`, logo y marcador por equipos. Charro Completo respeta sus suertes configuradas sin Terna ni Yegua. Cala, Coleadero y Pialadero reutilizan el score real existente, y el detalle tecnico permanece bajo `scoreDetail.attempt` y `scoreDetail.breakdown` sin crear calculos deportivos nuevos.
+
+La consola de Graficos muestra de forma informativa el contexto oficial recibido en tiempo real: competencia, tipo Equipo/Individual, jornada, turno, suerte, categoria y caballo. OBS y los graficos conservan todos los campos legacy; cuando el contexto es individual muestran al participante como unidad principal y el ranking activo usa el ranking de esa competencia. No se agregan automatizaciones, escenas, plantillas ni listeners duplicados.
+
+No se modifican reglas deportivas, calculos oficiales, Firebase Rules, Recovery, Event Engine, Resultados internos, pagina publica, Snapshot Publico, Master Data, roles, permisos ni exportaciones.
 
 Esta base agrega metadata de competencias al Snapshot Publico en `charropro/publicTournaments/{tournamentId}`. `schedule`, `activeCharreada`, `currentScoreboard`, `generalRanking`, `scoresheet`, `leaders`, `lastScores`, `teams` y `competitions` publican `competitionType`, `competitionScope`, `competitionId`, `category`, `participantScope` y `suerteIds` cuando aplica. En competencias individuales se agregan `participantId`, `participantName`, `association` y `horseName`; en competencias por equipos se conservan `teamId` y `teamName`. Las charreadas legacy sin metadata caen a `equipos_completo` con scope `team`.
 

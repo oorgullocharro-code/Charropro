@@ -1,9 +1,9 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260712-production-competitions-001-broadcast-context1";
 import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260708-recovery-001b-panel-status1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260708-recovery-001b-panel-status1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260709-competitions-003-scoring-by-competition1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260712-production-competitions-001-broadcast-context1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260709-competitions-003-scoring-by-competition1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260712-production-competitions-001-broadcast-context1";
 import { getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("graphic-root");
@@ -57,7 +57,7 @@ function render() {
   }
 
 	  if (view === "turn") {
-	    root.innerHTML = renderTurnGraphic(payload.turn);
+	    root.innerHTML = renderTurnGraphic(payload);
 	    return;
 	  }
 
@@ -243,8 +243,9 @@ function renderTimerGraphic(timer) {
   `;
 }
 
-function renderTurnGraphic(turn) {
-  const info = buildTurnInfo(turn);
+function renderTurnGraphic(payload) {
+  const turn = payload?.turn || null;
+  const info = buildTurnInfo(payload);
 
   return html`
     <main class="graphic-stage">
@@ -268,7 +269,8 @@ function renderTurnGraphic(turn) {
   `;
 }
 
-function buildTurnInfo(turn) {
+function buildTurnInfo(payload) {
+  const turn = payload?.turn || null;
   if (!turn) {
     return {
       kicker: "En vivo",
@@ -278,6 +280,8 @@ function buildTurnInfo(turn) {
     };
   }
 
+  const broadcast = payload?.broadcastContext || null;
+  const individual = broadcast?.competition?.participantScope === "individual" || broadcast?.competition?.scope === "individual";
   const charroName = getTurnCharroName(turn) || "Sin registrar";
   const suerteName = turn.suerte?.fullName || turn.suerte?.name || "Suerte";
   const teamName = turn.team?.name || "Equipo en turno";
@@ -286,6 +290,18 @@ function buildTurnInfo(turn) {
   if (isColeaderoTurn(turn)) meta.push(`Coleador ${Number(turn.coleadorIndex || 0) + 1}`);
   meta.push(getTurnAttemptLabel(turn));
   if (turn.attempt?.desc) meta.push("Descalificacion");
+
+  if (individual) {
+    const participant = broadcast.participant || turn.participant || {};
+    const secondary = participant.association || broadcast.competition?.category || broadcast.competition?.name || "Competencia individual";
+    if (participant.horseName || broadcast.horse?.name) meta.push(`Caballo: ${participant.horseName || broadcast.horse.name}`);
+    return {
+      kicker: "Participante en turno",
+      charro: participant.name || charroName,
+      team: secondary,
+      meta
+    };
+  }
 
   return {
     kicker: "Charro en turno",
@@ -365,7 +381,8 @@ function renderRankingGraphic(payload, config) {
 function renderIndividualTurnGraphic(payload, config) {
   const windowRows = buildIndividualTurnWindow(payload);
   const tournamentType = payload.tournament?.type || "";
-  const title = view === "coleadero-turno" || tournamentType === "coleadero" ? "Coleadero" : "Caladero";
+  const title = payload.broadcastContext?.competition?.name ||
+    (view === "coleadero-turno" || tournamentType === "coleadero" ? "Coleadero" : "Caladero");
   const charreadaName = payload.charreada?.name || "Charreada";
   const suerteName = payload.turn?.suerte?.fullName || title;
 
@@ -637,6 +654,26 @@ function getColeaderoData(payload) {
 
 function getTeamStandings(payload) {
   const activeTeamId = payload.turn?.team?.id || "";
+  const broadcast = payload.broadcastContext || null;
+  const individual = broadcast?.competition?.participantScope === "individual" || broadcast?.competition?.scope === "individual";
+  const broadcastRanking = Array.isArray(broadcast?.ranking) ? broadcast.ranking : [];
+  if (individual && broadcastRanking.length) {
+    return {
+      title: `Ranking ${broadcast.competition?.name || "individual"}`,
+      charreadas: [{ id: broadcast.charreada?.id || "actual", name: broadcast.charreada?.name || "Actual" }],
+      rows: broadcastRanking.map((row) => ({
+        team: {
+          id: row.participant?.id || row.participantId || "",
+          name: row.participant?.name || row.participantName || "Participante"
+        },
+        active: Boolean(activeTeamId && (row.participant?.id || row.participantId) === activeTeamId),
+        total: Number(row.total || 0),
+        average: Number(row.total || 0),
+        charreadasCount: 1,
+        infr: Number(row.infractions || 0)
+      }))
+    };
+  }
   const charreadas = Array.isArray(payload.teamStandings?.charreadas) ? payload.teamStandings.charreadas : [];
   const rows = Array.isArray(payload.teamStandings?.rows) ? payload.teamStandings.rows : [];
   const title = payload.teamStandings?.title || "Tabla general por equipos";

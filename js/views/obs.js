@@ -1,9 +1,9 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260712-production-competitions-001-broadcast-context1";
 import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260708-recovery-001b-panel-status1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260708-recovery-001b-panel-status1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260712-production-competitions-001-broadcast-context1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260709-competitions-003-scoring-by-competition1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260709-competitions-003-scoring-by-competition1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260712-production-competitions-001-broadcast-context1";
 import { getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("obs-root");
@@ -57,7 +57,7 @@ function render() {
           <div class="obs-team-stack">
             ${teams.map(renderObsTeamRow).join("")}
           </div>
-          ${renderObsNow(turn)}
+          ${renderObsNow(payload)}
         </div>
       </section>  
     </main>
@@ -213,7 +213,8 @@ function renderObsTeamRow(team) {
   `;
 }
 
-function renderObsNow(turn) {
+function renderObsNow(payload) {
+  const turn = payload?.turn || null;
   if (!turn) {
     return html`
       <div class="obs-now">
@@ -227,7 +228,7 @@ function renderObsNow(turn) {
     `;
   }
 
-  const info = buildObsTurnInfo(turn);
+  const info = buildObsTurnInfo(payload);
 
   return html`
     <div class="obs-now">
@@ -245,7 +246,10 @@ function renderObsNow(turn) {
   `;
 }
 
-function buildObsTurnInfo(turn) {
+function buildObsTurnInfo(payload) {
+  const turn = payload?.turn || null;
+  const broadcast = payload?.broadcastContext || null;
+  const individual = broadcast?.competition?.participantScope === "individual" || broadcast?.competition?.scope === "individual";
   const charroName = getObsTurnCharroName(turn) || "Sin registrar";
   const suerteName = turn.suerte?.fullName || turn.suerte?.name || "Suerte";
   const teamName = turn.team?.name || "Equipo en turno";
@@ -254,6 +258,16 @@ function buildObsTurnInfo(turn) {
   if (isColeaderoTurn(turn)) meta.push(`Coleador ${Number(turn.coleadorIndex || 0) + 1}`);
   meta.push(getTurnAttemptLabel(turn));
   if (turn.attempt?.desc) meta.push("Descalificacion");
+
+  if (individual) {
+    const participant = broadcast.participant || turn.participant || {};
+    if (participant.horseName || broadcast.horse?.name) meta.push(`Caballo: ${participant.horseName || broadcast.horse.name}`);
+    return {
+      charro: participant.name || charroName,
+      team: participant.association || broadcast.competition?.category || broadcast.competition?.name || "Competencia individual",
+      meta
+    };
+  }
 
   return {
     charro: charroName,

@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260708-recovery-001b-panel-status1";
+import { logCharroProVersion } from "./version.js?v=20260712-production-competitions-001-broadcast-context1";
 
 logCharroProVersion("runtime");
 

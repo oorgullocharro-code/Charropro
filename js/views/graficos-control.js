@@ -1,4 +1,4 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260712-production-competitions-001-broadcast-context1";
 import {
   DEFAULT_GRAPHICS_CONFIG,
   applyGraphicsConfig,
@@ -12,13 +12,16 @@ import {
   publishFirebaseGraphicsConfig,
   signInFirebaseUser,
   signOutFirebaseUser,
-  subscribeFirebaseAuthSession
-} from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+  subscribeFirebaseAuthSession,
+  subscribeFirebaseLiveCurrent
+} from "../core/firebaseSync.js?v=20260712-production-competitions-001-broadcast-context1";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260708-recovery-001b-panel-status1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260712-production-competitions-001-broadcast-context1";
 
 const root = document.getElementById("graphics-control-root");
 let liveChannel = "";
+let productionLivePayload = null;
+let productionLiveUnsubscribe = null;
 let accessSession = {
   ready: false,
   user: null,
@@ -28,6 +31,7 @@ let accessSession = {
 
 loadState();
 liveChannel = getLiveChannelFromUrl(state.activeTournamentId || "");
+ensureProductionLiveContext();
 render();
 wireEvents();
 
@@ -55,6 +59,8 @@ function render() {
           <a class="button" href="./index.html">Volver</a>
         </div>
       </header>
+
+      ${renderProductionContext()}
 
       <section class="graphics-control-grid">
         <form id="graphics-form" class="card graphics-form">
@@ -140,6 +146,100 @@ function render() {
       </section>
     </main>
   `;
+}
+
+function ensureProductionLiveContext() {
+  if (!liveChannel || productionLiveUnsubscribe) return;
+  productionLiveUnsubscribe = subscribeFirebaseLiveCurrent(liveChannel, (response) => {
+    productionLivePayload = response?.payload || response || null;
+    render();
+  });
+}
+
+function renderProductionContext() {
+  const context = resolveProductionContext(productionLivePayload);
+  if (!context) {
+    return html`
+      <section class="production-context card waiting">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Contexto de producción</h2>
+            <p class="card-subtitle">${liveChannel ? "Esperando contexto oficial en vivo." : "Abre esta consola con tournamentId para recibir el contexto oficial."}</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  const competitionScope = context.competition?.participantScope || context.competition?.scope || "team";
+  const turnName = competitionScope === "individual"
+    ? context.participant?.name || context.production?.currentTurnName || "—"
+    : context.team?.name || context.production?.currentTurnName || "—";
+  const category = context.competition?.category || context.participant?.category || context.team?.category || "—";
+  return html`
+    <section class="production-context card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Contexto de producción</h2>
+          <p class="card-subtitle">Datos oficiales recibidos en tiempo real desde live/current.</p>
+        </div>
+        <span class="access-badge green">En vivo</span>
+      </div>
+      <div class="production-context-grid">
+        ${renderProductionContextItem("Competencia actual", context.competition?.name || context.competition?.type || "—")}
+        ${renderProductionContextItem("Tipo", competitionScope === "individual" ? "Individual" : "Equipo")}
+        ${renderProductionContextItem("Jornada activa", context.charreada?.name || "—")}
+        ${renderProductionContextItem(competitionScope === "individual" ? "Participante en turno" : "Equipo en turno", turnName)}
+        ${renderProductionContextItem("Suerte activa", context.suerte?.name || "—")}
+        ${renderProductionContextItem("Categoría", category)}
+        ${renderProductionContextItem("Caballo", context.horse?.name || context.participant?.horseName || "—")}
+      </div>
+    </section>
+  `;
+}
+
+function renderProductionContextItem(label, value) {
+  return html`
+    <div class="production-context-item">
+      <span>${escapeHTML(label)}</span>
+      <strong>${escapeHTML(value || "—")}</strong>
+    </div>
+  `;
+}
+
+function resolveProductionContext(payload = null) {
+  if (!payload || typeof payload !== "object") return null;
+  if (payload.broadcastContext) return payload.broadcastContext;
+  if (!payload.competitionType && !payload.charreada && !payload.turn) return null;
+  const individual = (payload.participantScope || payload.competitionScope) === "individual";
+  return {
+    competition: {
+      type: payload.competitionType || "equipos_completo",
+      scope: payload.competitionScope || "team",
+      id: payload.competitionId || payload.competitionType || "equipos_completo",
+      name: payload.competitionName || "Competencia por equipos",
+      category: payload.category || "",
+      phase: payload.phase || "",
+      participantScope: payload.participantScope || payload.competitionScope || "team"
+    },
+    charreada: payload.charreada || { id: payload.charreadaId || "", name: payload.charreadaName || "" },
+    participant: individual
+      ? payload.turn?.participant || {
+          id: payload.participantId || "",
+          name: payload.participantName || payload.currentTurnName || "",
+          association: payload.association || "",
+          category: payload.category || "",
+          horseName: payload.horseName || ""
+        }
+      : null,
+    team: individual ? null : payload.turn?.team || { id: payload.teamId || "", name: payload.teamName || payload.currentTurnName || "" },
+    horse: payload.horseName ? { name: payload.horseName } : null,
+    suerte: payload.turn?.suerte || { id: payload.suerteId || "", name: payload.suerteName || "" },
+    production: {
+      currentTurnId: payload.currentTurnId || "",
+      currentTurnName: payload.currentTurnName || ""
+    }
+  };
 }
 
 function renderPreview(config) {

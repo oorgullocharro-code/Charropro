@@ -2,7 +2,7 @@ import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.13
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import { get, getDatabase, onValue, push, ref, set, update } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-functions.js";
-import { COMPETITION_TYPES, getCompetitionType } from "../data/competitionTypes.js?v=20260709-public-core-004-competition-snapshot1";
+import { COMPETITION_TYPES, getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260708-recovery-001b-panel-status1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 
@@ -501,6 +501,7 @@ export async function publishFirebaseTurn(payload, options = {}) {
       timestamp: payload.timestamp || new Date().toISOString(),
       firebaseUpdatedAt: Date.now(),
       liveChannel,
+      ...compactProductionFields(payload),
       tournament: compactTournament(payload.tournament),
       charreada: compactCharreada(payload.charreada),
       turn: compactTurn(payload.turn),
@@ -2593,6 +2594,7 @@ function compactLivePayload(payload = {}) {
     timestamp: payload.timestamp || new Date().toISOString(),
     firebaseUpdatedAt: Date.now(),
     liveChannel: normalizeLiveChannel(payload.liveChannel || payload.tournament?.liveChannel || payload.tournament?.id),
+    ...compactProductionFields(payload),
     tournament: compactTournament(payload.tournament),
     charreada: compactCharreada(payload.charreada),
     turn: compactTurn(payload.turn),
@@ -2908,6 +2910,12 @@ function compactCharreada(charreada) {
     date: charreada.date || "",
     startTime: charreada.startTime || "",
     phase: publicReadString(charreada.phase, charreada.fase),
+    category: charreada.category || "",
+    competitionType: charreada.competitionType || "",
+    competitionScope: charreada.competitionScope || "",
+    competitionId: charreada.competitionId || charreada.competitionType || "",
+    competitionName: charreada.competitionName || "",
+    suerteIds: Array.isArray(charreada.suerteIds) ? charreada.suerteIds : [],
     status: charreada.status || "",
     teamIds: charreada.teamIds || []
   };
@@ -2918,6 +2926,11 @@ function compactTurn(turn) {
   const suerte = turn.suerte || {};
   return {
     team: compactTeam(turn.team),
+    participant: turn.participant || null,
+    competition: turn.competition || null,
+    participantScope: turn.participantScope || "",
+    currentTurnId: turn.currentTurnId || "",
+    currentTurnName: turn.currentTurnName || "",
     suerte: {
       id: suerte.id || "",
       name: suerte.name || "",
@@ -2939,6 +2952,7 @@ function compactTeam(team) {
     name: team.name || "",
     participantName: team.participantName || "",
     horseName: team.horseName || "",
+    logo: team.logo || team.logoUrl || "",
     category: team.category || "Libre",
     captain: team.captain || "",
     association: team.association || ""
@@ -3065,8 +3079,9 @@ function compactPublishedScore(score) {
 	    supersededBy: score.supersededBy || "",
 	    supersededAt: score.supersededAt || "",
 	    tournament: compactTournament(score.tournament),
-    charreada: compactCharreada(score.charreada),
-    team: compactTeam(score.team),
+	    charreada: compactCharreada(score.charreada),
+	    competition: score.competition || null,
+	    team: compactTeam(score.team),
     suerte: {
       id: suerte.id || "",
       name: suerte.name || "",
@@ -3081,6 +3096,46 @@ function compactPublishedScore(score) {
     total: Number(score.total || 0),
     breakdown: compactPublishedBreakdown(score.breakdown)
 	  });
+}
+
+function compactProductionFields(payload = {}) {
+  return cleanUndefined({
+    tournamentId: payload.tournamentId || payload.tournament?.id || "",
+    tournamentName: payload.tournamentName || payload.tournament?.name || "",
+    activeCharreadaId: payload.activeCharreadaId || payload.charreadaId || payload.charreada?.id || "",
+    charreadaId: payload.charreadaId || payload.charreada?.id || "",
+    charreadaName: payload.charreadaName || payload.charreada?.name || "",
+    competitionType: payload.competitionType || payload.broadcastContext?.competition?.type || "equipos_completo",
+    competitionScope: payload.competitionScope || payload.broadcastContext?.competition?.scope || "team",
+    competitionId: payload.competitionId || payload.broadcastContext?.competition?.id || "equipos_completo",
+    competitionName: payload.competitionName || payload.broadcastContext?.competition?.name || "Competencia por equipos",
+    category: payload.category || payload.broadcastContext?.competition?.category || "",
+    phase: payload.phase || payload.broadcastContext?.competition?.phase || "",
+    participantScope: payload.participantScope || payload.broadcastContext?.competition?.participantScope || "team",
+    participantId: payload.participantId,
+    participantName: payload.participantName || "",
+    teamId: payload.teamId,
+    teamName: payload.teamName,
+    association: payload.association || "",
+    horseName: payload.horseName || "",
+    suerteId: payload.suerteId || payload.broadcastContext?.suerte?.id || "",
+    suerteName: payload.suerteName || payload.broadcastContext?.suerte?.name || "",
+    suerteIds: Array.isArray(payload.suerteIds) ? payload.suerteIds : payload.broadcastContext?.competition?.suerteIds || [],
+    currentTurnId: payload.currentTurnId || payload.broadcastContext?.production?.currentTurnId || "",
+    currentTurnName: payload.currentTurnName || payload.broadcastContext?.production?.currentTurnName || "",
+    scoreId: payload.scoreId || "",
+    basePoints: payload.basePoints ?? null,
+    additionalPoints: payload.additionalPoints ?? null,
+    infractions: payload.infractions ?? null,
+    penalties: payload.penalties ?? null,
+    totalPoints: payload.totalPoints ?? null,
+    time: payload.time ?? null,
+    attempts: payload.attempts ?? null,
+    scoreStatus: payload.scoreStatus ?? null,
+    scoreTimestamp: payload.scoreTimestamp ?? null,
+    scoreDetail: payload.scoreDetail || null,
+    broadcastContext: payload.broadcastContext || null
+  });
 }
 
 function compactPublishedBy(publishedBy = {}) {

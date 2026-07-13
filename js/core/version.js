@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260708-program-003-competition-program1";
+export const CHARROPRO_APP_VERSION = "20260712-production-competitions-001-broadcast-context1";
 
 let versionLogged = false;
 
