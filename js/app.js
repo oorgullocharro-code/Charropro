@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260712-broadcast-data-001-contract-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260713-broadcast-state-001-state-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   normalizeTeamPenalty,
   sumTeamPenalties
 } from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260712-broadcast-data-001-contract-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260713-broadcast-state-001-state-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
 import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260709-competitions-003-scoring-by-competition1";
 import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260709-competitions-003-scoring-by-competition1";
@@ -42,7 +42,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260712-broadcast-data-001-contract-v1";
+} from "./core/sync.js?v=20260713-broadcast-state-001-state-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -71,7 +71,7 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260712-broadcast-data-001-contract-v1";
+} from "./core/firebaseSync.js?v=20260713-broadcast-state-001-state-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,

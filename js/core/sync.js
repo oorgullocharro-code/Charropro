@@ -1,13 +1,14 @@
 import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260712-broadcast-data-001-contract-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260713-broadcast-state-001-state-v1";
 import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import { buildOfficialPackage } from "./officialFormat.js?v=20260709-competitions-003-scoring-by-competition1";
 import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260709-competitions-003-scoring-by-competition1";
 import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260712-broadcast-data-001-contract-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260713-broadcast-state-001-state-v1";
 import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260712-broadcast-data-001-contract-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260713-broadcast-state-001-state-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -20,6 +21,7 @@ function isIndividualTournament(tournament = getActiveTournament()) {
 }
 
 export function buildLivePayload(options = {}) {
+  const timestamp = new Date().toISOString();
   const context = getCurrentContext();
   const charreada = getActiveCharreada();
   const tournament = context?.tournament || getActiveTournament();
@@ -36,10 +38,50 @@ export function buildLivePayload(options = {}) {
     timer
   });
   const broadcastContract = buildBroadcastDataContract(broadcastContext, {
+    generatedAt: timestamp,
+    now: timestamp,
     visibility: "production",
     outputType: "program",
     includeLegacyAliases: true,
     appVersion: CHARROPRO_APP_VERSION
+  });
+  const liveChannel = getActiveLiveChannel(tournament);
+  const broadcastState = createInitialBroadcastState({
+    now: timestamp,
+    source: "live-payload",
+    status: "inactive",
+    session: {
+      tournamentId: broadcastContract.tournament?.id,
+      competitionId: broadcastContract.competition?.id,
+      outputIds: [],
+      status: "inactive",
+      recoverable: true,
+      recoveryRequired: false
+    },
+    contextRef: {
+      contractVersion: broadcastContract.contractVersion,
+      contractRevision: broadcastContract.revision,
+      generatedAt: broadcastContract.generatedAt,
+      freshness: broadcastContract.source?.freshness,
+      tournamentId: broadcastContract.tournament?.id,
+      competitionId: broadcastContract.competition?.id,
+      charreadaId: broadcastContract.charreada?.id,
+      participantId: broadcastContract.participant?.id,
+      teamId: broadcastContract.team?.id,
+      suerteId: broadcastContract.suerte?.id,
+      scoreId: broadcastContract.score?.id,
+      timerId: broadcastContract.timer?.id,
+      sourceType: broadcastContract.source?.type
+    },
+    legacy: {
+      enabled: true,
+      activeEngine: "v1",
+      v1OutputIds: liveChannel ? [liveChannel] : [],
+      v2OutputIds: [],
+      fallbackAvailable: true,
+      fallbackReason: null,
+      legacyProjectionRevision: 0
+    }
   });
   const tournamentColumns = tournament ? buildTournamentStandingColumns(tournament.id) : [];
   const individualTournament = isIndividualTournament(tournament);
@@ -60,13 +102,14 @@ export function buildLivePayload(options = {}) {
 
   const payload = {
     action: "update_live_graphics",
-    timestamp: new Date().toISOString(),
-    liveChannel: getActiveLiveChannel(tournament),
+    timestamp,
+    liveChannel,
     tournament: tournamentPayload,
     charreada: charreada || null,
     ...buildBroadcastFlatFields(broadcastContext),
     broadcastContext,
     broadcastContract,
+    broadcastState,
     turn: context
       ? {
           team: context.team,

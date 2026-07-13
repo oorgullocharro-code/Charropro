@@ -1,5 +1,23 @@
 # Despliegue CharroPro
 
+## Version BROADCAST-STATE-001
+
+Version actual de cache:
+
+```text
+v=20260713-broadcast-state-001-state-v1
+```
+
+Esta base agrega Broadcast State v1 (`1.0.0`) como modelo central, inmutable y serializable para el futuro Broadcast Studio. El modulo `js/broadcast/broadcastState.js` separa Selection, Preview y Program; administra layers, graficos, outputs, queue, session, contextRef, automation, messages y compatibilidad legacy; aplica revisionado monotónico con `expectedRevision`; y protege Program mediante promociones, bloqueos, emergencia y limpieza controlada.
+
+La integracion es aditiva bajo `live/current.broadcastState`: `broadcastContext`, `broadcastContract`, campos legacy, OBS y graficos V1 permanecen intactos. La proyeccion V2 inicia siempre con Preview y Program inactivos, revision 0 y `legacy.activeEngine: "v1"`; no agrega listeners, no define rutas definitivas, no publica en `publicTournaments` y no activa recuperacion o fallback automaticamente.
+
+El estado elimina funciones, controla ciclos, bloquea `__proto__`, `constructor` y `prototype`, limita profundidad/arreglos y conserva cero, `false` y cadena vacia. Se documenta en `BROADCAST_STATE_V1.md` y cuenta con pruebas independientes para inicializacion, concurrencia, Preview/Program, capas, graficos, outputs, queue, contexto, legacy, recuperacion e inmutabilidad. No se modifican reglas deportivas, calculos oficiales, Firebase Rules, calificador, Resultados, pagina publica, Recovery, Event Engine, roles, permisos, OBS ni graficos V1.
+
+### Correccion BROADCAST-STATE-001B
+
+Antes del primer commit se retiro `program` y todos los bloques con setter dedicado de la allowlist de `applyBroadcastStatePatch()`. Program solo puede cambiar mediante `setProgramState()`, `promotePreviewToProgram()` y `clearProgramState()`; un patch contra `program` o `program.*` se rechaza atomicamente con `program-patch-forbidden`, sin cambiar revision, timestamps ni otras rutas del mismo patch. La activacion controlada de Program exige actor y output valido, registra timestamp y modo, conserva capas bloqueadas y respeta emergencia. La recuperacion normalizada limpia cualquier Program persistido activo y no envia contenido automaticamente a outputs.
+
 ## Version BROADCAST-DATA-001
 
 Version actual de cache:

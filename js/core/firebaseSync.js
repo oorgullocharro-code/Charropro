@@ -3135,7 +3135,8 @@ function compactProductionFields(payload = {}) {
     scoreTimestamp: payload.scoreTimestamp ?? null,
     scoreDetail: payload.scoreDetail || null,
     broadcastContext: payload.broadcastContext || null,
-    broadcastContract: payload.broadcastContract || null
+    broadcastContract: payload.broadcastContract || null,
+    broadcastState: payload.broadcastState || null
   });
 }
 
