@@ -1,20 +1,20 @@
 # Despliegue CharroPro
 
-## Version ACTION-ENGINE-001
+## Version PRODUCTION-VARIABLES-001
 
 Version actual de cache:
 
 ```text
-v=20260713-action-engine-001-actions-v1
+v=20260713-production-variables-001-variables-v1
 ```
 
-Esta version agrega Broadcast Action Engine v1 (`1.0.0`) como unica puerta operativa de Production Console para Selection, Preview, Program, graficos, geometria, layers, outputs, heartbeat y queue. Las operaciones visibles se expresan como acciones declarativas, validan actor, permisos conceptuales, precondiciones, confirmaciones, Modo seguro, `expectedRevision` e idempotencia, y delegan exclusivamente a las APIs publicas de Broadcast State, Broadcast Output, Asset Manager y Broadcast Data Contract.
+Esta version agrega Production Variables v1 (`1.0.0`) como registro tipado y exclusivamente en memoria para mensajes, entrevista, produccion y referencias de recursos. La resolucion soporta scopes desde global hasta sesion, visibilidad, fallback, TTL, referencias controladas al Data Contract y referencias por identidad al Asset Manager.
 
-La consola conserva su interfaz y agrega una seccion minima `Ultimas acciones` con tipo, estado, resultado, timestamp y revisiones antes/despues. El actor solo se muestra en visibilidad operacional o restringida; panel e inspector eliminan identidad operativa en vista publica, y el inspector tambien la elimina en production. Preview y Program permanecen separados; heartbeat y queue no reproducen contenido ni modifican Program; los outputs siguen offline al iniciar; la recarga continua limpia.
+Action Engine avanza de forma compatible a `1.1.0` con `REGISTER_VARIABLE`, `SET_VARIABLE`, `RESET_VARIABLE`, `DISABLE_VARIABLE`, `ENABLE_VARIABLE` y `EXPIRE_VARIABLE`. Toda mutacion desde Production Console usa esas acciones con actor conceptual, permisos, revision esperada, idempotencia y auditoria. Las variables viajan en paralelo a Broadcast State: editar una variable no modifica Preview ni Program.
 
-El cierre endurece la matriz exacta por actionType: locutor solo puede `SELECT_GRAPHIC` y `SET_SELECTION` local, juez y lectura no ejecutan acciones mutantes, graficos opera emision sin administracion de outputs, y system queda limitado a heartbeat y reconocimientos tecnicos. Tambien valida atomicidad de targets de Program, revision optimista en las acciones mutantes principales e idempotencia estable sin incluir revisiones dinamicas en la huella.
+Production Console incorpora el panel `Variables de Produccion`, agrupado en Textos, Entrevista, Produccion y Recursos. Muestra scope, valor efectivo, procedencia, revision y expiracion; permite guardar, resetear, activar y desactivar; y agrega una pestaña Variables al inspector. La vista publica solo incluye variables publicas y elimina actor, tenant, sesion y metadata interna.
 
-El motor y su auditoria operan solo en memoria. No se agregan Firebase, persistencia, permisos reales, automatizaciones, escenas, macros, variables, OBS V2 ni cambios a graficos V1. Broadcast Playground conserva temporalmente sus APIs directas como banco legacy de V2. La referencia completa esta en `BROADCAST_ACTION_ENGINE_V1.md` y las pruebas en `tests/broadcast-action-engine.test.mjs`.
+No se agregan Firebase, Storage, `live/current`, `publicTournaments`, persistencia, permisos reales, automatizaciones, escenas, macros, OBS V2 ni cambios a graficos V1. La recarga vuelve a definiciones limpias. La referencia completa esta en `BROADCAST_PRODUCTION_VARIABLES_V1.md` y las pruebas en `tests/production-variables.test.mjs`, `tests/broadcast-action-engine.test.mjs` y `tests/production-console.test.mjs`.
 
 ## Version ASSET-MANAGER-001
 
@@ -373,7 +373,7 @@ La consola:
 - inicia los outputs offline para no inventar conectividad;
 - no consulta Firebase ni modifica el Core deportivo;
 - no persiste Program, Preview ni queue;
-- no es la consola final y todavía no incluye Action Engine, Template Engine ni OBS real.
+- no es la consola final y todavía no incluye Template Engine ni OBS real.
 
 Para abrirla localmente:
 

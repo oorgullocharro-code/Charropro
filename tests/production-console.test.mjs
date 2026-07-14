@@ -21,12 +21,15 @@ import {
   prepareProductionPreview,
   removeProductionQueueItem,
   restoreLastProductionPreview,
+  resetProductionConsoleVariable,
   sanitizeProductionConsoleInspectorData,
   selectProductionAsset,
   selectProductionGraphic,
   selectProductionOutput,
   setProductionLayerAction,
   setProductionOutputAction,
+  setProductionConsoleVariable,
+  setProductionConsoleVariableStatus,
   setProductionVisibility,
   transitionProductionToProgram,
   validateProductionConsoleModel
@@ -34,7 +37,7 @@ import {
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
 import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
 import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260713-asset-manager-001-assets-v1";
-import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260713-action-engine-001-actions-v1";
+import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260713-production-variables-001-variables-v1";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -43,7 +46,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260713-action-engine-001-actions-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260713-production-variables-001-variables-v1");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
 
@@ -58,12 +61,47 @@ assert.equal(model.programSnapshot, null);
 assert.deepEqual(model.actionHistory, []);
 assert.deepEqual(getBroadcastQueue(model.state), []);
 assert.equal(model.outputIds.length, 5);
+assert.equal(Object.keys(model.variableRegistry.variables).length, 14);
 for (const outputId of model.outputIds) {
   const output = getBroadcastOutput(outputId);
   assert.equal(validateBroadcastOutput(output).valid, true);
   assert.equal(output.status, "offline");
   assert.equal(output.assignedLayers.length, 9);
 }
+
+// Production Variables are edited only through Action Engine and never alter Preview, Program or Outputs.
+const stateBeforeVariables = structuredClone(model.state);
+const programBeforeVariables = structuredClone(model.state.program);
+const outputsBeforeVariables = Object.fromEntries(model.outputIds.map((outputId) => [outputId, structuredClone(getBroadcastOutput(outputId))]));
+model = setProductionConsoleVariable(model, "var_production_message", "Mensaje operativo", { now: T1 });
+assert.equal(model.variableRegistry.variables.var_production_message.value, "Mensaje operativo");
+assert.equal(model.actionHistory[0].actionType, ACTION_TYPES.SET_VARIABLE);
+assert.deepEqual(model.state.program, programBeforeVariables);
+model = resetProductionConsoleVariable(model, "var_production_message", { now: T2 });
+assert.equal(model.variableRegistry.variables.var_production_message.value, null);
+assert.equal(model.actionHistory[0].actionType, ACTION_TYPES.RESET_VARIABLE);
+assert.deepEqual(model.state.program, programBeforeVariables);
+model = setProductionConsoleVariableStatus(model, "var_production_message", false, { now: T2 });
+assert.equal(model.variableRegistry.variables.var_production_message.status, "disabled");
+assert.equal(model.actionHistory[0].actionType, ACTION_TYPES.DISABLE_VARIABLE);
+model = setProductionConsoleVariableStatus(model, "var_production_message", true, { now: T3 });
+assert.equal(model.variableRegistry.variables.var_production_message.status, "active");
+assert.equal(model.actionHistory[0].actionType, ACTION_TYPES.ENABLE_VARIABLE);
+assert.deepEqual(model.state.program, programBeforeVariables);
+assert.deepEqual(model.state, stateBeforeVariables);
+for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeVariables[outputId]);
+
+const variablesInspector = getProductionConsoleInspector(model, { visibility: "operational", now: T3 }).variables;
+assert.equal(variablesInspector.registry.variables.length, 14);
+assert.equal(variablesInspector.snapshot.snapshotVersion, "1.0.0");
+assert.ok(variablesInspector.resolved.some((entry) => entry.key === "production.message"));
+const publicVariablesInspector = getProductionConsoleInspector(model, { visibility: "public", now: T3 }).variables;
+assert.equal(publicVariablesInspector.registry.variables.every((variable) => variable.visibility === "public"), true);
+assert.equal(publicVariablesInspector.resolved.some((entry) => entry.key === "production.interviewName"), false);
+assert.equal(publicVariablesInspector.resolved.some((entry) => entry.key === "production.activeCamera"), false);
+assert.equal(JSON.stringify(publicVariablesInspector).includes('"actor"'), false);
+assert.equal(JSON.stringify(publicVariablesInspector).includes('"tenantId"'), false);
+assert.equal(JSON.stringify(publicVariablesInspector).includes('"sessionId"'), false);
 
 // All fixtures rebuild through the Data Contract and preserve their sports scope.
 for (const fixture of PRODUCTION_CONSOLE_FIXTURES) {
@@ -379,7 +417,14 @@ assert.equal(sensitiveInspectorValue.self, sensitiveInspectorValue);
 disposeProductionConsole(privacyModel);
 
 // Safe text handling and static source checks protect the browser shell.
-assert.equal(escapeProductionConsoleText("<script>alert('x')</script>"), "&lt;script&gt;alert(&#039;x&#039;)&lt;/script&gt;");
+for (const payload of [
+  "<script>alert(1)</script>", "<img src=x onerror=alert(1)>", "javascript:alert(1)",
+  "data:text/html,<script>alert(1)</script>", "<iframe></iframe>", "<object></object>", "<embed>"
+]) {
+  const escaped = escapeProductionConsoleText(payload);
+  assert.equal(escaped.includes("<"), false, payload);
+  assert.equal(escaped.includes(">"), false, payload);
+}
 assert.equal(escapeProductionConsoleText(0), "0");
 assert.equal(escapeProductionConsoleText(false), "false");
 assert.equal(escapeProductionConsoleText(""), "");
@@ -395,6 +440,7 @@ for (const id of [
   "console-layers-body",
   "console-outputs-list",
   "console-queue-list",
+  "console-variables",
   "console-inspector"
 ]) assert.ok(html.includes(`id="${id}"`), `HTML missing ${id}`);
 assert.equal(source.includes("innerHTML"), false);
@@ -421,6 +467,11 @@ assert.equal(source.includes("programSnapshot: model.programSnapshot"), false);
 const sessionWriterSource = source.slice(source.indexOf("function writeSessionSettings"), source.indexOf("async function copyText"));
 assert.equal(sessionWriterSource.includes("state: model.state"), false);
 assert.ok(source.includes("dispatchBroadcastAction(action, actionContext"));
+assert.ok(source.includes("variables: model.variableRegistry"));
+assert.ok(source.includes("ACTION_TYPES.SET_VARIABLE"));
+assert.ok(source.includes("ACTION_TYPES.RESET_VARIABLE"));
+assert.ok(source.includes("ACTION_TYPES.ENABLE_VARIABLE"));
+assert.ok(source.includes("ACTION_TYPES.DISABLE_VARIABLE"));
 assert.ok(source.includes("Últimas acciones"));
 assert.ok(source.includes("showOperationalActor"));
 assert.ok(source.includes("? `${item.actor?.name || item.actor?.role || \"Sistema\"} · ${item.timestamp || \"-\"}`"));
@@ -444,6 +495,8 @@ assert.equal(reloaded.state.preview.active, false);
 assert.equal(reloaded.state.program.active, false);
 assert.equal(reloaded.programSnapshot, null);
 assert.deepEqual(getBroadcastQueue(reloaded.state), []);
+assert.equal(reloaded.variableRegistry.variables.var_production_message.value, null);
+assert.equal(reloaded.variableRegistry.variables.var_production_message.revision, 0);
 disposeProductionConsole(reloaded);
 
 console.log("production-console.test.mjs: OK");

@@ -25,8 +25,15 @@ import {
 } from "./broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
 import { getBroadcastAsset } from "./assetManager.js?v=20260713-asset-manager-001-assets-v1";
 import { validateBroadcastDataContract } from "./dataContract.js?v=20260713-broadcast-output-001-output-v1";
+import {
+  expireProductionVariable,
+  registerProductionVariable,
+  resetProductionVariableValue,
+  setProductionVariableValue,
+  updateProductionVariable
+} from "./productionVariables.js?v=20260713-production-variables-001-variables-v1";
 
-export const BROADCAST_ACTION_ENGINE_VERSION = "1.0.0";
+export const BROADCAST_ACTION_ENGINE_VERSION = "1.1.0";
 
 export const ACTION_TYPES = Object.freeze({
   SELECT_GRAPHIC: "SELECT_GRAPHIC",
@@ -61,7 +68,13 @@ export const ACTION_TYPES = Object.freeze({
   SHOW_LAYER: "SHOW_LAYER",
   HIDE_LAYER: "HIDE_LAYER",
   ACKNOWLEDGE_WARNING: "ACKNOWLEDGE_WARNING",
-  ACKNOWLEDGE_ERROR: "ACKNOWLEDGE_ERROR"
+  ACKNOWLEDGE_ERROR: "ACKNOWLEDGE_ERROR",
+  REGISTER_VARIABLE: "REGISTER_VARIABLE",
+  SET_VARIABLE: "SET_VARIABLE",
+  RESET_VARIABLE: "RESET_VARIABLE",
+  DISABLE_VARIABLE: "DISABLE_VARIABLE",
+  ENABLE_VARIABLE: "ENABLE_VARIABLE",
+  EXPIRE_VARIABLE: "EXPIRE_VARIABLE"
 });
 
 export const ACTION_STATUSES = Object.freeze({
@@ -125,9 +138,18 @@ const MAX_ARRAY_LENGTH = 500;
 const MAX_STORE_SIZE = 500;
 const PROGRAM_ACTIONS = new Set([ACTION_TYPES.TAKE, ACTION_TYPES.CUT, ACTION_TYPES.AUTO, ACTION_TYPES.CLEAR_PROGRAM]);
 const QUEUE_ACTIONS = new Set([ACTION_TYPES.ENQUEUE_GRAPHIC, ACTION_TYPES.DEQUEUE_GRAPHIC, ACTION_TYPES.CLEAR_QUEUE]);
+const VARIABLE_ACTIONS = new Set([
+  ACTION_TYPES.REGISTER_VARIABLE,
+  ACTION_TYPES.SET_VARIABLE,
+  ACTION_TYPES.RESET_VARIABLE,
+  ACTION_TYPES.DISABLE_VARIABLE,
+  ACTION_TYPES.ENABLE_VARIABLE,
+  ACTION_TYPES.EXPIRE_VARIABLE
+]);
 const STATE_MUTATING_ACTIONS = new Set(Object.values(ACTION_TYPES).filter((type) => ![
   ACTION_TYPES.ACKNOWLEDGE_WARNING,
-  ACTION_TYPES.ACKNOWLEDGE_ERROR
+  ACTION_TYPES.ACKNOWLEDGE_ERROR,
+  ...VARIABLE_ACTIONS
 ].includes(type)));
 const ACTION_STORE = new Map();
 const IDEMPOTENCY_STORE = new Map();
@@ -166,7 +188,8 @@ const ALL_CURRENT_ACTIONS = Object.freeze([
   ACTION_TYPES.SHOW_LAYER,
   ACTION_TYPES.HIDE_LAYER,
   ACTION_TYPES.ACKNOWLEDGE_WARNING,
-  ACTION_TYPES.ACKNOWLEDGE_ERROR
+  ACTION_TYPES.ACKNOWLEDGE_ERROR,
+  ...VARIABLE_ACTIONS
 ]);
 const GRAPHICS_ACTIONS = Object.freeze([
   ACTION_TYPES.SELECT_GRAPHIC,
@@ -199,12 +222,12 @@ const GRAPHICS_ACTIONS = Object.freeze([
 ]);
 const ROLE_CAPABILITIES = Object.freeze({
   supervisor: new Set(ALL_CURRENT_ACTIONS),
-  operador: new Set(ALL_CURRENT_ACTIONS),
-  graficos: new Set(GRAPHICS_ACTIONS),
+  operador: new Set([...ALL_CURRENT_ACTIONS.filter((type) => !VARIABLE_ACTIONS.has(type)), ACTION_TYPES.SET_VARIABLE, ACTION_TYPES.RESET_VARIABLE, ACTION_TYPES.DISABLE_VARIABLE, ACTION_TYPES.ENABLE_VARIABLE]),
+  graficos: new Set([...GRAPHICS_ACTIONS, ACTION_TYPES.SET_VARIABLE, ACTION_TYPES.RESET_VARIABLE]),
   locutor: new Set([ACTION_TYPES.SELECT_GRAPHIC, ACTION_TYPES.SET_SELECTION]),
   juez: new Set(),
   lectura: new Set(),
-  system: new Set([ACTION_TYPES.SEND_HEARTBEAT, ACTION_TYPES.ACKNOWLEDGE_WARNING, ACTION_TYPES.ACKNOWLEDGE_ERROR])
+  system: new Set([ACTION_TYPES.SEND_HEARTBEAT, ACTION_TYPES.ACKNOWLEDGE_WARNING, ACTION_TYPES.ACKNOWLEDGE_ERROR, ACTION_TYPES.EXPIRE_VARIABLE])
 });
 
 export class BroadcastActionError extends Error {
@@ -307,12 +330,14 @@ export function createBroadcastActionContext(input = {}, options = {}) {
   const contract = cloneSerializable(source.contract, [], "context.contract") || null;
   const outputs = normalizeOutputRegistry(source.outputs ?? source.outputRegistry);
   const assets = cloneSerializable(source.assets ?? source.assetRegistry, [], "context.assets") || {};
+  const variables = cloneSerializable(source.variables ?? source.variableRegistry, [], "context.variables") || {};
   const actor = normalizeActor(options.actor || source.actor);
   return {
     state,
     contract,
     outputs,
     assets,
+    variables,
     visibility: normalizeVisibility(source.visibility),
     safeMode: source.safeMode !== false,
     actor,
@@ -469,6 +494,7 @@ export function executeBroadcastAction(actionInput, contextInput, options = {}) 
   const actor = action.actor;
   const now = resolveNow(context, options);
   let state = cloneBroadcastState(context.state);
+  let variables = cloneSerializable(context.variables, [], "execution.variables") || {};
   const outputIds = new Set();
   let data = {};
   const stateOptions = { now, actor, force: action.payload.force === true };
@@ -555,6 +581,14 @@ export function executeBroadcastAction(actionInput, contextInput, options = {}) 
     case ACTION_TYPES.ACKNOWLEDGE_ERROR:
       data = { acknowledgedId: action.target.warningId || action.target.errorId || action.payload.id || null };
       break;
+    case ACTION_TYPES.REGISTER_VARIABLE:
+    case ACTION_TYPES.SET_VARIABLE:
+    case ACTION_TYPES.RESET_VARIABLE:
+    case ACTION_TYPES.DISABLE_VARIABLE:
+    case ACTION_TYPES.ENABLE_VARIABLE:
+    case ACTION_TYPES.EXPIRE_VARIABLE:
+      ({ variables, data } = executeVariableAction(variables, action, { now, actor }));
+      break;
     default:
       throw new BroadcastActionError(ACTION_RESULT_CODES.INVALID_ACTION, { actionType: action.actionType });
   }
@@ -563,6 +597,7 @@ export function executeBroadcastAction(actionInput, contextInput, options = {}) 
     state,
     outputs: currentOutputMap(context.outputIds),
     assets: cloneSerializable(context.assets, [], "execution.assets") || {},
+    variables: cloneSerializable(variables, [], "execution.variables") || {},
     outputIds: uniqueStrings([...outputIds]),
     data: cloneSerializable(data, [], "execution.data") || {},
     warnings: [],
@@ -852,6 +887,54 @@ function executeLayerAction(state, action, options) {
   return { state, data: { layerId, locked: state.layers[layerId].locked, visible: state.layers[layerId].visible } };
 }
 
+function executeVariableAction(registry, action, options) {
+  const variableId = requiredTargetId(action, "variableId");
+  const variableOptions = {
+    now: options.now,
+    actor: options.actor,
+    expectedRevision: action.payload.expectedRevision
+  };
+  let variables = registry;
+  switch (action.actionType) {
+    case ACTION_TYPES.REGISTER_VARIABLE:
+      variables = registerProductionVariable(variables, {
+        ...safeRecord(action.payload.variable),
+        variableId
+      }, variableOptions);
+      break;
+    case ACTION_TYPES.SET_VARIABLE:
+      variables = setProductionVariableValue(variables, variableId, action.payload.value, variableOptions);
+      break;
+    case ACTION_TYPES.RESET_VARIABLE:
+      variables = resetProductionVariableValue(variables, variableId, {
+        ...variableOptions,
+        strategy: action.payload.strategy
+      });
+      break;
+    case ACTION_TYPES.DISABLE_VARIABLE:
+    case ACTION_TYPES.ENABLE_VARIABLE:
+      variables = updateProductionVariable(variables, variableId, {
+        status: action.actionType === ACTION_TYPES.ENABLE_VARIABLE ? "active" : "disabled"
+      }, { ...variableOptions, allowOperationalStatus: true });
+      break;
+    case ACTION_TYPES.EXPIRE_VARIABLE:
+      variables = expireProductionVariable(variables, variableId, variableOptions);
+      break;
+    default:
+      throw new BroadcastActionError(ACTION_RESULT_CODES.INVALID_ACTION, { actionType: action.actionType });
+  }
+  const variable = variables.variables?.[variableId] || null;
+  return {
+    variables,
+    data: {
+      variableId,
+      variableRevision: variable?.revision ?? null,
+      registryRevision: variables.revision ?? null,
+      status: variable?.status ?? null
+    }
+  };
+}
+
 function validateActionTargetAndPayload(action, contextInput, errors, warnings) {
   const context = contextInput ? createBroadcastActionContext(contextInput) : null;
   const needsOutput = [ACTION_TYPES.SET_OUTPUT, ACTION_TYPES.UPDATE_OUTPUT, ACTION_TYPES.SET_OUTPUT_STATUS, ACTION_TYPES.SEND_HEARTBEAT, ACTION_TYPES.ASSIGN_LAYERS_TO_OUTPUT, ACTION_TYPES.ASSIGN_THEME_TO_OUTPUT].includes(action.actionType);
@@ -870,6 +953,15 @@ function validateActionTargetAndPayload(action, contextInput, errors, warnings) 
   if (action.actionType === ACTION_TYPES.SET_GRAPHIC_SCALE && (!Number.isFinite(action.payload.scale) || action.payload.scale <= 0)) errors.push("action-scale-invalid");
   if (action.actionType === ACTION_TYPES.SEND_HEARTBEAT && !isRecord(action.payload.heartbeat || action.payload)) errors.push("action-heartbeat-payload-invalid");
   if (action.actionType === ACTION_TYPES.ENQUEUE_GRAPHIC && !isRecord(action.payload.item || action.payload)) errors.push("action-queue-payload-invalid");
+  if (VARIABLE_ACTIONS.has(action.actionType)) {
+    if (!normalizeId(action.target.variableId)) errors.push("action-target-variable-required");
+    if (!Number.isInteger(action.payload.expectedRevision) || action.payload.expectedRevision < 0) errors.push("action-variable-expected-revision-required");
+    if (action.actionType === ACTION_TYPES.REGISTER_VARIABLE && !isRecord(action.payload.variable)) errors.push("action-variable-definition-required");
+    if (action.actionType === ACTION_TYPES.SET_VARIABLE && !hasOwn(action.payload, "value")) errors.push("action-variable-value-required");
+    if (action.actionType === ACTION_TYPES.RESET_VARIABLE && action.payload.strategy !== undefined && !["null", "default"].includes(action.payload.strategy)) {
+      errors.push("action-variable-reset-strategy-invalid");
+    }
+  }
   if (layerId === "emergency") warnings.push("emergency-layer-targeted");
 }
 
@@ -951,6 +1043,7 @@ function buildDispatchEnvelope(action, context, result, execution = {}, auditEnt
     state: execution.state ? cloneBroadcastState(execution.state) : cloneBroadcastState(context.state),
     outputs: cloneSerializable(execution.outputs || context.outputs, [], "dispatch.outputs") || {},
     assets: cloneSerializable(execution.assets || context.assets, [], "dispatch.assets") || {},
+    variables: cloneSerializable(execution.variables || context.variables, [], "dispatch.variables") || {},
     result: cloneSerializable(result, [], "dispatch.result") || {},
     auditEntry: cloneSerializable(auditEntry || action.audit, [], "dispatch.audit") || {},
     warnings: uniqueStrings(result.warnings),
@@ -1115,6 +1208,7 @@ function cloneDispatchResult(dispatch) {
     state: cloneBroadcastState(dispatch.state),
     outputs: cloneSerializable(dispatch.outputs, [], "dispatch.outputs") || {},
     assets: cloneSerializable(dispatch.assets, [], "dispatch.assets") || {},
+    variables: cloneSerializable(dispatch.variables, [], "dispatch.variables") || {},
     result: cloneSerializable(dispatch.result, [], "dispatch.result") || {},
     auditEntry: cloneSerializable(dispatch.auditEntry, [], "dispatch.audit") || {},
     warnings: uniqueStrings(dispatch.warnings),
@@ -1165,6 +1259,11 @@ function mapExecutionError(error) {
   const code = error?.code || error?.message || "";
   if (Object.values(ACTION_RESULT_CODES).includes(code)) return code;
   if (String(code).includes("expected-revision")) return ACTION_RESULT_CODES.STATE_REVISION_CONFLICT;
+  if (String(code).includes("not-authorized") || String(code).includes("actor-required")) return ACTION_RESULT_CODES.PERMISSION_DENIED;
+  if (String(code).includes("variable-not-found")) return ACTION_RESULT_CODES.INVALID_TARGET;
+  if (String(code).includes("variable") && (String(code).includes("invalid") || String(code).includes("required") || String(code).includes("forbidden"))) {
+    return ACTION_RESULT_CODES.INVALID_PAYLOAD;
+  }
   if (String(code).includes("preview")) return ACTION_RESULT_CODES.PREVIEW_NOT_READY;
   if (String(code).includes("program") || String(code).includes("locked")) return ACTION_RESULT_CODES.PROGRAM_PROTECTED;
   if (String(code).includes("output")) return ACTION_RESULT_CODES.OUTPUT_NOT_FOUND;
@@ -1245,6 +1344,10 @@ function safeRecord(value) {
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function hasOwn(value, key) {
+  return Object.prototype.hasOwnProperty.call(value, key);
 }
 
 function containsDangerousKey(value, seen = new WeakSet()) {

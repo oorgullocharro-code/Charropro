@@ -255,7 +255,8 @@ input {
 }
 
 .console-field select,
-.console-field input {
+.console-field input,
+.console-field textarea {
   width: 100%;
   min-height: 36px;
   border: 1px solid #434a54;
@@ -266,7 +267,8 @@ input {
 }
 
 .console-field select:focus,
-.console-field input:focus {
+.console-field input:focus,
+.console-field textarea:focus {
   border-color: var(--console-blue);
   outline: 2px solid rgba(57, 125, 222, 0.2);
 }
@@ -931,4 +933,49 @@ input {
   .console-header-actions .button {
     flex: 1 1 140px;
   }
+}
+
+.console-variables {
+  display: grid;
+  gap: 14px;
+}
+
+.console-variable-group {
+  display: grid;
+  gap: 8px;
+}
+
+.console-variable-group + .console-variable-group {
+  border-top: 1px solid var(--console-border-soft);
+  padding-top: 12px;
+}
+
+.console-variable-group-title {
+  color: var(--console-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.console-variable-item {
+  background: var(--console-panel-2);
+  border: 1px solid var(--console-border-soft);
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.console-variable-item textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+
+.console-variable-meta {
+  grid-template-columns: minmax(84px, auto) minmax(0, 1fr);
+}
+
+.console-variable-meta dd {
+  overflow-wrap: anywhere;
 }

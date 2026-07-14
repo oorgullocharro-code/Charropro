@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260713-action-engine-001-actions-v1";
+export const CHARROPRO_APP_VERSION = "20260713-production-variables-001-variables-v1";
 
 let versionLogged = false;
 

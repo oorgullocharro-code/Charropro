@@ -45,11 +45,20 @@ import {
   createBroadcastActionContext,
   dispatchBroadcastAction,
   requiresBroadcastActionConfirmation
-} from "./actionEngine.js?v=20260713-action-engine-001-actions-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260713-action-engine-001-actions-v1";
+} from "./actionEngine.js?v=20260713-production-variables-001-variables-v1";
+import {
+  PRODUCTION_VARIABLES_VERSION,
+  PRODUCTION_VARIABLE_DEFINITIONS,
+  buildProductionVariablesSnapshot,
+  listProductionVariables,
+  registerProductionVariable,
+  resolveProductionVariables,
+  validateProductionVariable
+} from "./productionVariables.js?v=20260713-production-variables-001-variables-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260713-production-variables-001-variables-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260713-action-engine-001-actions-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260713-production-variables-001-variables-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -84,6 +93,12 @@ const CONSOLE_ACTOR = Object.freeze({
   deviceId: null,
   source: "production-console",
   visibility: "operational"
+});
+const CONSOLE_SETUP_ACTOR = Object.freeze({
+  id: "production_console_setup",
+  name: "Configuración de consola",
+  role: "supervisor",
+  source: "production-console"
 });
 const DEFAULT_FIXTURE_ID = "equipos_3";
 const DEFAULT_GRAPHIC_ID = "scoreboard-test";
@@ -164,6 +179,7 @@ export function createProductionConsoleModel(options = {}) {
   });
   const graphic = getGraphicDefinition(options.graphicId);
   const outputIds = outputs.map((output) => output.id);
+  const variableRegistry = registerConsoleVariables(contract, outputIds, now);
   return {
     consoleVersion: PRODUCTION_CONSOLE_VERSION,
     appVersion: CHARROPRO_APP_VERSION || PRODUCTION_CONSOLE_APP_VERSION,
@@ -173,6 +189,7 @@ export function createProductionConsoleModel(options = {}) {
     programSnapshot: null,
     lastPreviewConfig: null,
     assetRegistry,
+    variableRegistry,
     fixtureId: fixtureDefinition.id,
     selectedGraphicId: graphic.graphicId,
     selectedAssetId: assetExists(assetRegistry, options.assetId) ? options.assetId : DEFAULT_ASSET_ID,
@@ -209,6 +226,7 @@ export function dispatchProductionConsoleAction(model, actionType, target = {}, 
     contract: model.contract,
     outputs: Object.fromEntries(listBroadcastOutputs().filter((output) => model.outputIds.includes(output.id)).map((output) => [output.id, output])),
     assets: model.assetRegistry,
+    variables: model.variableRegistry,
     actor: CONSOLE_ACTOR,
     visibility: model.visibility,
     safeMode: model.safeMode,
@@ -251,6 +269,7 @@ export function dispatchProductionConsoleAction(model, actionType, target = {}, 
     ...model,
     state: dispatch.state,
     assetRegistry: dispatch.assets,
+    variableRegistry: dispatch.variables,
     actionSequence: sequence,
     actionHistory: [historyItem, ...(model.actionHistory || [])].slice(0, 20),
     lastAction: options.label || actionType.toLowerCase().replaceAll("_", "-"),
@@ -258,6 +277,29 @@ export function dispatchProductionConsoleAction(model, actionType, target = {}, 
   };
   if (!result.success && options.allowFailure !== true) throw consoleActionError(dispatch, actionType);
   return nextModel;
+}
+
+export function setProductionConsoleVariable(model, variableId, value, options = {}) {
+  const variable = requireConsoleVariable(model, variableId);
+  return dispatchProductionConsoleAction(model, ACTION_TYPES.SET_VARIABLE, { variableId }, {
+    expectedRevision: options.expectedRevision ?? variable.revision,
+    value
+  }, { ...options, label: options.label || "variable-value-set" });
+}
+
+export function resetProductionConsoleVariable(model, variableId, options = {}) {
+  const variable = requireConsoleVariable(model, variableId);
+  return dispatchProductionConsoleAction(model, ACTION_TYPES.RESET_VARIABLE, { variableId }, {
+    expectedRevision: options.expectedRevision ?? variable.revision,
+    strategy: options.strategy || "null"
+  }, { ...options, label: options.label || "variable-value-reset" });
+}
+
+export function setProductionConsoleVariableStatus(model, variableId, enabled, options = {}) {
+  const variable = requireConsoleVariable(model, variableId);
+  return dispatchProductionConsoleAction(model, enabled ? ACTION_TYPES.ENABLE_VARIABLE : ACTION_TYPES.DISABLE_VARIABLE, { variableId }, {
+    expectedRevision: options.expectedRevision ?? variable.revision
+  }, { ...options, label: options.label || (enabled ? "variable-enabled" : "variable-disabled") });
 }
 
 export function loadProductionConsoleFixture(model, fixtureId, options = {}) {
@@ -792,18 +834,21 @@ export function getProductionConsoleInspector(model, options = {}) {
   const assets = listBroadcastAssets(model.assetRegistry)
     .filter((asset) => !publicView || asset.visibility === "public")
     .map((asset) => publicView ? publicAssetDescriptor(asset) : asset);
+  const variables = buildConsoleVariablesInspector(model, visibility, options);
   const warnings = uniqueStrings([
     ...getBroadcastStateWarnings(model.state),
     ...getBroadcastOutputWarnings(selectedOutput),
     ...(previewProjection.warnings || []),
-    ...(programProjection.warnings || [])
+    ...(programProjection.warnings || []),
+    ...(variables.warnings || [])
   ]);
   const errors = uniqueStrings([
     ...(model.state.errors || []),
     ...(selectedOutput?.errors || []),
     ...(previewProjection.errors || []),
     ...(programProjection.errors || []),
-    ...(model.lastActionError ? [model.lastActionError] : [])
+    ...(model.lastActionError ? [model.lastActionError] : []),
+    ...(variables.errors || [])
   ]);
   const inspector = {
     contract: cloneValue(model.contract),
@@ -813,6 +858,7 @@ export function getProductionConsoleInspector(model, options = {}) {
     output: publicView ? publicOutputDescriptor(selectedOutput) : cloneValue(selectedOutput),
     projection: { preview: previewProjection, program: programProjection },
     assets,
+    variables,
     queue: getBroadcastQueue(model.state),
     actions: cloneValue(model.actionHistory || []),
     warnings: publicView ? [] : warnings,
@@ -824,7 +870,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       broadcastState: BROADCAST_STATE_VERSION,
       broadcastOutput: BROADCAST_OUTPUT_VERSION,
       assetManager: ASSET_MANAGER_VERSION,
-      actionEngine: BROADCAST_ACTION_ENGINE_VERSION
+      actionEngine: BROADCAST_ACTION_ENGINE_VERSION,
+      productionVariables: PRODUCTION_VARIABLES_VERSION
     }
   };
   return sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -907,11 +954,13 @@ export function validateProductionConsoleModel(model) {
   const contract = validateBroadcastDataContract(model.contract);
   const outputs = model.outputIds.map((id) => validateBroadcastOutput(getBroadcastOutput(id)));
   const assets = listBroadcastAssets(model.assetRegistry, { allVersions: true }).map((asset) => validateBroadcastAsset(asset));
+  const variables = listProductionVariables(model.variableRegistry).map((variable) => validateProductionVariable(variable));
   const errors = uniqueStrings([
     ...state.errors,
     ...contract.errors,
     ...outputs.flatMap((item) => item.errors),
-    ...assets.flatMap((item) => item.errors)
+    ...assets.flatMap((item) => item.errors),
+    ...variables.flatMap((item) => item.errors)
   ]);
   return {
     valid: errors.length === 0,
@@ -920,7 +969,8 @@ export function validateProductionConsoleModel(model) {
       ...state.warnings,
       ...contract.warnings,
       ...outputs.flatMap((item) => item.warnings),
-      ...assets.flatMap((item) => item.warnings)
+      ...assets.flatMap((item) => item.warnings),
+      ...variables.flatMap((item) => item.warnings)
     ])
   };
 }
@@ -997,6 +1047,31 @@ function registerConsoleAssets(now) {
     actor: CONSOLE_ACTOR,
     requireOriginalVariant: true
   }), {});
+}
+
+function registerConsoleVariables(contract, outputIds, now) {
+  const tenantId = contract.tenant?.id || "tenant_console_fixture";
+  const organizationId = contract.organization?.id || "organizacion_playground";
+  const tournamentId = contract.tournament?.id || "torneo_playground";
+  const base = {
+    variablesVersion: PRODUCTION_VARIABLES_VERSION,
+    revision: 0,
+    tenantId,
+    variables: {},
+    createdAt: now,
+    updatedAt: now
+  };
+  return PRODUCTION_VARIABLE_DEFINITIONS.reduce((registry, definition) => registerProductionVariable(registry, {
+    ...definition,
+    tenantId,
+    organizationId,
+    tournamentId,
+    outputId: definition.scope === "output" ? (outputIds.includes(DEFAULT_OUTPUT_ID) ? DEFAULT_OUTPUT_ID : outputIds[0]) : null
+  }, {
+    actor: CONSOLE_SETUP_ACTOR,
+    expectedRevision: registry.revision,
+    now
+  }), base);
 }
 
 function cleanupConsoleOutputs() {
@@ -1160,6 +1235,70 @@ function filterTemplateInstances(instances, visibleGraphicIds) {
   }, {});
 }
 
+function buildConsoleVariablesInspector(model, visibility, options = {}) {
+  const context = {
+    tenantId: model.variableRegistry?.tenantId || null,
+    organizationId: model.contract.organization?.id || null,
+    clientId: model.contract.client?.id || null,
+    tournamentId: model.contract.tournament?.id || null,
+    competitionId: model.contract.competition?.id || null,
+    charreadaId: model.contract.charreada?.id || null,
+    outputId: model.selectedOutputId,
+    userId: CONSOLE_ACTOR.id,
+    sessionId: model.state.session?.id || CONSOLE_ACTOR.sessionId,
+    visibility,
+    actor: CONSOLE_ACTOR,
+    contract: model.contract,
+    now: options.now
+  };
+  const rank = VISIBILITY_RANK[visibility] ?? VISIBILITY_RANK.production;
+  const visibleVariables = listProductionVariables(model.variableRegistry)
+    .filter((variable) => (VISIBILITY_RANK[variable.visibility] ?? VISIBILITY_RANK.restricted) <= rank);
+  const visibleKeys = new Set(visibleVariables.map((variable) => variable.key));
+  const definitions = visibleVariables.map((variable) => visibility === "public" ? publicVariableDescriptor(variable) : variable);
+  const resolved = resolveProductionVariables(model.variableRegistry, context, {
+    visibility,
+    contract: model.contract,
+    now: options.now
+  });
+  const snapshot = buildProductionVariablesSnapshot(model.variableRegistry, context, {
+    visibility,
+    contract: model.contract,
+    now: options.now
+  });
+  const resolvedEntries = resolved.entries.filter((entry) => visibleKeys.has(entry.key));
+  return {
+    registry: {
+      variablesVersion: PRODUCTION_VARIABLES_VERSION,
+      revision: model.variableRegistry?.revision ?? 0,
+      variables: definitions
+    },
+    resolved: resolvedEntries,
+    snapshot,
+    warnings: uniqueStrings([...resolvedEntries.flatMap((entry) => entry.warnings || []), ...(snapshot.warnings || [])]),
+    errors: uniqueStrings([...resolvedEntries.flatMap((entry) => entry.errors || []), ...(snapshot.errors || [])])
+  };
+}
+
+function publicVariableDescriptor(variable) {
+  return {
+    variablesVersion: variable.variablesVersion,
+    variableId: variable.variableId,
+    key: variable.key,
+    label: variable.label,
+    dataType: variable.dataType,
+    value: cloneValue(variable.value),
+    defaultValue: cloneValue(variable.defaultValue),
+    status: variable.status,
+    scope: variable.scope,
+    visibility: variable.visibility,
+    source: variable.source,
+    version: variable.version,
+    revision: variable.revision,
+    expiresAt: variable.expiresAt
+  };
+}
+
 function publicStateDescriptor(state) {
   return {
     stateVersion: state.stateVersion,
@@ -1275,6 +1414,7 @@ function collectRefs(root) {
     outputsList: id("console-outputs-list"),
     queueList: id("console-queue-list"),
     assetsList: id("console-assets-list"),
+    variables: id("console-variables"),
     system: id("console-system"),
     inspectorTabs: id("console-inspector-tabs"),
     inspector: id("console-inspector"),
@@ -1357,6 +1497,20 @@ function bindConsoleEvents(refs, getModel, setModel) {
       return changeProductionQueuePriority(model, button.dataset.queueId, button.dataset.queueAction === "up" ? 10 : -10);
     });
   });
+  refs.variables?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-variable-action]");
+    if (!button) return;
+    const variableId = button.dataset.variableId;
+    run((model) => {
+      if (button.dataset.variableAction === "reset") return resetProductionConsoleVariable(model, variableId);
+      if (button.dataset.variableAction === "toggle") {
+        const variable = requireConsoleVariable(model, variableId);
+        return setProductionConsoleVariableStatus(model, variableId, variable.status !== "active");
+      }
+      const input = refs.variables.querySelector(`[data-variable-input="${CSS.escape(variableId)}"]`);
+      return setProductionConsoleVariable(model, variableId, readProductionVariableControl(input, requireConsoleVariable(model, variableId), model));
+    });
+  });
   refs.inspectorTabs?.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-inspector-tab]");
     if (!button) return;
@@ -1429,6 +1583,7 @@ function renderConsole(refs, model) {
   renderOutputs(refs.outputsList, model);
   renderQueue(refs.queueList, model);
   renderAssets(refs.assetsList, model);
+  renderVariables(refs.variables, model);
   renderSystem(refs.system, model);
   renderInspectorTabs(refs.inspectorTabs, model);
   renderInspector(refs.inspector, model);
@@ -1466,6 +1621,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Output ${BROADCAST_OUTPUT_VERSION}`),
     element("span", "console-meta", `Assets ${ASSET_MANAGER_VERSION}`),
     element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
+    element("span", "console-meta", `Variables ${PRODUCTION_VARIABLES_VERSION}`),
     element("span", "console-meta", `${getFixtureDefinition(model.fixtureId).label}`),
     element("span", "console-meta", `${getBroadcastOutput(model.selectedOutputId)?.name || "Sin output"}`),
     statusChip(model.safeMode ? "Modo seguro activo" : "Modo seguro inactivo", model.safeMode ? "ok" : "warning")
@@ -1663,6 +1819,124 @@ function renderAssets(root, model) {
   });
 }
 
+function renderVariables(root, model) {
+  if (!root) return;
+  root.replaceChildren();
+  const inspector = buildConsoleVariablesInspector(model, "operational");
+  const resolvedById = new Map((inspector.resolved || []).map((entry) => [entry.variableId, entry]));
+  const variablesByKey = new Map(listProductionVariables(model.variableRegistry).map((variable) => [variable.key, variable]));
+  const groups = [
+    ["Textos", ["production.message", "production.blockTitle", "production.lowerThirdTitle", "production.lowerThirdSubtitle", "production.emergencyText", "production.nextBroadcast"]],
+    ["Entrevista", ["production.interviewName", "production.interviewRole"]],
+    ["Producción", ["production.activeCamera", "production.commercialCue", "production.bumperDuration", "production.customColor"]],
+    ["Recursos", ["production.selectedSponsor", "production.qrAsset"]]
+  ];
+  groups.forEach(([label, keys]) => {
+    const section = element("section", "console-variable-group");
+    section.append(element("h3", "console-variable-group-title", label));
+    keys.forEach((key) => {
+      const variable = variablesByKey.get(key);
+      if (!variable) return;
+      const resolved = resolvedById.get(variable.variableId) || (inspector.resolved || []).find((entry) => entry.key === key);
+      section.append(renderVariableControl(variable, resolved, model));
+    });
+    root.append(section);
+  });
+}
+
+function renderVariableControl(variable, resolved, model) {
+  const card = element("article", "console-variable-item");
+  const header = element("div", "console-item-header");
+  header.append(
+    element("strong", "", variable.label),
+    statusChip(variable.status, variable.status === "active" ? "ok" : variable.status === "disabled" ? "warning" : "error")
+  );
+  const field = element("label", "console-field");
+  field.append(element("span", "", variable.dataType === "duration" ? `${variable.label} (ms)` : variable.label));
+  const control = buildProductionVariableControl(variable, resolved, model);
+  control.dataset.variableInput = variable.variableId;
+  control.disabled = variable.status !== "active";
+  field.append(control);
+  const actions = element("div", "console-row-actions");
+  [["save", "Guardar"], ["reset", "Reset"], ["toggle", variable.status === "active" ? "Desactivar" : "Activar"]].forEach(([action, label]) => {
+    const button = element("button", "button button-quiet button-small", label);
+    button.type = "button";
+    button.dataset.variableAction = action;
+    button.dataset.variableId = variable.variableId;
+    if (action === "save" && variable.status !== "active") button.disabled = true;
+    actions.append(button);
+  });
+  const meta = element("dl", "console-compact-definition console-variable-meta");
+  [
+    ["Scope", variable.scope],
+    ["Valor efectivo", formatVariableValue(resolved?.value)],
+    ["Procedencia", resolved?.sourceScope || "fallback"],
+    ["Revisión", variable.revision],
+    ["Expira", variable.expiresAt || "—"]
+  ].forEach(([label, value]) => meta.append(definitionItem(label, value)));
+  card.append(header, field, actions, meta);
+  return card;
+}
+
+function buildProductionVariableControl(variable, resolved, model) {
+  const effective = resolved?.resolved ? resolved.value : variable.value ?? variable.defaultValue;
+  if (variable.dataType === "enum") {
+    const select = document.createElement("select");
+    populateSelect(select, variable.options.map((value) => ({ value, label: readableLabel(value) })), effective);
+    return select;
+  }
+  if (variable.dataType === "asset_ref") {
+    const select = document.createElement("select");
+    const assets = listBroadcastAssets(model.assetRegistry).filter((asset) => asset.status === "published");
+    populateSelect(select, [{ value: "", label: "Sin recurso" }, ...assets.map((asset) => ({ value: asset.assetId, label: asset.name }))], effective?.assetId || "");
+    return select;
+  }
+  const input = document.createElement(["production.message", "production.emergencyText", "production.commercialCue"].includes(variable.key) ? "textarea" : "input");
+  if (input.tagName === "INPUT") {
+    input.type = variable.dataType === "boolean" ? "checkbox"
+      : ["number", "duration"].includes(variable.dataType) ? "number"
+        : variable.dataType === "date" ? "date"
+          : variable.dataType === "datetime" ? "datetime-local"
+            : "text";
+  }
+  if (variable.dataType === "boolean") input.checked = effective === true;
+  else input.value = variable.dataType === "datetime" ? toDateTimeLocal(effective) : effective ?? "";
+  if (["number", "duration"].includes(variable.dataType)) {
+    input.min = variable.validation?.min ?? (variable.dataType === "duration" ? 0 : "");
+    input.max = variable.validation?.max ?? "";
+    input.step = variable.dataType === "duration" ? "1" : String(10 ** -(variable.validation?.decimals ?? 2));
+  }
+  if (variable.validation?.maxLength) input.maxLength = variable.validation.maxLength;
+  return input;
+}
+
+function readProductionVariableControl(control, variable, model) {
+  if (!control) throw consoleError("console-variable-control-not-found");
+  if (variable.dataType === "boolean") return control.checked;
+  if (["number", "duration"].includes(variable.dataType)) return control.value === "" ? null : Number(control.value);
+  if (variable.dataType === "datetime") return control.value ? new Date(control.value).toISOString() : null;
+  if (variable.dataType === "asset_ref") {
+    if (!control.value) return null;
+    const asset = listBroadcastAssets(model.assetRegistry).find((item) => item.assetId === control.value);
+    return { assetId: control.value, version: asset?.version || null, variantId: asset?.variants?.[0]?.variantId || null };
+  }
+  return control.value;
+}
+
+function formatVariableValue(value) {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "object") return value.assetId || JSON.stringify(value);
+  if (typeof value === "boolean") return value ? "Sí" : "No";
+  return String(value);
+}
+
+function toDateTimeLocal(value) {
+  if (!value || !Number.isFinite(Date.parse(value))) return "";
+  const date = new Date(value);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
 function renderSystem(root, model) {
   if (!root) return;
   const status = getProductionSystemStatus(model);
@@ -1671,7 +1945,7 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]
@@ -1736,6 +2010,7 @@ function inspectorValue(inspector, key) {
   if (key === "output") return inspector.output;
   if (key === "projection") return inspector.projection;
   if (key === "assets") return inspector.assets;
+  if (key === "variables") return inspector.variables;
   if (key === "queue") return inspector.queue;
   if (key === "actions") return inspector.actions;
   if (key === "warnings") return inspector.warnings;
@@ -1743,7 +2018,7 @@ function inspectorValue(inspector, key) {
 }
 
 function inspectorKeys() {
-  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "queue", "actions", "warnings", "errors"];
+  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "variables", "queue", "actions", "warnings", "errors"];
 }
 
 function normalizeInspectorTab(value) {
@@ -1753,7 +2028,7 @@ function normalizeInspectorTab(value) {
 function inspectorLabel(value) {
   return {
     "data-contract": "Data Contract", "broadcast-state": "Broadcast State", preview: "Preview", program: "Program", output: "Output",
-    projection: "Projection", assets: "Assets", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
+    projection: "Projection", assets: "Assets", variables: "Variables", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
   }[value] || value;
 }
 
@@ -2012,6 +2287,13 @@ function uniqueStrings(values) {
 
 function assertModel(model) {
   if (!model || typeof model !== "object" || !model.state || !model.contract) throw consoleError("console-model-required");
+}
+
+function requireConsoleVariable(model, variableId) {
+  assertModel(model);
+  const variable = model.variableRegistry?.variables?.[variableId];
+  if (!variable) throw consoleError("console-variable-not-found");
+  return variable;
 }
 
 function consoleActionError(dispatch, actionType) {
