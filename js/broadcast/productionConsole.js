@@ -64,10 +64,26 @@ import {
   removeBroadcastComponent,
   validateBroadcastComponent
 } from "./componentLibrary.js?v=20260713-component-library-001-components-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260713-component-library-001-components-v1";
+import {
+  COMPONENT_RENDERER_VERSION,
+  buildComponentRenderSnapshot,
+  clearBroadcastComponentRenderer,
+  cloneComponentRenderResult,
+  createComponentRenderer,
+  destroyComponentRenderer,
+  renderBroadcastComponent,
+  updateBroadcastComponentRender
+} from "./componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
+import {
+  COMPONENT_RENDERER_FIXTURE_TYPES,
+  COMPONENT_RENDERER_OUTPUTS,
+  buildComponentRendererFixture,
+  getComponentRendererOutput
+} from "./fixtures/componentRendererFixtures.js?v=20260714-component-renderer-001-renderer-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-component-renderer-001-renderer-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260713-component-library-001-components-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-component-renderer-001-renderer-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -214,6 +230,14 @@ export function createProductionConsoleModel(options = {}) {
     queueSequence: 0,
     actionSequence: 0,
     componentSequence: 0,
+    componentRendererFixtureType: COMPONENT_RENDERER_FIXTURE_TYPES[0],
+    componentRendererOutputId: COMPONENT_RENDERER_OUTPUTS[0].id,
+    componentRendererState: "uninitialized",
+    componentRendererResult: null,
+    componentRendererSnapshot: null,
+    componentRendererWarnings: [],
+    componentRendererErrors: [],
+    componentRendererSequence: 0,
     actionHistory: [],
     currentGraphicInstanceId: null,
     selectedComponentId: null,
@@ -326,6 +350,105 @@ export function selectProductionConsoleComponent(model, componentId) {
   assertModel(model);
   if (!findBroadcastComponent(model.componentRegistry, componentId)) throw consoleError("console-component-not-found");
   return { ...model, selectedComponentId: componentId, inspectorTab: "components", lastAction: "component-selected", lastActionError: null };
+}
+
+export function selectProductionComponentRendererFixture(model, componentType) {
+  assertModel(model);
+  const selected = COMPONENT_RENDERER_FIXTURE_TYPES.includes(componentType) ? componentType : COMPONENT_RENDERER_FIXTURE_TYPES[0];
+  return {
+    ...model,
+    componentRendererFixtureType: selected,
+    inspectorTab: "components",
+    lastAction: "component-renderer-fixture-selected",
+    lastActionError: null
+  };
+}
+
+export function selectProductionComponentRendererOutput(model, outputId) {
+  assertModel(model);
+  const output = getComponentRendererOutput(outputId);
+  return {
+    ...model,
+    componentRendererOutputId: output.id,
+    componentRendererState: "uninitialized",
+    componentRendererResult: null,
+    componentRendererSnapshot: null,
+    componentRendererWarnings: [],
+    componentRendererErrors: [],
+    inspectorTab: "components",
+    lastAction: "component-renderer-output-selected",
+    lastActionError: null
+  };
+}
+
+export function createProductionConsoleComponentRenderer(model, target, options = {}) {
+  assertModel(model);
+  const output = getComponentRendererOutput(options.outputId || model.componentRendererOutputId);
+  return createComponentRenderer(target, {
+    rendererId: options.rendererId || `production_console_component_renderer_${output.id}`,
+    outputId: output.id,
+    width: output.width,
+    height: output.height,
+    orientation: output.orientation,
+    safeArea: output.safeArea,
+    visibility: model.visibility,
+    debug: options.debug === true,
+    allowDisconnected: options.allowDisconnected === true,
+    now: options.now
+  });
+}
+
+export function renderProductionConsoleComponentFixture(model, renderer, mode = "render", options = {}) {
+  assertModel(model);
+  const sequence = model.componentRendererSequence + 1;
+  const fixture = buildComponentRendererFixture(model.componentRendererFixtureType, { variant: sequence, now: options.now });
+  const renderOptions = {
+    resolvedBindings: fixture.resolvedBindings,
+    resolvedContent: fixture.resolvedContent,
+    resolvedAssets: fixture.resolvedAssets,
+    fallback: fixture.fallback,
+    now: options.now
+  };
+  let result;
+  if (mode === "update" && model.componentRendererResult?.renderId) {
+    result = updateBroadcastComponentRender(renderer, model.componentRendererResult.renderId, fixture.instance, renderOptions);
+  } else {
+    if (model.componentRendererResult?.renderId) clearBroadcastComponentRenderer(renderer, { now: options.now });
+    result = renderBroadcastComponent(renderer, fixture.instance, {
+      ...renderOptions,
+      renderId: `production_console_${model.componentRendererFixtureType}`
+    });
+  }
+  const snapshot = buildComponentRenderSnapshot(renderer, { visibility: model.visibility, now: options.now });
+  return {
+    ...model,
+    componentRendererState: renderer.state,
+    componentRendererResult: cloneComponentRenderResult(result),
+    componentRendererSnapshot: snapshot,
+    componentRendererWarnings: [...(result.warnings || []), ...(snapshot.warnings || [])],
+    componentRendererErrors: [...(result.errors || []), ...(snapshot.errors || [])],
+    componentRendererSequence: sequence,
+    inspectorTab: "components",
+    lastAction: mode === "update" ? "component-renderer-updated" : "component-renderer-rendered",
+    lastActionError: null
+  };
+}
+
+export function clearProductionConsoleComponentRenderer(model, renderer, options = {}) {
+  assertModel(model);
+  const result = clearBroadcastComponentRenderer(renderer, { now: options.now });
+  const snapshot = buildComponentRenderSnapshot(renderer, { visibility: model.visibility, now: options.now });
+  return {
+    ...model,
+    componentRendererState: result.state,
+    componentRendererResult: null,
+    componentRendererSnapshot: snapshot,
+    componentRendererWarnings: snapshot.warnings || [],
+    componentRendererErrors: snapshot.errors || [],
+    inspectorTab: "components",
+    lastAction: "component-renderer-cleared",
+    lastActionError: null
+  };
 }
 
 export function disposeProductionConsole(model) {
@@ -992,7 +1115,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       assetManager: ASSET_MANAGER_VERSION,
       actionEngine: BROADCAST_ACTION_ENGINE_VERSION,
       productionVariables: PRODUCTION_VARIABLES_VERSION,
-      componentLibrary: COMPONENT_LIBRARY_VERSION
+      componentLibrary: COMPONENT_LIBRARY_VERSION,
+      componentRenderer: COMPONENT_RENDERER_VERSION
     }
   };
   return sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -1113,19 +1237,30 @@ export function initializeProductionConsole(root = document) {
   const settings = readSessionSettings();
   let model = createProductionConsoleModel({ ...settings, safeMode: true });
   const refs = collectRefs(root);
+  const runtime = { componentRenderer: null };
   populateStaticControls(refs, model);
+  if (refs.componentRendererTarget) {
+    runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
+    model = { ...model, componentRendererState: runtime.componentRenderer.state };
+  }
   const update = (nextModel) => {
     model = nextModel;
     writeSessionSettings(model);
-    renderConsole(refs, model);
+    renderConsole(refs, model, runtime);
   };
-  bindConsoleEvents(refs, () => model, update);
-  renderConsole(refs, model);
+  bindConsoleEvents(refs, () => model, update, runtime);
+  renderConsole(refs, model, runtime);
   console.info("[production-console] initialized", {
     version: PRODUCTION_CONSOLE_VERSION,
     appVersion: PRODUCTION_CONSOLE_APP_VERSION
   });
-  return { getModel: () => model, dispose: () => disposeProductionConsole(model) };
+  return {
+    getModel: () => model,
+    dispose: () => {
+      if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
+      disposeProductionConsole(model);
+    }
+  };
 }
 
 function registerConsoleOutputs(now) {
@@ -1433,6 +1568,16 @@ function buildConsoleComponentsInspector(model, visibility, options = {}) {
   const validations = components.map((component) => validateBroadcastComponent(component));
   return {
     version: COMPONENT_LIBRARY_VERSION,
+    renderer: {
+      version: COMPONENT_RENDERER_VERSION,
+      state: model.componentRendererState,
+      fixtureType: model.componentRendererFixtureType,
+      output: getComponentRendererOutput(model.componentRendererOutputId),
+      result: cloneValue(model.componentRendererResult),
+      snapshot: cloneValue(model.componentRendererSnapshot),
+      warnings: cloneValue(model.componentRendererWarnings || []),
+      errors: cloneValue(model.componentRendererErrors || [])
+    },
     registry: {
       libraryVersion: COMPONENT_LIBRARY_VERSION,
       revision: model.componentRegistry?.revision ?? 0,
@@ -1443,11 +1588,13 @@ function buildConsoleComponentsInspector(model, visibility, options = {}) {
     snapshot,
     warnings: uniqueStrings([
       ...validations.flatMap((validation) => validation.warnings || []),
-      ...(snapshot?.warnings || [])
+      ...(snapshot?.warnings || []),
+      ...(model.componentRendererWarnings || [])
     ]),
     errors: uniqueStrings([
       ...validations.flatMap((validation) => validation.errors || []),
-      ...(snapshot?.errors || [])
+      ...(snapshot?.errors || []),
+      ...(model.componentRendererErrors || [])
     ])
   };
 }
@@ -1589,6 +1736,16 @@ function collectRefs(root) {
     variables: id("console-variables"),
     system: id("console-system"),
     inspectorTabs: id("console-inspector-tabs"),
+    componentRendererLab: id("console-component-renderer-lab"),
+    componentRendererFixture: id("console-component-renderer-fixture"),
+    componentRendererOutput: id("console-component-renderer-output"),
+    componentRendererFrame: id("console-component-renderer-frame"),
+    componentRendererSafeArea: id("console-component-renderer-safe-area"),
+    componentRendererTarget: id("console-component-renderer-target"),
+    componentRendererStatus: id("console-component-renderer-status"),
+    componentRendererWarnings: id("console-component-renderer-warnings"),
+    componentRendererErrors: id("console-component-renderer-errors"),
+    componentRendererActions: [...root.querySelectorAll("[data-component-renderer-action]")],
     inspector: id("console-inspector"),
     actions: [...root.querySelectorAll("[data-console-action]")],
     presets: [...root.querySelectorAll("[data-console-preset]")]
@@ -1605,9 +1762,11 @@ function populateStaticControls(refs, model) {
   populateSelect(refs.layer, PLAYGROUND_LAYER_IDS.map((value) => ({ value, label: value })), model.geometry.layerId);
   populateSelect(refs.enterAnimation, ANIMATIONS.map((value) => ({ value, label: value })), model.animation.enter);
   populateSelect(refs.exitAnimation, ANIMATIONS.map((value) => ({ value, label: value })), model.animation.exit);
+  populateSelect(refs.componentRendererFixture, COMPONENT_RENDERER_FIXTURE_TYPES.map((value) => ({ value, label: readableLabel(value) })), model.componentRendererFixtureType);
+  populateSelect(refs.componentRendererOutput, COMPONENT_RENDERER_OUTPUTS.map((value) => ({ value: value.id, label: value.label })), model.componentRendererOutputId);
 }
 
-function bindConsoleEvents(refs, getModel, setModel) {
+function bindConsoleEvents(refs, getModel, setModel, runtime) {
   const run = (callback) => {
     try {
       setModel(callback(getModel()));
@@ -1621,7 +1780,12 @@ function bindConsoleEvents(refs, getModel, setModel) {
     const selected = selectProductionAsset(model, refs.asset.value);
     return selected.state.preview.active ? prepareProductionPreview(selected, {}, { confirmed: true }) : selected;
   }));
-  refs.visibility?.addEventListener("change", () => run((model) => setProductionVisibility(model, refs.visibility.value)));
+  refs.visibility?.addEventListener("change", () => run((model) => {
+    const selected = setProductionVisibility(model, refs.visibility.value);
+    if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
+    runtime.componentRenderer = createProductionConsoleComponentRenderer(selected, refs.componentRendererTarget);
+    return { ...selected, componentRendererState: runtime.componentRenderer.state, componentRendererResult: null, componentRendererSnapshot: null };
+  }));
   refs.output?.addEventListener("change", () => run((model) => selectProductionOutput(model, refs.output.value)));
   [refs.x, refs.y, refs.width, refs.height, refs.scale, refs.opacity, refs.anchor, refs.unit, refs.layer, refs.enterAnimation, refs.exitAnimation, refs.duration, refs.delay, refs.autoHide]
     .filter(Boolean)
@@ -1688,6 +1852,20 @@ function bindConsoleEvents(refs, getModel, setModel) {
     if (!button) return;
     run((model) => ({ ...model, inspectorTab: normalizeInspectorTab(button.dataset.inspectorTab), lastAction: "inspector-tab-changed" }));
   });
+  refs.componentRendererFixture?.addEventListener("change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)));
+  refs.componentRendererOutput?.addEventListener("change", () => run((model) => {
+    if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
+    const selected = selectProductionComponentRendererOutput(model, refs.componentRendererOutput.value);
+    runtime.componentRenderer = createProductionConsoleComponentRenderer(selected, refs.componentRendererTarget);
+    return { ...selected, componentRendererState: runtime.componentRenderer.state };
+  }));
+  refs.componentRendererActions.forEach((button) => button.addEventListener("click", () => run((model) => {
+    if (!runtime.componentRenderer || runtime.componentRenderer.state === "destroyed") {
+      runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
+    }
+    if (button.dataset.componentRendererAction === "clear") return clearProductionConsoleComponentRenderer(model, runtime.componentRenderer);
+    return renderProductionConsoleComponentFixture(model, runtime.componentRenderer, button.dataset.componentRendererAction);
+  })));
   refs.inspector?.addEventListener("click", async (event) => {
     const componentAction = event.target.closest("button[data-component-action]");
     if (componentAction) {
@@ -1757,7 +1935,7 @@ function handleConsoleAction(model, action, refs) {
   return model;
 }
 
-function renderConsole(refs, model) {
+function renderConsole(refs, model, runtime = {}) {
   syncControls(refs, model);
   const previewProjection = buildProductionProjection(model, "preview");
   const programProjection = buildProductionProjection(model, "program");
@@ -1773,6 +1951,7 @@ function renderConsole(refs, model) {
   renderVariables(refs.variables, model);
   renderSystem(refs.system, model);
   renderInspectorTabs(refs.inspectorTabs, model);
+  renderComponentRendererLab(refs, model, runtime);
   renderInspector(refs.inspector, model);
 }
 
@@ -1794,6 +1973,8 @@ function syncControls(refs, model) {
   setValue(refs.exitAnimation, model.animation.exit);
   setValue(refs.duration, model.animation.duration);
   setValue(refs.delay, model.animation.delay);
+  setValue(refs.componentRendererFixture, model.componentRendererFixtureType);
+  setValue(refs.componentRendererOutput, model.componentRendererOutputId);
   if (refs.autoHide) refs.autoHide.checked = model.animation.autoHide;
 }
 
@@ -1810,6 +1991,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
     element("span", "console-meta", `Variables ${PRODUCTION_VARIABLES_VERSION}`),
     element("span", "console-meta", `Components ${COMPONENT_LIBRARY_VERSION}`),
+    element("span", "console-meta", `Renderer ${COMPONENT_RENDERER_VERSION}`),
     element("span", "console-meta", `${getFixtureDefinition(model.fixtureId).label}`),
     element("span", "console-meta", `${getBroadcastOutput(model.selectedOutputId)?.name || "Sin output"}`),
     statusChip(model.safeMode ? "Modo seguro activo" : "Modo seguro inactivo", model.safeMode ? "ok" : "warning")
@@ -2133,7 +2315,7 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]
@@ -2169,6 +2351,45 @@ function renderInspectorTabs(root, model) {
     button.dataset.inspectorTab = key;
     root.append(button);
   });
+}
+
+function renderComponentRendererLab(refs, model, runtime) {
+  const root = refs.componentRendererLab;
+  if (!root) return;
+  root.hidden = model.inspectorTab !== "components";
+  const output = getComponentRendererOutput(model.componentRendererOutputId);
+  if (refs.componentRendererFrame) {
+    refs.componentRendererFrame.style.aspectRatio = `${output.width} / ${output.height}`;
+    refs.componentRendererFrame.dataset.orientation = output.orientation;
+  }
+  if (refs.componentRendererSafeArea) {
+    refs.componentRendererSafeArea.style.top = `${(output.safeArea.top / output.height) * 100}%`;
+    refs.componentRendererSafeArea.style.right = `${(output.safeArea.right / output.width) * 100}%`;
+    refs.componentRendererSafeArea.style.bottom = `${(output.safeArea.bottom / output.height) * 100}%`;
+    refs.componentRendererSafeArea.style.left = `${(output.safeArea.left / output.width) * 100}%`;
+  }
+  const runtimeState = runtime.componentRenderer?.state || model.componentRendererState;
+  if (refs.componentRendererStatus) {
+    refs.componentRendererStatus.replaceChildren(
+      statusChip(readableLabel(runtimeState), runtimeState === "error" ? "error" : runtimeState === "destroyed" ? "warning" : "ok"),
+      element("span", "console-meta", readableLabel(model.componentRendererFixtureType)),
+      element("span", "console-meta", `${output.width} x ${output.height}`),
+      element("span", "console-meta", output.orientation)
+    );
+  }
+  renderDiagnosticList(refs.componentRendererWarnings, model.componentRendererWarnings, "Sin warnings del renderer.");
+  renderDiagnosticList(refs.componentRendererErrors, model.componentRendererErrors, "Sin errores del renderer.");
+}
+
+function renderDiagnosticList(root, values, emptyText) {
+  if (!root) return;
+  root.replaceChildren();
+  const items = uniqueStrings(values || []);
+  if (!items.length) {
+    root.append(element("span", "console-empty-message", emptyText));
+    return;
+  }
+  items.forEach((value) => root.append(element("span", "console-diagnostic-item", value)));
 }
 
 function renderInspector(root, model) {
@@ -2238,12 +2459,15 @@ function renderComponentManager(root, componentsInspector) {
   }
 
   const snapshot = element("section", "console-component-snapshot");
-  snapshot.append(element("h4", "", "Vista previa JSON"));
+  snapshot.append(element("h4", "", "Inspector de componente y renderer"));
   const copy = element("button", "button button-quiet button-small", "Copiar JSON");
   copy.type = "button";
   copy.dataset.copyJson = "true";
   const pre = document.createElement("pre");
-  pre.textContent = JSON.stringify(componentsInspector?.snapshot || null, null, 2);
+  pre.textContent = JSON.stringify({
+    component: componentsInspector?.snapshot || null,
+    renderer: componentsInspector?.renderer || null
+  }, null, 2);
   snapshot.append(copy, pre);
   layout.append(library, detail, snapshot);
   root.append(toolbar, layout);

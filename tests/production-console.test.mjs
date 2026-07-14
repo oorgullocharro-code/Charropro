@@ -8,10 +8,12 @@ import {
   buildProductionProjection,
   buildProductionRenderDescriptor,
   changeProductionQueuePriority,
+  clearProductionConsoleComponentRenderer,
   clearProductionPreview,
   clearProductionProgram,
   clearProductionQueue,
   createProductionConsoleModel,
+  createProductionConsoleComponentRenderer,
   createProductionConsoleTestComponent,
   dispatchProductionConsoleAction,
   disposeProductionConsole,
@@ -23,10 +25,13 @@ import {
   prepareProductionPreview,
   removeProductionConsoleComponent,
   removeProductionQueueItem,
+  renderProductionConsoleComponentFixture,
   restoreLastProductionPreview,
   resetProductionConsoleVariable,
   sanitizeProductionConsoleInspectorData,
   selectProductionAsset,
+  selectProductionComponentRendererFixture,
+  selectProductionComponentRendererOutput,
   selectProductionGraphic,
   selectProductionOutput,
   setProductionLayerAction,
@@ -37,6 +42,7 @@ import {
   transitionProductionToProgram,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
+import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
 import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
 import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260713-asset-manager-001-assets-v1";
@@ -50,7 +56,8 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260713-component-library-001-components-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-component-renderer-001-renderer-v1");
+assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
 
@@ -130,6 +137,33 @@ assert.equal(listBroadcastComponents(model.componentRegistry).length, 1);
 assert.equal(model.selectedComponentId, firstComponentId);
 assert.deepEqual(model.state, stateBeforeComponents);
 for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeComponents[outputId]);
+
+// The renderer lab is visual-only and never mutates Preview, Program or registered Outputs.
+const stateBeforeRenderer = structuredClone(model.state);
+const outputsBeforeRenderer = Object.fromEntries(model.outputIds.map((outputId) => [outputId, structuredClone(getBroadcastOutput(outputId))]));
+const rendererDocument = createRendererMockDocument();
+const rendererTarget = rendererDocument.createElement("div");
+rendererDocument.body.appendChild(rendererTarget);
+let componentRenderer = createProductionConsoleComponentRenderer(model, rendererTarget, { rendererId: "console_renderer_test", now: T1 });
+assert.equal(componentRenderer.state, "ready");
+model = selectProductionComponentRendererFixture(model, "score");
+model = renderProductionConsoleComponentFixture(model, componentRenderer, "render", { now: T1 });
+assert.equal(model.componentRendererState, "rendered");
+assert.equal(model.componentRendererResult.componentType, "score");
+assert.equal(model.componentRendererSnapshot.components.length, 1);
+model = renderProductionConsoleComponentFixture(model, componentRenderer, "update", { now: T2 });
+assert.equal(model.componentRendererResult.renderId, "production_console_score");
+destroyComponentRenderer(componentRenderer);
+model = selectProductionComponentRendererOutput(model, "component_vertical");
+componentRenderer = createProductionConsoleComponentRenderer(model, rendererTarget, { rendererId: "console_renderer_vertical", now: T2 });
+assert.equal(componentRenderer.orientation, "portrait");
+model = renderProductionConsoleComponentFixture(model, componentRenderer, "render", { now: T2 });
+model = clearProductionConsoleComponentRenderer(model, componentRenderer, { now: T3 });
+assert.equal(model.componentRendererState, "cleared");
+assert.equal(model.componentRendererSnapshot.components.length, 0);
+assert.deepEqual(model.state, stateBeforeRenderer);
+for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeRenderer[outputId]);
+destroyComponentRenderer(componentRenderer);
 
 // All fixtures rebuild through the Data Contract and preserve their sports scope.
 for (const fixture of PRODUCTION_CONSOLE_FIXTURES) {
@@ -469,6 +503,10 @@ for (const id of [
   "console-outputs-list",
   "console-queue-list",
   "console-variables",
+  "console-component-renderer-lab",
+  "console-component-renderer-target",
+  "console-component-renderer-fixture",
+  "console-component-renderer-output",
   "console-inspector"
 ]) assert.ok(html.includes(`id="${id}"`), `HTML missing ${id}`);
 assert.equal(source.includes("innerHTML"), false);
@@ -491,7 +529,10 @@ assert.ok(source.includes('const pre = refs.inspector.querySelector("pre")'));
 assert.ok(source.includes("componentRegistry"));
 assert.ok(source.includes('components: "Componentes"'));
 assert.ok(source.includes("Crear componente de prueba"));
-assert.ok(source.includes("Vista previa JSON"));
+assert.ok(html.includes("Laboratorio de Componentes V2"));
+assert.ok(source.includes("COMPONENT_RENDERER_VERSION"));
+assert.ok(source.includes("renderProductionConsoleComponentFixture"));
+assert.ok(source.includes("clearProductionConsoleComponentRenderer"));
 assert.ok(source.includes("sessionStorage"));
 assert.ok(source.includes("fixtureId: model.fixtureId"));
 assert.ok(source.includes("safeMode: model.safeMode"));
@@ -534,3 +575,40 @@ assert.equal(listBroadcastComponents(reloaded.componentRegistry).length, 0);
 disposeProductionConsole(reloaded);
 
 console.log("production-console.test.mjs: OK");
+
+function createRendererMockDocument() {
+  class Element {
+    constructor(tagName, ownerDocument) {
+      this.nodeType = 1;
+      this.tagName = String(tagName).toUpperCase();
+      this.namespaceURI = "http://www.w3.org/1999/xhtml";
+      this.ownerDocument = ownerDocument;
+      this.parentNode = null;
+      this.children = [];
+      this.style = {};
+      this.className = "";
+      this.attributes = new Map();
+      this.isConnected = false;
+      this._textContent = "";
+    }
+    appendChild(child) { child.remove(); child.parentNode = this; child.setConnected(this.isConnected); this.children.push(child); return child; }
+    append(...children) { children.forEach((child) => this.appendChild(child)); }
+    replaceChildren(...children) { this.children.forEach((child) => { child.parentNode = null; child.setConnected(false); }); this.children = []; this._textContent = ""; this.append(...children); }
+    replaceWith(next) { if (!this.parentNode) return; const parent = this.parentNode; const index = parent.children.indexOf(this); this.parentNode = null; next.parentNode = parent; next.setConnected(parent.isConnected); parent.children[index] = next; }
+    remove() { if (!this.parentNode) return; const parent = this.parentNode; parent.children = parent.children.filter((child) => child !== this); this.parentNode = null; this.setConnected(false); }
+    setAttribute(name, value) { this.attributes.set(name, String(value)); }
+    removeAttribute(name) { this.attributes.delete(name); }
+    setConnected(value) { this.isConnected = value; this.children.forEach((child) => child.setConnected(value)); }
+    set textContent(value) { this.replaceChildren(); this._textContent = String(value ?? ""); }
+    get textContent() { return this._textContent + this.children.map((child) => child.textContent).join(""); }
+  }
+  const mockDocument = {
+    nodeType: 9,
+    baseURI: "https://charropro.test/production-console.html",
+    defaultView: { location: new URL("https://charropro.test/production-console.html"), HTMLElement: Element },
+    createElement(tagName) { return new Element(tagName, mockDocument); }
+  };
+  mockDocument.body = mockDocument.createElement("body");
+  mockDocument.body.isConnected = true;
+  return mockDocument;
+}

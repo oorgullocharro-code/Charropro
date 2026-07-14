@@ -415,3 +415,11 @@ La aplicación principal incorpora la sección `Producción` como punto oficial 
 También se agregó una tarjeta compacta de accesos rápidos en `Conexión`. La visibilidad reutiliza la capacidad existente `graphics`: supervisor, administrador normalizado, operador y gráficos tienen acceso; juez, locutor, lectura, organizador y usuarios sin permiso quedan bloqueados.
 
 Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos de una lista cerrada. No se agregaron consultas Firebase, polling, persistencia de Program, control real de OBS ni permisos persistentes nuevos. Consulta `PRODUCTION_NAV_V1.md` para la especificación completa.
+# COMPONENT-RENDERER-001 - Render visual seguro de componentes V2
+
+- Version de aplicacion: `20260714-component-renderer-001-renderer-v1`.
+- Se agrego `js/broadcast/componentRenderer.js` como renderer puro, seguro y en memoria para instancias validas de Component Library.
+- Se incorporaron 18 tipos visuales, lifecycle completo, geometria por output, estilos por allowlist, fallbacks controlados y snapshots sin DOM.
+- Production Console incorpora un Laboratorio de Componentes V2 para 1920 x 1080, 1080 x 1920 y 3840 x 720, sin modificar Preview, Program ni Outputs.
+- No se agregaron Firebase, persistencia, OBS, calculos deportivos, timer activo, QR real, ticker animado ni Program Output.
+- Contrato y limitaciones: `BROADCAST_COMPONENT_RENDERER_V1.md`.

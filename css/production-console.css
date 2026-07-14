@@ -1053,6 +1053,340 @@ input {
   overflow: auto;
 }
 
+.console-component-renderer-lab {
+  border-bottom: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 0 16px;
+}
+
+.console-component-renderer-lab[hidden] {
+  display: none;
+}
+
+.console-component-renderer-heading,
+.console-component-renderer-controls,
+.console-component-renderer-status,
+.console-component-renderer-actions {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.console-component-renderer-heading {
+  align-items: start;
+  justify-content: space-between;
+}
+
+.console-component-renderer-heading p,
+.console-component-renderer-heading h3 {
+  margin: 0;
+}
+
+.console-component-renderer-heading p {
+  color: var(--console-muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.console-component-renderer-heading h3 {
+  font-size: 1rem;
+}
+
+.console-component-renderer-controls .console-field {
+  flex: 1 1 180px;
+}
+
+.console-component-renderer-actions {
+  flex: 1 1 100%;
+}
+
+.console-component-renderer-viewport {
+  background: #070809;
+  border: 1px solid var(--console-border);
+  display: grid;
+  min-height: 150px;
+  overflow: auto;
+  padding: 12px;
+  place-items: center;
+}
+
+.console-component-renderer-frame {
+  aspect-ratio: 16 / 9;
+  background: #101318;
+  border: 1px solid #39404b;
+  box-shadow: 0 12px 34px rgb(0 0 0 / 35%);
+  isolation: isolate;
+  max-height: 520px;
+  max-width: 100%;
+  min-height: 120px;
+  overflow: hidden;
+  position: relative;
+  width: min(100%, 760px);
+}
+
+.console-component-renderer-frame[data-orientation="portrait"] {
+  height: min(62vh, 520px);
+  width: auto;
+}
+
+.console-component-renderer-frame[data-orientation="panoramic"] {
+  min-height: 52px;
+  width: 100%;
+}
+
+.console-component-renderer-grid,
+.console-component-renderer-safe-area,
+.console-component-renderer-target {
+  inset: 0;
+  position: absolute;
+}
+
+.console-component-renderer-grid {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 5%) 1px, transparent 1px);
+  background-size: 10% 10%;
+  pointer-events: none;
+}
+
+.console-component-renderer-safe-area {
+  border: 1px dashed rgb(214 173 67 / 70%);
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.console-component-renderer-target {
+  overflow: hidden;
+  z-index: 1;
+}
+
+.console-component-renderer-diagnostics {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.console-component-renderer-diagnostics > div {
+  background: var(--console-panel-2);
+  border: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 8px;
+}
+
+.console-component-renderer-diagnostics strong {
+  font-size: 0.75rem;
+}
+
+.console-component-renderer-diagnostics [id] {
+  display: grid;
+  gap: 3px;
+}
+
+.console-diagnostic-item {
+  color: var(--console-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.cp-component-renderer-root,
+.cp-component-renderer-canvas,
+.cp-component,
+.cp-component * {
+  box-sizing: border-box;
+}
+
+.cp-component {
+  color: #f4f5f7;
+  min-height: 0;
+  min-width: 0;
+}
+
+.cp-component > * {
+  height: 100%;
+  max-width: 100%;
+  width: 100%;
+}
+
+.cp-component-text-value {
+  margin: 0;
+}
+
+.cp-component-image-media,
+.cp-component-logo-media,
+.cp-component-fallback-asset {
+  display: block;
+}
+
+.cp-component-icon-symbol,
+.cp-component-badge-value {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.cp-component-icon-symbol {
+  font-size: 1.8em;
+}
+
+.cp-component-shape {
+  background: currentColor;
+  height: 100%;
+  width: 100%;
+}
+
+.cp-component-line-shape {
+  border-color: currentColor;
+}
+
+.cp-component-badge-live {
+  background: #a92828;
+  color: #fff;
+  padding: 0.35em 0.65em;
+}
+
+.cp-component-metric {
+  align-content: center;
+  display: grid;
+  gap: 4px;
+}
+
+.cp-component-metric-label,
+.cp-component-metric-status {
+  font-size: 0.4em;
+  opacity: 0.78;
+}
+
+.cp-component-metric-value {
+  font-size: 1em;
+  line-height: 1;
+}
+
+.cp-component-ranking-list,
+.cp-component-list-items {
+  display: grid;
+  gap: 5px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cp-component-ranking-row {
+  align-items: center;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 2em minmax(0, 1fr) auto;
+  padding: 0.22em 0;
+}
+
+.cp-component-ranking-row.is-highlighted {
+  color: #efca6c;
+}
+
+.cp-component-table-wrap {
+  overflow: auto;
+}
+
+.cp-component-table-element {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.cp-component-table-element th,
+.cp-component-table-element td {
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  padding: 0.28em 0.4em;
+}
+
+.cp-component-qr-placeholder {
+  align-content: center;
+  background:
+    linear-gradient(45deg, #e7e7e7 25%, transparent 25%) 0 0 / 18px 18px,
+    linear-gradient(-45deg, #e7e7e7 25%, transparent 25%) 0 0 / 18px 18px,
+    #fff;
+  color: #111;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  text-align: center;
+}
+
+.cp-component-qr-placeholder strong {
+  font-size: 1.6em;
+}
+
+.cp-component-sponsor-content {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(80px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.cp-component-sponsor-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.cp-component-progress {
+  align-content: center;
+  display: grid;
+  gap: 8px;
+}
+
+.cp-component-progress-track {
+  background: rgb(255 255 255 / 14%);
+  min-height: 14px;
+  overflow: hidden;
+}
+
+.cp-component-progress-fill {
+  background: #d6ad43;
+  height: 100%;
+  min-height: 14px;
+}
+
+.cp-component-progress-vertical {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.cp-component-progress-vertical .cp-component-progress-track {
+  align-items: end;
+  display: flex;
+  min-height: 80px;
+}
+
+.cp-component-progress-vertical .cp-component-progress-fill {
+  width: 100%;
+}
+
+.cp-component-ticker-static {
+  align-items: center;
+  display: flex;
+  white-space: nowrap;
+}
+
+.cp-component-fallback-placeholder,
+.cp-component-fallback-error,
+.cp-component-fallback-empty {
+  align-items: center;
+  border: 1px dashed rgb(255 255 255 / 35%);
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
+.cp-component-fallback-error {
+  border-color: #d65353;
+  color: #ffb5b5;
+}
+
 @media (max-width: 700px) {
   .console-component-manager {
     grid-template-columns: 1fr;
@@ -1060,5 +1394,13 @@ input {
 
   .console-component-snapshot {
     grid-column: 1;
+  }
+
+  .console-component-renderer-diagnostics {
+    grid-template-columns: 1fr;
+  }
+
+  .console-component-renderer-viewport {
+    padding: 8px;
   }
 }

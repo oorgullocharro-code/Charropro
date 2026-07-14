@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260713-component-library-001-components-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260714-component-renderer-001-renderer-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -178,11 +178,46 @@
         <section class="console-panel console-inspector-panel">
           <div class="console-panel-heading"><div><p>JSON de solo lectura</p><h2>Inspector técnico</h2></div></div>
           <div id="console-inspector-tabs" class="console-tabs" role="tablist"></div>
+          <section id="console-component-renderer-lab" class="console-component-renderer-lab" hidden>
+            <div class="console-component-renderer-heading">
+              <div>
+                <p>Render seguro en memoria</p>
+                <h3>Laboratorio de Componentes V2</h3>
+              </div>
+              <div id="console-component-renderer-status" class="console-component-renderer-status" aria-live="polite"></div>
+            </div>
+            <div class="console-component-renderer-controls">
+              <label class="console-field">
+                <span>Fixture</span>
+                <select id="console-component-renderer-fixture"></select>
+              </label>
+              <label class="console-field">
+                <span>Output simulado</span>
+                <select id="console-component-renderer-output"></select>
+              </label>
+              <div class="console-component-renderer-actions">
+                <button class="button button-primary button-small" type="button" data-component-renderer-action="render">Renderizar</button>
+                <button class="button button-quiet button-small" type="button" data-component-renderer-action="update">Actualizar</button>
+                <button class="button button-quiet button-small" type="button" data-component-renderer-action="clear">Limpiar</button>
+              </div>
+            </div>
+            <div class="console-component-renderer-viewport">
+              <div id="console-component-renderer-frame" class="console-component-renderer-frame" data-orientation="landscape">
+                <div class="console-component-renderer-grid" aria-hidden="true"></div>
+                <div id="console-component-renderer-safe-area" class="console-component-renderer-safe-area" aria-hidden="true"></div>
+                <div id="console-component-renderer-target" class="console-component-renderer-target" aria-label="Vista visual del componente"></div>
+              </div>
+            </div>
+            <div class="console-component-renderer-diagnostics">
+              <div><strong>Warnings</strong><div id="console-component-renderer-warnings"></div></div>
+              <div><strong>Errors</strong><div id="console-component-renderer-errors"></div></div>
+            </div>
+          </section>
           <div id="console-inspector" class="console-inspector"></div>
         </section>
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260713-component-library-001-components-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-component-renderer-001-renderer-v1"></script>
 </body>
 </html>
