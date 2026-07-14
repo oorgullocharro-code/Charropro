@@ -370,3 +370,18 @@ La especificación operativa está en `PRODUCTION_CONSOLE_V1.md`.
 Se cerró la fuga de identidad operativa del inspector público mediante una sanitización central y recursiva aplicada a todas sus pestañas. Preview y Program pueden permanecer activos y visibles sin exponer `preparedBy`, `takenBy`, `updatedBy`, operador, juez, sesión, tenant, cliente o diagnósticos internos.
 
 La matriz deja actores operativos disponibles desde `operational`; `restricted` conserva contexto autorizado, pero ningún nivel expone credenciales, tokens, secretos ni referencias inseguras. La corrección no modifica Preview, Program, layers, outputs, queue, heartbeat, fixtures ni assets.
+
+## PRODUCTION-NAV-001
+
+Versión:
+
+    v=20260713-production-nav-001-broadcast-access1
+
+La aplicación principal incorpora la sección `Producción` como punto oficial de acceso a Broadcast Studio. La sección usa el identificador estable `production`, muestra el estado declarativo de sus módulos y enlaza de forma segura a:
+
+- `production-console.html`;
+- `broadcast-playground.html`.
+
+También se agregó una tarjeta compacta de accesos rápidos en `Conexión`. La visibilidad reutiliza la capacidad existente `graphics`: supervisor, administrador normalizado, operador y gráficos tienen acceso; juez, locutor, lectura, organizador y usuarios sin permiso quedan bloqueados.
+
+Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos de una lista cerrada. No se agregaron consultas Firebase, polling, persistencia de Program, control real de OBS ni permisos persistentes nuevos. Consulta `PRODUCTION_NAV_V1.md` para la especificación completa.

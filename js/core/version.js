@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260713-production-console-001-control-center1";
+export const CHARROPRO_APP_VERSION = "20260713-production-nav-001-broadcast-access1";
 
 let versionLogged = false;
 

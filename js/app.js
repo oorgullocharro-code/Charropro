@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260713-asset-manager-001-assets-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260713-production-nav-001-broadcast-access1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -115,6 +115,35 @@ import {
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
 const PUBLIC_LINKS_PAGE_VERSION = "20260709-public-links-001";
+const PRODUCTION_NAV_VERSION = CHARROPRO_APP_VERSION;
+const PRODUCTION_NAV_VIEW = "production";
+const PRODUCTION_NAV_TARGETS = Object.freeze({
+  console: Object.freeze({
+    id: "console",
+    name: "Consola de Producción",
+    route: "production-console.html",
+    description: "Control Center para operar Preview, Program, layers, outputs, cola y recursos.",
+    availability: "Disponible",
+    availabilityDetail: "V1 operativa con fixtures"
+  }),
+  playground: Object.freeze({
+    id: "playground",
+    name: "Playground de Broadcast",
+    route: "broadcast-playground.html",
+    description: "Banco visual de pruebas para validar datos, outputs, geometría, assets y separación Preview/Program.",
+    availability: "Disponible",
+    availabilityDetail: "Entorno de pruebas"
+  })
+});
+const PRODUCTION_NAV_MODULES = Object.freeze([
+  Object.freeze({ name: "Arquitectura maestra", version: null, status: "Disponible", description: "Base documentada de Broadcast Studio." }),
+  Object.freeze({ name: "Data Contract", version: "1.0.0", status: "Disponible", description: "Contrato universal y sanitizado de datos." }),
+  Object.freeze({ name: "Broadcast State", version: "1.0.0", status: "Disponible", description: "Estado central de Preview, Program, layers y queue." }),
+  Object.freeze({ name: "Output Engine", version: "1.0.0", status: "Disponible", description: "Proyecciones y salidas universales en memoria." }),
+  Object.freeze({ name: "Asset Manager", version: "1.0.0", status: "Disponible", description: "Catálogo y resolución controlada de recursos." }),
+  Object.freeze({ name: "Playground", version: "V1", status: "Disponible", description: "Entorno visual de pruebas con fixtures." }),
+  Object.freeze({ name: "Production Console", version: "V1", status: "Disponible", description: "Control Center seguro con fixtures locales." })
+]);
 const APP_MODE = window.CHARROPRO_APP_MODE === "tournament" ? "tournament" : "portal";
 const IS_TOURNAMENT_APP = APP_MODE === "tournament";
 const scoringScrollSelectors = [".score-workspace", ".scoring-main", ".turn-panel", ".suertes-strip", ".scoring-shell", ".cp-scoring-shell"];
@@ -222,6 +251,9 @@ const READ_ACTIONS = new Set([
   "select-rule-suerte",
   "copy-live-url",
   "copy-public-url",
+  "open-production-target",
+  "open-production-target-new",
+  "copy-production-url",
   "export-csv",
   "export-official-xlsx",
   "export-json",
@@ -355,11 +387,12 @@ const routeMeta = {
   history: ["Historial", "Archivo por temporadas de torneos guardados."],
   users: ["Usuarios", "Alta de permisos y roles del sistema."],
   graphicsAccess: ["Graficos", "Links y pantallas para OBS."],
+  production: ["Producción", "Centro de producción y gráficos en vivo."],
   rules: ["Botoneras", "Reglamento y botones por torneo."],
   rulesAdmin: ["Botoneras generales", "Reglamento base oculto del sistema."],
   settings: ["Conexion", "Google Sheets, OBS y respaldos."]
 };
-const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "officialProgram", "program", "results", "stats", "recovery", "graphicsAccess", "rules", "settings"]);
+const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "officialProgram", "program", "results", "stats", "recovery", "graphicsAccess", "production", "rules", "settings"]);
 
 function isIndividualTournament(tournament = getActiveTournament()) {
   return INDIVIDUAL_TOURNAMENT_TYPES.includes(tournament?.type);
@@ -974,6 +1007,7 @@ function getSidebarFooterLinks() {
 function getVisibleGeneralNavItems() {
   const items = [
     ["tournaments", "Torneos", "folder"],
+    [PRODUCTION_NAV_VIEW, "Producción", "monitor"],
     ["globalStats", "Est. global", "chart"],
     ["history", "Historial", "history"],
     ["users", "Usuarios", "users"],
@@ -993,6 +1027,7 @@ function getVisibleTournamentNavItems(labels) {
     ["stats", "Est. torneo", "chart"],
     ["recovery", "Recovery Center", "shield"],
     ["graphicsAccess", "Graficos", "monitor"],
+    [PRODUCTION_NAV_VIEW, "Producción", "monitor"],
     ["rules", "Botoneras", "sliders"],
     ["settings", "Conexion", "link"]
   ];
@@ -1005,6 +1040,7 @@ function getVisibleTournamentNavItems(labels) {
 function canShowNavView(view) {
   if (!isActiveAccessSession(firebaseAccess)) return false;
   const role = firebaseAccess.role;
+  if (view === PRODUCTION_NAV_VIEW) return canAccessProductionRole(role);
   if (IS_TOURNAMENT_APP) {
     if (role === ROLES.SUPERVISOR || role === ROLES.OPERADOR) return true;
     if (ROLE_MENU_VIEWS[role]) return ROLE_MENU_VIEWS[role].includes(view);
@@ -1027,6 +1063,10 @@ function logPermissionsMenu(role, views = []) {
   if (key === lastPermissionsMenuLogKey) return;
   lastPermissionsMenuLogKey = key;
   console.info(`[permissions] menú aplicado para rol: ${role || "sin_acceso"}`, { views });
+}
+
+function canAccessProductionRole(role = firebaseAccess.role) {
+  return roleCan(role, "graphics");
 }
 
 function renderUiIcon(name) {
@@ -2606,6 +2646,7 @@ function renderCurrentView() {
   if (state.view === "users") return renderUsersAdmin();
   if (state.view === "history") return renderHistory();
   if (state.view === "globalStats") return renderGlobalStatsCenter();
+  if (state.view === PRODUCTION_NAV_VIEW) return renderProductionNav();
   const visibleTournaments = getVisibleTournaments();
   if (!state.tournaments.length) return renderNoTournament();
   if (!visibleTournaments.length) return renderNoAssignedTournaments();
@@ -2639,6 +2680,7 @@ function renderTournamentAppView() {
   if (state.activeTournamentId !== tournamentId) state.activeTournamentId = tournamentId;
   if (!isTournamentScopedView(state.view) && state.view !== "scoring") state.view = "dashboard";
 
+  if (state.view === PRODUCTION_NAV_VIEW) return renderProductionNav();
   if (state.view === "graphicsAccess") return renderGraphicsAccess();
   if (state.view === "teams") return renderTeams();
   if (state.view === "officialProgram") return renderOfficialProgram();
@@ -2680,6 +2722,7 @@ function canAccessTournamentId(tournamentId) {
 function canAccessCurrentView() {
   if (!isActiveAccessSession(firebaseAccess)) return true;
   const role = firebaseAccess.role;
+  if (state.view === PRODUCTION_NAV_VIEW) return canAccessProductionRole(role);
   if (IS_TOURNAMENT_APP) {
     if (role === ROLES.SUPERVISOR || role === ROLES.OPERADOR) return true;
     if (role === ROLES.JUEZ) return [...ROLE_MENU_VIEWS[ROLES.JUEZ], "scoring"].includes(state.view);
@@ -5909,6 +5952,8 @@ function renderSettings() {
 
       ${renderFirebaseDiagnosticsPanel()}
 
+      ${renderProductionQuickLinks()}
+
       <article class="card">
         <div class="card-header">
           <div>
@@ -6473,6 +6518,175 @@ function renderUserTournamentAccess(user) {
     <span class="pill blue">${operationalIds.length} torneo${operationalIds.length === 1 ? "" : "s"}</span>
     <p class="table-subtext">${escapeHTML(names.join(" / ") + extra)}</p>
   `;
+}
+
+function renderProductionNav() {
+  if (!canAccessProductionRole()) return renderRoleAccessHome();
+
+  return html`
+    <section class="content production-nav" data-production-nav-version="${escapeHTML(PRODUCTION_NAV_VERSION)}">
+      <header class="production-nav-header">
+        <div class="production-nav-copy">
+          <div class="production-nav-title-row">
+            <h2>Broadcast Studio</h2>
+            <span class="pill amber">V2 en desarrollo</span>
+          </div>
+          <p class="production-nav-subtitle">Centro de producción y gráficos en vivo</p>
+          <p>Controla Preview, Program, salidas, gráficos, capas y herramientas de prueba desde una interfaz dedicada.</p>
+        </div>
+      </header>
+
+      <div class="production-nav-grid">
+        ${Object.values(PRODUCTION_NAV_TARGETS).map(renderProductionCard).join("")}
+      </div>
+
+      <section class="production-module-list" aria-labelledby="production-module-list-title">
+        <div class="production-module-list-header">
+          <div>
+            <h3 id="production-module-list-title">Estado general de Broadcast Studio</h3>
+            <p>Catálogo declarativo de módulos disponibles en esta versión.</p>
+          </div>
+          <span class="production-status is-available">Disponible</span>
+        </div>
+        <div class="production-module-list-body">
+          ${PRODUCTION_NAV_MODULES.map(renderProductionModuleStatus).join("")}
+        </div>
+      </section>
+
+      <p class="production-nav-note">Sin conexión real a OBS ni persistencia definitiva de Program.</p>
+    </section>
+  `;
+}
+
+function renderProductionCard(target = {}) {
+  const url = getProductionTargetUrl(target.id);
+  const available = Boolean(url);
+  const status = available ? target.availability : "Error de ruta";
+  const detail = available ? target.availabilityDetail : "La ruta interna no es segura o no está disponible.";
+
+  return html`
+    <article class="production-card" data-production-card="${escapeHTML(target.id || "")}">
+      <div class="production-card-head">
+        <div>
+          <h3>${escapeHTML(target.name || "Módulo")}</h3>
+          <p>${escapeHTML(target.description || "")}</p>
+        </div>
+        <span class="production-status ${available ? "is-available" : "is-error"}">${escapeHTML(status)}</span>
+      </div>
+      <p class="production-card-availability">${escapeHTML(`${status} — ${detail}`)}</p>
+      <label for="production-url-${escapeHTML(target.id || "unknown")}">Enlace interno</label>
+      <input
+        id="production-url-${escapeHTML(target.id || "unknown")}"
+        data-production-url="${escapeHTML(target.id || "")}"
+        value="${escapeHTML(url?.href || "Ruta no disponible")}"
+        readonly
+        aria-label="Enlace de ${escapeHTML(target.name || "módulo")}"
+      >
+      <div class="production-card-actions">
+        <button class="button primary" data-action="open-production-target" data-production-target="${escapeHTML(target.id || "")}" ${available ? "" : "disabled"}>Abrir</button>
+        <button class="button" data-action="open-production-target-new" data-production-target="${escapeHTML(target.id || "")}" ${available ? "" : "disabled"}>Abrir en pestaña nueva</button>
+        <button class="button" data-action="copy-production-url" data-production-target="${escapeHTML(target.id || "")}" ${available ? "" : "disabled"}>Copiar enlace</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderProductionModuleStatus(module = {}) {
+  return html`
+    <article class="production-module-row">
+      <div>
+        <strong>${escapeHTML(module.name || "Módulo")}</strong>
+        <p>${escapeHTML(module.description || "")}</p>
+      </div>
+      <div class="production-module-meta">
+        <span>${escapeHTML(module.version || "—")}</span>
+        <span class="production-status is-available">${escapeHTML(module.status || "Pendiente")}</span>
+      </div>
+    </article>
+  `;
+}
+
+function renderProductionQuickLinks() {
+  if (!canAccessProductionRole()) return "";
+
+  return html`
+    <article class="card production-quick-links">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Broadcast Studio</h2>
+          <p class="card-subtitle">Accesos directos a las herramientas independientes de producción.</p>
+        </div>
+        <button class="button small" data-view="${PRODUCTION_NAV_VIEW}">Ver Producción</button>
+      </div>
+      <div class="card-body production-quick-links-actions">
+        <button class="button primary" data-action="open-production-target" data-production-target="console">Consola de Producción</button>
+        <button class="button" data-action="open-production-target" data-production-target="playground">Playground</button>
+      </div>
+    </article>
+  `;
+}
+
+function getProductionTargetUrl(targetId = "") {
+  const target = PRODUCTION_NAV_TARGETS[String(targetId || "")];
+  if (!target || !/^[a-z0-9-]+\.html$/.test(target.route)) return null;
+
+  try {
+    const url = new URL(`./${target.route}`, window.location.href);
+    if (!["http:", "https:"].includes(url.protocol)) return null;
+    if (url.origin !== window.location.origin) return null;
+    url.searchParams.set("v", PRODUCTION_NAV_VERSION);
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+function openProductionTarget(targetId = "", newTab = false) {
+  if (!canAccessProductionRole()) {
+    showToast("Tu rol no tiene acceso a Producción.");
+    return;
+  }
+
+  const url = getProductionTargetUrl(targetId);
+  if (!url) {
+    showToast("Error de ruta.");
+    return;
+  }
+
+  if (newTab) {
+    const opened = window.open(url.href, "_blank", "noopener,noreferrer");
+    if (opened) opened.opener = null;
+    return;
+  }
+
+  window.location.assign(url.href);
+}
+
+async function copyProductionTargetUrl(targetId = "") {
+  if (!canAccessProductionRole()) {
+    showToast("Tu rol no tiene acceso a Producción.");
+    return;
+  }
+
+  const target = PRODUCTION_NAV_TARGETS[String(targetId || "")];
+  const url = getProductionTargetUrl(targetId);
+  if (!target || !url) {
+    showToast("Error de ruta.");
+    return;
+  }
+
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error("clipboard-unavailable");
+    await navigator.clipboard.writeText(url.href);
+    showToast("Enlace copiado.");
+  } catch {
+    const input = document.querySelector(`[data-production-url="${target.id}"]`);
+    if (input instanceof HTMLInputElement) {
+      input.focus();
+      input.select();
+    }
+    showToast("Enlace seleccionado. Cópialo manualmente.");
+  }
 }
 
 function renderGraphicsAccess() {
@@ -9091,6 +9305,9 @@ function handleAction(action, target) {
     "clear-local-cache": clearLocalCacheAndReload,
     "copy-live-url": () => copyLiveUrl(target.dataset.target),
     "copy-public-url": () => copyLiveUrl(target.dataset.target),
+    "open-production-target": () => openProductionTarget(target.dataset.productionTarget),
+    "open-production-target-new": () => openProductionTarget(target.dataset.productionTarget, true),
+    "copy-production-url": () => copyProductionTargetUrl(target.dataset.productionTarget),
     "reset-data": confirmReset,
     "confirm-reset": () => {
       resetAllData();
