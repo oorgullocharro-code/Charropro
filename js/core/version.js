@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260714-component-renderer-001-renderer-v1";
+export const CHARROPRO_APP_VERSION = "20260714-template-engine-001-template-v1";
 
 let versionLogged = false;
 

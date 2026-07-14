@@ -80,10 +80,28 @@ import {
   buildComponentRendererFixture,
   getComponentRendererOutput
 } from "./fixtures/componentRendererFixtures.js?v=20260714-component-renderer-001-renderer-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-component-renderer-001-renderer-v1";
+import {
+  TEMPLATE_ENGINE_VERSION,
+  buildTemplateSnapshot,
+  clearTemplateRegistry,
+  cloneTemplateResult,
+  duplicateBroadcastTemplate,
+  getRegisteredTemplate,
+  instantiateBroadcastTemplate,
+  listRegisteredTemplates,
+  registerBroadcastTemplate,
+  removeBroadcastTemplate,
+  validateBroadcastTemplate
+} from "./templateEngine.js?v=20260714-template-engine-001-template-v1";
+import {
+  TEMPLATE_ENGINE_FIXTURES,
+  TEMPLATE_ENGINE_FIXTURE_TYPES,
+  buildTemplateEngineFixture
+} from "../../fixtures/templateEngineFixtures.js?v=20260714-template-engine-001-template-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-template-engine-001-template-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-component-renderer-001-renderer-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-template-engine-001-template-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -125,6 +143,7 @@ const CONSOLE_SETUP_ACTOR = Object.freeze({
   role: "supervisor",
   source: "production-console"
 });
+const PRODUCTION_CONSOLE_INSTANCES = new WeakMap();
 const DEFAULT_FIXTURE_ID = "equipos_3";
 const DEFAULT_GRAPHIC_ID = "scoreboard-test";
 const DEFAULT_ASSET_ID = "asset-tournament-logo";
@@ -206,6 +225,7 @@ export function createProductionConsoleModel(options = {}) {
   const outputIds = outputs.map((output) => output.id);
   const variableRegistry = registerConsoleVariables(contract, outputIds, now);
   const componentRegistry = emptyComponentRegistry(now);
+  const templateRegistry = clearTemplateRegistry({}, { resetRevision: true, now });
   return {
     consoleVersion: PRODUCTION_CONSOLE_VERSION,
     appVersion: CHARROPRO_APP_VERSION || PRODUCTION_CONSOLE_APP_VERSION,
@@ -217,6 +237,7 @@ export function createProductionConsoleModel(options = {}) {
     assetRegistry,
     variableRegistry,
     componentRegistry,
+    templateRegistry,
     fixtureId: fixtureDefinition.id,
     selectedGraphicId: graphic.graphicId,
     selectedAssetId: assetExists(assetRegistry, options.assetId) ? options.assetId : DEFAULT_ASSET_ID,
@@ -238,6 +259,13 @@ export function createProductionConsoleModel(options = {}) {
     componentRendererWarnings: [],
     componentRendererErrors: [],
     componentRendererSequence: 0,
+    templateFixtureType: TEMPLATE_ENGINE_FIXTURE_TYPES[0],
+    templateSequence: 0,
+    selectedTemplateId: null,
+    templateInstanceResult: null,
+    templateSnapshot: null,
+    templateWarnings: [],
+    templateErrors: [],
     actionHistory: [],
     currentGraphicInstanceId: null,
     selectedComponentId: null,
@@ -449,6 +477,171 @@ export function clearProductionConsoleComponentRenderer(model, renderer, options
     lastAction: "component-renderer-cleared",
     lastActionError: null
   };
+}
+
+export function selectProductionConsoleTemplateFixture(model, templateType) {
+  assertModel(model);
+  const selected = TEMPLATE_ENGINE_FIXTURE_TYPES.includes(templateType) ? templateType : TEMPLATE_ENGINE_FIXTURE_TYPES[0];
+  return {
+    ...model,
+    templateFixtureType: selected,
+    inspectorTab: "templates",
+    lastAction: "template-fixture-selected",
+    lastActionError: null
+  };
+}
+
+export function createProductionConsoleTemplate(model, options = {}) {
+  assertModel(model);
+  const sequence = model.templateSequence + 1;
+  const templateId = `template_console_${sequence}`;
+  const fixture = buildTemplateEngineFixture(model.templateFixtureType, {
+    templateId,
+    state: "draft",
+    variant: sequence,
+    now: normalizeNow(options.now)
+  });
+  const templateRegistry = registerBroadcastTemplate(model.templateRegistry, fixture.template, {
+    expectedRevision: model.templateRegistry.revision,
+    actor: CONSOLE_ACTOR,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    templateRegistry,
+    templateSequence: sequence,
+    selectedTemplateId: templateId,
+    templateInstanceResult: null,
+    templateSnapshot: null,
+    templateWarnings: [],
+    templateErrors: [],
+    inspectorTab: "templates",
+    lastAction: "template-created",
+    lastActionError: null
+  };
+}
+
+export function duplicateProductionConsoleTemplate(model, templateId = model?.selectedTemplateId, options = {}) {
+  assertModel(model);
+  const source = getRegisteredTemplate(model.templateRegistry, templateId);
+  if (!source) throw consoleError("console-template-not-found");
+  const sequence = model.templateSequence + 1;
+  const duplicateId = `template_console_${sequence}`;
+  const templateRegistry = duplicateBroadcastTemplate(model.templateRegistry, source.templateId, {
+    templateId: duplicateId,
+    name: `${source.name} copia`,
+    state: "draft"
+  }, {
+    expectedRevision: source.revision,
+    expectedRegistryRevision: model.templateRegistry.revision,
+    actor: CONSOLE_ACTOR,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    templateRegistry,
+    templateSequence: sequence,
+    selectedTemplateId: duplicateId,
+    templateInstanceResult: null,
+    templateSnapshot: null,
+    templateWarnings: [],
+    templateErrors: [],
+    inspectorTab: "templates",
+    lastAction: "template-duplicated",
+    lastActionError: null
+  };
+}
+
+export function removeProductionConsoleTemplate(model, templateId = model?.selectedTemplateId, options = {}) {
+  assertModel(model);
+  const current = getRegisteredTemplate(model.templateRegistry, templateId);
+  if (!current) throw consoleError("console-template-not-found");
+  const templateRegistry = removeBroadcastTemplate(model.templateRegistry, current.templateId, {
+    expectedRevision: current.revision,
+    expectedRegistryRevision: model.templateRegistry.revision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    templateRegistry,
+    selectedTemplateId: listRegisteredTemplates(templateRegistry)[0]?.templateId || null,
+    templateInstanceResult: null,
+    templateSnapshot: null,
+    templateWarnings: [],
+    templateErrors: [],
+    inspectorTab: "templates",
+    lastAction: "template-removed",
+    lastActionError: null
+  };
+}
+
+export function selectProductionConsoleTemplate(model, templateId) {
+  assertModel(model);
+  if (!getRegisteredTemplate(model.templateRegistry, templateId)) throw consoleError("console-template-not-found");
+  return {
+    ...model,
+    selectedTemplateId: templateId,
+    templateInstanceResult: null,
+    templateSnapshot: null,
+    templateWarnings: [],
+    templateErrors: [],
+    inspectorTab: "templates",
+    lastAction: "template-selected",
+    lastActionError: null
+  };
+}
+
+export function instantiateProductionConsoleTemplate(model, templateId = model?.selectedTemplateId, options = {}) {
+  assertModel(model);
+  const template = getRegisteredTemplate(model.templateRegistry, templateId);
+  if (!template) throw consoleError("console-template-not-found");
+  const sources = buildProductionConsoleTemplateSources(model, options);
+  const result = instantiateBroadcastTemplate(template, sources, {
+    visibility: model.visibility,
+    tenantId: template.tenantId,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    templateInstanceResult: cloneTemplateResult(result),
+    templateSnapshot: cloneValue(result.snapshot),
+    templateWarnings: uniqueStrings(result.warnings || []),
+    templateErrors: uniqueStrings(result.errors || []),
+    inspectorTab: "templates",
+    lastAction: "template-instantiated",
+    lastActionError: null
+  };
+}
+
+export function snapshotProductionConsoleTemplate(model, templateId = model?.selectedTemplateId, options = {}) {
+  assertModel(model);
+  const snapshot = getProductionConsoleTemplateClipboardSnapshot(model, {
+    ...options,
+    templateId,
+    visibility: options.visibility || model.visibility
+  });
+  return {
+    ...model,
+    templateSnapshot: snapshot,
+    templateWarnings: uniqueStrings(snapshot.warnings || []),
+    templateErrors: uniqueStrings(snapshot.errors || []),
+    inspectorTab: "templates",
+    lastAction: "template-snapshot-built",
+    lastActionError: null
+  };
+}
+
+export function getProductionConsoleTemplateClipboardSnapshot(model, options = {}) {
+  assertModel(model);
+  const templateId = options.templateId || model.selectedTemplateId;
+  const template = getRegisteredTemplate(model.templateRegistry, templateId);
+  if (!template) throw consoleError("console-template-not-found");
+  return buildTemplateSnapshot(template, buildProductionConsoleTemplateSources(model, options), {
+    visibility: normalizeVisibility(options.visibility || model.visibility),
+    tenantId: template.tenantId,
+    templateInstanceId: options.templateInstanceId || `template_snapshot_${template.templateId}_${template.revision}`,
+    now: normalizeNow(options.now)
+  });
 }
 
 export function disposeProductionConsole(model) {
@@ -1075,13 +1268,15 @@ export function getProductionConsoleInspector(model, options = {}) {
     .map((asset) => publicView ? publicAssetDescriptor(asset) : asset);
   const variables = buildConsoleVariablesInspector(model, visibility, options);
   const components = buildConsoleComponentsInspector(model, visibility, options);
+  const templates = buildConsoleTemplatesInspector(model, visibility, options);
   const warnings = uniqueStrings([
     ...getBroadcastStateWarnings(model.state),
     ...getBroadcastOutputWarnings(selectedOutput),
     ...(previewProjection.warnings || []),
     ...(programProjection.warnings || []),
     ...(variables.warnings || []),
-    ...(components.warnings || [])
+    ...(components.warnings || []),
+    ...(templates.warnings || [])
   ]);
   const errors = uniqueStrings([
     ...(model.state.errors || []),
@@ -1090,7 +1285,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(programProjection.errors || []),
     ...(model.lastActionError ? [model.lastActionError] : []),
     ...(variables.errors || []),
-    ...(components.errors || [])
+    ...(components.errors || []),
+    ...(templates.errors || [])
   ]);
   const inspector = {
     contract: cloneValue(model.contract),
@@ -1102,6 +1298,7 @@ export function getProductionConsoleInspector(model, options = {}) {
     assets,
     variables,
     components,
+    templates,
     queue: getBroadcastQueue(model.state),
     actions: cloneValue(model.actionHistory || []),
     warnings: publicView ? [] : warnings,
@@ -1116,12 +1313,18 @@ export function getProductionConsoleInspector(model, options = {}) {
       actionEngine: BROADCAST_ACTION_ENGINE_VERSION,
       productionVariables: PRODUCTION_VARIABLES_VERSION,
       componentLibrary: COMPONENT_LIBRARY_VERSION,
-      componentRenderer: COMPONENT_RENDERER_VERSION
+      componentRenderer: COMPONENT_RENDERER_VERSION,
+      templateEngine: TEMPLATE_ENGINE_VERSION
     }
   };
-  return sanitizeProductionConsoleInspectorData(inspector, visibility, {
+  const sanitized = sanitizeProductionConsoleInspectorData(inspector, visibility, {
     preserveRootKeys: ["warnings", "errors"]
   });
+  if (sanitized.templates && templates) {
+    sanitized.templates.snapshot = cloneValue(templates.snapshot);
+    sanitized.templates.clipboardSnapshot = cloneValue(templates.clipboardSnapshot);
+  }
+  return sanitized;
 }
 
 export function sanitizeProductionConsoleInspectorData(value, visibility = "production", options = {}) {
@@ -1234,10 +1437,13 @@ export function escapeProductionConsoleText(value) {
 
 export function initializeProductionConsole(root = document) {
   if (!root?.querySelector || !root.querySelector("#production-console")) return null;
+  const currentInstance = PRODUCTION_CONSOLE_INSTANCES.get(root);
+  if (currentInstance && !currentInstance.disposed) return currentInstance.api;
   const settings = readSessionSettings();
   let model = createProductionConsoleModel({ ...settings, safeMode: true });
   const refs = collectRefs(root);
-  const runtime = { componentRenderer: null };
+  const controller = new AbortController();
+  const runtime = { componentRenderer: null, controller };
   populateStaticControls(refs, model);
   if (refs.componentRendererTarget) {
     runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
@@ -1248,19 +1454,27 @@ export function initializeProductionConsole(root = document) {
     writeSessionSettings(model);
     renderConsole(refs, model, runtime);
   };
-  bindConsoleEvents(refs, () => model, update, runtime);
+  bindConsoleEvents(refs, () => model, update, runtime, controller.signal);
   renderConsole(refs, model, runtime);
   console.info("[production-console] initialized", {
     version: PRODUCTION_CONSOLE_VERSION,
     appVersion: PRODUCTION_CONSOLE_APP_VERSION
   });
-  return {
+  const instance = { disposed: false, api: null };
+  const api = {
     getModel: () => model,
     dispose: () => {
+      if (instance.disposed) return;
+      instance.disposed = true;
+      controller.abort();
       if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
       disposeProductionConsole(model);
+      PRODUCTION_CONSOLE_INSTANCES.delete(root);
     }
   };
+  instance.api = api;
+  PRODUCTION_CONSOLE_INSTANCES.set(root, instance);
+  return api;
 }
 
 function registerConsoleOutputs(now) {
@@ -1599,6 +1813,51 @@ function buildConsoleComponentsInspector(model, visibility, options = {}) {
   };
 }
 
+function buildProductionConsoleTemplateSources(model, options = {}) {
+  const variables = buildConsoleVariablesInspector(model, model.visibility, options);
+  return {
+    productionVariables: variables.snapshot,
+    broadcastContract: model.contract,
+    assetManager: model.assetRegistry
+  };
+}
+
+function buildConsoleTemplatesInspector(model, visibility, options = {}) {
+  const rank = VISIBILITY_RANK[visibility] ?? VISIBILITY_RANK.production;
+  const templates = listRegisteredTemplates(model.templateRegistry)
+    .filter((template) => (VISIBILITY_RANK[template.visibility] ?? VISIBILITY_RANK.restricted) <= rank);
+  const visibleIds = new Set(templates.map((template) => template.templateId));
+  const selectedTemplateId = visibleIds.has(model.selectedTemplateId) ? model.selectedTemplateId : templates[0]?.templateId || null;
+  const selected = selectedTemplateId ? getRegisteredTemplate(model.templateRegistry, selectedTemplateId) : null;
+  const validations = templates.map((template) => validateBroadcastTemplate(template));
+  const snapshot = selected
+    ? getProductionConsoleTemplateClipboardSnapshot(model, { ...options, templateId: selected.templateId, visibility })
+    : null;
+  return {
+    version: TEMPLATE_ENGINE_VERSION,
+    registry: {
+      engineVersion: TEMPLATE_ENGINE_VERSION,
+      revision: model.templateRegistry?.revision ?? 0,
+      templates
+    },
+    selectedTemplateId,
+    selected,
+    instance: cloneValue(model.templateInstanceResult),
+    snapshot: cloneValue(snapshot),
+    clipboardSnapshot: cloneValue(snapshot),
+    warnings: uniqueStrings([
+      ...validations.flatMap((validation) => validation.warnings || []),
+      ...(snapshot?.warnings || []),
+      ...(model.templateWarnings || [])
+    ]),
+    errors: uniqueStrings([
+      ...validations.flatMap((validation) => validation.errors || []),
+      ...(snapshot?.errors || []),
+      ...(model.templateErrors || [])
+    ])
+  };
+}
+
 function publicVariableDescriptor(variable) {
   return {
     variablesVersion: variable.variablesVersion,
@@ -1736,6 +1995,12 @@ function collectRefs(root) {
     variables: id("console-variables"),
     system: id("console-system"),
     inspectorTabs: id("console-inspector-tabs"),
+    templateLab: id("console-template-lab"),
+    templateFixture: id("console-template-fixture"),
+    templateStatus: id("console-template-status"),
+    templateWarnings: id("console-template-warnings"),
+    templateErrors: id("console-template-errors"),
+    templateActions: [...root.querySelectorAll("[data-template-action]")],
     componentRendererLab: id("console-component-renderer-lab"),
     componentRendererFixture: id("console-component-renderer-fixture"),
     componentRendererOutput: id("console-component-renderer-output"),
@@ -1762,11 +2027,12 @@ function populateStaticControls(refs, model) {
   populateSelect(refs.layer, PLAYGROUND_LAYER_IDS.map((value) => ({ value, label: value })), model.geometry.layerId);
   populateSelect(refs.enterAnimation, ANIMATIONS.map((value) => ({ value, label: value })), model.animation.enter);
   populateSelect(refs.exitAnimation, ANIMATIONS.map((value) => ({ value, label: value })), model.animation.exit);
+  populateSelect(refs.templateFixture, TEMPLATE_ENGINE_FIXTURES.map((fixture) => ({ value: fixture.type, label: fixture.label })), model.templateFixtureType);
   populateSelect(refs.componentRendererFixture, COMPONENT_RENDERER_FIXTURE_TYPES.map((value) => ({ value, label: readableLabel(value) })), model.componentRendererFixtureType);
   populateSelect(refs.componentRendererOutput, COMPONENT_RENDERER_OUTPUTS.map((value) => ({ value: value.id, label: value.label })), model.componentRendererOutputId);
 }
 
-function bindConsoleEvents(refs, getModel, setModel, runtime) {
+function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
   const run = (callback) => {
     try {
       setModel(callback(getModel()));
@@ -1775,34 +2041,34 @@ function bindConsoleEvents(refs, getModel, setModel, runtime) {
       setModel({ ...getModel(), lastAction: "action-failed", lastActionError: error?.code || error?.message || "console-action-failed" });
     }
   };
-  refs.loadFixture?.addEventListener("click", () => run((model) => loadProductionConsoleFixture(model, refs.fixture.value)));
-  refs.asset?.addEventListener("change", () => run((model) => {
+  listen(refs.loadFixture, "click", () => run((model) => loadProductionConsoleFixture(model, refs.fixture.value)), signal);
+  listen(refs.asset, "change", () => run((model) => {
     const selected = selectProductionAsset(model, refs.asset.value);
     return selected.state.preview.active ? prepareProductionPreview(selected, {}, { confirmed: true }) : selected;
-  }));
-  refs.visibility?.addEventListener("change", () => run((model) => {
+  }), signal);
+  listen(refs.visibility, "change", () => run((model) => {
     const selected = setProductionVisibility(model, refs.visibility.value);
     if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
     runtime.componentRenderer = createProductionConsoleComponentRenderer(selected, refs.componentRendererTarget);
     return { ...selected, componentRendererState: runtime.componentRenderer.state, componentRendererResult: null, componentRendererSnapshot: null };
-  }));
-  refs.output?.addEventListener("change", () => run((model) => selectProductionOutput(model, refs.output.value)));
+  }), signal);
+  listen(refs.output, "change", () => run((model) => selectProductionOutput(model, refs.output.value)), signal);
   [refs.x, refs.y, refs.width, refs.height, refs.scale, refs.opacity, refs.anchor, refs.unit, refs.layer, refs.enterAnimation, refs.exitAnimation, refs.duration, refs.delay, refs.autoHide]
     .filter(Boolean)
-    .forEach((control) => control.addEventListener("change", () => run((model) => prepareProductionPreview(model, {
+    .forEach((control) => listen(control, "change", () => run((model) => prepareProductionPreview(model, {
       geometry: readGeometryControls(refs),
       animation: readAnimationControls(refs)
-    }, { confirmed: true }))));
-  refs.graphicLibrary?.addEventListener("click", (event) => {
+    }, { confirmed: true })), signal));
+  listen(refs.graphicLibrary, "click", (event) => {
     const button = event.target.closest("button[data-graphic-id]");
     if (!button) return;
     run((model) => selectProductionGraphic(model, button.dataset.graphicId));
-  });
-  refs.actions.forEach((button) => button.addEventListener("click", () => run((model) => handleConsoleAction(model, button.dataset.consoleAction, refs))));
-  refs.presets.forEach((button) => button.addEventListener("click", () => run((model) => prepareProductionPreview(model, {
+  }, signal);
+  refs.actions.forEach((button) => listen(button, "click", () => run((model) => handleConsoleAction(model, button.dataset.consoleAction, refs)), signal));
+  refs.presets.forEach((button) => listen(button, "click", () => run((model) => prepareProductionPreview(model, {
     geometry: geometryPreset(button.dataset.consolePreset, model.geometry)
-  }, { confirmed: true }))));
-  refs.layersBody?.addEventListener("click", (event) => {
+  }, { confirmed: true })), signal));
+  listen(refs.layersBody, "click", (event) => {
     const button = event.target.closest("button[data-layer-action]");
     if (!button) return;
     const layer = getModel().state.layers[button.dataset.layerId];
@@ -1816,24 +2082,24 @@ function bindConsoleEvents(refs, getModel, setModel, runtime) {
     const confirmed = !needsConfirmation || confirmations > 0;
     if (!confirmed) return;
     run((model) => setProductionLayerAction(model, button.dataset.layerId, button.dataset.layerAction, { confirmed, confirmations }));
-  });
-  refs.outputsList?.addEventListener("click", (event) => {
+  }, signal);
+  listen(refs.outputsList, "click", (event) => {
     const button = event.target.closest("button[data-output-action]");
     if (!button) return;
     run((model) => {
       const selected = selectProductionOutput(model, button.dataset.outputId);
       return setProductionOutputAction(selected, button.dataset.outputAction, { outputId: button.dataset.outputId });
     });
-  });
-  refs.queueList?.addEventListener("click", (event) => {
+  }, signal);
+  listen(refs.queueList, "click", (event) => {
     const button = event.target.closest("button[data-queue-action]");
     if (!button) return;
     run((model) => {
       if (button.dataset.queueAction === "remove") return removeProductionQueueItem(model, button.dataset.queueId);
       return changeProductionQueuePriority(model, button.dataset.queueId, button.dataset.queueAction === "up" ? 10 : -10);
     });
-  });
-  refs.variables?.addEventListener("click", (event) => {
+  }, signal);
+  listen(refs.variables, "click", (event) => {
     const button = event.target.closest("button[data-variable-action]");
     if (!button) return;
     const variableId = button.dataset.variableId;
@@ -1846,27 +2112,36 @@ function bindConsoleEvents(refs, getModel, setModel, runtime) {
       const input = refs.variables.querySelector(`[data-variable-input="${CSS.escape(variableId)}"]`);
       return setProductionConsoleVariable(model, variableId, readProductionVariableControl(input, requireConsoleVariable(model, variableId), model));
     });
-  });
-  refs.inspectorTabs?.addEventListener("click", (event) => {
+  }, signal);
+  listen(refs.inspectorTabs, "click", (event) => {
     const button = event.target.closest("button[data-inspector-tab]");
     if (!button) return;
     run((model) => ({ ...model, inspectorTab: normalizeInspectorTab(button.dataset.inspectorTab), lastAction: "inspector-tab-changed" }));
-  });
-  refs.componentRendererFixture?.addEventListener("change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)));
-  refs.componentRendererOutput?.addEventListener("change", () => run((model) => {
+  }, signal);
+  listen(refs.templateFixture, "change", () => run((model) => selectProductionConsoleTemplateFixture(model, refs.templateFixture.value)), signal);
+  refs.templateActions.forEach((button) => listen(button, "click", () => run((model) => {
+    if (button.dataset.templateAction === "create") return createProductionConsoleTemplate(model);
+    if (button.dataset.templateAction === "duplicate") return duplicateProductionConsoleTemplate(model);
+    if (button.dataset.templateAction === "delete") return removeProductionConsoleTemplate(model);
+    if (button.dataset.templateAction === "instantiate") return instantiateProductionConsoleTemplate(model);
+    if (button.dataset.templateAction === "snapshot") return snapshotProductionConsoleTemplate(model);
+    return model;
+  }), signal));
+  listen(refs.componentRendererFixture, "change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)), signal);
+  listen(refs.componentRendererOutput, "change", () => run((model) => {
     if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
     const selected = selectProductionComponentRendererOutput(model, refs.componentRendererOutput.value);
     runtime.componentRenderer = createProductionConsoleComponentRenderer(selected, refs.componentRendererTarget);
     return { ...selected, componentRendererState: runtime.componentRenderer.state };
-  }));
-  refs.componentRendererActions.forEach((button) => button.addEventListener("click", () => run((model) => {
+  }), signal);
+  refs.componentRendererActions.forEach((button) => listen(button, "click", () => run((model) => {
     if (!runtime.componentRenderer || runtime.componentRenderer.state === "destroyed") {
       runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
     }
     if (button.dataset.componentRendererAction === "clear") return clearProductionConsoleComponentRenderer(model, runtime.componentRenderer);
     return renderProductionConsoleComponentFixture(model, runtime.componentRenderer, button.dataset.componentRendererAction);
-  })));
-  refs.inspector?.addEventListener("click", async (event) => {
+  }), signal));
+  listen(refs.inspector, "click", async (event) => {
     const componentAction = event.target.closest("button[data-component-action]");
     if (componentAction) {
       run((model) => {
@@ -1882,6 +2157,11 @@ function bindConsoleEvents(refs, getModel, setModel, runtime) {
       run((model) => selectProductionConsoleComponent(model, componentSelection.dataset.componentId));
       return;
     }
+    const templateSelection = event.target.closest("button[data-template-id]");
+    if (templateSelection) {
+      run((model) => selectProductionConsoleTemplate(model, templateSelection.dataset.templateId));
+      return;
+    }
     const refreshButton = event.target.closest('button[data-console-action="refresh-inspector"]');
     if (refreshButton) {
       run((model) => ({ ...model, lastAction: "inspector-refreshed", lastActionError: null }));
@@ -1889,11 +2169,19 @@ function bindConsoleEvents(refs, getModel, setModel, runtime) {
     }
     const button = event.target.closest("button[data-copy-json]");
     if (!button) return;
+    const value = button.dataset.copyJson === "template-snapshot"
+      ? getProductionConsoleTemplateClipboardSnapshot(getModel(), { visibility: getModel().visibility })
+      : null;
     const pre = refs.inspector.querySelector("pre");
-    await copyText(pre?.textContent || "");
+    await copyText(value ? JSON.stringify(value, null, 2) : pre?.textContent || "");
     button.textContent = "Copiado";
     window.setTimeout(() => { button.textContent = "Copiar JSON"; }, 1200);
-  });
+  }, signal);
+}
+
+function listen(target, type, handler, signal) {
+  if (!target?.addEventListener) return;
+  target.addEventListener(type, handler, signal ? { signal } : undefined);
 }
 
 function handleConsoleAction(model, action, refs) {
@@ -1951,6 +2239,7 @@ function renderConsole(refs, model, runtime = {}) {
   renderVariables(refs.variables, model);
   renderSystem(refs.system, model);
   renderInspectorTabs(refs.inspectorTabs, model);
+  renderTemplateLab(refs, model);
   renderComponentRendererLab(refs, model, runtime);
   renderInspector(refs.inspector, model);
 }
@@ -1973,6 +2262,7 @@ function syncControls(refs, model) {
   setValue(refs.exitAnimation, model.animation.exit);
   setValue(refs.duration, model.animation.duration);
   setValue(refs.delay, model.animation.delay);
+  setValue(refs.templateFixture, model.templateFixtureType);
   setValue(refs.componentRendererFixture, model.componentRendererFixtureType);
   setValue(refs.componentRendererOutput, model.componentRendererOutputId);
   if (refs.autoHide) refs.autoHide.checked = model.animation.autoHide;
@@ -1992,6 +2282,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Variables ${PRODUCTION_VARIABLES_VERSION}`),
     element("span", "console-meta", `Components ${COMPONENT_LIBRARY_VERSION}`),
     element("span", "console-meta", `Renderer ${COMPONENT_RENDERER_VERSION}`),
+    element("span", "console-meta", `Templates ${TEMPLATE_ENGINE_VERSION}`),
     element("span", "console-meta", `${getFixtureDefinition(model.fixtureId).label}`),
     element("span", "console-meta", `${getBroadcastOutput(model.selectedOutputId)?.name || "Sin output"}`),
     statusChip(model.safeMode ? "Modo seguro activo" : "Modo seguro inactivo", model.safeMode ? "ok" : "warning")
@@ -2353,6 +2644,26 @@ function renderInspectorTabs(root, model) {
   });
 }
 
+function renderTemplateLab(refs, model) {
+  const root = refs.templateLab;
+  if (!root) return;
+  root.hidden = model.inspectorTab !== "templates";
+  const selected = model.selectedTemplateId ? getRegisteredTemplate(model.templateRegistry, model.selectedTemplateId) : null;
+  if (refs.templateStatus) {
+    refs.templateStatus.replaceChildren(
+      statusChip(selected ? readableLabel(selected.status) : "Sin template", selected?.status === "error" ? "error" : selected ? "ok" : "warning"),
+      element("span", "console-meta", readableLabel(model.templateFixtureType)),
+      element("span", "console-meta", `${listRegisteredTemplates(model.templateRegistry).length} registrados`),
+      element("span", "console-meta", model.templateInstanceResult ? "Instanciado" : "Sin instancia")
+    );
+  }
+  refs.templateActions.forEach((button) => {
+    button.disabled = button.dataset.templateAction !== "create" && !selected;
+  });
+  renderDiagnosticList(refs.templateWarnings, model.templateWarnings, "Sin warnings de templates.");
+  renderDiagnosticList(refs.templateErrors, model.templateErrors, "Sin errores de templates.");
+}
+
 function renderComponentRendererLab(refs, model, runtime) {
   const root = refs.componentRendererLab;
   if (!root) return;
@@ -2397,6 +2708,10 @@ function renderInspector(root, model) {
   const inspector = getProductionConsoleInspector(model);
   if (model.inspectorTab === "components") {
     renderComponentManager(root, inspector.components);
+    return;
+  }
+  if (model.inspectorTab === "templates") {
+    renderTemplateManager(root, inspector.templates);
     return;
   }
   const value = inspectorValue(inspector, model.inspectorTab);
@@ -2473,6 +2788,56 @@ function renderComponentManager(root, componentsInspector) {
   root.append(toolbar, layout);
 }
 
+function renderTemplateManager(root, templatesInspector) {
+  root.replaceChildren();
+  const selected = templatesInspector?.selected || null;
+  const toolbar = element("div", "console-inspector-toolbar console-template-toolbar");
+  toolbar.append(element("strong", "", "Templates"));
+  const copy = element("button", "button button-quiet button-small", "Copiar JSON");
+  copy.type = "button";
+  copy.dataset.copyJson = "template-snapshot";
+  toolbar.append(copy);
+
+  const layout = element("div", "console-template-manager");
+  const library = element("section", "console-template-library");
+  library.append(element("h4", "", "Registro en memoria"));
+  const templates = templatesInspector?.registry?.templates || [];
+  if (!templates.length) library.append(element("p", "console-empty-message", "Crea un template desde un fixture para comenzar."));
+  templates.forEach((template) => {
+    const button = element("button", `console-template-item ${selected?.templateId === template.templateId ? "is-selected" : ""}`);
+    button.type = "button";
+    button.dataset.templateId = template.templateId;
+    button.append(
+      element("strong", "", template.name),
+      element("span", "", `${readableLabel(template.templateType)} · ${template.status}`),
+      element("span", "", `v${template.templateVersion} · rev ${template.revision}`)
+    );
+    library.append(button);
+  });
+
+  const detail = element("section", "console-template-detail");
+  detail.append(element("h4", "", "Inspector"));
+  if (!selected) detail.append(element("p", "console-empty-message", "No hay un template seleccionado."));
+  else {
+    const definition = element("dl", "console-compact-definition console-template-definition");
+    [
+      ["ID", selected.templateId], ["Nombre", selected.name], ["Tipo", readableLabel(selected.templateType)],
+      ["Estado", selected.status], ["Visibilidad", selected.visibility], ["Componentes", selected.components.length],
+      ["Layout", selected.layout.mode], ["Outputs", selected.outputs.join(", ") || "—"],
+      ["Versión", selected.templateVersion], ["Revisión", selected.revision]
+    ].forEach(([label, value]) => definition.append(definitionItem(label, value)));
+    detail.append(definition);
+  }
+
+  const snapshot = element("section", "console-template-snapshot");
+  snapshot.append(element("h4", "", "Snapshot sanitizado"));
+  const pre = document.createElement("pre");
+  pre.textContent = JSON.stringify(templatesInspector?.clipboardSnapshot || null, null, 2);
+  snapshot.append(pre);
+  layout.append(library, detail, snapshot);
+  root.append(toolbar, layout);
+}
+
 function inspectorValue(inspector, key) {
   if (key === "data-contract") return inspector.contract;
   if (key === "broadcast-state") return inspector.state;
@@ -2483,6 +2848,7 @@ function inspectorValue(inspector, key) {
   if (key === "assets") return inspector.assets;
   if (key === "variables") return inspector.variables;
   if (key === "components") return inspector.components;
+  if (key === "templates") return inspector.templates;
   if (key === "queue") return inspector.queue;
   if (key === "actions") return inspector.actions;
   if (key === "warnings") return inspector.warnings;
@@ -2490,7 +2856,7 @@ function inspectorValue(inspector, key) {
 }
 
 function inspectorKeys() {
-  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "variables", "components", "queue", "actions", "warnings", "errors"];
+  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "variables", "components", "templates", "queue", "actions", "warnings", "errors"];
 }
 
 function normalizeInspectorTab(value) {
@@ -2500,7 +2866,7 @@ function normalizeInspectorTab(value) {
 function inspectorLabel(value) {
   return {
     "data-contract": "Data Contract", "broadcast-state": "Broadcast State", preview: "Preview", program: "Program", output: "Output",
-    projection: "Projection", assets: "Assets", variables: "Variables", components: "Componentes", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
+    projection: "Projection", assets: "Assets", variables: "Variables", components: "Componentes", templates: "Templates", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
   }[value] || value;
 }
 

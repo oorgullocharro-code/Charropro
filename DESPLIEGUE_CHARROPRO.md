@@ -1,5 +1,27 @@
 # Despliegue CharroPro
 
+## Version TEMPLATE-ENGINE-001
+
+Version actual de cache:
+
+```text
+v=20260714-template-engine-001-template-v1
+```
+
+Esta version agrega Broadcast Template Engine V1 (`1.0.0`) como motor declarativo, puro y exclusivamente en memoria para agrupar Component Instances reutilizables. Las plantillas resuelven bindings unicamente mediante Production Variables, Broadcast Data Contract y Asset Manager; crean instancias y snapshots serializables, pero no renderizan ni modifican Preview, Program, Outputs o Broadcast State.
+
+Production Console incorpora una pestaña `Templates` para crear, duplicar, eliminar, instanciar, inspeccionar y construir snapshots desde fixtures controlados. El registro no se persiste y permanece aislado de Component Renderer. La referencia tecnica esta en `BROADCAST_TEMPLATE_ENGINE_V1.md`, los fixtures en `fixtures/templateEngineFixtures.js` y las pruebas en `tests/broadcast-template-engine.test.mjs`.
+
+No se agregan Firebase, listeners, rutas nuevas, escenas, composiciones, editor visual, OBS V2, expresiones, scripts ni ejecucion de plantillas `custom`. Broadcast Data Contract, Production Variables, Asset Manager, Component Library, Component Renderer, Broadcast State, Broadcast Output y graficos V1 permanecen intactos.
+
+### TEMPLATE-ENGINE-001B
+
+La correccion 001B completa identidad y trazabilidad con `tenantId`, contexto organizacional/deportivo, `createdBy`, `updatedBy` y `status`; protege templates publicados contra cambios y permite solo la transicion controlada a `deprecated`. La validacion bloquea cruces de tenant en componentes, contexto, bindings, fallbacks y assets.
+
+Los snapshots aplican una matriz recursiva de visibilidad a templates y Component Instances. La vista publica elimina actores, tenant, organizacion interna, sesion, permisos, diagnosticos, secretos, URLs firmadas y metadata ejecutable; `restricted` conserva contexto autorizado, pero nunca credenciales o secretos. `custom` requiere estructura declarativa y rechaza vacios o metadata ejecutable. Layout rechaza `NaN` e infinitos sin modificar el registro.
+
+Production Console muestra y copia el mismo snapshot sanitizado mediante un unico helper. Su inicializacion queda idempotente por root y `dispose()` elimina exclusivamente los listeners de esa instancia mediante `AbortController`. No se modifican Renderer, Preview, Program, Outputs, Firebase ni Core deportivo.
+
 ## Version COMPONENT-LIBRARY-001
 
 Version actual de cache:
@@ -417,7 +439,7 @@ También se agregó una tarjeta compacta de accesos rápidos en `Conexión`. La 
 Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos de una lista cerrada. No se agregaron consultas Firebase, polling, persistencia de Program, control real de OBS ni permisos persistentes nuevos. Consulta `PRODUCTION_NAV_V1.md` para la especificación completa.
 # COMPONENT-RENDERER-001 - Render visual seguro de componentes V2
 
-- Version de aplicacion: `20260714-component-renderer-001-renderer-v1`.
+- Version de aplicacion: `20260714-template-engine-001-template-v1`.
 - Se agrego `js/broadcast/componentRenderer.js` como renderer puro, seguro y en memoria para instancias validas de Component Library.
 - Se incorporaron 18 tipos visuales, lifecycle completo, geometria por output, estilos por allowlist, fallbacks controlados y snapshots sin DOM.
 - Production Console incorpora un Laboratorio de Componentes V2 para 1920 x 1080, 1080 x 1920 y 3840 x 720, sin modificar Preview, Program ni Outputs.

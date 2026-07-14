@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260714-component-renderer-001-renderer-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260714-template-engine-001-template-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -178,6 +178,32 @@
         <section class="console-panel console-inspector-panel">
           <div class="console-panel-heading"><div><p>JSON de solo lectura</p><h2>Inspector técnico</h2></div></div>
           <div id="console-inspector-tabs" class="console-tabs" role="tablist"></div>
+          <section id="console-template-lab" class="console-template-lab" hidden>
+            <div class="console-template-heading">
+              <div>
+                <p>Registro temporal en memoria</p>
+                <h3>Template Engine V1</h3>
+              </div>
+              <div id="console-template-status" class="console-template-status" aria-live="polite"></div>
+            </div>
+            <div class="console-template-controls">
+              <label class="console-field">
+                <span>Fixture</span>
+                <select id="console-template-fixture"></select>
+              </label>
+              <div class="console-template-actions">
+                <button class="button button-primary button-small" type="button" data-template-action="create">Crear</button>
+                <button class="button button-quiet button-small" type="button" data-template-action="duplicate">Duplicar</button>
+                <button class="button button-quiet button-small" type="button" data-template-action="delete">Eliminar</button>
+                <button class="button button-quiet button-small" type="button" data-template-action="instantiate">Instanciar</button>
+                <button class="button button-quiet button-small" type="button" data-template-action="snapshot">Snapshot</button>
+              </div>
+            </div>
+            <div class="console-template-diagnostics">
+              <div><strong>Warnings</strong><div id="console-template-warnings"></div></div>
+              <div><strong>Errors</strong><div id="console-template-errors"></div></div>
+            </div>
+          </section>
           <section id="console-component-renderer-lab" class="console-component-renderer-lab" hidden>
             <div class="console-component-renderer-heading">
               <div>
@@ -218,6 +244,6 @@
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-component-renderer-001-renderer-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-template-engine-001-template-v1"></script>
 </body>
 </html>

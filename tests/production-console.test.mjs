@@ -15,15 +15,21 @@ import {
   createProductionConsoleModel,
   createProductionConsoleComponentRenderer,
   createProductionConsoleTestComponent,
+  createProductionConsoleTemplate,
   dispatchProductionConsoleAction,
   disposeProductionConsole,
   duplicateProductionConsoleComponent,
+  duplicateProductionConsoleTemplate,
   enqueueProductionGraphic,
   escapeProductionConsoleText,
+  getProductionConsoleTemplateClipboardSnapshot,
   getProductionConsoleInspector,
+  initializeProductionConsole,
   loadProductionConsoleFixture,
   prepareProductionPreview,
+  instantiateProductionConsoleTemplate,
   removeProductionConsoleComponent,
+  removeProductionConsoleTemplate,
   removeProductionQueueItem,
   renderProductionConsoleComponentFixture,
   restoreLastProductionPreview,
@@ -32,6 +38,8 @@ import {
   selectProductionAsset,
   selectProductionComponentRendererFixture,
   selectProductionComponentRendererOutput,
+  selectProductionConsoleTemplate,
+  selectProductionConsoleTemplateFixture,
   selectProductionGraphic,
   selectProductionOutput,
   setProductionLayerAction,
@@ -39,6 +47,7 @@ import {
   setProductionConsoleVariable,
   setProductionConsoleVariableStatus,
   setProductionVisibility,
+  snapshotProductionConsoleTemplate,
   transitionProductionToProgram,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
@@ -48,6 +57,13 @@ import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/bro
 import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260713-asset-manager-001-assets-v1";
 import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260713-production-variables-001-variables-v1";
 import { findBroadcastComponent, listBroadcastComponents, validateBroadcastComponent } from "../js/broadcast/componentLibrary.js";
+import {
+  createBroadcastTemplate,
+  getRegisteredTemplate,
+  listRegisteredTemplates,
+  registerBroadcastTemplate,
+  validateTemplateSnapshot
+} from "../js/broadcast/templateEngine.js";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -56,7 +72,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-component-renderer-001-renderer-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-template-engine-001-template-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
@@ -74,6 +90,7 @@ assert.deepEqual(getBroadcastQueue(model.state), []);
 assert.equal(model.outputIds.length, 5);
 assert.equal(Object.keys(model.variableRegistry.variables).length, 14);
 assert.equal(listBroadcastComponents(model.componentRegistry).length, 0);
+assert.equal(listRegisteredTemplates(model.templateRegistry).length, 0);
 for (const outputId of model.outputIds) {
   const output = getBroadcastOutput(outputId);
   assert.equal(validateBroadcastOutput(output).valid, true);
@@ -154,6 +171,90 @@ assert.equal(model.componentRendererSnapshot.components.length, 1);
 model = renderProductionConsoleComponentFixture(model, componentRenderer, "update", { now: T2 });
 assert.equal(model.componentRendererResult.renderId, "production_console_score");
 destroyComponentRenderer(componentRenderer);
+
+// Template Engine controls only prepare template instances and snapshots in memory.
+const stateBeforeTemplates = structuredClone(model.state);
+const outputsBeforeTemplates = Object.fromEntries(model.outputIds.map((outputId) => [outputId, structuredClone(getBroadcastOutput(outputId))]));
+const rendererStateBeforeTemplates = structuredClone(model.componentRendererSnapshot);
+model = selectProductionConsoleTemplateFixture(model, "scoreboard");
+model = createProductionConsoleTemplate(model, { now: T1 });
+assert.equal(model.inspectorTab, "templates");
+assert.equal(listRegisteredTemplates(model.templateRegistry).length, 1);
+const firstTemplateId = model.selectedTemplateId;
+assert.equal(getRegisteredTemplate(model.templateRegistry, firstTemplateId).templateType, "scoreboard");
+model = instantiateProductionConsoleTemplate(model, firstTemplateId, { now: T2 });
+assert.equal(model.templateInstanceResult.templateInstance.templateId, firstTemplateId);
+assert.equal(validateTemplateSnapshot(model.templateSnapshot).valid, true);
+model = snapshotProductionConsoleTemplate(model, firstTemplateId, { now: T2 });
+assert.equal(validateTemplateSnapshot(model.templateSnapshot).valid, true);
+model = duplicateProductionConsoleTemplate(model, firstTemplateId, { now: T3 });
+assert.equal(listRegisteredTemplates(model.templateRegistry).length, 2);
+assert.notEqual(model.selectedTemplateId, firstTemplateId);
+const duplicateTemplateId = model.selectedTemplateId;
+model = selectProductionConsoleTemplate(model, duplicateTemplateId);
+model = removeProductionConsoleTemplate(model, duplicateTemplateId, { now: T4 });
+assert.equal(listRegisteredTemplates(model.templateRegistry).length, 1);
+const templatesInspector = getProductionConsoleInspector(model, { visibility: "production", now: T4 }).templates;
+assert.equal(templatesInspector.version, "1.0.0");
+assert.equal(templatesInspector.registry.templates.length, 1);
+assert.equal(templatesInspector.selected.templateId, firstTemplateId);
+
+// Templates display and copy the same visibility-aware snapshot, never the full inspector.
+const clipboardSource = getRegisteredTemplate(model.templateRegistry, firstTemplateId);
+const privateClipboardTemplate = createBroadcastTemplate({
+  ...clipboardSource,
+  templateId: "template_console_clipboard_private",
+  visibility: "public",
+  status: "draft",
+  tenantId: "tenant_private",
+  organizationId: "organization_private",
+  components: clipboardSource.components.map((component) => ({
+    ...component,
+    visibility: "public",
+    tenantId: "tenant_private",
+    createdBy: "template_operator",
+    metadata: {
+      ...component.metadata,
+      apiKey: "secret-key",
+      plugins: ["runtime-plugin"],
+      safeLabel: "visible"
+    }
+  })),
+  metadata: { apiKey: "template-secret", plugins: ["template-plugin"] },
+  createdBy: undefined,
+  updatedBy: undefined
+}, {
+  actor: { id: "clipboard_operator", name: "Clipboard operator", role: "producer" },
+  now: T4
+});
+model = {
+  ...model,
+  visibility: "public",
+  selectedTemplateId: privateClipboardTemplate.templateId,
+  templateRegistry: registerBroadcastTemplate(model.templateRegistry, privateClipboardTemplate, {
+    expectedRevision: model.templateRegistry.revision,
+    now: T4
+  })
+};
+const clipboardSnapshot = getProductionConsoleTemplateClipboardSnapshot(model, { visibility: "public", now: T4 });
+const clipboardJson = JSON.stringify(clipboardSnapshot);
+for (const privateValue of [
+  "template_operator", "clipboard_operator", "tenant_private", "organization_private",
+  "secret-key", "template-secret", "runtime-plugin", "template-plugin", "apiKey", "plugins"
+]) assert.equal(clipboardJson.includes(privateValue), false, privateValue);
+assert.equal(clipboardJson.includes(privateClipboardTemplate.templateId), true);
+assert.equal(clipboardJson.includes('"templateType":"scoreboard"'), true);
+assert.equal(clipboardJson.includes('"components"'), true);
+assert.equal(clipboardJson.includes('"safeLabel":"visible"'), true);
+const publicTemplatesInspector = getProductionConsoleInspector(model, { visibility: "public", now: T4 }).templates;
+assert.deepEqual(publicTemplatesInspector.clipboardSnapshot, clipboardSnapshot);
+assert.deepEqual(publicTemplatesInspector.snapshot, clipboardSnapshot);
+assert.equal("registry" in clipboardSnapshot, false);
+model = removeProductionConsoleTemplate(model, privateClipboardTemplate.templateId, { now: T4 });
+model = { ...model, visibility: "production" };
+assert.deepEqual(model.state, stateBeforeTemplates);
+assert.deepEqual(model.componentRendererSnapshot, rendererStateBeforeTemplates);
+for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeTemplates[outputId]);
 model = selectProductionComponentRendererOutput(model, "component_vertical");
 componentRenderer = createProductionConsoleComponentRenderer(model, rendererTarget, { rendererId: "console_renderer_vertical", now: T2 });
 assert.equal(componentRenderer.orientation, "portrait");
@@ -503,6 +604,9 @@ for (const id of [
   "console-outputs-list",
   "console-queue-list",
   "console-variables",
+  "console-template-lab",
+  "console-template-fixture",
+  "console-template-status",
   "console-component-renderer-lab",
   "console-component-renderer-target",
   "console-component-renderer-fixture",
@@ -528,6 +632,12 @@ assert.ok(source.includes("pre.textContent = JSON.stringify(value, null, 2)"));
 assert.ok(source.includes('const pre = refs.inspector.querySelector("pre")'));
 assert.ok(source.includes("componentRegistry"));
 assert.ok(source.includes('components: "Componentes"'));
+assert.ok(source.includes('templates: "Templates"'));
+assert.ok(source.includes("createProductionConsoleTemplate"));
+assert.ok(source.includes("instantiateProductionConsoleTemplate"));
+assert.ok(source.includes("getProductionConsoleTemplateClipboardSnapshot"));
+assert.ok(source.includes('copy.dataset.copyJson = "template-snapshot"'));
+assert.ok(html.includes("Template Engine V1"));
 assert.ok(source.includes("Crear componente de prueba"));
 assert.ok(html.includes("Laboratorio de Componentes V2"));
 assert.ok(source.includes("COMPONENT_RENDERER_VERSION"));
@@ -540,6 +650,7 @@ assert.equal(source.includes("programSnapshot: model.programSnapshot"), false);
 const sessionWriterSource = source.slice(source.indexOf("function writeSessionSettings"), source.indexOf("async function copyText"));
 assert.equal(sessionWriterSource.includes("state: model.state"), false);
 assert.equal(sessionWriterSource.includes("componentRegistry"), false);
+assert.equal(sessionWriterSource.includes("templateRegistry"), false);
 assert.ok(source.includes("dispatchBroadcastAction(action, actionContext"));
 assert.ok(source.includes("variables: model.variableRegistry"));
 assert.ok(source.includes("ACTION_TYPES.SET_VARIABLE"));
@@ -572,9 +683,41 @@ assert.deepEqual(getBroadcastQueue(reloaded.state), []);
 assert.equal(reloaded.variableRegistry.variables.var_production_message.value, null);
 assert.equal(reloaded.variableRegistry.variables.var_production_message.revision, 0);
 assert.equal(listBroadcastComponents(reloaded.componentRegistry).length, 0);
+assert.equal(listRegisteredTemplates(reloaded.templateRegistry).length, 0);
 disposeProductionConsole(reloaded);
 
+// Initialization is idempotent per root; dispose removes only its listeners and permits a clean restart.
+const lifecycleHarness = createConsoleLifecycleHarness();
+const firstInitialization = initializeProductionConsole(lifecycleHarness.root);
+const secondInitialization = initializeProductionConsole(lifecycleHarness.root);
+assert.strictEqual(secondInitialization, firstInitialization);
+lifecycleHarness.templateAction.dispatchEvent(new Event("click"));
+assert.equal(listRegisteredTemplates(firstInitialization.getModel().templateRegistry).length, 1);
+firstInitialization.dispose();
+lifecycleHarness.templateAction.dispatchEvent(new Event("click"));
+assert.equal(listRegisteredTemplates(firstInitialization.getModel().templateRegistry).length, 1);
+const thirdInitialization = initializeProductionConsole(lifecycleHarness.root);
+assert.notStrictEqual(thirdInitialization, firstInitialization);
+lifecycleHarness.templateAction.dispatchEvent(new Event("click"));
+assert.equal(listRegisteredTemplates(thirdInitialization.getModel().templateRegistry).length, 1);
+thirdInitialization.dispose();
+
 console.log("production-console.test.mjs: OK");
+
+function createConsoleLifecycleHarness() {
+  const templateAction = new EventTarget();
+  templateAction.dataset = { templateAction: "create" };
+  const consoleRoot = {};
+  const root = {
+    querySelector(selector) {
+      return selector === "#production-console" ? consoleRoot : null;
+    },
+    querySelectorAll(selector) {
+      return selector === "[data-template-action]" ? [templateAction] : [];
+    }
+  };
+  return { root, templateAction };
+}
 
 function createRendererMockDocument() {
   class Element {
