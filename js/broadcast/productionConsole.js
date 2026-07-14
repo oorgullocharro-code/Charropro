@@ -98,10 +98,22 @@ import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
 } from "../../fixtures/templateEngineFixtures.js?v=20260714-template-engine-001-template-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-template-engine-001-template-v1";
+import {
+  TEMPLATE_RENDERER_INTEGRATION_VERSION,
+  buildTemplateRenderSnapshot,
+  clearTemplateRendererIntegration,
+  cloneTemplateRenderResult,
+  createTemplateRendererIntegration,
+  destroyTemplateRendererIntegration,
+  prepareTemplateRender,
+  renderTemplateInstance,
+  updateTemplateRender,
+  validateTemplateRenderSnapshot
+} from "./templateRendererIntegration.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-template-engine-001-template-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-template-renderer-integration-001-composed-preview-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -223,7 +235,12 @@ export function createProductionConsoleModel(options = {}) {
   });
   const graphic = getGraphicDefinition(options.graphicId);
   const outputIds = outputs.map((output) => output.id);
-  const variableRegistry = registerConsoleVariables(contract, outputIds, now);
+  const variableRegistry = registerConsoleVariables(
+    contract,
+    outputIds,
+    now,
+    fixtureSource.organization?.tenantId
+  );
   const componentRegistry = emptyComponentRegistry(now);
   const templateRegistry = clearTemplateRegistry({}, { resetRevision: true, now });
   return {
@@ -266,6 +283,15 @@ export function createProductionConsoleModel(options = {}) {
     templateSnapshot: null,
     templateWarnings: [],
     templateErrors: [],
+    templateRendererContextId: fixtureDefinition.id,
+    templateRendererOutputId: COMPONENT_RENDERER_OUTPUTS[0].id,
+    templateRendererVisibility: visibility,
+    templateRendererState: "uninitialized",
+    templateRendererPreparation: null,
+    templateRendererResult: null,
+    templateRendererSnapshot: null,
+    templateRendererWarnings: [],
+    templateRendererErrors: [],
     actionHistory: [],
     currentGraphicInstanceId: null,
     selectedComponentId: null,
@@ -495,7 +521,7 @@ export function createProductionConsoleTemplate(model, options = {}) {
   assertModel(model);
   const sequence = model.templateSequence + 1;
   const templateId = `template_console_${sequence}`;
-  const fixture = buildTemplateEngineFixture(model.templateFixtureType, {
+  const fixture = buildProductionConsoleTemplateFixture(model, {
     templateId,
     state: "draft",
     variant: sequence,
@@ -515,6 +541,7 @@ export function createProductionConsoleTemplate(model, options = {}) {
     templateSnapshot: null,
     templateWarnings: [],
     templateErrors: [],
+    ...emptyTemplateRendererRuntimeState(),
     inspectorTab: "templates",
     lastAction: "template-created",
     lastActionError: null
@@ -546,6 +573,7 @@ export function duplicateProductionConsoleTemplate(model, templateId = model?.se
     templateSnapshot: null,
     templateWarnings: [],
     templateErrors: [],
+    ...emptyTemplateRendererRuntimeState(),
     inspectorTab: "templates",
     lastAction: "template-duplicated",
     lastActionError: null
@@ -569,6 +597,7 @@ export function removeProductionConsoleTemplate(model, templateId = model?.selec
     templateSnapshot: null,
     templateWarnings: [],
     templateErrors: [],
+    ...emptyTemplateRendererRuntimeState(),
     inspectorTab: "templates",
     lastAction: "template-removed",
     lastActionError: null
@@ -585,6 +614,7 @@ export function selectProductionConsoleTemplate(model, templateId) {
     templateSnapshot: null,
     templateWarnings: [],
     templateErrors: [],
+    ...emptyTemplateRendererRuntimeState(),
     inspectorTab: "templates",
     lastAction: "template-selected",
     lastActionError: null
@@ -595,9 +625,9 @@ export function instantiateProductionConsoleTemplate(model, templateId = model?.
   assertModel(model);
   const template = getRegisteredTemplate(model.templateRegistry, templateId);
   if (!template) throw consoleError("console-template-not-found");
-  const sources = buildProductionConsoleTemplateSources(model, options);
+  const sources = options.sources || buildProductionConsoleTemplateSources(model, options);
   const result = instantiateBroadcastTemplate(template, sources, {
-    visibility: model.visibility,
+    visibility: normalizeVisibility(options.visibility || model.visibility),
     tenantId: template.tenantId,
     now: normalizeNow(options.now)
   });
@@ -607,6 +637,11 @@ export function instantiateProductionConsoleTemplate(model, templateId = model?.
     templateSnapshot: cloneValue(result.snapshot),
     templateWarnings: uniqueStrings(result.warnings || []),
     templateErrors: uniqueStrings(result.errors || []),
+    templateRendererPreparation: null,
+    templateRendererResult: null,
+    templateRendererSnapshot: null,
+    templateRendererWarnings: [],
+    templateRendererErrors: [],
     inspectorTab: "templates",
     lastAction: "template-instantiated",
     lastActionError: null
@@ -642,6 +677,176 @@ export function getProductionConsoleTemplateClipboardSnapshot(model, options = {
     templateInstanceId: options.templateInstanceId || `template_snapshot_${template.templateId}_${template.revision}`,
     now: normalizeNow(options.now)
   });
+}
+
+export function selectProductionConsoleTemplateRendererContext(model, fixtureId) {
+  assertModel(model);
+  const fixture = getFixtureDefinition(fixtureId);
+  return {
+    ...model,
+    templateRendererContextId: fixture.id,
+    templateInstanceResult: null,
+    ...emptyTemplateRendererRuntimeState(),
+    inspectorTab: "templates",
+    lastAction: "template-renderer-context-selected",
+    lastActionError: null
+  };
+}
+
+export function selectProductionConsoleTemplateRendererOutput(model, outputId) {
+  assertModel(model);
+  const output = getComponentRendererOutput(outputId);
+  return {
+    ...model,
+    templateRendererOutputId: output.id,
+    templateInstanceResult: null,
+    ...emptyTemplateRendererRuntimeState(),
+    inspectorTab: "templates",
+    lastAction: "template-renderer-output-selected",
+    lastActionError: null
+  };
+}
+
+export function selectProductionConsoleTemplateRendererVisibility(model, visibility) {
+  assertModel(model);
+  return {
+    ...model,
+    templateRendererVisibility: normalizeVisibility(visibility),
+    templateInstanceResult: null,
+    ...emptyTemplateRendererRuntimeState(),
+    inspectorTab: "templates",
+    lastAction: "template-renderer-visibility-selected",
+    lastActionError: null
+  };
+}
+
+export function createProductionConsoleTemplateRendererIntegration(model, target, options = {}) {
+  assertModel(model);
+  const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
+  const sources = buildProductionConsoleTemplateRendererSources(model, options);
+  return createTemplateRendererIntegration(target, {
+    integrationId: options.integrationId || `production_console_template_renderer_${output.id}`,
+    rendererId: options.rendererId || `production_console_template_component_renderer_${output.id}`,
+    outputId: output.id,
+    width: output.width,
+    height: output.height,
+    orientation: output.orientation,
+    safeArea: output.safeArea,
+    visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
+    tenantId: sources.broadcastContract?.tenant?.id,
+    allowDisconnected: options.allowDisconnected === true,
+    now: options.now
+  });
+}
+
+export function instantiateProductionConsoleTemplateForRenderer(model, options = {}) {
+  assertModel(model);
+  const sources = buildProductionConsoleTemplateRendererSources(model, options);
+  return {
+    ...instantiateProductionConsoleTemplate(model, options.templateId || model.selectedTemplateId, {
+      ...options,
+      sources,
+      visibility: model.templateRendererVisibility
+    }),
+    lastAction: "template-renderer-instantiated"
+  };
+}
+
+export function prepareProductionConsoleTemplateRenderer(model, options = {}) {
+  assertModel(model);
+  const template = requireConsoleTemplate(model, options.templateId);
+  const sources = buildProductionConsoleTemplateRendererSources(model, options);
+  const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
+  const templateInstanceId = options.templateInstanceId || `template_lab_instance_${template.templateId}`;
+  const instance = instantiateBroadcastTemplate(template, sources, {
+    visibility: model.templateRendererVisibility,
+    tenantId: sources.broadcastContract?.tenant?.id,
+    templateInstanceId,
+    now: normalizeNow(options.now)
+  });
+  const preparation = prepareTemplateRender(instance, sources, {
+    templateRenderId: options.templateRenderId || model.templateRendererResult?.templateRenderId || `template_lab_render_${template.templateId}`,
+    outputId: output.id,
+    outputType: "preview",
+    width: output.width,
+    height: output.height,
+    orientation: output.orientation,
+    safeArea: output.safeArea,
+    visibility: model.templateRendererVisibility,
+    tenantId: sources.broadcastContract?.tenant?.id,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    templateInstanceResult: cloneTemplateResult(instance),
+    templateRendererPreparation: cloneValue(preparation),
+    templateRendererState: preparation.status,
+    templateRendererWarnings: uniqueStrings(preparation.warnings || []),
+    templateRendererErrors: uniqueStrings(preparation.errors || []),
+    inspectorTab: "templates",
+    lastAction: "template-renderer-prepared",
+    lastActionError: preparation.errors?.[0] || null
+  };
+}
+
+export function renderProductionConsoleTemplateRenderer(model, integration, options = {}) {
+  assertModel(model);
+  if (!model.templateRendererPreparation) throw consoleError("console-template-renderer-not-prepared");
+  const result = renderTemplateInstance(integration, model.templateRendererPreparation, {
+    now: options.now
+  });
+  const snapshot = buildTemplateRenderSnapshot(integration, {
+    visibility: model.templateRendererVisibility,
+    now: options.now
+  });
+  return templateRendererModelResult(model, integration, result, snapshot, "template-renderer-rendered");
+}
+
+export function updateProductionConsoleTemplateRenderer(model, integration, options = {}) {
+  assertModel(model);
+  const currentId = model.templateRendererResult?.templateRenderId;
+  if (!currentId) throw consoleError("console-template-renderer-not-rendered");
+  const preparedModel = prepareProductionConsoleTemplateRenderer(model, { ...options, templateRenderId: currentId });
+  if (preparedModel.templateRendererErrors.length) return preparedModel;
+  const result = updateTemplateRender(integration, currentId, preparedModel.templateRendererPreparation, { now: options.now });
+  const snapshot = buildTemplateRenderSnapshot(integration, {
+    visibility: preparedModel.templateRendererVisibility,
+    now: options.now
+  });
+  return templateRendererModelResult(preparedModel, integration, result, snapshot, "template-renderer-updated");
+}
+
+export function clearProductionConsoleTemplateRenderer(model, integration, options = {}) {
+  assertModel(model);
+  clearTemplateRendererIntegration(integration, { now: options.now });
+  const snapshot = buildTemplateRenderSnapshot(integration, {
+    visibility: model.templateRendererVisibility,
+    now: options.now
+  });
+  return {
+    ...model,
+    templateRendererState: integration.state,
+    templateRendererPreparation: null,
+    templateRendererResult: null,
+    templateRendererSnapshot: snapshot,
+    templateRendererWarnings: uniqueStrings(snapshot.warnings || []),
+    templateRendererErrors: uniqueStrings(snapshot.errors || []),
+    inspectorTab: "templates",
+    lastAction: "template-renderer-cleared",
+    lastActionError: null
+  };
+}
+
+export function getProductionConsoleTemplateRenderClipboardSnapshot(model, integration, options = {}) {
+  assertModel(model);
+  const snapshot = integration
+    ? buildTemplateRenderSnapshot(integration, {
+        visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
+        now: options.now
+      })
+    : cloneValue(model.templateRendererSnapshot);
+  if (!snapshot || !validateTemplateRenderSnapshot(snapshot).valid) throw consoleError("console-template-renderer-snapshot-invalid");
+  return snapshot;
 }
 
 export function disposeProductionConsole(model) {
@@ -1314,7 +1519,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       productionVariables: PRODUCTION_VARIABLES_VERSION,
       componentLibrary: COMPONENT_LIBRARY_VERSION,
       componentRenderer: COMPONENT_RENDERER_VERSION,
-      templateEngine: TEMPLATE_ENGINE_VERSION
+      templateEngine: TEMPLATE_ENGINE_VERSION,
+      templateRendererIntegration: TEMPLATE_RENDERER_INTEGRATION_VERSION
     }
   };
   const sanitized = sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -1404,13 +1610,17 @@ export function validateProductionConsoleModel(model) {
   const assets = listBroadcastAssets(model.assetRegistry, { allVersions: true }).map((asset) => validateBroadcastAsset(asset));
   const variables = listProductionVariables(model.variableRegistry).map((variable) => validateProductionVariable(variable));
   const components = listBroadcastComponents(model.componentRegistry).map((component) => validateBroadcastComponent(component));
+  const templateRenderer = model.templateRendererSnapshot
+    ? validateTemplateRenderSnapshot(model.templateRendererSnapshot)
+    : { valid: true, errors: [], warnings: [] };
   const errors = uniqueStrings([
     ...state.errors,
     ...contract.errors,
     ...outputs.flatMap((item) => item.errors),
     ...assets.flatMap((item) => item.errors),
     ...variables.flatMap((item) => item.errors),
-    ...components.flatMap((item) => item.errors)
+    ...components.flatMap((item) => item.errors),
+    ...templateRenderer.errors
   ]);
   return {
     valid: errors.length === 0,
@@ -1421,7 +1631,8 @@ export function validateProductionConsoleModel(model) {
       ...outputs.flatMap((item) => item.warnings),
       ...assets.flatMap((item) => item.warnings),
       ...variables.flatMap((item) => item.warnings),
-      ...components.flatMap((item) => item.warnings)
+      ...components.flatMap((item) => item.warnings),
+      ...templateRenderer.warnings
     ])
   };
 }
@@ -1443,11 +1654,15 @@ export function initializeProductionConsole(root = document) {
   let model = createProductionConsoleModel({ ...settings, safeMode: true });
   const refs = collectRefs(root);
   const controller = new AbortController();
-  const runtime = { componentRenderer: null, controller };
+  const runtime = { componentRenderer: null, templateRendererIntegration: null, controller };
   populateStaticControls(refs, model);
   if (refs.componentRendererTarget) {
     runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
     model = { ...model, componentRendererState: runtime.componentRenderer.state };
+  }
+  if (refs.templateRendererTarget) {
+    runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
+    model = { ...model, templateRendererState: runtime.templateRendererIntegration.state };
   }
   const update = (nextModel) => {
     model = nextModel;
@@ -1468,6 +1683,9 @@ export function initializeProductionConsole(root = document) {
       instance.disposed = true;
       controller.abort();
       if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
+      if (runtime.templateRendererIntegration && runtime.templateRendererIntegration.state !== "destroyed") {
+        destroyTemplateRendererIntegration(runtime.templateRendererIntegration);
+      }
       disposeProductionConsole(model);
       PRODUCTION_CONSOLE_INSTANCES.delete(root);
     }
@@ -1475,6 +1693,28 @@ export function initializeProductionConsole(root = document) {
   instance.api = api;
   PRODUCTION_CONSOLE_INSTANCES.set(root, instance);
   return api;
+}
+
+function recreateProductionConsoleTemplateRendererRuntime(model, runtime, refs) {
+  if (runtime.templateRendererIntegration && runtime.templateRendererIntegration.state !== "destroyed") {
+    destroyTemplateRendererIntegration(runtime.templateRendererIntegration);
+  }
+  runtime.templateRendererIntegration = null;
+  if (refs.templateRendererTarget) {
+    runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
+  }
+  return {
+    ...model,
+    ...emptyTemplateRendererRuntimeState(),
+    templateRendererState: runtime.templateRendererIntegration?.state || "uninitialized"
+  };
+}
+
+function ensureProductionConsoleTemplateRendererRuntime(model, runtime, refs) {
+  if (!runtime.templateRendererIntegration || runtime.templateRendererIntegration.state === "destroyed") {
+    runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
+  }
+  return runtime.templateRendererIntegration;
 }
 
 function registerConsoleOutputs(now) {
@@ -1522,8 +1762,8 @@ function registerConsoleAssets(now) {
   }), {});
 }
 
-function registerConsoleVariables(contract, outputIds, now) {
-  const tenantId = contract.tenant?.id || "tenant_console_fixture";
+function registerConsoleVariables(contract, outputIds, now, sourceTenantId = null) {
+  const tenantId = sourceTenantId || contract.tenant?.id || "tenant_console_fixture";
   const organizationId = contract.organization?.id || "organizacion_playground";
   const tournamentId = contract.tournament?.id || "torneo_playground";
   const base = {
@@ -1822,6 +2062,105 @@ function buildProductionConsoleTemplateSources(model, options = {}) {
   };
 }
 
+function buildProductionConsoleTemplateFixture(model, options = {}) {
+  const fixture = buildTemplateEngineFixture(model.templateFixtureType, options);
+  const context = getFixtureDefinition(model.templateRendererContextId || model.fixtureId);
+  const source = buildPlaygroundFixture(context.competitionType, context.countOption);
+  if (model.templateFixtureType === "roster") {
+    return withConsoleTemplateComponentProperties(fixture, {
+      items: (source.team?.members || []).map((member) => member?.name || member?.id || "").filter(Boolean)
+    });
+  }
+  if (model.templateFixtureType === "ticker") {
+    return withConsoleTemplateComponentProperties(fixture, { items: ["CharroPro"] });
+  }
+  if (model.templateFixtureType === "standings") {
+    return withConsoleTemplateComponentProperties(fixture, {
+      rows: (source.ranking?.entries || []).map((entry) => [entry.position, entry.name, entry.total])
+    });
+  }
+  if (model.templateFixtureType !== "scoreboard") return fixture;
+  if (context.competitionType !== "equipos_completo" || !["three", "four"].includes(context.countOption)) return fixture;
+  const count = context.countOption === "four" ? 4 : 3;
+  const rankingFixture = buildTemplateEngineFixture("ranking", options);
+  const ranking = cloneValue(rankingFixture.template.components[0]);
+  ranking.instanceId = `template_instance_scoreboard_${options.variant || 1}_teams`;
+  ranking.layout = { ...ranking.layout, x: 0.05, y: 0.1, width: 0.9, height: 0.78, anchor: "top-left", zIndex: 2 };
+  return {
+    ...fixture,
+    template: {
+      ...fixture.template,
+      components: [ranking],
+      metadata: { ...fixture.template.metadata, consoleTeamCount: count }
+    }
+  };
+}
+
+function withConsoleTemplateComponentProperties(fixture, properties) {
+  const component = cloneValue(fixture.template.components[0]);
+  component.bindings = [];
+  component.properties = { ...component.properties, ...properties };
+  return {
+    ...fixture,
+    template: {
+      ...fixture.template,
+      components: [component],
+      metadata: { ...fixture.template.metadata, consoleDisplayAdapter: true }
+    }
+  };
+}
+
+function buildProductionConsoleTemplateRendererSources(model, options = {}) {
+  const now = normalizeNow(options.now);
+  const fixture = getFixtureDefinition(options.fixtureId || model.templateRendererContextId);
+  const source = stampFixtureSource(buildPlaygroundFixture(fixture.competitionType, fixture.countOption), now);
+  const visibility = normalizeVisibility(options.visibility || model.templateRendererVisibility);
+  const contract = buildBroadcastDataContract(source, {
+    visibility,
+    outputType: "preview",
+    includeLegacyAliases: true,
+    now
+  });
+  const variables = buildConsoleVariablesInspector(model, visibility, options);
+  return {
+    productionVariables: variables.snapshot,
+    broadcastContract: contract,
+    assetManager: model.assetRegistry
+  };
+}
+
+function requireConsoleTemplate(model, templateId) {
+  const template = getRegisteredTemplate(model.templateRegistry, templateId || model.selectedTemplateId);
+  if (!template) throw consoleError("console-template-not-found");
+  return template;
+}
+
+function emptyTemplateRendererRuntimeState() {
+  return {
+    templateRendererState: "uninitialized",
+    templateRendererPreparation: null,
+    templateRendererResult: null,
+    templateRendererSnapshot: null,
+    templateRendererWarnings: [],
+    templateRendererErrors: []
+  };
+}
+
+function templateRendererModelResult(model, integration, result, snapshot, lastAction) {
+  const clonedResult = cloneTemplateRenderResult(result);
+  return {
+    ...model,
+    templateRendererState: integration.state,
+    templateRendererResult: clonedResult,
+    templateRendererSnapshot: cloneValue(snapshot),
+    templateRendererWarnings: uniqueStrings([...(clonedResult.warnings || []), ...(snapshot.warnings || [])]),
+    templateRendererErrors: uniqueStrings([...(clonedResult.errors || []), ...(snapshot.errors || [])]),
+    inspectorTab: "templates",
+    lastAction,
+    lastActionError: clonedResult.errors?.[0] || null
+  };
+}
+
 function buildConsoleTemplatesInspector(model, visibility, options = {}) {
   const rank = VISIBILITY_RANK[visibility] ?? VISIBILITY_RANK.production;
   const templates = listRegisteredTemplates(model.templateRegistry)
@@ -1835,6 +2174,19 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
     : null;
   return {
     version: TEMPLATE_ENGINE_VERSION,
+    rendererIntegration: {
+      version: TEMPLATE_RENDERER_INTEGRATION_VERSION,
+      state: model.templateRendererState,
+      contextId: model.templateRendererContextId,
+      output: getComponentRendererOutput(model.templateRendererOutputId),
+      visibility: model.templateRendererVisibility,
+      preparation: cloneValue(model.templateRendererPreparation),
+      result: cloneValue(model.templateRendererResult),
+      componentResults: cloneValue(model.templateRendererResult?.componentResults || []),
+      snapshot: cloneValue(model.templateRendererSnapshot),
+      warnings: cloneValue(model.templateRendererWarnings || []),
+      errors: cloneValue(model.templateRendererErrors || [])
+    },
     registry: {
       engineVersion: TEMPLATE_ENGINE_VERSION,
       revision: model.templateRegistry?.revision ?? 0,
@@ -1848,12 +2200,14 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
     warnings: uniqueStrings([
       ...validations.flatMap((validation) => validation.warnings || []),
       ...(snapshot?.warnings || []),
-      ...(model.templateWarnings || [])
+      ...(model.templateWarnings || []),
+      ...(model.templateRendererWarnings || [])
     ]),
     errors: uniqueStrings([
       ...validations.flatMap((validation) => validation.errors || []),
       ...(snapshot?.errors || []),
-      ...(model.templateErrors || [])
+      ...(model.templateErrors || []),
+      ...(model.templateRendererErrors || [])
     ])
   };
 }
@@ -2001,6 +2355,19 @@ function collectRefs(root) {
     templateWarnings: id("console-template-warnings"),
     templateErrors: id("console-template-errors"),
     templateActions: [...root.querySelectorAll("[data-template-action]")],
+    templateRendererLab: id("console-template-renderer-lab"),
+    templateRendererTemplate: id("console-template-renderer-template"),
+    templateRendererContext: id("console-template-renderer-context"),
+    templateRendererOutput: id("console-template-renderer-output"),
+    templateRendererVisibility: id("console-template-renderer-visibility"),
+    templateRendererFrame: id("console-template-renderer-frame"),
+    templateRendererSafeArea: id("console-template-renderer-safe-area"),
+    templateRendererTarget: id("console-template-renderer-target"),
+    templateRendererStatus: id("console-template-renderer-status"),
+    templateRendererMetrics: id("console-template-renderer-metrics"),
+    templateRendererWarnings: id("console-template-renderer-warnings"),
+    templateRendererErrors: id("console-template-renderer-errors"),
+    templateRendererActions: [...root.querySelectorAll("[data-template-renderer-action]")],
     componentRendererLab: id("console-component-renderer-lab"),
     componentRendererFixture: id("console-component-renderer-fixture"),
     componentRendererOutput: id("console-component-renderer-output"),
@@ -2028,6 +2395,9 @@ function populateStaticControls(refs, model) {
   populateSelect(refs.enterAnimation, ANIMATIONS.map((value) => ({ value, label: value })), model.animation.enter);
   populateSelect(refs.exitAnimation, ANIMATIONS.map((value) => ({ value, label: value })), model.animation.exit);
   populateSelect(refs.templateFixture, TEMPLATE_ENGINE_FIXTURES.map((fixture) => ({ value: fixture.type, label: fixture.label })), model.templateFixtureType);
+  populateSelect(refs.templateRendererContext, PRODUCTION_CONSOLE_FIXTURES.map((fixture) => ({ value: fixture.id, label: fixture.label })), model.templateRendererContextId);
+  populateSelect(refs.templateRendererOutput, COMPONENT_RENDERER_OUTPUTS.map((value) => ({ value: value.id, label: value.label })), model.templateRendererOutputId);
+  populateSelect(refs.templateRendererVisibility, VISIBILITIES.map((value) => ({ value, label: value })), model.templateRendererVisibility);
   populateSelect(refs.componentRendererFixture, COMPONENT_RENDERER_FIXTURE_TYPES.map((value) => ({ value, label: readableLabel(value) })), model.componentRendererFixtureType);
   populateSelect(refs.componentRendererOutput, COMPONENT_RENDERER_OUTPUTS.map((value) => ({ value: value.id, label: value.label })), model.componentRendererOutputId);
 }
@@ -2120,13 +2490,63 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
   }, signal);
   listen(refs.templateFixture, "change", () => run((model) => selectProductionConsoleTemplateFixture(model, refs.templateFixture.value)), signal);
   refs.templateActions.forEach((button) => listen(button, "click", () => run((model) => {
-    if (button.dataset.templateAction === "create") return createProductionConsoleTemplate(model);
-    if (button.dataset.templateAction === "duplicate") return duplicateProductionConsoleTemplate(model);
-    if (button.dataset.templateAction === "delete") return removeProductionConsoleTemplate(model);
-    if (button.dataset.templateAction === "instantiate") return instantiateProductionConsoleTemplate(model);
+    let next = model;
+    if (button.dataset.templateAction === "create") next = createProductionConsoleTemplate(model);
+    else if (button.dataset.templateAction === "duplicate") next = duplicateProductionConsoleTemplate(model);
+    else if (button.dataset.templateAction === "delete") next = removeProductionConsoleTemplate(model);
+    else if (button.dataset.templateAction === "instantiate") next = instantiateProductionConsoleTemplate(model);
     if (button.dataset.templateAction === "snapshot") return snapshotProductionConsoleTemplate(model);
-    return model;
+    return next === model ? model : recreateProductionConsoleTemplateRendererRuntime(next, runtime, refs);
   }), signal));
+  listen(refs.templateRendererTemplate, "change", () => run((model) => {
+    if (!refs.templateRendererTemplate.value) return model;
+    return recreateProductionConsoleTemplateRendererRuntime(
+      selectProductionConsoleTemplate(model, refs.templateRendererTemplate.value),
+      runtime,
+      refs
+    );
+  }), signal);
+  listen(refs.templateRendererContext, "change", () => run((model) => recreateProductionConsoleTemplateRendererRuntime(
+    selectProductionConsoleTemplateRendererContext(model, refs.templateRendererContext.value),
+    runtime,
+    refs
+  )), signal);
+  listen(refs.templateRendererOutput, "change", () => run((model) => recreateProductionConsoleTemplateRendererRuntime(
+    selectProductionConsoleTemplateRendererOutput(model, refs.templateRendererOutput.value),
+    runtime,
+    refs
+  )), signal);
+  listen(refs.templateRendererVisibility, "change", () => run((model) => recreateProductionConsoleTemplateRendererRuntime(
+    selectProductionConsoleTemplateRendererVisibility(model, refs.templateRendererVisibility.value),
+    runtime,
+    refs
+  )), signal);
+  refs.templateRendererActions.forEach((button) => listen(button, "click", async () => {
+    if (button.dataset.templateRendererAction === "copy-snapshot") {
+      try {
+        const snapshot = getProductionConsoleTemplateRenderClipboardSnapshot(getModel(), runtime.templateRendererIntegration);
+        await copyText(JSON.stringify(snapshot, null, 2));
+        button.textContent = "Copiado";
+        window.setTimeout(() => { button.textContent = "Copiar Snapshot"; }, 1200);
+      } catch (error) {
+        console.error("[production-console] template snapshot copy failed", error);
+      }
+      return;
+    }
+    run((model) => {
+      const action = button.dataset.templateRendererAction;
+      if (action === "instantiate") {
+        const next = instantiateProductionConsoleTemplateForRenderer(model);
+        return recreateProductionConsoleTemplateRendererRuntime(next, runtime, refs);
+      }
+      if (action === "prepare") return prepareProductionConsoleTemplateRenderer(model);
+      const integration = ensureProductionConsoleTemplateRendererRuntime(model, runtime, refs);
+      if (action === "render") return renderProductionConsoleTemplateRenderer(model, integration);
+      if (action === "update") return updateProductionConsoleTemplateRenderer(model, integration);
+      if (action === "clear") return clearProductionConsoleTemplateRenderer(model, integration);
+      return model;
+    });
+  }, signal));
   listen(refs.componentRendererFixture, "change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)), signal);
   listen(refs.componentRendererOutput, "change", () => run((model) => {
     if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
@@ -2159,7 +2579,11 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
     }
     const templateSelection = event.target.closest("button[data-template-id]");
     if (templateSelection) {
-      run((model) => selectProductionConsoleTemplate(model, templateSelection.dataset.templateId));
+      run((model) => recreateProductionConsoleTemplateRendererRuntime(
+        selectProductionConsoleTemplate(model, templateSelection.dataset.templateId),
+        runtime,
+        refs
+      ));
       return;
     }
     const refreshButton = event.target.closest('button[data-console-action="refresh-inspector"]');
@@ -2240,6 +2664,7 @@ function renderConsole(refs, model, runtime = {}) {
   renderSystem(refs.system, model);
   renderInspectorTabs(refs.inspectorTabs, model);
   renderTemplateLab(refs, model);
+  renderTemplateRendererLab(refs, model, runtime);
   renderComponentRendererLab(refs, model, runtime);
   renderInspector(refs.inspector, model);
 }
@@ -2263,6 +2688,10 @@ function syncControls(refs, model) {
   setValue(refs.duration, model.animation.duration);
   setValue(refs.delay, model.animation.delay);
   setValue(refs.templateFixture, model.templateFixtureType);
+  setValue(refs.templateRendererTemplate, model.selectedTemplateId || "");
+  setValue(refs.templateRendererContext, model.templateRendererContextId);
+  setValue(refs.templateRendererOutput, model.templateRendererOutputId);
+  setValue(refs.templateRendererVisibility, model.templateRendererVisibility);
   setValue(refs.componentRendererFixture, model.componentRendererFixtureType);
   setValue(refs.componentRendererOutput, model.componentRendererOutputId);
   if (refs.autoHide) refs.autoHide.checked = model.animation.autoHide;
@@ -2283,6 +2712,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Components ${COMPONENT_LIBRARY_VERSION}`),
     element("span", "console-meta", `Renderer ${COMPONENT_RENDERER_VERSION}`),
     element("span", "console-meta", `Templates ${TEMPLATE_ENGINE_VERSION}`),
+    element("span", "console-meta", `Template Render ${TEMPLATE_RENDERER_INTEGRATION_VERSION}`),
     element("span", "console-meta", `${getFixtureDefinition(model.fixtureId).label}`),
     element("span", "console-meta", `${getBroadcastOutput(model.selectedOutputId)?.name || "Sin output"}`),
     statusChip(model.safeMode ? "Modo seguro activo" : "Modo seguro inactivo", model.safeMode ? "ok" : "warning")
@@ -2606,7 +3036,7 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Template Renderer", TEMPLATE_RENDERER_INTEGRATION_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]
@@ -2662,6 +3092,60 @@ function renderTemplateLab(refs, model) {
   });
   renderDiagnosticList(refs.templateWarnings, model.templateWarnings, "Sin warnings de templates.");
   renderDiagnosticList(refs.templateErrors, model.templateErrors, "Sin errores de templates.");
+}
+
+function renderTemplateRendererLab(refs, model, runtime) {
+  const root = refs.templateRendererLab;
+  if (!root) return;
+  root.hidden = model.inspectorTab !== "templates";
+  const templates = listRegisteredTemplates(model.templateRegistry);
+  populateSelect(refs.templateRendererTemplate, [
+    { value: "", label: "Selecciona un template" },
+    ...templates.map((template) => ({ value: template.templateId, label: `${template.name} · ${readableLabel(template.templateType)}` }))
+  ], model.selectedTemplateId || "");
+  const selected = model.selectedTemplateId ? getRegisteredTemplate(model.templateRegistry, model.selectedTemplateId) : null;
+  const output = getComponentRendererOutput(model.templateRendererOutputId);
+  if (refs.templateRendererFrame) {
+    refs.templateRendererFrame.style.aspectRatio = `${output.width} / ${output.height}`;
+    refs.templateRendererFrame.dataset.orientation = output.orientation;
+  }
+  if (refs.templateRendererSafeArea) {
+    refs.templateRendererSafeArea.style.top = `${(output.safeArea.top / output.height) * 100}%`;
+    refs.templateRendererSafeArea.style.right = `${(output.safeArea.right / output.width) * 100}%`;
+    refs.templateRendererSafeArea.style.bottom = `${(output.safeArea.bottom / output.height) * 100}%`;
+    refs.templateRendererSafeArea.style.left = `${(output.safeArea.left / output.width) * 100}%`;
+  }
+  const runtimeState = runtime.templateRendererIntegration?.state || model.templateRendererState;
+  if (refs.templateRendererStatus) {
+    refs.templateRendererStatus.replaceChildren(
+      statusChip(`Template ${selected ? readableLabel(selected.status) : "sin selección"}`, selected ? "ok" : "warning"),
+      statusChip(`Integración ${readableLabel(runtimeState)}`, runtimeState === "error" ? "error" : runtimeState === "uninitialized" ? "warning" : "ok"),
+      statusChip(`Renderer ${runtime.templateRendererIntegration?.rendererId ? "ready" : "uninitialized"}`, runtime.templateRendererIntegration?.rendererId ? "ok" : "warning")
+    );
+  }
+  if (refs.templateRendererMetrics) {
+    const result = model.templateRendererResult;
+    refs.templateRendererMetrics.replaceChildren(
+      definitionItem("Template", selected?.name || "—"),
+      definitionItem("Template Instance", model.templateInstanceResult?.templateInstance?.templateInstanceId || "—"),
+      definitionItem("Componentes", result?.componentCount ?? model.templateRendererPreparation?.componentInstances?.length ?? 0),
+      definitionItem("Renderizados", result?.renderedCount ?? 0),
+      definitionItem("Output", output.label),
+      definitionItem("Resolución", `${output.width} x ${output.height}`),
+      definitionItem("Safe area", `${output.safeArea.top}/${output.safeArea.right}/${output.safeArea.bottom}/${output.safeArea.left}`),
+      definitionItem("Visibilidad", model.templateRendererVisibility)
+    );
+  }
+  refs.templateRendererActions.forEach((button) => {
+    const action = button.dataset.templateRendererAction;
+    if (["instantiate", "prepare"].includes(action)) button.disabled = !selected;
+    else if (action === "render") button.disabled = !model.templateRendererPreparation || Boolean(model.templateRendererResult);
+    else if (action === "update") button.disabled = !model.templateRendererResult;
+    else if (action === "clear") button.disabled = !model.templateRendererResult && runtimeState !== "partially_rendered" && runtimeState !== "rendered";
+    else if (action === "copy-snapshot") button.disabled = !model.templateRendererSnapshot;
+  });
+  renderDiagnosticList(refs.templateRendererWarnings, model.templateRendererWarnings, "Sin warnings de integración.");
+  renderDiagnosticList(refs.templateRendererErrors, model.templateRendererErrors, "Sin errores de integración.");
 }
 
 function renderComponentRendererLab(refs, model, runtime) {
@@ -2830,9 +3314,18 @@ function renderTemplateManager(root, templatesInspector) {
   }
 
   const snapshot = element("section", "console-template-snapshot");
-  snapshot.append(element("h4", "", "Snapshot sanitizado"));
+  snapshot.append(element("h4", "", "Inspector de Template y composición"));
   const pre = document.createElement("pre");
-  pre.textContent = JSON.stringify(templatesInspector?.clipboardSnapshot || null, null, 2);
+  pre.textContent = JSON.stringify({
+    templateDefinition: selected,
+    templateInstance: templatesInspector?.instance || null,
+    preparedTemplate: templatesInspector?.rendererIntegration?.preparation || null,
+    templateRenderResult: templatesInspector?.rendererIntegration?.result || null,
+    componentResults: templatesInspector?.rendererIntegration?.componentResults || [],
+    templateRenderSnapshot: templatesInspector?.rendererIntegration?.snapshot || null,
+    warnings: templatesInspector?.rendererIntegration?.warnings || [],
+    errors: templatesInspector?.rendererIntegration?.errors || []
+  }, null, 2);
   snapshot.append(pre);
   layout.append(library, detail, snapshot);
   root.append(toolbar, layout);

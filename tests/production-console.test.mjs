@@ -9,11 +9,13 @@ import {
   buildProductionRenderDescriptor,
   changeProductionQueuePriority,
   clearProductionConsoleComponentRenderer,
+  clearProductionConsoleTemplateRenderer,
   clearProductionPreview,
   clearProductionProgram,
   clearProductionQueue,
   createProductionConsoleModel,
   createProductionConsoleComponentRenderer,
+  createProductionConsoleTemplateRendererIntegration,
   createProductionConsoleTestComponent,
   createProductionConsoleTemplate,
   dispatchProductionConsoleAction,
@@ -23,15 +25,19 @@ import {
   enqueueProductionGraphic,
   escapeProductionConsoleText,
   getProductionConsoleTemplateClipboardSnapshot,
+  getProductionConsoleTemplateRenderClipboardSnapshot,
   getProductionConsoleInspector,
   initializeProductionConsole,
   loadProductionConsoleFixture,
   prepareProductionPreview,
   instantiateProductionConsoleTemplate,
+  instantiateProductionConsoleTemplateForRenderer,
+  prepareProductionConsoleTemplateRenderer,
   removeProductionConsoleComponent,
   removeProductionConsoleTemplate,
   removeProductionQueueItem,
   renderProductionConsoleComponentFixture,
+  renderProductionConsoleTemplateRenderer,
   restoreLastProductionPreview,
   resetProductionConsoleVariable,
   sanitizeProductionConsoleInspectorData,
@@ -40,6 +46,9 @@ import {
   selectProductionComponentRendererOutput,
   selectProductionConsoleTemplate,
   selectProductionConsoleTemplateFixture,
+  selectProductionConsoleTemplateRendererContext,
+  selectProductionConsoleTemplateRendererOutput,
+  selectProductionConsoleTemplateRendererVisibility,
   selectProductionGraphic,
   selectProductionOutput,
   setProductionLayerAction,
@@ -49,6 +58,7 @@ import {
   setProductionVisibility,
   snapshotProductionConsoleTemplate,
   transitionProductionToProgram,
+  updateProductionConsoleTemplateRenderer,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
@@ -64,6 +74,11 @@ import {
   registerBroadcastTemplate,
   validateTemplateSnapshot
 } from "../js/broadcast/templateEngine.js";
+import {
+  TEMPLATE_RENDERER_INTEGRATION_VERSION,
+  destroyTemplateRendererIntegration,
+  validateTemplateRenderSnapshot
+} from "../js/broadcast/templateRendererIntegration.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -72,8 +87,9 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-template-engine-001-template-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-template-renderer-integration-001-composed-preview-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
+assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
 
@@ -89,8 +105,12 @@ assert.deepEqual(model.actionHistory, []);
 assert.deepEqual(getBroadcastQueue(model.state), []);
 assert.equal(model.outputIds.length, 5);
 assert.equal(Object.keys(model.variableRegistry.variables).length, 14);
+assert.equal(model.variableRegistry.tenantId, model.fixtureSource.organization.tenantId);
 assert.equal(listBroadcastComponents(model.componentRegistry).length, 0);
 assert.equal(listRegisteredTemplates(model.templateRegistry).length, 0);
+assert.equal(model.templateRendererState, "uninitialized");
+assert.equal(model.templateRendererPreparation, null);
+assert.equal(model.templateRendererResult, null);
 for (const outputId of model.outputIds) {
   const output = getBroadcastOutput(outputId);
   assert.equal(validateBroadcastOutput(output).valid, true);
@@ -176,6 +196,14 @@ destroyComponentRenderer(componentRenderer);
 const stateBeforeTemplates = structuredClone(model.state);
 const outputsBeforeTemplates = Object.fromEntries(model.outputIds.map((outputId) => [outputId, structuredClone(getBroadcastOutput(outputId))]));
 const rendererStateBeforeTemplates = structuredClone(model.componentRendererSnapshot);
+for (const assetTemplateType of ["sponsor", "qr", "bug"]) {
+  model = selectProductionConsoleTemplateFixture(model, assetTemplateType);
+  model = createProductionConsoleTemplate(model, { now: T1 });
+  model = instantiateProductionConsoleTemplate(model, model.selectedTemplateId, { now: T1 });
+  assert.equal(model.templateInstanceResult.templateInstance.templateType, assetTemplateType);
+  assert.doesNotThrow(() => getProductionConsoleInspector(model, { visibility: "production", now: T1 }));
+  model = removeProductionConsoleTemplate(model, model.selectedTemplateId, { now: T1 });
+}
 model = selectProductionConsoleTemplateFixture(model, "scoreboard");
 model = createProductionConsoleTemplate(model, { now: T1 });
 assert.equal(model.inspectorTab, "templates");
@@ -198,6 +226,94 @@ const templatesInspector = getProductionConsoleInspector(model, { visibility: "p
 assert.equal(templatesInspector.version, "1.0.0");
 assert.equal(templatesInspector.registry.templates.length, 1);
 assert.equal(templatesInspector.selected.templateId, firstTemplateId);
+
+// Template Renderer Integration composes only inside its isolated laboratory.
+const stateBeforeTemplateRenderer = structuredClone(model.state);
+const previewBeforeTemplateRenderer = structuredClone(model.state.preview);
+const programBeforeTemplateRenderer = structuredClone(model.state.program);
+const outputsBeforeTemplateRenderer = Object.fromEntries(model.outputIds.map((outputId) => [outputId, structuredClone(getBroadcastOutput(outputId))]));
+const templateRendererDocument = createRendererMockDocument();
+const templateRendererTarget = templateRendererDocument.createElement("div");
+templateRendererDocument.body.appendChild(templateRendererTarget);
+model = selectProductionConsoleTemplateRendererContext(model, "equipos_3");
+model = selectProductionConsoleTemplateRendererOutput(model, "component_16_9");
+model = selectProductionConsoleTemplateRendererVisibility(model, "production");
+let templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, templateRendererTarget, {
+  integrationId: "console_template_renderer_test",
+  now: T1
+});
+assert.equal(templateRendererIntegration.state, "ready");
+model = instantiateProductionConsoleTemplateForRenderer(model, { now: T1 });
+assert.equal(model.templateInstanceResult.templateInstance.templateId, firstTemplateId);
+model = prepareProductionConsoleTemplateRenderer(model, { now: T2 });
+assert.equal(model.templateRendererPreparation.status, "prepared");
+assert.equal(model.templateRendererPreparation.componentInstances.length, 1);
+model = renderProductionConsoleTemplateRenderer(model, templateRendererIntegration, { now: T2 });
+assert.equal(model.templateRendererResult.status, "rendered");
+assert.equal(model.templateRendererResult.componentCount, 1);
+assert.equal(countByClass(templateRendererTarget, "cp-component-ranking-row"), 3);
+assert.equal(validateTemplateRenderSnapshot(model.templateRendererSnapshot).valid, true);
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+const stableTemplateRenderId = model.templateRendererResult.templateRenderId;
+model = updateProductionConsoleTemplateRenderer(model, templateRendererIntegration, { now: T3 });
+assert.equal(model.templateRendererResult.templateRenderId, stableTemplateRenderId);
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+const renderClipboard = getProductionConsoleTemplateRenderClipboardSnapshot(model, templateRendererIntegration, { visibility: "production", now: T3 });
+assert.equal(validateTemplateRenderSnapshot(renderClipboard).valid, true);
+assert.equal(JSON.stringify(renderClipboard).includes("nodeType"), false);
+assert.deepEqual(model.state, stateBeforeTemplateRenderer);
+assert.deepEqual(model.state.preview, previewBeforeTemplateRenderer);
+assert.deepEqual(model.state.program, programBeforeTemplateRenderer);
+for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeTemplateRenderer[outputId]);
+model = clearProductionConsoleTemplateRenderer(model, templateRendererIntegration, { now: T4 });
+assert.equal(model.templateRendererState, "cleared");
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 0);
+destroyTemplateRendererIntegration(templateRendererIntegration);
+
+model = selectProductionConsoleTemplateRendererOutput(model, "component_vertical");
+templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, templateRendererTarget, {
+  integrationId: "console_template_renderer_vertical",
+  now: T4
+});
+assert.deepEqual(templateRendererIntegration.resolution, { width: 1080, height: 1920 });
+assert.equal(templateRendererIntegration.orientation, "portrait");
+destroyTemplateRendererIntegration(templateRendererIntegration);
+model = selectProductionConsoleTemplateRendererOutput(model, "component_16_9");
+
+model = selectProductionConsoleTemplateRendererContext(model, "equipos_4");
+model = selectProductionConsoleTemplateFixture(model, "scoreboard");
+model = createProductionConsoleTemplate(model, { now: T4 });
+const fourTeamTemplateId = model.selectedTemplateId;
+assert.equal(getRegisteredTemplate(model.templateRegistry, fourTeamTemplateId).metadata.consoleTeamCount, 4);
+templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, templateRendererTarget, {
+  integrationId: "console_template_renderer_four_teams",
+  now: T4
+});
+model = prepareProductionConsoleTemplateRenderer(model, { now: T4 });
+model = renderProductionConsoleTemplateRenderer(model, templateRendererIntegration, { now: T4 });
+assert.equal(countByClass(templateRendererTarget, "cp-component-ranking-row"), 4);
+destroyTemplateRendererIntegration(templateRendererIntegration);
+model = removeProductionConsoleTemplate(model, fourTeamTemplateId, { now: T4 });
+model = selectProductionConsoleTemplateRendererContext(model, "equipos_3");
+
+for (const [templateType, expectedText] of [
+  ["roster", "José de la Torre"],
+  ["ticker", "CharroPro"],
+  ["standings", "Rancho El Laurel"]
+]) {
+  model = selectProductionConsoleTemplateFixture(model, templateType);
+  model = createProductionConsoleTemplate(model, { now: T4 });
+  templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, templateRendererTarget, {
+    integrationId: `console_template_renderer_${templateType}`,
+    now: T4
+  });
+  model = prepareProductionConsoleTemplateRenderer(model, { now: T4 });
+  model = renderProductionConsoleTemplateRenderer(model, templateRendererIntegration, { now: T4 });
+  assert.equal(templateRendererTarget.textContent.includes(expectedText), true, templateType);
+  assert.equal(templateRendererTarget.textContent.includes("[object Object]"), false, templateType);
+  destroyTemplateRendererIntegration(templateRendererIntegration);
+  model = removeProductionConsoleTemplate(model, model.selectedTemplateId, { now: T4 });
+}
 
 // Templates display and copy the same visibility-aware snapshot, never the full inspector.
 const clipboardSource = getRegisteredTemplate(model.templateRegistry, firstTemplateId);
@@ -607,6 +723,15 @@ for (const id of [
   "console-template-lab",
   "console-template-fixture",
   "console-template-status",
+  "console-template-renderer-lab",
+  "console-template-renderer-template",
+  "console-template-renderer-context",
+  "console-template-renderer-output",
+  "console-template-renderer-visibility",
+  "console-template-renderer-frame",
+  "console-template-renderer-safe-area",
+  "console-template-renderer-target",
+  "console-template-renderer-metrics",
   "console-component-renderer-lab",
   "console-component-renderer-target",
   "console-component-renderer-fixture",
@@ -638,6 +763,13 @@ assert.ok(source.includes("instantiateProductionConsoleTemplate"));
 assert.ok(source.includes("getProductionConsoleTemplateClipboardSnapshot"));
 assert.ok(source.includes('copy.dataset.copyJson = "template-snapshot"'));
 assert.ok(html.includes("Template Engine V1"));
+assert.ok(html.includes("Laboratorio de Templates V2"));
+assert.ok(source.includes("TEMPLATE_RENDERER_INTEGRATION_VERSION"));
+assert.ok(source.includes("prepareProductionConsoleTemplateRenderer"));
+assert.ok(source.includes("renderProductionConsoleTemplateRenderer"));
+assert.ok(source.includes("updateProductionConsoleTemplateRenderer"));
+assert.ok(source.includes("clearProductionConsoleTemplateRenderer"));
+assert.ok(source.includes("getProductionConsoleTemplateRenderClipboardSnapshot"));
 assert.ok(source.includes("Crear componente de prueba"));
 assert.ok(html.includes("Laboratorio de Componentes V2"));
 assert.ok(source.includes("COMPONENT_RENDERER_VERSION"));
@@ -733,6 +865,8 @@ function createRendererMockDocument() {
       this.attributes = new Map();
       this.isConnected = false;
       this._textContent = "";
+      this.clientWidth = 1920;
+      this.clientHeight = 1080;
     }
     appendChild(child) { child.remove(); child.parentNode = this; child.setConnected(this.isConnected); this.children.push(child); return child; }
     append(...children) { children.forEach((child) => this.appendChild(child)); }
@@ -740,6 +874,7 @@ function createRendererMockDocument() {
     replaceWith(next) { if (!this.parentNode) return; const parent = this.parentNode; const index = parent.children.indexOf(this); this.parentNode = null; next.parentNode = parent; next.setConnected(parent.isConnected); parent.children[index] = next; }
     remove() { if (!this.parentNode) return; const parent = this.parentNode; parent.children = parent.children.filter((child) => child !== this); this.parentNode = null; this.setConnected(false); }
     setAttribute(name, value) { this.attributes.set(name, String(value)); }
+    getAttribute(name) { return this.attributes.has(name) ? this.attributes.get(name) : null; }
     removeAttribute(name) { this.attributes.delete(name); }
     setConnected(value) { this.isConnected = value; this.children.forEach((child) => child.setConnected(value)); }
     set textContent(value) { this.replaceChildren(); this._textContent = String(value ?? ""); }
@@ -754,4 +889,10 @@ function createRendererMockDocument() {
   mockDocument.body = mockDocument.createElement("body");
   mockDocument.body.isConnected = true;
   return mockDocument;
+}
+
+function countByClass(root, className) {
+  if (!root) return 0;
+  const own = String(root.className || "").split(/\s+/).includes(className) ? 1 : 0;
+  return own + (root.children || []).reduce((total, child) => total + countByClass(child, className), 0);
 }

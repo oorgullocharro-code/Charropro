@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260714-template-engine-001-template-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260714-template-renderer-integration-001-composed-preview-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -203,6 +203,53 @@
               <div><strong>Warnings</strong><div id="console-template-warnings"></div></div>
               <div><strong>Errors</strong><div id="console-template-errors"></div></div>
             </div>
+            <section id="console-template-renderer-lab" class="console-template-renderer-lab">
+              <div class="console-template-renderer-heading">
+                <div>
+                  <p>Composición declarativa aislada</p>
+                  <h3>Laboratorio de Templates V2</h3>
+                </div>
+                <div id="console-template-renderer-status" class="console-template-renderer-status" aria-live="polite"></div>
+              </div>
+              <div class="console-template-renderer-controls">
+                <label class="console-field">
+                  <span>Template</span>
+                  <select id="console-template-renderer-template"></select>
+                </label>
+                <label class="console-field">
+                  <span>Fixture / contexto</span>
+                  <select id="console-template-renderer-context"></select>
+                </label>
+                <label class="console-field">
+                  <span>Output simulado</span>
+                  <select id="console-template-renderer-output"></select>
+                </label>
+                <label class="console-field">
+                  <span>Visibilidad</span>
+                  <select id="console-template-renderer-visibility"></select>
+                </label>
+              </div>
+              <div class="console-template-renderer-actions">
+                <button class="button button-quiet button-small" type="button" data-template-renderer-action="instantiate">Instanciar</button>
+                <button class="button button-quiet button-small" type="button" data-template-renderer-action="prepare">Preparar</button>
+                <button class="button button-primary button-small" type="button" data-template-renderer-action="render">Renderizar</button>
+                <button class="button button-quiet button-small" type="button" data-template-renderer-action="update">Actualizar</button>
+                <button class="button button-quiet button-small" type="button" data-template-renderer-action="clear">Limpiar</button>
+                <button class="button button-quiet button-small" type="button" data-template-renderer-action="copy-snapshot">Copiar Snapshot</button>
+              </div>
+              <div class="console-template-renderer-viewport">
+                <div id="console-template-renderer-frame" class="console-template-renderer-frame" data-orientation="landscape">
+                  <div class="console-template-renderer-grid" aria-hidden="true"></div>
+                  <div id="console-template-renderer-safe-area" class="console-template-renderer-safe-area" aria-hidden="true"></div>
+                  <div id="console-template-renderer-target" class="console-template-renderer-target" aria-label="Vista compuesta del template"></div>
+                </div>
+              </div>
+              <dl id="console-template-renderer-metrics" class="console-template-renderer-metrics"></dl>
+              <div class="console-template-renderer-diagnostics">
+                <div><strong>Warnings</strong><div id="console-template-renderer-warnings"></div></div>
+                <div><strong>Errors</strong><div id="console-template-renderer-errors"></div></div>
+              </div>
+            </section>
           </section>
           <section id="console-component-renderer-lab" class="console-component-renderer-lab" hidden>
             <div class="console-component-renderer-heading">
@@ -244,6 +291,6 @@
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-template-engine-001-template-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-template-renderer-integration-001-composed-preview-v1"></script>
 </body>
 </html>

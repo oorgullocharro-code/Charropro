@@ -5,7 +5,7 @@
 Version actual de cache:
 
 ```text
-v=20260714-template-engine-001-template-v1
+v=20260714-template-renderer-integration-001-composed-preview-v1
 ```
 
 Esta version agrega Broadcast Template Engine V1 (`1.0.0`) como motor declarativo, puro y exclusivamente en memoria para agrupar Component Instances reutilizables. Las plantillas resuelven bindings unicamente mediante Production Variables, Broadcast Data Contract y Asset Manager; crean instancias y snapshots serializables, pero no renderizan ni modifican Preview, Program, Outputs o Broadcast State.
@@ -439,9 +439,21 @@ También se agregó una tarjeta compacta de accesos rápidos en `Conexión`. La 
 Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos de una lista cerrada. No se agregaron consultas Firebase, polling, persistencia de Program, control real de OBS ni permisos persistentes nuevos. Consulta `PRODUCTION_NAV_V1.md` para la especificación completa.
 # COMPONENT-RENDERER-001 - Render visual seguro de componentes V2
 
-- Version de aplicacion: `20260714-template-engine-001-template-v1`.
+- Version de aplicacion: `20260714-template-renderer-integration-001-composed-preview-v1`.
 - Se agrego `js/broadcast/componentRenderer.js` como renderer puro, seguro y en memoria para instancias validas de Component Library.
 - Se incorporaron 18 tipos visuales, lifecycle completo, geometria por output, estilos por allowlist, fallbacks controlados y snapshots sin DOM.
 - Production Console incorpora un Laboratorio de Componentes V2 para 1920 x 1080, 1080 x 1920 y 3840 x 720, sin modificar Preview, Program ni Outputs.
 - No se agregaron Firebase, persistencia, OBS, calculos deportivos, timer activo, QR real, ticker animado ni Program Output.
 - Contrato y limitaciones: `BROADCAST_COMPONENT_RENDERER_V1.md`.
+
+# TEMPLATE-RENDERER-INTEGRATION-001 - Render visual de plantillas compuestas V1
+
+- Version de aplicacion: `20260714-template-renderer-integration-001-composed-preview-v1`.
+- Se agrego `js/broadcast/templateRendererIntegration.js` como capa pura entre Template Engine V1 y Component Renderer V1.
+- La integracion prepara bindings antes del DOM, compone por `instanceId`, conserva una sola raiz por Template y actualiza manualmente sin duplicar nodos.
+- Los errores opcionales producen `partially_rendered`; un componente required no renderizable y sin fallback bloquea antes de crear nodos.
+- Production Console incorpora el Laboratorio de Templates V2 con contextos de prueba, outputs 1920 x 1080, 1080 x 1920 y 3840 x 720, visibilidad, safe area, metricas, diagnosticos y snapshot sanitizado.
+- Los doce fixtures oficiales de Template Engine pueden prepararse, renderizarse, actualizarse y limpiarse desde el laboratorio.
+- El runtime es exclusivo del laboratorio: no modifica Preview, Program, Outputs, Broadcast State, Firebase ni el Core deportivo.
+- QR permanece como placeholder sin asset resuelto, ticker es estatico y timer no crea intervalos.
+- Contrato, seguridad y limitaciones: `BROADCAST_TEMPLATE_RENDERER_INTEGRATION_V1.md`.
