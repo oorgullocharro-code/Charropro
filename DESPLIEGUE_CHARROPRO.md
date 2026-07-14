@@ -339,3 +339,34 @@ Para abrirlo:
     https://orgullocharro.com/charropro/broadcast-playground.html?v=20260713-broadcast-playground-001-visual-test1
 
 La especificación operativa está en BROADCAST_PLAYGROUND_V1.md.
+
+## PRODUCTION-CONSOLE-001
+
+Versión:
+
+    v=20260713-production-console-001-control-center1
+
+Se agregó `production-console.html` como primer centro de control visible de Broadcast Studio.
+
+La consola:
+
+- trabaja únicamente en memoria y con fixtures locales;
+- consume Data Contract, Broadcast State, Broadcast Output y Asset Manager v1;
+- separa Preview de Program y activa Modo seguro en cada recarga;
+- opera layers, outputs, queue, assets, visibilidad e inspector mediante APIs públicas;
+- inicia los outputs offline para no inventar conectividad;
+- no consulta Firebase ni modifica el Core deportivo;
+- no persiste Program, Preview ni queue;
+- no es la consola final y todavía no incluye Action Engine, Template Engine ni OBS real.
+
+Para abrirla localmente:
+
+    http://127.0.0.1:8765/production-console.html
+
+La especificación operativa está en `PRODUCTION_CONSOLE_V1.md`.
+
+### PRODUCTION-CONSOLE-001B
+
+Se cerró la fuga de identidad operativa del inspector público mediante una sanitización central y recursiva aplicada a todas sus pestañas. Preview y Program pueden permanecer activos y visibles sin exponer `preparedBy`, `takenBy`, `updatedBy`, operador, juez, sesión, tenant, cliente o diagnósticos internos.
+
+La matriz deja actores operativos disponibles desde `operational`; `restricted` conserva contexto autorizado, pero ningún nivel expone credenciales, tokens, secretos ni referencias inseguras. La corrección no modifica Preview, Program, layers, outputs, queue, heartbeat, fixtures ni assets.
