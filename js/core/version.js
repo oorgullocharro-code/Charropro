@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260713-production-variables-001-variables-v1";
+export const CHARROPRO_APP_VERSION = "20260713-component-library-001-components-v1";
 
 let versionLogged = false;
 

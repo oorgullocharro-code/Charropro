@@ -979,3 +979,86 @@ input {
 .console-variable-meta dd {
   overflow-wrap: anywhere;
 }
+
+.console-component-toolbar {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.console-component-toolbar strong {
+  width: 100%;
+}
+
+.console-component-manager {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+}
+
+.console-component-library,
+.console-component-detail,
+.console-component-snapshot {
+  background: var(--console-panel-2);
+  border: 1px solid var(--console-border-soft);
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.console-component-library h4,
+.console-component-detail h4,
+.console-component-snapshot h4 {
+  margin: 0;
+}
+
+.console-component-item {
+  background: var(--console-panel);
+  border: 1px solid var(--console-border-soft);
+  border-radius: 4px;
+  color: var(--console-text);
+  cursor: pointer;
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px;
+  text-align: left;
+}
+
+.console-component-item.is-selected {
+  border-color: var(--console-accent);
+  box-shadow: inset 3px 0 0 var(--console-accent);
+}
+
+.console-component-item span {
+  color: var(--console-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.console-component-definition {
+  grid-template-columns: minmax(80px, auto) minmax(0, 1fr);
+}
+
+.console-component-snapshot {
+  grid-column: 1 / -1;
+}
+
+.console-component-snapshot pre {
+  margin: 0;
+  max-height: 460px;
+  overflow: auto;
+}
+
+@media (max-width: 700px) {
+  .console-component-manager {
+    grid-template-columns: 1fr;
+  }
+
+  .console-component-snapshot {
+    grid-column: 1;
+  }
+}

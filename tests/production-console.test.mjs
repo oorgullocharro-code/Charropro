@@ -12,13 +12,16 @@ import {
   clearProductionProgram,
   clearProductionQueue,
   createProductionConsoleModel,
+  createProductionConsoleTestComponent,
   dispatchProductionConsoleAction,
   disposeProductionConsole,
+  duplicateProductionConsoleComponent,
   enqueueProductionGraphic,
   escapeProductionConsoleText,
   getProductionConsoleInspector,
   loadProductionConsoleFixture,
   prepareProductionPreview,
+  removeProductionConsoleComponent,
   removeProductionQueueItem,
   restoreLastProductionPreview,
   resetProductionConsoleVariable,
@@ -38,6 +41,7 @@ import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broad
 import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
 import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260713-asset-manager-001-assets-v1";
 import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260713-production-variables-001-variables-v1";
+import { findBroadcastComponent, listBroadcastComponents, validateBroadcastComponent } from "../js/broadcast/componentLibrary.js";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -46,7 +50,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260713-production-variables-001-variables-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260713-component-library-001-components-v1");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
 
@@ -62,6 +66,7 @@ assert.deepEqual(model.actionHistory, []);
 assert.deepEqual(getBroadcastQueue(model.state), []);
 assert.equal(model.outputIds.length, 5);
 assert.equal(Object.keys(model.variableRegistry.variables).length, 14);
+assert.equal(listBroadcastComponents(model.componentRegistry).length, 0);
 for (const outputId of model.outputIds) {
   const output = getBroadcastOutput(outputId);
   assert.equal(validateBroadcastOutput(output).valid, true);
@@ -102,6 +107,29 @@ assert.equal(publicVariablesInspector.resolved.some((entry) => entry.key === "pr
 assert.equal(JSON.stringify(publicVariablesInspector).includes('"actor"'), false);
 assert.equal(JSON.stringify(publicVariablesInspector).includes('"tenantId"'), false);
 assert.equal(JSON.stringify(publicVariablesInspector).includes('"sessionId"'), false);
+
+// Component Library remains in memory and its console controls never alter Preview, Program or Outputs.
+const stateBeforeComponents = structuredClone(model.state);
+const outputsBeforeComponents = Object.fromEntries(model.outputIds.map((outputId) => [outputId, structuredClone(getBroadcastOutput(outputId))]));
+model = createProductionConsoleTestComponent(model, { now: T1 });
+assert.equal(model.inspectorTab, "components");
+assert.equal(listBroadcastComponents(model.componentRegistry).length, 1);
+assert.equal(validateBroadcastComponent(findBroadcastComponent(model.componentRegistry, model.selectedComponentId)).valid, true);
+const firstComponentId = model.selectedComponentId;
+model = duplicateProductionConsoleComponent(model, firstComponentId, { now: T2 });
+assert.equal(listBroadcastComponents(model.componentRegistry).length, 2);
+assert.notEqual(model.selectedComponentId, firstComponentId);
+const componentInspector = getProductionConsoleInspector(model, { visibility: "production", now: T2 }).components;
+assert.equal(componentInspector.version, "1.0.0");
+assert.equal(componentInspector.registry.components.length, 2);
+assert.equal(componentInspector.selected.componentId, model.selectedComponentId);
+assert.equal(componentInspector.snapshot.version, "1.0.0");
+assert.equal(componentInspector.snapshot.resolvedBindings["properties.text"], "");
+model = removeProductionConsoleComponent(model, model.selectedComponentId, { now: T3 });
+assert.equal(listBroadcastComponents(model.componentRegistry).length, 1);
+assert.equal(model.selectedComponentId, firstComponentId);
+assert.deepEqual(model.state, stateBeforeComponents);
+for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeComponents[outputId]);
 
 // All fixtures rebuild through the Data Contract and preserve their sports scope.
 for (const fixture of PRODUCTION_CONSOLE_FIXTURES) {
@@ -460,12 +488,17 @@ assert.equal(/\.queue\s*=/.test(source), false);
 assert.ok(source.includes("sanitizeProductionConsoleInspectorData(inspector, visibility"));
 assert.ok(source.includes("pre.textContent = JSON.stringify(value, null, 2)"));
 assert.ok(source.includes('const pre = refs.inspector.querySelector("pre")'));
+assert.ok(source.includes("componentRegistry"));
+assert.ok(source.includes('components: "Componentes"'));
+assert.ok(source.includes("Crear componente de prueba"));
+assert.ok(source.includes("Vista previa JSON"));
 assert.ok(source.includes("sessionStorage"));
 assert.ok(source.includes("fixtureId: model.fixtureId"));
 assert.ok(source.includes("safeMode: model.safeMode"));
 assert.equal(source.includes("programSnapshot: model.programSnapshot"), false);
 const sessionWriterSource = source.slice(source.indexOf("function writeSessionSettings"), source.indexOf("async function copyText"));
 assert.equal(sessionWriterSource.includes("state: model.state"), false);
+assert.equal(sessionWriterSource.includes("componentRegistry"), false);
 assert.ok(source.includes("dispatchBroadcastAction(action, actionContext"));
 assert.ok(source.includes("variables: model.variableRegistry"));
 assert.ok(source.includes("ACTION_TYPES.SET_VARIABLE"));
@@ -497,6 +530,7 @@ assert.equal(reloaded.programSnapshot, null);
 assert.deepEqual(getBroadcastQueue(reloaded.state), []);
 assert.equal(reloaded.variableRegistry.variables.var_production_message.value, null);
 assert.equal(reloaded.variableRegistry.variables.var_production_message.revision, 0);
+assert.equal(listBroadcastComponents(reloaded.componentRegistry).length, 0);
 disposeProductionConsole(reloaded);
 
 console.log("production-console.test.mjs: OK");

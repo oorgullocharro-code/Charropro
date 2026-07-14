@@ -55,10 +55,19 @@ import {
   resolveProductionVariables,
   validateProductionVariable
 } from "./productionVariables.js?v=20260713-production-variables-001-variables-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260713-production-variables-001-variables-v1";
+import {
+  COMPONENT_LIBRARY_VERSION,
+  buildComponentSnapshot,
+  findBroadcastComponent,
+  listBroadcastComponents,
+  registerBroadcastComponent,
+  removeBroadcastComponent,
+  validateBroadcastComponent
+} from "./componentLibrary.js?v=20260713-component-library-001-components-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260713-component-library-001-components-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260713-production-variables-001-variables-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260713-component-library-001-components-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -180,6 +189,7 @@ export function createProductionConsoleModel(options = {}) {
   const graphic = getGraphicDefinition(options.graphicId);
   const outputIds = outputs.map((output) => output.id);
   const variableRegistry = registerConsoleVariables(contract, outputIds, now);
+  const componentRegistry = emptyComponentRegistry(now);
   return {
     consoleVersion: PRODUCTION_CONSOLE_VERSION,
     appVersion: CHARROPRO_APP_VERSION || PRODUCTION_CONSOLE_APP_VERSION,
@@ -190,6 +200,7 @@ export function createProductionConsoleModel(options = {}) {
     lastPreviewConfig: null,
     assetRegistry,
     variableRegistry,
+    componentRegistry,
     fixtureId: fixtureDefinition.id,
     selectedGraphicId: graphic.graphicId,
     selectedAssetId: assetExists(assetRegistry, options.assetId) ? options.assetId : DEFAULT_ASSET_ID,
@@ -202,14 +213,119 @@ export function createProductionConsoleModel(options = {}) {
     graphicSequence: 0,
     queueSequence: 0,
     actionSequence: 0,
+    componentSequence: 0,
     actionHistory: [],
     currentGraphicInstanceId: null,
+    selectedComponentId: null,
     inspectorTab: normalizeInspectorTab(options.inspectorTab),
     panelSize: normalizePanelSize(options.panelSize),
     lastAction: "initialized",
     lastActionError: null,
     outputIds
   };
+}
+
+export function createProductionConsoleTestComponent(model, options = {}) {
+  assertModel(model);
+  const sequence = model.componentSequence + 1;
+  const componentId = `component_console_${sequence}`;
+  const registry = registerBroadcastComponent(model.componentRegistry, {
+    componentId,
+    name: `Texto de prueba ${sequence}`,
+    componentType: "text",
+    componentVersion: "1.0.0",
+    componentRevision: 0,
+    visibility: "production",
+    status: "draft",
+    bindings: [{
+      bindingId: `binding_console_${sequence}`,
+      target: "properties.text",
+      source: "production_variables",
+      key: "production.message",
+      fallback: "Texto de prueba",
+      visibility: "production"
+    }],
+    style: {
+      fontFamily: "Inter", fontSize: 36, fontWeight: 700, color: "#ffffff",
+      backgroundColor: "#000000", borderColor: "#d6ad43", borderWidth: 1,
+      borderRadius: 4, opacity: 1, padding: 12, margin: 0
+    },
+    layout: { x: 0.5, y: 0.8, width: 0.7, height: 0.16, anchor: "center", scale: 1, zIndex: 10 },
+    animation: { type: "none", duration: 0, delay: 0, easing: "linear", repeat: 0, direction: "normal", trigger: "manual" },
+    properties: { text: "Texto de prueba", multiline: true, ellipsis: true, maxLines: 2, textTransform: "none" },
+    metadata: { fixture: true, source: "production-console" }
+  }, {
+    actor: CONSOLE_SETUP_ACTOR,
+    expectedRevision: model.componentRegistry.revision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    componentRegistry: registry,
+    componentSequence: sequence,
+    selectedComponentId: componentId,
+    inspectorTab: "components",
+    lastAction: "component-created",
+    lastActionError: null
+  };
+}
+
+export function duplicateProductionConsoleComponent(model, componentId = model?.selectedComponentId, options = {}) {
+  assertModel(model);
+  const source = findBroadcastComponent(model.componentRegistry, componentId);
+  if (!source) throw consoleError("console-component-not-found");
+  const sequence = model.componentSequence + 1;
+  const duplicateId = `component_console_${sequence}`;
+  const registry = registerBroadcastComponent(model.componentRegistry, {
+    ...source,
+    componentId: duplicateId,
+    name: `${source.name} copia`,
+    componentRevision: 0,
+    status: "draft",
+    createdAt: undefined,
+    updatedAt: undefined,
+    createdBy: undefined,
+    updatedBy: undefined,
+    warnings: [],
+    errors: []
+  }, {
+    actor: CONSOLE_SETUP_ACTOR,
+    expectedRevision: model.componentRegistry.revision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    componentRegistry: registry,
+    componentSequence: sequence,
+    selectedComponentId: duplicateId,
+    inspectorTab: "components",
+    lastAction: "component-duplicated",
+    lastActionError: null
+  };
+}
+
+export function removeProductionConsoleComponent(model, componentId = model?.selectedComponentId, options = {}) {
+  assertModel(model);
+  const current = findBroadcastComponent(model.componentRegistry, componentId);
+  if (!current) throw consoleError("console-component-not-found");
+  const registry = removeBroadcastComponent(model.componentRegistry, componentId, {
+    expectedRevision: current.componentRevision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    componentRegistry: registry,
+    selectedComponentId: listBroadcastComponents(registry)[0]?.componentId || null,
+    inspectorTab: "components",
+    lastAction: "component-removed",
+    lastActionError: null
+  };
+}
+
+export function selectProductionConsoleComponent(model, componentId) {
+  assertModel(model);
+  if (!findBroadcastComponent(model.componentRegistry, componentId)) throw consoleError("console-component-not-found");
+  return { ...model, selectedComponentId: componentId, inspectorTab: "components", lastAction: "component-selected", lastActionError: null };
 }
 
 export function disposeProductionConsole(model) {
@@ -835,12 +951,14 @@ export function getProductionConsoleInspector(model, options = {}) {
     .filter((asset) => !publicView || asset.visibility === "public")
     .map((asset) => publicView ? publicAssetDescriptor(asset) : asset);
   const variables = buildConsoleVariablesInspector(model, visibility, options);
+  const components = buildConsoleComponentsInspector(model, visibility, options);
   const warnings = uniqueStrings([
     ...getBroadcastStateWarnings(model.state),
     ...getBroadcastOutputWarnings(selectedOutput),
     ...(previewProjection.warnings || []),
     ...(programProjection.warnings || []),
-    ...(variables.warnings || [])
+    ...(variables.warnings || []),
+    ...(components.warnings || [])
   ]);
   const errors = uniqueStrings([
     ...(model.state.errors || []),
@@ -848,7 +966,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(previewProjection.errors || []),
     ...(programProjection.errors || []),
     ...(model.lastActionError ? [model.lastActionError] : []),
-    ...(variables.errors || [])
+    ...(variables.errors || []),
+    ...(components.errors || [])
   ]);
   const inspector = {
     contract: cloneValue(model.contract),
@@ -859,6 +978,7 @@ export function getProductionConsoleInspector(model, options = {}) {
     projection: { preview: previewProjection, program: programProjection },
     assets,
     variables,
+    components,
     queue: getBroadcastQueue(model.state),
     actions: cloneValue(model.actionHistory || []),
     warnings: publicView ? [] : warnings,
@@ -871,7 +991,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       broadcastOutput: BROADCAST_OUTPUT_VERSION,
       assetManager: ASSET_MANAGER_VERSION,
       actionEngine: BROADCAST_ACTION_ENGINE_VERSION,
-      productionVariables: PRODUCTION_VARIABLES_VERSION
+      productionVariables: PRODUCTION_VARIABLES_VERSION,
+      componentLibrary: COMPONENT_LIBRARY_VERSION
     }
   };
   return sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -955,12 +1076,14 @@ export function validateProductionConsoleModel(model) {
   const outputs = model.outputIds.map((id) => validateBroadcastOutput(getBroadcastOutput(id)));
   const assets = listBroadcastAssets(model.assetRegistry, { allVersions: true }).map((asset) => validateBroadcastAsset(asset));
   const variables = listProductionVariables(model.variableRegistry).map((variable) => validateProductionVariable(variable));
+  const components = listBroadcastComponents(model.componentRegistry).map((component) => validateBroadcastComponent(component));
   const errors = uniqueStrings([
     ...state.errors,
     ...contract.errors,
     ...outputs.flatMap((item) => item.errors),
     ...assets.flatMap((item) => item.errors),
-    ...variables.flatMap((item) => item.errors)
+    ...variables.flatMap((item) => item.errors),
+    ...components.flatMap((item) => item.errors)
   ]);
   return {
     valid: errors.length === 0,
@@ -970,7 +1093,8 @@ export function validateProductionConsoleModel(model) {
       ...contract.warnings,
       ...outputs.flatMap((item) => item.warnings),
       ...assets.flatMap((item) => item.warnings),
-      ...variables.flatMap((item) => item.warnings)
+      ...variables.flatMap((item) => item.warnings),
+      ...components.flatMap((item) => item.warnings)
     ])
   };
 }
@@ -1072,6 +1196,16 @@ function registerConsoleVariables(contract, outputIds, now) {
     expectedRevision: registry.revision,
     now
   }), base);
+}
+
+function emptyComponentRegistry(now) {
+  return {
+    libraryVersion: COMPONENT_LIBRARY_VERSION,
+    revision: 0,
+    components: {},
+    createdAt: now,
+    updatedAt: now
+  };
 }
 
 function cleanupConsoleOutputs() {
@@ -1277,6 +1411,44 @@ function buildConsoleVariablesInspector(model, visibility, options = {}) {
     snapshot,
     warnings: uniqueStrings([...resolvedEntries.flatMap((entry) => entry.warnings || []), ...(snapshot.warnings || [])]),
     errors: uniqueStrings([...resolvedEntries.flatMap((entry) => entry.errors || []), ...(snapshot.errors || [])])
+  };
+}
+
+function buildConsoleComponentsInspector(model, visibility, options = {}) {
+  const rank = VISIBILITY_RANK[visibility] ?? VISIBILITY_RANK.production;
+  const components = listBroadcastComponents(model.componentRegistry)
+    .filter((component) => (VISIBILITY_RANK[component.visibility] ?? VISIBILITY_RANK.restricted) <= rank);
+  const visibleIds = new Set(components.map((component) => component.componentId));
+  const selectedComponentId = visibleIds.has(model.selectedComponentId) ? model.selectedComponentId : components[0]?.componentId || null;
+  const selected = selectedComponentId ? findBroadcastComponent(model.componentRegistry, selectedComponentId) : null;
+  const variables = buildConsoleVariablesInspector(model, visibility, options);
+  const snapshot = selected ? buildComponentSnapshot(selected, {
+    productionVariables: variables.snapshot,
+    broadcastContract: model.contract,
+    assetManager: listBroadcastAssets(model.assetRegistry)
+  }, {
+    visibility,
+    now: options.now
+  }) : null;
+  const validations = components.map((component) => validateBroadcastComponent(component));
+  return {
+    version: COMPONENT_LIBRARY_VERSION,
+    registry: {
+      libraryVersion: COMPONENT_LIBRARY_VERSION,
+      revision: model.componentRegistry?.revision ?? 0,
+      components
+    },
+    selectedComponentId,
+    selected,
+    snapshot,
+    warnings: uniqueStrings([
+      ...validations.flatMap((validation) => validation.warnings || []),
+      ...(snapshot?.warnings || [])
+    ]),
+    errors: uniqueStrings([
+      ...validations.flatMap((validation) => validation.errors || []),
+      ...(snapshot?.errors || [])
+    ])
   };
 }
 
@@ -1517,6 +1689,21 @@ function bindConsoleEvents(refs, getModel, setModel) {
     run((model) => ({ ...model, inspectorTab: normalizeInspectorTab(button.dataset.inspectorTab), lastAction: "inspector-tab-changed" }));
   });
   refs.inspector?.addEventListener("click", async (event) => {
+    const componentAction = event.target.closest("button[data-component-action]");
+    if (componentAction) {
+      run((model) => {
+        if (componentAction.dataset.componentAction === "create") return createProductionConsoleTestComponent(model);
+        if (componentAction.dataset.componentAction === "duplicate") return duplicateProductionConsoleComponent(model);
+        if (componentAction.dataset.componentAction === "delete") return removeProductionConsoleComponent(model);
+        return model;
+      });
+      return;
+    }
+    const componentSelection = event.target.closest("button[data-component-id]");
+    if (componentSelection) {
+      run((model) => selectProductionConsoleComponent(model, componentSelection.dataset.componentId));
+      return;
+    }
     const refreshButton = event.target.closest('button[data-console-action="refresh-inspector"]');
     if (refreshButton) {
       run((model) => ({ ...model, lastAction: "inspector-refreshed", lastActionError: null }));
@@ -1622,6 +1809,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Assets ${ASSET_MANAGER_VERSION}`),
     element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
     element("span", "console-meta", `Variables ${PRODUCTION_VARIABLES_VERSION}`),
+    element("span", "console-meta", `Components ${COMPONENT_LIBRARY_VERSION}`),
     element("span", "console-meta", `${getFixtureDefinition(model.fixtureId).label}`),
     element("span", "console-meta", `${getBroadcastOutput(model.selectedOutputId)?.name || "Sin output"}`),
     statusChip(model.safeMode ? "Modo seguro activo" : "Modo seguro inactivo", model.safeMode ? "ok" : "warning")
@@ -1945,7 +2133,7 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]
@@ -1986,6 +2174,10 @@ function renderInspectorTabs(root, model) {
 function renderInspector(root, model) {
   if (!root) return;
   const inspector = getProductionConsoleInspector(model);
+  if (model.inspectorTab === "components") {
+    renderComponentManager(root, inspector.components);
+    return;
+  }
   const value = inspectorValue(inspector, model.inspectorTab);
   root.replaceChildren();
   const toolbar = element("div", "console-inspector-toolbar");
@@ -2002,6 +2194,61 @@ function renderInspector(root, model) {
   root.append(toolbar, pre);
 }
 
+function renderComponentManager(root, componentsInspector) {
+  root.replaceChildren();
+  const selected = componentsInspector?.selected || null;
+  const toolbar = element("div", "console-inspector-toolbar console-component-toolbar");
+  toolbar.append(element("strong", "", "Componentes"));
+  [["create", "Crear componente de prueba"], ["duplicate", "Duplicar"], ["delete", "Eliminar"]].forEach(([action, label]) => {
+    const button = element("button", "button button-quiet button-small", label);
+    button.type = "button";
+    button.dataset.componentAction = action;
+    if (action !== "create" && !selected) button.disabled = true;
+    toolbar.append(button);
+  });
+
+  const layout = element("div", "console-component-manager");
+  const library = element("section", "console-component-library");
+  library.append(element("h4", "", "Lista"));
+  const componentList = componentsInspector?.registry?.components || [];
+  if (!componentList.length) library.append(element("p", "console-empty-message", "No hay componentes en esta sesión."));
+  componentList.forEach((component) => {
+    const button = element("button", `console-component-item ${selected?.componentId === component.componentId ? "is-selected" : ""}`);
+    button.type = "button";
+    button.dataset.componentId = component.componentId;
+    button.append(
+      element("strong", "", component.name),
+      element("span", "", `${component.componentType} · ${component.status}`),
+      element("span", "", `v${component.componentVersion} · rev ${component.componentRevision}`)
+    );
+    library.append(button);
+  });
+
+  const detail = element("section", "console-component-detail");
+  detail.append(element("h4", "", "Inspector"));
+  if (!selected) detail.append(element("p", "console-empty-message", "Crea o selecciona un componente para inspeccionarlo."));
+  else {
+    const definition = element("dl", "console-compact-definition console-component-definition");
+    [
+      ["ID", selected.componentId], ["Nombre", selected.name], ["Tipo", selected.componentType],
+      ["Estado", selected.status], ["Visibilidad", selected.visibility], ["Bindings", selected.bindings.length],
+      ["Versión", selected.componentVersion], ["Revisión", selected.componentRevision]
+    ].forEach(([label, value]) => definition.append(definitionItem(label, value)));
+    detail.append(definition);
+  }
+
+  const snapshot = element("section", "console-component-snapshot");
+  snapshot.append(element("h4", "", "Vista previa JSON"));
+  const copy = element("button", "button button-quiet button-small", "Copiar JSON");
+  copy.type = "button";
+  copy.dataset.copyJson = "true";
+  const pre = document.createElement("pre");
+  pre.textContent = JSON.stringify(componentsInspector?.snapshot || null, null, 2);
+  snapshot.append(copy, pre);
+  layout.append(library, detail, snapshot);
+  root.append(toolbar, layout);
+}
+
 function inspectorValue(inspector, key) {
   if (key === "data-contract") return inspector.contract;
   if (key === "broadcast-state") return inspector.state;
@@ -2011,6 +2258,7 @@ function inspectorValue(inspector, key) {
   if (key === "projection") return inspector.projection;
   if (key === "assets") return inspector.assets;
   if (key === "variables") return inspector.variables;
+  if (key === "components") return inspector.components;
   if (key === "queue") return inspector.queue;
   if (key === "actions") return inspector.actions;
   if (key === "warnings") return inspector.warnings;
@@ -2018,7 +2266,7 @@ function inspectorValue(inspector, key) {
 }
 
 function inspectorKeys() {
-  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "variables", "queue", "actions", "warnings", "errors"];
+  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "variables", "components", "queue", "actions", "warnings", "errors"];
 }
 
 function normalizeInspectorTab(value) {
@@ -2028,7 +2276,7 @@ function normalizeInspectorTab(value) {
 function inspectorLabel(value) {
   return {
     "data-contract": "Data Contract", "broadcast-state": "Broadcast State", preview: "Preview", program: "Program", output: "Output",
-    projection: "Projection", assets: "Assets", variables: "Variables", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
+    projection: "Projection", assets: "Assets", variables: "Variables", components: "Componentes", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
   }[value] || value;
 }
 

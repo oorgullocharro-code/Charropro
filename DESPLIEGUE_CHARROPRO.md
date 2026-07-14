@@ -1,5 +1,19 @@
 # Despliegue CharroPro
 
+## Version COMPONENT-LIBRARY-001
+
+Version actual de cache:
+
+```text
+v=20260713-component-library-001-components-v1
+```
+
+Esta version agrega Broadcast Component Library v1 (`1.0.0`) como base declarativa e independiente de los futuros graficos V2. `js/broadcast/componentLibrary.js` define 19 tipos, estados, visibilidad, style, layout, animation, bindings, registros inmutables, instancias desacopladas y snapshots sanitizados.
+
+Los bindings solo resuelven Production Variables, Broadcast Data Contract o identidades del Asset Manager. No leen Core, Firebase, Broadcast State, outputs ni estructuras legacy. La libreria conserva `0`, `false`, cadena vacia y `null`; elimina funciones, simbolos, BigInt, ciclos, claves peligrosas, protocolos no autorizados y markup ejecutable; y limita profundidad y tamanos.
+
+Production Console incorpora la pestaña `Componentes` para crear, duplicar, eliminar e inspeccionar fixtures exclusivamente en memoria. Estas operaciones no cambian Preview, Program, outputs ni persistencia. No se agregan Template Engine, renderer, Canvas, SVG, OBS, escenas o graficos V2 completos. La referencia esta en `BROADCAST_COMPONENT_LIBRARY_V1.md` y las pruebas en `tests/broadcast-component-library.test.mjs` y `tests/production-console.test.mjs`.
+
 ## Version PRODUCTION-VARIABLES-001
 
 Version actual de cache:
