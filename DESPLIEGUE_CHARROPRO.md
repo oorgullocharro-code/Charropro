@@ -1,5 +1,21 @@
 # Despliegue CharroPro
 
+## Version ACTION-ENGINE-001
+
+Version actual de cache:
+
+```text
+v=20260713-action-engine-001-actions-v1
+```
+
+Esta version agrega Broadcast Action Engine v1 (`1.0.0`) como unica puerta operativa de Production Console para Selection, Preview, Program, graficos, geometria, layers, outputs, heartbeat y queue. Las operaciones visibles se expresan como acciones declarativas, validan actor, permisos conceptuales, precondiciones, confirmaciones, Modo seguro, `expectedRevision` e idempotencia, y delegan exclusivamente a las APIs publicas de Broadcast State, Broadcast Output, Asset Manager y Broadcast Data Contract.
+
+La consola conserva su interfaz y agrega una seccion minima `Ultimas acciones` con tipo, estado, resultado, timestamp y revisiones antes/despues. El actor solo se muestra en visibilidad operacional o restringida; panel e inspector eliminan identidad operativa en vista publica, y el inspector tambien la elimina en production. Preview y Program permanecen separados; heartbeat y queue no reproducen contenido ni modifican Program; los outputs siguen offline al iniciar; la recarga continua limpia.
+
+El cierre endurece la matriz exacta por actionType: locutor solo puede `SELECT_GRAPHIC` y `SET_SELECTION` local, juez y lectura no ejecutan acciones mutantes, graficos opera emision sin administracion de outputs, y system queda limitado a heartbeat y reconocimientos tecnicos. Tambien valida atomicidad de targets de Program, revision optimista en las acciones mutantes principales e idempotencia estable sin incluir revisiones dinamicas en la huella.
+
+El motor y su auditoria operan solo en memoria. No se agregan Firebase, persistencia, permisos reales, automatizaciones, escenas, macros, variables, OBS V2 ni cambios a graficos V1. Broadcast Playground conserva temporalmente sus APIs directas como banco legacy de V2. La referencia completa esta en `BROADCAST_ACTION_ENGINE_V1.md` y las pruebas en `tests/broadcast-action-engine.test.mjs`.
+
 ## Version ASSET-MANAGER-001
 
 Version actual de cache:

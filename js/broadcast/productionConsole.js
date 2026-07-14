@@ -6,34 +6,20 @@ import {
 } from "./dataContract.js?v=20260713-broadcast-output-001-output-v1";
 import {
   BROADCAST_STATE_VERSION,
-  clearPreviewState,
-  clearProgramState,
   cloneBroadcastState,
   createInitialBroadcastState,
-  dequeueBroadcastItem,
-  enqueueBroadcastItem,
   getBroadcastQueue,
   getBroadcastStateWarnings,
-  promotePreviewToProgram,
-  setBroadcastContextRef,
-  setGraphicState,
-  setLayerState,
-  setOutputState,
-  setPreviewState,
   validateBroadcastState
 } from "./broadcastState.js?v=20260713-broadcast-output-001-output-v1";
 import {
   BROADCAST_OUTPUT_VERSION,
-  assignLayersToOutput,
   buildBroadcastOutputProjection,
   getBroadcastOutput,
   getBroadcastOutputWarnings,
   listBroadcastOutputs,
   registerBroadcastOutput,
   removeBroadcastOutput,
-  setBroadcastOutputStatus,
-  updateBroadcastOutput,
-  updateBroadcastOutputHeartbeat,
   validateBroadcastOutput
 } from "./broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
 import {
@@ -50,10 +36,20 @@ import {
   PLAYGROUND_OUTPUT_DEFINITIONS,
   buildPlaygroundFixture
 } from "./fixtures/broadcastPlaygroundFixtures.js?v=20260713-broadcast-playground-001-visual-test1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260713-production-console-001-control-center1";
+import {
+  ACTION_CONFIRMATION_TYPES,
+  ACTION_TYPES,
+  BROADCAST_ACTION_ENGINE_VERSION,
+  confirmBroadcastAction,
+  createBroadcastAction,
+  createBroadcastActionContext,
+  dispatchBroadcastAction,
+  requiresBroadcastActionConfirmation
+} from "./actionEngine.js?v=20260713-action-engine-001-actions-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260713-action-engine-001-actions-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260713-production-console-001-control-center1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260713-action-engine-001-actions-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -80,7 +76,15 @@ export const PRODUCTION_CONSOLE_GRAPHICS = Object.freeze(Object.fromEntries(
   })])
 ));
 
-const CONSOLE_ACTOR = Object.freeze({ userId: "production_console_operator", name: "Operador de consola", role: "production" });
+const CONSOLE_ACTOR = Object.freeze({
+  id: "production_console_operator",
+  name: "Operador de consola",
+  role: "operador",
+  sessionId: "session_production_console",
+  deviceId: null,
+  source: "production-console",
+  visibility: "operational"
+});
 const DEFAULT_FIXTURE_ID = "equipos_3";
 const DEFAULT_GRAPHIC_ID = "scoreboard-test";
 const DEFAULT_ASSET_ID = "asset-tournament-logo";
@@ -180,6 +184,8 @@ export function createProductionConsoleModel(options = {}) {
     previewVisible: true,
     graphicSequence: 0,
     queueSequence: 0,
+    actionSequence: 0,
+    actionHistory: [],
     currentGraphicInstanceId: null,
     inspectorTab: normalizeInspectorTab(options.inspectorTab),
     panelSize: normalizePanelSize(options.panelSize),
@@ -194,6 +200,66 @@ export function disposeProductionConsole(model) {
   ids.forEach((id) => removeBroadcastOutput(id));
 }
 
+export function dispatchProductionConsoleAction(model, actionType, target = {}, payload = {}, options = {}) {
+  assertModel(model);
+  const now = normalizeNow(options.now);
+  const sequence = model.actionSequence + 1;
+  const actionContext = createBroadcastActionContext({
+    state: model.state,
+    contract: model.contract,
+    outputs: Object.fromEntries(listBroadcastOutputs().filter((output) => model.outputIds.includes(output.id)).map((output) => [output.id, output])),
+    assets: model.assetRegistry,
+    actor: CONSOLE_ACTOR,
+    visibility: model.visibility,
+    safeMode: model.safeMode,
+    outputIds: model.outputIds,
+    now
+  }, { expectedRevision: options.expectedRevision ?? model.state.revision, now });
+  let action = createBroadcastAction(actionType, payload, {
+    actionId: options.actionId || undefined,
+    target,
+    actor: CONSOLE_ACTOR,
+    mode: options.mode || "manual",
+    idempotencyKey: options.idempotencyKey || null,
+    correlationId: options.correlationId || null,
+    causationId: options.causationId || null,
+    context: actionContext,
+    now
+  });
+  const confirmation = requiresBroadcastActionConfirmation(action, actionContext);
+  const confirmations = options.confirmations ?? (options.confirmed === true ? confirmation.requiredCount : 0);
+  for (let index = 0; index < confirmations; index += 1) {
+    action = confirmBroadcastAction(action, {
+      type: confirmation.type,
+      confirmationId: `${action.actionId}_confirmation_${index + 1}`
+    }, { context: actionContext, actor: CONSOLE_ACTOR, now });
+  }
+  const dispatch = dispatchBroadcastAction(action, actionContext, { now });
+  const result = dispatch.result;
+  const historyItem = {
+    actionId: dispatch.action.actionId,
+    actionType: dispatch.action.actionType,
+    status: dispatch.action.status,
+    resultCode: result.code,
+    success: result.success,
+    actor: dispatch.action.actor,
+    timestamp: result.completedAt || dispatch.action.createdAt,
+    stateRevisionBefore: result.stateRevisionBefore,
+    stateRevisionAfter: result.stateRevisionAfter
+  };
+  const nextModel = {
+    ...model,
+    state: dispatch.state,
+    assetRegistry: dispatch.assets,
+    actionSequence: sequence,
+    actionHistory: [historyItem, ...(model.actionHistory || [])].slice(0, 20),
+    lastAction: options.label || actionType.toLowerCase().replaceAll("_", "-"),
+    lastActionError: result.success ? null : result.code
+  };
+  if (!result.success && options.allowFailure !== true) throw consoleActionError(dispatch, actionType);
+  return nextModel;
+}
+
 export function loadProductionConsoleFixture(model, fixtureId, options = {}) {
   assertModel(model);
   const now = normalizeNow(options.now);
@@ -205,11 +271,14 @@ export function loadProductionConsoleFixture(model, fixtureId, options = {}) {
     includeLegacyAliases: true,
     now
   });
-  let state = clearPreviewState(model.state, { now, actor: CONSOLE_ACTOR });
-  state = setBroadcastContextRef(state, contextRefFromContract(contract), { now, actor: CONSOLE_ACTOR });
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_SELECTION, {}, {
+    selection: model.state.selection,
+    contextRef: contextRefFromContract(contract),
+    clearPreview: true,
+    model: { fixtureId: definition.id }
+  }, { now, label: "context-loaded" });
   return {
-    ...model,
-    state,
+    ...dispatched,
     fixtureSource: source,
     contract,
     fixtureId: definition.id,
@@ -223,8 +292,19 @@ export function loadProductionConsoleFixture(model, fixtureId, options = {}) {
 export function selectProductionGraphic(model, graphicId) {
   assertModel(model);
   const graphic = getGraphicDefinition(graphicId);
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SELECT_GRAPHIC, {
+    graphicId: graphic.graphicId,
+    layerId: graphic.layerId,
+    outputIds: [model.selectedOutputId]
+  }, {
+    templateId: graphic.graphicId,
+    position: graphic.defaultPosition,
+    size: graphic.defaultSize,
+    scale: graphic.defaultScale,
+    opacity: graphic.defaultOpacity
+  }, { label: "graphic-selected" });
   return {
-    ...model,
+    ...dispatched,
     selectedGraphicId: graphic.graphicId,
     geometry: geometryFromGraphic(graphic),
     previewVisible: true,
@@ -235,9 +315,17 @@ export function selectProductionGraphic(model, graphicId) {
 
 export function selectProductionAsset(model, assetId) {
   assertModel(model);
+  const selectedAssetId = assetExists(model.assetRegistry, assetId) ? assetId : DEFAULT_ASSET_ID;
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_SELECTION, {}, {
+    selection: {
+      ...model.state.selection,
+      payloadBindings: { ...model.state.selection.payloadBindings, assetId: selectedAssetId }
+    },
+    model: { selectedAssetId }
+  }, { label: "asset-selected" });
   return {
-    ...model,
-    selectedAssetId: assetExists(model.assetRegistry, assetId) ? assetId : DEFAULT_ASSET_ID,
+    ...dispatched,
+    selectedAssetId,
     lastAction: "asset-selected",
     lastActionError: null
   };
@@ -246,7 +334,8 @@ export function selectProductionAsset(model, assetId) {
 export function selectProductionOutput(model, outputId) {
   assertModel(model);
   if (!model.outputIds.includes(outputId) || !getBroadcastOutput(outputId)) throw consoleError("console-output-not-found", { outputId });
-  return { ...model, selectedOutputId: outputId, lastAction: "output-selected", lastActionError: null };
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_OUTPUT, { outputId }, {}, { label: "output-selected" });
+  return { ...dispatched, selectedOutputId: outputId, lastAction: "output-selected", lastActionError: null };
 }
 
 export function setProductionVisibility(model, visibility, options = {}) {
@@ -259,8 +348,12 @@ export function setProductionVisibility(model, visibility, options = {}) {
     includeLegacyAliases: true,
     now
   });
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_SELECTION, {}, {
+    selection: model.state.selection,
+    model: { visibility: nextVisibility }
+  }, { now, label: "visibility-rebuilt" });
   return {
-    ...model,
+    ...dispatched,
     visibility: nextVisibility,
     contract,
     lastAction: "visibility-rebuilt",
@@ -270,7 +363,12 @@ export function setProductionVisibility(model, visibility, options = {}) {
 
 export function setProductionSafeMode(model, enabled) {
   assertModel(model);
-  return { ...model, safeMode: enabled !== false, lastAction: enabled !== false ? "safe-mode-on" : "safe-mode-off", lastActionError: null };
+  const safeMode = enabled !== false;
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_SELECTION, {}, {
+    selection: model.state.selection,
+    model: { safeMode }
+  }, { label: safeMode ? "safe-mode-on" : "safe-mode-off" });
+  return { ...dispatched, safeMode, lastAction: safeMode ? "safe-mode-on" : "safe-mode-off", lastActionError: null };
 }
 
 export function prepareProductionPreview(model, patch = {}, options = {}) {
@@ -300,7 +398,7 @@ export function prepareProductionPreview(model, patch = {}, options = {}) {
     exitAnimation: animation.exit,
     delay: animation.delay
   };
-  let state = setGraphicState(model.state, instanceId, {
+  const graphicState = {
     templateId: graphic.graphicId,
     templateVersion: "1.0.0",
     variantId: "production-console",
@@ -320,16 +418,16 @@ export function prepareProductionPreview(model, patch = {}, options = {}) {
     payloadBindings,
     errors: patch.errors || [],
     warnings: patch.warnings || []
-  }, { now, actor: CONSOLE_ACTOR });
-  const currentLayer = state.layers[geometry.layerId];
+  };
+  const currentLayer = model.state.layers[geometry.layerId];
   if (currentLayer?.locked && options.confirmed !== true) throw consoleError("console-layer-locked", { layerId: geometry.layerId });
-  state = setLayerState(state, geometry.layerId, {
+  const layerState = {
     visible,
     graphicIds: visible ? [instanceId] : [],
     outputIds: targetOutputIds,
     status: visible ? "visible" : "hidden"
-  }, { now, actor: CONSOLE_ACTOR, force: currentLayer?.locked === true && options.confirmed === true });
-  state = setPreviewState(state, {
+  };
+  const previewState = {
     active: true,
     compositionId: `console-composition-${graphic.graphicId}`,
     sceneId: `console-scene-${model.fixtureId}`,
@@ -350,10 +448,24 @@ export function prepareProductionPreview(model, patch = {}, options = {}) {
     },
     warnings: patch.warnings || [],
     errors: patch.errors || []
-  }, { now, actor: CONSOLE_ACTOR });
+  };
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.PREPARE_PREVIEW, {
+    graphicId: instanceId,
+    layerId: geometry.layerId,
+    outputIds: targetOutputIds
+  }, {
+    graphicState,
+    layerState,
+    previewState,
+    replace: patch.replace === true,
+    force: currentLayer?.locked === true && options.confirmed === true
+  }, {
+    now,
+    confirmed: options.confirmed === true,
+    label: patch.replace === true ? "preview-replaced" : "preview-prepared"
+  });
   return {
-    ...model,
-    state,
+    ...dispatched,
     lastPreviewConfig: model.state.preview.active ? {
       graphicId: model.selectedGraphicId,
       assetId: model.selectedAssetId,
@@ -379,24 +491,17 @@ export function transitionProductionToProgram(model, mode = "take", options = {}
   const transitionMode = ["take", "cut", "auto"].includes(mode) ? mode : "take";
   if (model.safeMode && options.confirmed !== true) throw consoleError("console-safe-mode-confirmation-required", { mode: transitionMode });
   const now = normalizeNow(options.now);
-  let state = promotePreviewToProgram(model.state, {
+  const actionType = { take: ACTION_TYPES.TAKE, cut: ACTION_TYPES.CUT, auto: ACTION_TYPES.AUTO }[transitionMode];
+  const dispatched = dispatchProductionConsoleAction(model, actionType, { outputIds: model.outputIds }, {}, {
     now,
-    actor: CONSOLE_ACTOR,
-    mode: transitionMode,
-    expectedRevision: model.state.revision
-  });
-  model.outputIds.forEach((outputId) => {
-    const output = updateBroadcastOutput(outputId, {
-      lastAppliedRevision: state.program.revision,
-      lastAppliedAt: now
-    }, { now, actor: CONSOLE_ACTOR });
-    state = setOutputState(state, outputId, output, { now, actor: CONSOLE_ACTOR });
+    confirmed: options.confirmed === true,
+    label: `program-${transitionMode}`,
+    idempotencyKey: options.idempotencyKey || null
   });
   return {
-    ...model,
-    state,
+    ...dispatched,
     programSnapshot: {
-      state: cloneBroadcastState(state),
+      state: cloneBroadcastState(dispatched.state),
       contract: cloneValue(model.contract),
       visibility: model.visibility,
       takenAt: now,
@@ -409,9 +514,12 @@ export function transitionProductionToProgram(model, mode = "take", options = {}
 
 export function clearProductionPreview(model, options = {}) {
   assertModel(model);
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.CLEAR_PREVIEW, {}, {}, {
+    now: options.now,
+    label: "preview-cleared"
+  });
   return {
-    ...model,
-    state: clearPreviewState(model.state, { now: normalizeNow(options.now), actor: CONSOLE_ACTOR }),
+    ...dispatched,
     currentGraphicInstanceId: null,
     lastAction: "preview-cleared",
     lastActionError: null
@@ -425,14 +533,14 @@ export function clearProductionProgram(model, options = {}) {
   }
   const now = normalizeNow(options.now);
   const force = options.force === true;
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.CLEAR_PROGRAM, {}, { force }, {
+    now,
+    confirmed: options.confirmed === true,
+    confirmations: options.confirmations,
+    label: "program-cleared"
+  });
   return {
-    ...model,
-    state: clearProgramState(model.state, {
-      now,
-      actor: CONSOLE_ACTOR,
-      force,
-      expectedRevision: model.state.revision
-    }),
+    ...dispatched,
     programSnapshot: null,
     lastAction: "program-cleared",
     lastActionError: null
@@ -457,35 +565,30 @@ export function setProductionLayerAction(model, layerId, action, options = {}) {
   assertModel(model);
   if (!PLAYGROUND_LAYER_IDS.includes(layerId)) throw consoleError("console-layer-not-found", { layerId });
   if (!['select', 'show', 'hide', 'lock', 'unlock'].includes(action)) throw consoleError("console-layer-action-invalid", { action });
-  if (action === "select") return { ...model, geometry: { ...model.geometry, layerId }, lastAction: "layer-selected", lastActionError: null };
+  if (action === "select") {
+    const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_SELECTION, {}, {
+      selection: { ...model.state.selection, layerId },
+      model: { layerId }
+    }, { now: options.now, label: "layer-selected" });
+    return { ...dispatched, geometry: { ...model.geometry, layerId }, lastAction: "layer-selected", lastActionError: null };
+  }
   const layer = model.state.layers[layerId];
   const protectedAction = layerId === "emergency" || (layer?.locked && ["hide", "unlock"].includes(action));
   if (protectedAction && options.confirmed !== true) throw consoleError("console-layer-confirmation-required", { layerId, action });
-  const now = normalizeNow(options.now);
-  const patch = action === "lock"
-    ? { locked: true }
-    : action === "unlock"
-      ? { locked: false }
-      : { visible: action === "show", status: action === "show" ? "visible" : "hidden" };
-  let state = setLayerState(model.state, layerId, patch, {
-    now,
-    actor: CONSOLE_ACTOR,
-    force: options.confirmed === true
+  const actionType = {
+    show: ACTION_TYPES.SHOW_LAYER,
+    hide: ACTION_TYPES.HIDE_LAYER,
+    lock: ACTION_TYPES.LOCK_LAYER,
+    unlock: ACTION_TYPES.UNLOCK_LAYER
+  }[action];
+  return dispatchProductionConsoleAction(model, actionType, { layerId }, {
+    force: protectedAction && options.confirmed === true
+  }, {
+    now: options.now,
+    confirmed: options.confirmed === true,
+    confirmations: options.confirmations,
+    label: `layer-${action}`
   });
-  if (["show", "hide"].includes(action)) {
-    const activeLayers = new Set(state.preview.activeLayers);
-    if (action === "show") activeLayers.add(layerId);
-    else activeLayers.delete(layerId);
-    const visibleGraphics = state.preview.visibleGraphics.filter((graphicId) => (
-      action === "show" || state.graphics[graphicId]?.layerId !== layerId
-    ));
-    state = setPreviewState(state, {
-      activeLayers: [...activeLayers],
-      visibleGraphics,
-      templateInstances: filterTemplateInstances(state.preview.templateInstances, visibleGraphics)
-    }, { now, actor: CONSOLE_ACTOR });
-  }
-  return { ...model, state, lastAction: `layer-${action}`, lastActionError: null };
 }
 
 export function setProductionOutputAction(model, action, options = {}) {
@@ -494,44 +597,36 @@ export function setProductionOutputAction(model, action, options = {}) {
   const current = getBroadcastOutput(outputId);
   if (!current) throw consoleError("console-output-not-found", { outputId });
   const now = normalizeNow(options.now);
-  let output;
-  let lastActionError = null;
-  if (action === "offline") output = setBroadcastOutputStatus(outputId, "offline", { now, actor: CONSOLE_ACTOR });
-  else if (action === "stale") {
-    output = updateBroadcastOutputHeartbeat(outputId, {
+  let dispatched = model;
+  if (action === "offline") {
+    dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_OUTPUT_STATUS, { outputId }, { status: "offline" }, { now, label: "output-offline" });
+  } else if (action === "stale") {
+    dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SEND_HEARTBEAT, { outputId }, { heartbeat: {
       at: new Date(Date.parse(now) - 60000).toISOString(),
       status: "stale",
       sequence: (current.heartbeat.sequence || 0) + 1,
       latency: 4200
-    }, { now, actor: CONSOLE_ACTOR });
+    } }, { now, label: "output-stale" });
   } else if (action === "heartbeat" || action === "online") {
-    if (action === "online") setBroadcastOutputStatus(outputId, "online", { now, actor: CONSOLE_ACTOR });
+    if (action === "online") {
+      dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SET_OUTPUT_STATUS, { outputId }, { status: "online" }, { now, label: "output-online" });
+    }
     const refreshed = getBroadcastOutput(outputId);
-    output = updateBroadcastOutputHeartbeat(outputId, {
+    dispatched = dispatchProductionConsoleAction(dispatched, ACTION_TYPES.SEND_HEARTBEAT, { outputId }, { heartbeat: {
       at: now,
       status: "online",
       sequence: (refreshed.heartbeat.sequence || 0) + 1,
       latency: 28
-    }, { now, actor: CONSOLE_ACTOR });
+    } }, { now, label: `output-${action}` });
   } else if (action === "repeated") {
-    try {
-      output = updateBroadcastOutputHeartbeat(outputId, {
+    dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.SEND_HEARTBEAT, { outputId }, { heartbeat: {
         at: now,
         status: "online",
         sequence: current.heartbeat.sequence,
         latency: current.latency ?? 0
-      }, { now, actor: CONSOLE_ACTOR });
-    } catch (error) {
-      output = current;
-      lastActionError = error?.code || error?.message || "heartbeat-rejected";
-    }
+      } }, { now, label: "output-repeated", allowFailure: true });
   } else throw consoleError("console-output-action-invalid", { action });
-  return {
-    ...model,
-    state: setOutputState(model.state, outputId, output, { now, actor: CONSOLE_ACTOR }),
-    lastAction: `output-${action}`,
-    lastActionError
-  };
+  return dispatched;
 }
 
 export function enqueueProductionGraphic(model, options = {}) {
@@ -540,7 +635,7 @@ export function enqueueProductionGraphic(model, options = {}) {
   const graphic = getGraphicDefinition(options.graphicId || model.selectedGraphicId);
   const sequence = model.queueSequence + 1;
   const queueItemId = options.queueItemId || `console-queue-${sequence}`;
-  const state = enqueueBroadcastItem(model.state, {
+  const dispatched = dispatchProductionConsoleAction(model, ACTION_TYPES.ENQUEUE_GRAPHIC, {}, { item: {
     queueItemId,
     type: "graphic",
     graphicId: graphic.graphicId,
@@ -553,52 +648,51 @@ export function enqueueProductionGraphic(model, options = {}) {
     priority: finiteNumber(options.priority, 50),
     status: "queued",
     queuedAt: now,
-    queuedBy: CONSOLE_ACTOR.userId,
+    queuedBy: CONSOLE_ACTOR.id,
     expiresAt: options.expiresAt || null,
     duration: options.duration ?? model.animation.duration,
     autoHide: options.autoHide ?? model.animation.autoHide,
     notes: options.notes ?? ""
-  }, { now, actor: CONSOLE_ACTOR });
-  return { ...model, state, queueSequence: sequence, lastAction: "queue-enqueued", lastActionError: null };
+  } }, { now, label: "queue-enqueued", idempotencyKey: options.idempotencyKey || null });
+  return { ...dispatched, queueSequence: sequence, lastAction: "queue-enqueued", lastActionError: null };
 }
 
 export function removeProductionQueueItem(model, queueItemId, options = {}) {
   assertModel(model);
-  const now = normalizeNow(options.now);
-  return {
-    ...model,
-    state: dequeueBroadcastItem(model.state, { queueItemId, now, actor: CONSOLE_ACTOR }),
-    lastAction: "queue-dequeued",
-    lastActionError: null
-  };
+  return dispatchProductionConsoleAction(model, ACTION_TYPES.DEQUEUE_GRAPHIC, { queueItemId }, {}, {
+    now: options.now,
+    label: "queue-dequeued"
+  });
 }
 
 export function changeProductionQueuePriority(model, queueItemId, delta, options = {}) {
   assertModel(model);
   const item = getBroadcastQueue(model.state).find((entry) => entry.queueItemId === queueItemId);
   if (!item) throw consoleError("console-queue-item-not-found", { queueItemId });
-  const now = normalizeNow(options.now);
-  let state = dequeueBroadcastItem(model.state, { queueItemId, now, actor: CONSOLE_ACTOR });
-  state = enqueueBroadcastItem(state, {
-    ...item,
-    priority: finiteNumber(item.priority, 0) + finiteNumber(delta, 0),
-    queuedAt: item.queuedAt
-  }, { now, actor: CONSOLE_ACTOR });
-  return { ...model, state, lastAction: "queue-priority-changed", lastActionError: null };
+  return dispatchProductionConsoleAction(model, ACTION_TYPES.ENQUEUE_GRAPHIC, {}, {
+    replaceQueueItemId: queueItemId,
+    item: {
+      ...item,
+      priority: finiteNumber(item.priority, 0) + finiteNumber(delta, 0),
+      queuedAt: item.queuedAt
+    }
+  }, { now: options.now, label: "queue-priority-changed" });
 }
 
 export function clearProductionQueue(model, options = {}) {
   assertModel(model);
-  const now = normalizeNow(options.now);
-  let state = model.state;
-  getBroadcastQueue(state).forEach((item) => {
-    state = dequeueBroadcastItem(state, { queueItemId: item.queueItemId, now, actor: CONSOLE_ACTOR });
+  return dispatchProductionConsoleAction(model, ACTION_TYPES.CLEAR_QUEUE, {}, {}, {
+    now: options.now,
+    confirmed: options.confirmed === true,
+    label: "queue-cleared"
   });
-  return { ...model, state, lastAction: "queue-cleared", lastActionError: null };
 }
 
 export function restoreProductionConsole(model, options = {}) {
   assertModel(model);
+  let cleared = clearProductionPreview(model, options);
+  if (cleared.state.program.active) cleared = clearProductionProgram(cleared, { ...options, confirmed: true, force: true });
+  if (getBroadcastQueue(cleared.state).length) cleared = clearProductionQueue(cleared, { ...options, confirmed: true });
   const restored = createProductionConsoleModel({
     fixtureId: model.fixtureId,
     graphicId: model.selectedGraphicId,
@@ -610,7 +704,12 @@ export function restoreProductionConsole(model, options = {}) {
     panelSize: model.panelSize,
     now: options.now
   });
-  return { ...restored, lastAction: "console-restored" };
+  return {
+    ...restored,
+    actionSequence: cleared.actionSequence,
+    actionHistory: cleared.actionHistory,
+    lastAction: "console-restored"
+  };
 }
 
 export function buildProductionProjection(model, view = "preview", options = {}) {
@@ -715,6 +814,7 @@ export function getProductionConsoleInspector(model, options = {}) {
     projection: { preview: previewProjection, program: programProjection },
     assets,
     queue: getBroadcastQueue(model.state),
+    actions: cloneValue(model.actionHistory || []),
     warnings: publicView ? [] : warnings,
     errors: publicView ? [] : errors,
     versions: {
@@ -723,7 +823,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       dataContract: BROADCAST_DATA_CONTRACT_VERSION,
       broadcastState: BROADCAST_STATE_VERSION,
       broadcastOutput: BROADCAST_OUTPUT_VERSION,
-      assetManager: ASSET_MANAGER_VERSION
+      assetManager: ASSET_MANAGER_VERSION,
+      actionEngine: BROADCAST_ACTION_ENGINE_VERSION
     }
   };
   return sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -886,7 +987,6 @@ function registerConsoleOutputs(now) {
       competitionId: "equipos_completo",
       sessionId: "session_production_console"
     }, { now, actor: CONSOLE_ACTOR });
-    output = assignLayersToOutput(output.id, [...PLAYGROUND_LAYER_IDS], { now, actor: CONSOLE_ACTOR });
     return output;
   });
 }
@@ -1231,9 +1331,15 @@ function bindConsoleEvents(refs, getModel, setModel) {
     if (!button) return;
     const layer = getModel().state.layers[button.dataset.layerId];
     const needsConfirmation = button.dataset.layerId === "emergency" || (layer?.locked && ["hide", "unlock"].includes(button.dataset.layerAction));
-    const confirmed = !needsConfirmation || window.confirm(`Confirmar ${button.dataset.layerAction} en ${button.dataset.layerId}.`);
+    const confirmations = !needsConfirmation ? 0 : button.dataset.layerId === "emergency"
+      ? countExplicitConfirmations([
+          `Confirmar ${button.dataset.layerAction} en emergency.`,
+          "Confirmar nuevamente la acción crítica sobre emergency."
+        ])
+      : countExplicitConfirmations([`Confirmar ${button.dataset.layerAction} en ${button.dataset.layerId}.`]);
+    const confirmed = !needsConfirmation || confirmations > 0;
     if (!confirmed) return;
-    run((model) => setProductionLayerAction(model, button.dataset.layerId, button.dataset.layerAction, { confirmed }));
+    run((model) => setProductionLayerAction(model, button.dataset.layerId, button.dataset.layerAction, { confirmed, confirmations }));
   });
   refs.outputsList?.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-output-action]");
@@ -1280,22 +1386,31 @@ function handleConsoleAction(model, action, refs) {
   if (action === "clear-preview") return clearProductionPreview(model);
   if (action === "clear-program") {
     const protectedProgram = model.safeMode || model.state.program.emergencyMode || model.state.program.lockedLayers.length > 0;
-    const confirmed = !model.state.program.active || !protectedProgram || window.confirm("Confirmar limpieza de Program.");
-    return confirmed ? clearProductionProgram(model, { confirmed, force: model.state.program.emergencyMode || model.state.program.lockedLayers.length > 0 }) : model;
+    const force = model.state.program.emergencyMode || model.state.program.lockedLayers.length > 0;
+    const confirmations = !model.state.program.active || !protectedProgram ? 0 : force && model.state.program.emergencyMode
+      ? countExplicitConfirmations(["Confirmar limpieza de Program.", "Confirmar nuevamente la limpieza crítica de Program."])
+      : countExplicitConfirmations(["Confirmar limpieza de Program."]);
+    const confirmed = !model.state.program.active || !protectedProgram || confirmations > 0;
+    return confirmed ? clearProductionProgram(model, { confirmed, confirmations, force }) : model;
   }
   if (action === "hide") return prepareProductionPreview(model, { visible: false }, { confirmed: true });
-  if (action === "hide-all") return clearProductionPreview(model);
+  if (action === "hide-all") {
+    if (!window.confirm("Confirmar ocultar todos los gráficos no protegidos en Preview.")) return model;
+    return dispatchProductionConsoleAction(model, ACTION_TYPES.HIDE_ALL, {}, {}, { confirmed: true, label: "preview-hide-all" });
+  }
   if (action === "replace") return prepareProductionPreview(model, { replace: true, geometry: readGeometryControls(refs), animation: readAnimationControls(refs) }, { confirmed: true });
   if (action === "restore-preview") return restoreLastProductionPreview(model);
   if (action === "enqueue") return enqueueProductionGraphic(model);
-  if (action === "clear-queue") return clearProductionQueue(model);
+  if (action === "clear-queue") return window.confirm("Confirmar limpieza de la cola.")
+    ? clearProductionQueue(model, { confirmed: true })
+    : model;
   if (action === "safe-mode") return setProductionSafeMode(model, !model.safeMode);
   if (action === "restore") return restoreProductionConsole(model);
   if (action === "clear-all") {
     if (!window.confirm("Confirmar limpieza de Preview, Program y cola.")) return model;
     let cleared = clearProductionPreview(model);
     if (cleared.state.program.active) cleared = clearProductionProgram(cleared, { confirmed: true, force: true });
-    return clearProductionQueue(cleared);
+    return clearProductionQueue(cleared, { confirmed: true });
   }
   if (action === "refresh-inspector") return { ...model, lastAction: "inspector-refreshed" };
   return model;
@@ -1350,6 +1465,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `State ${BROADCAST_STATE_VERSION}`),
     element("span", "console-meta", `Output ${BROADCAST_OUTPUT_VERSION}`),
     element("span", "console-meta", `Assets ${ASSET_MANAGER_VERSION}`),
+    element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
     element("span", "console-meta", `${getFixtureDefinition(model.fixtureId).label}`),
     element("span", "console-meta", `${getBroadcastOutput(model.selectedOutputId)?.name || "Sin output"}`),
     statusChip(model.safeMode ? "Modo seguro activo" : "Modo seguro inactivo", model.safeMode ? "ok" : "warning")
@@ -1555,12 +1671,31 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]
   ].forEach(([label, value]) => grid.append(definitionItem(label, value)));
-  root.append(grid);
+  const recent = element("section", "console-action-history");
+  recent.append(element("h4", "", "Últimas acciones"));
+  const history = (model.actionHistory || []).slice(0, 8);
+  const showOperationalActor = (VISIBILITY_RANK[model.visibility] ?? VISIBILITY_RANK.production) >= VISIBILITY_RANK.operational;
+  if (!history.length) recent.append(element("p", "console-empty-message", "No hay acciones operativas en esta sesión."));
+  history.forEach((item) => {
+    const row = element("article", "console-action-history-item");
+    const actionIdentity = showOperationalActor
+      ? `${item.actor?.name || item.actor?.role || "Sistema"} · ${item.timestamp || "-"}`
+      : item.timestamp || "-";
+    row.append(
+      element("strong", "", item.actionType),
+      statusChip(item.status, item.success ? "ok" : item.status === "pending_confirmation" ? "warning" : "error"),
+      element("span", "", item.resultCode),
+      element("span", "", actionIdentity),
+      element("span", "", `Rev ${valueText(item.stateRevisionBefore, "-")} → ${valueText(item.stateRevisionAfter, "-")}`)
+    );
+    recent.append(row);
+  });
+  root.append(grid, recent);
 }
 
 function renderInspectorTabs(root, model) {
@@ -1602,12 +1737,13 @@ function inspectorValue(inspector, key) {
   if (key === "projection") return inspector.projection;
   if (key === "assets") return inspector.assets;
   if (key === "queue") return inspector.queue;
+  if (key === "actions") return inspector.actions;
   if (key === "warnings") return inspector.warnings;
   return inspector.errors;
 }
 
 function inspectorKeys() {
-  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "queue", "warnings", "errors"];
+  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "queue", "actions", "warnings", "errors"];
 }
 
 function normalizeInspectorTab(value) {
@@ -1617,7 +1753,7 @@ function normalizeInspectorTab(value) {
 function inspectorLabel(value) {
   return {
     "data-contract": "Data Contract", "broadcast-state": "Broadcast State", preview: "Preview", program: "Program", output: "Output",
-    projection: "Projection", assets: "Assets", queue: "Queue", warnings: "Warnings", errors: "Errors"
+    projection: "Projection", assets: "Assets", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
   }[value] || value;
 }
 
@@ -1737,6 +1873,15 @@ function numberFromControl(control) {
   const value = Number(control?.value);
   if (!Number.isFinite(value)) throw consoleError("console-number-invalid", { id: control?.id });
   return value;
+}
+
+function countExplicitConfirmations(messages) {
+  let count = 0;
+  for (const message of messages) {
+    if (!window.confirm(message)) break;
+    count += 1;
+  }
+  return count;
 }
 
 function safeAreaText(value = {}) {
@@ -1867,6 +2012,22 @@ function uniqueStrings(values) {
 
 function assertModel(model) {
   if (!model || typeof model !== "object" || !model.state || !model.contract) throw consoleError("console-model-required");
+}
+
+function consoleActionError(dispatch, actionType) {
+  let code = dispatch.result?.code || "console-action-failed";
+  if (code === "confirmation-required") {
+    if ([ACTION_TYPES.TAKE, ACTION_TYPES.CUT, ACTION_TYPES.AUTO].includes(actionType)) code = "console-safe-mode-confirmation-required";
+    else if (actionType === ACTION_TYPES.CLEAR_PROGRAM) code = "console-clear-program-confirmation-required";
+    else if ([ACTION_TYPES.SET_LAYER, ACTION_TYPES.LOCK_LAYER, ACTION_TYPES.UNLOCK_LAYER, ACTION_TYPES.SHOW_LAYER, ACTION_TYPES.HIDE_LAYER].includes(actionType)) code = "console-layer-confirmation-required";
+    else code = "console-action-confirmation-required";
+  }
+  return consoleError(code, {
+    actionId: dispatch.action?.actionId,
+    actionType,
+    resultCode: dispatch.result?.code,
+    errors: dispatch.errors
+  });
 }
 
 function consoleError(code, details = {}) {

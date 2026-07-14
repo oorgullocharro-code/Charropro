@@ -12,6 +12,7 @@ import {
   clearProductionProgram,
   clearProductionQueue,
   createProductionConsoleModel,
+  dispatchProductionConsoleAction,
   disposeProductionConsole,
   enqueueProductionGraphic,
   escapeProductionConsoleText,
@@ -33,6 +34,7 @@ import {
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
 import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
 import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260713-asset-manager-001-assets-v1";
+import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260713-action-engine-001-actions-v1";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -41,7 +43,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260713-production-console-001-control-center1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260713-action-engine-001-actions-v1");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
 
@@ -53,6 +55,7 @@ assert.equal(model.safeMode, true);
 assert.equal(model.state.preview.active, false);
 assert.equal(model.state.program.active, false);
 assert.equal(model.programSnapshot, null);
+assert.deepEqual(model.actionHistory, []);
 assert.deepEqual(getBroadcastQueue(model.state), []);
 assert.equal(model.outputIds.length, 5);
 for (const outputId of model.outputIds) {
@@ -90,6 +93,8 @@ model = prepareProductionPreview(model, {
   animation: { duration: 0, delay: 0, autoHide: false }
 }, { now: T1, confirmed: true });
 assert.equal(model.state.preview.active, true);
+assert.equal(model.actionHistory[0].actionType, ACTION_TYPES.PREPARE_PREVIEW);
+assert.equal(model.actionHistory[0].resultCode, "action-succeeded");
 assert.equal(model.state.program.active, false);
 let previewProjection = buildProductionProjection(model, "preview", { now: T1 });
 assert.equal(previewProjection.graphics[0].position.x, 0);
@@ -230,7 +235,7 @@ queue = getBroadcastQueue(model.state);
 assert.equal(queue[0].queueItemId, "queue_a");
 model = removeProductionQueueItem(model, "queue_b", { now: T3 });
 assert.equal(getBroadcastQueue(model.state).some((item) => item.queueItemId === "queue_b"), false);
-model = clearProductionQueue(model, { now: T3 });
+model = clearProductionQueue(model, { now: T3, confirmed: true });
 assert.deepEqual(getBroadcastQueue(model.state), []);
 assert.deepEqual(model.state.program, programBeforeQueue);
 
@@ -271,6 +276,13 @@ let privacyModel = createProductionConsoleModel({ now: T0 });
 privacyModel = prepareProductionPreview(privacyModel, {}, { now: T1, confirmed: true });
 privacyModel = transitionProductionToProgram(privacyModel, "take", { now: T2, confirmed: true });
 privacyModel = enqueueProductionGraphic(privacyModel, { now: T3, queueItemId: "privacy_queue" });
+const activeProductionInspectorText = JSON.stringify(getProductionConsoleInspector(privacyModel, {
+  now: T3,
+  visibility: "production"
+}));
+for (const restricted of ["production_console_operator", '"actor"', "deviceId", "sessionId", "permissions"]) {
+  assert.equal(activeProductionInspectorText.includes(restricted), false, `Active production inspector leaked ${restricted}`);
+}
 privacyModel = setProductionVisibility(privacyModel, "public", { now: T4 });
 const stateBeforePublicInspector = structuredClone(privacyModel.state);
 const outputBeforePublicInspector = structuredClone(getBroadcastOutput(privacyModel.selectedOutputId));
@@ -406,7 +418,18 @@ assert.ok(source.includes("sessionStorage"));
 assert.ok(source.includes("fixtureId: model.fixtureId"));
 assert.ok(source.includes("safeMode: model.safeMode"));
 assert.equal(source.includes("programSnapshot: model.programSnapshot"), false);
-assert.equal(source.includes("state: model.state"), false);
+const sessionWriterSource = source.slice(source.indexOf("function writeSessionSettings"), source.indexOf("async function copyText"));
+assert.equal(sessionWriterSource.includes("state: model.state"), false);
+assert.ok(source.includes("dispatchBroadcastAction(action, actionContext"));
+assert.ok(source.includes("Últimas acciones"));
+assert.ok(source.includes("showOperationalActor"));
+assert.ok(source.includes("? `${item.actor?.name || item.actor?.role || \"Sistema\"} · ${item.timestamp || \"-\"}`"));
+const handlersSource = source.slice(source.indexOf("function bindConsoleEvents"), source.indexOf("function renderConsole"));
+for (const protectedApi of [
+  "setPreviewState(", "promotePreviewToProgram(", "clearPreviewState(", "clearProgramState(",
+  "setLayerState(", "setGraphicState(", "setOutputState(", "enqueueBroadcastItem(",
+  "dequeueBroadcastItem(", "updateBroadcastOutput(", "updateBroadcastOutputHeartbeat("
+]) assert.equal(handlersSource.includes(protectedApi), false, `Console handler bypassed Action Engine with ${protectedApi}`);
 assert.equal(css.includes("@media (max-width: 1600px)"), true);
 assert.equal(css.includes("@media (max-width: 1199px)"), true);
 assert.equal(css.includes("@media (max-width: 900px)"), true);
