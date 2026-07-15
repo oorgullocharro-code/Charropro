@@ -138,7 +138,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-browser-output-001-common-web-output-infrastructure-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-program-main-output-001-official-program-visual-output-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -1081,6 +1081,8 @@ const officialProgramMarkup = html.slice(html.indexOf("<h3>Official Program</h3>
 assert.doesNotMatch(officialProgramMarkup, /\bOBS\b|\bvMix\b|Browser Output|Firebase/);
 const outputRoutingMarkup = html.slice(html.indexOf("<h2>OUTPUT ROUTING</h2>"), html.indexOf("console-geometry-panel"));
 assert.match(outputRoutingMarkup, /Copiar Snapshot/);
+assert.match(outputRoutingMarkup, /href="\.\/program-main-output\.html"/);
+assert.match(outputRoutingMarkup, /Abrir Program Main Output/);
 assert.match(outputRoutingMarkup, /href="\.\/browser-output\.html\?type=generic"/);
 assert.match(outputRoutingMarkup, /Abrir laboratorio Browser Output/);
 assert.doesNotMatch(outputRoutingMarkup, /Abrir Browser Source|\bOBS\b|\bvMix\b|URL pública|Start Timer|Pause Timer|Reset Timer|\bTake\b|\bCut\b|\bAuto\b/);

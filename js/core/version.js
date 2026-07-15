@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260715-program-projection-001b-theme-preparation-export-v1";
+export const CHARROPRO_APP_VERSION = "20260715-program-main-output-001-official-program-visual-output-v1";
 
 let versionLogged = false;
 

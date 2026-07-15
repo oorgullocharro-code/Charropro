@@ -561,3 +561,16 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - Output Routing reenvia la proyeccion oficial y conserva Program vacio como `controlled-empty`, con `composition: null`, `components: []` y `layers: []`.
 - Browser Output no fue modificado y continua como infraestructura tecnica; el render final de Program Main queda fuera de este ticket.
 - Contrato, seguridad y limitaciones: `BROADCAST_PROGRAM_PROJECTION_V1.md`.
+
+# PROGRAM-MAIN-OUTPUT-001 - Salida visual oficial Program Main V1
+
+- Versión de aplicación: `20260715-program-main-output-001-official-program-visual-output-v1`.
+- Se agregó `js/broadcast/programMainOutput.js` como salida visual específica para la ruta oficial `program-main`.
+- La salida recibe exclusivamente el sobre validado de Output Routing y usa Browser Output para lifecycle/revisiones y Component Renderer para el DOM declarativo.
+- `program-main-output.html` es una página local limpia, transparente, sin navegación, inspector ni controles de Program.
+- Program vacío permanece transparente; Program activo conserva identidad, composición, componentes, capas, geometría, Theme, Template y turno oficial.
+- El cambio A → B prepara el siguiente render de forma aislada y retira por completo las capas anteriores después de validar el nuevo resultado.
+- Production Console incorpora únicamente el enlace local `Abrir Program Main Output`; abrirlo no modifica Preview ni Program.
+- Los fixtures locales requieren `?debug=1&fixture=...` y nunca se activan en modo normal.
+- No se agregaron Firebase, WebSocket, polling, BroadcastChannel, OBS, vMix, Wirecast, autenticación, URL productiva ni sincronización automática.
+- Contrato, seguridad, lifecycle y limitaciones: `BROADCAST_PROGRAM_MAIN_OUTPUT_V1.md`.
