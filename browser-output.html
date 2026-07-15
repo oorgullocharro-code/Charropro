@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>CharroPro Browser Output Lab</title>
+  <link rel="stylesheet" href="./css/browser-output.css?v=20260715-browser-output-001-common-web-output-infrastructure-v1">
+</head>
+<body data-browser-output-lab>
+  <header class="browser-output-lab-header">
+    <div>
+      <p>CharroPro Broadcast Studio</p>
+      <h1>Browser Output Infrastructure</h1>
+    </div>
+    <div class="browser-output-lab-status">
+      <span id="browser-output-version">Browser Output 1.0.0</span>
+      <span id="browser-output-instance-status" aria-live="polite">Uninitialized</span>
+    </div>
+  </header>
+
+  <div class="browser-output-lab-notice" role="note">
+    LABORATORIO TÉCNICO — NO ES UNA SALIDA DE PRODUCCIÓN
+  </div>
+
+  <main class="browser-output-lab-layout">
+    <section class="browser-output-workspace" aria-labelledby="browser-output-workspace-title">
+      <div class="browser-output-section-heading">
+        <div>
+          <p>Infraestructura común</p>
+          <h2 id="browser-output-workspace-title">Salida técnica</h2>
+        </div>
+        <dl class="browser-output-status-metrics">
+          <div><dt>Estado</dt><dd id="browser-output-state-value">Uninitialized</dd></div>
+          <div><dt>Raíz</dt><dd id="browser-output-root-value">0</dd></div>
+          <div><dt>Projection</dt><dd id="browser-output-projection-revision">0</dd></div>
+        </dl>
+      </div>
+
+      <div class="browser-output-controls" aria-label="Controles del laboratorio">
+        <label>
+          <span>Fixture</span>
+          <select id="browser-output-fixture">
+            <option value="program-empty">Program Main vacío</option>
+            <option value="program-active" selected>Program Main activo</option>
+            <option value="announcer-operational">Announcer Monitor operacional</option>
+            <option value="timer-ready">Timer Display ready</option>
+            <option value="timer-running">Timer Display running</option>
+            <option value="timer-paused">Timer Display paused</option>
+            <option value="timer-stopped">Timer Display stopped</option>
+            <option value="timer-finished">Timer Display finished</option>
+            <option value="timer-stale">Timer Display stale</option>
+            <option value="output-unavailable">Output unavailable</option>
+            <option value="output-disabled">Output disabled</option>
+          </select>
+        </label>
+        <label>
+          <span>Display mode</span>
+          <select id="browser-output-display-mode">
+            <option value="fit" selected>Fit</option>
+            <option value="fill">Fill</option>
+            <option value="native">Native</option>
+            <option value="responsive">Responsive</option>
+            <option value="fullscreen">Fullscreen</option>
+          </select>
+        </label>
+        <label>
+          <span>Resolución</span>
+          <select id="browser-output-resolution">
+            <option value="1920x1080" selected>1920 × 1080</option>
+            <option value="1280x720">1280 × 720</option>
+            <option value="1080x1920">1080 × 1920</option>
+            <option value="3840x720">3840 × 720</option>
+          </select>
+        </label>
+        <label>
+          <span>Orientación</span>
+          <select id="browser-output-orientation">
+            <option value="landscape" selected>Landscape</option>
+            <option value="portrait">Portrait</option>
+            <option value="ultra_wide">Ultra wide</option>
+            <option value="auto">Auto</option>
+          </select>
+        </label>
+        <label class="browser-output-checkbox">
+          <input id="browser-output-transparent" type="checkbox">
+          <span>Fondo transparente</span>
+        </label>
+      </div>
+
+      <div class="browser-output-actions">
+        <button type="button" data-browser-output-action="configure">Configurar</button>
+        <button type="button" data-browser-output-action="mount">Montar</button>
+        <button type="button" class="button-primary" data-browser-output-action="apply">Aplicar Projection</button>
+        <button type="button" data-browser-output-action="update">Actualizar</button>
+        <button type="button" data-browser-output-action="clear">Limpiar</button>
+        <button type="button" data-browser-output-action="fullscreen">Pantalla completa</button>
+        <button type="button" data-browser-output-action="snapshot">Copiar Snapshot</button>
+        <button type="button" class="button-danger" data-browser-output-action="destroy">Destruir</button>
+      </div>
+
+      <div class="browser-output-stage-shell">
+        <div class="browser-output-stage-grid" aria-hidden="true"></div>
+        <div id="browser-output-stage" class="browser-output-stage" aria-label="Canvas técnico Browser Output"></div>
+      </div>
+    </section>
+
+    <aside class="browser-output-inspector" aria-labelledby="browser-output-inspector-title">
+      <div class="browser-output-section-heading">
+        <div>
+          <p>Snapshot desacoplado</p>
+          <h2 id="browser-output-inspector-title">Inspector técnico</h2>
+        </div>
+      </div>
+      <pre id="browser-output-inspector-value">{}</pre>
+      <section class="browser-output-diagnostic-section">
+        <h3>Warnings</h3>
+        <div id="browser-output-warnings">Sin registros</div>
+      </section>
+      <section class="browser-output-diagnostic-section">
+        <h3>Errors</h3>
+        <div id="browser-output-errors">Sin registros</div>
+      </section>
+    </aside>
+  </main>
+
+  <script type="module" src="./js/broadcast/browserOutput.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1"></script>
+</body>
+</html>

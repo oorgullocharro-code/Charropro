@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260715-output-routing-001-three-official-routes-v1";
+export const CHARROPRO_APP_VERSION = "20260715-browser-output-001-common-web-output-infrastructure-v1";
 
 let versionLogged = false;
 

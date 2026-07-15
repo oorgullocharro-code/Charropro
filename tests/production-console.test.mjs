@@ -105,7 +105,7 @@ import {
   destroyOutputRoutingEngine,
   listOutputRoutes,
   validateOutputRoutingSnapshot
-} from "../js/broadcast/outputRouting.js?v=20260715-output-routing-001-three-official-routes-v1";
+} from "../js/broadcast/outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
@@ -138,7 +138,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-output-routing-001-three-official-routes-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-browser-output-001-common-web-output-infrastructure-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -1081,6 +1081,8 @@ const officialProgramMarkup = html.slice(html.indexOf("<h3>Official Program</h3>
 assert.doesNotMatch(officialProgramMarkup, /\bOBS\b|\bvMix\b|Browser Output|Firebase/);
 const outputRoutingMarkup = html.slice(html.indexOf("<h2>OUTPUT ROUTING</h2>"), html.indexOf("console-geometry-panel"));
 assert.match(outputRoutingMarkup, /Copiar Snapshot/);
+assert.match(outputRoutingMarkup, /href="\.\/browser-output\.html\?type=generic"/);
+assert.match(outputRoutingMarkup, /Abrir laboratorio Browser Output/);
 assert.doesNotMatch(outputRoutingMarkup, /Abrir Browser Source|\bOBS\b|\bvMix\b|URL pública|Start Timer|Pause Timer|Reset Timer|\bTake\b|\bCut\b|\bAuto\b/);
 assert.equal(source.includes("innerHTML"), false);
 assert.equal(source.includes("localStorage"), false);

@@ -536,3 +536,14 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - No se agregaron Browser Outputs, URLs físicas, OBS, vMix, Firebase, persistencia, polling, sockets ni automatización.
 - La página pública continúa fuera de Output Routing y sigue usando `publicTournaments`.
 - Contrato y limitaciones: `BROADCAST_OUTPUT_ROUTING_V1.md`.
+
+# BROWSER-OUTPUT-001 - Infraestructura común de salidas web Broadcast V1
+
+- Versión de aplicación: `20260715-browser-output-001-common-web-output-infrastructure-v1`.
+- Se agregó `js/broadcast/browserOutput.js` como infraestructura pura, aislada y en memoria para recibir proyecciones ya resueltas por Output Routing.
+- El lifecycle cubre configuración, montaje de una sola raíz, aplicación explícita, actualización, limpieza reutilizable y destrucción terminal.
+- `browser-output.html` funciona únicamente como laboratorio técnico común con fixtures locales, display modes, orientaciones, safe areas, transparencia, fullscreen manual e inspector seguro.
+- Production Console incorpora un acceso mínimo al laboratorio, sin generar una URL productiva ni una Browser Source oficial.
+- No se agregaron Firebase, sockets, polling, persistencia, OBS, vMix, Wirecast ni conexión en tiempo real.
+- No se implementaron todavía las interfaces finales de Program Main, Announcer Monitor o Timer Display.
+- Contrato y limitaciones: `BROADCAST_BROWSER_OUTPUT_V1.md`.
