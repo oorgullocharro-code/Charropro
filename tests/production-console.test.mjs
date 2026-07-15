@@ -4,6 +4,7 @@ import {
   PRODUCTION_CONSOLE_APP_VERSION,
   PRODUCTION_CONSOLE_FIXTURES,
   PRODUCTION_CONSOLE_GRAPHICS,
+  PRODUCTION_CONSOLE_OUTPUT_ROUTES,
   PRODUCTION_CONSOLE_THEME_DEFINITIONS,
   PRODUCTION_CONSOLE_VERSION,
   activateProductionConsoleTheme,
@@ -15,6 +16,7 @@ import {
   clearProductionConsoleThemeTemplate,
   clearProductionConsoleOfficialPreview,
   clearProductionConsoleOfficialProgram,
+  clearProductionConsoleOutputRoute,
   clearProductionPreview,
   clearProductionProgram,
   clearProductionQueue,
@@ -24,6 +26,7 @@ import {
   createProductionConsoleThemeTemplateIntegration,
   createProductionConsoleOfficialPreviewEngine,
   createProductionConsoleOfficialProgramEngine,
+  createProductionConsoleOutputRoutingEngine,
   createProductionConsoleTestComponent,
   createProductionConsoleTemplate,
   createProductionConsoleTheme,
@@ -40,6 +43,7 @@ import {
   getProductionConsoleThemeTemplateClipboardSnapshot,
   getProductionConsoleOfficialPreviewClipboardSnapshot,
   getProductionConsoleOfficialProgramClipboardSnapshot,
+  getProductionConsoleOutputRoutingClipboardSnapshot,
   getProductionConsoleInspector,
   getProductionConsoleThemeClipboardSnapshot,
   initializeProductionConsole,
@@ -59,6 +63,7 @@ import {
   renderProductionConsoleTemplateRenderer,
   renderProductionConsoleThemeTemplate,
   renderProductionConsoleOfficialPreview,
+  resolveProductionConsoleOutputRoute,
   resolveProductionConsoleThemeTemplate,
   restoreLastProductionPreview,
   resetProductionConsoleVariable,
@@ -77,6 +82,7 @@ import {
   selectProductionOutput,
   setProductionLayerAction,
   setProductionOutputAction,
+  setProductionConsoleOutputRouteEnabled,
   setProductionConsoleVariable,
   setProductionConsoleVariableStatus,
   setProductionVisibility,
@@ -87,6 +93,7 @@ import {
   updateProductionConsoleThemeTemplate,
   updateProductionConsoleOfficialPreview,
   updateProductionConsoleOfficialProgram,
+  configureProductionConsoleOutputRoute,
   takeProductionConsoleOfficialProgram,
   cutProductionConsoleOfficialProgram,
   autoProductionConsoleOfficialProgram,
@@ -94,6 +101,11 @@ import {
 } from "../js/broadcast/productionConsole.js";
 import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
 import { destroyProgramEngine, validateProgram } from "../js/broadcast/programEngine.js?v=20260715-program-engine-001-official-program-v1";
+import {
+  destroyOutputRoutingEngine,
+  listOutputRoutes,
+  validateOutputRoutingSnapshot
+} from "../js/broadcast/outputRouting.js?v=20260715-output-routing-001-three-official-routes-v1";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
@@ -126,13 +138,14 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-program-engine-001-official-program-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-output-routing-001-three-official-routes-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
 assert.equal(PRODUCTION_CONSOLE_THEME_DEFINITIONS.length, 7);
+assert.deepEqual(PRODUCTION_CONSOLE_OUTPUT_ROUTES.map((route) => route.outputId), ["program-main", "announcer-monitor", "timer-display"]);
 
 // Initial load is valid, safe and contains no operational recovery.
 let model = createProductionConsoleModel({ now: T0 });
@@ -509,6 +522,50 @@ assert.equal(JSON.stringify(officialProgramSnapshot).includes("runtime"), false)
 assert.equal(JSON.stringify(officialProgramSnapshot).includes("tenantId"), false);
 assert.deepEqual(model.state, stateBeforeTemplateRenderer);
 assert.deepEqual(model.state.program, programBeforeTemplateRenderer);
+
+// Output Routing exposes exactly three logical, read-only routes and never mutates Program or the official timer source.
+const outputRoutingEngine = createProductionConsoleOutputRoutingEngine(model, {
+  engineId: "console_output_routing_test",
+  now: T3
+});
+assert.deepEqual(listOutputRoutes(outputRoutingEngine).map((route) => route.outputId), ["announcer-monitor", "program-main", "timer-display"]);
+const officialProgramBeforeRouting = structuredClone(model.officialProgram);
+const contractBeforeRouting = structuredClone(model.contract);
+model = configureProductionConsoleOutputRoute(model, outputRoutingEngine, "route-program-main", { now: T3 });
+model = resolveProductionConsoleOutputRoute(model, outputRoutingEngine, "route-program-main", {
+  programEngine: officialProgramEngine,
+  now: T3
+});
+assert.equal(model.outputRoutingResults["route-program-main"].projection.programId, officialProgramId);
+assert.equal(model.outputRoutingResults["route-program-main"].projection.kind, "program-main");
+model = resolveProductionConsoleOutputRoute(model, outputRoutingEngine, "route-announcer-monitor", { now: T3 });
+assert.equal(model.outputRoutingResults["route-announcer-monitor"].visibility, "operational");
+assert.equal(model.outputRoutingResults["route-announcer-monitor"].projection.kind, "announcer-monitor");
+assert.equal("controls" in model.outputRoutingResults["route-announcer-monitor"].projection, false);
+model = resolveProductionConsoleOutputRoute(model, outputRoutingEngine, "route-timer-display", { now: T3 });
+assert.equal(model.outputRoutingResults["route-timer-display"].projection.kind, "timer-display");
+assert.equal(model.outputRoutingResults["route-timer-display"].projection.formattedTime, model.contract.timer.display);
+assert.equal(model.outputRoutingResults["route-timer-display"].projection.sourceRevision, model.contract.timer.revision);
+assert.equal("controls" in model.outputRoutingResults["route-timer-display"].projection, false);
+assert.deepEqual(model.officialProgram, officialProgramBeforeRouting);
+assert.deepEqual(model.contract, contractBeforeRouting);
+const announcerProjectionBeforeDisable = structuredClone(model.outputRoutingResults["route-announcer-monitor"]);
+model = setProductionConsoleOutputRouteEnabled(model, outputRoutingEngine, "route-timer-display", false, { now: T3 });
+assert.equal(listOutputRoutes(outputRoutingEngine).find((route) => route.routeId === "route-timer-display").enabled, false);
+assert.deepEqual(model.outputRoutingResults["route-announcer-monitor"], announcerProjectionBeforeDisable);
+model = setProductionConsoleOutputRouteEnabled(model, outputRoutingEngine, "route-timer-display", true, { now: T3 });
+model = clearProductionConsoleOutputRoute(model, outputRoutingEngine, "route-program-main", { now: T3 });
+assert.equal(model.outputRoutingResults["route-program-main"], undefined);
+assert.deepEqual(model.outputRoutingResults["route-announcer-monitor"], announcerProjectionBeforeDisable);
+const outputRoutingSnapshot = getProductionConsoleOutputRoutingClipboardSnapshot(model, outputRoutingEngine, {
+  visibility: "public",
+  now: T3
+});
+assert.equal(validateOutputRoutingSnapshot(outputRoutingSnapshot).valid, true);
+assert.equal(JSON.stringify(outputRoutingSnapshot).includes("tenantId"), false);
+assert.equal(JSON.stringify(outputRoutingSnapshot).includes("officialProgram"), false);
+destroyOutputRoutingEngine(outputRoutingEngine, { now: T3 });
+
 model = clearProductionConsoleOfficialProgram(model, officialProgramEngine, { now: T3 });
 assert.equal(model.officialProgramState, "ready");
 assert.equal(model.officialProgram, null);
@@ -1003,6 +1060,9 @@ for (const id of [
   "console-official-program-metrics",
   "console-official-program-warnings",
   "console-official-program-errors",
+  "console-output-routing",
+  "console-output-routing-status",
+  "console-output-routing-routes",
   "console-component-renderer-lab",
   "console-component-renderer-target",
   "console-component-renderer-fixture",
@@ -1019,6 +1079,9 @@ for (const action of ["prepare", "take", "cut", "auto", "update", "clear", "snap
 }
 const officialProgramMarkup = html.slice(html.indexOf("<h3>Official Program</h3>"), html.indexOf("console-component-renderer-lab"));
 assert.doesNotMatch(officialProgramMarkup, /\bOBS\b|\bvMix\b|Browser Output|Firebase/);
+const outputRoutingMarkup = html.slice(html.indexOf("<h2>OUTPUT ROUTING</h2>"), html.indexOf("console-geometry-panel"));
+assert.match(outputRoutingMarkup, /Copiar Snapshot/);
+assert.doesNotMatch(outputRoutingMarkup, /Abrir Browser Source|\bOBS\b|\bvMix\b|URL pública|Start Timer|Pause Timer|Reset Timer|\bTake\b|\bCut\b|\bAuto\b/);
 assert.equal(source.includes("innerHTML"), false);
 assert.equal(source.includes("localStorage"), false);
 assert.equal(/from\s+["'][^"']*firebase/i.test(source), false);
@@ -1054,6 +1117,17 @@ assert.ok(source.includes('copy.dataset.copyJson = "template-snapshot"'));
 assert.ok(html.includes("Template Engine V1"));
 assert.ok(html.includes("Official Preview"));
 assert.ok(html.includes("Official Program"));
+assert.ok(html.includes("OUTPUT ROUTING"));
+assert.ok(source.includes("PRODUCTION_CONSOLE_OUTPUT_ROUTES"));
+assert.ok(source.includes('routeId: "route-program-main"'));
+assert.ok(source.includes('routeId: "route-announcer-monitor"'));
+assert.ok(source.includes('routeId: "route-timer-display"'));
+for (const action of ["configure", "resolve", "update", "enable", "disable", "clear"]) {
+  assert.ok(source.includes(`[\"${action}\",`), `Output Routing missing ${action}`);
+}
+for (const forbiddenOutput of ["public-results", "judge-output", "generic-led", "social-output", "multiview"]) {
+  assert.equal(source.includes(forbiddenOutput), false);
+}
 assert.ok(source.includes("createProductionConsoleOfficialProgramEngine"));
 assert.ok(source.includes("prepareProductionConsoleOfficialProgram"));
 assert.ok(source.includes("takeProductionConsoleOfficialProgram"));

@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260715-program-engine-001-official-program-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260715-output-routing-001-three-official-routes-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -83,6 +83,20 @@
         <section class="console-stage-grid">
           <article id="console-preview" class="console-stage"></article>
           <article id="console-program" class="console-stage console-stage-program"></article>
+        </section>
+
+        <section id="console-output-routing" class="console-panel console-output-routing-panel">
+          <div class="console-panel-heading">
+            <div>
+              <p>Rutas lógicas de solo lectura</p>
+              <h2>OUTPUT ROUTING</h2>
+            </div>
+            <div class="console-row-actions">
+              <div id="console-output-routing-status" class="console-output-routing-status" aria-live="polite"></div>
+              <button class="button button-quiet button-small" type="button" data-output-routing-action="snapshot">Copiar Snapshot</button>
+            </div>
+          </div>
+          <div id="console-output-routing-routes" class="console-output-routing-grid"></div>
         </section>
 
         <section class="console-panel console-geometry-panel">
@@ -374,6 +388,6 @@
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260715-program-engine-001-official-program-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260715-output-routing-001-three-official-routes-v1"></script>
 </body>
 </html>

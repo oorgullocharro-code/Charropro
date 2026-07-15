@@ -523,3 +523,16 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - No se agregaron Browser Outputs, OBS, vMix, Firebase, persistencia, Live Sync, animaciones ni routing.
 - Broadcast State V1, Output Engine y los gráficos V1 permanecen intactos.
 - Contrato y limitaciones: `BROADCAST_PROGRAM_ENGINE_V1.md`.
+
+# OUTPUT-ROUTING-001 - Enrutamiento oficial de salidas Broadcast V1
+
+- Versión de aplicación: `20260715-output-routing-001-three-official-routes-v1`.
+- Se agregó `js/broadcast/outputRouting.js` como motor puro, privado y en memoria para las tres rutas lógicas oficiales: `program-main`, `announcer-monitor` y `timer-display`.
+- `program-main` recibe exclusivamente snapshots validados de Program; no prepara ni modifica Program.
+- `announcer-monitor` proyecta datos ya calculados para locución con visibilidad operational/restricted y sin controles de producción.
+- `timer-display` conserva tiempo, estado y revisión del cronómetro oficial existente sin crear un segundo reloj ni controles.
+- El motor incluye lifecycle, revisión esperada, idempotencia, stale bajo consulta, aislamiento multi-tenant, sanitización y snapshots desacoplados.
+- Production Console incorpora `OUTPUT ROUTING` con tres tarjetas, proyecciones técnicas y acciones explícitas de configuración y resolución.
+- No se agregaron Browser Outputs, URLs físicas, OBS, vMix, Firebase, persistencia, polling, sockets ni automatización.
+- La página pública continúa fuera de Output Routing y sigue usando `publicTournaments`.
+- Contrato y limitaciones: `BROADCAST_OUTPUT_ROUTING_V1.md`.

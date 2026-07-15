@@ -162,10 +162,36 @@ import {
   updateProgram as updateOfficialProgram,
   validateProgram
 } from "./programEngine.js?v=20260715-program-engine-001-official-program-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-program-engine-001-official-program-v1";
+import {
+  OUTPUT_ROUTING_VERSION,
+  buildOutputRoutingSnapshot,
+  clearOutputRoute,
+  createOutputRoute,
+  createOutputRoutingEngine,
+  destroyOutputRoutingEngine,
+  disableOutputRoute,
+  enableOutputRoute,
+  getOutputRoute,
+  getOutputRoutingErrors,
+  getOutputRoutingStatus,
+  getOutputRoutingWarnings,
+  listOutputRoutes,
+  routeAnnouncerMonitor,
+  routeProgramToOutput,
+  routeTimerDisplay,
+  updateOutputRoute,
+  validateOutputRoutingSnapshot
+} from "./outputRouting.js?v=20260715-output-routing-001-three-official-routes-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-output-routing-001-three-official-routes-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-program-engine-001-official-program-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-output-routing-001-three-official-routes-v1";
+
+export const PRODUCTION_CONSOLE_OUTPUT_ROUTES = Object.freeze([
+  Object.freeze({ routeId: "route-program-main", routeType: "program_main", outputId: "program-main", sourceType: "program_snapshot", visibility: "public", name: "Program Main" }),
+  Object.freeze({ routeId: "route-announcer-monitor", routeType: "announcer_monitor", outputId: "announcer-monitor", sourceType: "announcer_projection", visibility: "operational", name: "Announcer Monitor" }),
+  Object.freeze({ routeId: "route-timer-display", routeType: "timer_display", outputId: "timer-display", sourceType: "timer_projection", visibility: "public", name: "Timer Display" })
+]);
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -402,6 +428,13 @@ export function createProductionConsoleModel(options = {}) {
     officialProgramSnapshot: null,
     officialProgramWarnings: [],
     officialProgramErrors: [],
+    outputRoutingVersion: OUTPUT_ROUTING_VERSION,
+    outputRoutingState: "uninitialized",
+    outputRoutingRoutes: [],
+    outputRoutingResults: {},
+    outputRoutingSnapshot: null,
+    outputRoutingWarnings: [],
+    outputRoutingErrors: [],
     themeSequence: PRODUCTION_CONSOLE_THEME_DEFINITIONS.length,
     selectedThemeId: themeRegistry.activeThemeId || "theme_default",
     themeSnapshot: null,
@@ -1495,6 +1528,221 @@ export function getProductionConsoleOfficialProgramClipboardSnapshot(model, engi
   });
 }
 
+export function createProductionConsoleOutputRoutingEngine(model, options = {}) {
+  assertModel(model);
+  const engine = createOutputRoutingEngine({
+    engineId: options.engineId || "production_console_output_routing",
+    now: options.now
+  });
+  const scope = productionConsoleRoutingScope(model);
+  PRODUCTION_CONSOLE_OUTPUT_ROUTES.forEach((definition) => {
+    createOutputRoute(engine, {
+      ...definition,
+      ...scope,
+      resolution: { width: 1920, height: 1080, transparentBackground: definition.routeType === "program_main" },
+      enabled: true,
+      refreshMode: "manual",
+      permissions: {
+        readOnly: true,
+        canResolve: true,
+        canConfigure: true,
+        canControlProgram: false,
+        canControlPreview: false,
+        canControlTimer: false
+      },
+      metadata: { source: "production-console", physicalOutput: false }
+    }, { now: options.now });
+  });
+  return engine;
+}
+
+export function configureProductionConsoleOutputRoute(model, engine, routeId, options = {}) {
+  assertModel(model);
+  const route = getOutputRoute(engine, routeId, { now: options.now });
+  if (!route) throw consoleError("console-output-route-not-found");
+  const scope = productionConsoleRoutingScope(model);
+  updateOutputRoute(engine, routeId, {
+    name: PRODUCTION_CONSOLE_OUTPUT_ROUTES.find((entry) => entry.routeId === routeId)?.name || route.name,
+    organizationId: scope.organizationId,
+    clientId: scope.clientId,
+    tournamentId: scope.tournamentId,
+    competitionId: scope.competitionId,
+    sessionId: scope.sessionId,
+    metadata: { source: "production-console", physicalOutput: false, configured: true }
+  }, {
+    expectedRevision: route.revision,
+    actor: CONSOLE_SETUP_ACTOR,
+    now: options.now
+  });
+  return syncProductionConsoleOutputRoutingModel(model, engine, {
+    lastAction: "output-routing-configured",
+    now: options.now
+  });
+}
+
+export function resolveProductionConsoleOutputRoute(model, engine, routeId, options = {}) {
+  assertModel(model);
+  const scope = productionConsoleRoutingScope(model);
+  const sharedOptions = {
+    context: scope,
+    visibility: routeId === "route-announcer-monitor" ? "operational" : undefined,
+    now: options.now
+  };
+  let result;
+  if (routeId === "route-program-main") {
+    const snapshot = options.programEngine
+      ? getProgramSnapshot(options.programEngine, { visibility: "public", now: options.now })
+      : model.officialProgramSnapshot;
+    if (!snapshot) throw consoleError("console-output-routing-program-snapshot-required");
+    result = routeProgramToOutput(engine, routeId, snapshot, sharedOptions);
+  } else if (routeId === "route-announcer-monitor") {
+    result = routeAnnouncerMonitor(engine, routeId, buildProductionConsoleAnnouncerSources(model), sharedOptions);
+  } else if (routeId === "route-timer-display") {
+    result = routeTimerDisplay(engine, routeId, buildProductionConsoleOfficialTimerState(model), sharedOptions);
+  } else {
+    throw consoleError("console-output-route-not-found");
+  }
+  return syncProductionConsoleOutputRoutingModel(model, engine, {
+    result,
+    routeId,
+    lastAction: options.update === true ? "output-routing-updated" : "output-routing-resolved",
+    now: options.now
+  });
+}
+
+export function setProductionConsoleOutputRouteEnabled(model, engine, routeId, enabled, options = {}) {
+  assertModel(model);
+  const route = getOutputRoute(engine, routeId, { now: options.now });
+  if (!route) throw consoleError("console-output-route-not-found");
+  if (enabled) enableOutputRoute(engine, routeId, {
+    expectedRevision: route.revision,
+    actor: CONSOLE_SETUP_ACTOR,
+    now: options.now
+  });
+  else disableOutputRoute(engine, routeId, {
+    expectedRevision: route.revision,
+    actor: CONSOLE_SETUP_ACTOR,
+    now: options.now
+  });
+  return syncProductionConsoleOutputRoutingModel(model, engine, {
+    lastAction: enabled ? "output-routing-enabled" : "output-routing-disabled",
+    now: options.now
+  });
+}
+
+export function clearProductionConsoleOutputRoute(model, engine, routeId, options = {}) {
+  assertModel(model);
+  const route = getOutputRoute(engine, routeId, { now: options.now });
+  if (!route) throw consoleError("console-output-route-not-found");
+  clearOutputRoute(engine, routeId, {
+    expectedRevision: route.revision,
+    actor: CONSOLE_SETUP_ACTOR,
+    now: options.now
+  });
+  const results = { ...(model.outputRoutingResults || {}) };
+  delete results[routeId];
+  return syncProductionConsoleOutputRoutingModel({ ...model, outputRoutingResults: results }, engine, {
+    lastAction: "output-routing-cleared",
+    now: options.now
+  });
+}
+
+export function getProductionConsoleOutputRoutingClipboardSnapshot(model, engine, options = {}) {
+  assertModel(model);
+  return buildOutputRoutingSnapshot(engine, {
+    visibility: options.visibility || "production",
+    now: options.now
+  });
+}
+
+function syncProductionConsoleOutputRoutingModel(model, engine, options = {}) {
+  const results = { ...(model.outputRoutingResults || {}) };
+  if (options.routeId && options.result) results[options.routeId] = cloneValue(options.result);
+  const snapshot = buildOutputRoutingSnapshot(engine, { visibility: "production", now: options.now });
+  return {
+    ...model,
+    outputRoutingState: getOutputRoutingStatus(engine, { now: options.now }).state,
+    outputRoutingRoutes: listOutputRoutes(engine, {}, { now: options.now }),
+    outputRoutingResults: results,
+    outputRoutingSnapshot: snapshot,
+    outputRoutingWarnings: getOutputRoutingWarnings(engine, { now: options.now }),
+    outputRoutingErrors: getOutputRoutingErrors(engine),
+    lastAction: options.lastAction || model.lastAction,
+    lastActionError: null
+  };
+}
+
+function productionConsoleRoutingScope(model) {
+  return {
+    tenantId: model.fixtureSource?.organization?.tenantId || null,
+    organizationId: model.contract?.organization?.id || model.fixtureSource?.organization?.id || null,
+    clientId: model.fixtureSource?.organization?.clientId || null,
+    tournamentId: model.contract?.tournament?.id || null,
+    competitionId: model.contract?.competition?.id || null,
+    sessionId: model.state?.session?.id || "session_production_console"
+  };
+}
+
+function buildProductionConsoleAnnouncerSources(model) {
+  const contract = model.contract || {};
+  const rankingEntries = Array.isArray(contract.ranking?.entries) ? contract.ranking.entries : [];
+  const currentId = contract.participant?.id || contract.team?.id || null;
+  const nextEntry = rankingEntries.find((entry) => entry.id && entry.id !== currentId) || null;
+  return {
+    sourceRevision: contract.revision ?? 0,
+    visibility: "operational",
+    ...productionConsoleRoutingScope(model),
+    contract,
+    next: nextEntry ? {
+      team: contract.competition?.scope === "team" ? nextEntry : null,
+      participant: contract.competition?.scope === "individual" ? nextEntry : null
+    } : null,
+    standings: rankingEntries,
+    timer: contract.timer || null,
+    notes: contract.production?.messages || [],
+    sponsorMention: contract.sponsor?.active || null,
+    alerts: contract.warnings || [],
+    context: {
+      tournamentId: contract.tournament?.id || null,
+      competitionId: contract.competition?.id || null,
+      charreadaId: contract.charreada?.id || null,
+      suerteId: contract.suerte?.id || null
+    },
+    generatedAt: contract.generatedAt
+  };
+}
+
+function buildProductionConsoleOfficialTimerState(model) {
+  const timer = model.contract?.timer || {};
+  return {
+    timerId: timer.id,
+    status: timer.status,
+    formattedTime: timer.display,
+    elapsedMs: timer.elapsed,
+    remainingMs: timer.remaining,
+    startedAt: timer.startedAt,
+    pausedAt: timer.pausedAt || null,
+    stoppedAt: timer.stoppedAt || null,
+    sourceRevision: timer.revision,
+    contextRef: {
+      tournamentId: model.contract?.tournament?.id || null,
+      competitionId: model.contract?.competition?.id || null,
+      charreadaId: model.contract?.charreada?.id || null,
+      teamId: model.contract?.team?.id || null,
+      participantId: model.contract?.participant?.id || null,
+      suerteId: model.contract?.suerte?.id || null
+    },
+    generatedAt: timer.updatedAt || model.contract?.generatedAt,
+    alertState: timer.alertState || null,
+    suerte: model.contract?.suerte || null,
+    team: model.contract?.team || null,
+    participant: model.contract?.participant || null,
+    attempt: model.contract?.suerte?.attempt ?? null,
+    visibility: "public",
+    ...productionConsoleRoutingScope(model)
+  };
+}
+
 function buildProductionConsoleOfficialPreviewSourceSnapshot(model, integration, options = {}) {
   const preparation = model.themeTemplatePreparation;
   if (!preparation) throw consoleError("console-official-preview-preparation-required");
@@ -2222,7 +2470,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(variables.warnings || []),
     ...(components.warnings || []),
     ...(templates.warnings || []),
-    ...(themes.warnings || [])
+    ...(themes.warnings || []),
+    ...(model.outputRoutingWarnings || [])
   ]);
   const errors = uniqueStrings([
     ...(model.state.errors || []),
@@ -2233,7 +2482,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(variables.errors || []),
     ...(components.errors || []),
     ...(templates.errors || []),
-    ...(themes.errors || [])
+    ...(themes.errors || []),
+    ...(model.outputRoutingErrors || [])
   ]);
   const inspector = {
     contract: cloneValue(model.contract),
@@ -2247,6 +2497,15 @@ export function getProductionConsoleInspector(model, options = {}) {
     components,
     templates,
     themes,
+    outputRouting: {
+      version: OUTPUT_ROUTING_VERSION,
+      state: model.outputRoutingState,
+      routes: cloneValue(model.outputRoutingRoutes || []),
+      results: publicView ? {} : cloneValue(model.outputRoutingResults || {}),
+      snapshot: cloneValue(model.outputRoutingSnapshot),
+      warnings: cloneValue(model.outputRoutingWarnings || []),
+      errors: cloneValue(model.outputRoutingErrors || [])
+    },
     queue: getBroadcastQueue(model.state),
     actions: cloneValue(model.actionHistory || []),
     warnings: publicView ? [] : warnings,
@@ -2257,6 +2516,7 @@ export function getProductionConsoleInspector(model, options = {}) {
       dataContract: BROADCAST_DATA_CONTRACT_VERSION,
       broadcastState: BROADCAST_STATE_VERSION,
       broadcastOutput: BROADCAST_OUTPUT_VERSION,
+      outputRouting: OUTPUT_ROUTING_VERSION,
       assetManager: ASSET_MANAGER_VERSION,
       actionEngine: BROADCAST_ACTION_ENGINE_VERSION,
       productionVariables: PRODUCTION_VARIABLES_VERSION,
@@ -2370,6 +2630,9 @@ export function validateProductionConsoleModel(model) {
   const officialProgram = model.officialProgram
     ? validateProgram(model.officialProgram)
     : { valid: true, errors: [], warnings: [] };
+  const outputRouting = model.outputRoutingSnapshot
+    ? validateOutputRoutingSnapshot(model.outputRoutingSnapshot)
+    : { valid: true, errors: [], warnings: [] };
   const errors = uniqueStrings([
     ...state.errors,
     ...contract.errors,
@@ -2380,7 +2643,8 @@ export function validateProductionConsoleModel(model) {
     ...themes.flatMap((item) => item.errors),
     ...templateRenderer.errors,
     ...themeTemplate.errors,
-    ...officialProgram.errors
+    ...officialProgram.errors,
+    ...outputRouting.errors
   ]);
   return {
     valid: errors.length === 0,
@@ -2395,7 +2659,8 @@ export function validateProductionConsoleModel(model) {
       ...themes.flatMap((item) => item.warnings),
       ...templateRenderer.warnings,
       ...themeTemplate.warnings,
-      ...officialProgram.warnings
+      ...officialProgram.warnings,
+      ...outputRouting.warnings
     ])
   };
 }
@@ -2425,9 +2690,12 @@ export function initializeProductionConsole(root = document) {
     officialPreviewPreparationStore: { preparation: null },
     officialProgramEngine: null,
     officialProgramVisualRoot: null,
+    outputRoutingEngine: null,
     controller
   };
   runtime.officialProgramEngine = createProductionConsoleOfficialProgramEngine(model);
+  runtime.outputRoutingEngine = createProductionConsoleOutputRoutingEngine(model);
+  model = syncProductionConsoleOutputRoutingModel(model, runtime.outputRoutingEngine);
   populateStaticControls(refs, model);
   if (refs.componentRendererTarget) {
     runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
@@ -2473,6 +2741,9 @@ export function initializeProductionConsole(root = document) {
       }
       if (runtime.officialProgramEngine && !isProgramDestroyed(runtime.officialProgramEngine)) {
         destroyProgramEngine(runtime.officialProgramEngine);
+      }
+      if (runtime.outputRoutingEngine && runtime.outputRoutingEngine.state !== "destroyed") {
+        destroyOutputRoutingEngine(runtime.outputRoutingEngine);
       }
       if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
         destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
@@ -3483,6 +3754,10 @@ function collectRefs(root) {
     officialProgramWarnings: id("console-official-program-warnings"),
     officialProgramErrors: id("console-official-program-errors"),
     officialProgramActions: [...root.querySelectorAll("[data-official-program-action]")],
+    outputRouting: id("console-output-routing"),
+    outputRoutingStatus: id("console-output-routing-status"),
+    outputRoutingRoutes: id("console-output-routing-routes"),
+    outputRoutingActions: [...root.querySelectorAll("[data-output-routing-action]")],
     componentRendererLab: id("console-component-renderer-lab"),
     componentRendererFixture: id("console-component-renderer-fixture"),
     componentRendererOutput: id("console-component-renderer-output"),
@@ -3775,6 +4050,51 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       return model;
     });
   }, signal));
+  listen(refs.outputRouting, "click", async (event) => {
+    const button = event.target.closest("button[data-output-routing-action]");
+    if (!button) return;
+    const action = button.dataset.outputRoutingAction;
+    const routeId = button.dataset.outputRoutingRouteId;
+    if (action === "snapshot") {
+      try {
+        const snapshot = getProductionConsoleOutputRoutingClipboardSnapshot(
+          getModel(),
+          runtime.outputRoutingEngine
+        );
+        await copyText(JSON.stringify(snapshot, null, 2));
+        button.textContent = "Copiado";
+        window.setTimeout(() => { button.textContent = "Copiar Snapshot"; }, 1200);
+      } catch (error) {
+        console.error("[production-console] output routing snapshot failed", error);
+      }
+      return;
+    }
+    if (!routeId) return;
+    run((model) => {
+      if (!runtime.outputRoutingEngine || runtime.outputRoutingEngine.state === "destroyed") {
+        runtime.outputRoutingEngine = createProductionConsoleOutputRoutingEngine(model);
+      }
+      if (action === "configure") {
+        return configureProductionConsoleOutputRoute(model, runtime.outputRoutingEngine, routeId);
+      }
+      if (action === "resolve" || action === "update") {
+        return resolveProductionConsoleOutputRoute(model, runtime.outputRoutingEngine, routeId, {
+          programEngine: runtime.officialProgramEngine,
+          update: action === "update"
+        });
+      }
+      if (action === "enable") {
+        return setProductionConsoleOutputRouteEnabled(model, runtime.outputRoutingEngine, routeId, true);
+      }
+      if (action === "disable") {
+        return setProductionConsoleOutputRouteEnabled(model, runtime.outputRoutingEngine, routeId, false);
+      }
+      if (action === "clear") {
+        return clearProductionConsoleOutputRoute(model, runtime.outputRoutingEngine, routeId);
+      }
+      return model;
+    });
+  }, signal);
   listen(refs.componentRendererFixture, "change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)), signal);
   listen(refs.componentRendererOutput, "change", () => run((model) => {
     if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
@@ -3906,6 +4226,7 @@ function renderConsole(refs, model, runtime = {}) {
   renderGraphicLibrary(refs.graphicLibrary, model);
   renderStage(refs.preview, previewProjection, buildProductionRenderDescriptor(previewProjection, model.assetRegistry), "Preview");
   renderStage(refs.program, programProjection, buildProductionRenderDescriptor(programProjection, model.assetRegistry), "Program");
+  renderOutputRouting(refs, model, runtime);
   renderLayers(refs.layersBody, model);
   renderOutputs(refs.outputsList, model);
   renderQueue(refs.queueList, model);
@@ -3958,6 +4279,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Contract ${BROADCAST_DATA_CONTRACT_VERSION}`),
     element("span", "console-meta", `State ${BROADCAST_STATE_VERSION}`),
     element("span", "console-meta", `Output ${BROADCAST_OUTPUT_VERSION}`),
+    element("span", "console-meta", `Routing ${OUTPUT_ROUTING_VERSION}`),
     element("span", "console-meta", `Assets ${ASSET_MANAGER_VERSION}`),
     element("span", "console-meta", `Preview ${PREVIEW_ENGINE_VERSION}`),
     element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
@@ -4282,6 +4604,117 @@ function toDateTimeLocal(value) {
   return local.toISOString().slice(0, 16);
 }
 
+function renderOutputRouting(refs, model, runtime) {
+  if (!refs.outputRoutingRoutes) return;
+  const routes = runtime.outputRoutingEngine && runtime.outputRoutingEngine.state !== "destroyed"
+    ? listOutputRoutes(runtime.outputRoutingEngine)
+    : model.outputRoutingRoutes || [];
+  const status = runtime.outputRoutingEngine && runtime.outputRoutingEngine.state !== "destroyed"
+    ? getOutputRoutingStatus(runtime.outputRoutingEngine)
+    : { state: model.outputRoutingState || "uninitialized", routes: routes.length, stale: 0 };
+  if (refs.outputRoutingStatus) {
+    refs.outputRoutingStatus.replaceChildren(
+      statusChip(readableLabel(status.state), status.state === "routed" ? "ok" : status.state === "stale" ? "warning" : "neutral"),
+      element("span", "console-meta", `${status.routes} rutas`)
+    );
+  }
+  refs.outputRoutingRoutes.replaceChildren();
+  PRODUCTION_CONSOLE_OUTPUT_ROUTES.forEach((definition) => {
+    const route = routes.find((entry) => entry.routeId === definition.routeId) || null;
+    const result = model.outputRoutingResults?.[definition.routeId] || null;
+    const card = element("article", `console-output-route-card console-output-route-${definition.routeType.replaceAll("_", "-")}`);
+    card.dataset.outputRoutingRouteId = definition.routeId;
+    const heading = element("div", "console-output-route-heading");
+    heading.append(
+      element("h3", "", definition.name),
+      statusChip(readableLabel(route?.status || "uninitialized"), route?.status === "routed" ? "ok" : route?.status === "stale" ? "warning" : route?.status === "disabled" ? "error" : "neutral")
+    );
+    const metrics = element("dl", "console-output-route-metrics");
+    [
+      ["Source revision", route?.sourceRevision ?? "—"],
+      ["Route revision", route?.revision ?? "—"],
+      ["Resolución", route ? `${route.resolution.width} × ${route.resolution.height}` : "—"],
+      ["Visibilidad", route?.visibility || definition.visibility],
+      ["Stale", route?.status === "stale" ? "Sí" : "No"]
+    ].forEach(([label, value]) => metrics.append(definitionItem(label, value)));
+    const preview = renderOutputRoutePreview(definition.routeType, result);
+    const diagnostics = element("div", "console-output-route-diagnostics");
+    const warningBlock = element("div", "");
+    warningBlock.append(element("strong", "", "Warnings"));
+    renderOutputRouteDiagnosticItems(warningBlock, route?.warnings || result?.warnings || [], "Sin warnings.");
+    const errorBlock = element("div", "");
+    errorBlock.append(element("strong", "", "Errors"));
+    renderOutputRouteDiagnosticItems(errorBlock, route?.errors || result?.errors || [], "Sin errores.");
+    diagnostics.append(warningBlock, errorBlock);
+    const actions = element("div", "console-output-route-actions");
+    [
+      ["configure", "Configurar"],
+      ["resolve", "Resolver"],
+      ["update", "Actualizar"],
+      ["enable", "Habilitar"],
+      ["disable", "Deshabilitar"],
+      ["clear", "Limpiar proyección"]
+    ].forEach(([action, label]) => {
+      const button = element("button", `button button-small ${action === "resolve" ? "button-primary" : action === "clear" ? "button-danger" : "button-quiet"}`, label);
+      button.type = "button";
+      button.dataset.outputRoutingAction = action;
+      button.dataset.outputRoutingRouteId = definition.routeId;
+      button.disabled = !route
+        || (["resolve", "update", "disable", "clear"].includes(action) && route.enabled === false)
+        || (action === "update" && !result)
+        || (action === "enable" && route.enabled === true)
+        || (action === "disable" && route.enabled === false);
+      actions.append(button);
+    });
+    card.append(heading, metrics, preview, diagnostics, actions);
+    refs.outputRoutingRoutes.append(card);
+  });
+}
+
+function renderOutputRoutePreview(routeType, result) {
+  const preview = element("div", "console-output-route-preview");
+  const projection = result?.projection;
+  if (!projection) {
+    preview.append(element("p", "console-empty-message", "Proyección no resuelta."));
+    return preview;
+  }
+  if (routeType === "program_main") {
+    preview.append(
+      element("span", "console-output-route-kicker", result.status === "controlled-empty" ? "CONTROLLED EMPTY" : "PROGRAM"),
+      element("strong", "", projection.programId || "Program sin contenido"),
+      element("span", "", projection.templateId || "Sin Template"),
+      element("small", "", projection.themeId || "Sin Theme")
+    );
+    return preview;
+  }
+  if (routeType === "announcer_monitor") {
+    preview.append(
+      element("span", "console-output-route-kicker", "SOLO LECTURA"),
+      element("strong", "", projection.current?.team?.name || projection.current?.participant?.name || "NO DISPONIBLE"),
+      element("span", "", projection.current?.suerte?.name || "Suerte no disponible"),
+      element("small", "", projection.timer?.display || projection.timer?.formattedTime || "Tiempo no disponible")
+    );
+    return preview;
+  }
+  preview.classList.add("console-output-route-timer-preview");
+  preview.append(
+    element("span", "console-output-route-kicker", "CRONÓMETRO OFICIAL · SOLO LECTURA"),
+    element("strong", "console-output-route-time", projection.formattedTime || "—"),
+    element("span", "", readableLabel(projection.status || "unavailable")),
+    element("small", "", projection.suerte?.name || projection.contextRef?.suerteId || "Contexto no disponible")
+  );
+  return preview;
+}
+
+function renderOutputRouteDiagnosticItems(root, values, emptyText) {
+  const entries = uniqueStrings(values || []);
+  if (!entries.length) {
+    root.append(element("span", "console-empty-message", emptyText));
+    return;
+  }
+  entries.slice(0, 5).forEach((entry) => root.append(element("span", "", entry)));
+}
+
 function renderSystem(root, model) {
   if (!root) return;
   const status = getProductionSystemStatus(model);
@@ -4290,7 +4723,7 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Template Renderer", TEMPLATE_RENDERER_INTEGRATION_VERSION], ["Theme + Template", THEME_TEMPLATE_INTEGRATION_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Output Routing", OUTPUT_ROUTING_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Template Renderer", TEMPLATE_RENDERER_INTEGRATION_VERSION], ["Theme + Template", THEME_TEMPLATE_INTEGRATION_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]
