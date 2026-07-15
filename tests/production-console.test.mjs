@@ -14,6 +14,7 @@ import {
   clearProductionConsoleTemplateRenderer,
   clearProductionConsoleThemeTemplate,
   clearProductionConsoleOfficialPreview,
+  clearProductionConsoleOfficialProgram,
   clearProductionPreview,
   clearProductionProgram,
   clearProductionQueue,
@@ -22,6 +23,7 @@ import {
   createProductionConsoleTemplateRendererIntegration,
   createProductionConsoleThemeTemplateIntegration,
   createProductionConsoleOfficialPreviewEngine,
+  createProductionConsoleOfficialProgramEngine,
   createProductionConsoleTestComponent,
   createProductionConsoleTemplate,
   createProductionConsoleTheme,
@@ -37,6 +39,7 @@ import {
   getProductionConsoleTemplateRenderClipboardSnapshot,
   getProductionConsoleThemeTemplateClipboardSnapshot,
   getProductionConsoleOfficialPreviewClipboardSnapshot,
+  getProductionConsoleOfficialProgramClipboardSnapshot,
   getProductionConsoleInspector,
   getProductionConsoleThemeClipboardSnapshot,
   initializeProductionConsole,
@@ -47,6 +50,7 @@ import {
   prepareProductionConsoleTemplateRenderer,
   prepareProductionConsoleThemeTemplate,
   prepareProductionConsoleOfficialPreview,
+  prepareProductionConsoleOfficialProgram,
   removeProductionConsoleComponent,
   removeProductionConsoleTemplate,
   removeProductionConsoleTheme,
@@ -82,9 +86,14 @@ import {
   updateProductionConsoleTemplateRenderer,
   updateProductionConsoleThemeTemplate,
   updateProductionConsoleOfficialPreview,
+  updateProductionConsoleOfficialProgram,
+  takeProductionConsoleOfficialProgram,
+  cutProductionConsoleOfficialProgram,
+  autoProductionConsoleOfficialProgram,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
 import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
+import { destroyProgramEngine, validateProgram } from "../js/broadcast/programEngine.js?v=20260715-program-engine-001-official-program-v1";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
@@ -117,7 +126,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-preview-engine-001-official-preview-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-program-engine-001-official-program-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -461,6 +470,52 @@ assert.equal(JSON.stringify(officialSnapshot).includes("nodeType"), false);
 assert.equal(JSON.stringify(officialSnapshot).includes("tenantId"), false);
 assert.deepEqual(model.state, stateBeforeTemplateRenderer);
 assert.deepEqual(model.state.program, programBeforeTemplateRenderer);
+
+// Official Program promotes only the Official Preview snapshot and never consumes Preview.
+const officialProgramEngine = createProductionConsoleOfficialProgramEngine(model, {
+  engineId: "console_official_program_test",
+  now: T3
+});
+model = prepareProductionConsoleOfficialProgram(model, officialProgramEngine, officialPreviewEngine, { now: T3 });
+assert.equal(model.officialProgramState, "prepared");
+assert.equal(model.officialPreviewState, "rendered");
+model = takeProductionConsoleOfficialProgram(model, officialProgramEngine, { now: T3 });
+assert.equal(model.officialProgramState, "program");
+assert.equal(validateProgram(model.officialProgram).valid, true);
+assert.equal(model.officialProgram.previewId, model.officialPreview.previewId);
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+const officialProgramId = model.officialProgram.programId;
+
+model = prepareProductionConsoleOfficialProgram(model, officialProgramEngine, officialPreviewEngine, { now: T3 });
+model = cutProductionConsoleOfficialProgram(model, officialProgramEngine, { now: T3 });
+assert.equal(model.officialProgram.programId, officialProgramId);
+assert.equal(model.officialProgram.transitionMode, "cut");
+model = prepareProductionConsoleOfficialProgram(model, officialProgramEngine, officialPreviewEngine, { now: T3 });
+model = autoProductionConsoleOfficialProgram(model, officialProgramEngine, { now: T3 });
+assert.equal(model.officialProgram.programId, officialProgramId);
+assert.equal(model.officialProgram.transitionMode, "auto");
+model = updateProductionConsoleOfficialProgram(model, officialProgramEngine, officialPreviewEngine, { now: T3 });
+assert.equal(model.officialProgram.programId, officialProgramId);
+assert.equal(model.officialProgram.transitionMode, "update");
+
+const officialProgramSnapshot = getProductionConsoleOfficialProgramClipboardSnapshot(
+  model,
+  officialProgramEngine,
+  { visibility: "public", now: T3 }
+);
+assert.doesNotThrow(() => JSON.stringify(officialProgramSnapshot));
+assert.equal(JSON.stringify(officialProgramSnapshot).includes("nodeType"), false);
+assert.equal(JSON.stringify(officialProgramSnapshot).includes("runtime"), false);
+assert.equal(JSON.stringify(officialProgramSnapshot).includes("tenantId"), false);
+assert.deepEqual(model.state, stateBeforeTemplateRenderer);
+assert.deepEqual(model.state.program, programBeforeTemplateRenderer);
+model = clearProductionConsoleOfficialProgram(model, officialProgramEngine, { now: T3 });
+assert.equal(model.officialProgramState, "ready");
+assert.equal(model.officialProgram, null);
+assert.equal(model.officialPreviewState, "rendered");
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+destroyProgramEngine(officialProgramEngine, { now: T3 });
+
 model = clearProductionConsoleOfficialPreview(model, officialPreviewEngine, officialPreparationStore, { now: T4 });
 assert.equal(model.officialPreviewState, "ready");
 assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 0);
@@ -941,6 +996,13 @@ for (const id of [
   "console-template-renderer-safe-area",
   "console-template-renderer-target",
   "console-template-renderer-metrics",
+  "console-official-program-lab",
+  "console-official-program-status",
+  "console-official-program-frame",
+  "console-official-program-target",
+  "console-official-program-metrics",
+  "console-official-program-warnings",
+  "console-official-program-errors",
   "console-component-renderer-lab",
   "console-component-renderer-target",
   "console-component-renderer-fixture",
@@ -950,8 +1012,13 @@ for (const id of [
 for (const action of ["prepare", "render", "update", "clear", "snapshot"]) {
   assert.ok(html.includes(`data-official-preview-action="${action}"`), `Official Preview missing ${action}`);
 }
-const officialPreviewMarkup = html.slice(html.indexOf("<h3>Official Preview</h3>"), html.indexOf("console-component-renderer-lab"));
+const officialPreviewMarkup = html.slice(html.indexOf("<h3>Official Preview</h3>"), html.indexOf("console-official-program-lab"));
 assert.doesNotMatch(officialPreviewMarkup, /\bTake\b|\bCut\b|\bAuto\b|\bProgram\b/);
+for (const action of ["prepare", "take", "cut", "auto", "update", "clear", "snapshot"]) {
+  assert.ok(html.includes(`data-official-program-action="${action}"`), `Official Program missing ${action}`);
+}
+const officialProgramMarkup = html.slice(html.indexOf("<h3>Official Program</h3>"), html.indexOf("console-component-renderer-lab"));
+assert.doesNotMatch(officialProgramMarkup, /\bOBS\b|\bvMix\b|Browser Output|Firebase/);
 assert.equal(source.includes("innerHTML"), false);
 assert.equal(source.includes("localStorage"), false);
 assert.equal(/from\s+["'][^"']*firebase/i.test(source), false);
@@ -986,6 +1053,14 @@ assert.ok(source.includes("getProductionConsoleTemplateClipboardSnapshot"));
 assert.ok(source.includes('copy.dataset.copyJson = "template-snapshot"'));
 assert.ok(html.includes("Template Engine V1"));
 assert.ok(html.includes("Official Preview"));
+assert.ok(html.includes("Official Program"));
+assert.ok(source.includes("createProductionConsoleOfficialProgramEngine"));
+assert.ok(source.includes("prepareProductionConsoleOfficialProgram"));
+assert.ok(source.includes("takeProductionConsoleOfficialProgram"));
+assert.ok(source.includes("cutProductionConsoleOfficialProgram"));
+assert.ok(source.includes("autoProductionConsoleOfficialProgram"));
+assert.ok(source.includes("updateProductionConsoleOfficialProgram"));
+assert.ok(source.includes("clearProductionConsoleOfficialProgram"));
 assert.ok(source.includes("TEMPLATE_RENDERER_INTEGRATION_VERSION"));
 assert.ok(source.includes("prepareProductionConsoleTemplateRenderer"));
 assert.ok(source.includes("renderProductionConsoleTemplateRenderer"));
@@ -1001,6 +1076,7 @@ assert.ok(source.includes("updateProductionConsoleThemeTemplate"));
 assert.ok(source.includes("clearProductionConsoleThemeTemplate"));
 assert.ok(source.includes("getProductionConsoleThemeTemplateClipboardSnapshot"));
 assert.equal((html.match(/data-official-preview-action=/g) || []).length, 5);
+assert.equal((html.match(/data-official-program-action=/g) || []).length, 7);
 assert.ok(source.includes("Crear componente de prueba"));
 assert.ok(html.includes("Laboratorio de Componentes V2"));
 assert.ok(source.includes("COMPONENT_RENDERER_VERSION"));

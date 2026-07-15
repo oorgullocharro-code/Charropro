@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260715-preview-engine-001-official-preview-v1";
+export const CHARROPRO_APP_VERSION = "20260715-program-engine-001-official-program-v1";
 
 let versionLogged = false;
 

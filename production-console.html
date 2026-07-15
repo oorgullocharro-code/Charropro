@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260715-preview-engine-001-official-preview-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260715-program-engine-001-official-program-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -304,6 +304,35 @@
                 <div><strong>Errors</strong><div id="console-template-renderer-errors"></div></div>
               </div>
             </section>
+            <section id="console-official-program-lab" class="console-official-program-lab">
+              <div class="console-template-renderer-heading">
+                <div>
+                  <p>Salida oficial completamente en memoria</p>
+                  <h3>Official Program</h3>
+                </div>
+                <div id="console-official-program-status" class="console-template-renderer-status" aria-live="polite"></div>
+              </div>
+              <div class="console-official-program-actions">
+                <button class="button button-quiet button-small" type="button" data-official-program-action="prepare">Prepare</button>
+                <button class="button button-take button-small" type="button" data-official-program-action="take">Take</button>
+                <button class="button button-cut button-small" type="button" data-official-program-action="cut">Cut</button>
+                <button class="button button-auto button-small" type="button" data-official-program-action="auto">Auto</button>
+                <button class="button button-quiet button-small" type="button" data-official-program-action="update">Update</button>
+                <button class="button button-danger button-small" type="button" data-official-program-action="clear">Clear</button>
+                <button class="button button-quiet button-small" type="button" data-official-program-action="snapshot">Snapshot</button>
+              </div>
+              <div class="console-official-program-viewport">
+                <div id="console-official-program-frame" class="console-official-program-frame" data-orientation="landscape">
+                  <div class="console-template-renderer-grid" aria-hidden="true"></div>
+                  <div id="console-official-program-target" class="console-official-program-target" aria-label="Canvas de Official Program"></div>
+                </div>
+              </div>
+              <dl id="console-official-program-metrics" class="console-template-renderer-metrics"></dl>
+              <div class="console-template-renderer-diagnostics">
+                <div><strong>Warnings</strong><div id="console-official-program-warnings"></div></div>
+                <div><strong>Errors</strong><div id="console-official-program-errors"></div></div>
+              </div>
+            </section>
           </section>
           <section id="console-component-renderer-lab" class="console-component-renderer-lab" hidden>
             <div class="console-component-renderer-heading">
@@ -345,6 +374,6 @@
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260715-preview-engine-001-official-preview-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260715-program-engine-001-official-program-v1"></script>
 </body>
 </html>

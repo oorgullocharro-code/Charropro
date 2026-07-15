@@ -147,10 +147,25 @@ import {
   renderPreview as renderOfficialPreview,
   updatePreview as updateOfficialPreview
 } from "./previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-preview-engine-001-official-preview-v1";
+import {
+  PROGRAM_ENGINE_VERSION,
+  autoProgram as autoOfficialProgram,
+  clearProgram as clearOfficialProgram,
+  createProgramEngine,
+  cutProgram as cutOfficialProgram,
+  destroyProgramEngine,
+  getProgramSnapshot,
+  getProgramState,
+  isProgramDestroyed,
+  prepareProgram as prepareOfficialProgram,
+  takeProgram as takeOfficialProgram,
+  updateProgram as updateOfficialProgram,
+  validateProgram
+} from "./programEngine.js?v=20260715-program-engine-001-official-program-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-program-engine-001-official-program-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-preview-engine-001-official-preview-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-program-engine-001-official-program-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -382,6 +397,11 @@ export function createProductionConsoleModel(options = {}) {
     officialPreviewSnapshot: null,
     officialPreviewWarnings: [],
     officialPreviewErrors: [],
+    officialProgramState: "uninitialized",
+    officialProgram: null,
+    officialProgramSnapshot: null,
+    officialProgramWarnings: [],
+    officialProgramErrors: [],
     themeSequence: PRODUCTION_CONSOLE_THEME_DEFINITIONS.length,
     selectedThemeId: themeRegistry.activeThemeId || "theme_default",
     themeSnapshot: null,
@@ -1384,6 +1404,97 @@ export function getProductionConsoleOfficialPreviewClipboardSnapshot(model, engi
   });
 }
 
+export function createProductionConsoleOfficialProgramEngine(model, options = {}) {
+  assertModel(model);
+  return createProgramEngine({
+    engineId: options.engineId || "production_console_official_program",
+    now: options.now
+  });
+}
+
+export function prepareProductionConsoleOfficialProgram(model, programEngine, previewEngine, options = {}) {
+  assertModel(model);
+  if (model.officialPreview?.status !== "rendered") throw consoleError("console-official-preview-not-rendered");
+  const previewSnapshot = getPreviewSnapshot(previewEngine, {
+    visibility: options.visibility || model.templateRendererVisibility,
+    now: options.now
+  });
+  prepareOfficialProgram(programEngine, previewSnapshot, {
+    rendererId: options.rendererId || "production-console-preview-runtime-v1",
+    visibility: options.visibility || model.templateRendererVisibility,
+    now: options.now
+  });
+  return {
+    ...model,
+    officialProgramState: getProgramState(programEngine),
+    officialProgramSnapshot: getProgramSnapshot(programEngine, {
+      visibility: options.visibility || model.templateRendererVisibility,
+      now: options.now
+    }),
+    officialProgramWarnings: [],
+    officialProgramErrors: [],
+    inspectorTab: "templates",
+    lastAction: "official-program-prepared",
+    lastActionError: null
+  };
+}
+
+export function takeProductionConsoleOfficialProgram(model, engine, options = {}) {
+  assertModel(model);
+  return officialProgramModelResult(model, engine, takeOfficialProgram(engine, { now: options.now }), "official-program-taken", options);
+}
+
+export function cutProductionConsoleOfficialProgram(model, engine, options = {}) {
+  assertModel(model);
+  return officialProgramModelResult(model, engine, cutOfficialProgram(engine, { now: options.now }), "official-program-cut", options);
+}
+
+export function autoProductionConsoleOfficialProgram(model, engine, options = {}) {
+  assertModel(model);
+  return officialProgramModelResult(model, engine, autoOfficialProgram(engine, { now: options.now }), "official-program-auto", options);
+}
+
+export function updateProductionConsoleOfficialProgram(model, programEngine, previewEngine, options = {}) {
+  assertModel(model);
+  const previewSnapshot = getPreviewSnapshot(previewEngine, {
+    visibility: options.visibility || model.templateRendererVisibility,
+    now: options.now
+  });
+  const program = updateOfficialProgram(programEngine, previewSnapshot, {
+    rendererId: options.rendererId || "production-console-preview-runtime-v1",
+    visibility: options.visibility || model.templateRendererVisibility,
+    now: options.now
+  });
+  return officialProgramModelResult(model, programEngine, program, "official-program-updated", options);
+}
+
+export function clearProductionConsoleOfficialProgram(model, engine, options = {}) {
+  assertModel(model);
+  clearOfficialProgram(engine, { now: options.now });
+  return {
+    ...model,
+    officialProgramState: getProgramState(engine),
+    officialProgram: null,
+    officialProgramSnapshot: getProgramSnapshot(engine, {
+      visibility: options.visibility || model.templateRendererVisibility,
+      now: options.now
+    }),
+    officialProgramWarnings: [],
+    officialProgramErrors: [],
+    inspectorTab: "templates",
+    lastAction: "official-program-cleared",
+    lastActionError: null
+  };
+}
+
+export function getProductionConsoleOfficialProgramClipboardSnapshot(model, engine, options = {}) {
+  assertModel(model);
+  return getProgramSnapshot(engine, {
+    visibility: options.visibility || model.templateRendererVisibility,
+    now: options.now
+  });
+}
+
 function buildProductionConsoleOfficialPreviewSourceSnapshot(model, integration, options = {}) {
   const preparation = model.themeTemplatePreparation;
   if (!preparation) throw consoleError("console-official-preview-preparation-required");
@@ -1452,6 +1563,24 @@ function officialPreviewModelResult(model, engine, preview, lastAction, options 
     inspectorTab: "templates",
     lastAction,
     lastActionError: preview.errors?.[0] || null
+  };
+}
+
+function officialProgramModelResult(model, engine, program, lastAction, options = {}) {
+  const snapshot = getProgramSnapshot(engine, {
+    visibility: options.visibility || model.templateRendererVisibility,
+    now: options.now
+  });
+  return {
+    ...model,
+    officialProgramState: getProgramState(engine),
+    officialProgram: cloneValue(program),
+    officialProgramSnapshot: cloneValue(snapshot),
+    officialProgramWarnings: uniqueStrings([...(program.warnings || []), ...(snapshot.warnings || [])]),
+    officialProgramErrors: uniqueStrings([...(program.errors || []), ...(snapshot.errors || [])]),
+    inspectorTab: "templates",
+    lastAction,
+    lastActionError: program.errors?.[0] || null
   };
 }
 
@@ -2136,7 +2265,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       templateEngine: TEMPLATE_ENGINE_VERSION,
       templateRendererIntegration: TEMPLATE_RENDERER_INTEGRATION_VERSION,
       themeEngine: THEME_ENGINE_VERSION,
-      previewEngine: PREVIEW_ENGINE_VERSION
+      previewEngine: PREVIEW_ENGINE_VERSION,
+      programEngine: PROGRAM_ENGINE_VERSION
     }
   };
   const sanitized = sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -2237,6 +2367,9 @@ export function validateProductionConsoleModel(model) {
   const themeTemplate = model.themeTemplateSnapshot
     ? validateThemeTemplateSnapshot(model.themeTemplateSnapshot)
     : { valid: true, errors: [], warnings: [] };
+  const officialProgram = model.officialProgram
+    ? validateProgram(model.officialProgram)
+    : { valid: true, errors: [], warnings: [] };
   const errors = uniqueStrings([
     ...state.errors,
     ...contract.errors,
@@ -2246,7 +2379,8 @@ export function validateProductionConsoleModel(model) {
     ...components.flatMap((item) => item.errors),
     ...themes.flatMap((item) => item.errors),
     ...templateRenderer.errors,
-    ...themeTemplate.errors
+    ...themeTemplate.errors,
+    ...officialProgram.errors
   ]);
   return {
     valid: errors.length === 0,
@@ -2260,7 +2394,8 @@ export function validateProductionConsoleModel(model) {
       ...components.flatMap((item) => item.warnings),
       ...themes.flatMap((item) => item.warnings),
       ...templateRenderer.warnings,
-      ...themeTemplate.warnings
+      ...themeTemplate.warnings,
+      ...officialProgram.warnings
     ])
   };
 }
@@ -2288,8 +2423,11 @@ export function initializeProductionConsole(root = document) {
     themeTemplateIntegration: null,
     officialPreviewEngine: null,
     officialPreviewPreparationStore: { preparation: null },
+    officialProgramEngine: null,
+    officialProgramVisualRoot: null,
     controller
   };
+  runtime.officialProgramEngine = createProductionConsoleOfficialProgramEngine(model);
   populateStaticControls(refs, model);
   if (refs.componentRendererTarget) {
     runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
@@ -2307,7 +2445,8 @@ export function initializeProductionConsole(root = document) {
       ...model,
       templateRendererState: runtime.templateRendererIntegration.state,
       themeTemplateState: runtime.themeTemplateIntegration.state,
-      officialPreviewState: getPreviewState(runtime.officialPreviewEngine)
+      officialPreviewState: getPreviewState(runtime.officialPreviewEngine),
+      officialProgramState: getProgramState(runtime.officialProgramEngine)
     };
   }
   const update = (nextModel) => {
@@ -2331,6 +2470,9 @@ export function initializeProductionConsole(root = document) {
       if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
       if (runtime.officialPreviewEngine && !isOfficialPreviewEngineDestroyed(runtime.officialPreviewEngine)) {
         destroyPreviewEngine(runtime.officialPreviewEngine);
+      }
+      if (runtime.officialProgramEngine && !isProgramDestroyed(runtime.officialProgramEngine)) {
+        destroyProgramEngine(runtime.officialProgramEngine);
       }
       if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
         destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
@@ -3053,6 +3195,14 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
       warnings: cloneValue(model.officialPreviewWarnings || []),
       errors: cloneValue(model.officialPreviewErrors || [])
     },
+    officialProgram: {
+      version: PROGRAM_ENGINE_VERSION,
+      state: model.officialProgramState,
+      program: cloneValue(model.officialProgram),
+      snapshot: cloneValue(model.officialProgramSnapshot),
+      warnings: cloneValue(model.officialProgramWarnings || []),
+      errors: cloneValue(model.officialProgramErrors || [])
+    },
     registry: {
       engineVersion: TEMPLATE_ENGINE_VERSION,
       revision: model.templateRegistry?.revision ?? 0,
@@ -3069,7 +3219,8 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
       ...(model.templateWarnings || []),
       ...(model.templateRendererWarnings || []),
       ...(model.themeTemplateWarnings || []),
-      ...(model.officialPreviewWarnings || [])
+      ...(model.officialPreviewWarnings || []),
+      ...(model.officialProgramWarnings || [])
     ]),
     errors: uniqueStrings([
       ...validations.flatMap((validation) => validation.errors || []),
@@ -3077,7 +3228,8 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
       ...(model.templateErrors || []),
       ...(model.templateRendererErrors || []),
       ...(model.themeTemplateErrors || []),
-      ...(model.officialPreviewErrors || [])
+      ...(model.officialPreviewErrors || []),
+      ...(model.officialProgramErrors || [])
     ])
   };
 }
@@ -3323,6 +3475,14 @@ function collectRefs(root) {
     templateRendererErrors: id("console-template-renderer-errors"),
     templateRendererActions: [...root.querySelectorAll("[data-template-renderer-action]")],
     officialPreviewActions: [...root.querySelectorAll("[data-official-preview-action]")],
+    officialProgramLab: id("console-official-program-lab"),
+    officialProgramStatus: id("console-official-program-status"),
+    officialProgramFrame: id("console-official-program-frame"),
+    officialProgramTarget: id("console-official-program-target"),
+    officialProgramMetrics: id("console-official-program-metrics"),
+    officialProgramWarnings: id("console-official-program-warnings"),
+    officialProgramErrors: id("console-official-program-errors"),
+    officialProgramActions: [...root.querySelectorAll("[data-official-program-action]")],
     componentRendererLab: id("console-component-renderer-lab"),
     componentRendererFixture: id("console-component-renderer-fixture"),
     componentRendererOutput: id("console-component-renderer-output"),
@@ -3562,6 +3722,59 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       return model;
     });
   }, signal));
+  refs.officialProgramActions.forEach((button) => listen(button, "click", async () => {
+    const action = button.dataset.officialProgramAction;
+    if (action === "snapshot") {
+      try {
+        const snapshot = getProductionConsoleOfficialProgramClipboardSnapshot(
+          getModel(),
+          runtime.officialProgramEngine
+        );
+        await copyText(JSON.stringify(snapshot, null, 2));
+        button.textContent = "Copiado";
+        window.setTimeout(() => { button.textContent = "Snapshot"; }, 1200);
+      } catch (error) {
+        console.error("[production-console] official program snapshot failed", error);
+      }
+      return;
+    }
+    run((model) => {
+      if (!runtime.officialProgramEngine || isProgramDestroyed(runtime.officialProgramEngine)) {
+        runtime.officialProgramEngine = createProductionConsoleOfficialProgramEngine(model);
+      }
+      if (action === "prepare") {
+        return prepareProductionConsoleOfficialProgram(
+          model,
+          runtime.officialProgramEngine,
+          runtime.officialPreviewEngine
+        );
+      }
+      if (["take", "cut", "auto"].includes(action)) {
+        const next = action === "take"
+          ? takeProductionConsoleOfficialProgram(model, runtime.officialProgramEngine)
+          : action === "cut"
+            ? cutProductionConsoleOfficialProgram(model, runtime.officialProgramEngine)
+            : autoProductionConsoleOfficialProgram(model, runtime.officialProgramEngine);
+        captureOfficialProgramVisual(refs, runtime);
+        return next;
+      }
+      if (action === "update") {
+        const next = updateProductionConsoleOfficialProgram(
+          model,
+          runtime.officialProgramEngine,
+          runtime.officialPreviewEngine
+        );
+        captureOfficialProgramVisual(refs, runtime);
+        return next;
+      }
+      if (action === "clear") {
+        const next = clearProductionConsoleOfficialProgram(model, runtime.officialProgramEngine);
+        clearOfficialProgramVisual(refs, runtime);
+        return next;
+      }
+      return model;
+    });
+  }, signal));
   listen(refs.componentRendererFixture, "change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)), signal);
   listen(refs.componentRendererOutput, "change", () => run((model) => {
     if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
@@ -3630,6 +3843,21 @@ function listen(target, type, handler, signal) {
   target.addEventListener(type, handler, signal ? { signal } : undefined);
 }
 
+function captureOfficialProgramVisual(refs, runtime) {
+  const previewRoot = refs.templateRendererTarget?.firstElementChild;
+  if (!previewRoot || typeof previewRoot.cloneNode !== "function") {
+    throw consoleError("console-official-program-preview-root-required");
+  }
+  const nextRoot = previewRoot.cloneNode(true);
+  runtime.officialProgramVisualRoot = nextRoot;
+  refs.officialProgramTarget?.replaceChildren(nextRoot);
+}
+
+function clearOfficialProgramVisual(refs, runtime) {
+  runtime.officialProgramVisualRoot = null;
+  refs.officialProgramTarget?.replaceChildren();
+}
+
 function handleConsoleAction(model, action, refs) {
   if (action === "prepare") return prepareProductionPreview(model, { geometry: readGeometryControls(refs), animation: readAnimationControls(refs) }, { confirmed: true });
   if (["take", "cut", "auto"].includes(action)) {
@@ -3688,6 +3916,7 @@ function renderConsole(refs, model, runtime = {}) {
   renderThemeLab(refs, model);
   renderTemplateLab(refs, model);
   renderTemplateRendererLab(refs, model, runtime);
+  renderOfficialProgramLab(refs, model, runtime);
   renderComponentRendererLab(refs, model, runtime);
   renderInspector(refs.inspector, model);
 }
@@ -4381,6 +4610,70 @@ function renderTemplateRendererLab(refs, model, runtime) {
   });
   renderDiagnosticList(refs.templateRendererWarnings, model.officialPreviewWarnings, "Sin warnings de Official Preview.");
   renderDiagnosticList(refs.templateRendererErrors, model.officialPreviewErrors, "Sin errores de Official Preview.");
+}
+
+function renderOfficialProgramLab(refs, model, runtime) {
+  if (!refs.officialProgramLab) return;
+  refs.officialProgramLab.hidden = model.inspectorTab !== "templates";
+  const state = runtime.officialProgramEngine
+    ? getProgramState(runtime.officialProgramEngine)
+    : model.officialProgramState;
+  const program = model.officialProgram;
+  const output = program?.output || model.officialPreview?.output || {};
+  const resolution = output.resolution || {};
+  const width = Number(resolution.width) || 1920;
+  const height = Number(resolution.height) || 1080;
+  if (refs.officialProgramFrame) {
+    refs.officialProgramFrame.style.aspectRatio = `${width} / ${height}`;
+    refs.officialProgramFrame.dataset.orientation = output.orientation || (height > width ? "portrait" : "landscape");
+  }
+  if (refs.officialProgramStatus) {
+    refs.officialProgramStatus.replaceChildren(
+      statusChip(`Estado ${readableLabel(state)}`, state === "error" ? "error" : state === "ready" ? "warning" : "ok"),
+      statusChip(program ? "AL AIRE" : "SIN PROGRAM", program ? "error" : "warning"),
+      statusChip(program?.transitionMode ? readableLabel(program.transitionMode) : "Sin transición", program ? "ok" : "warning")
+    );
+  }
+  if (refs.officialProgramMetrics) {
+    refs.officialProgramMetrics.replaceChildren(
+      definitionItem("Program ID", program?.programId || "—"),
+      definitionItem("Estado", readableLabel(state)),
+      definitionItem("Revision", program?.revision ?? 0),
+      definitionItem("Theme", program?.themeId || "—"),
+      definitionItem("Template", program?.templateId || "—"),
+      definitionItem("Output", program?.output?.outputId || "—"),
+      definitionItem("Preview fuente", program?.previewId || "—"),
+      definitionItem("Resolución", `${width} x ${height}`),
+      definitionItem("Visibilidad", program?.visibility || model.templateRendererVisibility)
+    );
+  }
+  if (refs.officialProgramTarget) {
+    if (!program) {
+      refs.officialProgramTarget.replaceChildren();
+      runtime.officialProgramVisualRoot = null;
+    } else if (runtime.officialProgramVisualRoot && refs.officialProgramTarget.firstElementChild !== runtime.officialProgramVisualRoot) {
+      refs.officialProgramTarget.replaceChildren(runtime.officialProgramVisualRoot);
+    } else if (!runtime.officialProgramVisualRoot) {
+      const root = element("div", "console-official-program-slate");
+      root.replaceChildren(
+        element("span", "console-official-program-live", "AL AIRE"),
+        element("strong", "", program.templateId),
+        element("span", "console-meta", `${program.themeId} · ${program.output.outputId}`)
+      );
+      runtime.officialProgramVisualRoot = root;
+      refs.officialProgramTarget.replaceChildren(root);
+    }
+  }
+  refs.officialProgramActions.forEach((button) => {
+    const action = button.dataset.officialProgramAction;
+    if (action === "prepare") button.disabled = model.officialPreview?.status !== "rendered" || model.officialPreviewErrors.length > 0;
+    else if (["take", "cut", "auto"].includes(action)) button.disabled = state !== "prepared";
+    else if (action === "update") button.disabled = !program || !model.officialPreview;
+    else if (action === "clear") button.disabled = !program;
+    else if (action === "snapshot") button.disabled = !model.officialProgramSnapshot;
+  });
+  renderDiagnosticList(refs.officialProgramWarnings, model.officialProgramWarnings, "Sin warnings de Official Program.");
+  renderDiagnosticList(refs.officialProgramErrors, model.officialProgramErrors, "Sin errores de Official Program.");
 }
 
 function renderComponentRendererLab(refs, model, runtime) {

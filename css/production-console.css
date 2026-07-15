@@ -1348,6 +1348,93 @@ input {
   gap: 3px;
 }
 
+.console-official-program-lab {
+  border-top: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding-top: 16px;
+}
+
+.console-official-program-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.console-official-program-actions .button {
+  min-width: 0;
+  width: 100%;
+}
+
+.console-official-program-viewport {
+  background: #070809;
+  border: 1px solid #7f2631;
+  display: grid;
+  min-height: 150px;
+  overflow: auto;
+  padding: 12px;
+  place-items: center;
+}
+
+.console-official-program-frame {
+  aspect-ratio: 16 / 9;
+  background: #101318;
+  border: 1px solid #a63a48;
+  box-shadow: 0 12px 34px rgb(0 0 0 / 35%);
+  isolation: isolate;
+  max-height: 560px;
+  max-width: 100%;
+  min-height: 120px;
+  overflow: hidden;
+  position: relative;
+  width: min(100%, 900px);
+}
+
+.console-official-program-frame[data-orientation="portrait"] {
+  height: min(66vh, 560px);
+  width: auto;
+}
+
+.console-official-program-frame[data-orientation="panoramic"] {
+  min-height: 64px;
+  width: 100%;
+}
+
+.console-official-program-target {
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: 1;
+}
+
+.console-official-program-target > :only-child {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.console-official-program-slate {
+  align-content: center;
+  background: #111318;
+  color: var(--console-text);
+  display: grid;
+  gap: 8px;
+  height: 100%;
+  justify-items: center;
+  padding: 16px;
+  text-align: center;
+  width: 100%;
+}
+
+.console-official-program-live {
+  background: #8c2835;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 7px;
+  text-transform: uppercase;
+}
+
 .cp-template-renderer-integration-root,
 .cp-template-renderer-integration-host,
 .cp-template-render-root,
@@ -1698,6 +1785,10 @@ input {
   .console-template-renderer-actions {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .console-official-program-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 700px) {
@@ -1719,11 +1810,13 @@ input {
 
   .console-template-renderer-controls,
   .console-template-renderer-actions,
+  .console-official-program-actions,
   .console-template-renderer-metrics {
     grid-template-columns: 1fr;
   }
 
   .console-template-renderer-viewport,
+  .console-official-program-viewport,
   .console-component-renderer-viewport {
     padding: 8px;
   }

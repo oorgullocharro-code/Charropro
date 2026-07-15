@@ -511,3 +511,15 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - Production Console sustituye el bloque Theme + Template Lab por `Official Preview`, con las acciones Preparar, Renderizar, Actualizar, Limpiar y Snapshot.
 - Official Preview no modifica Broadcast State V1, Program, Outputs, OBS, Firebase ni el Core deportivo.
 - Contrato y limitaciones: `BROADCAST_PREVIEW_ENGINE_V1.md`.
+
+# PROGRAM-ENGINE-001 - Official Broadcast Program Engine V1
+
+- Versión de aplicación: `20260715-program-engine-001-official-program-v1`.
+- Se agregó `js/broadcast/programEngine.js` como motor oficial en memoria para una sola composición Program.
+- Program recibe únicamente snapshots validados de Preview Engine y modela Prepare, Take, Cut, Auto, Update, Clear y Snapshot.
+- Preview permanece vivo después de cualquier promoción; Program usa identidad y runtime privados, sin compartir referencias mutables.
+- Las actualizaciones son atómicas y conservan el Program anterior ante una validación fallida.
+- Production Console incorpora `Official Program` con canvas de raíz única, estado, métricas y diagnósticos separados de Official Preview.
+- No se agregaron Browser Outputs, OBS, vMix, Firebase, persistencia, Live Sync, animaciones ni routing.
+- Broadcast State V1, Output Engine y los gráficos V1 permanecen intactos.
+- Contrato y limitaciones: `BROADCAST_PROGRAM_ENGINE_V1.md`.
