@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260714-theme-template-integration-001-themed-compositions-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260715-preview-engine-001-official-preview-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -257,8 +257,8 @@
             <section id="console-template-renderer-lab" class="console-template-renderer-lab">
               <div class="console-template-renderer-heading">
                 <div>
-                  <p>Composición declarativa aislada</p>
-                  <h3>Theme + Template Lab</h3>
+                  <p>Composición oficial aislada</p>
+                  <h3>Official Preview</h3>
                 </div>
                 <div id="console-template-renderer-status" class="console-template-renderer-status" aria-live="polite"></div>
               </div>
@@ -285,20 +285,17 @@
                 </label>
               </div>
               <div class="console-template-renderer-actions">
-                <button class="button button-quiet button-small" type="button" data-template-renderer-action="instantiate">Instanciar</button>
-                <button class="button button-quiet button-small" type="button" data-template-renderer-action="resolve-theme">Resolver Theme</button>
-                <button class="button button-quiet button-small" type="button" data-template-renderer-action="prepare">Preparar</button>
-                <button class="button button-primary button-small" type="button" data-template-renderer-action="render">Renderizar</button>
-                <button class="button button-quiet button-small" type="button" data-template-renderer-action="change-theme">Cambiar Theme</button>
-                <button class="button button-quiet button-small" type="button" data-template-renderer-action="update">Actualizar</button>
-                <button class="button button-quiet button-small" type="button" data-template-renderer-action="clear">Limpiar</button>
-                <button class="button button-quiet button-small" type="button" data-template-renderer-action="copy-snapshot">Copiar Snapshot</button>
+                <button class="button button-quiet button-small" type="button" data-official-preview-action="prepare">Preparar</button>
+                <button class="button button-primary button-small" type="button" data-official-preview-action="render">Renderizar</button>
+                <button class="button button-quiet button-small" type="button" data-official-preview-action="update">Actualizar</button>
+                <button class="button button-quiet button-small" type="button" data-official-preview-action="clear">Limpiar</button>
+                <button class="button button-quiet button-small" type="button" data-official-preview-action="snapshot">Snapshot</button>
               </div>
               <div class="console-template-renderer-viewport">
                 <div id="console-template-renderer-frame" class="console-template-renderer-frame" data-orientation="landscape">
                   <div class="console-template-renderer-grid" aria-hidden="true"></div>
                   <div id="console-template-renderer-safe-area" class="console-template-renderer-safe-area" aria-hidden="true"></div>
-                  <div id="console-template-renderer-target" class="console-template-renderer-target" aria-label="Vista compuesta del template"></div>
+                  <div id="console-template-renderer-target" class="console-template-renderer-target" aria-label="Canvas de Official Preview"></div>
                 </div>
               </div>
               <dl id="console-template-renderer-metrics" class="console-template-renderer-metrics"></dl>
@@ -348,6 +345,6 @@
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-theme-template-integration-001-themed-compositions-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260715-preview-engine-001-official-preview-v1"></script>
 </body>
 </html>

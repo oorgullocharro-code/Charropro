@@ -7,7 +7,7 @@ const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8
 const cssSource = await readFile(new URL("../css/styles.css", import.meta.url), "utf8");
 const indexSource = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const documentation = await readFile(new URL("../PRODUCTION_NAV_V1.md", import.meta.url), "utf8");
-const version = "20260714-theme-template-integration-001-themed-compositions-v1";
+const version = "20260715-preview-engine-001-official-preview-v1";
 
 assert.equal(CHARROPRO_APP_VERSION, version);
 assert.match(appSource, /const PRODUCTION_NAV_VERSION = CHARROPRO_APP_VERSION/);

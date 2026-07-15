@@ -136,10 +136,21 @@ import {
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
 } from "./themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
+import {
+  PREVIEW_ENGINE_VERSION,
+  clearPreview as clearOfficialPreview,
+  createPreviewEngine,
+  destroyPreviewEngine,
+  getPreviewSnapshot,
+  getPreviewState,
+  preparePreview as prepareOfficialPreview,
+  renderPreview as renderOfficialPreview,
+  updatePreview as updateOfficialPreview
+} from "./previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-preview-engine-001-official-preview-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-theme-template-integration-001-themed-compositions-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-preview-engine-001-official-preview-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -366,6 +377,11 @@ export function createProductionConsoleModel(options = {}) {
     themeTemplateSnapshot: null,
     themeTemplateWarnings: [],
     themeTemplateErrors: [],
+    officialPreviewState: "uninitialized",
+    officialPreview: null,
+    officialPreviewSnapshot: null,
+    officialPreviewWarnings: [],
+    officialPreviewErrors: [],
     themeSequence: PRODUCTION_CONSOLE_THEME_DEFINITIONS.length,
     selectedThemeId: themeRegistry.activeThemeId || "theme_default",
     themeSnapshot: null,
@@ -1299,6 +1315,150 @@ export function getProductionConsoleThemeTemplateClipboardSnapshot(model, integr
   return snapshot;
 }
 
+export function createProductionConsoleOfficialPreviewEngine(model, integration, preparationStore = {}, options = {}) {
+  assertModel(model);
+  const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
+  return createPreviewEngine({
+    engineId: options.engineId || `production_console_official_preview_${output.id}`,
+    themeTemplateIntegration: integration,
+    resolvePreparation: () => preparationStore.preparation,
+    now: options.now
+  });
+}
+
+export function prepareProductionConsoleOfficialPreview(model, engine, preparationStore = {}, integration, options = {}) {
+  assertModel(model);
+  const preparedModel = prepareProductionConsoleThemeTemplate(model, integration, options);
+  preparationStore.preparation = cloneValue(preparedModel.themeTemplatePreparation);
+  const sourceSnapshot = buildProductionConsoleOfficialPreviewSourceSnapshot(preparedModel, integration, options);
+  const preview = prepareOfficialPreview(engine, sourceSnapshot, {
+    visibility: preparedModel.templateRendererVisibility,
+    now: options.now
+  });
+  return officialPreviewModelResult(preparedModel, engine, preview, "official-preview-prepared", options);
+}
+
+export function renderProductionConsoleOfficialPreview(model, engine, options = {}) {
+  assertModel(model);
+  const preview = renderOfficialPreview(engine, { now: options.now });
+  return officialPreviewModelResult(model, engine, preview, "official-preview-rendered", options);
+}
+
+export function updateProductionConsoleOfficialPreview(model, engine, options = {}) {
+  assertModel(model);
+  const preview = updateOfficialPreview(engine, {
+    themeId: options.themeId || model.themeTemplateThemeId,
+    visibility: options.visibility || model.templateRendererVisibility
+  }, { now: options.now });
+  return officialPreviewModelResult(model, engine, preview, "official-preview-updated", options);
+}
+
+export function clearProductionConsoleOfficialPreview(model, engine, preparationStore = {}, options = {}) {
+  assertModel(model);
+  clearOfficialPreview(engine, { now: options.now });
+  preparationStore.preparation = null;
+  return {
+    ...model,
+    officialPreviewState: getPreviewState(engine),
+    officialPreview: null,
+    officialPreviewSnapshot: getPreviewSnapshot(engine, {
+      visibility: model.templateRendererVisibility,
+      now: options.now
+    }),
+    officialPreviewWarnings: [],
+    officialPreviewErrors: [],
+    themeTemplateState: integrationStateAfterOfficialClear(model),
+    themeTemplateResult: null,
+    themeTemplateSnapshot: null,
+    inspectorTab: "templates",
+    lastAction: "official-preview-cleared",
+    lastActionError: null
+  };
+}
+
+export function getProductionConsoleOfficialPreviewClipboardSnapshot(model, engine, options = {}) {
+  assertModel(model);
+  return getPreviewSnapshot(engine, {
+    visibility: options.visibility || model.templateRendererVisibility,
+    now: options.now
+  });
+}
+
+function buildProductionConsoleOfficialPreviewSourceSnapshot(model, integration, options = {}) {
+  const preparation = model.themeTemplatePreparation;
+  if (!preparation) throw consoleError("console-official-preview-preparation-required");
+  const output = getComponentRendererOutput(model.templateRendererOutputId);
+  const now = normalizeNow(options.now);
+  const themedRenderId = `themed_${preparation.templateRenderId}_${preparation.themeId}`;
+  const render = {
+    themedRenderId,
+    templateRenderId: preparation.templateRenderId,
+    templateId: preparation.templateId,
+    templateVersion: preparation.templateInstance?.templateVersion || "1.0.0",
+    templateInstanceId: preparation.templateInstanceId,
+    themeId: preparation.themeId,
+    themeVersion: preparation.themeVersion,
+    themeScope: preparation.themeScope,
+    brandingStatus: preparation.brandingStatus,
+    outputId: output.id,
+    visibility: preparation.effectiveVisibility || model.templateRendererVisibility,
+    state: "prepared",
+    status: "prepared",
+    componentCount: preparation.componentInstances?.length || 0,
+    renderedCount: 0,
+    warnings: uniqueStrings(preparation.warnings || []),
+    errors: uniqueStrings(preparation.errors || []),
+    createdAt: now,
+    updatedAt: now
+  };
+  const snapshot = {
+    snapshotVersion: THEME_TEMPLATE_INTEGRATION_VERSION,
+    integrationVersion: THEME_TEMPLATE_INTEGRATION_VERSION,
+    generatedAt: now,
+    visibility: render.visibility,
+    integrationId: integration.integrationId,
+    state: "prepared",
+    outputId: output.id,
+    tenantId: integration.tenantId,
+    themedRenderIds: [themedRenderId],
+    renders: [render],
+    rendererSummary: {
+      integrationVersion: TEMPLATE_RENDERER_INTEGRATION_VERSION,
+      outputId: output.id,
+      orientation: output.orientation,
+      resolution: { width: output.width, height: output.height },
+      safeArea: cloneValue(output.safeArea),
+      templateRenderIds: [preparation.templateRenderId]
+    },
+    warnings: uniqueStrings(preparation.warnings || []),
+    errors: uniqueStrings(preparation.errors || [])
+  };
+  if (!validateThemeTemplateSnapshot(snapshot).valid) throw consoleError("console-official-preview-source-snapshot-invalid");
+  return snapshot;
+}
+
+function officialPreviewModelResult(model, engine, preview, lastAction, options = {}) {
+  const snapshot = getPreviewSnapshot(engine, {
+    visibility: model.templateRendererVisibility,
+    now: options.now
+  });
+  return {
+    ...model,
+    officialPreviewState: getPreviewState(engine),
+    officialPreview: cloneValue(preview),
+    officialPreviewSnapshot: cloneValue(snapshot),
+    officialPreviewWarnings: uniqueStrings([...(preview.warnings || []), ...(snapshot.warnings || [])]),
+    officialPreviewErrors: uniqueStrings([...(preview.errors || []), ...(snapshot.errors || [])]),
+    inspectorTab: "templates",
+    lastAction,
+    lastActionError: preview.errors?.[0] || null
+  };
+}
+
+function integrationStateAfterOfficialClear(model) {
+  return model.themeTemplateState === "destroyed" ? "destroyed" : "cleared";
+}
+
 export function disposeProductionConsole(model) {
   const ids = Array.isArray(model?.outputIds) ? model.outputIds : consoleOutputIds();
   ids.forEach((id) => removeBroadcastOutput(id));
@@ -1975,7 +2135,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       componentRenderer: COMPONENT_RENDERER_VERSION,
       templateEngine: TEMPLATE_ENGINE_VERSION,
       templateRendererIntegration: TEMPLATE_RENDERER_INTEGRATION_VERSION,
-      themeEngine: THEME_ENGINE_VERSION
+      themeEngine: THEME_ENGINE_VERSION,
+      previewEngine: PREVIEW_ENGINE_VERSION
     }
   };
   const sanitized = sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -2121,7 +2282,14 @@ export function initializeProductionConsole(root = document) {
   let model = createProductionConsoleModel({ ...settings, safeMode: true });
   const refs = collectRefs(root);
   const controller = new AbortController();
-  const runtime = { componentRenderer: null, templateRendererIntegration: null, themeTemplateIntegration: null, controller };
+  const runtime = {
+    componentRenderer: null,
+    templateRendererIntegration: null,
+    themeTemplateIntegration: null,
+    officialPreviewEngine: null,
+    officialPreviewPreparationStore: { preparation: null },
+    controller
+  };
   populateStaticControls(refs, model);
   if (refs.componentRendererTarget) {
     runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
@@ -2130,10 +2298,16 @@ export function initializeProductionConsole(root = document) {
   if (refs.templateRendererTarget) {
     runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
     runtime.themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, runtime.templateRendererIntegration);
+    runtime.officialPreviewEngine = createProductionConsoleOfficialPreviewEngine(
+      model,
+      runtime.themeTemplateIntegration,
+      runtime.officialPreviewPreparationStore
+    );
     model = {
       ...model,
       templateRendererState: runtime.templateRendererIntegration.state,
-      themeTemplateState: runtime.themeTemplateIntegration.state
+      themeTemplateState: runtime.themeTemplateIntegration.state,
+      officialPreviewState: getPreviewState(runtime.officialPreviewEngine)
     };
   }
   const update = (nextModel) => {
@@ -2155,6 +2329,9 @@ export function initializeProductionConsole(root = document) {
       instance.disposed = true;
       controller.abort();
       if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
+      if (runtime.officialPreviewEngine && !isOfficialPreviewEngineDestroyed(runtime.officialPreviewEngine)) {
+        destroyPreviewEngine(runtime.officialPreviewEngine);
+      }
       if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
         destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
       }
@@ -2171,6 +2348,11 @@ export function initializeProductionConsole(root = document) {
 }
 
 function recreateProductionConsoleTemplateRendererRuntime(model, runtime, refs) {
+  if (runtime.officialPreviewEngine && !isOfficialPreviewEngineDestroyed(runtime.officialPreviewEngine)) {
+    destroyPreviewEngine(runtime.officialPreviewEngine);
+  }
+  runtime.officialPreviewEngine = null;
+  runtime.officialPreviewPreparationStore.preparation = null;
   if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
     destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
   }
@@ -2182,12 +2364,22 @@ function recreateProductionConsoleTemplateRendererRuntime(model, runtime, refs) 
   if (refs.templateRendererTarget) {
     runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
     runtime.themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, runtime.templateRendererIntegration);
+    runtime.officialPreviewEngine = createProductionConsoleOfficialPreviewEngine(
+      model,
+      runtime.themeTemplateIntegration,
+      runtime.officialPreviewPreparationStore
+    );
   }
   return {
     ...model,
     ...emptyTemplateRendererRuntimeState(),
     templateRendererState: runtime.templateRendererIntegration?.state || "uninitialized",
-    themeTemplateState: runtime.themeTemplateIntegration?.state || "uninitialized"
+    themeTemplateState: runtime.themeTemplateIntegration?.state || "uninitialized",
+    officialPreviewState: runtime.officialPreviewEngine ? getPreviewState(runtime.officialPreviewEngine) : "uninitialized",
+    officialPreview: null,
+    officialPreviewSnapshot: null,
+    officialPreviewWarnings: [],
+    officialPreviewErrors: []
   };
 }
 
@@ -2198,12 +2390,24 @@ function ensureProductionConsoleTemplateRendererRuntime(model, runtime, refs) {
   if (!runtime.themeTemplateIntegration || runtime.themeTemplateIntegration.state === "destroyed") {
     runtime.themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, runtime.templateRendererIntegration);
   }
+  if (!runtime.officialPreviewEngine || isOfficialPreviewEngineDestroyed(runtime.officialPreviewEngine)) {
+    runtime.officialPreviewPreparationStore.preparation = null;
+    runtime.officialPreviewEngine = createProductionConsoleOfficialPreviewEngine(
+      model,
+      runtime.themeTemplateIntegration,
+      runtime.officialPreviewPreparationStore
+    );
+  }
   return runtime.templateRendererIntegration;
 }
 
 function ensureProductionConsoleThemeTemplateRuntime(model, runtime, refs) {
   ensureProductionConsoleTemplateRendererRuntime(model, runtime, refs);
   return runtime.themeTemplateIntegration;
+}
+
+function isOfficialPreviewEngineDestroyed(engine) {
+  return !engine || engine.state === "destroyed";
 }
 
 function registerConsoleOutputs(now) {
@@ -2761,7 +2965,12 @@ function emptyThemeTemplateRuntimeState() {
     themeTemplateResult: null,
     themeTemplateSnapshot: null,
     themeTemplateWarnings: [],
-    themeTemplateErrors: []
+    themeTemplateErrors: [],
+    officialPreviewState: "uninitialized",
+    officialPreview: null,
+    officialPreviewSnapshot: null,
+    officialPreviewWarnings: [],
+    officialPreviewErrors: []
   };
 }
 
@@ -2836,6 +3045,14 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
       warnings: cloneValue(model.themeTemplateWarnings || []),
       errors: cloneValue(model.themeTemplateErrors || [])
     },
+    officialPreview: {
+      version: PREVIEW_ENGINE_VERSION,
+      state: model.officialPreviewState,
+      preview: cloneValue(model.officialPreview),
+      snapshot: cloneValue(model.officialPreviewSnapshot),
+      warnings: cloneValue(model.officialPreviewWarnings || []),
+      errors: cloneValue(model.officialPreviewErrors || [])
+    },
     registry: {
       engineVersion: TEMPLATE_ENGINE_VERSION,
       revision: model.templateRegistry?.revision ?? 0,
@@ -2851,14 +3068,16 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
       ...(snapshot?.warnings || []),
       ...(model.templateWarnings || []),
       ...(model.templateRendererWarnings || []),
-      ...(model.themeTemplateWarnings || [])
+      ...(model.themeTemplateWarnings || []),
+      ...(model.officialPreviewWarnings || [])
     ]),
     errors: uniqueStrings([
       ...validations.flatMap((validation) => validation.errors || []),
       ...(snapshot?.errors || []),
       ...(model.templateErrors || []),
       ...(model.templateRendererErrors || []),
-      ...(model.themeTemplateErrors || [])
+      ...(model.themeTemplateErrors || []),
+      ...(model.officialPreviewErrors || [])
     ])
   };
 }
@@ -3103,6 +3322,7 @@ function collectRefs(root) {
     templateRendererWarnings: id("console-template-renderer-warnings"),
     templateRendererErrors: id("console-template-renderer-errors"),
     templateRendererActions: [...root.querySelectorAll("[data-template-renderer-action]")],
+    officialPreviewActions: [...root.querySelectorAll("[data-official-preview-action]")],
     componentRendererLab: id("console-component-renderer-lab"),
     componentRendererFixture: id("console-component-renderer-fixture"),
     componentRendererOutput: id("console-component-renderer-output"),
@@ -3304,6 +3524,44 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       return model;
     });
   }, signal));
+  refs.officialPreviewActions.forEach((button) => listen(button, "click", async () => {
+    if (button.dataset.officialPreviewAction === "snapshot") {
+      try {
+        const snapshot = getProductionConsoleOfficialPreviewClipboardSnapshot(
+          getModel(),
+          runtime.officialPreviewEngine
+        );
+        await copyText(JSON.stringify(snapshot, null, 2));
+        button.textContent = "Copiado";
+        window.setTimeout(() => { button.textContent = "Snapshot"; }, 1200);
+      } catch (error) {
+        console.error("[production-console] official preview snapshot failed", error);
+      }
+      return;
+    }
+    run((model) => {
+      ensureProductionConsoleThemeTemplateRuntime(model, runtime, refs);
+      const action = button.dataset.officialPreviewAction;
+      if (action === "prepare") {
+        return prepareProductionConsoleOfficialPreview(
+          model,
+          runtime.officialPreviewEngine,
+          runtime.officialPreviewPreparationStore,
+          runtime.themeTemplateIntegration
+        );
+      }
+      if (action === "render") return renderProductionConsoleOfficialPreview(model, runtime.officialPreviewEngine);
+      if (action === "update") return updateProductionConsoleOfficialPreview(model, runtime.officialPreviewEngine);
+      if (action === "clear") {
+        return clearProductionConsoleOfficialPreview(
+          model,
+          runtime.officialPreviewEngine,
+          runtime.officialPreviewPreparationStore
+        );
+      }
+      return model;
+    });
+  }, signal));
   listen(refs.componentRendererFixture, "change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)), signal);
   listen(refs.componentRendererOutput, "change", () => run((model) => {
     if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
@@ -3472,6 +3730,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `State ${BROADCAST_STATE_VERSION}`),
     element("span", "console-meta", `Output ${BROADCAST_OUTPUT_VERSION}`),
     element("span", "console-meta", `Assets ${ASSET_MANAGER_VERSION}`),
+    element("span", "console-meta", `Preview ${PREVIEW_ENGINE_VERSION}`),
     element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
     element("span", "console-meta", `Variables ${PRODUCTION_VARIABLES_VERSION}`),
     element("span", "console-meta", `Components ${COMPONENT_LIBRARY_VERSION}`),
@@ -4068,32 +4327,35 @@ function renderTemplateRendererLab(refs, model, runtime) {
     refs.templateRendererSafeArea.style.left = `${(output.safeArea.left / output.width) * 100}%`;
   }
   const runtimeState = runtime.themeTemplateIntegration?.state || model.themeTemplateState;
+  const officialState = runtime.officialPreviewEngine
+    ? getPreviewState(runtime.officialPreviewEngine)
+    : model.officialPreviewState;
   if (refs.templateRendererStatus) {
     refs.templateRendererStatus.replaceChildren(
       statusChip(`Template ${selected ? readableLabel(selected.status) : "sin selección"}`, selected ? "ok" : "warning"),
       statusChip(`Theme ${selectedTheme?.name || "sin selección"}`, selectedTheme ? "ok" : "warning"),
-      statusChip(`Integración ${readableLabel(runtimeState)}`, runtimeState === "error" ? "error" : runtimeState === "uninitialized" ? "warning" : "ok"),
-      statusChip(`Renderer ${runtime.templateRendererIntegration?.rendererId ? "ready" : "uninitialized"}`, runtime.templateRendererIntegration?.rendererId ? "ok" : "warning")
+      statusChip(`Preview ${readableLabel(officialState)}`, officialState === "error" ? "error" : officialState === "uninitialized" ? "warning" : "ok"),
+      statusChip(`Integración ${readableLabel(runtimeState)}`, runtimeState === "error" ? "error" : runtimeState === "uninitialized" ? "warning" : "ok")
     );
   }
   if (refs.templateRendererMetrics) {
-    const result = model.themeTemplateResult;
+    const result = model.officialPreview;
     const resolution = model.themeTemplateResolution;
     refs.templateRendererMetrics.replaceChildren(
+      definitionItem("Preview ID", result?.previewId || "—"),
+      definitionItem("Estado", readableLabel(officialState)),
+      definitionItem("Revision", result?.revision ?? 0),
       definitionItem("Template", selected?.name || "—"),
-      definitionItem("Template Instance", model.templateInstanceResult?.templateInstance?.templateInstanceId || "—"),
-      definitionItem("Theme", resolution?.themeId || selectedTheme?.themeId || "—"),
+      definitionItem("Template Instance", result?.templateInstanceId || model.templateInstanceResult?.templateInstance?.templateInstanceId || "—"),
+      definitionItem("Theme", result?.themeId || resolution?.themeId || selectedTheme?.themeId || "—"),
       definitionItem("Theme version", resolution?.themeVersion || selectedTheme?.themeVersion || "—"),
       definitionItem("Branding", resolution?.brandingStatus || selectedTheme?.metadata?.brandingStatus || "neutral"),
       definitionItem("Scope", resolution?.themeScope || selectedTheme?.scope || "—"),
       definitionItem("Resolved from", resolution?.resolvedFrom?.join(" → ") || "—"),
       definitionItem("Selección", resolution?.selectionReason || "—"),
       definitionItem("Fallback", resolution?.fallbackUsed ? "Sí" : "No"),
-      definitionItem("Componentes", result?.componentCount ?? model.themeTemplatePreparation?.componentInstances?.length ?? 0),
-      definitionItem("Renderizados", result?.renderedCount ?? 0),
-      definitionItem("Tokens aplicados", result?.appliedTokens?.length ?? model.themeTemplatePreparation?.appliedTokens?.length ?? 0),
-      definitionItem("Tokens fallback", result?.fallbackTokens?.length ?? model.themeTemplatePreparation?.fallbackTokens?.length ?? 0),
-      definitionItem("Tokens ignorados", result?.ignoredTokens?.length ?? model.themeTemplatePreparation?.ignoredTokens?.length ?? 0),
+      definitionItem("Theme Render", result?.themeRenderId || "—"),
+      definitionItem("Template Render", result?.templateRenderId || "—"),
       definitionItem("Output", output.label),
       definitionItem("Resolución", `${output.width} x ${output.height}`),
       definitionItem("Safe area", `${output.safeArea.top}/${output.safeArea.right}/${output.safeArea.bottom}/${output.safeArea.left}`),
@@ -4109,8 +4371,16 @@ function renderTemplateRendererLab(refs, model, runtime) {
     else if (action === "clear") button.disabled = !model.themeTemplateResult && runtimeState !== "partially_rendered" && runtimeState !== "rendered";
     else if (action === "copy-snapshot") button.disabled = !model.themeTemplateSnapshot;
   });
-  renderDiagnosticList(refs.templateRendererWarnings, model.themeTemplateWarnings, "Sin warnings de integración temática.");
-  renderDiagnosticList(refs.templateRendererErrors, model.themeTemplateErrors, "Sin errores de integración temática.");
+  refs.officialPreviewActions.forEach((button) => {
+    const action = button.dataset.officialPreviewAction;
+    if (action === "prepare") button.disabled = !selected || officialState === "rendering" || officialState === "updating";
+    else if (action === "render") button.disabled = officialState !== "prepared";
+    else if (action === "update") button.disabled = officialState !== "rendered" || !selectedTheme;
+    else if (action === "clear") button.disabled = !model.officialPreview;
+    else if (action === "snapshot") button.disabled = !model.officialPreviewSnapshot;
+  });
+  renderDiagnosticList(refs.templateRendererWarnings, model.officialPreviewWarnings, "Sin warnings de Official Preview.");
+  renderDiagnosticList(refs.templateRendererErrors, model.officialPreviewErrors, "Sin errores de Official Preview.");
 }
 
 function renderComponentRendererLab(refs, model, runtime) {

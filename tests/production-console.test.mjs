@@ -13,6 +13,7 @@ import {
   clearProductionConsoleComponentRenderer,
   clearProductionConsoleTemplateRenderer,
   clearProductionConsoleThemeTemplate,
+  clearProductionConsoleOfficialPreview,
   clearProductionPreview,
   clearProductionProgram,
   clearProductionQueue,
@@ -20,6 +21,7 @@ import {
   createProductionConsoleComponentRenderer,
   createProductionConsoleTemplateRendererIntegration,
   createProductionConsoleThemeTemplateIntegration,
+  createProductionConsoleOfficialPreviewEngine,
   createProductionConsoleTestComponent,
   createProductionConsoleTemplate,
   createProductionConsoleTheme,
@@ -34,6 +36,7 @@ import {
   getProductionConsoleTemplateClipboardSnapshot,
   getProductionConsoleTemplateRenderClipboardSnapshot,
   getProductionConsoleThemeTemplateClipboardSnapshot,
+  getProductionConsoleOfficialPreviewClipboardSnapshot,
   getProductionConsoleInspector,
   getProductionConsoleThemeClipboardSnapshot,
   initializeProductionConsole,
@@ -43,6 +46,7 @@ import {
   instantiateProductionConsoleTemplateForRenderer,
   prepareProductionConsoleTemplateRenderer,
   prepareProductionConsoleThemeTemplate,
+  prepareProductionConsoleOfficialPreview,
   removeProductionConsoleComponent,
   removeProductionConsoleTemplate,
   removeProductionConsoleTheme,
@@ -50,6 +54,7 @@ import {
   renderProductionConsoleComponentFixture,
   renderProductionConsoleTemplateRenderer,
   renderProductionConsoleThemeTemplate,
+  renderProductionConsoleOfficialPreview,
   resolveProductionConsoleThemeTemplate,
   restoreLastProductionPreview,
   resetProductionConsoleVariable,
@@ -76,8 +81,10 @@ import {
   transitionProductionToProgram,
   updateProductionConsoleTemplateRenderer,
   updateProductionConsoleThemeTemplate,
+  updateProductionConsoleOfficialPreview,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
+import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
@@ -110,7 +117,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-theme-template-integration-001-themed-compositions-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-preview-engine-001-official-preview-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -410,6 +417,54 @@ for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outp
 model = clearProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T4 });
 assert.equal(model.themeTemplateState, "cleared");
 assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 0);
+destroyThemeTemplateIntegration(themeTemplateIntegration, { now: T4 });
+destroyTemplateRendererIntegration(templateRendererIntegration);
+
+// Official Preview owns one isolated themed composition and never mutates Broadcast State or Program.
+templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, templateRendererTarget, {
+  integrationId: "console_official_preview_renderer_test",
+  now: T1
+});
+themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, templateRendererIntegration, { now: T1 });
+const officialPreparationStore = { preparation: null };
+const officialPreviewEngine = createProductionConsoleOfficialPreviewEngine(
+  model,
+  themeTemplateIntegration,
+  officialPreparationStore,
+  { now: T1 }
+);
+model = selectProductionConsoleThemeTemplateTheme(model, "theme_orgullo_charro");
+model = prepareProductionConsoleOfficialPreview(
+  model,
+  officialPreviewEngine,
+  officialPreparationStore,
+  themeTemplateIntegration,
+  { now: T1 }
+);
+assert.equal(model.officialPreviewState, "prepared");
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 0);
+model = renderProductionConsoleOfficialPreview(model, officialPreviewEngine, { now: T2 });
+assert.equal(model.officialPreviewState, "rendered");
+assert.equal(validatePreview(model.officialPreview).valid, true);
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+const officialPreviewId = model.officialPreview.previewId;
+model = selectProductionConsoleThemeTemplateTheme(model, "theme_dark");
+model = updateProductionConsoleOfficialPreview(model, officialPreviewEngine, { now: T3 });
+assert.equal(model.officialPreview.previewId, officialPreviewId);
+assert.equal(model.officialPreview.themeId, "theme_dark");
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+const officialSnapshot = getProductionConsoleOfficialPreviewClipboardSnapshot(model, officialPreviewEngine, {
+  visibility: "public",
+  now: T3
+});
+assert.equal(JSON.stringify(officialSnapshot).includes("nodeType"), false);
+assert.equal(JSON.stringify(officialSnapshot).includes("tenantId"), false);
+assert.deepEqual(model.state, stateBeforeTemplateRenderer);
+assert.deepEqual(model.state.program, programBeforeTemplateRenderer);
+model = clearProductionConsoleOfficialPreview(model, officialPreviewEngine, officialPreparationStore, { now: T4 });
+assert.equal(model.officialPreviewState, "ready");
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 0);
+destroyPreviewEngine(officialPreviewEngine, { now: T4 });
 destroyThemeTemplateIntegration(themeTemplateIntegration, { now: T4 });
 destroyTemplateRendererIntegration(templateRendererIntegration);
 
@@ -892,6 +947,11 @@ for (const id of [
   "console-component-renderer-output",
   "console-inspector"
 ]) assert.ok(html.includes(`id="${id}"`), `HTML missing ${id}`);
+for (const action of ["prepare", "render", "update", "clear", "snapshot"]) {
+  assert.ok(html.includes(`data-official-preview-action="${action}"`), `Official Preview missing ${action}`);
+}
+const officialPreviewMarkup = html.slice(html.indexOf("<h3>Official Preview</h3>"), html.indexOf("console-component-renderer-lab"));
+assert.doesNotMatch(officialPreviewMarkup, /\bTake\b|\bCut\b|\bAuto\b|\bProgram\b/);
 assert.equal(source.includes("innerHTML"), false);
 assert.equal(source.includes("localStorage"), false);
 assert.equal(/from\s+["'][^"']*firebase/i.test(source), false);
@@ -925,7 +985,7 @@ assert.ok(source.includes("instantiateProductionConsoleTemplate"));
 assert.ok(source.includes("getProductionConsoleTemplateClipboardSnapshot"));
 assert.ok(source.includes('copy.dataset.copyJson = "template-snapshot"'));
 assert.ok(html.includes("Template Engine V1"));
-assert.ok(html.includes("Theme + Template Lab"));
+assert.ok(html.includes("Official Preview"));
 assert.ok(source.includes("TEMPLATE_RENDERER_INTEGRATION_VERSION"));
 assert.ok(source.includes("prepareProductionConsoleTemplateRenderer"));
 assert.ok(source.includes("renderProductionConsoleTemplateRenderer"));
@@ -940,9 +1000,7 @@ assert.ok(source.includes("renderProductionConsoleThemeTemplate"));
 assert.ok(source.includes("updateProductionConsoleThemeTemplate"));
 assert.ok(source.includes("clearProductionConsoleThemeTemplate"));
 assert.ok(source.includes("getProductionConsoleThemeTemplateClipboardSnapshot"));
-for (const action of ["resolve-theme", "prepare", "render", "change-theme", "update", "clear", "copy-snapshot"]) {
-  assert.ok(html.includes(`data-template-renderer-action="${action}"`));
-}
+assert.equal((html.match(/data-official-preview-action=/g) || []).length, 5);
 assert.ok(source.includes("Crear componente de prueba"));
 assert.ok(html.includes("Laboratorio de Componentes V2"));
 assert.ok(source.includes("COMPONENT_RENDERER_VERSION"));

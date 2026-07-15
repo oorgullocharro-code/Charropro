@@ -500,3 +500,14 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - Los snapshots no contienen `basePreparation`, DOM, registries ni referencias runtime.
 - `destroy` bloquea todas las operaciones posteriores con `theme-template-integration-destroyed`.
 - No se integraron Preview oficial, Program, Outputs, OBS, Firebase ni persistencia.
+
+# PREVIEW-ENGINE-001 - Official Broadcast Preview Engine V1
+
+- Versión de aplicación: `20260715-preview-engine-001-official-preview-v1`.
+- Se agregó `js/broadcast/previewEngine.js` como motor oficial, aislado y en memoria para una sola composición Preview.
+- El motor recibe exclusivamente snapshots de Theme Template Integration y delega el DOM al runtime temático existente; no invoca Component Renderer directamente.
+- El lifecycle cubre preparación, render, actualización atómica, limpieza, reutilización y destrucción terminal.
+- Los snapshots son desacoplados y no contienen DOM, runtime, renderer, listeners, actores, secretos ni identidad tenant en visibilidad pública.
+- Production Console sustituye el bloque Theme + Template Lab por `Official Preview`, con las acciones Preparar, Renderizar, Actualizar, Limpiar y Snapshot.
+- Official Preview no modifica Broadcast State V1, Program, Outputs, OBS, Firebase ni el Core deportivo.
+- Contrato y limitaciones: `BROADCAST_PREVIEW_ENGINE_V1.md`.

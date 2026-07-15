@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260714-theme-template-integration-001-themed-compositions-v1";
+export const CHARROPRO_APP_VERSION = "20260715-preview-engine-001-official-preview-v1";
 
 let versionLogged = false;
 

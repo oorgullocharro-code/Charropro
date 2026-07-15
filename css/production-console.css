@@ -1306,12 +1306,22 @@ input {
   z-index: 1;
 }
 
+.console-template-renderer-target > :only-child {
+  max-height: 100%;
+  max-width: 100%;
+}
+
 .console-template-renderer-metrics {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   margin: 0;
   min-width: 0;
+}
+
+.console-template-renderer-metrics dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .console-template-renderer-diagnostics {
