@@ -1,5 +1,27 @@
 # Despliegue CharroPro
 
+## Version THEME-ENGINE-001
+
+Version actual de cache:
+
+```text
+v=20260714-theme-engine-001-theme-system-v1
+```
+
+Se agrego Theme Engine V1 (`1.0.0`) como registro declarativo, inmutable y exclusivamente en memoria para paletas, tipografia, espaciado, radios, bordes, sombras, logos, fondos, iconos, watermarks, safe area y defaults. La herencia se resuelve de tema base a descendiente con precedencia determinista, rechazo de ciclos y snapshots filtrados por visibilidad.
+
+Production Console incorpora la pestana `Themes` con siete presets iniciales, acciones de crear, duplicar, eliminar, activar y desactivar, inspector JSON, snapshot y muestras visuales controladas. Estas operaciones no modifican Preview, Program, Outputs, Broadcast State, Components ni Templates.
+
+No se agregan persistencia, Firebase, URLs de assets, editor visual, Layout Engine, Animation Engine, OBS ni Program Output. El contrato y sus limitaciones estan documentados en `BROADCAST_THEME_ENGINE_V1.md`; las pruebas puras estan en `tests/broadcast-theme-engine.test.mjs`.
+
+### THEME-ENGINE-001B
+
+La correccion 001B establece `themeId` como identidad canonica, conserva `id` solo como alias compatible y agrega contexto completo de tenant, organizacion, cliente, torneo, competencia y evento. Los Themes se crean como `draft`, se publican mediante API controlada y quedan inmutables; la activacion solo acepta Themes publicados y se aisla por clave efectiva de scope, sin desactivar otros tenants o torneos.
+
+La herencia queda limitada a 12 Themes, valida jerarquia y tenant, y revisa ownership de assets en toda la cadena cuando se proporciona Asset Registry. Colores, tipografia, fondos, gradients y numeros usan validacion estricta sin correcciones silenciosas. Los snapshots `public` eliminan contexto interno y actores; `restricted` conserva contexto autorizado, pero ningun nivel expone secretos o URLs.
+
+Los siete presets se registran y publican por API. `Default`, `Dark` y `Light` son neutrales; `Orgullo Charro` usa la identidad confirmada negro, azul rey, plata y rojo tinto; `Liga Mexicana - Provisional`, `Rodeo` y `Empresarial` se marcan como provisionales. Los controles visuales de Publicar y Deprecar quedan pendientes porque su HTML y CSS estan fuera del alcance de 001B. No se modifica Renderer, Preview, Program, Outputs ni Firebase.
+
 ## Version TEMPLATE-ENGINE-001
 
 Version actual de cache:

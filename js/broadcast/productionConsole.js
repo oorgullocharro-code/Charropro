@@ -110,10 +110,24 @@ import {
   updateTemplateRender,
   validateTemplateRenderSnapshot
 } from "./templateRendererIntegration.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
+import {
+  THEME_ENGINE_VERSION,
+  activateBroadcastTheme,
+  buildBroadcastThemeSnapshot,
+  createBroadcastTheme,
+  deactivateBroadcastTheme,
+  deleteBroadcastTheme,
+  duplicateBroadcastTheme,
+  getBroadcastTheme,
+  listBroadcastThemes,
+  publishBroadcastTheme,
+  resolveBroadcastTheme,
+  validateBroadcastTheme
+} from "./themeEngine.js?v=20260714-theme-engine-001-theme-system-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-theme-engine-001-theme-system-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-template-renderer-integration-001-composed-preview-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-theme-engine-001-theme-system-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -122,6 +136,44 @@ export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "caladero", label: "Caladero", competitionType: "caladero", countOption: "two" }),
   Object.freeze({ id: "coleadero", label: "Coleadero", competitionType: "coleadero", countOption: "two" }),
   Object.freeze({ id: "pialadero", label: "Pialadero", competitionType: "pialadero", countOption: "two" })
+]);
+
+export const PRODUCTION_CONSOLE_THEME_DEFINITIONS = Object.freeze([
+  Object.freeze({ id: "theme_default", name: "Default", description: "Base visual neutral de Broadcast Studio.", status: "active", visibility: "public", metadata: Object.freeze({ brandingStatus: "neutral" }) }),
+  Object.freeze({
+    id: "theme_orgullo_charro",
+    name: "Orgullo Charro",
+    description: "Identidad confirmada en negro, azul rey, plata y rojo tinto.",
+    status: "inactive",
+    visibility: "public",
+    baseThemeId: "theme_default",
+    metadata: Object.freeze({ brandingStatus: "confirmed" }),
+    colors: Object.freeze({
+      primary: "#090A0C", secondary: "#174EA6", accent: "#C0C5CC", success: "#174EA6",
+      warning: "#7A1538", danger: "#7A1538", neutral: "#C0C5CC", background: "#090A0C",
+      surface: "#15171B", textPrimary: "#C0C5CC", textSecondary: "#9EA4AC", border: "#C0C5CC",
+      highlight: "#7A1538", overlay: "#090A0CCC", transparent: "transparent"
+    }),
+    borders: Object.freeze({
+      subtle: Object.freeze({ width: 1, radius: 4, style: "solid", color: "#C0C5CC" }),
+      emphasis: Object.freeze({ width: 2, radius: 4, style: "solid", color: "#174EA6" })
+    }),
+    shadows: Object.freeze({
+      panel: Object.freeze({ x: 0, y: 8, blur: 24, opacity: 0.35, color: "#090A0C" }),
+      text: Object.freeze({ x: 0, y: 2, blur: 4, opacity: 0.5, color: "#090A0C" })
+    }),
+    backgrounds: Object.freeze({
+      program: Object.freeze({ type: "solid", color: "#090A0C" }),
+      panel: Object.freeze({ type: "solid", color: "#15171B" }),
+      emphasis: Object.freeze({ type: "gradient", gradientType: "linear", angle: 90, stops: Object.freeze([Object.freeze({ color: "#090A0C", position: 0 }), Object.freeze({ color: "#174EA6", position: 1 })]) }),
+      transparent: Object.freeze({ type: "transparent" })
+    })
+  }),
+  Object.freeze({ id: "theme_liga_mexicana", name: "Liga Mexicana - Provisional", description: "Tema técnico heredado de Default; identidad pendiente de aprobación de marca.", status: "inactive", visibility: "public", baseThemeId: "theme_default", metadata: Object.freeze({ brandingStatus: "provisional" }) }),
+  Object.freeze({ id: "theme_rodeo", name: "Rodeo", description: "Paleta técnica provisional para producción.", status: "inactive", visibility: "production", baseThemeId: "theme_default", metadata: Object.freeze({ brandingStatus: "provisional" }), colors: Object.freeze({ primary: "#241A16", secondary: "#6E4934", accent: "#D69A4A", highlight: "#F3D6A0", surface: "#33251F" }) }),
+  Object.freeze({ id: "theme_empresarial", name: "Empresarial", description: "Presentación técnica provisional para clientes y patrocinadores.", status: "inactive", visibility: "production", baseThemeId: "theme_default", metadata: Object.freeze({ brandingStatus: "provisional" }), colors: Object.freeze({ primary: "#14283D", secondary: "#315A78", accent: "#49A6C8", highlight: "#DCEEF6", surface: "#193147" }) }),
+  Object.freeze({ id: "theme_dark", name: "Dark", description: "Tema técnico oscuro de alto contraste.", status: "inactive", visibility: "public", baseThemeId: "theme_default", metadata: Object.freeze({ brandingStatus: "neutral" }), colors: Object.freeze({ primary: "#07080A", secondary: "#191C22", accent: "#8EB8FF", highlight: "#FFFFFF", background: "#050609", surface: "#111319" }) }),
+  Object.freeze({ id: "theme_light", name: "Light", description: "Tema técnico claro para monitores y fondos luminosos.", status: "inactive", visibility: "public", baseThemeId: "theme_default", metadata: Object.freeze({ brandingStatus: "neutral" }), colors: Object.freeze({ primary: "#F4F6F8", secondary: "#DCE2E8", accent: "#9B7424", highlight: "#6D4F15", background: "#FFFFFF", surface: "#F1F3F5", textPrimary: "#111318", textSecondary: "#505661", border: "#C9CFD6", overlay: "#FFFFFFCC" }) })
 ]);
 
 export const PRODUCTION_CONSOLE_GRAPHICS = Object.freeze(Object.fromEntries(
@@ -243,6 +295,7 @@ export function createProductionConsoleModel(options = {}) {
   );
   const componentRegistry = emptyComponentRegistry(now);
   const templateRegistry = clearTemplateRegistry({}, { resetRevision: true, now });
+  const themeRegistry = registerConsoleThemes(now);
   return {
     consoleVersion: PRODUCTION_CONSOLE_VERSION,
     appVersion: CHARROPRO_APP_VERSION || PRODUCTION_CONSOLE_APP_VERSION,
@@ -255,6 +308,7 @@ export function createProductionConsoleModel(options = {}) {
     variableRegistry,
     componentRegistry,
     templateRegistry,
+    themeRegistry,
     fixtureId: fixtureDefinition.id,
     selectedGraphicId: graphic.graphicId,
     selectedAssetId: assetExists(assetRegistry, options.assetId) ? options.assetId : DEFAULT_ASSET_ID,
@@ -292,6 +346,11 @@ export function createProductionConsoleModel(options = {}) {
     templateRendererSnapshot: null,
     templateRendererWarnings: [],
     templateRendererErrors: [],
+    themeSequence: PRODUCTION_CONSOLE_THEME_DEFINITIONS.length,
+    selectedThemeId: themeRegistry.activeThemeId || "theme_default",
+    themeSnapshot: null,
+    themeWarnings: [],
+    themeErrors: [],
     actionHistory: [],
     currentGraphicInstanceId: null,
     selectedComponentId: null,
@@ -503,6 +562,166 @@ export function clearProductionConsoleComponentRenderer(model, renderer, options
     lastAction: "component-renderer-cleared",
     lastActionError: null
   };
+}
+
+export function selectProductionConsoleTheme(model, themeId) {
+  assertModel(model);
+  if (!getBroadcastTheme(model.themeRegistry, themeId)) throw consoleError("console-theme-not-found");
+  return {
+    ...model,
+    selectedThemeId: themeId,
+    themeSnapshot: null,
+    ...themeDiagnostics(model.themeRegistry, themeId),
+    inspectorTab: "themes",
+    lastAction: "theme-selected",
+    lastActionError: null
+  };
+}
+
+export function createProductionConsoleTheme(model, options = {}) {
+  assertModel(model);
+  const sequence = model.themeSequence + 1;
+  const id = options.id || `theme_console_${sequence}`;
+  const themeRegistry = createBroadcastTheme(model.themeRegistry, {
+    id,
+    name: options.name || `Tema ${sequence}`,
+    description: "Tema declarativo de sesión.",
+    status: "draft",
+    visibility: normalizeVisibility(options.visibility || model.visibility),
+    scope: "global",
+    baseThemeId: options.baseThemeId || "theme_default",
+    colors: cloneValue(options.colors || {}),
+    typography: cloneValue(options.typography || {}),
+    metadata: { source: "production-console", temporary: true }
+  }, {
+    actor: CONSOLE_ACTOR,
+    expectedRegistryRevision: model.themeRegistry.revision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    themeRegistry,
+    themeSequence: sequence,
+    selectedThemeId: id,
+    themeSnapshot: null,
+    ...themeDiagnostics(themeRegistry, id),
+    inspectorTab: "themes",
+    lastAction: "theme-created",
+    lastActionError: null
+  };
+}
+
+export function duplicateProductionConsoleTheme(model, themeId = model?.selectedThemeId, options = {}) {
+  assertModel(model);
+  const source = getBroadcastTheme(model.themeRegistry, themeId);
+  if (!source) throw consoleError("console-theme-not-found");
+  const sequence = model.themeSequence + 1;
+  const id = options.id || `theme_console_${sequence}`;
+  const themeRegistry = duplicateBroadcastTheme(model.themeRegistry, source.id, {
+    id,
+    name: options.name || `${source.name} copia`
+  }, {
+    actor: CONSOLE_ACTOR,
+    expectedRegistryRevision: model.themeRegistry.revision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    themeRegistry,
+    themeSequence: sequence,
+    selectedThemeId: id,
+    themeSnapshot: null,
+    ...themeDiagnostics(themeRegistry, id),
+    inspectorTab: "themes",
+    lastAction: "theme-duplicated",
+    lastActionError: null
+  };
+}
+
+export function removeProductionConsoleTheme(model, themeId = model?.selectedThemeId, options = {}) {
+  assertModel(model);
+  const current = getBroadcastTheme(model.themeRegistry, themeId);
+  if (!current) throw consoleError("console-theme-not-found");
+  const themeRegistry = deleteBroadcastTheme(model.themeRegistry, current.id, {
+    expectedRegistryRevision: model.themeRegistry.revision,
+    now: normalizeNow(options.now)
+  });
+  const selectedThemeId = themeRegistry.activeThemeId || listBroadcastThemes(themeRegistry)[0]?.id || null;
+  return {
+    ...model,
+    themeRegistry,
+    selectedThemeId,
+    themeSnapshot: null,
+    ...themeDiagnostics(themeRegistry, selectedThemeId),
+    inspectorTab: "themes",
+    lastAction: "theme-removed",
+    lastActionError: null
+  };
+}
+
+export function activateProductionConsoleTheme(model, themeId = model?.selectedThemeId, options = {}) {
+  assertModel(model);
+  const current = getBroadcastTheme(model.themeRegistry, themeId);
+  if (!current) throw consoleError("console-theme-not-found");
+  const themeRegistry = activateBroadcastTheme(model.themeRegistry, current.id, {
+    actor: CONSOLE_ACTOR,
+    expectedRegistryRevision: model.themeRegistry.revision,
+    expectedRevision: current.revision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    themeRegistry,
+    selectedThemeId: current.id,
+    themeSnapshot: null,
+    ...themeDiagnostics(themeRegistry, current.id),
+    inspectorTab: "themes",
+    lastAction: "theme-activated",
+    lastActionError: null
+  };
+}
+
+export function deactivateProductionConsoleTheme(model, themeId = model?.selectedThemeId, options = {}) {
+  assertModel(model);
+  const current = getBroadcastTheme(model.themeRegistry, themeId);
+  if (!current) throw consoleError("console-theme-not-found");
+  const themeRegistry = deactivateBroadcastTheme(model.themeRegistry, current.id, {
+    actor: CONSOLE_ACTOR,
+    expectedRegistryRevision: model.themeRegistry.revision,
+    expectedRevision: current.revision,
+    now: normalizeNow(options.now)
+  });
+  return {
+    ...model,
+    themeRegistry,
+    selectedThemeId: current.id,
+    themeSnapshot: null,
+    ...themeDiagnostics(themeRegistry, current.id),
+    inspectorTab: "themes",
+    lastAction: "theme-deactivated",
+    lastActionError: null
+  };
+}
+
+export function snapshotProductionConsoleTheme(model, options = {}) {
+  assertModel(model);
+  const snapshot = getProductionConsoleThemeClipboardSnapshot(model, options);
+  return {
+    ...model,
+    themeSnapshot: snapshot,
+    inspectorTab: "themes",
+    lastAction: "theme-snapshot-built",
+    lastActionError: null
+  };
+}
+
+export function getProductionConsoleThemeClipboardSnapshot(model, options = {}) {
+  assertModel(model);
+  return buildBroadcastThemeSnapshot(model.themeRegistry, {
+    visibility: normalizeVisibility(options.visibility || model.visibility),
+    resolve: options.resolve !== false,
+    now: options.now
+  });
 }
 
 export function selectProductionConsoleTemplateFixture(model, templateType) {
@@ -1474,6 +1693,7 @@ export function getProductionConsoleInspector(model, options = {}) {
   const variables = buildConsoleVariablesInspector(model, visibility, options);
   const components = buildConsoleComponentsInspector(model, visibility, options);
   const templates = buildConsoleTemplatesInspector(model, visibility, options);
+  const themes = buildConsoleThemesInspector(model, visibility, options);
   const warnings = uniqueStrings([
     ...getBroadcastStateWarnings(model.state),
     ...getBroadcastOutputWarnings(selectedOutput),
@@ -1481,7 +1701,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(programProjection.warnings || []),
     ...(variables.warnings || []),
     ...(components.warnings || []),
-    ...(templates.warnings || [])
+    ...(templates.warnings || []),
+    ...(themes.warnings || [])
   ]);
   const errors = uniqueStrings([
     ...(model.state.errors || []),
@@ -1491,7 +1712,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(model.lastActionError ? [model.lastActionError] : []),
     ...(variables.errors || []),
     ...(components.errors || []),
-    ...(templates.errors || [])
+    ...(templates.errors || []),
+    ...(themes.errors || [])
   ]);
   const inspector = {
     contract: cloneValue(model.contract),
@@ -1504,6 +1726,7 @@ export function getProductionConsoleInspector(model, options = {}) {
     variables,
     components,
     templates,
+    themes,
     queue: getBroadcastQueue(model.state),
     actions: cloneValue(model.actionHistory || []),
     warnings: publicView ? [] : warnings,
@@ -1520,7 +1743,8 @@ export function getProductionConsoleInspector(model, options = {}) {
       componentLibrary: COMPONENT_LIBRARY_VERSION,
       componentRenderer: COMPONENT_RENDERER_VERSION,
       templateEngine: TEMPLATE_ENGINE_VERSION,
-      templateRendererIntegration: TEMPLATE_RENDERER_INTEGRATION_VERSION
+      templateRendererIntegration: TEMPLATE_RENDERER_INTEGRATION_VERSION,
+      themeEngine: THEME_ENGINE_VERSION
     }
   };
   const sanitized = sanitizeProductionConsoleInspectorData(inspector, visibility, {
@@ -1529,6 +1753,10 @@ export function getProductionConsoleInspector(model, options = {}) {
   if (sanitized.templates && templates) {
     sanitized.templates.snapshot = cloneValue(templates.snapshot);
     sanitized.templates.clipboardSnapshot = cloneValue(templates.clipboardSnapshot);
+  }
+  if (sanitized.themes && themes) {
+    sanitized.themes.snapshot = cloneValue(themes.snapshot);
+    sanitized.themes.clipboardSnapshot = cloneValue(themes.clipboardSnapshot);
   }
   return sanitized;
 }
@@ -1610,6 +1838,7 @@ export function validateProductionConsoleModel(model) {
   const assets = listBroadcastAssets(model.assetRegistry, { allVersions: true }).map((asset) => validateBroadcastAsset(asset));
   const variables = listProductionVariables(model.variableRegistry).map((variable) => validateProductionVariable(variable));
   const components = listBroadcastComponents(model.componentRegistry).map((component) => validateBroadcastComponent(component));
+  const themes = listBroadcastThemes(model.themeRegistry).map((theme) => validateBroadcastTheme(theme));
   const templateRenderer = model.templateRendererSnapshot
     ? validateTemplateRenderSnapshot(model.templateRendererSnapshot)
     : { valid: true, errors: [], warnings: [] };
@@ -1620,6 +1849,7 @@ export function validateProductionConsoleModel(model) {
     ...assets.flatMap((item) => item.errors),
     ...variables.flatMap((item) => item.errors),
     ...components.flatMap((item) => item.errors),
+    ...themes.flatMap((item) => item.errors),
     ...templateRenderer.errors
   ]);
   return {
@@ -1632,6 +1862,7 @@ export function validateProductionConsoleModel(model) {
       ...assets.flatMap((item) => item.warnings),
       ...variables.flatMap((item) => item.warnings),
       ...components.flatMap((item) => item.warnings),
+      ...themes.flatMap((item) => item.warnings),
       ...templateRenderer.warnings
     ])
   };
@@ -1760,6 +1991,123 @@ function registerConsoleAssets(now) {
     actor: CONSOLE_ACTOR,
     requireOriginalVariant: true
   }), {});
+}
+
+function registerConsoleThemes(now) {
+  const baseDefinition = buildConsoleBaseThemeDefinition();
+  return PRODUCTION_CONSOLE_THEME_DEFINITIONS.reduce((registry, definition) => {
+    const shouldActivate = definition.status === "active";
+    let next = createBroadcastTheme(registry, {
+      ...(definition.id === "theme_default" ? baseDefinition : {}),
+      ...cloneValue(definition),
+      status: "draft",
+      scope: "global",
+      colors: {
+        ...(definition.id === "theme_default" ? baseDefinition.colors : {}),
+        ...(definition.colors || {})
+      },
+      metadata: {
+        ...(definition.id === "theme_default" ? baseDefinition.metadata : {}),
+        ...(definition.metadata || {})
+      }
+    }, {
+      actor: CONSOLE_SETUP_ACTOR,
+      expectedRegistryRevision: registry.revision,
+      now
+    });
+    const draft = getBroadcastTheme(next, definition.id);
+    next = publishBroadcastTheme(next, definition.id, {
+      actor: CONSOLE_SETUP_ACTOR,
+      expectedRegistryRevision: next.revision,
+      expectedRevision: draft.revision,
+      now
+    });
+    if (!shouldActivate) return next;
+    const published = getBroadcastTheme(next, definition.id);
+    return activateBroadcastTheme(next, definition.id, {
+      actor: CONSOLE_SETUP_ACTOR,
+      expectedRegistryRevision: next.revision,
+      expectedRevision: published.revision,
+      now
+    });
+  }, {
+    themeEngineVersion: THEME_ENGINE_VERSION,
+    revision: 0,
+    activeThemeId: null,
+    activeThemes: {},
+    themes: {},
+    createdAt: now,
+    updatedAt: now
+  });
+}
+
+function buildConsoleBaseThemeDefinition() {
+  return {
+    colors: {
+      primary: "#17191D",
+      secondary: "#2A2E35",
+      accent: "#C79A3B",
+      success: "#2FA36B",
+      warning: "#E0A43A",
+      danger: "#CF4B4B",
+      neutral: "#8B929E",
+      background: "#0D0F12",
+      surface: "#191C21",
+      textPrimary: "#F5F7FA",
+      textSecondary: "#B7BDC7",
+      border: "#3B414A",
+      highlight: "#E9C66B",
+      overlay: "#090A0CCC",
+      transparent: "transparent"
+    },
+    typography: {
+      display: { family: "Arial", weight: 800, size: 72, lineHeight: 1.05, tracking: 0, uppercase: false, fallbacks: ["sans-serif"] },
+      heading: { family: "Arial", weight: 700, size: 42, lineHeight: 1.1, tracking: 0, uppercase: false, fallbacks: ["sans-serif"] },
+      body: { family: "Arial", weight: 400, size: 28, lineHeight: 1.35, tracking: 0, uppercase: false, fallbacks: ["sans-serif"] },
+      score: { family: "Arial", weight: 800, size: 88, lineHeight: 1, tracking: 0, uppercase: false, fallbacks: ["sans-serif"] },
+      label: { family: "Arial", weight: 700, size: 20, lineHeight: 1.2, tracking: 1, uppercase: true, fallbacks: ["sans-serif"] }
+    },
+    spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 40 },
+    radius: { none: 0, sm: 2, md: 4, lg: 8 },
+    borders: {
+      subtle: { width: 1, radius: 4, style: "solid", color: "#3B414A" },
+      emphasis: { width: 2, radius: 4, style: "solid", color: "#C79A3B" }
+    },
+    shadows: {
+      panel: { x: 0, y: 8, blur: 24, opacity: 0.35, color: "#000000" },
+      text: { x: 0, y: 2, blur: 4, opacity: 0.5, color: "#000000" }
+    },
+    logos: {
+      organization: { assetId: "asset-organization-logo", variantId: "original", version: "1.0.0", position: "top-left", scale: 1, visibility: "public" },
+      tournament: { assetId: "asset-tournament-logo", variantId: "original", version: "1.0.0", position: "top-right", scale: 1, visibility: "public" },
+      sponsor: { assetId: "asset-sponsor", variantId: "original", version: "1.0.0", position: "bottom-right", scale: 1, visibility: "public" }
+    },
+    backgrounds: {
+      program: { type: "solid", color: "#0D0F12" },
+      panel: { type: "solid", color: "#191C21" },
+      emphasis: {
+        type: "gradient",
+        angle: 90,
+        stops: [{ color: "#17191D", position: 0 }, { color: "#2A2E35", position: 1 }]
+      },
+      transparent: { type: "transparent" }
+    },
+    icons: {
+      watermark: { assetId: "asset-watermark", variantId: "original", version: "1.0.0", position: "center", scale: 1, visibility: "public" }
+    },
+    watermarks: {
+      primary: {
+        asset: { assetId: "asset-watermark", variantId: "original", version: "1.0.0", position: "bottom-right", scale: 1, visibility: "public" },
+        opacity: 0.18,
+        position: "bottom-right",
+        scale: 0.7,
+        safeArea: { top: 0, right: 48, bottom: 36, left: 0 }
+      }
+    },
+    safeArea: { top: 54, right: 96, bottom: 54, left: 96 },
+    defaults: { outputRole: "program", backgroundToken: "program", logoToken: "tournament", watermarkToken: "primary" },
+    metadata: { source: "production-console", preset: true, allowTenantInheritance: true, brandingStatus: "neutral" }
+  };
 }
 
 function registerConsoleVariables(contract, outputIds, now, sourceTenantId = null) {
@@ -2212,6 +2560,76 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
   };
 }
 
+function buildConsoleThemesInspector(model, visibility, options = {}) {
+  const rank = VISIBILITY_RANK[visibility] ?? VISIBILITY_RANK.production;
+  const themes = listBroadcastThemes(model.themeRegistry)
+    .filter((theme) => (VISIBILITY_RANK[theme.visibility] ?? VISIBILITY_RANK.restricted) <= rank);
+  const visibleIds = new Set(themes.map((theme) => theme.id));
+  const selectedThemeId = visibleIds.has(model.selectedThemeId)
+    ? model.selectedThemeId
+    : visibleIds.has(model.themeRegistry.activeThemeId)
+      ? model.themeRegistry.activeThemeId
+      : themes[0]?.id || null;
+  const selected = selectedThemeId ? getBroadcastTheme(model.themeRegistry, selectedThemeId) : null;
+  let resolved = null;
+  let resolutionError = null;
+  if (selected) {
+    try {
+      resolved = resolveBroadcastTheme(model.themeRegistry, selected.id);
+    } catch (error) {
+      resolutionError = error?.code || error?.message || "theme-resolution-failed";
+    }
+  }
+  const validations = themes.map((theme) => validateBroadcastTheme(theme));
+  const snapshot = buildBroadcastThemeSnapshot(model.themeRegistry, {
+    visibility,
+    resolve: true,
+    now: options.now
+  });
+  return {
+    version: THEME_ENGINE_VERSION,
+    registry: {
+      themeEngineVersion: THEME_ENGINE_VERSION,
+      revision: model.themeRegistry?.revision ?? 0,
+      activeThemeId: visibleIds.has(model.themeRegistry?.activeThemeId) ? model.themeRegistry.activeThemeId : null,
+      themes
+    },
+    selectedThemeId,
+    selected,
+    resolved,
+    snapshot: cloneValue(snapshot),
+    clipboardSnapshot: cloneValue(snapshot),
+    warnings: uniqueStrings([
+      ...validations.flatMap((validation) => validation.warnings || []),
+      ...(snapshot.warnings || []),
+      ...(model.themeWarnings || [])
+    ]),
+    errors: uniqueStrings([
+      ...validations.flatMap((validation) => validation.errors || []),
+      ...(snapshot.errors || []),
+      ...(resolutionError ? [resolutionError] : []),
+      ...(model.themeErrors || [])
+    ])
+  };
+}
+
+function themeDiagnostics(registry, themeId) {
+  if (!themeId) return { themeWarnings: [], themeErrors: [] };
+  const theme = getBroadcastTheme(registry, themeId);
+  if (!theme) return { themeWarnings: [], themeErrors: ["theme-not-found"] };
+  const validation = validateBroadcastTheme(theme);
+  const errors = [...(validation.errors || [])];
+  try {
+    resolveBroadcastTheme(registry, theme.id);
+  } catch (error) {
+    errors.push(error?.code || error?.message || "theme-resolution-failed");
+  }
+  return {
+    themeWarnings: uniqueStrings(validation.warnings || []),
+    themeErrors: uniqueStrings(errors)
+  };
+}
+
 function publicVariableDescriptor(variable) {
   return {
     variablesVersion: variable.variablesVersion,
@@ -2349,6 +2767,19 @@ function collectRefs(root) {
     variables: id("console-variables"),
     system: id("console-system"),
     inspectorTabs: id("console-inspector-tabs"),
+    themeLab: id("console-theme-lab"),
+    themeSelect: id("console-theme-select"),
+    themeStatus: id("console-theme-status"),
+    themePalette: id("console-theme-palette"),
+    themeTypography: id("console-theme-typography"),
+    themeLogos: id("console-theme-logos"),
+    themeBackgrounds: id("console-theme-backgrounds"),
+    themeWatermark: id("console-theme-watermark"),
+    themeBorders: id("console-theme-borders"),
+    themeComponents: id("console-theme-components"),
+    themeWarnings: id("console-theme-warnings"),
+    themeErrors: id("console-theme-errors"),
+    themeActions: [...root.querySelectorAll("[data-theme-action]")],
     templateLab: id("console-template-lab"),
     templateFixture: id("console-template-fixture"),
     templateStatus: id("console-template-status"),
@@ -2488,6 +2919,17 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
     if (!button) return;
     run((model) => ({ ...model, inspectorTab: normalizeInspectorTab(button.dataset.inspectorTab), lastAction: "inspector-tab-changed" }));
   }, signal);
+  listen(refs.themeSelect, "change", () => run((model) => selectProductionConsoleTheme(model, refs.themeSelect.value)), signal);
+  refs.themeActions.forEach((button) => listen(button, "click", () => run((model) => {
+    const action = button.dataset.themeAction;
+    if (action === "create") return createProductionConsoleTheme(model);
+    if (action === "duplicate") return duplicateProductionConsoleTheme(model);
+    if (action === "delete") return removeProductionConsoleTheme(model);
+    if (action === "activate") return activateProductionConsoleTheme(model);
+    if (action === "deactivate") return deactivateProductionConsoleTheme(model);
+    if (action === "snapshot") return snapshotProductionConsoleTheme(model);
+    return model;
+  }), signal));
   listen(refs.templateFixture, "change", () => run((model) => selectProductionConsoleTemplateFixture(model, refs.templateFixture.value)), signal);
   refs.templateActions.forEach((button) => listen(button, "click", () => run((model) => {
     let next = model;
@@ -2586,6 +3028,11 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       ));
       return;
     }
+    const themeSelection = event.target.closest("button[data-theme-id]");
+    if (themeSelection) {
+      run((model) => selectProductionConsoleTheme(model, themeSelection.dataset.themeId));
+      return;
+    }
     const refreshButton = event.target.closest('button[data-console-action="refresh-inspector"]');
     if (refreshButton) {
       run((model) => ({ ...model, lastAction: "inspector-refreshed", lastActionError: null }));
@@ -2595,7 +3042,9 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
     if (!button) return;
     const value = button.dataset.copyJson === "template-snapshot"
       ? getProductionConsoleTemplateClipboardSnapshot(getModel(), { visibility: getModel().visibility })
-      : null;
+      : button.dataset.copyJson === "theme-snapshot"
+        ? getProductionConsoleThemeClipboardSnapshot(getModel(), { visibility: getModel().visibility })
+        : null;
     const pre = refs.inspector.querySelector("pre");
     await copyText(value ? JSON.stringify(value, null, 2) : pre?.textContent || "");
     button.textContent = "Copiado";
@@ -2663,6 +3112,7 @@ function renderConsole(refs, model, runtime = {}) {
   renderVariables(refs.variables, model);
   renderSystem(refs.system, model);
   renderInspectorTabs(refs.inspectorTabs, model);
+  renderThemeLab(refs, model);
   renderTemplateLab(refs, model);
   renderTemplateRendererLab(refs, model, runtime);
   renderComponentRendererLab(refs, model, runtime);
@@ -2713,6 +3163,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Renderer ${COMPONENT_RENDERER_VERSION}`),
     element("span", "console-meta", `Templates ${TEMPLATE_ENGINE_VERSION}`),
     element("span", "console-meta", `Template Render ${TEMPLATE_RENDERER_INTEGRATION_VERSION}`),
+    element("span", "console-meta", `Themes ${THEME_ENGINE_VERSION}`),
     element("span", "console-meta", `${getFixtureDefinition(model.fixtureId).label}`),
     element("span", "console-meta", `${getBroadcastOutput(model.selectedOutputId)?.name || "Sin output"}`),
     statusChip(model.safeMode ? "Modo seguro activo" : "Modo seguro inactivo", model.safeMode ? "ok" : "warning")
@@ -3074,6 +3525,186 @@ function renderInspectorTabs(root, model) {
   });
 }
 
+function renderThemeLab(refs, model) {
+  const root = refs.themeLab;
+  if (!root) return;
+  root.hidden = model.inspectorTab !== "themes";
+  const themes = listBroadcastThemes(model.themeRegistry);
+  const selected = getBroadcastTheme(model.themeRegistry, model.selectedThemeId)
+    || getBroadcastTheme(model.themeRegistry, model.themeRegistry.activeThemeId)
+    || themes[0]
+    || null;
+  populateSelect(refs.themeSelect, themes.map((theme) => ({
+    value: theme.id,
+    label: `${theme.name} · ${readableLabel(theme.status)}`
+  })), selected?.id || "");
+  let resolved = null;
+  let resolutionError = null;
+  if (selected) {
+    try {
+      resolved = resolveBroadcastTheme(model.themeRegistry, selected.id);
+    } catch (error) {
+      resolutionError = error?.code || error?.message || "theme-resolution-failed";
+    }
+  }
+  if (refs.themeStatus) {
+    refs.themeStatus.replaceChildren(
+      statusChip(selected ? readableLabel(selected.status) : "Sin tema", selected?.status === "active" ? "ok" : selected?.status === "error" ? "error" : "warning"),
+      element("span", "console-meta", `${themes.length} temas`),
+      element("span", "console-meta", `Registro rev ${model.themeRegistry.revision}`),
+      element("span", "console-meta", selected?.baseThemeId ? `Base ${selected.baseThemeId}` : "Tema base")
+    );
+  }
+  const hasChildren = selected && themes.some((theme) => theme.baseThemeId === selected.id);
+  refs.themeActions.forEach((button) => {
+    const action = button.dataset.themeAction;
+    if (action === "create") button.disabled = false;
+    else if (!selected) button.disabled = true;
+    else if (action === "delete") button.disabled = !["draft", "error"].includes(selected.status) || hasChildren;
+    else if (action === "activate") button.disabled = selected.status === "active" || !["published", "inactive"].includes(selected.status);
+    else if (action === "deactivate") button.disabled = selected.status !== "active";
+    else button.disabled = false;
+  });
+  renderThemePalette(refs.themePalette, resolved?.colors || {});
+  renderThemeTypography(refs.themeTypography, resolved?.typography || {});
+  renderThemeAssetReferences(refs.themeLogos, resolved?.logos || {}, "No hay logos configurados.");
+  renderThemeBackgrounds(refs.themeBackgrounds, resolved?.backgrounds || {});
+  renderThemeWatermarks(refs.themeWatermark, resolved?.watermarks || {});
+  renderThemeBorders(refs.themeBorders, resolved?.borders || {}, resolved?.shadows || {});
+  renderThemeComponents(refs.themeComponents, resolved);
+  renderDiagnosticList(refs.themeWarnings, model.themeWarnings, "Sin warnings de temas.");
+  renderDiagnosticList(refs.themeErrors, uniqueStrings([...(model.themeErrors || []), ...(resolutionError ? [resolutionError] : [])]), "Sin errores de temas.");
+}
+
+function renderThemePalette(root, colors) {
+  if (!root) return;
+  root.replaceChildren();
+  Object.entries(colors).forEach(([name, color]) => {
+    const item = element("div", "console-theme-swatch");
+    const sample = element("span", "console-theme-swatch-color");
+    sample.style.backgroundColor = color;
+    item.append(sample, element("strong", "", name), element("span", "", color));
+    root.append(item);
+  });
+  if (!root.children.length) root.append(element("p", "console-empty-message", "No hay colores configurados."));
+}
+
+function renderThemeTypography(root, typography) {
+  if (!root) return;
+  root.replaceChildren();
+  Object.entries(typography).forEach(([name, token]) => {
+    const item = element("div", "console-theme-type-sample");
+    const sample = element("span", "", name === "score" ? "303" : "CharroPro Broadcast");
+    sample.style.fontFamily = [token.family, ...(token.fallbacks || [])].filter(Boolean).join(", ");
+    sample.style.fontWeight = String(token.weight ?? 400);
+    sample.style.fontSize = `${Math.min(token.size || 24, 42)}px`;
+    sample.style.lineHeight = String(token.lineHeight || 1.2);
+    sample.style.letterSpacing = `${Math.min(token.tracking || 0, 3)}px`;
+    sample.style.textTransform = token.uppercase ? "uppercase" : token.capitalize ? "capitalize" : "none";
+    sample.style.fontStyle = token.italic ? "italic" : "normal";
+    item.append(element("strong", "", name), sample, element("small", "", `${token.family || "—"} · ${token.size ?? "—"} · ${token.weight ?? "—"}`));
+    root.append(item);
+  });
+  if (!root.children.length) root.append(element("p", "console-empty-message", "No hay tipografías configuradas."));
+}
+
+function renderThemeAssetReferences(root, references, emptyText) {
+  if (!root) return;
+  root.replaceChildren();
+  Object.entries(references).forEach(([name, reference]) => {
+    const item = element("div", "console-theme-asset-reference");
+    item.append(
+      element("span", "console-theme-asset-placeholder", name.slice(0, 2).toUpperCase()),
+      element("strong", "", name),
+      element("span", "", reference.assetId || "Sin asset"),
+      element("small", "", reference.variantId || "variante por defecto")
+    );
+    root.append(item);
+  });
+  if (!root.children.length) root.append(element("p", "console-empty-message", emptyText));
+}
+
+function renderThemeBackgrounds(root, backgrounds) {
+  if (!root) return;
+  root.replaceChildren();
+  Object.entries(backgrounds).forEach(([name, background]) => {
+    const item = element("div", "console-theme-background-sample");
+    const sample = element("span", "console-theme-background-visual");
+    if (background.type === "solid") sample.style.backgroundColor = background.color;
+    else if (background.type === "gradient" && background.stops?.length >= 2) {
+      const stops = background.stops.map((stop) => `${stop.color} ${stop.position * 100}%`).join(", ");
+      sample.style.backgroundImage = `linear-gradient(${background.angle}deg, ${stops})`;
+    } else if (background.type === "transparent") sample.classList.add("is-transparent");
+    item.append(sample, element("strong", "", name), element("span", "", background.type));
+    if (background.type === "asset") item.append(element("small", "", background.asset?.assetId || "Sin asset"));
+    root.append(item);
+  });
+  if (!root.children.length) root.append(element("p", "console-empty-message", "No hay fondos configurados."));
+}
+
+function renderThemeWatermarks(root, watermarks) {
+  if (!root) return;
+  root.replaceChildren();
+  Object.entries(watermarks).forEach(([name, watermark]) => {
+    const item = element("div", "console-theme-watermark-item");
+    item.append(
+      element("strong", "", name),
+      element("span", "", watermark.asset?.assetId || "Sin asset"),
+      element("small", "", `${watermark.position} · opacidad ${watermark.opacity}`)
+    );
+    root.append(item);
+  });
+  if (!root.children.length) root.append(element("p", "console-empty-message", "No hay marca de agua configurada."));
+}
+
+function renderThemeBorders(root, borders, shadows) {
+  if (!root) return;
+  root.replaceChildren();
+  Object.entries(borders).forEach(([name, border]) => {
+    const item = element("div", "console-theme-border-sample", name);
+    item.style.borderWidth = `${border.width ?? 0}px`;
+    item.style.borderStyle = border.style || "solid";
+    item.style.borderColor = border.color || "transparent";
+    item.style.borderRadius = `${border.radius ?? 0}px`;
+    const shadow = shadows[name] || shadows.panel;
+    if (shadow) item.style.boxShadow = `${shadow.x}px ${shadow.y}px ${shadow.blur}px color-mix(in srgb, ${shadow.color} ${shadow.opacity * 100}%, transparent)`;
+    root.append(item);
+  });
+  if (!root.children.length) root.append(element("p", "console-empty-message", "No hay bordes configurados."));
+}
+
+function renderThemeComponents(root, theme) {
+  if (!root) return;
+  root.replaceChildren();
+  if (!theme) {
+    root.append(element("p", "console-empty-message", "No hay tema resuelto para la muestra."));
+    return;
+  }
+  const samples = [
+    ["Marcador", "Rancho El Laurel", "303"],
+    ["Lower third", "Juan Pérez", "Charro Completo"],
+    ["Cronómetro", "Tiempo oficial", "00:42.8"]
+  ];
+  samples.forEach(([label, title, value]) => {
+    const sample = element("article", "console-theme-component-sample");
+    sample.style.backgroundColor = theme.colors.surface;
+    sample.style.color = theme.colors.textPrimary;
+    sample.style.borderColor = theme.colors.border;
+    sample.style.borderRadius = `${theme.radius.md ?? 0}px`;
+    const eyebrow = element("span", "", label);
+    eyebrow.style.color = theme.colors.accent;
+    const heading = element("strong", "", title);
+    heading.style.fontFamily = theme.typography.heading?.family || theme.typography.body?.family || "sans-serif";
+    heading.style.fontWeight = String(theme.typography.heading?.weight ?? 700);
+    const data = element("b", "", value);
+    data.style.color = theme.colors.highlight;
+    data.style.fontFamily = theme.typography.score?.family || theme.typography.body?.family || "sans-serif";
+    data.style.fontWeight = String(theme.typography.score?.weight ?? 800);
+    sample.append(eyebrow, heading, data);
+    root.append(sample);
+  });
+}
+
 function renderTemplateLab(refs, model) {
   const root = refs.templateLab;
   if (!root) return;
@@ -3196,6 +3827,10 @@ function renderInspector(root, model) {
   }
   if (model.inspectorTab === "templates") {
     renderTemplateManager(root, inspector.templates);
+    return;
+  }
+  if (model.inspectorTab === "themes") {
+    renderThemeManager(root, inspector.themes);
     return;
   }
   const value = inspectorValue(inspector, model.inspectorTab);
@@ -3331,6 +3966,57 @@ function renderTemplateManager(root, templatesInspector) {
   root.append(toolbar, layout);
 }
 
+function renderThemeManager(root, themesInspector) {
+  root.replaceChildren();
+  const selected = themesInspector?.selected || null;
+  const resolved = themesInspector?.resolved || null;
+  const toolbar = element("div", "console-inspector-toolbar console-theme-toolbar");
+  toolbar.append(element("strong", "", "Themes"));
+  const copy = element("button", "button button-quiet button-small", "Copiar Snapshot");
+  copy.type = "button";
+  copy.dataset.copyJson = "theme-snapshot";
+  toolbar.append(copy);
+
+  const layout = element("div", "console-theme-manager");
+  const library = element("section", "console-theme-library");
+  library.append(element("h4", "", "Registro en memoria"));
+  const themes = themesInspector?.registry?.themes || [];
+  if (!themes.length) library.append(element("p", "console-empty-message", "No hay temas visibles para este contexto."));
+  themes.forEach((theme) => {
+    const button = element("button", `console-theme-item ${selected?.id === theme.id ? "is-selected" : ""}`);
+    button.type = "button";
+    button.dataset.themeId = theme.id;
+    button.append(
+      element("strong", "", theme.name),
+      element("span", "", `${readableLabel(theme.status)} · ${theme.visibility}`),
+      element("span", "", `rev ${theme.revision}${theme.baseThemeId ? ` · base ${theme.baseThemeId}` : ""}`)
+    );
+    library.append(button);
+  });
+
+  const detail = element("section", "console-theme-detail");
+  detail.append(element("h4", "", "Tema resuelto"));
+  if (!selected) detail.append(element("p", "console-empty-message", "Selecciona un tema para inspeccionarlo."));
+  else {
+    const definition = element("dl", "console-compact-definition console-theme-definition");
+    [
+      ["ID", selected.id], ["Nombre", selected.name], ["Estado", readableLabel(selected.status)],
+      ["Visibilidad", selected.visibility], ["Base", selected.baseThemeId || "—"],
+      ["Herencia", resolved?.resolvedFrom?.join(" → ") || "—"], ["Revisión", selected.revision],
+      ["Colores", Object.keys(resolved?.colors || {}).length], ["Tipografías", Object.keys(resolved?.typography || {}).length]
+    ].forEach(([label, value]) => definition.append(definitionItem(label, value)));
+    detail.append(definition);
+  }
+
+  const snapshot = element("section", "console-theme-snapshot");
+  snapshot.append(element("h4", "", "Snapshot serializable"));
+  const pre = document.createElement("pre");
+  pre.textContent = JSON.stringify(themesInspector?.snapshot || null, null, 2);
+  snapshot.append(pre);
+  layout.append(library, detail, snapshot);
+  root.append(toolbar, layout);
+}
+
 function inspectorValue(inspector, key) {
   if (key === "data-contract") return inspector.contract;
   if (key === "broadcast-state") return inspector.state;
@@ -3342,6 +4028,7 @@ function inspectorValue(inspector, key) {
   if (key === "variables") return inspector.variables;
   if (key === "components") return inspector.components;
   if (key === "templates") return inspector.templates;
+  if (key === "themes") return inspector.themes;
   if (key === "queue") return inspector.queue;
   if (key === "actions") return inspector.actions;
   if (key === "warnings") return inspector.warnings;
@@ -3349,7 +4036,7 @@ function inspectorValue(inspector, key) {
 }
 
 function inspectorKeys() {
-  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "variables", "components", "templates", "queue", "actions", "warnings", "errors"];
+  return ["data-contract", "broadcast-state", "preview", "program", "output", "projection", "assets", "variables", "components", "templates", "themes", "queue", "actions", "warnings", "errors"];
 }
 
 function normalizeInspectorTab(value) {
@@ -3359,7 +4046,7 @@ function normalizeInspectorTab(value) {
 function inspectorLabel(value) {
   return {
     "data-contract": "Data Contract", "broadcast-state": "Broadcast State", preview: "Preview", program: "Program", output: "Output",
-    projection: "Projection", assets: "Assets", variables: "Variables", components: "Componentes", templates: "Templates", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
+    projection: "Projection", assets: "Assets", variables: "Variables", components: "Componentes", templates: "Templates", themes: "Themes", queue: "Queue", actions: "Acciones", warnings: "Warnings", errors: "Errors"
   }[value] || value;
 }
 

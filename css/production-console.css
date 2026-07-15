@@ -1718,3 +1718,293 @@ input {
     padding: 8px;
   }
 }
+
+.console-theme-lab {
+  border-bottom: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 0 16px;
+}
+
+.console-theme-lab[hidden] {
+  display: none;
+}
+
+.console-theme-heading,
+.console-theme-controls,
+.console-theme-status,
+.console-theme-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.console-theme-heading {
+  align-items: start;
+  justify-content: space-between;
+}
+
+.console-theme-heading p,
+.console-theme-heading h3,
+.console-theme-preview-section h4,
+.console-theme-library h4,
+.console-theme-detail h4,
+.console-theme-snapshot h4 {
+  margin: 0;
+}
+
+.console-theme-heading p {
+  color: var(--console-muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.console-theme-heading h3 {
+  font-size: 1rem;
+}
+
+.console-theme-controls .console-field {
+  flex: 1 1 240px;
+}
+
+.console-theme-actions {
+  flex: 1 1 100%;
+}
+
+.console-theme-preview-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.console-theme-preview-section,
+.console-theme-library,
+.console-theme-detail,
+.console-theme-snapshot {
+  background: var(--console-panel-2);
+  border: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.console-theme-component-preview-section {
+  grid-column: 1 / -1;
+}
+
+.console-theme-palette,
+.console-theme-typography,
+.console-theme-assets-preview,
+.console-theme-backgrounds,
+.console-theme-watermark-preview,
+.console-theme-borders {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.console-theme-components {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.console-theme-component-sample {
+  border: 1px solid;
+  display: grid;
+  gap: 5px;
+  min-height: 96px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.console-theme-component-sample span {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.console-theme-component-sample strong,
+.console-theme-component-sample b {
+  overflow-wrap: anywhere;
+}
+
+.console-theme-component-sample b {
+  font-size: 1.5rem;
+}
+
+.console-theme-palette {
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+}
+
+.console-theme-swatch,
+.console-theme-asset-reference,
+.console-theme-background-sample,
+.console-theme-watermark-item {
+  align-items: center;
+  background: var(--console-panel);
+  border: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 3px 7px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  min-width: 0;
+  padding: 7px;
+}
+
+.console-theme-swatch-color,
+.console-theme-background-visual {
+  border: 1px solid rgb(255 255 255 / 20%);
+  display: block;
+  grid-row: 1 / span 2;
+  height: 28px;
+  width: 28px;
+}
+
+.console-theme-swatch span:last-child,
+.console-theme-asset-reference span:not(.console-theme-asset-placeholder),
+.console-theme-background-sample span:not(.console-theme-background-visual),
+.console-theme-watermark-item span,
+.console-theme-item span {
+  color: var(--console-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.console-theme-type-sample {
+  border-bottom: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 5px 0 8px;
+}
+
+.console-theme-type-sample > span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.console-theme-type-sample small,
+.console-theme-asset-reference small,
+.console-theme-watermark-item small {
+  color: var(--console-muted);
+  overflow-wrap: anywhere;
+}
+
+.console-theme-asset-placeholder {
+  align-items: center;
+  background: #303640;
+  border: 1px solid var(--console-border);
+  display: flex;
+  font-size: 0.68rem;
+  font-weight: 800;
+  grid-row: 1 / span 3;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.console-theme-backgrounds {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.console-theme-background-visual {
+  height: 36px;
+  width: 44px;
+}
+
+.console-theme-background-visual.is-transparent {
+  background-color: #fff;
+  background-image: linear-gradient(45deg, #c8c8c8 25%, transparent 25%), linear-gradient(-45deg, #c8c8c8 25%, transparent 25%);
+  background-position: 0 0, 0 8px;
+  background-size: 16px 16px;
+}
+
+.console-theme-border-sample {
+  align-items: center;
+  background: var(--console-panel);
+  display: flex;
+  justify-content: center;
+  min-height: 48px;
+  padding: 8px;
+}
+
+.console-theme-diagnostics {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.console-theme-diagnostics > div {
+  background: var(--console-panel-2);
+  border: 1px solid var(--console-border-soft);
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 8px;
+}
+
+.console-theme-diagnostics strong {
+  font-size: 0.75rem;
+}
+
+.console-theme-diagnostics [id] {
+  display: grid;
+  gap: 3px;
+}
+
+.console-theme-manager {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(180px, 1fr);
+  min-width: 0;
+}
+
+.console-theme-item {
+  background: var(--console-panel);
+  border: 1px solid var(--console-border-soft);
+  border-radius: 4px;
+  color: var(--console-text);
+  cursor: pointer;
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px;
+  text-align: left;
+}
+
+.console-theme-item.is-selected {
+  border-color: var(--console-gold);
+  box-shadow: inset 3px 0 0 var(--console-gold);
+}
+
+.console-theme-definition {
+  grid-template-columns: minmax(80px, auto) minmax(0, 1fr);
+}
+
+.console-theme-snapshot {
+  grid-column: 1 / -1;
+}
+
+.console-theme-snapshot pre {
+  margin: 0;
+  max-height: 460px;
+  overflow: auto;
+}
+
+@media (max-width: 700px) {
+  .console-theme-preview-grid,
+  .console-theme-manager,
+  .console-theme-diagnostics,
+  .console-theme-components {
+    grid-template-columns: 1fr;
+  }
+
+  .console-theme-snapshot {
+    grid-column: 1;
+  }
+}

@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260714-template-renderer-integration-001-composed-preview-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260714-theme-engine-001-theme-system-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -178,6 +178,57 @@
         <section class="console-panel console-inspector-panel">
           <div class="console-panel-heading"><div><p>JSON de solo lectura</p><h2>Inspector técnico</h2></div></div>
           <div id="console-inspector-tabs" class="console-tabs" role="tablist"></div>
+          <section id="console-theme-lab" class="console-theme-lab" hidden>
+            <div class="console-theme-heading">
+              <div>
+                <p>Tokens declarativos en memoria</p>
+                <h3>Theme Engine V1</h3>
+              </div>
+              <div id="console-theme-status" class="console-theme-status" aria-live="polite"></div>
+            </div>
+            <div class="console-theme-controls">
+              <label class="console-field">
+                <span>Tema</span>
+                <select id="console-theme-select"></select>
+              </label>
+              <div class="console-theme-actions">
+                <button class="button button-primary button-small" type="button" data-theme-action="create">Crear</button>
+                <button class="button button-quiet button-small" type="button" data-theme-action="duplicate">Duplicar</button>
+                <button class="button button-quiet button-small" type="button" data-theme-action="delete">Eliminar</button>
+                <button class="button button-quiet button-small" type="button" data-theme-action="activate">Activar</button>
+                <button class="button button-quiet button-small" type="button" data-theme-action="deactivate">Desactivar</button>
+                <button class="button button-quiet button-small" type="button" data-theme-action="snapshot">Snapshot</button>
+              </div>
+            </div>
+            <div class="console-theme-preview-grid">
+              <section class="console-theme-preview-section">
+                <h4>Paleta</h4>
+                <div id="console-theme-palette" class="console-theme-palette"></div>
+              </section>
+              <section class="console-theme-preview-section">
+                <h4>Tipografía</h4>
+                <div id="console-theme-typography" class="console-theme-typography"></div>
+              </section>
+              <section class="console-theme-preview-section">
+                <h4>Logos y marca de agua</h4>
+                <div id="console-theme-logos" class="console-theme-assets-preview"></div>
+                <div id="console-theme-watermark" class="console-theme-watermark-preview"></div>
+              </section>
+              <section class="console-theme-preview-section">
+                <h4>Fondos, bordes y sombras</h4>
+                <div id="console-theme-backgrounds" class="console-theme-backgrounds"></div>
+                <div id="console-theme-borders" class="console-theme-borders"></div>
+              </section>
+              <section class="console-theme-preview-section console-theme-component-preview-section">
+                <h4>Componentes de muestra</h4>
+                <div id="console-theme-components" class="console-theme-components"></div>
+              </section>
+            </div>
+            <div class="console-theme-diagnostics">
+              <div><strong>Warnings</strong><div id="console-theme-warnings"></div></div>
+              <div><strong>Errors</strong><div id="console-theme-errors"></div></div>
+            </div>
+          </section>
           <section id="console-template-lab" class="console-template-lab" hidden>
             <div class="console-template-heading">
               <div>
@@ -291,6 +342,6 @@
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-template-renderer-integration-001-composed-preview-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260714-theme-engine-001-theme-system-v1"></script>
 </body>
 </html>

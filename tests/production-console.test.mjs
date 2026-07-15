@@ -4,7 +4,9 @@ import {
   PRODUCTION_CONSOLE_APP_VERSION,
   PRODUCTION_CONSOLE_FIXTURES,
   PRODUCTION_CONSOLE_GRAPHICS,
+  PRODUCTION_CONSOLE_THEME_DEFINITIONS,
   PRODUCTION_CONSOLE_VERSION,
+  activateProductionConsoleTheme,
   buildProductionProjection,
   buildProductionRenderDescriptor,
   changeProductionQueuePriority,
@@ -18,15 +20,19 @@ import {
   createProductionConsoleTemplateRendererIntegration,
   createProductionConsoleTestComponent,
   createProductionConsoleTemplate,
+  createProductionConsoleTheme,
+  deactivateProductionConsoleTheme,
   dispatchProductionConsoleAction,
   disposeProductionConsole,
   duplicateProductionConsoleComponent,
   duplicateProductionConsoleTemplate,
+  duplicateProductionConsoleTheme,
   enqueueProductionGraphic,
   escapeProductionConsoleText,
   getProductionConsoleTemplateClipboardSnapshot,
   getProductionConsoleTemplateRenderClipboardSnapshot,
   getProductionConsoleInspector,
+  getProductionConsoleThemeClipboardSnapshot,
   initializeProductionConsole,
   loadProductionConsoleFixture,
   prepareProductionPreview,
@@ -35,6 +41,7 @@ import {
   prepareProductionConsoleTemplateRenderer,
   removeProductionConsoleComponent,
   removeProductionConsoleTemplate,
+  removeProductionConsoleTheme,
   removeProductionQueueItem,
   renderProductionConsoleComponentFixture,
   renderProductionConsoleTemplateRenderer,
@@ -49,6 +56,7 @@ import {
   selectProductionConsoleTemplateRendererContext,
   selectProductionConsoleTemplateRendererOutput,
   selectProductionConsoleTemplateRendererVisibility,
+  selectProductionConsoleTheme,
   selectProductionGraphic,
   selectProductionOutput,
   setProductionLayerAction,
@@ -57,10 +65,12 @@ import {
   setProductionConsoleVariableStatus,
   setProductionVisibility,
   snapshotProductionConsoleTemplate,
+  snapshotProductionConsoleTheme,
   transitionProductionToProgram,
   updateProductionConsoleTemplateRenderer,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
+import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
 import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
@@ -87,11 +97,12 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-template-renderer-integration-001-composed-preview-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-theme-engine-001-theme-system-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
+assert.equal(PRODUCTION_CONSOLE_THEME_DEFINITIONS.length, 7);
 
 // Initial load is valid, safe and contains no operational recovery.
 let model = createProductionConsoleModel({ now: T0 });
@@ -116,6 +127,66 @@ for (const outputId of model.outputIds) {
   assert.equal(validateBroadcastOutput(output).valid, true);
   assert.equal(output.status, "offline");
   assert.equal(output.assignedLayers.length, 9);
+}
+
+// Theme controls stay in memory and never mutate Preview, Program, Broadcast State or Outputs.
+assert.equal(listBroadcastThemes(model.themeRegistry).length, 7);
+assert.equal(model.themeRegistry.activeThemeId, "theme_default");
+assert.equal(listBroadcastThemes(model.themeRegistry).every((theme) => validateBroadcastTheme(theme).valid), true);
+assert.equal(model.themeRegistry.themes.theme_default.status, "active");
+assert.equal(listBroadcastThemes(model.themeRegistry).filter((theme) => theme.themeId !== "theme_default").every((theme) => theme.status === "published"), true);
+assert.equal(model.themeRegistry.themes.theme_orgullo_charro.metadata.brandingStatus, "confirmed");
+assert.equal(model.themeRegistry.themes.theme_liga_mexicana.metadata.brandingStatus, "provisional");
+assert.equal(model.themeRegistry.themes.theme_liga_mexicana.name, "Liga Mexicana - Provisional");
+const resolvedOrgulloTheme = resolveBroadcastTheme(model.themeRegistry, "theme_orgullo_charro");
+for (const legacyGold of ["#D6AD43", "#F0CC69", "#C79A3B", "#E9C66B"]) {
+  assert.equal(JSON.stringify({
+    colors: resolvedOrgulloTheme.colors,
+    borders: resolvedOrgulloTheme.borders,
+    shadows: resolvedOrgulloTheme.shadows,
+    backgrounds: resolvedOrgulloTheme.backgrounds
+  }).includes(legacyGold), false);
+}
+const stateBeforeThemes = structuredClone(model.state);
+const previewBeforeThemes = structuredClone(model.state.preview);
+const programBeforeThemes = structuredClone(model.state.program);
+const outputsBeforeThemes = Object.fromEntries(model.outputIds.map((outputId) => [outputId, structuredClone(getBroadcastOutput(outputId))]));
+model = selectProductionConsoleTheme(model, "theme_orgullo_charro");
+model = activateProductionConsoleTheme(model, "theme_orgullo_charro", { now: T2 });
+assert.equal(model.themeRegistry.activeThemeId, "theme_orgullo_charro");
+assert.equal(model.themeRegistry.themes.theme_default.status, "inactive");
+model = duplicateProductionConsoleTheme(model, "theme_orgullo_charro", { id: "theme_console_copy", now: T1 });
+assert.equal(listBroadcastThemes(model.themeRegistry).length, 8);
+assert.equal(model.selectedThemeId, "theme_console_copy");
+assert.equal(model.themeRegistry.themes.theme_console_copy.status, "draft");
+model = snapshotProductionConsoleTheme(model, { visibility: "public", now: T2 });
+assert.equal(model.themeSnapshot.themeEngineVersion, "1.0.0");
+assert.equal(model.themeSnapshot.activeThemeId, "theme_orgullo_charro");
+model = removeProductionConsoleTheme(model, "theme_console_copy", { now: T3 });
+assert.equal(listBroadcastThemes(model.themeRegistry).length, 7);
+model = deactivateProductionConsoleTheme(model, "theme_orgullo_charro", { now: T3 });
+assert.equal(model.themeRegistry.activeThemeId, null);
+model = activateProductionConsoleTheme(model, "theme_default", { now: T4 });
+model = createProductionConsoleTheme(model, { id: "theme_console_temporary", now: T4 });
+assert.equal(listBroadcastThemes(model.themeRegistry).length, 8);
+model = removeProductionConsoleTheme(model, "theme_console_temporary", { now: T4 });
+assert.equal(listBroadcastThemes(model.themeRegistry).length, 7);
+assert.deepEqual(model.state, stateBeforeThemes);
+assert.deepEqual(model.state.preview, previewBeforeThemes);
+assert.deepEqual(model.state.program, programBeforeThemes);
+for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeThemes[outputId]);
+
+const themesInspector = getProductionConsoleInspector(model, { visibility: "production", now: T4 }).themes;
+assert.equal(themesInspector.version, "1.0.0");
+assert.equal(themesInspector.registry.themes.length, 7);
+assert.equal(themesInspector.registry.activeThemeId, "theme_default");
+assert.equal(themesInspector.resolved.id, "theme_default");
+assert.ok(themesInspector.resolved.colors.accent);
+const publicThemeSnapshot = getProductionConsoleThemeClipboardSnapshot(model, { visibility: "public", now: T4 });
+assert.equal(publicThemeSnapshot.themes.every((theme) => theme.visibility === "public"), true);
+assert.equal(publicThemeSnapshot.themes.every((theme) => ["confirmed", "provisional", "neutral"].includes(theme.metadata?.brandingStatus)), true);
+for (const unsafeField of ["tenantId", "organizationId", "sessionId", "actor", "signedUrl", "externalUrl", "storageRef"]) {
+  assert.equal(JSON.stringify(publicThemeSnapshot).includes(`"${unsafeField}"`), false);
 }
 
 // Production Variables are edited only through Action Engine and never alter Preview, Program or Outputs.
@@ -720,6 +791,16 @@ for (const id of [
   "console-outputs-list",
   "console-queue-list",
   "console-variables",
+  "console-theme-lab",
+  "console-theme-select",
+  "console-theme-status",
+  "console-theme-palette",
+  "console-theme-typography",
+  "console-theme-logos",
+  "console-theme-backgrounds",
+  "console-theme-watermark",
+  "console-theme-borders",
+  "console-theme-components",
   "console-template-lab",
   "console-template-fixture",
   "console-template-status",
@@ -758,6 +839,14 @@ assert.ok(source.includes('const pre = refs.inspector.querySelector("pre")'));
 assert.ok(source.includes("componentRegistry"));
 assert.ok(source.includes('components: "Componentes"'));
 assert.ok(source.includes('templates: "Templates"'));
+assert.ok(source.includes('themes: "Themes"'));
+assert.ok(source.includes("createProductionConsoleTheme"));
+assert.ok(source.includes("duplicateProductionConsoleTheme"));
+assert.ok(source.includes("activateProductionConsoleTheme"));
+assert.ok(source.includes("deactivateProductionConsoleTheme"));
+assert.ok(source.includes("getProductionConsoleThemeClipboardSnapshot"));
+assert.ok(source.includes('copy.dataset.copyJson = "theme-snapshot"'));
+assert.ok(html.includes("Theme Engine V1"));
 assert.ok(source.includes("createProductionConsoleTemplate"));
 assert.ok(source.includes("instantiateProductionConsoleTemplate"));
 assert.ok(source.includes("getProductionConsoleTemplateClipboardSnapshot"));
