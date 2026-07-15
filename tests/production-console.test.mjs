@@ -138,7 +138,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-program-main-output-001-official-program-visual-output-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -1083,9 +1083,11 @@ const outputRoutingMarkup = html.slice(html.indexOf("<h2>OUTPUT ROUTING</h2>"), 
 assert.match(outputRoutingMarkup, /Copiar Snapshot/);
 assert.match(outputRoutingMarkup, /href="\.\/program-main-output\.html"/);
 assert.match(outputRoutingMarkup, /Abrir Program Main Output/);
+assert.match(outputRoutingMarkup, /href="\.\/announcer-monitor\.html"/);
+assert.equal((outputRoutingMarkup.match(/Abrir Announcer Monitor/g) || []).length, 1);
 assert.match(outputRoutingMarkup, /href="\.\/browser-output\.html\?type=generic"/);
 assert.match(outputRoutingMarkup, /Abrir laboratorio Browser Output/);
-assert.doesNotMatch(outputRoutingMarkup, /Abrir Browser Source|\bOBS\b|\bvMix\b|URL pública|Start Timer|Pause Timer|Reset Timer|\bTake\b|\bCut\b|\bAuto\b/);
+assert.doesNotMatch(outputRoutingMarkup, /Abrir Browser Source|\bOBS\b|\bvMix\b|URL pública|NDI conectado|tiempo real|Start Timer|Pause Timer|Reset Timer|\bTake\b|\bCut\b|\bAuto\b/);
 assert.equal(source.includes("innerHTML"), false);
 assert.equal(source.includes("localStorage"), false);
 assert.equal(/from\s+["'][^"']*firebase/i.test(source), false);

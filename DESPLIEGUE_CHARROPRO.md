@@ -574,3 +574,18 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - Los fixtures locales requieren `?debug=1&fixture=...` y nunca se activan en modo normal.
 - No se agregaron Firebase, WebSocket, polling, BroadcastChannel, OBS, vMix, Wirecast, autenticación, URL productiva ni sincronización automática.
 - Contrato, seguridad, lifecycle y limitaciones: `BROADCAST_PROGRAM_MAIN_OUTPUT_V1.md`.
+
+# ANNOUNCER-MONITOR-001 + ANNOUNCER-MONITOR-001A - Monitor operativo para locutores V1
+
+- Versión de aplicación: `20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1`.
+- Se agregó `js/broadcast/announcerMonitor.js` como salida operacional de solo lectura que consume exclusivamente `announcer_projection` desde Output Routing mediante Browser Output.
+- `announcer-monitor.html` presenta contexto, turno actual, siguiente, cronómetro oficial, posiciones, mensajes, patrocinador y alertas sin consultar Program, Preview, Firebase o el Core deportivo.
+- La región `announcer-video-region` queda reservada como placeholder 16:9 para una futura fuente NDI local; no existe conexión, receptor, reproducción, audio, URL, IP, socket o integración de red.
+- Se soportan los modos locales `balanced`, `video_focus`, `data_focus`, `compact` y `large_text`, además de tamaño de texto y fullscreen explícito.
+- Production Console incorpora un único acceso `Abrir Announcer Monitor`; el acceso heredado de Locutores no se modifica porque vive fuera del alcance autorizado. Jueces y Supervisión permanecen intactos.
+- El módulo incluye lifecycle, revisiones, stale, visibilidad operational/restricted, aislamiento multi-tenant, sanitización, snapshots desacoplados y pruebas de regresión.
+- Archivos nuevos: `js/broadcast/announcerMonitor.js`, `announcer-monitor.html`, `css/announcer-monitor.css`, `tests/announcer-monitor.test.mjs` y `BROADCAST_ANNOUNCER_MONITOR_V1.md`.
+- Estado: implementado localmente y pendiente de publicación; este cierre no crea commit ni push.
+- Limitaciones: sin sincronización productiva de la página aislada, sin NDI/video/audio real, sin persistencia y sin controles de producción o cronómetro.
+- Siguiente paso después de publicar este ticket: `TIMER-DISPLAY-001`; la conexión local de video se reserva para `ANNOUNCER-NDI-VIDEO-001`.
+- Contrato, seguridad y limitaciones: `BROADCAST_ANNOUNCER_MONITOR_V1.md`.

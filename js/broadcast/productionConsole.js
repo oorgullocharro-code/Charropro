@@ -182,10 +182,10 @@ import {
   updateOutputRoute,
   validateOutputRoutingSnapshot
 } from "./outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-program-main-output-001-official-program-visual-output-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
 
 export const PRODUCTION_CONSOLE_OUTPUT_ROUTES = Object.freeze([
   Object.freeze({ routeId: "route-program-main", routeType: "program_main", outputId: "program-main", sourceType: "program_snapshot", visibility: "public", name: "Program Main" }),
