@@ -5,7 +5,16 @@
 Version actual de cache:
 
 ```text
-v=20260714-theme-engine-001-theme-system-v1
+v=20260714-theme-template-integration-001-themed-compositions-v1
+
+## THEME-TEMPLATE-INTEGRATION-001
+
+- Se agregó `Theme Template Integration V1` como capa pura entre Theme Engine y Template Renderer Integration.
+- Production Console incorpora `Theme + Template Lab` con resolución, preparación, render, cambio manual de Theme, update, clear y snapshot sanitizado.
+- La integración aplica tokens sobre clones de Component Instances y conserva datos, bindings, orden, scores, ranking y timer.
+- Los fondos sólidos y gradients seguros se aplican al único root creado por Template Renderer; no se acepta CSS de entrada.
+- Preview oficial, Program, Outputs, Broadcast State, Firebase y gráficos V1 permanecen sin cambios.
+- No existe actualización automática, persistencia, Layout Engine, Animation Engine ni control de OBS.
 ```
 
 Se agrego Theme Engine V1 (`1.0.0`) como registro declarativo, inmutable y exclusivamente en memoria para paletas, tipografia, espaciado, radios, bordes, sombras, logos, fondos, iconos, watermarks, safe area y defaults. La herencia se resuelve de tema base a descendiente con precedencia determinista, rechazo de ciclos y snapshots filtrados por visibilidad.
@@ -479,3 +488,15 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - El runtime es exclusivo del laboratorio: no modifica Preview, Program, Outputs, Broadcast State, Firebase ni el Core deportivo.
 - QR permanece como placeholder sin asset resuelto, ticker es estatico y timer no crea intervalos.
 - Contrato, seguridad y limitaciones: `BROADCAST_TEMPLATE_RENDERER_INTEGRATION_V1.md`.
+
+# THEME-TEMPLATE-INTEGRATION-001C - Cierre final
+
+- La integración conserva una `basePreparation` privada e inmutable y reconstruye cada Theme desde esa fuente, evitando residuos al cambiar de Theme.
+- Las actualizaciones son atómicas: un Theme, Asset o visibility inválido conserva estado, DOM, revision y timestamps anteriores.
+- La resolución automática admite solo Themes publicados (`published` o `active` con `publishedAt`); selecciones explícitas pueden usar `draft`, `inactive` o `deprecated`; `error` nunca se aplica.
+- Los Assets requeridos bloquean con `theme-required-asset-unavailable` cuando no están disponibles o autorizados.
+- `themeVariant`, `gap` y `border.style` quedan diagnosticados como capacidades no soportadas en V1 y no se reportan como aplicados.
+- La visibilidad pública elimina contenido no público del DOM y permite restaurarlo desde la base al volver a producción.
+- Los snapshots no contienen `basePreparation`, DOM, registries ni referencias runtime.
+- `destroy` bloquea todas las operaciones posteriores con `theme-template-integration-destroyed`.
+- No se integraron Preview oficial, Program, Outputs, OBS, Firebase ni persistencia.

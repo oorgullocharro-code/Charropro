@@ -124,10 +124,22 @@ import {
   resolveBroadcastTheme,
   validateBroadcastTheme
 } from "./themeEngine.js?v=20260714-theme-engine-001-theme-system-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-theme-engine-001-theme-system-v1";
+import {
+  THEME_TEMPLATE_INTEGRATION_VERSION,
+  buildThemeTemplateSnapshot,
+  buildThemedTemplatePreparation,
+  clearThemeTemplateIntegration,
+  createThemeTemplateIntegration,
+  destroyThemeTemplateIntegration,
+  renderThemedTemplate,
+  resolveThemeForTemplate,
+  updateThemedTemplateRender,
+  validateThemeTemplateSnapshot
+} from "./themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-theme-engine-001-theme-system-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260714-theme-template-integration-001-themed-compositions-v1";
 
 export const PRODUCTION_CONSOLE_FIXTURES = Object.freeze([
   Object.freeze({ id: "equipos_3", label: "Competencia por equipos - 3 equipos", competitionType: "equipos_completo", countOption: "three" }),
@@ -346,6 +358,14 @@ export function createProductionConsoleModel(options = {}) {
     templateRendererSnapshot: null,
     templateRendererWarnings: [],
     templateRendererErrors: [],
+    themeTemplateThemeId: themeRegistry.activeThemeId || "theme_default",
+    themeTemplateState: "uninitialized",
+    themeTemplateResolution: null,
+    themeTemplatePreparation: null,
+    themeTemplateResult: null,
+    themeTemplateSnapshot: null,
+    themeTemplateWarnings: [],
+    themeTemplateErrors: [],
     themeSequence: PRODUCTION_CONSOLE_THEME_DEFINITIONS.length,
     selectedThemeId: themeRegistry.activeThemeId || "theme_default",
     themeSnapshot: null,
@@ -928,14 +948,18 @@ export function selectProductionConsoleTemplateRendererOutput(model, outputId) {
 
 export function selectProductionConsoleTemplateRendererVisibility(model, visibility) {
   assertModel(model);
-  return {
+  const selection = {
     ...model,
     templateRendererVisibility: normalizeVisibility(visibility),
-    templateInstanceResult: null,
-    ...emptyTemplateRendererRuntimeState(),
     inspectorTab: "templates",
     lastAction: "template-renderer-visibility-selected",
     lastActionError: null
+  };
+  if (model.themeTemplateResult) return selection;
+  return {
+    ...selection,
+    templateInstanceResult: null,
+    ...emptyTemplateRendererRuntimeState()
   };
 }
 
@@ -1065,6 +1089,213 @@ export function getProductionConsoleTemplateRenderClipboardSnapshot(model, integ
       })
     : cloneValue(model.templateRendererSnapshot);
   if (!snapshot || !validateTemplateRenderSnapshot(snapshot).valid) throw consoleError("console-template-renderer-snapshot-invalid");
+  return snapshot;
+}
+
+export function selectProductionConsoleThemeTemplateTheme(model, themeId) {
+  assertModel(model);
+  if (!getBroadcastTheme(model.themeRegistry, themeId)) throw consoleError("console-theme-not-found");
+  return {
+    ...model,
+    themeTemplateThemeId: themeId,
+    themeTemplateResolution: null,
+    themeTemplatePreparation: null,
+    themeTemplateWarnings: [],
+    themeTemplateErrors: [],
+    themeTemplateState: model.themeTemplateResult ? model.themeTemplateState : "ready",
+    inspectorTab: "templates",
+    lastAction: "theme-template-theme-selected",
+    lastActionError: null
+  };
+}
+
+export function createProductionConsoleThemeTemplateIntegration(model, templateRendererIntegration, options = {}) {
+  assertModel(model);
+  if (!templateRendererIntegration) throw consoleError("console-template-renderer-not-ready");
+  const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
+  const sources = buildProductionConsoleTemplateRendererSources(model, options);
+  const sourceFixture = getFixtureDefinition(options.fixtureId || model.templateRendererContextId);
+  const source = buildPlaygroundFixture(sourceFixture.competitionType, sourceFixture.countOption);
+  return createThemeTemplateIntegration({
+    integrationId: options.integrationId || `production_console_theme_template_${output.id}`,
+    themeRegistry: model.themeRegistry,
+    templateRegistry: model.templateRegistry,
+    componentRegistry: model.componentRegistry,
+    templateRendererIntegration,
+    assetRegistry: model.assetRegistry,
+    productionVariables: sources.productionVariables,
+    broadcastContract: sources.broadcastContract,
+    output: {
+      id: output.id,
+      outputId: output.id,
+      type: "preview",
+      width: output.width,
+      height: output.height,
+      orientation: output.orientation,
+      safeArea: output.safeArea
+    },
+    visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
+    tenantId: source.organization?.tenantId,
+    organizationId: source.organization?.id,
+    clientId: source.organization?.clientId,
+    tournamentId: source.tournament?.id,
+    competitionId: source.competition?.id,
+    eventId: source.tournament?.id,
+    sessionId: "session_production_console",
+    themeSelections: {
+      sessionThemeId: options.sessionThemeId,
+      outputThemeId: options.outputThemeId,
+      competitionThemeId: options.competitionThemeId,
+      tournamentThemeId: options.tournamentThemeId
+    }
+  }, { now: options.now });
+}
+
+export function resolveProductionConsoleThemeTemplate(model, integration, options = {}) {
+  assertModel(model);
+  const resolution = resolveThemeForTemplate(options.themeId || model.themeTemplateThemeId, integration, {
+    visibility: model.templateRendererVisibility,
+    now: options.now
+  });
+  return {
+    ...model,
+    themeTemplateState: integration.state,
+    themeTemplateResolution: cloneValue(resolution),
+    themeTemplatePreparation: null,
+    themeTemplateWarnings: uniqueStrings(resolution.warnings || []),
+    themeTemplateErrors: uniqueStrings(resolution.errors || []),
+    inspectorTab: "templates",
+    lastAction: "theme-template-theme-resolved",
+    lastActionError: resolution.errors?.[0] || null
+  };
+}
+
+export function prepareProductionConsoleThemeTemplate(model, integration, options = {}) {
+  assertModel(model);
+  const baseModel = prepareProductionConsoleTemplateRenderer(model, options);
+  const resolution = baseModel.themeTemplateResolution
+    || resolveThemeForTemplate(options.themeId || baseModel.themeTemplateThemeId, integration, {
+      visibility: baseModel.templateRendererVisibility,
+      now: options.now
+    });
+  const preparation = buildThemedTemplatePreparation(
+    baseModel.templateRendererPreparation,
+    resolution,
+    integration,
+    { visibility: baseModel.templateRendererVisibility, now: options.now }
+  );
+  return {
+    ...baseModel,
+    themeTemplateState: integration.state,
+    themeTemplateResolution: cloneValue(resolution),
+    themeTemplatePreparation: cloneValue(preparation),
+    themeTemplateWarnings: uniqueStrings(preparation.warnings || []),
+    themeTemplateErrors: uniqueStrings(preparation.errors || []),
+    inspectorTab: "templates",
+    lastAction: "theme-template-prepared",
+    lastActionError: preparation.errors?.[0] || null
+  };
+}
+
+export function renderProductionConsoleThemeTemplate(model, integration, options = {}) {
+  assertModel(model);
+  if (!model.themeTemplatePreparation) throw consoleError("console-theme-template-not-prepared");
+  const result = renderThemedTemplate(integration, model.themeTemplatePreparation, { now: options.now });
+  const snapshot = buildThemeTemplateSnapshot(integration, result.themedRenderId, {
+    visibility: model.templateRendererVisibility,
+    now: options.now
+  });
+  return themeTemplateModelResult(model, integration, result, snapshot, "theme-template-rendered");
+}
+
+export function changeProductionConsoleThemeTemplate(model, integration, options = {}) {
+  assertModel(model);
+  const themedRenderId = model.themeTemplateResult?.themedRenderId;
+  if (!themedRenderId) throw consoleError("console-theme-template-not-rendered");
+  const themeId = options.themeId || model.themeTemplateThemeId;
+  const result = updateThemedTemplateRender(
+    integration,
+    themedRenderId,
+    themeId,
+    { visibility: model.templateRendererVisibility, now: options.now }
+  );
+  const resolution = resolveThemeForTemplate(
+    themeId,
+    buildProductionConsoleThemeResolutionContext(model, options),
+    { visibility: model.templateRendererVisibility, now: options.now }
+  );
+  const snapshot = buildThemeTemplateSnapshot(integration, themedRenderId, {
+    visibility: model.templateRendererVisibility,
+    now: options.now
+  });
+  return {
+    ...themeTemplateModelResult(model, integration, result, snapshot, "theme-template-theme-changed"),
+    themeTemplateResolution: cloneValue(resolution)
+  };
+}
+
+function buildProductionConsoleThemeResolutionContext(model, options = {}) {
+  const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
+  const sourceFixture = getFixtureDefinition(options.fixtureId || model.templateRendererContextId);
+  const source = buildPlaygroundFixture(sourceFixture.competitionType, sourceFixture.countOption);
+  return {
+    themeRegistry: model.themeRegistry,
+    assetRegistry: model.assetRegistry,
+    output: {
+      id: output.id,
+      outputId: output.id,
+      type: "preview",
+      width: output.width,
+      height: output.height,
+      orientation: output.orientation,
+      safeArea: output.safeArea
+    },
+    visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
+    tenantId: source.organization?.tenantId,
+    organizationId: source.organization?.id,
+    clientId: source.organization?.clientId,
+    tournamentId: source.tournament?.id,
+    competitionId: source.competition?.id,
+    eventId: source.tournament?.id,
+    sessionId: "session_production_console"
+  };
+}
+
+export function updateProductionConsoleThemeTemplate(model, integration, options = {}) {
+  return changeProductionConsoleThemeTemplate(model, integration, options);
+}
+
+export function clearProductionConsoleThemeTemplate(model, integration, options = {}) {
+  assertModel(model);
+  clearThemeTemplateIntegration(integration, { now: options.now });
+  return {
+    ...model,
+    themeTemplateState: integration.state,
+    themeTemplateResolution: null,
+    themeTemplatePreparation: null,
+    themeTemplateResult: null,
+    themeTemplateSnapshot: null,
+    themeTemplateWarnings: [],
+    themeTemplateErrors: [],
+    templateRendererPreparation: null,
+    templateRendererResult: null,
+    templateRendererSnapshot: null,
+    templateRendererWarnings: [],
+    templateRendererErrors: [],
+    inspectorTab: "templates",
+    lastAction: "theme-template-cleared",
+    lastActionError: null
+  };
+}
+
+export function getProductionConsoleThemeTemplateClipboardSnapshot(model, integration, options = {}) {
+  assertModel(model);
+  const themedRenderId = options.themedRenderId || model.themeTemplateResult?.themedRenderId;
+  const snapshot = buildThemeTemplateSnapshot(integration, themedRenderId || null, {
+    visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
+    now: options.now
+  });
+  if (!validateThemeTemplateSnapshot(snapshot).valid) throw consoleError("console-theme-template-snapshot-invalid");
   return snapshot;
 }
 
@@ -1842,6 +2073,9 @@ export function validateProductionConsoleModel(model) {
   const templateRenderer = model.templateRendererSnapshot
     ? validateTemplateRenderSnapshot(model.templateRendererSnapshot)
     : { valid: true, errors: [], warnings: [] };
+  const themeTemplate = model.themeTemplateSnapshot
+    ? validateThemeTemplateSnapshot(model.themeTemplateSnapshot)
+    : { valid: true, errors: [], warnings: [] };
   const errors = uniqueStrings([
     ...state.errors,
     ...contract.errors,
@@ -1850,7 +2084,8 @@ export function validateProductionConsoleModel(model) {
     ...variables.flatMap((item) => item.errors),
     ...components.flatMap((item) => item.errors),
     ...themes.flatMap((item) => item.errors),
-    ...templateRenderer.errors
+    ...templateRenderer.errors,
+    ...themeTemplate.errors
   ]);
   return {
     valid: errors.length === 0,
@@ -1863,7 +2098,8 @@ export function validateProductionConsoleModel(model) {
       ...variables.flatMap((item) => item.warnings),
       ...components.flatMap((item) => item.warnings),
       ...themes.flatMap((item) => item.warnings),
-      ...templateRenderer.warnings
+      ...templateRenderer.warnings,
+      ...themeTemplate.warnings
     ])
   };
 }
@@ -1885,7 +2121,7 @@ export function initializeProductionConsole(root = document) {
   let model = createProductionConsoleModel({ ...settings, safeMode: true });
   const refs = collectRefs(root);
   const controller = new AbortController();
-  const runtime = { componentRenderer: null, templateRendererIntegration: null, controller };
+  const runtime = { componentRenderer: null, templateRendererIntegration: null, themeTemplateIntegration: null, controller };
   populateStaticControls(refs, model);
   if (refs.componentRendererTarget) {
     runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
@@ -1893,7 +2129,12 @@ export function initializeProductionConsole(root = document) {
   }
   if (refs.templateRendererTarget) {
     runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
-    model = { ...model, templateRendererState: runtime.templateRendererIntegration.state };
+    runtime.themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, runtime.templateRendererIntegration);
+    model = {
+      ...model,
+      templateRendererState: runtime.templateRendererIntegration.state,
+      themeTemplateState: runtime.themeTemplateIntegration.state
+    };
   }
   const update = (nextModel) => {
     model = nextModel;
@@ -1914,6 +2155,9 @@ export function initializeProductionConsole(root = document) {
       instance.disposed = true;
       controller.abort();
       if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
+      if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
+        destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
+      }
       if (runtime.templateRendererIntegration && runtime.templateRendererIntegration.state !== "destroyed") {
         destroyTemplateRendererIntegration(runtime.templateRendererIntegration);
       }
@@ -1927,17 +2171,23 @@ export function initializeProductionConsole(root = document) {
 }
 
 function recreateProductionConsoleTemplateRendererRuntime(model, runtime, refs) {
+  if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
+    destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
+  }
+  runtime.themeTemplateIntegration = null;
   if (runtime.templateRendererIntegration && runtime.templateRendererIntegration.state !== "destroyed") {
     destroyTemplateRendererIntegration(runtime.templateRendererIntegration);
   }
   runtime.templateRendererIntegration = null;
   if (refs.templateRendererTarget) {
     runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
+    runtime.themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, runtime.templateRendererIntegration);
   }
   return {
     ...model,
     ...emptyTemplateRendererRuntimeState(),
-    templateRendererState: runtime.templateRendererIntegration?.state || "uninitialized"
+    templateRendererState: runtime.templateRendererIntegration?.state || "uninitialized",
+    themeTemplateState: runtime.themeTemplateIntegration?.state || "uninitialized"
   };
 }
 
@@ -1945,7 +2195,15 @@ function ensureProductionConsoleTemplateRendererRuntime(model, runtime, refs) {
   if (!runtime.templateRendererIntegration || runtime.templateRendererIntegration.state === "destroyed") {
     runtime.templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, refs.templateRendererTarget);
   }
+  if (!runtime.themeTemplateIntegration || runtime.themeTemplateIntegration.state === "destroyed") {
+    runtime.themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, runtime.templateRendererIntegration);
+  }
   return runtime.templateRendererIntegration;
+}
+
+function ensureProductionConsoleThemeTemplateRuntime(model, runtime, refs) {
+  ensureProductionConsoleTemplateRendererRuntime(model, runtime, refs);
+  return runtime.themeTemplateIntegration;
 }
 
 function registerConsoleOutputs(now) {
@@ -2490,7 +2748,35 @@ function emptyTemplateRendererRuntimeState() {
     templateRendererResult: null,
     templateRendererSnapshot: null,
     templateRendererWarnings: [],
-    templateRendererErrors: []
+    templateRendererErrors: [],
+    ...emptyThemeTemplateRuntimeState()
+  };
+}
+
+function emptyThemeTemplateRuntimeState() {
+  return {
+    themeTemplateState: "uninitialized",
+    themeTemplateResolution: null,
+    themeTemplatePreparation: null,
+    themeTemplateResult: null,
+    themeTemplateSnapshot: null,
+    themeTemplateWarnings: [],
+    themeTemplateErrors: []
+  };
+}
+
+function themeTemplateModelResult(model, integration, result, snapshot, lastAction) {
+  const safeResult = cloneValue(result);
+  return {
+    ...model,
+    themeTemplateState: integration.state,
+    themeTemplateResult: safeResult,
+    themeTemplateSnapshot: cloneValue(snapshot),
+    themeTemplateWarnings: uniqueStrings([...(safeResult.warnings || []), ...(snapshot.warnings || [])]),
+    themeTemplateErrors: uniqueStrings([...(safeResult.errors || []), ...(snapshot.errors || [])]),
+    inspectorTab: "templates",
+    lastAction,
+    lastActionError: safeResult.errors?.[0] || null
   };
 }
 
@@ -2535,6 +2821,21 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
       warnings: cloneValue(model.templateRendererWarnings || []),
       errors: cloneValue(model.templateRendererErrors || [])
     },
+    themeTemplateIntegration: {
+      version: THEME_TEMPLATE_INTEGRATION_VERSION,
+      state: model.themeTemplateState,
+      themeSelection: model.themeTemplateThemeId,
+      resolvedTheme: cloneValue(model.themeTemplateResolution),
+      themedPreparation: cloneValue(model.themeTemplatePreparation),
+      themedComponentInstances: cloneValue(model.themeTemplatePreparation?.componentInstances || []),
+      themedRenderResult: cloneValue(model.themeTemplateResult),
+      snapshot: cloneValue(model.themeTemplateSnapshot),
+      appliedTokens: cloneValue(model.themeTemplateResult?.appliedTokens || model.themeTemplatePreparation?.appliedTokens || []),
+      fallbackTokens: cloneValue(model.themeTemplateResult?.fallbackTokens || model.themeTemplatePreparation?.fallbackTokens || []),
+      ignoredTokens: cloneValue(model.themeTemplateResult?.ignoredTokens || model.themeTemplatePreparation?.ignoredTokens || []),
+      warnings: cloneValue(model.themeTemplateWarnings || []),
+      errors: cloneValue(model.themeTemplateErrors || [])
+    },
     registry: {
       engineVersion: TEMPLATE_ENGINE_VERSION,
       revision: model.templateRegistry?.revision ?? 0,
@@ -2549,13 +2850,15 @@ function buildConsoleTemplatesInspector(model, visibility, options = {}) {
       ...validations.flatMap((validation) => validation.warnings || []),
       ...(snapshot?.warnings || []),
       ...(model.templateWarnings || []),
-      ...(model.templateRendererWarnings || [])
+      ...(model.templateRendererWarnings || []),
+      ...(model.themeTemplateWarnings || [])
     ]),
     errors: uniqueStrings([
       ...validations.flatMap((validation) => validation.errors || []),
       ...(snapshot?.errors || []),
       ...(model.templateErrors || []),
-      ...(model.templateRendererErrors || [])
+      ...(model.templateRendererErrors || []),
+      ...(model.themeTemplateErrors || [])
     ])
   };
 }
@@ -2788,6 +3091,7 @@ function collectRefs(root) {
     templateActions: [...root.querySelectorAll("[data-template-action]")],
     templateRendererLab: id("console-template-renderer-lab"),
     templateRendererTemplate: id("console-template-renderer-template"),
+    templateRendererTheme: id("console-template-renderer-theme"),
     templateRendererContext: id("console-template-renderer-context"),
     templateRendererOutput: id("console-template-renderer-output"),
     templateRendererVisibility: id("console-template-renderer-visibility"),
@@ -2827,6 +3131,10 @@ function populateStaticControls(refs, model) {
   populateSelect(refs.exitAnimation, ANIMATIONS.map((value) => ({ value, label: value })), model.animation.exit);
   populateSelect(refs.templateFixture, TEMPLATE_ENGINE_FIXTURES.map((fixture) => ({ value: fixture.type, label: fixture.label })), model.templateFixtureType);
   populateSelect(refs.templateRendererContext, PRODUCTION_CONSOLE_FIXTURES.map((fixture) => ({ value: fixture.id, label: fixture.label })), model.templateRendererContextId);
+  populateSelect(refs.templateRendererTheme, listBroadcastThemes(model.themeRegistry).map((theme) => ({
+    value: theme.themeId,
+    label: `${theme.name} · ${theme.metadata?.brandingStatus || "neutral"}`
+  })), model.themeTemplateThemeId);
   populateSelect(refs.templateRendererOutput, COMPONENT_RENDERER_OUTPUTS.map((value) => ({ value: value.id, label: value.label })), model.templateRendererOutputId);
   populateSelect(refs.templateRendererVisibility, VISIBILITIES.map((value) => ({ value, label: value })), model.templateRendererVisibility);
   populateSelect(refs.componentRendererFixture, COMPONENT_RENDERER_FIXTURE_TYPES.map((value) => ({ value, label: readableLabel(value) })), model.componentRendererFixtureType);
@@ -2922,13 +3230,14 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
   listen(refs.themeSelect, "change", () => run((model) => selectProductionConsoleTheme(model, refs.themeSelect.value)), signal);
   refs.themeActions.forEach((button) => listen(button, "click", () => run((model) => {
     const action = button.dataset.themeAction;
-    if (action === "create") return createProductionConsoleTheme(model);
-    if (action === "duplicate") return duplicateProductionConsoleTheme(model);
-    if (action === "delete") return removeProductionConsoleTheme(model);
-    if (action === "activate") return activateProductionConsoleTheme(model);
-    if (action === "deactivate") return deactivateProductionConsoleTheme(model);
+    let next = model;
+    if (action === "create") next = createProductionConsoleTheme(model);
+    else if (action === "duplicate") next = duplicateProductionConsoleTheme(model);
+    else if (action === "delete") next = removeProductionConsoleTheme(model);
+    else if (action === "activate") next = activateProductionConsoleTheme(model);
+    else if (action === "deactivate") next = deactivateProductionConsoleTheme(model);
     if (action === "snapshot") return snapshotProductionConsoleTheme(model);
-    return model;
+    return next === model ? model : recreateProductionConsoleTemplateRendererRuntime(next, runtime, refs);
   }), signal));
   listen(refs.templateFixture, "change", () => run((model) => selectProductionConsoleTemplateFixture(model, refs.templateFixture.value)), signal);
   refs.templateActions.forEach((button) => listen(button, "click", () => run((model) => {
@@ -2948,6 +3257,10 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       refs
     );
   }), signal);
+  listen(refs.templateRendererTheme, "change", () => run((model) => {
+    if (!refs.templateRendererTheme.value) return model;
+    return selectProductionConsoleThemeTemplateTheme(model, refs.templateRendererTheme.value);
+  }), signal);
   listen(refs.templateRendererContext, "change", () => run((model) => recreateProductionConsoleTemplateRendererRuntime(
     selectProductionConsoleTemplateRendererContext(model, refs.templateRendererContext.value),
     runtime,
@@ -2958,15 +3271,15 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
     runtime,
     refs
   )), signal);
-  listen(refs.templateRendererVisibility, "change", () => run((model) => recreateProductionConsoleTemplateRendererRuntime(
-    selectProductionConsoleTemplateRendererVisibility(model, refs.templateRendererVisibility.value),
-    runtime,
-    refs
-  )), signal);
+  listen(refs.templateRendererVisibility, "change", () => run((model) => {
+    const selected = selectProductionConsoleTemplateRendererVisibility(model, refs.templateRendererVisibility.value);
+    if (model.themeTemplateResult) return selected;
+    return recreateProductionConsoleTemplateRendererRuntime(selected, runtime, refs);
+  }), signal);
   refs.templateRendererActions.forEach((button) => listen(button, "click", async () => {
     if (button.dataset.templateRendererAction === "copy-snapshot") {
       try {
-        const snapshot = getProductionConsoleTemplateRenderClipboardSnapshot(getModel(), runtime.templateRendererIntegration);
+        const snapshot = getProductionConsoleThemeTemplateClipboardSnapshot(getModel(), runtime.themeTemplateIntegration);
         await copyText(JSON.stringify(snapshot, null, 2));
         button.textContent = "Copiado";
         window.setTimeout(() => { button.textContent = "Copiar Snapshot"; }, 1200);
@@ -2981,11 +3294,13 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
         const next = instantiateProductionConsoleTemplateForRenderer(model);
         return recreateProductionConsoleTemplateRendererRuntime(next, runtime, refs);
       }
-      if (action === "prepare") return prepareProductionConsoleTemplateRenderer(model);
-      const integration = ensureProductionConsoleTemplateRendererRuntime(model, runtime, refs);
-      if (action === "render") return renderProductionConsoleTemplateRenderer(model, integration);
-      if (action === "update") return updateProductionConsoleTemplateRenderer(model, integration);
-      if (action === "clear") return clearProductionConsoleTemplateRenderer(model, integration);
+      const integration = ensureProductionConsoleThemeTemplateRuntime(model, runtime, refs);
+      if (action === "resolve-theme") return resolveProductionConsoleThemeTemplate(model, integration);
+      if (action === "prepare") return prepareProductionConsoleThemeTemplate(model, integration);
+      if (action === "render") return renderProductionConsoleThemeTemplate(model, integration);
+      if (action === "change-theme") return changeProductionConsoleThemeTemplate(model, integration);
+      if (action === "update") return updateProductionConsoleThemeTemplate(model, integration);
+      if (action === "clear") return clearProductionConsoleThemeTemplate(model, integration);
       return model;
     });
   }, signal));
@@ -3487,7 +3802,7 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Template Renderer", TEMPLATE_RENDERER_INTEGRATION_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Template Renderer", TEMPLATE_RENDERER_INTEGRATION_VERSION], ["Theme + Template", THEME_TEMPLATE_INTEGRATION_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]
@@ -3734,7 +4049,13 @@ function renderTemplateRendererLab(refs, model, runtime) {
     { value: "", label: "Selecciona un template" },
     ...templates.map((template) => ({ value: template.templateId, label: `${template.name} · ${readableLabel(template.templateType)}` }))
   ], model.selectedTemplateId || "");
+  const themes = listBroadcastThemes(model.themeRegistry);
+  populateSelect(refs.templateRendererTheme, themes.map((theme) => ({
+    value: theme.themeId,
+    label: `${theme.name} · ${theme.metadata?.brandingStatus || "neutral"}`
+  })), model.themeTemplateThemeId || "theme_default");
   const selected = model.selectedTemplateId ? getRegisteredTemplate(model.templateRegistry, model.selectedTemplateId) : null;
+  const selectedTheme = getBroadcastTheme(model.themeRegistry, model.themeTemplateThemeId);
   const output = getComponentRendererOutput(model.templateRendererOutputId);
   if (refs.templateRendererFrame) {
     refs.templateRendererFrame.style.aspectRatio = `${output.width} / ${output.height}`;
@@ -3746,21 +4067,33 @@ function renderTemplateRendererLab(refs, model, runtime) {
     refs.templateRendererSafeArea.style.bottom = `${(output.safeArea.bottom / output.height) * 100}%`;
     refs.templateRendererSafeArea.style.left = `${(output.safeArea.left / output.width) * 100}%`;
   }
-  const runtimeState = runtime.templateRendererIntegration?.state || model.templateRendererState;
+  const runtimeState = runtime.themeTemplateIntegration?.state || model.themeTemplateState;
   if (refs.templateRendererStatus) {
     refs.templateRendererStatus.replaceChildren(
       statusChip(`Template ${selected ? readableLabel(selected.status) : "sin selección"}`, selected ? "ok" : "warning"),
+      statusChip(`Theme ${selectedTheme?.name || "sin selección"}`, selectedTheme ? "ok" : "warning"),
       statusChip(`Integración ${readableLabel(runtimeState)}`, runtimeState === "error" ? "error" : runtimeState === "uninitialized" ? "warning" : "ok"),
       statusChip(`Renderer ${runtime.templateRendererIntegration?.rendererId ? "ready" : "uninitialized"}`, runtime.templateRendererIntegration?.rendererId ? "ok" : "warning")
     );
   }
   if (refs.templateRendererMetrics) {
-    const result = model.templateRendererResult;
+    const result = model.themeTemplateResult;
+    const resolution = model.themeTemplateResolution;
     refs.templateRendererMetrics.replaceChildren(
       definitionItem("Template", selected?.name || "—"),
       definitionItem("Template Instance", model.templateInstanceResult?.templateInstance?.templateInstanceId || "—"),
-      definitionItem("Componentes", result?.componentCount ?? model.templateRendererPreparation?.componentInstances?.length ?? 0),
+      definitionItem("Theme", resolution?.themeId || selectedTheme?.themeId || "—"),
+      definitionItem("Theme version", resolution?.themeVersion || selectedTheme?.themeVersion || "—"),
+      definitionItem("Branding", resolution?.brandingStatus || selectedTheme?.metadata?.brandingStatus || "neutral"),
+      definitionItem("Scope", resolution?.themeScope || selectedTheme?.scope || "—"),
+      definitionItem("Resolved from", resolution?.resolvedFrom?.join(" → ") || "—"),
+      definitionItem("Selección", resolution?.selectionReason || "—"),
+      definitionItem("Fallback", resolution?.fallbackUsed ? "Sí" : "No"),
+      definitionItem("Componentes", result?.componentCount ?? model.themeTemplatePreparation?.componentInstances?.length ?? 0),
       definitionItem("Renderizados", result?.renderedCount ?? 0),
+      definitionItem("Tokens aplicados", result?.appliedTokens?.length ?? model.themeTemplatePreparation?.appliedTokens?.length ?? 0),
+      definitionItem("Tokens fallback", result?.fallbackTokens?.length ?? model.themeTemplatePreparation?.fallbackTokens?.length ?? 0),
+      definitionItem("Tokens ignorados", result?.ignoredTokens?.length ?? model.themeTemplatePreparation?.ignoredTokens?.length ?? 0),
       definitionItem("Output", output.label),
       definitionItem("Resolución", `${output.width} x ${output.height}`),
       definitionItem("Safe area", `${output.safeArea.top}/${output.safeArea.right}/${output.safeArea.bottom}/${output.safeArea.left}`),
@@ -3770,13 +4103,14 @@ function renderTemplateRendererLab(refs, model, runtime) {
   refs.templateRendererActions.forEach((button) => {
     const action = button.dataset.templateRendererAction;
     if (["instantiate", "prepare"].includes(action)) button.disabled = !selected;
-    else if (action === "render") button.disabled = !model.templateRendererPreparation || Boolean(model.templateRendererResult);
-    else if (action === "update") button.disabled = !model.templateRendererResult;
-    else if (action === "clear") button.disabled = !model.templateRendererResult && runtimeState !== "partially_rendered" && runtimeState !== "rendered";
-    else if (action === "copy-snapshot") button.disabled = !model.templateRendererSnapshot;
+    else if (action === "resolve-theme") button.disabled = !selected || !selectedTheme;
+    else if (action === "render") button.disabled = !model.themeTemplatePreparation || Boolean(model.themeTemplateResult);
+    else if (["change-theme", "update"].includes(action)) button.disabled = !model.themeTemplateResult || !selectedTheme;
+    else if (action === "clear") button.disabled = !model.themeTemplateResult && runtimeState !== "partially_rendered" && runtimeState !== "rendered";
+    else if (action === "copy-snapshot") button.disabled = !model.themeTemplateSnapshot;
   });
-  renderDiagnosticList(refs.templateRendererWarnings, model.templateRendererWarnings, "Sin warnings de integración.");
-  renderDiagnosticList(refs.templateRendererErrors, model.templateRendererErrors, "Sin errores de integración.");
+  renderDiagnosticList(refs.templateRendererWarnings, model.themeTemplateWarnings, "Sin warnings de integración temática.");
+  renderDiagnosticList(refs.templateRendererErrors, model.themeTemplateErrors, "Sin errores de integración temática.");
 }
 
 function renderComponentRendererLab(refs, model, runtime) {

@@ -12,12 +12,14 @@ import {
   changeProductionQueuePriority,
   clearProductionConsoleComponentRenderer,
   clearProductionConsoleTemplateRenderer,
+  clearProductionConsoleThemeTemplate,
   clearProductionPreview,
   clearProductionProgram,
   clearProductionQueue,
   createProductionConsoleModel,
   createProductionConsoleComponentRenderer,
   createProductionConsoleTemplateRendererIntegration,
+  createProductionConsoleThemeTemplateIntegration,
   createProductionConsoleTestComponent,
   createProductionConsoleTemplate,
   createProductionConsoleTheme,
@@ -31,6 +33,7 @@ import {
   escapeProductionConsoleText,
   getProductionConsoleTemplateClipboardSnapshot,
   getProductionConsoleTemplateRenderClipboardSnapshot,
+  getProductionConsoleThemeTemplateClipboardSnapshot,
   getProductionConsoleInspector,
   getProductionConsoleThemeClipboardSnapshot,
   initializeProductionConsole,
@@ -39,12 +42,15 @@ import {
   instantiateProductionConsoleTemplate,
   instantiateProductionConsoleTemplateForRenderer,
   prepareProductionConsoleTemplateRenderer,
+  prepareProductionConsoleThemeTemplate,
   removeProductionConsoleComponent,
   removeProductionConsoleTemplate,
   removeProductionConsoleTheme,
   removeProductionQueueItem,
   renderProductionConsoleComponentFixture,
   renderProductionConsoleTemplateRenderer,
+  renderProductionConsoleThemeTemplate,
+  resolveProductionConsoleThemeTemplate,
   restoreLastProductionPreview,
   resetProductionConsoleVariable,
   sanitizeProductionConsoleInspectorData,
@@ -56,6 +62,7 @@ import {
   selectProductionConsoleTemplateRendererContext,
   selectProductionConsoleTemplateRendererOutput,
   selectProductionConsoleTemplateRendererVisibility,
+  selectProductionConsoleThemeTemplateTheme,
   selectProductionConsoleTheme,
   selectProductionGraphic,
   selectProductionOutput,
@@ -68,6 +75,7 @@ import {
   snapshotProductionConsoleTheme,
   transitionProductionToProgram,
   updateProductionConsoleTemplateRenderer,
+  updateProductionConsoleThemeTemplate,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
@@ -89,6 +97,11 @@ import {
   destroyTemplateRendererIntegration,
   validateTemplateRenderSnapshot
 } from "../js/broadcast/templateRendererIntegration.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
+import {
+  THEME_TEMPLATE_INTEGRATION_VERSION,
+  destroyThemeTemplateIntegration,
+  validateThemeTemplateSnapshot
+} from "../js/broadcast/themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -97,9 +110,10 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-theme-engine-001-theme-system-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260714-theme-template-integration-001-themed-compositions-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
+assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
 assert.equal(PRODUCTION_CONSOLE_FIXTURES.length, 6);
 assert.equal(Object.keys(PRODUCTION_CONSOLE_GRAPHICS).length, 8);
 assert.equal(PRODUCTION_CONSOLE_THEME_DEFINITIONS.length, 7);
@@ -122,6 +136,10 @@ assert.equal(listRegisteredTemplates(model.templateRegistry).length, 0);
 assert.equal(model.templateRendererState, "uninitialized");
 assert.equal(model.templateRendererPreparation, null);
 assert.equal(model.templateRendererResult, null);
+assert.equal(model.themeTemplateThemeId, "theme_default");
+assert.equal(model.themeTemplateState, "uninitialized");
+assert.equal(model.themeTemplatePreparation, null);
+assert.equal(model.themeTemplateResult, null);
 for (const outputId of model.outputIds) {
   const output = getBroadcastOutput(outputId);
   assert.equal(validateBroadcastOutput(output).valid, true);
@@ -339,6 +357,60 @@ for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outp
 model = clearProductionConsoleTemplateRenderer(model, templateRendererIntegration, { now: T4 });
 assert.equal(model.templateRendererState, "cleared");
 assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 0);
+destroyTemplateRendererIntegration(templateRendererIntegration);
+
+// Theme + Template Lab applies a resolved Theme manually without touching Preview, Program or Outputs.
+templateRendererIntegration = createProductionConsoleTemplateRendererIntegration(model, templateRendererTarget, {
+  integrationId: "console_theme_template_renderer_test",
+  now: T1
+});
+let themeTemplateIntegration = createProductionConsoleThemeTemplateIntegration(model, templateRendererIntegration, { now: T1 });
+model = selectProductionConsoleThemeTemplateTheme(model, "theme_orgullo_charro");
+model = resolveProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T1 });
+assert.equal(model.themeTemplateResolution.themeId, "theme_orgullo_charro");
+assert.equal(model.themeTemplateResolution.brandingStatus, "confirmed");
+model = prepareProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T2 });
+assert.equal(model.themeTemplatePreparation.status, "prepared");
+assert.equal(model.themeTemplatePreparation.appliedTokens.length > 0, true);
+model = renderProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T2 });
+assert.equal(["rendered", "partially_rendered"].includes(model.themeTemplateResult.status), true);
+assert.equal(model.themeTemplateResult.themeId, "theme_orgullo_charro");
+assert.equal(countByClass(templateRendererTarget, "cp-component-ranking-row"), 3);
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+const themedRenderId = model.themeTemplateResult.themedRenderId;
+const themedTemplateRenderId = model.themeTemplateResult.templateRenderId;
+model = selectProductionConsoleThemeTemplateTheme(model, "theme_dark");
+model = updateProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T3 });
+assert.equal(model.themeTemplateResult.themedRenderId, themedRenderId);
+assert.equal(model.themeTemplateResult.templateRenderId, themedTemplateRenderId);
+assert.equal(model.themeTemplateResult.themeId, "theme_dark");
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 1);
+const themedRootBeforeVisibility = templateRendererTarget.children[0];
+model = selectProductionConsoleTemplateRendererVisibility(model, "public");
+assert.equal(model.themeTemplateResult.themedRenderId, themedRenderId);
+model = updateProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T3 });
+assert.equal(model.themeTemplateResult.visibility, "public");
+assert.equal(templateRendererTarget.children[0], themedRootBeforeVisibility);
+model = selectProductionConsoleTemplateRendererVisibility(model, "production");
+model = updateProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T3 });
+assert.equal(model.themeTemplateResult.visibility, "production");
+const themedClipboard = getProductionConsoleThemeTemplateClipboardSnapshot(model, themeTemplateIntegration, {
+  visibility: "production", now: T3
+});
+assert.equal(validateThemeTemplateSnapshot(themedClipboard).valid, true);
+assert.equal(JSON.stringify(themedClipboard).includes("nodeType"), false);
+const themeTemplateInspector = getProductionConsoleInspector(model, { visibility: "production", now: T3 }).templates.themeTemplateIntegration;
+assert.equal(themeTemplateInspector.version, "1.0.0");
+assert.equal(themeTemplateInspector.resolvedTheme.themeId, "theme_dark");
+assert.equal(themeTemplateInspector.themedRenderResult.themeId, "theme_dark");
+assert.deepEqual(model.state, stateBeforeTemplateRenderer);
+assert.deepEqual(model.state.preview, previewBeforeTemplateRenderer);
+assert.deepEqual(model.state.program, programBeforeTemplateRenderer);
+for (const outputId of model.outputIds) assert.deepEqual(getBroadcastOutput(outputId), outputsBeforeTemplateRenderer[outputId]);
+model = clearProductionConsoleThemeTemplate(model, themeTemplateIntegration, { now: T4 });
+assert.equal(model.themeTemplateState, "cleared");
+assert.equal(countByClass(templateRendererTarget, "cp-template-render-root"), 0);
+destroyThemeTemplateIntegration(themeTemplateIntegration, { now: T4 });
 destroyTemplateRendererIntegration(templateRendererIntegration);
 
 model = selectProductionConsoleTemplateRendererOutput(model, "component_vertical");
@@ -806,6 +878,7 @@ for (const id of [
   "console-template-status",
   "console-template-renderer-lab",
   "console-template-renderer-template",
+  "console-template-renderer-theme",
   "console-template-renderer-context",
   "console-template-renderer-output",
   "console-template-renderer-visibility",
@@ -852,13 +925,24 @@ assert.ok(source.includes("instantiateProductionConsoleTemplate"));
 assert.ok(source.includes("getProductionConsoleTemplateClipboardSnapshot"));
 assert.ok(source.includes('copy.dataset.copyJson = "template-snapshot"'));
 assert.ok(html.includes("Template Engine V1"));
-assert.ok(html.includes("Laboratorio de Templates V2"));
+assert.ok(html.includes("Theme + Template Lab"));
 assert.ok(source.includes("TEMPLATE_RENDERER_INTEGRATION_VERSION"));
 assert.ok(source.includes("prepareProductionConsoleTemplateRenderer"));
 assert.ok(source.includes("renderProductionConsoleTemplateRenderer"));
 assert.ok(source.includes("updateProductionConsoleTemplateRenderer"));
 assert.ok(source.includes("clearProductionConsoleTemplateRenderer"));
 assert.ok(source.includes("getProductionConsoleTemplateRenderClipboardSnapshot"));
+assert.ok(source.includes("THEME_TEMPLATE_INTEGRATION_VERSION"));
+assert.ok(source.includes("createProductionConsoleThemeTemplateIntegration"));
+assert.ok(source.includes("resolveProductionConsoleThemeTemplate"));
+assert.ok(source.includes("prepareProductionConsoleThemeTemplate"));
+assert.ok(source.includes("renderProductionConsoleThemeTemplate"));
+assert.ok(source.includes("updateProductionConsoleThemeTemplate"));
+assert.ok(source.includes("clearProductionConsoleThemeTemplate"));
+assert.ok(source.includes("getProductionConsoleThemeTemplateClipboardSnapshot"));
+for (const action of ["resolve-theme", "prepare", "render", "change-theme", "update", "clear", "copy-snapshot"]) {
+  assert.ok(html.includes(`data-template-renderer-action="${action}"`));
+}
 assert.ok(source.includes("Crear componente de prueba"));
 assert.ok(html.includes("Laboratorio de Componentes V2"));
 assert.ok(source.includes("COMPONENT_RENDERER_VERSION"));
