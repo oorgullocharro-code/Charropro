@@ -89,11 +89,51 @@ function validProgramSnapshot(overrides = {}) {
     themeId: "theme_default",
     templateInstanceId: "template_instance_1",
     transitionMode: "take",
-    components: [{ componentId: "scoreboard_1", visible: true, value: 0 }],
     warnings: [],
     errors: [],
     ...(overrides.program || {})
   };
+  const components = [{
+    componentId: "scoreboard_1",
+    sourceComponentId: "scoreboard_table",
+    componentType: "table",
+    parentId: null,
+    layerId: "scoreboard",
+    order: 0,
+    visibility: "public",
+    geometry: { x: 0, y: 0, width: 1920, height: 1080, rotation: 0, anchor: "center", scale: 1, zIndex: 0 },
+    opacity: 1,
+    style: { opacity: 1 },
+    properties: { value: 0 },
+    content: {},
+    data: { turn: { team: { id: "team_tijuana", name: "Rancheros de Tijuana" } } },
+    assetRefs: [],
+    metadata: {}
+  }];
+  Object.assign(program, {
+    projectionVersion: "1.0.0",
+    composition: {
+      compositionVersion: "1.0.0",
+      compositionId: "composition_scoreboard_1",
+      templateId: program.templateId,
+      themeId: program.themeId,
+      rootComponentId: components[0].componentId,
+      components: structuredClone(components),
+      layers: [{ layerId: "scoreboard", order: 0, zIndex: 0, visibility: "public", componentIds: [components[0].componentId] }],
+      order: [components[0].componentId],
+      geometry: { width: 1920, height: 1080, orientation: "landscape" },
+      safeArea: { top: 0, right: 0, bottom: 0, left: 0 },
+      transparentBackground: true,
+      background: { type: "transparent" },
+      data: structuredClone(components[0].data),
+      metadata: {}
+    },
+    components: structuredClone(components),
+    layers: [{ layerId: "scoreboard", order: 0, zIndex: 0, visibility: "public", componentIds: [components[0].componentId] }],
+    sourceRevision: 2,
+    programRevision: program.revision,
+    generatedAt: program.updatedAt
+  });
   return {
     snapshotVersion: "1.0.0",
     generatedAt: T1,
@@ -234,7 +274,10 @@ assert.equal(programResult.projection.kind, "program-main");
 assert.equal(programResult.projection.programId, "program_official_1");
 assert.equal(programResult.projection.themeId, "theme_default");
 assert.equal(programResult.projection.templateId, "template_scoreboard");
-assert.equal(programResult.projection.components[0].value, 0);
+assert.equal(programResult.projection.components[0].properties.value, 0);
+assert.equal(programResult.projection.composition.data.turn.team.name, "Rancheros de Tijuana");
+assert.equal(programResult.projection.layers[0].layerId, "scoreboard");
+assert.equal(programResult.projection.programRevision, 3);
 assert.equal(JSON.stringify(programResult).includes("runtime"), false);
 assert.equal(JSON.stringify(programResult).includes("tenantId"), false);
 assert.deepEqual(sourceProgram, sourceProgramClone);
@@ -246,6 +289,9 @@ const emptyResult = routeProgramToOutput(engine, "route-program-main", emptyProg
 });
 assert.equal(emptyResult.status, "controlled-empty");
 assert.equal(emptyResult.projection.program, null);
+assert.equal(emptyResult.projection.composition, null);
+assert.deepEqual(emptyResult.projection.components, []);
+assert.deepEqual(emptyResult.projection.layers, []);
 assert.throws(
   () => routeProgramToOutput(engine, "route-program-main", { snapshotVersion: "1.0.0", generatedAt: T1, program: { invalid: true } }),
   (error) => error.code === "output-route-program-snapshot-invalid"

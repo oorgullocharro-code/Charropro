@@ -68,11 +68,77 @@ function snapshot(overrides = {}) {
   };
 }
 
+function themedPreparation(sourceRender, overrides = {}) {
+  const component = {
+    instance: {
+      instanceId: "scoreboard_rows",
+      componentId: "scoreboard_table",
+      componentType: "table",
+      visibility: "production",
+      layout: { x: 120, y: 120, width: 1680, height: 720, rotation: 0, anchor: "center", scale: 1, zIndex: 10 },
+      style: { opacity: 1, color: "#ffffff", backgroundColor: "#111111" },
+      properties: {
+        columns: ["Equipo", "Total"],
+        rows: [["Rancheros de Tijuana", 203], ["Charros de Jalisco", 202], ["Tres Regalos", 201]],
+        alignments: ["left", "right"]
+      },
+      metadata: { layerId: "scoreboard" }
+    },
+    resolvedBindings: {
+      turn: { team: { id: "team_tijuana", name: "Rancheros de Tijuana" } },
+      lastScoredTeam: { id: "team_jalisco", name: "Charros de Jalisco" }
+    },
+    resolvedContent: { title: "Marcador oficial" }
+  };
+  return {
+    preparationVersion: "1.0.0",
+    themedPreparationVersion: "1.0.0",
+    preparationId: "preparation_scoreboard",
+    templateId: sourceRender.templateId,
+    templateInstanceId: sourceRender.templateInstanceId,
+    templateType: "scoreboard",
+    templateInstance: {
+      templateId: sourceRender.templateId,
+      templateInstanceId: sourceRender.templateInstanceId,
+      templateType: "scoreboard",
+      templateVersion: "1.0.0",
+      tenantId: "tenant_internal",
+      tournamentId: "tournament_a",
+      competitionId: "competition_a"
+    },
+    themeId: overrides.themeId || sourceRender.themeId,
+    themeVersion: "1.0.0",
+    themeScope: "tournament",
+    brandingStatus: "confirmed",
+    visibility: "production",
+    effectiveVisibility: "production",
+    resolution: { width: 1920, height: 1080 },
+    orientation: "landscape",
+    safeArea: { top: 54, right: 96, bottom: 54, left: 96 },
+    layout: { mode: "absolute" },
+    themeBackground: { type: "transparent" },
+    resolvedBindings: component.resolvedBindings,
+    components: [component],
+    componentOrder: [component.instance.instanceId],
+    warnings: [],
+    errors: [],
+    ...overrides
+  };
+}
+
 function harness() {
-  const state = { roots: [], clears: 0, failUpdate: false };
+  const state = {
+    roots: [],
+    clears: 0,
+    failUpdate: false,
+    omitPreparationOnUpdate: false,
+    preparationPreparedAt: null,
+    resultUpdatedAt: null
+  };
   const adapter = {
     prepare(source, sourceRender) {
-      return { source, sourceRender };
+      state.preparation = themedPreparation(sourceRender);
+      return { source, sourceRender, preparation: state.preparation };
     },
     render(prepared) {
       const root = { nodeType: 1, id: prepared.sourceRender.themedRenderId };
@@ -82,8 +148,24 @@ function harness() {
     update(active, changes) {
       if (state.failUpdate) throw new Error("fixture-update-failed");
       const next = changes.sourceRender || {};
+      if (state.omitPreparationOnUpdate) {
+        return {
+          themedRenderId: next.themedRenderId || active.themeRenderId,
+          templateRenderId: next.templateRenderId || active.templateRenderId,
+          templateId: next.templateId,
+          templateInstanceId: next.templateInstanceId,
+          themeId: changes.themeId || next.themeId,
+          state: "rendered",
+          status: "rendered",
+          root: state.roots[0]
+        };
+      }
       const root = { nodeType: 1, id: next.themedRenderId || active.themeRenderId };
       state.roots.splice(0, state.roots.length, root);
+      state.preparation = themedPreparation(next, {
+        themeId: changes.themeId || next.themeId,
+        ...(state.preparationPreparedAt ? { preparedAt: state.preparationPreparedAt } : {})
+      });
       return {
         themedRenderId: next.themedRenderId || active.themeRenderId,
         templateRenderId: next.templateRenderId || active.templateRenderId,
@@ -94,6 +176,8 @@ function harness() {
         visibility: changes.visibility,
         state: "rendered",
         status: "rendered",
+        ...(state.resultUpdatedAt ? { updatedAt: state.resultUpdatedAt } : {}),
+        preparation: state.preparation,
         root
       };
     },
@@ -122,6 +206,10 @@ assert.equal(preview.status, "prepared");
 assert.equal(preview.revision, 0);
 assert.equal(preview.themeRenderId, "themed_render_scoreboard");
 assert.equal(preview.templateRenderId, "template_render_scoreboard");
+assert.equal(preview.composition.components.length, 1);
+assert.equal(preview.components[0].componentType, "table");
+assert.equal(preview.composition.data.turn.team.name, "Rancheros de Tijuana");
+assert.equal(preview.layers[0].layerId, "scoreboard");
 assert.deepEqual(source, sourceClone);
 
 preview = renderPreview(engine, { now: T1 });
@@ -138,6 +226,7 @@ assert.equal(fixture.state.roots.length, 1);
 preview = updatePreview(engine, { themeId: "theme_dark", visibility: "restricted" }, { now: T2 });
 assert.equal(preview.previewId, originalId);
 assert.equal(preview.themeId, "theme_dark");
+assert.equal(preview.composition.themeId, "theme_dark");
 assert.equal(preview.visibility, "restricted");
 assert.equal(preview.revision, 2);
 assert.equal(fixture.state.roots.length, 1);
@@ -160,11 +249,31 @@ assert.equal(
   JSON.stringify(beforeFailureSnapshot)
 );
 
+// A Theme change without the corresponding public preparation is rejected atomically.
+fixture.state.omitPreparationOnUpdate = true;
+assert.throws(
+  () => updatePreview(engine, { themeId: "theme_missing_preparation" }, { now: T3 }),
+  (error) => error instanceof BroadcastPreviewError && error.code === "preview-theme-preparation-mismatch"
+);
+fixture.state.omitPreparationOnUpdate = false;
+assert.deepEqual(getPreview(engine), beforeFailure);
+assert.equal(getPreviewState(engine), "rendered");
+
+// Preparation and render timestamps may be consecutive without representing a stale Theme.
+fixture.state.preparationPreparedAt = T2;
+fixture.state.resultUpdatedAt = T3;
+preview = updatePreview(engine, { themeId: "theme_light" }, { now: T3 });
+assert.equal(preview.themeId, "theme_light");
+assert.equal(preview.revision, 3);
+fixture.state.preparationPreparedAt = null;
+fixture.state.resultUpdatedAt = null;
+
 // Snapshot is detached, serializable and public visibility removes tenant identity.
 const publicSnapshot = getPreviewSnapshot(engine, { visibility: "public", now: T3 });
 assert.doesNotThrow(() => JSON.stringify(publicSnapshot));
 assert.equal("tenantId" in publicSnapshot, false);
 assert.equal(JSON.stringify(publicSnapshot).includes("tenant_internal"), false);
+assert.equal(publicSnapshot.preview.composition.data.turn.team.name, "Rancheros de Tijuana");
 publicSnapshot.preview.output.outputId = "mutated";
 assert.equal(getPreview(engine).output.outputId, "preview_1080");
 

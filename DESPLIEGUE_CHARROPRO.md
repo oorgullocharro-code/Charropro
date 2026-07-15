@@ -547,3 +547,17 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - No se agregaron Firebase, sockets, polling, persistencia, OBS, vMix, Wirecast ni conexión en tiempo real.
 - No se implementaron todavía las interfaces finales de Program Main, Announcer Monitor o Timer Display.
 - Contrato y limitaciones: `BROADCAST_BROWSER_OUTPUT_V1.md`.
+
+# PROGRAM-PROJECTION-001 + THEME-PREPARATION-EXPORT-001 - Transporte declarativo coherente V1
+
+- Version de aplicacion: `20260715-program-projection-001b-theme-preparation-export-v1`.
+- Preview Snapshot conserva una composicion declarativa sanitizada con componentes, capas, orden, geometria, estilos resueltos, contenido, datos y referencias de assets por identidad.
+- Theme Template Integration expone `preparation` vigente en render, update y snapshot mediante copias sanitizadas y desacopladas.
+- Preview rechaza `preview-theme-preparation-mismatch` si un cambio de Theme, Template, bindings, contexto, visibilidad o snapshot no entrega una preparacion coherente.
+- La frescura se valida por la preparacion devuelta y su identidad Theme/Template; `preparedAt` y `updatedAt` pueden ser marcas consecutivas y no requieren igualdad exacta.
+- La regresion de integracion real cubre Theme A a Theme B, retiro de residuos, tres y cuatro equipos, Take, Cut, Auto, Program Snapshot y Output Routing.
+- Take, Cut y Auto copian esa composicion hacia Program sin compartir referencias mutables; un cambio posterior de Preview no modifica Program.
+- Program Snapshot publica `projectionVersion`, `composition`, `components`, `layers`, `sourceRevision` y `programRevision` sin DOM, renderer, listeners, actores ni secretos.
+- Output Routing reenvia la proyeccion oficial y conserva Program vacio como `controlled-empty`, con `composition: null`, `components: []` y `layers: []`.
+- Browser Output no fue modificado y continua como infraestructura tecnica; el render final de Program Main queda fuera de este ticket.
+- Contrato, seguridad y limitaciones: `BROADCAST_PROGRAM_PROJECTION_V1.md`.

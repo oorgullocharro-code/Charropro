@@ -703,6 +703,7 @@ export function validateThemeTemplateSnapshot(snapshot) {
   if (!VISIBILITIES.includes(snapshot.visibility)) errors.push("theme-template-snapshot-visibility-invalid");
   if (!isSafeId(snapshot.integrationId)) errors.push("theme-template-snapshot-integration-id-invalid");
   if (!Array.isArray(snapshot.renders)) errors.push("theme-template-snapshot-renders-invalid");
+  else snapshot.renders.forEach((render) => validateSnapshotPreparation(render, errors));
   if (!Array.isArray(snapshot.warnings) || !Array.isArray(snapshot.errors)) errors.push("theme-template-snapshot-diagnostics-invalid");
   if (containsRuntimeReference(snapshot)) errors.push("theme-template-snapshot-runtime-reference-forbidden");
   if (containsUnsafeSnapshotValue(snapshot)) errors.push("theme-template-snapshot-unsafe-value");
@@ -1125,6 +1126,7 @@ function buildRendererResolvedAssets(assetRegistry, preparation, options) {
 }
 
 function buildThemedRenderResult(themedRenderId, preparation, renderResult, createdAt, updatedAt) {
+  const visibility = preparation.effectiveVisibility || renderResult.visibility;
   return {
     resultVersion: THEME_TEMPLATE_INTEGRATION_VERSION,
     themedRenderId,
@@ -1140,7 +1142,7 @@ function buildThemedRenderResult(themedRenderId, preparation, renderResult, crea
     fallbackUsed: preparation.fallbackUsed,
     brandingStatus: preparation.brandingStatus,
     outputId: renderResult.outputId,
-    visibility: preparation.effectiveVisibility || renderResult.visibility,
+    visibility,
     state: renderResult.state,
     status: renderResult.status,
     componentCount: renderResult.componentCount,
@@ -1151,6 +1153,7 @@ function buildThemedRenderResult(themedRenderId, preparation, renderResult, crea
     fallbackTokens: [...preparation.fallbackTokens],
     ignoredTokens: [...preparation.ignoredTokens],
     themeBackground: safeClone(preparation.themeBackground).value,
+    preparation: exportThemedPreparation(preparation, visibility),
     warnings: uniqueStrings([...(preparation.warnings || []), ...(renderResult.warnings || [])]),
     errors: uniqueStrings([...(preparation.errors || []), ...(renderResult.errors || [])]),
     createdAt,
@@ -1191,6 +1194,7 @@ function snapshotRender(record, visibility) {
     appliedTokens: result.appliedTokens,
     fallbackTokens: result.fallbackTokens,
     ignoredTokens: result.ignoredTokens,
+    preparation: exportThemedPreparation(record.themedPreparation, visibility),
     componentSummaries: (result.componentResults || []).map((component) => ({
       instanceId: component.instanceId,
       componentType: component.componentType,
@@ -1202,6 +1206,40 @@ function snapshotRender(record, visibility) {
     createdAt: result.createdAt,
     updatedAt: result.updatedAt
   }, visibility);
+}
+
+function exportThemedPreparation(preparation, visibility) {
+  const exported = sanitizeSnapshot(preparation, normalizeVisibility(visibility || preparation?.effectiveVisibility || preparation?.visibility));
+  if (!isTemplatePreparation(exported)
+    || exported.themedPreparationVersion !== THEME_TEMPLATE_INTEGRATION_VERSION
+    || !isSafeId(exported.themeId)
+    || !isSafeId(exported.templateId)
+    || !Array.isArray(exported.components)) {
+    throw integrationError(THEME_TEMPLATE_INTEGRATION_ERROR_CODES.PREPARATION_INVALID, {
+      reason: "theme-template-exported-preparation-invalid"
+    });
+  }
+  if (containsRuntimeReference(exported) || containsUnsafeSnapshotValue(exported)) {
+    throw integrationError(THEME_TEMPLATE_INTEGRATION_ERROR_CODES.UNSAFE_INPUT, {
+      reason: "theme-template-exported-preparation-unsafe"
+    });
+  }
+  return exported;
+}
+
+function validateSnapshotPreparation(render, errors) {
+  if (!isRecord(render) || render.preparation === undefined) return;
+  const preparation = render.preparation;
+  if (!isTemplatePreparation(preparation)
+    || preparation.themedPreparationVersion !== THEME_TEMPLATE_INTEGRATION_VERSION) {
+    errors.push("theme-template-snapshot-preparation-invalid");
+    return;
+  }
+  if (preparation.themeId !== render.themeId) errors.push("theme-template-snapshot-preparation-theme-mismatch");
+  if (preparation.templateId !== render.templateId) errors.push("theme-template-snapshot-preparation-template-mismatch");
+  if (preparation.templateRenderId !== render.templateRenderId) errors.push("theme-template-snapshot-preparation-render-mismatch");
+  if (containsRuntimeReference(preparation)) errors.push("theme-template-snapshot-preparation-runtime-forbidden");
+  if (containsUnsafeSnapshotValue(preparation)) errors.push("theme-template-snapshot-preparation-unsafe");
 }
 
 function buildRuntimeResolutionContext(integration, runtime, visibility) {

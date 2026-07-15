@@ -8,6 +8,8 @@ import {
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 
+const PROGRAM_PROJECTION_VERSION = "1.0.0";
+
 const ENGINES = new WeakMap();
 const STATES = new Set([
   "uninitialized", "ready", "preparing", "prepared", "rendering",
@@ -21,19 +23,25 @@ const RUNTIME_KEYS = new Set([
   "runtime", "renderer", "target", "weakmap", "weakset"
 ]);
 const SECRET_KEYS = new Set([
-  "apikey", "authorization", "cookie", "credentials", "password", "privatekey",
-  "secret", "signedurl", "token"
+  "accesstoken", "apikey", "auth", "authorization", "cookie", "cookies", "credential",
+  "credentials", "header", "headers", "password", "privatekey", "refreshtoken", "secret",
+  "signedurl", "token", "tokens"
 ]);
 const PUBLIC_PRIVATE_KEYS = new Set([
   "actor", "clientid", "createdby", "organizationid", "operatorid", "sessionid",
-  "tenantid", "updatedby", "userid"
+  "tenantid", "updatedby", "userid", "diagnostics", "internalnotes", "operationalnotes",
+  "privatenotes"
 ]);
-const UNSAFE_TEXT = /<\s*(?:script|iframe|object|embed|style|link|img)\b|\bon(?:error|load|click)\s*=|(?:^|[\s"'])\s*(?:javascript|file|data|vbscript):|\beval\s*\(|\bnew\s+Function\b/i;
+const UNSAFE_TEXT = /<\s*\/?\s*[a-z][^>]*>|\bon(?:error|load|click)\s*=|(?:^|[\s"'])\s*(?:javascript|file|data|vbscript):|\beval\s*\(|\bnew\s+Function\b|\bexpression\s*\(|@import\b|url\s*\(\s*["']?\s*(?:javascript|file|data\s*:\s*text\/html|vbscript):/i;
 const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/;
 const MAX_DEPTH = 16;
 const MAX_ARRAY_ITEMS = 500;
 const MAX_OBJECT_KEYS = 700;
 const MAX_TEXT_LENGTH = 20000;
+const MAX_COMPONENTS = 300;
+const CONTEXT_FIELDS = Object.freeze([
+  "tenantId", "organizationId", "clientId", "tournamentId", "competitionId", "sessionId"
+]);
 
 export class BroadcastPreviewError extends Error {
   constructor(code, details = {}) {
@@ -89,9 +97,11 @@ export function preparePreview(engine, snapshot, options = {}) {
   setEngineState(engine, runtime, "preparing", options.now, false);
   try {
     const adapterPreparation = runtime.adapter.prepare(source, sourceRender, options);
+    assertPreparationCoherence(adapterPreparation, sourceRender, { operation: "prepare" });
     if (runtime.activeRuntime) runtime.adapter.clear(runtime.activeRuntime, { ...options, reason: "preview-replaced" });
     const now = normalizeNow(options.now);
     const previewId = buildPreviewId(engine, runtime, now);
+    const prepared = { snapshot: source, sourceRender, adapterPreparation };
     const preview = buildPreviewDescriptor(source, sourceRender, {
       previewId,
       revision: 0,
@@ -99,10 +109,11 @@ export function preparePreview(engine, snapshot, options = {}) {
       createdAt: now,
       updatedAt: now,
       visibility: options.visibility,
-      output: options.output
+      output: options.output,
+      prepared
     });
     runtime.preview = preview;
-    runtime.prepared = { snapshot: source, sourceRender, adapterPreparation };
+    runtime.prepared = prepared;
     runtime.activeRuntime = null;
     setEngineState(engine, runtime, "prepared", now);
     return clonePreview(preview);
@@ -123,15 +134,22 @@ export function renderPreview(engine, options = {}) {
   try {
     const rendered = runtime.adapter.render(runtime.prepared, options);
     const now = normalizeNow(options.now);
+    const renderedPrepared = resolveOperationPreparation(runtime.prepared, rendered, {
+      operation: "render",
+      expectedThemeId: rendered?.themeId || runtime.preview.themeId,
+      expectedTemplateId: rendered?.templateId || runtime.preview.templateId,
+      requireFresh: false
+    });
     const preview = mergeRenderedPreview(runtime.preview, rendered, {
       revision: runtime.preview.revision + 1,
       status: "rendered",
       updatedAt: now
-    });
+    }, renderedPrepared);
     const validation = validatePreview(preview);
     if (!validation.valid) throw previewError("preview-render-invalid", { errors: validation.errors });
     runtime.preview = preview;
-    runtime.activeRuntime = buildActiveRuntime(rendered, runtime.prepared);
+    runtime.prepared = renderedPrepared;
+    runtime.activeRuntime = buildActiveRuntime(rendered, renderedPrepared);
     setEngineState(engine, runtime, "rendered", now);
     return clonePreview(preview);
   } catch (error) {
@@ -164,6 +182,27 @@ export function updatePreview(engine, changes = {}, options = {}) {
     }, options);
     const now = normalizeNow(options.now);
     const previewId = compatible ? runtime.preview.previewId : buildPreviewId(engine, runtime, now);
+    const currentPreparation = findPreparation(runtime.prepared.adapterPreparation);
+    const resultThemeId = normalizeId(result?.themeId || safeChanges.themeId || nextRender.themeId);
+    const requiresFreshPreparation = Boolean(
+      safeChanges.snapshot
+      || safeChanges.themeId
+      || safeChanges.templateId
+      || safeChanges.binding
+      || safeChanges.context
+      || safeChanges.visibility
+      || (resultThemeId && resultThemeId !== normalizeId(currentPreparation?.themeId || runtime.preview.themeId))
+    );
+    const nextPrepared = resolveOperationPreparation({
+      snapshot: nextSnapshot,
+      sourceRender: nextRender,
+      adapterPreparation: runtime.prepared.adapterPreparation
+    }, result, {
+      operation: "update",
+      expectedThemeId: resultThemeId,
+      expectedTemplateId: result?.templateId || safeChanges.templateId || nextRender.templateId,
+      requireFresh: requiresFreshPreparation
+    });
     const base = compatible
       ? runtime.preview
       : buildPreviewDescriptor(nextSnapshot, nextRender, {
@@ -173,22 +212,19 @@ export function updatePreview(engine, changes = {}, options = {}) {
         createdAt: now,
         updatedAt: now,
         visibility: safeChanges.visibility,
-        output: safeChanges.output
+        output: safeChanges.output,
+        prepared: nextPrepared
       });
     const preview = mergeRenderedPreview(base, result, {
       previewId,
       revision: compatible ? runtime.preview.revision + 1 : 1,
       status: "rendered",
       updatedAt: now
-    });
+    }, nextPrepared);
     const validation = validatePreview(preview);
     if (!validation.valid) throw previewError("preview-update-invalid", { errors: validation.errors });
     runtime.preview = preview;
-    runtime.prepared = {
-      snapshot: nextSnapshot,
-      sourceRender: nextRender,
-      adapterPreparation: result?.preparation || runtime.prepared.adapterPreparation
-    };
+    runtime.prepared = nextPrepared;
     runtime.activeRuntime = buildActiveRuntime(result, runtime.prepared);
     setEngineState(engine, runtime, "rendered", now);
     return clonePreview(preview);
@@ -239,7 +275,7 @@ export function getPreviewSnapshot(engine, options = {}) {
     warnings: uniqueStrings(runtime.preview?.warnings || []),
     errors: uniqueStrings(runtime.preview?.errors || [])
   };
-  return sanitizeSnapshot(snapshot, effectiveVisibility);
+  return sanitizeSnapshot(snapshot, visibility);
 }
 
 export function validatePreview(preview) {
@@ -256,6 +292,7 @@ export function validatePreview(preview) {
   });
   if (!isRecord(preview.output)) errors.push("preview-output-invalid");
   if (!Array.isArray(preview.warnings) || !Array.isArray(preview.errors)) errors.push("preview-diagnostics-invalid");
+  validateDeclarativeProjection(preview, errors, "preview");
   const safety = safeClone(preview);
   errors.push(...safety.errors);
   return validation(uniqueStrings(errors), warnings);
@@ -323,6 +360,92 @@ function normalizeAdapter(options) {
   };
 }
 
+function resolveOperationPreparation(currentPrepared, result, options = {}) {
+  const returnedPreparation = findPreparation(result);
+  const currentPreparation = findPreparation(currentPrepared?.adapterPreparation);
+  if (!returnedPreparation) {
+    if (options.requireFresh) {
+      throw previewError("preview-theme-preparation-mismatch", {
+        operation: options.operation,
+        reason: "updated-preparation-required",
+        expectedThemeId: normalizeId(options.expectedThemeId) || null
+      });
+    }
+    assertPreparationCoherence(currentPreparation, {
+      themeId: options.expectedThemeId,
+      templateId: options.expectedTemplateId
+    }, options);
+    return currentPrepared;
+  }
+  assertPreparationCoherence(returnedPreparation, {
+    themeId: options.expectedThemeId || result?.themeId,
+    themeVersion: result?.themeVersion,
+    templateId: options.expectedTemplateId || result?.templateId,
+    updatedAt: result?.updatedAt
+  }, { ...options, requireFresh: options.requireFresh === true });
+  const cloned = safeClone(returnedPreparation);
+  if (cloned.errors.length) throw previewError("preview-theme-preparation-mismatch", { operation: options.operation, errors: cloned.errors });
+  const sourceRender = {
+    ...currentPrepared.sourceRender,
+    themedRenderId: normalizeId(result?.themedRenderId) || currentPrepared.sourceRender.themedRenderId,
+    templateRenderId: normalizeId(result?.templateRenderId) || currentPrepared.sourceRender.templateRenderId,
+    templateId: normalizeId(result?.templateId) || cloned.value.templateId || currentPrepared.sourceRender.templateId,
+    templateInstanceId: normalizeId(result?.templateInstanceId) || cloned.value.templateInstanceId || currentPrepared.sourceRender.templateInstanceId,
+    themeId: normalizeId(result?.themeId) || cloned.value.themeId || currentPrepared.sourceRender.themeId,
+    themeVersion: result?.themeVersion || cloned.value.themeVersion || currentPrepared.sourceRender.themeVersion,
+    state: result?.state || currentPrepared.sourceRender.state,
+    status: result?.status || currentPrepared.sourceRender.status,
+    updatedAt: result?.updatedAt || currentPrepared.sourceRender.updatedAt,
+    preparation: cloned.value
+  };
+  return {
+    ...currentPrepared,
+    sourceRender,
+    adapterPreparation: cloned.value
+  };
+}
+
+function findPreparation(value) {
+  const candidates = [
+    value?.preparation,
+    value?.themedPreparation,
+    value?.nextPreparation,
+    value?.adapterPreparation?.preparation,
+    value?.adapterPreparation,
+    value
+  ];
+  return candidates.find((candidate) => isRecord(candidate) && Array.isArray(candidate.components)) || null;
+}
+
+function assertPreparationCoherence(value, expected = {}, options = {}) {
+  const preparation = findPreparation(value);
+  if (!preparation) throw previewError("preview-theme-preparation-mismatch", { operation: options.operation, reason: "preparation-missing" });
+  const expectedThemeId = normalizeId(expected.themeId || options.expectedThemeId);
+  const expectedTemplateId = normalizeId(expected.templateId || options.expectedTemplateId);
+  if ((expectedThemeId && preparation.themeId !== expectedThemeId)
+    || (expectedTemplateId && preparation.templateId !== expectedTemplateId)
+    || (expected.themeVersion && preparation.themeVersion && preparation.themeVersion !== expected.themeVersion)) {
+    throw previewError("preview-theme-preparation-mismatch", {
+      operation: options.operation,
+      expectedThemeId: expectedThemeId || null,
+      actualThemeId: preparation.themeId || null,
+      expectedTemplateId: expectedTemplateId || null,
+      actualTemplateId: preparation.templateId || null
+    });
+  }
+  for (const component of preparation.components) {
+    const appliedThemeId = normalizeId(component?.instance?.metadata?.themeApplication?.appliedThemeId);
+    if (expectedThemeId && appliedThemeId && appliedThemeId !== expectedThemeId) {
+      throw previewError("preview-theme-preparation-mismatch", {
+        operation: options.operation,
+        reason: "component-theme-mismatch",
+        componentId: component?.instance?.instanceId || null
+      });
+    }
+  }
+  return preparation;
+}
+
 function normalizeThemeTemplateSnapshot(snapshot, options) {
   const cloned = safeClone(snapshot);
   if (cloned.errors.length) throw previewError("preview-snapshot-unsafe", { errors: cloned.errors });
@@ -358,6 +481,7 @@ function buildPreviewDescriptor(snapshot, render, options) {
     safeArea: snapshot.rendererSummary?.safeArea
   });
   const sourceVisibility = normalizeVisibility(render.visibility || snapshot.visibility);
+  const projection = buildDeclarativeProjection(snapshot, render, options.prepared, null, output);
   return {
     previewId: options.previewId,
     createdAt: options.createdAt,
@@ -371,26 +495,307 @@ function buildPreviewDescriptor(snapshot, render, options) {
     templateId: render.templateId,
     themeId: render.themeId,
     templateInstanceId: render.templateInstanceId,
+    ...projection,
     warnings: uniqueStrings([...(snapshot.warnings || []), ...(render.warnings || [])]),
     errors: uniqueStrings([...(snapshot.errors || []), ...(render.errors || [])])
   };
 }
 
-function mergeRenderedPreview(base, rendered, overrides) {
+function mergeRenderedPreview(base, rendered, overrides, prepared) {
   const result = isRecord(rendered) ? rendered : {};
+  const output = normalizeOutput({ ...base.output, outputId: result.outputId || base.output.outputId });
+  const projection = buildDeclarativeProjection(prepared?.snapshot || {}, prepared?.sourceRender || {}, prepared, result, output);
   return {
     ...base,
     ...overrides,
     visibility: moreRestrictiveVisibility(base.visibility, normalizeVisibility(result.visibility || base.visibility)),
-    output: normalizeOutput({ ...base.output, outputId: result.outputId || base.output.outputId }),
+    output,
     themeRenderId: normalizeId(result.themedRenderId) || base.themeRenderId,
     templateRenderId: normalizeId(result.templateRenderId) || base.templateRenderId,
     templateId: normalizeId(result.templateId) || base.templateId,
     themeId: normalizeId(result.themeId) || base.themeId,
     templateInstanceId: normalizeId(result.templateInstanceId) || base.templateInstanceId,
+    ...projection,
     warnings: uniqueStrings([...(base.warnings || []), ...(result.warnings || [])]),
     errors: uniqueStrings([...(result.errors || [])])
   };
+}
+
+function buildDeclarativeProjection(snapshot, render, prepared, rendered, output) {
+  const source = findDeclarativeCompositionSource(rendered, prepared, render);
+  const sourceRevision = nonNegativeInteger(snapshot?.revision ?? render?.revision, 0);
+  if (!source) {
+    return {
+      projectionVersion: PROGRAM_PROJECTION_VERSION,
+      composition: null,
+      components: [],
+      layers: [],
+      sourceRevision,
+      ...extractContext({}, snapshot)
+    };
+  }
+  const templateInstance = isRecord(source.templateInstance) ? source.templateInstance : {};
+  const templateId = normalizeId(rendered?.templateId || source.templateId || source.composition?.templateId || templateInstance.templateId || render.templateId);
+  const themeId = normalizeId(rendered?.themeId || source.themeId || source.composition?.themeId || render.themeId);
+  const rawComposition = isRecord(source.composition) ? source.composition : source;
+  const componentInputs = Array.isArray(rawComposition.components) ? rawComposition.components : [];
+  if (componentInputs.length > MAX_COMPONENTS) throw previewError("preview-composition-components-limit");
+  const declaredOrder = Array.isArray(rawComposition.order)
+    ? rawComposition.order
+    : Array.isArray(source.componentOrder) ? source.componentOrder : [];
+  const orderIndex = new Map(declaredOrder.map((id, index) => [normalizeId(id), index]));
+  const components = componentInputs
+    .map((component, index) => buildDeclarativeComponent(component, index, orderIndex))
+    .sort(compareDeclarativeComponents)
+    .map((component, index) => ({ ...component, order: index }));
+  const componentIds = new Set(components.map((component) => component.componentId));
+  if (componentIds.size !== components.length) throw previewError("preview-composition-component-duplicate");
+  const order = components.map((component) => component.componentId);
+  const layers = buildDeclarativeLayers(rawComposition.layers, components);
+  const geometrySource = isRecord(rawComposition.geometry) ? rawComposition.geometry : {};
+  const resolution = isRecord(source.resolution) ? source.resolution : output.resolution;
+  const background = cloneProjectionValue(
+    rawComposition.background ?? rendered?.themeBackground ?? source.themeBackground ?? null,
+    null,
+    "composition.background"
+  );
+  const context = extractContext(source, templateInstance, rawComposition, snapshot);
+  const compositionId = normalizeId(rawComposition.compositionId || source.preparationId)
+    || normalizeId(`composition_${templateInstance.templateInstanceId || templateId || "program"}`);
+  const rootComponentId = normalizeId(rawComposition.rootComponentId || templateInstance.metadata?.rootComponentId)
+    || components[0]?.componentId
+    || null;
+  const composition = {
+    compositionVersion: PROGRAM_PROJECTION_VERSION,
+    compositionId,
+    templateId,
+    themeId,
+    rootComponentId,
+    components: cloneProjectionValue(components, [], "composition.components"),
+    layers: cloneProjectionValue(layers, [], "composition.layers"),
+    order: [...order],
+    geometry: {
+      width: positiveFinite(geometrySource.width ?? resolution?.width, 1920),
+      height: positiveFinite(geometrySource.height ?? resolution?.height, 1080),
+      orientation: normalizeId(geometrySource.orientation || source.orientation || output.orientation) || "landscape"
+    },
+    safeArea: cloneProjectionValue(rawComposition.safeArea ?? source.safeArea ?? output.safeArea ?? {}, {}, "composition.safeArea"),
+    transparentBackground: typeof rawComposition.transparentBackground === "boolean"
+      ? rawComposition.transparentBackground
+      : background?.type === "transparent",
+    background,
+    data: cloneProjectionValue(rawComposition.data ?? source.resolvedBindings ?? {}, {}, "composition.data"),
+    metadata: cloneProjectionValue({
+      ...(isRecord(rawComposition.metadata) ? rawComposition.metadata : {}),
+      templateType: source.templateType || templateInstance.templateType || null,
+      templateVersion: templateInstance.templateVersion || render.templateVersion || null,
+      themeVersion: rendered?.themeVersion || source.themeVersion || render.themeVersion || null,
+      themeScope: source.themeScope || null,
+      brandingStatus: source.brandingStatus || null,
+      layout: source.layout || templateInstance.layout || null
+    }, {}, "composition.metadata")
+  };
+  const projection = {
+    projectionVersion: PROGRAM_PROJECTION_VERSION,
+    composition,
+    components: cloneProjectionValue(components, [], "projection.components"),
+    layers: cloneProjectionValue(layers, [], "projection.layers"),
+    sourceRevision,
+    ...context
+  };
+  const errors = [];
+  validateDeclarativeProjection({ ...projection, templateId, themeId }, errors, "preview");
+  if (errors.length) throw previewError("preview-composition-invalid", { errors });
+  return projection;
+}
+
+function findDeclarativeCompositionSource(rendered, prepared, render) {
+  const candidates = [
+    rendered?.composition,
+    rendered?.preparation,
+    prepared?.adapterPreparation?.composition,
+    prepared?.adapterPreparation?.preparation,
+    prepared?.adapterPreparation,
+    render?.composition
+  ];
+  return candidates.find((candidate) => isRecord(candidate) && Array.isArray(candidate.components)) || null;
+}
+
+function buildDeclarativeComponent(input, fallbackOrder, orderIndex) {
+  if (!isRecord(input)) throw previewError("preview-composition-component-invalid");
+  const instance = isRecord(input.instance) ? input.instance : input;
+  const componentId = normalizeId(instance.instanceId || input.componentId || instance.componentId);
+  const componentType = normalizeId(instance.componentType || input.componentType);
+  if (!componentId || !componentType) throw previewError("preview-composition-component-invalid");
+  const rawGeometry = isRecord(input.geometry)
+    ? input.geometry
+    : isRecord(instance.layout) ? instance.layout : isRecord(input.layout) ? input.layout : {};
+  const style = cloneProjectionValue(instance.style ?? input.style ?? {}, {}, `component.${componentId}.style`);
+  const metadata = cloneProjectionValue(instance.metadata ?? input.metadata ?? {}, {}, `component.${componentId}.metadata`);
+  const zIndex = finiteInteger(rawGeometry.zIndex, 0);
+  const declared = orderIndex.has(componentId) ? orderIndex.get(componentId) : fallbackOrder;
+  const layerId = normalizeId(input.layerId || metadata.layerId) || normalizeId(`layer_${zIndex}`);
+  const assetRefs = collectAuthorizedAssetRefs(instance.properties, input.assetRefs);
+  return {
+    componentId,
+    sourceComponentId: normalizeId(instance.componentId) || componentId,
+    componentType,
+    parentId: normalizeId(input.parentId || metadata.parentId),
+    layerId,
+    order: nonNegativeInteger(input.order, declared),
+    visibility: normalizeComponentVisibility(input.visibility ?? instance.visibility),
+    geometry: {
+      x: finite(rawGeometry.x, 0),
+      y: finite(rawGeometry.y, 0),
+      width: nonNegativeFinite(rawGeometry.width, 0),
+      height: nonNegativeFinite(rawGeometry.height, 0),
+      rotation: finite(rawGeometry.rotation, 0),
+      anchor: normalizeId(rawGeometry.anchor) || "center",
+      scale: positiveFinite(rawGeometry.scale, 1),
+      zIndex,
+      safeArea: cloneProjectionValue(rawGeometry.safeArea ?? {}, {}, `component.${componentId}.safeArea`),
+      responsive: cloneProjectionValue(rawGeometry.responsive ?? {}, {}, `component.${componentId}.responsive`)
+    },
+    opacity: opacityValue(input.opacity ?? style.opacity, 1),
+    style,
+    properties: cloneProjectionValue(instance.properties ?? input.properties ?? {}, {}, `component.${componentId}.properties`),
+    content: cloneProjectionValue(input.resolvedContent ?? input.content ?? {}, {}, `component.${componentId}.content`),
+    data: cloneProjectionValue(input.resolvedBindings ?? input.data ?? {}, {}, `component.${componentId}.data`),
+    assetRefs,
+    metadata
+  };
+}
+
+function compareDeclarativeComponents(left, right) {
+  return left.order - right.order
+    || left.geometry.zIndex - right.geometry.zIndex
+    || left.componentId.localeCompare(right.componentId);
+}
+
+function buildDeclarativeLayers(rawLayers, components) {
+  const byLayer = new Map();
+  components.forEach((component) => {
+    if (!byLayer.has(component.layerId)) {
+      byLayer.set(component.layerId, {
+        layerId: component.layerId,
+        order: component.order,
+        zIndex: component.geometry.zIndex,
+        visibility: component.visibility,
+        componentIds: []
+      });
+    }
+    const layer = byLayer.get(component.layerId);
+    layer.order = Math.min(layer.order, component.order);
+    layer.zIndex = Math.min(layer.zIndex, component.geometry.zIndex);
+    layer.componentIds.push(component.componentId);
+  });
+  if (Array.isArray(rawLayers)) {
+    rawLayers.forEach((raw, index) => {
+      if (!isRecord(raw)) return;
+      const layerId = normalizeId(raw.layerId || raw.id);
+      if (!layerId || !byLayer.has(layerId)) return;
+      const layer = byLayer.get(layerId);
+      layer.order = nonNegativeInteger(raw.order, layer.order ?? index);
+      layer.zIndex = finiteInteger(raw.zIndex, layer.zIndex);
+      if (typeof raw.visibility === "boolean" || typeof raw.visibility === "string") layer.visibility = normalizeComponentVisibility(raw.visibility);
+    });
+  }
+  return [...byLayer.values()]
+    .sort((left, right) => left.order - right.order || left.zIndex - right.zIndex || left.layerId.localeCompare(right.layerId))
+    .map((layer, index) => ({ ...layer, order: index }));
+}
+
+function collectAuthorizedAssetRefs(properties, supplied) {
+  const candidates = [];
+  if (isRecord(properties?.assetRef)) candidates.push(properties.assetRef);
+  if (Array.isArray(supplied)) candidates.push(...supplied);
+  const seen = new Set();
+  return candidates.map((candidate) => {
+    if (!isRecord(candidate)) return null;
+    const assetId = normalizeId(candidate.assetId);
+    if (!assetId) return null;
+    const value = {
+      assetId,
+      version: typeof candidate.version === "string" ? candidate.version.slice(0, 40) : null,
+      variantId: normalizeId(candidate.variantId || candidate.variant) || null
+    };
+    const key = `${value.assetId}|${value.version || ""}|${value.variantId || ""}`;
+    if (seen.has(key)) return null;
+    seen.add(key);
+    return value;
+  }).filter(Boolean);
+}
+
+function extractContext(...sources) {
+  const result = {};
+  CONTEXT_FIELDS.forEach((field) => {
+    for (const source of sources) {
+      const value = normalizeId(source?.[field] || source?.context?.[field]);
+      if (value) {
+        result[field] = value;
+        break;
+      }
+    }
+  });
+  return result;
+}
+
+function validateDeclarativeProjection(holder, errors, prefix) {
+  const hasProjection = holder.projectionVersion !== undefined
+    || holder.composition !== undefined
+    || holder.components !== undefined
+    || holder.layers !== undefined;
+  if (!hasProjection) return;
+  if (holder.projectionVersion !== PROGRAM_PROJECTION_VERSION) errors.push(`${prefix}-projection-version-invalid`);
+  if (!Array.isArray(holder.components) || holder.components.length > MAX_COMPONENTS) errors.push(`${prefix}-components-invalid`);
+  if (!Array.isArray(holder.layers) || holder.layers.length > MAX_COMPONENTS) errors.push(`${prefix}-layers-invalid`);
+  if (!Number.isInteger(holder.sourceRevision) || holder.sourceRevision < 0) errors.push(`${prefix}-source-revision-invalid`);
+  if (holder.composition === null) {
+    if ((holder.components || []).length || (holder.layers || []).length) errors.push(`${prefix}-empty-composition-invalid`);
+    return;
+  }
+  const composition = holder.composition;
+  if (!isRecord(composition) || composition.compositionVersion !== PROGRAM_PROJECTION_VERSION) {
+    errors.push(`${prefix}-composition-invalid`);
+    return;
+  }
+  if (!isSafeId(composition.compositionId) || !isSafeId(composition.templateId) || !isSafeId(composition.themeId)) {
+    errors.push(`${prefix}-composition-identity-invalid`);
+  }
+  if (holder.templateId && composition.templateId !== holder.templateId) errors.push(`${prefix}-composition-template-mismatch`);
+  if (holder.themeId && composition.themeId !== holder.themeId) errors.push(`${prefix}-composition-theme-mismatch`);
+  if (!Array.isArray(composition.components) || !Array.isArray(composition.layers) || !Array.isArray(composition.order)) {
+    errors.push(`${prefix}-composition-structure-invalid`);
+    return;
+  }
+  if (!isRecord(composition.geometry)
+    || !Number.isFinite(composition.geometry.width) || composition.geometry.width <= 0
+    || !Number.isFinite(composition.geometry.height) || composition.geometry.height <= 0
+    || !isSafeId(composition.geometry.orientation)) errors.push(`${prefix}-composition-geometry-invalid`);
+  const ids = new Set();
+  composition.components.forEach((component) => {
+    if (!isRecord(component) || !isSafeId(component.componentId) || !isSafeId(component.componentType)
+      || ids.has(component.componentId) || !isRecord(component.geometry)) {
+      errors.push(`${prefix}-component-invalid`);
+      return;
+    }
+    ids.add(component.componentId);
+    const geometry = component.geometry;
+    if (![geometry.x, geometry.y, geometry.width, geometry.height, geometry.rotation, geometry.scale, geometry.zIndex].every(Number.isFinite)
+      || geometry.width < 0 || geometry.height < 0 || geometry.scale <= 0
+      || !Number.isFinite(component.opacity) || component.opacity < 0 || component.opacity > 1) {
+      errors.push(`${prefix}-component-geometry-invalid`);
+    }
+  });
+  if (composition.order.length !== ids.size || composition.order.some((id) => !ids.has(id))) errors.push(`${prefix}-composition-order-invalid`);
+  if (holder.components.length !== composition.components.length) errors.push(`${prefix}-components-mismatch`);
+}
+
+function cloneProjectionValue(value, fallback, path) {
+  if (value === undefined) return fallback;
+  const result = safeClone(value);
+  if (result.errors.length) throw previewError("preview-composition-unsafe", { path, errors: result.errors });
+  return result.value === undefined ? fallback : result.value;
 }
 
 function buildActiveRuntime(result, prepared) {
@@ -497,9 +902,10 @@ function clonePreview(preview) {
 function sanitizeSnapshot(snapshot, visibility) {
   return safeClone(snapshot, {
     rejectUnsafeText: false,
-    keyFilter: (key) => {
+    keyFilter: (key, path, value) => {
       const normalized = key.toLowerCase();
-      if (SECRET_KEYS.has(normalized) || RUNTIME_KEYS.has(normalized)) return false;
+      if (SECRET_KEYS.has(normalized)) return false;
+      if (RUNTIME_KEYS.has(normalized) && !isDeclarativeBindingTarget(key, path, value)) return false;
       if (visibility === "public" && PUBLIC_PRIVATE_KEYS.has(normalized)) return false;
       return true;
     }
@@ -564,16 +970,23 @@ function safeClone(value, options = {}, state = { depth: 0, ancestors: new WeakS
       state.errors.push(`preview-accessor-forbidden:${state.path}.${key}`);
       return;
     }
-    if (RUNTIME_KEYS.has(normalized) || SECRET_KEYS.has(normalized)) {
+    if ((RUNTIME_KEYS.has(normalized) && !isDeclarativeBindingTarget(key, state.path, descriptor.value))
+      || SECRET_KEYS.has(normalized)) {
       state.errors.push(`preview-field-forbidden:${state.path}.${key}`);
       return;
     }
-    if (options.keyFilter && !options.keyFilter(key, state.path)) return;
+    if (options.keyFilter && !options.keyFilter(key, state.path, descriptor.value)) return;
     const child = safeClone(descriptor.value, options, { ...state, depth: state.depth + 1, path: `${state.path}.${key}` });
     if (child.value !== undefined) result[key] = child.value;
   });
   state.ancestors.delete(value);
   return { value: result, errors: state.errors };
+}
+
+function isDeclarativeBindingTarget(key, path, value) {
+  return key === "target"
+    && typeof value === "string"
+    && /(?:^|\.)bindings\.\d+$/.test(path);
 }
 
 function moreRestrictiveVisibility(left, right) {
@@ -604,6 +1017,35 @@ function isSafeId(value) {
 function finiteNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function finite(value, fallback = 0) {
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function finiteInteger(value, fallback = 0) {
+  return Number.isInteger(value) ? value : fallback;
+}
+
+function nonNegativeInteger(value, fallback = 0) {
+  return Number.isInteger(value) && value >= 0 ? value : fallback;
+}
+
+function nonNegativeFinite(value, fallback = 0) {
+  return Number.isFinite(value) && value >= 0 ? value : fallback;
+}
+
+function positiveFinite(value, fallback = 1) {
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function opacityValue(value, fallback = 1) {
+  return Number.isFinite(value) && value >= 0 && value <= 1 ? value : fallback;
+}
+
+function normalizeComponentVisibility(value) {
+  if (typeof value === "boolean") return value;
+  return VISIBILITIES.includes(value) ? value : "production";
 }
 
 function isIso(value) {

@@ -51,6 +51,48 @@ function previewSnapshot(overrides = {}) {
     errors: [],
     ...(overrides.preview || {})
   };
+  const components = [{
+    componentId: "scoreboard_rows",
+    sourceComponentId: "scoreboard_table",
+    componentType: "table",
+    parentId: null,
+    layerId: "scoreboard",
+    order: 0,
+    visibility: "production",
+    geometry: { x: 100, y: 100, width: 1720, height: 760, rotation: 0, anchor: "center", scale: 1, zIndex: 10 },
+    opacity: 1,
+    style: { opacity: 1 },
+    properties: { columns: ["Equipo", "Total"], rows: [["Rancheros de Tijuana", 203]] },
+    content: {},
+    data: { turn: { team: { id: "team_tijuana", name: "Rancheros de Tijuana" } } },
+    assetRefs: [],
+    metadata: {}
+  }];
+  Object.assign(preview, {
+    projectionVersion: "1.0.0",
+    composition: {
+      compositionVersion: "1.0.0",
+      compositionId: `composition_${preview.templateInstanceId}`,
+      templateId: preview.templateId,
+      themeId: preview.themeId,
+      rootComponentId: components[0].componentId,
+      components: structuredClone(components),
+      layers: [{ layerId: "scoreboard", order: 0, zIndex: 10, visibility: "production", componentIds: [components[0].componentId] }],
+      order: [components[0].componentId],
+      geometry: { width: preview.output.resolution.width, height: preview.output.resolution.height, orientation: preview.output.orientation },
+      safeArea: structuredClone(preview.output.safeArea),
+      transparentBackground: true,
+      background: { type: "transparent" },
+      data: structuredClone(components[0].data),
+      metadata: {}
+    },
+    components: structuredClone(components),
+    layers: [{ layerId: "scoreboard", order: 0, zIndex: 10, visibility: "production", componentIds: [components[0].componentId] }],
+    sourceRevision: preview.revision,
+    tenantId: "tenant_a",
+    tournamentId: "tournament_a",
+    competitionId: "competition_a"
+  });
   return {
     snapshotVersion: "1.0.0",
     generatedAt: T1,
@@ -107,6 +149,11 @@ assert.equal(program.status, "program");
 assert.equal(program.transitionMode, "take");
 assert.equal(program.revision, 0);
 assert.equal(program.previewId, source.preview.previewId);
+assert.equal(program.projectionVersion, "1.0.0");
+assert.equal(program.composition.data.turn.team.name, "Rancheros de Tijuana");
+assert.equal(program.components.length, 1);
+assert.equal(program.layers.length, 1);
+assert.equal(program.programRevision, program.revision);
 assert.equal(program.output.safeArea.top, 0);
 assert.equal(program.output.safeArea.bottom, false);
 assert.equal(program.output.safeArea.left, "");
@@ -117,11 +164,14 @@ const originalProgramId = program.programId;
 // Program snapshot is detached, serializable and never exposes runtime, roots, listeners or actors.
 const programSnapshot = getProgramSnapshot(engine, { visibility: "public", now: T2 });
 assert.doesNotThrow(() => JSON.stringify(programSnapshot));
-for (const forbidden of ["runtime", "root", "renderer", "listener", "actor", "tenantId", "signedUrl", "secret"]) {
+for (const forbidden of ["runtime", "renderer", "listener", "actor", "tenantId", "signedUrl", "secret"]) {
   assert.equal(JSON.stringify(programSnapshot).includes(forbidden), false, `${forbidden} leaked`);
 }
+assert.doesNotMatch(JSON.stringify(programSnapshot), /"root"\s*:/);
 programSnapshot.program.output.outputId = "mutated";
+programSnapshot.program.composition.data.turn.team.name = "mutated";
 assert.equal(getProgram(engine).output.outputId, "preview_1080");
+assert.equal(getProgram(engine).composition.data.turn.team.name, "Rancheros de Tijuana");
 
 // CUT and AUTO are synchronous modeled transitions that retain one compatible Program identity.
 prepareProgram(engine, previewSnapshot({

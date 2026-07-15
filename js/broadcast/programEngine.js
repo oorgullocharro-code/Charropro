@@ -5,6 +5,8 @@ import {
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 
+const PROGRAM_PROJECTION_VERSION = "1.0.0";
+
 const ENGINES = new WeakMap();
 const STATES = new Set([
   "uninitialized", "ready", "prepared", "taking", "program", "cutting",
@@ -18,19 +20,25 @@ const RUNTIME_KEYS = new Set([
   "runtime", "renderer", "target", "weakmap", "weakset"
 ]);
 const SECRET_KEYS = new Set([
-  "apikey", "authorization", "cookie", "credentials", "password", "privatekey",
-  "secret", "signedurl", "token"
+  "accesstoken", "apikey", "auth", "authorization", "cookie", "cookies", "credential",
+  "credentials", "header", "headers", "password", "privatekey", "refreshtoken", "secret",
+  "signedurl", "token", "tokens"
 ]);
 const PRIVATE_KEYS = new Set([
   "actor", "clientid", "createdby", "organizationid", "operatorid", "sessionid",
-  "tenantid", "updatedby", "userid"
+  "tenantid", "updatedby", "userid", "diagnostics", "internalnotes", "operationalnotes",
+  "privatenotes"
 ]);
-const UNSAFE_TEXT = /<\s*(?:script|iframe|object|embed|style|link|img)\b|\bon(?:error|load|click)\s*=|(?:^|[\s"'])\s*(?:javascript|file|data|vbscript):|\beval\s*\(|\bnew\s+Function\b/i;
+const UNSAFE_TEXT = /<\s*\/?\s*[a-z][^>]*>|\bon(?:error|load|click)\s*=|(?:^|[\s"'])\s*(?:javascript|file|data|vbscript):|\beval\s*\(|\bnew\s+Function\b|\bexpression\s*\(|@import\b|url\s*\(\s*["']?\s*(?:javascript|file|data\s*:\s*text\/html|vbscript):/i;
 const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/;
 const MAX_DEPTH = 16;
 const MAX_ARRAY_ITEMS = 500;
 const MAX_OBJECT_KEYS = 700;
 const MAX_TEXT_LENGTH = 20000;
+const MAX_COMPONENTS = 300;
+const CONTEXT_FIELDS = Object.freeze([
+  "tenantId", "organizationId", "clientId", "tournamentId", "competitionId", "sessionId"
+]);
 
 export class BroadcastProgramError extends Error {
   constructor(code, details = {}) {
@@ -167,7 +175,7 @@ export function getProgramSnapshot(engine, options = {}) {
     warnings: uniqueStrings(runtime.program?.warnings || []),
     errors: uniqueStrings(runtime.program?.errors || [])
   };
-  return sanitizeSnapshot(snapshot, effectiveVisibility);
+  return sanitizeSnapshot(snapshot, visibility);
 }
 
 export function validateProgram(program) {
@@ -185,6 +193,7 @@ export function validateProgram(program) {
   if (!isRecord(program.output)) errors.push("program-output-invalid");
   else if (!isSafeId(program.output.outputId) || !isSafeId(program.output.type)) errors.push("program-output-invalid");
   if (!Array.isArray(program.warnings) || !Array.isArray(program.errors)) errors.push("program-diagnostics-invalid");
+  validateProgramProjection(program, errors);
   const safety = safeClone(program);
   errors.push(...safety.errors);
   return validation(uniqueStrings(errors), warnings);
@@ -247,6 +256,7 @@ function normalizePreviewSnapshot(snapshot, options = {}) {
     : sourceVisibility;
   value.visibility = moreRestrictiveVisibility(sourceVisibility, requestedVisibility);
   value.preview.visibility = value.visibility;
+  assertContextCompatible(value, options.context);
   return value;
 }
 
@@ -282,7 +292,9 @@ function buildProgram(runtime, engine, prepared, options) {
   const createdAt = options.compatible && previous ? previous.createdAt : options.now;
   const revision = options.compatible && previous ? previous.revision + 1 : 0;
   const preview = prepared.preview;
+  const context = extractContext(preview, prepared.snapshot);
   return {
+    projectionVersion: preview.projectionVersion || PROGRAM_PROJECTION_VERSION,
     programId,
     createdAt,
     updatedAt: options.now,
@@ -296,10 +308,97 @@ function buildProgram(runtime, engine, prepared, options) {
     templateId: preview.templateId,
     themeId: preview.themeId,
     templateInstanceId: preview.templateInstanceId,
+    composition: preview.composition === null || preview.composition === undefined
+      ? null
+      : cloneProgram(preview.composition),
+    components: Array.isArray(preview.components) ? cloneProgram(preview.components) : [],
+    layers: Array.isArray(preview.layers) ? cloneProgram(preview.layers) : [],
+    sourceRevision: nonNegativeInteger(prepared.snapshot.revision, nonNegativeInteger(preview.sourceRevision, 0)),
+    programRevision: revision,
+    generatedAt: options.now,
+    ...context,
     transitionMode: options.mode,
     warnings: uniqueStrings([...(prepared.snapshot.warnings || []), ...(preview.warnings || [])]),
     errors: []
   };
+}
+
+function validateProgramProjection(program, errors) {
+  const hasProjection = program.projectionVersion !== undefined
+    || program.composition !== undefined
+    || program.layers !== undefined
+    || program.sourceRevision !== undefined
+    || program.programRevision !== undefined;
+  if (!hasProjection) return;
+  if (program.projectionVersion !== PROGRAM_PROJECTION_VERSION) errors.push("program-projection-version-invalid");
+  if (!Array.isArray(program.components) || program.components.length > MAX_COMPONENTS) errors.push("program-components-invalid");
+  if (!Array.isArray(program.layers) || program.layers.length > MAX_COMPONENTS) errors.push("program-layers-invalid");
+  if (!Number.isInteger(program.sourceRevision) || program.sourceRevision < 0) errors.push("program-source-revision-invalid");
+  if (!Number.isInteger(program.programRevision) || program.programRevision !== program.revision) errors.push("program-projection-revision-invalid");
+  if (!isIso(program.generatedAt)) errors.push("program-projection-timestamp-invalid");
+  if (program.composition === null) {
+    if ((program.components || []).length || (program.layers || []).length) errors.push("program-empty-composition-invalid");
+    return;
+  }
+  const composition = program.composition;
+  if (!isRecord(composition) || composition.compositionVersion !== PROGRAM_PROJECTION_VERSION) {
+    errors.push("program-composition-invalid");
+    return;
+  }
+  if (!isSafeId(composition.compositionId) || !isSafeId(composition.templateId) || !isSafeId(composition.themeId)
+    || composition.templateId !== program.templateId || composition.themeId !== program.themeId) {
+    errors.push("program-composition-identity-invalid");
+  }
+  if (!Array.isArray(composition.components) || !Array.isArray(composition.layers) || !Array.isArray(composition.order)) {
+    errors.push("program-composition-structure-invalid");
+    return;
+  }
+  if (!isRecord(composition.geometry)
+    || !Number.isFinite(composition.geometry.width) || composition.geometry.width <= 0
+    || !Number.isFinite(composition.geometry.height) || composition.geometry.height <= 0
+    || !isSafeId(composition.geometry.orientation)) errors.push("program-composition-geometry-invalid");
+  const ids = new Set();
+  composition.components.forEach((component) => {
+    if (!isRecord(component) || !isSafeId(component.componentId) || !isSafeId(component.componentType)
+      || ids.has(component.componentId) || !isRecord(component.geometry)) {
+      errors.push("program-component-invalid");
+      return;
+    }
+    ids.add(component.componentId);
+    const geometry = component.geometry;
+    if (![geometry.x, geometry.y, geometry.width, geometry.height, geometry.rotation, geometry.scale, geometry.zIndex].every(Number.isFinite)
+      || geometry.width < 0 || geometry.height < 0 || geometry.scale <= 0
+      || !Number.isFinite(component.opacity) || component.opacity < 0 || component.opacity > 1) {
+      errors.push("program-component-geometry-invalid");
+    }
+  });
+  if (composition.order.length !== ids.size || composition.order.some((id) => !ids.has(id))) errors.push("program-composition-order-invalid");
+  if (program.components.length !== composition.components.length) errors.push("program-components-mismatch");
+}
+
+function assertContextCompatible(snapshot, requestedContext) {
+  if (!isRecord(requestedContext)) return;
+  const source = extractContext(snapshot.preview, snapshot);
+  CONTEXT_FIELDS.forEach((field) => {
+    const requested = normalizeId(requestedContext[field]);
+    if (source[field] && requested && source[field] !== requested) {
+      throw programError(`program-${field}-mismatch`, { expected: requested, actual: source[field] });
+    }
+  });
+}
+
+function extractContext(...sources) {
+  const result = {};
+  CONTEXT_FIELDS.forEach((field) => {
+    for (const source of sources) {
+      const value = normalizeId(source?.[field] || source?.context?.[field]);
+      if (value) {
+        result[field] = value;
+        break;
+      }
+    }
+  });
+  return result;
 }
 
 function buildProgramRuntime(program, prepared, mode) {
@@ -512,6 +611,10 @@ function isSafeId(value) {
 function finiteNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function nonNegativeInteger(value, fallback = 0) {
+  return Number.isInteger(value) && value >= 0 ? value : fallback;
 }
 
 function isIso(value) {

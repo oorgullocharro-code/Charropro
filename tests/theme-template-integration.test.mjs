@@ -460,11 +460,24 @@ const rendered = renderThemedTemplate(integration, themedPreparation, {
 });
 assert.equal(["rendered", "partially_rendered"].includes(rendered.state), true);
 assert.equal(rendered.themeId, "theme_orgullo_charro");
+assert.equal(rendered.preparation.themeId, "theme_orgullo_charro");
+assert.equal(rendered.preparation.templateId, rendered.templateId);
+assert.equal(rendered.preparation.preparedAt, T0);
+assert.doesNotMatch(JSON.stringify(rendered.preparation), /"(?:root|renderer|listener|runtime|signedUrl|token|secret)"\s*:/i);
 assert.ok(rendered.root);
 assert.equal(rendered.root.style.backgroundColor, "#090A0C");
 const stableRoot = rendered.root;
 assert.equal(listThemedTemplateRenders(integration).length, 1);
 assert.equal(getThemedTemplateRender(integration, "themed_render_main").themeId, "theme_orgullo_charro");
+const themeAPreparation = structuredClone(rendered.preparation);
+rendered.preparation.components[0].instance.style.color = "#abcdef";
+rendered.preparation.components[0].instance.properties.text = "mutated";
+rendered.preparation.appliedTokens.push("mutated.token");
+rendered.preparation.themeAssetRefs.push({ assetId: "mutated-asset", version: "1.0.0" });
+assert.notEqual(getThemedTemplateRender(integration, "themed_render_main").preparation.components[0].instance.style.color, "#abcdef");
+assert.notEqual(getThemedTemplateRender(integration, "themed_render_main").preparation.components[0].instance.properties.text, "mutated");
+assert.equal(getThemedTemplateRender(integration, "themed_render_main").preparation.appliedTokens.includes("mutated.token"), false);
+assert.equal(getThemedTemplateRender(integration, "themed_render_main").preparation.themeAssetRefs.some((asset) => asset.assetId === "mutated-asset"), false);
 
 const gradientPreparation = structuredClone(orgulloGradient);
 gradientPreparation.templateRenderId = "theme_template_gradient_visual";
@@ -481,6 +494,11 @@ const updated = updateThemedTemplateRender(integration, "themed_render_main", "t
 assert.equal(updated.themedRenderId, rendered.themedRenderId);
 assert.equal(updated.templateRenderId, rendered.templateRenderId);
 assert.equal(updated.themeId, "theme_dark");
+assert.equal(updated.preparation.themeId, "theme_dark");
+assert.equal(updated.preparation.templateId, updated.templateId);
+assert.equal(updated.preparation.preparedAt, T1);
+assert.notDeepEqual(updated.preparation.components[0].instance.style, themeAPreparation.components[0].instance.style);
+assert.equal(themeAPreparation.themeId, "theme_orgullo_charro");
 assert.equal(updated.root, stableRoot);
 assert.equal(listThemedTemplateRenders(integration).length, 1);
 assert.deepEqual({
@@ -494,6 +512,9 @@ assert.deepEqual({
 
 const lightUpdated = updateThemedTemplateRender(integration, "themed_render_main", "theme_light", { now: T2 });
 assert.equal(lightUpdated.themeId, "theme_light");
+assert.equal(lightUpdated.preparation.themeId, "theme_light");
+assert.equal(lightUpdated.preparation.preparedAt, T2);
+assert.notDeepEqual(lightUpdated.preparation.components[0].instance.style, updated.preparation.components[0].instance.style);
 assert.equal(lightUpdated.createdAt, T0);
 assert.equal(lightUpdated.updatedAt, T2);
 
@@ -589,14 +610,27 @@ destroyTemplateRendererIntegration(residueRenderer, { now: T2 });
 const snapshot = buildThemeTemplateSnapshot(integration, "themed_render_main", { visibility: "production", now: T2 });
 assert.equal(validateThemeTemplateSnapshot(snapshot).valid, true);
 assert.equal(snapshot.renders[0].themeId, "theme_light");
+assert.equal(snapshot.renders[0].preparation.themeId, "theme_light");
+assert.deepEqual(snapshot.renders[0].preparation.components, lightUpdated.preparation.components);
+const mismatchedPreparationSnapshot = structuredClone(snapshot);
+mismatchedPreparationSnapshot.renders[0].preparation.themeId = "theme_dark";
+assert.equal(validateThemeTemplateSnapshot(mismatchedPreparationSnapshot).valid, false);
+assert.equal(
+  validateThemeTemplateSnapshot(mismatchedPreparationSnapshot).errors.includes("theme-template-snapshot-preparation-theme-mismatch"),
+  true
+);
 assert.equal("root" in snapshot.renders[0], false);
 assert.equal(JSON.stringify(snapshot).includes("ownerDocument"), false);
 const publicSnapshot = buildThemeTemplateSnapshot(integration, "themed_render_main", { visibility: "public", now: T2 });
 assert.equal("tenantId" in publicSnapshot, false);
+assert.equal(publicSnapshot.renders[0].preparation.themeId, "theme_light");
+assert.equal(JSON.stringify(publicSnapshot.renders[0].preparation).includes(TENANT), false);
 assert.equal(JSON.stringify(publicSnapshot).toLowerCase().includes("actor"), false);
 const runtimeThemeBeforeMutation = getThemedTemplateRender(integration, "themed_render_main").themeId;
 snapshot.renders[0].themeId = "mutated";
+snapshot.renders[0].preparation.components[0].instance.style.color = "#123456";
 assert.equal(getThemedTemplateRender(integration, "themed_render_main").themeId, runtimeThemeBeforeMutation);
+assert.notEqual(getThemedTemplateRender(integration, "themed_render_main").preparation.components[0].instance.style.color, "#123456");
 const cloned = cloneThemedTemplateResult(lightUpdated);
 cloned.appliedTokens.push("mutated");
 assert.equal(getThemedTemplateRender(integration, "themed_render_main").appliedTokens.includes("mutated"), false);
@@ -763,6 +797,10 @@ const publicUpdated = updateThemedTemplateRender(visibilityIntegration, "themed_
 });
 assert.equal(publicUpdated.visibility, "public");
 assert.equal(publicUpdated.componentCount, 1);
+assert.equal(publicUpdated.preparation.themeId, "theme_light");
+assert.equal(publicUpdated.preparation.components.length, 1);
+assert.equal(JSON.stringify(publicUpdated.preparation).includes("tenant_playground"), false);
+assert.equal(JSON.stringify(publicUpdated.preparation).includes("PRIVATE CONTENT"), false);
 assert.equal(publicUpdated.root, visibilityRoot);
 assert.equal(publicUpdated.root.textContent.includes("PUBLIC CONTENT"), true);
 assert.equal(publicUpdated.root.textContent.includes("PRIVATE CONTENT"), false);
@@ -776,6 +814,7 @@ const productionRestored = updateThemedTemplateRender(visibilityIntegration, "th
   visibility: "production", includeRoot: true, now: T2
 });
 assert.equal(productionRestored.componentCount, 2);
+assert.equal(productionRestored.preparation.components.length, 2);
 assert.equal(productionRestored.root, visibilityRoot);
 assert.equal(productionRestored.root.textContent.includes("PRIVATE CONTENT"), true);
 
