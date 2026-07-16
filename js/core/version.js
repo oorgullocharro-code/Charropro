@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
+export const CHARROPRO_APP_VERSION = "20260715-broadcast-access-and-sync-001-local-output-sync-v1";
 
 let versionLogged = false;
 

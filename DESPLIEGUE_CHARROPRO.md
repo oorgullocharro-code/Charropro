@@ -589,3 +589,14 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - Limitaciones: sin sincronización productiva de la página aislada, sin NDI/video/audio real, sin persistencia y sin controles de producción o cronómetro.
 - Siguiente paso después de publicar este ticket: `TIMER-DISPLAY-001`; la conexión local de video se reserva para `ANNOUNCER-NDI-VIDEO-001`.
 - Contrato, seguridad y limitaciones: `BROADCAST_ANNOUNCER_MONITOR_V1.md`.
+# BROADCAST-ACCESS-AND-SYNC-001 — Centro de acceso y sincronización local
+
+- Se agregó `broadcast-studio.html` como centro de acceso para Production Console, Playground, Program Main Output, Announcer Monitor, Browser Output Lab y los portales independientes de Jueces/Supervisión.
+- Se agregó `js/broadcast/outputSynchronization.js` V1 para aplicar Program Snapshot y `announcer_projection` en targets locales montados dentro de Production Console.
+- Program vacío se aplica como `cleared` sin error; el receptor interno de Program Main usa visibilidad `production` y conserva la política de no elevar datos hacia salidas públicas.
+- La sincronización es explícita, aislada, revisionada e idempotente. No ejecuta Take/Cut/Auto y no modifica Program, Preview, Output Routing ni los módulos de salida.
+- Production Console distingue `FIXTURE DE LABORATORIO` de `DATOS REALES DE LA SESIÓN` y no presenta fixtures como operación productiva.
+- Los accesos heredados `Abrir OBS` y `Locutores` están definidos en `js/app.js`, fuera del alcance autorizado, por lo que su migración queda pendiente.
+- Jueces y Supervisión permanecen intactos.
+- Esta fase no usa Firebase, WebSocket, polling, BroadcastChannel, NDI ni transporte entre pestañas o computadoras.
+- Versión: `20260715-broadcast-access-and-sync-001-local-output-sync-v1`.

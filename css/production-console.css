@@ -2124,6 +2124,120 @@ input {
   gap: 7px;
 }
 
+.console-output-synchronization-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.console-output-synchronization-status {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.console-source-label {
+  border: 1px solid var(--console-border-soft);
+  border-radius: 4px;
+  color: var(--console-muted);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 7px;
+}
+
+.console-source-label.is-session {
+  border-color: var(--console-green);
+  color: var(--console-green);
+}
+
+.console-source-label.is-fixture {
+  border-color: var(--console-yellow);
+  color: var(--console-yellow);
+}
+
+.console-output-synchronization-note {
+  color: var(--console-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.console-output-synchronization-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.console-output-synchronization-card {
+  background: var(--console-panel-2);
+  border: 1px solid var(--console-border-soft);
+  border-radius: 6px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.console-output-synchronization-heading {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.console-output-synchronization-heading h3 {
+  font-size: 14px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.console-output-synchronization-metrics {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.console-output-synchronization-metrics .console-definition-item {
+  background: var(--console-panel-3);
+  border: 1px solid var(--console-border-soft);
+  min-width: 0;
+  padding: 6px;
+}
+
+.console-output-synchronization-metrics dt,
+.console-output-synchronization-metrics dd {
+  overflow-wrap: anywhere;
+}
+
+.console-output-synchronization-diagnostics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.console-output-synchronization-diagnostics span {
+  color: var(--console-muted);
+  font-size: 10px;
+}
+
+.console-output-synchronization-actions {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.console-output-synchronization-actions .button {
+  min-width: 0;
+  white-space: normal;
+  width: 100%;
+}
+
+.console-output-synchronization-runtime {
+  display: none !important;
+}
+
 .console-output-routing-grid {
   display: grid;
   gap: 10px;
@@ -2268,6 +2382,10 @@ input {
   .console-output-route-actions {
     grid-column: 1 / -1;
   }
+
+  .console-output-synchronization-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
@@ -2283,13 +2401,20 @@ input {
   .console-output-route-actions {
     grid-column: 1;
   }
+
+  .console-output-synchronization-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 700px) {
   .console-output-routing-grid,
   .console-output-route-metrics,
   .console-output-route-diagnostics,
-  .console-output-route-actions {
+  .console-output-route-actions,
+  .console-output-synchronization-grid,
+  .console-output-synchronization-metrics,
+  .console-output-synchronization-actions {
     grid-template-columns: 1fr;
   }
 

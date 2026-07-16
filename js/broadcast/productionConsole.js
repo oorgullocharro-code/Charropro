@@ -182,10 +182,40 @@ import {
   updateOutputRoute,
   validateOutputRoutingSnapshot
 } from "./outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
+import {
+  buildProgramMainOutputSnapshot,
+  configureProgramMainOutput,
+  createProgramMainOutput,
+  destroyProgramMainOutput,
+  mountProgramMainOutput
+} from "./programMainOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+import {
+  configureAnnouncerMonitor,
+  createAnnouncerMonitor,
+  destroyAnnouncerMonitor,
+  getAnnouncerSnapshot,
+  mountAnnouncerMonitor
+} from "./announcerMonitor.js?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
+import {
+  OUTPUT_SYNCHRONIZATION_VERSION,
+  buildOutputSynchronizationSnapshot,
+  clearSynchronizedOutput,
+  configureOutputSynchronization,
+  createOutputSynchronization,
+  destroyOutputSynchronization,
+  getOutputSynchronizationErrors,
+  getOutputSynchronizationStatus,
+  getOutputSynchronizationWarnings,
+  startOutputSynchronization,
+  synchronizeAllOutputs,
+  synchronizeAnnouncerMonitor,
+  synchronizeProgramMain,
+  validateOutputSynchronizationSnapshot
+} from "./outputSynchronization.js?v=20260715-broadcast-access-and-sync-001-local-output-sync-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-broadcast-access-and-sync-001-local-output-sync-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-broadcast-access-and-sync-001-local-output-sync-v1";
 
 export const PRODUCTION_CONSOLE_OUTPUT_ROUTES = Object.freeze([
   Object.freeze({ routeId: "route-program-main", routeType: "program_main", outputId: "program-main", sourceType: "program_snapshot", visibility: "public", name: "Program Main" }),
@@ -435,6 +465,11 @@ export function createProductionConsoleModel(options = {}) {
     outputRoutingSnapshot: null,
     outputRoutingWarnings: [],
     outputRoutingErrors: [],
+    outputSynchronizationVersion: OUTPUT_SYNCHRONIZATION_VERSION,
+    outputSynchronizationState: "uninitialized",
+    outputSynchronizationSnapshot: null,
+    outputSynchronizationWarnings: [],
+    outputSynchronizationErrors: [],
     themeSequence: PRODUCTION_CONSOLE_THEME_DEFINITIONS.length,
     selectedThemeId: themeRegistry.activeThemeId || "theme_default",
     themeSnapshot: null,
@@ -1712,6 +1747,171 @@ function buildProductionConsoleAnnouncerSources(model) {
   };
 }
 
+function setupProductionConsoleOutputSynchronization(model, runtime, refs, options = {}) {
+  disposeProductionConsoleOutputSynchronization(runtime, options);
+  if (!refs.outputSynchronizationProgramHost || !refs.outputSynchronizationAnnouncerHost || !runtime.outputRoutingEngine) {
+    return model;
+  }
+  const scope = productionConsoleRoutingScope(model);
+  const now = options.now;
+  runtime.synchronizedProgramMainOutput = createProgramMainOutput({
+    programMainOutputId: "production-console-program-main-output",
+    browserOutputId: "production-console-browser-program-main"
+  }, { now });
+  configureProgramMainOutput(runtime.synchronizedProgramMainOutput, {
+    programMainOutputId: "production-console-program-main-output",
+    browserOutputId: "production-console-browser-program-main",
+    routeId: "route-program-main",
+    outputId: "program-main",
+    routeType: "program_main",
+    sourceType: "program_snapshot",
+    displayMode: "fit",
+    visibility: "production",
+    resolution: { width: 1920, height: 1080 },
+    orientation: "landscape",
+    safeArea: { top: 0, right: 0, bottom: 0, left: 0, unit: "percent" },
+    transparentBackground: true,
+    viewport: null,
+    ...scope,
+    metadata: { source: "production-console", synchronization: "local-explicit" }
+  }, { now });
+  mountProgramMainOutput(runtime.synchronizedProgramMainOutput, refs.outputSynchronizationProgramHost, { now });
+
+  runtime.synchronizedAnnouncerMonitor = createAnnouncerMonitor({
+    announcerMonitorId: "production-console-announcer-monitor",
+    browserOutputId: "production-console-browser-announcer"
+  }, { now });
+  configureAnnouncerMonitor(runtime.synchronizedAnnouncerMonitor, {
+    announcerMonitorId: "production-console-announcer-monitor",
+    browserOutputId: "production-console-browser-announcer",
+    routeId: "route-announcer-monitor",
+    outputId: "announcer-monitor",
+    routeType: "announcer_monitor",
+    sourceType: "announcer_projection",
+    displayMode: "balanced",
+    visibility: "operational",
+    resolution: { width: 1920, height: 1080 },
+    orientation: "landscape",
+    transparentBackground: false,
+    viewport: null,
+    videoRegion: { enabled: true, status: "placeholder", sourceType: null, connected: false, muted: true, aspectRatio: "16:9" },
+    ...scope,
+    metadata: { source: "production-console", synchronization: "local-explicit" }
+  }, { now });
+  mountAnnouncerMonitor(runtime.synchronizedAnnouncerMonitor, refs.outputSynchronizationAnnouncerHost, { now });
+
+  runtime.outputSynchronization = createOutputSynchronization({
+    synchronizationId: "production-console-output-synchronization"
+  }, { now });
+  configureOutputSynchronization(runtime.outputSynchronization, {
+    targets: ["program_main", "announcer_monitor"],
+    staleAfterMs: 15000,
+    context: scope
+  }, { expectedRevision: 0, now });
+  startOutputSynchronization(runtime.outputSynchronization, { expectedRevision: 1, now });
+  return syncProductionConsoleOutputSynchronizationModel(model, runtime, {
+    lastAction: "output-synchronization-ready",
+    now
+  });
+}
+
+function runProductionConsoleOutputSynchronization(model, runtime, action, options = {}) {
+  if (!runtime.outputSynchronization || runtime.outputSynchronization.status === "destroyed") {
+    throw consoleError("console-output-synchronization-unavailable");
+  }
+  const scope = productionConsoleRoutingScope(model);
+  let next = model;
+  if (["sync-program", "sync-all"].includes(action)) {
+    next = configureProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-program-main", options);
+  }
+  if (["sync-announcer", "sync-all"].includes(action)) {
+    next = configureProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-announcer-monitor", options);
+  }
+  if (action === "sync-program") {
+    synchronizeProgramMain(runtime.outputSynchronization, {
+      routingEngine: runtime.outputRoutingEngine,
+      programEngine: runtime.officialProgramEngine,
+      programMainOutput: runtime.synchronizedProgramMainOutput,
+      context: scope
+    }, { expectedRevision: runtime.outputSynchronization.revision, now: options.now });
+  } else if (action === "sync-announcer") {
+    synchronizeAnnouncerMonitor(runtime.outputSynchronization, {
+      routingEngine: runtime.outputRoutingEngine,
+      announcerSources: buildProductionConsoleAnnouncerSources(next),
+      announcerMonitor: runtime.synchronizedAnnouncerMonitor,
+      context: scope,
+      visibility: "operational"
+    }, { expectedRevision: runtime.outputSynchronization.revision, now: options.now });
+  } else if (action === "sync-all") {
+    synchronizeAllOutputs(runtime.outputSynchronization, {
+      programMain: {
+        routingEngine: runtime.outputRoutingEngine,
+        programEngine: runtime.officialProgramEngine,
+        programMainOutput: runtime.synchronizedProgramMainOutput,
+        context: scope
+      },
+      announcerMonitor: {
+        routingEngine: runtime.outputRoutingEngine,
+        announcerSources: buildProductionConsoleAnnouncerSources(next),
+        announcerMonitor: runtime.synchronizedAnnouncerMonitor,
+        context: scope,
+        visibility: "operational"
+      }
+    }, { expectedRevision: runtime.outputSynchronization.revision, now: options.now });
+  } else if (action === "clear-program") {
+    clearSynchronizedOutput(runtime.outputSynchronization, "program_main", {
+      programMainOutput: runtime.synchronizedProgramMainOutput
+    }, { expectedRevision: runtime.outputSynchronization.revision, now: options.now });
+  } else if (action === "clear-announcer") {
+    clearSynchronizedOutput(runtime.outputSynchronization, "announcer_monitor", {
+      announcerMonitor: runtime.synchronizedAnnouncerMonitor
+    }, { expectedRevision: runtime.outputSynchronization.revision, now: options.now });
+  } else {
+    throw consoleError("console-output-synchronization-action-invalid");
+  }
+  return syncProductionConsoleOutputSynchronizationModel(next, runtime, {
+    lastAction: `output-synchronization-${action}`,
+    now: options.now
+  });
+}
+
+function syncProductionConsoleOutputSynchronizationModel(model, runtime, options = {}) {
+  if (!runtime.outputSynchronization || runtime.outputSynchronization.status === "destroyed") {
+    return {
+      ...model,
+      outputSynchronizationState: "uninitialized",
+      outputSynchronizationSnapshot: null,
+      outputSynchronizationWarnings: [],
+      outputSynchronizationErrors: []
+    };
+  }
+  const snapshot = buildOutputSynchronizationSnapshot(runtime.outputSynchronization, { now: options.now });
+  return {
+    ...model,
+    outputSynchronizationState: getOutputSynchronizationStatus(runtime.outputSynchronization, { now: options.now }).status,
+    outputSynchronizationSnapshot: snapshot,
+    outputSynchronizationWarnings: getOutputSynchronizationWarnings(runtime.outputSynchronization, { now: options.now }),
+    outputSynchronizationErrors: getOutputSynchronizationErrors(runtime.outputSynchronization, { now: options.now }),
+    lastAction: options.lastAction || model.lastAction,
+    lastActionError: null
+  };
+}
+
+function disposeProductionConsoleOutputSynchronization(runtime, options = {}) {
+  if (runtime.outputSynchronization && runtime.outputSynchronization.status !== "destroyed") {
+    destroyOutputSynchronization(runtime.outputSynchronization, { now: options.now });
+  }
+  if (runtime.synchronizedProgramMainOutput && runtime.synchronizedProgramMainOutput.status !== "destroyed") {
+    destroyProgramMainOutput(runtime.synchronizedProgramMainOutput, { now: options.now });
+  }
+  if (runtime.synchronizedAnnouncerMonitor && runtime.synchronizedAnnouncerMonitor.status !== "destroyed") {
+    destroyAnnouncerMonitor(runtime.synchronizedAnnouncerMonitor, { now: options.now });
+  }
+  runtime.outputSynchronization = null;
+  runtime.synchronizedProgramMainOutput = null;
+  runtime.synchronizedAnnouncerMonitor = null;
+}
+
 function buildProductionConsoleOfficialTimerState(model) {
   const timer = model.contract?.timer || {};
   return {
@@ -2471,7 +2671,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(components.warnings || []),
     ...(templates.warnings || []),
     ...(themes.warnings || []),
-    ...(model.outputRoutingWarnings || [])
+    ...(model.outputRoutingWarnings || []),
+    ...(model.outputSynchronizationWarnings || [])
   ]);
   const errors = uniqueStrings([
     ...(model.state.errors || []),
@@ -2483,7 +2684,8 @@ export function getProductionConsoleInspector(model, options = {}) {
     ...(components.errors || []),
     ...(templates.errors || []),
     ...(themes.errors || []),
-    ...(model.outputRoutingErrors || [])
+    ...(model.outputRoutingErrors || []),
+    ...(model.outputSynchronizationErrors || [])
   ]);
   const inspector = {
     contract: cloneValue(model.contract),
@@ -2506,6 +2708,13 @@ export function getProductionConsoleInspector(model, options = {}) {
       warnings: cloneValue(model.outputRoutingWarnings || []),
       errors: cloneValue(model.outputRoutingErrors || [])
     },
+    outputSynchronization: {
+      version: OUTPUT_SYNCHRONIZATION_VERSION,
+      state: model.outputSynchronizationState,
+      snapshot: cloneValue(model.outputSynchronizationSnapshot),
+      warnings: cloneValue(model.outputSynchronizationWarnings || []),
+      errors: cloneValue(model.outputSynchronizationErrors || [])
+    },
     queue: getBroadcastQueue(model.state),
     actions: cloneValue(model.actionHistory || []),
     warnings: publicView ? [] : warnings,
@@ -2517,6 +2726,7 @@ export function getProductionConsoleInspector(model, options = {}) {
       broadcastState: BROADCAST_STATE_VERSION,
       broadcastOutput: BROADCAST_OUTPUT_VERSION,
       outputRouting: OUTPUT_ROUTING_VERSION,
+      outputSynchronization: OUTPUT_SYNCHRONIZATION_VERSION,
       assetManager: ASSET_MANAGER_VERSION,
       actionEngine: BROADCAST_ACTION_ENGINE_VERSION,
       productionVariables: PRODUCTION_VARIABLES_VERSION,
@@ -2633,6 +2843,9 @@ export function validateProductionConsoleModel(model) {
   const outputRouting = model.outputRoutingSnapshot
     ? validateOutputRoutingSnapshot(model.outputRoutingSnapshot)
     : { valid: true, errors: [], warnings: [] };
+  const outputSynchronization = model.outputSynchronizationSnapshot
+    ? validateOutputSynchronizationSnapshot(model.outputSynchronizationSnapshot)
+    : { valid: true, errors: [], warnings: [] };
   const errors = uniqueStrings([
     ...state.errors,
     ...contract.errors,
@@ -2644,7 +2857,8 @@ export function validateProductionConsoleModel(model) {
     ...templateRenderer.errors,
     ...themeTemplate.errors,
     ...officialProgram.errors,
-    ...outputRouting.errors
+    ...outputRouting.errors,
+    ...outputSynchronization.errors
   ]);
   return {
     valid: errors.length === 0,
@@ -2660,7 +2874,8 @@ export function validateProductionConsoleModel(model) {
       ...templateRenderer.warnings,
       ...themeTemplate.warnings,
       ...officialProgram.warnings,
-      ...outputRouting.warnings
+      ...outputRouting.warnings,
+      ...outputSynchronization.warnings
     ])
   };
 }
@@ -2691,11 +2906,15 @@ export function initializeProductionConsole(root = document) {
     officialProgramEngine: null,
     officialProgramVisualRoot: null,
     outputRoutingEngine: null,
+    outputSynchronization: null,
+    synchronizedProgramMainOutput: null,
+    synchronizedAnnouncerMonitor: null,
     controller
   };
   runtime.officialProgramEngine = createProductionConsoleOfficialProgramEngine(model);
   runtime.outputRoutingEngine = createProductionConsoleOutputRoutingEngine(model);
   model = syncProductionConsoleOutputRoutingModel(model, runtime.outputRoutingEngine);
+  model = setupProductionConsoleOutputSynchronization(model, runtime, refs);
   populateStaticControls(refs, model);
   if (refs.componentRendererTarget) {
     runtime.componentRenderer = createProductionConsoleComponentRenderer(model, refs.componentRendererTarget);
@@ -2745,6 +2964,7 @@ export function initializeProductionConsole(root = document) {
       if (runtime.outputRoutingEngine && runtime.outputRoutingEngine.state !== "destroyed") {
         destroyOutputRoutingEngine(runtime.outputRoutingEngine);
       }
+      disposeProductionConsoleOutputSynchronization(runtime);
       if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
         destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
       }
@@ -3758,6 +3978,11 @@ function collectRefs(root) {
     outputRoutingStatus: id("console-output-routing-status"),
     outputRoutingRoutes: id("console-output-routing-routes"),
     outputRoutingActions: [...root.querySelectorAll("[data-output-routing-action]")],
+    outputSynchronization: id("console-output-synchronization"),
+    outputSynchronizationStatus: id("console-output-synchronization-status"),
+    outputSynchronizationTargets: id("console-output-synchronization-targets"),
+    outputSynchronizationProgramHost: id("console-output-synchronization-program-host"),
+    outputSynchronizationAnnouncerHost: id("console-output-synchronization-announcer-host"),
     componentRendererLab: id("console-component-renderer-lab"),
     componentRendererFixture: id("console-component-renderer-fixture"),
     componentRendererOutput: id("console-component-renderer-output"),
@@ -3805,7 +4030,10 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       setModel({ ...getModel(), lastAction: "action-failed", lastActionError: error?.code || error?.message || "console-action-failed" });
     }
   };
-  listen(refs.loadFixture, "click", () => run((model) => loadProductionConsoleFixture(model, refs.fixture.value)), signal);
+  listen(refs.loadFixture, "click", () => run((model) => {
+    const next = loadProductionConsoleFixture(model, refs.fixture.value);
+    return setupProductionConsoleOutputSynchronization(next, runtime, refs);
+  }), signal);
   listen(refs.asset, "change", () => run((model) => {
     const selected = selectProductionAsset(model, refs.asset.value);
     return selected.state.preview.active ? prepareProductionPreview(selected, {}, { confirmed: true }) : selected;
@@ -4095,6 +4323,15 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       return model;
     });
   }, signal);
+  listen(refs.outputSynchronization, "click", (event) => {
+    const button = event.target.closest("button[data-output-synchronization-action]");
+    if (!button) return;
+    run((model) => runProductionConsoleOutputSynchronization(
+      model,
+      runtime,
+      button.dataset.outputSynchronizationAction
+    ));
+  }, signal);
   listen(refs.componentRendererFixture, "change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)), signal);
   listen(refs.componentRendererOutput, "change", () => run((model) => {
     if (runtime.componentRenderer && runtime.componentRenderer.state !== "destroyed") destroyComponentRenderer(runtime.componentRenderer);
@@ -4227,6 +4464,7 @@ function renderConsole(refs, model, runtime = {}) {
   renderStage(refs.preview, previewProjection, buildProductionRenderDescriptor(previewProjection, model.assetRegistry), "Preview");
   renderStage(refs.program, programProjection, buildProductionRenderDescriptor(programProjection, model.assetRegistry), "Program");
   renderOutputRouting(refs, model, runtime);
+  renderOutputSynchronization(refs, model, runtime);
   renderLayers(refs.layersBody, model);
   renderOutputs(refs.outputsList, model);
   renderQueue(refs.queueList, model);
@@ -4280,6 +4518,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `State ${BROADCAST_STATE_VERSION}`),
     element("span", "console-meta", `Output ${BROADCAST_OUTPUT_VERSION}`),
     element("span", "console-meta", `Routing ${OUTPUT_ROUTING_VERSION}`),
+    element("span", "console-meta", `Sync ${OUTPUT_SYNCHRONIZATION_VERSION}`),
     element("span", "console-meta", `Assets ${ASSET_MANAGER_VERSION}`),
     element("span", "console-meta", `Preview ${PREVIEW_ENGINE_VERSION}`),
     element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
@@ -4604,6 +4843,96 @@ function toDateTimeLocal(value) {
   return local.toISOString().slice(0, 16);
 }
 
+function renderOutputSynchronization(refs, model, runtime) {
+  if (!refs.outputSynchronizationTargets) return;
+  const snapshot = runtime.outputSynchronization && runtime.outputSynchronization.status !== "destroyed"
+    ? buildOutputSynchronizationSnapshot(runtime.outputSynchronization)
+    : model.outputSynchronizationSnapshot;
+  const program = snapshot?.targets?.program_main || {};
+  const announcer = snapshot?.targets?.announcer_monitor || {};
+  const laboratory = model.fixtureSource?.metadata?.fixture !== false;
+  if (refs.outputSynchronizationStatus) {
+    refs.outputSynchronizationStatus.replaceChildren(
+      statusChip(readableLabel(snapshot?.status || "uninitialized"), snapshot?.status === "synchronized" ? "ok" : snapshot?.status === "stale" || snapshot?.status === "partial" ? "warning" : "neutral"),
+      element("span", `console-source-label ${laboratory ? "is-fixture" : "is-session"}`, laboratory ? "FIXTURE DE LABORATORIO" : "DATOS REALES DE LA SESIÓN")
+    );
+  }
+  refs.outputSynchronizationTargets.replaceChildren(
+    renderOutputSynchronizationTarget({
+      id: "program_main",
+      title: "Program Main",
+      status: program.status,
+      primaryRevision: model.officialProgramSnapshot?.revision ?? "—",
+      primaryLabel: "Program revision",
+      sourceRevision: program.sourceRevision,
+      routeRevision: program.routeRevision,
+      outputRevision: program.outputRevision,
+      stale: program.stale,
+      lastSynchronizedAt: program.lastSynchronizedAt,
+      warnings: program.warnings,
+      errors: program.errors,
+      actions: [["sync-program", "Sincronizar", "primary"], ["clear-program", "Limpiar salida", "danger"]],
+      href: "./program-main-output.html",
+      openLabel: "Abrir salida"
+    }),
+    renderOutputSynchronizationTarget({
+      id: "announcer_monitor",
+      title: "Announcer Monitor",
+      status: announcer.status,
+      primaryRevision: announcer.sourceRevision ?? "—",
+      primaryLabel: "Source revision",
+      sourceRevision: announcer.sourceRevision,
+      routeRevision: announcer.routeRevision,
+      outputRevision: announcer.outputRevision,
+      stale: announcer.stale,
+      lastSynchronizedAt: announcer.lastSynchronizedAt,
+      warnings: announcer.warnings,
+      errors: announcer.errors,
+      actions: [["sync-announcer", "Sincronizar", "primary"], ["clear-announcer", "Limpiar monitor", "danger"]],
+      href: "./announcer-monitor.html",
+      openLabel: "Abrir monitor"
+    })
+  );
+}
+
+function renderOutputSynchronizationTarget(definition) {
+  const card = element("article", "console-output-synchronization-card");
+  card.dataset.outputSynchronizationTarget = definition.id;
+  const heading = element("div", "console-output-synchronization-heading");
+  heading.append(
+    element("h3", "", definition.title),
+    statusChip(readableLabel(definition.status || "ready"), definition.status === "synchronized" ? "ok" : definition.status === "stale" ? "warning" : definition.status === "error" ? "error" : "neutral")
+  );
+  const metrics = element("dl", "console-output-synchronization-metrics");
+  [
+    [definition.primaryLabel, definition.primaryRevision],
+    ["Source revision", definition.sourceRevision ?? "—"],
+    ["Route revision", definition.routeRevision ?? "—"],
+    ["Output revision", definition.outputRevision ?? "—"],
+    ["Stale", definition.stale ? "Sí" : "No"],
+    ["Última sincronización", definition.lastSynchronizedAt || "—"]
+  ].forEach(([label, value]) => metrics.append(definitionItem(label, value)));
+  const diagnostics = element("div", "console-output-synchronization-diagnostics");
+  diagnostics.append(
+    element("span", "", `Warnings ${definition.warnings?.length || 0}`),
+    element("span", "", `Errors ${definition.errors?.length || 0}`)
+  );
+  const actions = element("div", "console-output-synchronization-actions");
+  definition.actions.forEach(([action, label, style]) => {
+    const button = element("button", `button button-small button-${style}`, label);
+    button.type = "button";
+    button.dataset.outputSynchronizationAction = action;
+    actions.append(button);
+  });
+  const link = element("a", "button button-small button-quiet", definition.openLabel);
+  link.href = definition.href;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  actions.append(link);
+  card.append(heading, metrics, diagnostics, actions);
+  return card;
+}
+
 function renderOutputRouting(refs, model, runtime) {
   if (!refs.outputRoutingRoutes) return;
   const routes = runtime.outputRoutingEngine && runtime.outputRoutingEngine.state !== "destroyed"
@@ -4723,7 +5052,7 @@ function renderSystem(root, model) {
   [
     ["State revision", status.stateRevision], ["Preview revision", status.previewRevision], ["Program revision", status.programRevision],
     ["Output applied", status.outputRevision], ["Contract", BROADCAST_DATA_CONTRACT_VERSION], ["State", BROADCAST_STATE_VERSION],
-    ["Output", BROADCAST_OUTPUT_VERSION], ["Output Routing", OUTPUT_ROUTING_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Template Renderer", TEMPLATE_RENDERER_INTEGRATION_VERSION], ["Theme + Template", THEME_TEMPLATE_INTEGRATION_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
+    ["Output", BROADCAST_OUTPUT_VERSION], ["Output Routing", OUTPUT_ROUTING_VERSION], ["Output Sync", OUTPUT_SYNCHRONIZATION_VERSION], ["Asset Manager", ASSET_MANAGER_VERSION], ["Action Engine", BROADCAST_ACTION_ENGINE_VERSION], ["Variables", PRODUCTION_VARIABLES_VERSION], ["Components", COMPONENT_LIBRARY_VERSION], ["Renderer", COMPONENT_RENDERER_VERSION], ["Template Renderer", TEMPLATE_RENDERER_INTEGRATION_VERSION], ["Theme + Template", THEME_TEMPLATE_INTEGRATION_VERSION], ["Context stale", status.contextStale ? "Sí" : "No"],
     ["Output stale", status.outputStale ? "Sí" : "No"], ["Preview activo", status.previewActive ? "Sí" : "No"],
     ["Program activo", status.programActive ? "Sí" : "No"], ["Modo seguro", status.safeMode ? "Sí" : "No"],
     ["Warnings", status.warnings.length], ["Errors", status.errors.length]

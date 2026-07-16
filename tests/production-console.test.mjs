@@ -106,6 +106,18 @@ import {
   listOutputRoutes,
   validateOutputRoutingSnapshot
 } from "../js/broadcast/outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
+import {
+  configureOutputSynchronization,
+  createOutputSynchronization,
+  startOutputSynchronization,
+  synchronizeProgramMain
+} from "../js/broadcast/outputSynchronization.js";
+import {
+  buildProgramMainOutputSnapshot,
+  configureProgramMainOutput,
+  createProgramMainOutput,
+  mountProgramMainOutput
+} from "../js/broadcast/programMainOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
@@ -138,7 +150,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-broadcast-access-and-sync-001-local-output-sync-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -538,6 +550,56 @@ model = resolveProductionConsoleOutputRoute(model, outputRoutingEngine, "route-p
 });
 assert.equal(model.outputRoutingResults["route-program-main"].projection.programId, officialProgramId);
 assert.equal(model.outputRoutingResults["route-program-main"].projection.kind, "program-main");
+
+// The actual Production Console Program reaches the mounted local Program Main target.
+const synchronizedProgramDocument = createRendererMockDocument();
+const synchronizedProgramHost = synchronizedProgramDocument.createElement("section");
+synchronizedProgramDocument.body.appendChild(synchronizedProgramHost);
+const synchronizedProgramOutput = createProgramMainOutput({
+  programMainOutputId: "production_console_program_main_test",
+  browserOutputId: "production_console_browser_program_main_test"
+}, { now: T3 });
+configureProgramMainOutput(synchronizedProgramOutput, {
+  programMainOutputId: "production_console_program_main_test",
+  browserOutputId: "production_console_browser_program_main_test",
+  routeId: "route-program-main",
+  outputId: "program-main",
+  routeType: "program_main",
+  sourceType: "program_snapshot",
+  displayMode: "fit",
+  visibility: model.officialProgram.visibility,
+  resolution: { width: 1920, height: 1080 },
+  orientation: "landscape",
+  safeArea: { top: 0, right: 0, bottom: 0, left: 0, unit: "percent" },
+  transparentBackground: true,
+  tournamentId: model.contract.tournament.id,
+  competitionId: model.contract.competition.id
+}, { now: T3 });
+mountProgramMainOutput(synchronizedProgramOutput, synchronizedProgramHost, { now: T3 });
+const productionConsoleSynchronization = createOutputSynchronization({
+  synchronizationId: "production_console_output_sync_test"
+}, { now: T3 });
+configureOutputSynchronization(productionConsoleSynchronization, {
+  targets: ["program_main"],
+  staleAfterMs: 60000,
+  context: {
+    tournamentId: model.contract.tournament.id,
+    competitionId: model.contract.competition.id
+  }
+}, { expectedRevision: 0, now: T3 });
+startOutputSynchronization(productionConsoleSynchronization, { expectedRevision: 1, now: T3 });
+const productionConsoleSyncResult = synchronizeProgramMain(productionConsoleSynchronization, {
+  routingEngine: outputRoutingEngine,
+  programEngine: officialProgramEngine,
+  programMainOutput: synchronizedProgramOutput,
+  context: {
+    tournamentId: model.contract.tournament.id,
+    competitionId: model.contract.competition.id
+  }
+}, { expectedRevision: 2, now: T3 });
+assert.equal(productionConsoleSyncResult.targets.program_main.status, "synchronized");
+assert.equal(buildProgramMainOutputSnapshot(synchronizedProgramOutput, { now: T3 }).programId, officialProgramId);
+
 model = resolveProductionConsoleOutputRoute(model, outputRoutingEngine, "route-announcer-monitor", { now: T3 });
 assert.equal(model.outputRoutingResults["route-announcer-monitor"].visibility, "operational");
 assert.equal(model.outputRoutingResults["route-announcer-monitor"].projection.kind, "announcer-monitor");
@@ -1063,6 +1125,11 @@ for (const id of [
   "console-output-routing",
   "console-output-routing-status",
   "console-output-routing-routes",
+  "console-output-synchronization",
+  "console-output-synchronization-status",
+  "console-output-synchronization-targets",
+  "console-output-synchronization-program-host",
+  "console-output-synchronization-announcer-host",
   "console-component-renderer-lab",
   "console-component-renderer-target",
   "console-component-renderer-fixture",
@@ -1088,6 +1155,19 @@ assert.equal((outputRoutingMarkup.match(/Abrir Announcer Monitor/g) || []).lengt
 assert.match(outputRoutingMarkup, /href="\.\/browser-output\.html\?type=generic"/);
 assert.match(outputRoutingMarkup, /Abrir laboratorio Browser Output/);
 assert.doesNotMatch(outputRoutingMarkup, /Abrir Browser Source|\bOBS\b|\bvMix\b|URL pública|NDI conectado|tiempo real|Start Timer|Pause Timer|Reset Timer|\bTake\b|\bCut\b|\bAuto\b/);
+const synchronizationMarkup = html.slice(html.indexOf("<h2>SINCRONIZACIÓN DE SALIDAS</h2>"), html.indexOf("console-geometry-panel"));
+for (const action of ["sync-all", "sync-program", "clear-program", "sync-announcer", "clear-announcer"]) {
+  const presentInHtml = synchronizationMarkup.includes(`data-output-synchronization-action="${action}"`);
+  const generatedInSource = source.includes(`["${action}"`) || source.includes(`action === "${action}"`);
+  assert.equal(presentInHtml || generatedInSource, true, `Missing synchronization action ${action}`);
+}
+assert.match(synchronizationMarkup, /Sincronización local explícita/);
+assert.doesNotMatch(synchronizationMarkup, /Start Timer|Pause Timer|Reset Timer|NDI Connect|OBS Connect|Firebase Connect|tiempo real/i);
+assert.ok(source.includes("synchronizeProgramMain"));
+assert.ok(source.includes("synchronizeAnnouncerMonitor"));
+assert.ok(source.includes("synchronizeAllOutputs"));
+assert.ok(source.includes("FIXTURE DE LABORATORIO"));
+assert.ok(source.includes("DATOS REALES DE LA SESIÓN"));
 assert.equal(source.includes("innerHTML"), false);
 assert.equal(source.includes("localStorage"), false);
 assert.equal(/from\s+["'][^"']*firebase/i.test(source), false);
