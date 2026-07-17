@@ -7,6 +7,7 @@ import {
   PRODUCTION_CONSOLE_OUTPUT_ROUTES,
   PRODUCTION_CONSOLE_THEME_DEFINITIONS,
   PRODUCTION_CONSOLE_VERSION,
+  applyProductionConsoleRealtimeContract,
   activateProductionConsoleTheme,
   buildProductionProjection,
   buildProductionRenderDescriptor,
@@ -20,6 +21,8 @@ import {
   clearProductionPreview,
   clearProductionProgram,
   clearProductionQueue,
+  closeProductionConsoleRealtimeSession,
+  connectProductionConsoleRealtime,
   createProductionConsoleModel,
   createProductionConsoleComponentRenderer,
   createProductionConsoleTemplateRendererIntegration,
@@ -55,6 +58,8 @@ import {
   prepareProductionConsoleThemeTemplate,
   prepareProductionConsoleOfficialPreview,
   prepareProductionConsoleOfficialProgram,
+  publishProductionConsoleRealtime,
+  renewProductionConsoleRealtimeSession,
   removeProductionConsoleComponent,
   removeProductionConsoleTemplate,
   removeProductionConsoleTheme,
@@ -63,6 +68,7 @@ import {
   renderProductionConsoleTemplateRenderer,
   renderProductionConsoleThemeTemplate,
   renderProductionConsoleOfficialPreview,
+  resolveProductionConsoleRealtimeContext,
   resolveProductionConsoleOutputRoute,
   resolveProductionConsoleThemeTemplate,
   restoreLastProductionPreview,
@@ -99,6 +105,12 @@ import {
   autoProductionConsoleOfficialProgram,
   validateProductionConsoleModel
 } from "../js/broadcast/productionConsole.js";
+import {
+  configureBroadcastRealtimeTransport,
+  connectBroadcastRealtimeTransport,
+  createBroadcastRealtimeTransport,
+  destroyBroadcastRealtimeTransport
+} from "../js/broadcast/broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
 import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
 import { destroyProgramEngine, validateProgram } from "../js/broadcast/programEngine.js?v=20260715-program-engine-001-official-program-v1";
 import {
@@ -122,6 +134,7 @@ import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } fr
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
 import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
+import { validateBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260713-broadcast-output-001-output-v1";
 import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260713-asset-manager-001-assets-v1";
 import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260713-production-variables-001-variables-v1";
 import { findBroadcastComponent, listBroadcastComponents, validateBroadcastComponent } from "../js/broadcast/componentLibrary.js";
@@ -150,7 +163,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260715-broadcast-access-and-sync-001-local-output-sync-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260716-broadcast-context-resolution-001-real-context-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -181,6 +194,122 @@ assert.equal(model.themeTemplateThemeId, "theme_default");
 assert.equal(model.themeTemplateState, "uninitialized");
 assert.equal(model.themeTemplatePreparation, null);
 assert.equal(model.themeTemplateResult, null);
+const realtimeRequest = resolveProductionConsoleRealtimeContext(model, {
+  tournamentId: "tournament-real"
+});
+assert.deepEqual(Object.keys(realtimeRequest).sort(), ["activeCharreadaId", "competitionId", "tournamentId"]);
+assert.equal(realtimeRequest.tournamentId, "tournament-real");
+assert.equal(realtimeRequest.competitionId, null);
+assert.equal(realtimeRequest.activeCharreadaId, null);
+assert.notEqual(realtimeRequest.tournamentId, model.contract.tournament.id, "the laboratory contract cannot override production context");
+assert.equal("sessionId" in realtimeRequest, false);
+assert.equal("tenantId" in realtimeRequest, false);
+assert.equal("organizationId" in realtimeRequest, false);
+assert.equal("clientId" in realtimeRequest, false);
+assert.throws(
+  () => resolveProductionConsoleRealtimeContext(model),
+  (error) => error.code === "console-realtime-context-unavailable"
+);
+const laboratoryRealtimeRequest = resolveProductionConsoleRealtimeContext(model, {}, { allowFixture: true });
+assert.equal(laboratoryRealtimeRequest.tournamentId, model.contract.tournament.id);
+assert.equal(laboratoryRealtimeRequest.competitionId, model.contract.competition.id);
+assert.equal(laboratoryRealtimeRequest.activeCharreadaId, model.contract.charreada.id);
+assert.throws(
+  () => resolveProductionConsoleRealtimeContext(model, { sessionId: "session-requested" }, { allowFixture: true }),
+  (error) => error.code === "console-realtime-session-override-forbidden"
+);
+for (const key of ["tenantId", "organizationId", "clientId"]) {
+  assert.throws(
+    () => resolveProductionConsoleRealtimeContext(model, { [key]: "spoof" }, { allowFixture: true }),
+    (error) => error.code === "console-realtime-identity-override-forbidden"
+  );
+}
+
+// Production Console reuses the existing authenticated publisher and creates output grants automatically.
+const simpleAccessRuntime = {
+  realtimeTransport: null,
+  realtimeContractUnsubscribe: null,
+  realtimeAccess: null,
+  firebaseBroadcastApi: null
+};
+const simpleAccessContext = {
+  tenantId: "charropro-e8a68",
+  organizationId: null,
+  clientId: null,
+  tournamentId: "tournament-real",
+  competitionId: "competition-real",
+  activeCharreadaId: "charreada-real",
+  sessionId: "broadcast_auto_test",
+  source: "firebase-tournament-active-charreada",
+  revision: 7,
+  resolvedAt: T0
+};
+const simpleAccessSessionContext = Object.fromEntries(
+  ["tenantId", "organizationId", "clientId", "tournamentId", "competitionId", "activeCharreadaId", "sessionId"]
+    .map((key) => [key, simpleAccessContext[key]])
+);
+let simpleAccessRequest = null;
+let simpleAccessRenewals = 0;
+let simpleAccessClosed = 0;
+const simpleAccessAdapter = {
+  async connect({ onStatus }) { onStatus?.({ connected: true, at: T0 }); return () => {}; },
+  async read() { return null; },
+  subscribe() { return () => {}; },
+  async publish() { return { ok: true, revision: 1 }; },
+  async publishOutputState() { return { ok: true, revision: 1 }; },
+  disconnect() {}
+};
+const simpleAccessFirebaseApi = {
+  async resolveCurrentBroadcastContext(request, options) {
+    simpleAccessRequest = structuredClone(request);
+    assert.equal(options.operation, "publish");
+    return structuredClone(simpleAccessContext);
+  },
+  createFirebaseBroadcastAdapter({ accessMode }) {
+    assert.equal(accessMode, "publish");
+    return simpleAccessAdapter;
+  },
+  async getOrCreateFirebaseBroadcastTemporaryAccess(context, outputType, options = {}) {
+    const canonicalContext = Object.fromEntries(
+      Object.keys(simpleAccessSessionContext).map((key) => [key, context[key]])
+    );
+    assert.deepEqual(canonicalContext, simpleAccessSessionContext);
+    if (options.renew) simpleAccessRenewals += 1;
+    return {
+      accessId: outputType === "program_main" ? "bca_program_console" : "bca_announcer_console",
+      sessionId: context.sessionId,
+      outputType,
+      readOnly: true,
+      status: "active"
+    };
+  },
+  async renewFirebaseBroadcastSession(context) {
+    assert.deepEqual({ ...context }, simpleAccessSessionContext);
+  },
+  async closeFirebaseBroadcastSession(context) {
+    assert.deepEqual({ ...context }, simpleAccessSessionContext);
+    simpleAccessClosed += 1;
+  }
+};
+let simpleAccessModel = await connectProductionConsoleRealtime(model, simpleAccessRuntime, {
+  context: { tournamentId: "tournament-real" },
+  firebaseApi: simpleAccessFirebaseApi,
+  now: T0
+});
+assert.deepEqual(simpleAccessRequest, realtimeRequest);
+assert.equal(simpleAccessModel.realtimeContextSource, "firebase-tournament-active-charreada");
+assert.equal(simpleAccessModel.realtimeContextRevision, 7);
+assert.equal("sessionId" in simpleAccessRequest, false, "operators do not enter a session id");
+assert.equal(simpleAccessRuntime.realtimeAccess.program.readOnly, true);
+assert.equal(simpleAccessRuntime.realtimeAccess.announcer.readOnly, true);
+simpleAccessModel = await renewProductionConsoleRealtimeSession(simpleAccessModel, simpleAccessRuntime, { now: T1 });
+assert.equal(simpleAccessRenewals, 2);
+simpleAccessModel = await closeProductionConsoleRealtimeSession(simpleAccessModel, simpleAccessRuntime, { now: T2 });
+assert.equal(simpleAccessClosed, 1);
+assert.equal(simpleAccessRuntime.realtimeAccess, null);
+assert.equal(simpleAccessModel.realtimeTransportState, "disconnected");
+simpleAccessModel = await closeProductionConsoleRealtimeSession(simpleAccessModel, simpleAccessRuntime, { now: T3 });
+assert.equal(simpleAccessClosed, 2, "repeating close remains controlled by the Firebase session API");
 for (const outputId of model.outputIds) {
   const output = getBroadcastOutput(outputId);
   assert.equal(validateBroadcastOutput(output).valid, true);
@@ -626,6 +755,154 @@ const outputRoutingSnapshot = getProductionConsoleOutputRoutingClipboardSnapshot
 assert.equal(validateOutputRoutingSnapshot(outputRoutingSnapshot).valid, true);
 assert.equal(JSON.stringify(outputRoutingSnapshot).includes("tenantId"), false);
 assert.equal(JSON.stringify(outputRoutingSnapshot).includes("officialProgram"), false);
+
+// A canonical live contract updates only declared data bindings and preserves real zero values.
+const liveContext = {
+  tenantId: model.fixtureSource.organization.tenantId,
+  organizationId: model.fixtureSource.organization.id,
+  clientId: model.fixtureSource.organization.clientId,
+  tournamentId: model.contract.tournament.id,
+  competitionId: model.contract.competition.id,
+  activeCharreadaId: model.contract.charreada.id,
+  sessionId: "session_production_console"
+};
+let publishedRealtimeEnvelope = null;
+const liveAdapter = {
+  async connect({ onStatus }) { onStatus({ connected: true, at: T3 }); return () => {}; },
+  subscribe() { return () => {}; },
+  async publish({ envelope }) { publishedRealtimeEnvelope = structuredClone(envelope); return { ok: true, revision: envelope.revision }; },
+  async publishOutputState({ state }) { return { ok: true, revision: state.revision }; }
+};
+const liveTransport = createBroadcastRealtimeTransport({ transportId: "console-live-contract-test" }, { now: T3 });
+configureBroadcastRealtimeTransport(liveTransport, { adapter: liveAdapter, context: liveContext }, { expectedRevision: 0, now: T3 });
+await connectBroadcastRealtimeTransport(liveTransport, { expectedRevision: 1, now: T3 });
+const liveContract = structuredClone(model.contract);
+liveContract.generatedAt = T4;
+liveContract.revision += 1;
+liveContract.tournament.name = "Torneo Oficial en Vivo";
+liveContract.team.name = "Rancheros de Tijuana";
+liveContract.team.active = true;
+liveContract.participant.name = "Participante Oficial";
+liveContract.ranking.entries[0].name = "Clasificación Oficial en Vivo";
+liveContract.score.total = 0;
+liveContract.timer.display = "";
+const contractBeforeLive = structuredClone(model.contract);
+let liveModel = {
+  ...model,
+  themeTemplatePreparation: {
+    components: [{
+      instance: {
+        instanceId: "live-score-component",
+        componentId: "live-score-source",
+        bindings: [{ source: "broadcast_contract", path: "score.total", target: "properties.value" }]
+      }
+    }]
+  },
+  outputRoutingResults: {
+    ...model.outputRoutingResults,
+    "route-program-main": {
+      routeId: "route-program-main",
+      visibility: "public",
+      status: "routed",
+      projection: {
+        components: [{ componentId: "live-score-component", sourceComponentId: "live-score-source", data: { "properties.value": 99 } }],
+        composition: { components: [{ componentId: "live-score-component", data: { "properties.value": 99 } }] }
+      }
+    }
+  }
+};
+const liveRuntime = {
+  realtimeTransport: liveTransport,
+  liveBindingsEngine: null,
+  outputRoutingEngine,
+  officialProgramEngine
+};
+liveModel = applyProductionConsoleRealtimeContract(liveModel, liveRuntime, liveContract, { now: T4 });
+assert.equal(liveModel.realtimeSourceReady, true);
+assert.equal(liveModel.variableRegistry.tenantId, liveContext.tenantId);
+assert.equal(Object.values(liveModel.variableRegistry.variables).every((variable) => variable.tournamentId === liveContext.tournamentId), true);
+assert.equal(liveModel.contract.team.name, "Rancheros de Tijuana");
+assert.equal(liveModel.contract.charreada.id, liveContext.activeCharreadaId);
+assert.equal(liveModel.contract.score.total, 0);
+assert.equal(liveModel.contract.timer.display, "");
+assert.equal(liveModel.contract.generatedAt, liveContract.generatedAt);
+assert.equal(liveModel.outputRoutingResults["route-program-main"], undefined, "entering an official context clears a fixture Program route");
+assert.equal(liveModel.officialProgram, null, "entering an official context clears a fixture Official Program");
+assert.equal(liveModel.outputRoutingResults["route-announcer-monitor"].projection.current.team.name, "Rancheros de Tijuana");
+assert.equal("values" in liveModel.liveBindingsSnapshot.lastResolution, false);
+assert.deepEqual(model.contract, contractBeforeLive);
+assert.throws(
+  () => loadProductionConsoleFixture(liveModel, "equipos_4", { now: T4 }),
+  (error) => error.code === "console-fixture-disabled-in-realtime"
+);
+liveModel = {
+  ...liveModel,
+  themeTemplatePreparation: {
+    components: [{
+      instance: {
+        instanceId: "live-score-component",
+        componentId: "live-score-source",
+        bindings: [{ source: "broadcast_contract", path: "score.total", target: "properties.value" }]
+      }
+    }]
+  },
+  outputRoutingResults: {
+    ...liveModel.outputRoutingResults,
+    "route-program-main": {
+      routeId: "route-program-main",
+      visibility: "production",
+      status: "routed",
+      projection: {
+        components: [{ componentId: "live-score-component", sourceComponentId: "live-score-source", data: { "properties.value": 99 } }],
+        composition: { components: [{ componentId: "live-score-component", data: { "properties.value": 99 } }] }
+      }
+    }
+  }
+};
+const liveContractUpdate = structuredClone(liveContract);
+liveContractUpdate.revision += 1;
+liveModel = applyProductionConsoleRealtimeContract(liveModel, liveRuntime, liveContractUpdate, { now: T4 });
+assert.equal(liveModel.outputRoutingResults["route-program-main"].projection.components[0].data["properties.value"], 0);
+const liveTemplateModel = prepareProductionConsoleTemplateRenderer(liveModel, { now: T4 });
+const liveTemplateText = JSON.stringify(liveTemplateModel.templateRendererPreparation);
+assert.equal(liveTemplateText.includes("Clasificación Oficial en Vivo"), true, "official Templates consume the live Broadcast Data Contract");
+assert.equal(liveTemplateText.includes("Cuenca del Papaloapan"), false, "official Templates never retain the laboratory team");
+const sparseFirebaseContract = structuredClone(liveContract);
+for (const field of ["organization", "sponsor", "branding", "customFields", "warnings", "errors"]) delete sparseFirebaseContract[field];
+const sparseLiveModel = applyProductionConsoleRealtimeContract(liveModel, liveRuntime, sparseFirebaseContract, { now: T4 });
+assert.equal(validateBroadcastDataContract(sparseLiveModel.contract).valid, true, "RTDB empty-node omissions are rehydrated through the canonical contract builder");
+assert.equal(sparseLiveModel.contract.score.total, 0, "rehydration preserves an official zero score");
+assert.equal(sparseLiveModel.contract.charreada.id, liveContext.activeCharreadaId);
+liveModel.outputRoutingResults["route-program-main"].tenantId = liveContext.tenantId;
+liveModel.outputRoutingResults["route-program-main"].organizationId = liveContext.organizationId;
+liveModel.outputRoutingResults["route-program-main"].clientId = liveContext.clientId;
+liveModel.outputRoutingResults["route-program-main"].projection.identityMetadata = {
+  tenantId: liveContext.tenantId,
+  organizationId: liveContext.organizationId,
+  clientId: liveContext.clientId
+};
+const routeBeforeRealtimePublish = structuredClone(liveModel.outputRoutingResults["route-program-main"]);
+liveModel = await publishProductionConsoleRealtime(liveModel, liveRuntime, "program", {
+  allowFixture: true,
+  idempotencyKey: "production-console-identity-test",
+  now: T4
+});
+const publishedProjectionText = JSON.stringify(publishedRealtimeEnvelope.projection);
+assert.equal(/"(?:tenantId|organizationId|clientId)"/.test(publishedProjectionText), false, "organizational identity stays in the authoritative envelope context only");
+assert.deepEqual(liveModel.outputRoutingResults["route-program-main"], routeBeforeRealtimePublish, "realtime sanitization does not mutate the routed projection");
+const wrongTournamentContract = structuredClone(liveContract);
+wrongTournamentContract.tournament.id = "other-tournament";
+assert.throws(
+  () => applyProductionConsoleRealtimeContract(liveModel, liveRuntime, wrongTournamentContract, { now: T4 }),
+  (error) => error.code === "console-realtime-tournament-conflict"
+);
+const wrongCharreadaContract = structuredClone(liveContract);
+wrongCharreadaContract.charreada.id = "other-charreada";
+assert.throws(
+  () => applyProductionConsoleRealtimeContract(liveModel, liveRuntime, wrongCharreadaContract, { now: T4 }),
+  (error) => error.code === "console-realtime-charreada-conflict"
+);
+destroyBroadcastRealtimeTransport(liveTransport, { now: T4 });
 destroyOutputRoutingEngine(outputRoutingEngine, { now: T3 });
 
 model = clearProductionConsoleOfficialProgram(model, officialProgramEngine, { now: T3 });
@@ -1155,7 +1432,7 @@ assert.equal((outputRoutingMarkup.match(/Abrir Announcer Monitor/g) || []).lengt
 assert.match(outputRoutingMarkup, /href="\.\/browser-output\.html\?type=generic"/);
 assert.match(outputRoutingMarkup, /Abrir laboratorio Browser Output/);
 assert.doesNotMatch(outputRoutingMarkup, /Abrir Browser Source|\bOBS\b|\bvMix\b|URL pública|NDI conectado|tiempo real|Start Timer|Pause Timer|Reset Timer|\bTake\b|\bCut\b|\bAuto\b/);
-const synchronizationMarkup = html.slice(html.indexOf("<h2>SINCRONIZACIÓN DE SALIDAS</h2>"), html.indexOf("console-geometry-panel"));
+const synchronizationMarkup = html.slice(html.indexOf("<h2>SINCRONIZACIÓN DE SALIDAS</h2>"), html.indexOf("console-realtime-transport"));
 for (const action of ["sync-all", "sync-program", "clear-program", "sync-announcer", "clear-announcer"]) {
   const presentInHtml = synchronizationMarkup.includes(`data-output-synchronization-action="${action}"`);
   const generatedInSource = source.includes(`["${action}"`) || source.includes(`action === "${action}"`);
@@ -1163,18 +1440,44 @@ for (const action of ["sync-all", "sync-program", "clear-program", "sync-announc
 }
 assert.match(synchronizationMarkup, /Sincronización local explícita/);
 assert.doesNotMatch(synchronizationMarkup, /Start Timer|Pause Timer|Reset Timer|NDI Connect|OBS Connect|Firebase Connect|tiempo real/i);
+const realtimeMarkup = html.slice(html.indexOf("console-realtime-transport"), html.indexOf("console-geometry-panel"));
+assert.match(realtimeMarkup, /TRANSPORTE EN TIEMPO REAL/);
+for (const action of ["connect", "disconnect", "resync", "renew-session", "close-session", "snapshot"]) {
+  assert.match(realtimeMarkup, new RegExp(`data-realtime-transport-action="${action}"`));
+}
+for (const action of ["copy-program-link", "copy-announcer-link"]) {
+  assert.ok(source.includes(`"${action}"`), `Missing temporary access action ${action}`);
+}
+assert.match(source, /Abrir Program Main/);
+assert.match(source, /Abrir Locutores/);
+assert.match(source, /Copiar enlace de Program/);
+assert.match(source, /Copiar enlace de Locutores/);
+assert.doesNotMatch(realtimeMarkup, /Start Timer|Pause Timer|Reset Timer|NDI Connect|OBS Connect|\bTake\b|\bCut\b|\bAuto\b/i);
 assert.ok(source.includes("synchronizeProgramMain"));
 assert.ok(source.includes("synchronizeAnnouncerMonitor"));
 assert.ok(source.includes("synchronizeAllOutputs"));
 assert.ok(source.includes("FIXTURE DE LABORATORIO"));
 assert.ok(source.includes("DATOS REALES DE LA SESIÓN"));
 assert.equal(source.includes("innerHTML"), false);
-assert.equal(source.includes("localStorage"), false);
+assert.equal((source.match(/localStorage/g) || []).length, 1);
+assert.ok(source.includes("ACTIVE_TOURNAMENT_CONTEXT_KEY"));
+assert.equal(/localStorage\?\.setItem|localStorage\.setItem/.test(source), false);
+const realtimeLocationSource = source.slice(
+  source.indexOf("function realtimeContextFromLocation"),
+  source.indexOf("function buildProductionConsoleTemporaryAccessUrl")
+);
+assert.ok(realtimeLocationSource.indexOf("storedTournamentId || params.get(\"tournamentId\")") >= 0);
+assert.equal(realtimeLocationSource.includes("sessionStorage"), false);
+assert.equal(realtimeLocationSource.includes('params.get("competitionId")'), false);
+assert.equal(realtimeLocationSource.includes('params.get("sessionId")'), false);
+for (const key of ["competitionId", "activeCharreadaId", "charreadaId", "sessionId"]) {
+  assert.ok(realtimeLocationSource.includes(`"${key}"`), `URL ${key} override is rejected`);
+}
 assert.equal(/from\s+["'][^"']*firebase/i.test(source), false);
 assert.equal(/\bfirebase\s*\.(database|firestore|storage|auth)/i.test(source), false);
 assert.ok(source.includes('"firebaseconnected"'));
 assert.equal(source.includes("../core/state.js"), false);
-assert.equal(source.includes("broadcastContext"), false);
+assert.equal(/(?:\.|["'])broadcastContext(?:\b|["'])/.test(source), false);
 assert.equal(source.includes("live/current"), false);
 assert.equal(source.includes("publicTournaments"), false);
 assert.equal(source.includes("WebSocket"), false);

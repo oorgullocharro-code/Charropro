@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import * as api from "../js/broadcast/programMainOutput.js";
+import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js";
 import {
   BroadcastProgramMainOutputError,
   PROGRAM_MAIN_OUTPUT_DISPLAY_MODES,
@@ -683,6 +684,165 @@ for (const operation of [
   () => destroyProgramMainOutput(lifecycle)
 ]) assert.throws(operation, (error) => error.code === PROGRAM_MAIN_OUTPUT_ERROR_CODES.DESTROYED);
 
+// A remote Program Main subscribes read-only and applies/clears official revisions.
+const remote = mounted({
+  programMainOutputId: "remote-program",
+  browserOutputId: "remote-browser",
+  tenantId: "tenant-a",
+  organizationId: "org-a",
+  clientId: "client-a",
+  tournamentId: "tournament_a",
+  competitionId: "competition_a",
+  sessionId: "session-a"
+});
+let remoteValue = null;
+let remoteStatus = null;
+let remoteWrites = 0;
+const remoteAdapter = {
+  async connect({ onStatus }) { remoteStatus = onStatus; onStatus({ connected: true, at: T1 }); return () => {}; },
+  subscribe({ onValue }) { remoteValue = onValue; return () => { remoteValue = null; }; },
+  async publish() { remoteWrites += 1; throw new Error("read-only-output"); },
+  async publishOutputState() { remoteWrites += 1; throw new Error("read-only-output"); }
+};
+const remoteContext = {
+  tenantId: "tenant-a",
+  organizationId: "org-a",
+  clientId: "client-a",
+  tournamentId: "tournament_a",
+  competitionId: "competition_a",
+  sessionId: "session-a"
+};
+const remoteController = await api.connectProgramMainRealtime(remote.instance, {
+  authorizedContext: remoteContext,
+  adapter: remoteAdapter,
+  transportApi: realtimeApi,
+  documentRef: remote.document
+});
+const remoteProgramProjection = activeEnvelope({ revision: 1, tournamentId: "tournament_a", competitionId: "competition_a" });
+delete remoteProgramProjection.errors;
+remoteValue({
+  transportVersion: "1.0.0",
+  messageId: "program-remote-1",
+  sessionId: "session-a",
+  channel: "program",
+  revision: 1,
+  previousRevision: 0,
+  status: "routed",
+  visibility: "public",
+  context: remoteContext,
+  projection: remoteProgramProjection,
+  publishedAt: T1
+});
+assert.equal(getProgramMainOutput(remote.instance).status, "ready");
+assert.equal(getProgramMainOutput(remote.instance).programId, "program-A");
+remoteStatus({ connected: false, offline: true, at: T2 });
+assert.equal(getProgramMainOutput(remote.instance).status, "ready");
+assert.equal(remote.document.body.getAttribute("data-realtime-status"), "offline");
+assert.equal(remote.document.body.getAttribute("data-last-valid-projection"), "preserved");
+remoteStatus({ connected: true, at: T3 });
+remoteValue({
+  transportVersion: "1.0.0",
+  messageId: "program-remote-2",
+  sessionId: "session-a",
+  channel: "program",
+  revision: 2,
+  previousRevision: 1,
+  status: "cleared",
+  visibility: "public",
+  context: remoteContext,
+  projection: null,
+  publishedAt: T3
+});
+assert.equal(getProgramMainOutput(remote.instance).status, "cleared");
+assert.equal(remoteWrites, 0);
+assert.equal("publish" in remoteController, false);
+remoteController.destroy();
+
+await assert.rejects(
+  () => api.connectProgramMainRealtime(remote.instance, {
+    search: "?tournamentId=tournament_a&competitionId=competition_a&sessionId=session-a&tenantId=spoof",
+    adapter: remoteAdapter,
+    transportApi: realtimeApi,
+    documentRef: remote.document
+  }),
+  (error) => error.code === "program-main-output-url-identity-forbidden"
+);
+
+let resolvedRequest = null;
+let resolvedOutputType = null;
+let resolvedAdapterDefinition = null;
+const resolvedRemote = mounted({
+  programMainOutputId: "resolved-remote-program",
+  browserOutputId: "resolved-remote-browser",
+  tenantId: "tenant-a",
+  organizationId: "org-a",
+  clientId: "client-a",
+  tournamentId: "tournament_a",
+  competitionId: "competition_a",
+  sessionId: "session-a"
+});
+const fakeFirebaseApi = {
+  async resolveFirebaseBroadcastTemporaryAccess(request, outputType) {
+    resolvedRequest = structuredClone(request);
+    resolvedOutputType = outputType;
+    return {
+      context: structuredClone(remoteContext),
+      descriptor: { accessId: "bca_program_test", sessionId: "session-a", outputType: "program_main", channel: "program", readOnly: true },
+      outputType: "program_main",
+      channel: "program"
+    };
+  },
+  createFirebaseBroadcastTemporaryAccessAdapter(definition, options) {
+    resolvedAdapterDefinition = structuredClone(definition);
+    assert.match(options.adapterId, /^program-main-access-/);
+    return remoteAdapter;
+  }
+};
+const resolvedController = await api.connectProgramMainRealtime(resolvedRemote.instance, {
+  search: "?sessionId=session-a&access=bca_program_test",
+  firebaseApi: fakeFirebaseApi,
+  transportApi: realtimeApi,
+  documentRef: resolvedRemote.document
+});
+assert.deepEqual(resolvedRequest, {
+  sessionId: "session-a",
+  accessId: "bca_program_test"
+});
+assert.equal(resolvedOutputType, "program_main");
+assert.equal(resolvedAdapterDefinition.descriptor.readOnly, true);
+assert.equal("tenantId" in resolvedRequest, false);
+assert.equal("organizationId" in resolvedRequest, false);
+assert.equal("clientId" in resolvedRequest, false);
+assert.equal("tournamentId" in resolvedRequest, false);
+assert.equal("competitionId" in resolvedRequest, false);
+remoteValue({
+  transportVersion: "1.0.0",
+  messageId: "program-remote-empty",
+  sessionId: "session-a",
+  channel: "program",
+  revision: 1,
+  previousRevision: 0,
+  status: "ready",
+  visibility: "production",
+  context: remoteContext,
+  projection: {
+    routeId: "route-program-main",
+    routeType: "program_main",
+    outputId: "program-main",
+    sourceType: "program_snapshot",
+    sourceRevision: 0,
+    routeRevision: 1,
+    status: "controlled-empty",
+    visibility: "production",
+    resolution: { width: 1920, height: 1080 },
+    projection: { projectionVersion: "1.0.0", state: "controlled-empty", sourceRevision: 0 },
+    resolvedAt: T1
+  },
+  publishedAt: T1
+});
+assert.equal(getProgramMainOutput(resolvedRemote.instance).status, "empty", "RTDB sparse controlled-empty is rehydrated");
+resolvedController.destroy();
+
 // Static checks keep the page clean and the implementation on approved infrastructure.
 const source = await readFile(new URL("../js/broadcast/programMainOutput.js", import.meta.url), "utf8");
 const html = await readFile(new URL("../program-main-output.html", import.meta.url), "utf8");
@@ -697,6 +857,8 @@ assert.doesNotMatch(source, /\.innerHTML|\.outerHTML|insertAdjacentHTML|document
 assert.doesNotMatch(html, /<button|<select|<nav|inspector|Take|Cut|Auto|OBS|vMix|Wirecast/i);
 assert.match(html, /data-program-main-output-page/);
 assert.match(html, /program-main-output-host/);
+assert.equal(typeof api.connectProgramMainRealtime, "function");
+assert.match(source, /createFirebaseBroadcastTemporaryAccessAdapter/);
 assert.match(css, /background:\s*transparent/);
 assert.match(css, /overflow:\s*hidden/);
 

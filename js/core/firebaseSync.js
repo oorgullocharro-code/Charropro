@@ -1,10 +1,22 @@
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { get, getDatabase, onValue, push, ref, set, update } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+import { get, getDatabase, onValue, push, ref, runTransaction, set, update } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-functions.js";
-import { COMPETITION_TYPES, getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
+import {
+  COMPETITION_TYPES,
+  getCompetitionType,
+  getCompetitionTypeFromTournamentType
+} from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260708-recovery-001b-panel-status1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
+import {
+  BROADCAST_SINGLE_TENANT_SCOPE_ID,
+  buildBroadcastAutomaticSessionId,
+  createBroadcastTemporaryAccessDescriptor,
+  isBroadcastTemporaryAccessActive,
+  revokeBroadcastTemporaryAccessDescriptor,
+  validateBroadcastTemporaryAccessDescriptor
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD1GjI5EJYAMhe1JRM7nETHQSqHceiBBD8",
@@ -27,6 +39,8 @@ const JUDGE_SESSIONS_PATH = "charropro/judges/sessions";
 const JUDGE_EVENTS_PATH = "charropro/judges/events";
 const AUDIT_PUBLISHED_SCORES_PATH = "charropro/audit/publishedScores";
 const HISTORY_STATISTICS_PATH = "charropro/history/statistics";
+const BROADCAST_STUDIO_SESSIONS_PATH = "charropro/broadcastStudio/sessions";
+const BROADCAST_TEMPORARY_ACCESS_TYPES = new Set(["program_main", "announcer_monitor"]);
 const PUBLIC_SNAPSHOT_VERSION = 1;
 const PUBLIC_SUERTES = [
   { key: "CC", aliases: ["cc", "cala", "calaCaballo", "cala_de_caballo"], label: "Cala" },
@@ -63,6 +77,340 @@ let publicSnapshotSetCount = 0;
 
 export function isFirebaseLiveConfigured() {
   return Boolean(FIREBASE_CONFIG.databaseURL);
+}
+
+export function getFirebaseBroadcastSessionPath(sessionId = "") {
+  const cleanSessionId = normalizeBroadcastContextId(sessionId);
+  return cleanSessionId ? `${BROADCAST_STUDIO_SESSIONS_PATH}/${cleanSessionId}` : "";
+}
+
+export function getFirebaseBroadcastTemporaryAccessPath(sessionId = "", accessId = "") {
+  const sessionPath = getFirebaseBroadcastSessionPath(sessionId);
+  const cleanAccessId = normalizeBroadcastContextId(accessId);
+  return sessionPath && cleanAccessId ? `${sessionPath}/access/${cleanAccessId}` : "";
+}
+
+export async function getOrCreateFirebaseBroadcastTemporaryAccess(value = {}, outputType, options = {}) {
+  const context = normalizeFirebaseBroadcastContext(value);
+  const normalizedOutputType = normalizeFirebaseBroadcastOutputType(outputType);
+  const access = await resolveFirebaseBroadcastAccess(context, "publish");
+  const sessionPath = getFirebaseBroadcastSessionPath(context.sessionId);
+  await ensureFirebaseBroadcastSessionContext(sessionPath, context, access);
+  const accessRoot = ref(getFirebaseDatabase(), `${sessionPath}/access`);
+  const snapshot = await get(accessRoot);
+  const now = options.now || new Date().toISOString();
+  const candidates = Object.values(snapshot.val() || {})
+    .map((entry) => entry?.descriptor)
+    .filter((descriptor) => descriptor?.outputType === normalizedOutputType)
+    .filter((descriptor) => isBroadcastTemporaryAccessActive(descriptor, { now }))
+    .sort((left, right) => Number(right.createdAt && Date.parse(right.createdAt) || 0) - Number(left.createdAt && Date.parse(left.createdAt) || 0));
+  if (options.renew !== true && candidates[0]) return cloneFirebaseBroadcastValue(candidates[0]);
+  const updates = {};
+  if (options.renew === true) {
+    for (const descriptor of candidates) {
+      const revoked = revokeBroadcastTemporaryAccessDescriptor(descriptor, { now });
+      updates[`${descriptor.accessId}/descriptor`] = cloneFirebaseBroadcastValue(revoked);
+    }
+  }
+  const descriptor = createBroadcastTemporaryAccessDescriptor(context, normalizedOutputType, {
+    accessId: options.accessId,
+    ttlMs: options.ttlMs,
+    now
+  });
+  updates[`${descriptor.accessId}/descriptor`] = cloneFirebaseBroadcastValue(descriptor);
+  await update(accessRoot, updates);
+  console.info("[broadcast-simple-access] temporary access ready", {
+    outputType: normalizedOutputType,
+    sessionId: context.sessionId,
+    expiresAt: descriptor.expiresAtIso
+  });
+  return cloneFirebaseBroadcastValue(descriptor);
+}
+
+export async function revokeFirebaseBroadcastTemporaryAccess(value = {}, accessId, options = {}) {
+  const context = normalizeFirebaseBroadcastContext(value);
+  await resolveFirebaseBroadcastAccess(context, "publish");
+  const accessPath = getFirebaseBroadcastTemporaryAccessPath(context.sessionId, accessId);
+  if (!accessPath) throw firebaseBroadcastError("broadcast-temporary-access-invalid");
+  const descriptorRef = ref(getFirebaseDatabase(), `${accessPath}/descriptor`);
+  const snapshot = await get(descriptorRef);
+  const descriptor = snapshot.val();
+  if (!descriptor || !sameFirebaseBroadcastAccessContext(descriptor.context, context)) {
+    throw firebaseBroadcastError("broadcast-temporary-access-context-conflict");
+  }
+  const revoked = revokeBroadcastTemporaryAccessDescriptor(descriptor, { now: options.now });
+  await set(descriptorRef, cloneFirebaseBroadcastValue(revoked));
+  return cloneFirebaseBroadcastValue(revoked);
+}
+
+export async function closeFirebaseBroadcastSession(value = {}, options = {}) {
+  const context = normalizeFirebaseBroadcastContext(value);
+  await resolveFirebaseBroadcastAccess(context, "publish");
+  const session = await readFirebaseBroadcastSessionContext(context);
+  if (!session.exists) {
+    return Object.freeze({
+      ...context,
+      status: "not-found",
+      revision: 0,
+      alreadyClosed: false
+    });
+  }
+  await revokeAllFirebaseBroadcastTemporaryAccess(context, options);
+  return setFirebaseBroadcastSessionStatus(context, "closed", options);
+}
+
+export async function renewFirebaseBroadcastSession(value = {}, options = {}) {
+  const context = normalizeFirebaseBroadcastContext(value);
+  await resolveFirebaseBroadcastAccess(context, "publish");
+  await revokeAllFirebaseBroadcastTemporaryAccess(context, options);
+  return setFirebaseBroadcastSessionStatus(context, "active", options);
+}
+
+export async function resolveFirebaseBroadcastTemporaryAccess(value = {}, expectedOutputType) {
+  const sessionId = normalizeBroadcastContextId(value.sessionId);
+  const accessId = normalizeBroadcastContextId(value.accessId || value.access);
+  const outputType = normalizeFirebaseBroadcastOutputType(expectedOutputType || value.outputType);
+  const accessPath = getFirebaseBroadcastTemporaryAccessPath(sessionId, accessId);
+  if (!accessPath) throw firebaseBroadcastError("broadcast-temporary-access-invalid");
+  const snapshot = await get(ref(getFirebaseDatabase(), `${accessPath}/descriptor`));
+  const descriptor = snapshot.val();
+  const validation = validateBroadcastTemporaryAccessDescriptor(descriptor);
+  if (!validation.valid) {
+    const code = validation.errors.includes("broadcast-realtime-temporary-access-expired")
+      ? "broadcast-temporary-access-expired"
+      : validation.errors.includes("broadcast-realtime-temporary-access-revoked")
+        ? "broadcast-temporary-access-revoked"
+        : "broadcast-temporary-access-invalid";
+    throw firebaseBroadcastError(code);
+  }
+  if (descriptor.outputType !== outputType || descriptor.sessionId !== sessionId || descriptor.readOnly !== true) {
+    throw firebaseBroadcastError("broadcast-temporary-access-scope-conflict");
+  }
+  return Object.freeze({
+    descriptor: Object.freeze(cloneFirebaseBroadcastValue(descriptor)),
+    context: Object.freeze({
+      tenantId: BROADCAST_SINGLE_TENANT_SCOPE_ID,
+      organizationId: null,
+      clientId: null,
+      tournamentId: descriptor.context.tournamentId,
+      competitionId: descriptor.context.competitionId || null,
+      activeCharreadaId: descriptor.context.activeCharreadaId || null,
+      sessionId: descriptor.sessionId
+    }),
+    accessPath,
+    outputType,
+    channel: descriptor.channel
+  });
+}
+
+export function createFirebaseBroadcastTemporaryAccessAdapter(accessDefinition = {}, options = {}) {
+  const descriptor = accessDefinition.descriptor;
+  const context = normalizeFirebaseBroadcastContext(accessDefinition.context);
+  const outputType = normalizeFirebaseBroadcastOutputType(accessDefinition.outputType || descriptor?.outputType);
+  const channel = outputType === "program_main" ? "program" : "announcer";
+  const accessPath = getFirebaseBroadcastTemporaryAccessPath(context.sessionId, descriptor?.accessId);
+  if (!accessPath || descriptor?.channel !== channel) throw firebaseBroadcastError("broadcast-temporary-access-invalid");
+  let connectionUnsubscribe = null;
+  return Object.freeze({
+    adapterId: normalizeBroadcastContextId(options.adapterId) || `firebase-broadcast-access-${descriptor.accessId}`,
+    type: "firebase-rtdb-read-only-access",
+    async connect(request = {}) {
+      const requested = normalizeFirebaseBroadcastContext(request.context);
+      if (!sameFirebaseBroadcastContext(context, requested)) throw firebaseBroadcastError("broadcast-temporary-access-context-conflict");
+      connectionUnsubscribe?.();
+      connectionUnsubscribe = onValue(
+        ref(getFirebaseDatabase(), ".info/connected"),
+        (snapshot) => request.onStatus?.({ connected: snapshot.val() === true, offline: snapshot.val() !== true, at: new Date().toISOString() }),
+        (error) => request.onError?.(normalizeFirebaseBroadcastError(error))
+      );
+      return () => {
+        connectionUnsubscribe?.();
+        connectionUnsubscribe = null;
+      };
+    },
+    subscribe(request = {}) {
+      if (!String(request.path || "").endsWith(`/${channel}/current`)) {
+        throw firebaseBroadcastError("broadcast-temporary-access-channel-forbidden");
+      }
+      return onValue(
+        ref(getFirebaseDatabase(), `${accessPath}/${channel}/current`),
+        (snapshot) => {
+          const envelope = decodeFirebaseBroadcastValue(snapshot.val());
+          request.onValue?.(envelope ? { ...envelope, context: cloneFirebaseBroadcastValue(context) } : null);
+        },
+        (error) => request.onError?.(normalizeFirebaseBroadcastError(error))
+      );
+    },
+    async publish() {
+      throw firebaseBroadcastError("broadcast-temporary-access-read-only");
+    },
+    async publishOutputState() {
+      throw firebaseBroadcastError("broadcast-temporary-access-read-only");
+    },
+    async read() {
+      return null;
+    },
+    disconnect() {
+      connectionUnsubscribe?.();
+      connectionUnsubscribe = null;
+    }
+  });
+}
+
+export function createFirebaseBroadcastAdapter(options = {}) {
+  const adapterId = normalizeBroadcastContextId(options.adapterId) || "firebase-broadcast-adapter";
+  const accessMode = options.accessMode === "publish" ? "publish" : "read";
+  let connectionUnsubscribe = null;
+  let access = null;
+  let connectedContext = null;
+
+  return Object.freeze({
+    adapterId,
+    type: "firebase-rtdb",
+    async connect(request = {}) {
+      const context = normalizeFirebaseBroadcastContext(request.context);
+      const sessionPath = requireFirebaseBroadcastSessionPath(request.sessionPath, context.sessionId);
+      access = await resolveFirebaseBroadcastAccess(context, accessMode);
+      await validateExistingFirebaseBroadcastSessionContext(sessionPath, context, accessMode);
+      connectedContext = context;
+      connectionUnsubscribe?.();
+      connectionUnsubscribe = onValue(
+        ref(getFirebaseDatabase(), ".info/connected"),
+        (snapshot) => request.onStatus?.({ connected: snapshot.val() === true, offline: snapshot.val() !== true, at: new Date().toISOString() }),
+        (error) => request.onError?.(normalizeFirebaseBroadcastError(error))
+      );
+      return () => {
+        connectionUnsubscribe?.();
+        connectionUnsubscribe = null;
+      };
+    },
+    subscribe(request = {}) {
+      const context = request.context
+        ? normalizeFirebaseBroadcastContext(request.context)
+        : connectedContext;
+      const sessionPath = requireConnectedFirebaseBroadcastAdapterContext(connectedContext, context);
+      const path = requireFirebaseBroadcastPath(request.path, sessionPath);
+      return onValue(
+        ref(getFirebaseDatabase(), path),
+        (snapshot) => request.onValue?.(decodeFirebaseBroadcastValue(snapshot.val())),
+        (error) => request.onError?.(normalizeFirebaseBroadcastError(error))
+      );
+    },
+    subscribeContract(request = {}) {
+      const context = normalizeFirebaseBroadcastContext(request.context || connectedContext);
+      if (!access || !connectedContext || !sameFirebaseBroadcastContext(connectedContext, context)) {
+        throw firebaseBroadcastError("broadcast-adapter-not-connected");
+      }
+      const path = `${LIVE_ROOT_PATH}/${normalizeLiveChannel(context.tournamentId)}/current/broadcastContract`;
+      return onValue(
+        ref(getFirebaseDatabase(), path),
+        (snapshot) => request.onValue?.(snapshot.val()),
+        (error) => request.onError?.(normalizeFirebaseBroadcastError(error))
+      );
+    },
+    async publish(request = {}) {
+      const context = normalizeFirebaseBroadcastContext(request.context);
+      requireConnectedFirebaseBroadcastAdapterContext(connectedContext, context);
+      const sessionPath = requireFirebaseBroadcastSessionPath(request.sessionPath, context.sessionId);
+      const path = requireFirebaseBroadcastPath(request.path, sessionPath);
+      access = await resolveFirebaseBroadcastAccess(context, "publish");
+      await ensureFirebaseBroadcastSessionContext(sessionPath, context, access);
+      const firebaseEnvelope = encodeFirebaseBroadcastValue(request.envelope);
+      const result = await publishFirebaseBroadcastValue(path, firebaseEnvelope, {
+        expectedRevision: request.expectedRevision,
+        idempotencyKey: request.idempotencyKey
+      });
+      await updateFirebaseBroadcastRevision(sessionPath, request.channel, result.revision, context);
+      await publishFirebaseBroadcastTemporaryAccessCopies(sessionPath, request.channel, firebaseEnvelope);
+      return result;
+    },
+    async publishOutputState(request = {}) {
+      const context = normalizeFirebaseBroadcastContext(request.context);
+      requireConnectedFirebaseBroadcastAdapterContext(connectedContext, context);
+      const sessionPath = requireFirebaseBroadcastSessionPath(request.sessionPath, context.sessionId);
+      const path = requireFirebaseBroadcastPath(request.path, sessionPath);
+      access = await resolveFirebaseBroadcastAccess(context, "publish");
+      await ensureFirebaseBroadcastSessionContext(sessionPath, context, access);
+      return publishFirebaseBroadcastValue(path, {
+        outputId: normalizeBroadcastContextId(request.outputId),
+        context,
+        ...cleanUndefined(request.state || {})
+      }, { expectedRevision: request.expectedRevision });
+    },
+    async read(path = "") {
+      const sessionPath = requireConnectedFirebaseBroadcastAdapterContext(connectedContext);
+      const cleanPath = requireFirebaseBroadcastPath(path, sessionPath);
+      const snapshot = await get(ref(getFirebaseDatabase(), cleanPath));
+      return decodeFirebaseBroadcastValue(snapshot.val());
+    },
+    disconnect() {
+      connectionUnsubscribe?.();
+      connectionUnsubscribe = null;
+      access = null;
+      connectedContext = null;
+    }
+  });
+}
+
+export async function resolveCurrentBroadcastContext(value = {}, options = {}) {
+  const input = normalizeFirebaseBroadcastRequestContext(value);
+  const operation = options.operation === "publish" ? "publish" : "read";
+  const user = await getFirebaseBroadcastAuthenticatedUser();
+  if (!user?.uid) throw firebaseBroadcastError("broadcast-auth-required");
+  const profileSnapshot = await get(ref(getFirebaseDatabase(), `${USERS_PATH}/${user.uid}`));
+  const profile = profileSnapshot.val() || {};
+  const tournamentAssigned = await readFirebaseBroadcastTournamentAssignment(profile, user.uid, input.tournamentId);
+  const tournamentSnapshot = await get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${input.tournamentId}`));
+  if (!tournamentSnapshot.exists()) throw firebaseBroadcastError("broadcast-context-unavailable");
+  const tournament = tournamentSnapshot.val() || {};
+  const officialTournamentId = normalizeBroadcastContextId(tournament.info?.id || input.tournamentId);
+  if (officialTournamentId !== input.tournamentId) throw firebaseBroadcastError("broadcast-context-mismatch");
+  const charreadas = arrayFromRecord(tournament.charreadas);
+  const officialActiveCharreadaId = normalizeBroadcastContextId(
+    tournament.meta?.activeCharreadaId ||
+      tournament.info?.activeCharreadaId ||
+      tournament.tournamentState?.activeCharreadaId ||
+      tournament.activeCharreadaId
+  );
+  if (!officialActiveCharreadaId) throw firebaseBroadcastError("broadcast-context-unavailable");
+  const activeCharreada = charreadas.find((charreada) => normalizeBroadcastContextId(charreada?.id) === officialActiveCharreadaId);
+  if (!activeCharreada) throw firebaseBroadcastError("broadcast-context-mismatch");
+  if (input.activeCharreadaId && input.activeCharreadaId !== officialActiveCharreadaId) {
+    throw firebaseBroadcastError("broadcast-context-mismatch");
+  }
+  const officialCompetitionId = normalizeBroadcastContextId(
+    activeCharreada.competitionId ||
+      activeCharreada.competitionType ||
+      getCompetitionTypeFromTournamentType(tournament.info?.type)
+  );
+  if (!officialCompetitionId) throw firebaseBroadcastError("broadcast-context-unavailable");
+  if (input.competitionId && input.competitionId !== officialCompetitionId) {
+    throw firebaseBroadcastError("broadcast-context-mismatch");
+  }
+  const sessionId = buildBroadcastAutomaticSessionId({
+    tournamentId: officialTournamentId,
+    competitionId: officialCompetitionId,
+    activeCharreadaId: officialActiveCharreadaId
+  });
+  if (input.sessionId && input.sessionId !== sessionId) throw firebaseBroadcastError("broadcast-session-context-conflict");
+  const context = {
+    tenantId: BROADCAST_SINGLE_TENANT_SCOPE_ID,
+    organizationId: null,
+    clientId: null,
+    tournamentId: officialTournamentId,
+    competitionId: officialCompetitionId,
+    activeCharreadaId: officialActiveCharreadaId,
+    sessionId,
+    source: "firebase-tournament-active-charreada",
+    revision: Number(tournament.meta?.version || tournament.version || 0),
+    resolvedAt: options.now ? new Date(options.now).toISOString() : new Date().toISOString()
+  };
+  validateFirebaseBroadcastProfileAccess(profile, user.uid, context, operation, { tournamentAssigned });
+  return Object.freeze(context);
+}
+
+export async function resolveFirebaseBroadcastAuthorizedContext(value = {}, operation = "read") {
+  return resolveCurrentBroadcastContext(value, { operation });
 }
 
 export function normalizeLiveChannel(value) {
@@ -2582,10 +2930,349 @@ function getFirebaseAuth() {
   return authInstance;
 }
 
+async function getFirebaseBroadcastAuthenticatedUser() {
+  const auth = getFirebaseAuth();
+  if (typeof auth.authStateReady === "function") await auth.authStateReady();
+  return auth.currentUser;
+}
+
 function getFirebaseFunctions() {
   if (!appInstance) appInstance = getApps()[0] || initializeApp(FIREBASE_CONFIG);
   if (!functionsInstance) functionsInstance = getFunctions(appInstance, "us-central1");
   return functionsInstance;
+}
+
+async function resolveFirebaseBroadcastAccess(context, operation = "read") {
+  const user = await getFirebaseBroadcastAuthenticatedUser();
+  if (!user?.uid) throw firebaseBroadcastError("broadcast-auth-required");
+  const profileSnapshot = await get(ref(getFirebaseDatabase(), `${USERS_PATH}/${user.uid}`));
+  const profile = profileSnapshot.val() || {};
+  const tournamentAssigned = await readFirebaseBroadcastTournamentAssignment(profile, user.uid, context.tournamentId);
+  return validateFirebaseBroadcastProfileAccess(profile, user.uid, context, operation, { tournamentAssigned });
+}
+
+function validateFirebaseBroadcastProfileAccess(profile, uid, context, operation = "read", options = {}) {
+  if (profile.active !== true) throw firebaseBroadcastError("broadcast-user-inactive");
+  const role = normalizeRole(profile.role);
+  const readRoles = new Set(["supervisor", "graficos"]);
+  const publishRoles = new Set(["supervisor", "graficos"]);
+  if (operation === "publish" ? !publishRoles.has(role) : !readRoles.has(role)) {
+    throw firebaseBroadcastError("broadcast-permission-denied");
+  }
+  if (context.tenantId !== BROADCAST_SINGLE_TENANT_SCOPE_ID || context.organizationId !== null || context.clientId !== null) {
+    throw firebaseBroadcastError("broadcast-single-tenant-context-conflict");
+  }
+  if (!firebaseProfileHasTournamentAccess(profile, context.tournamentId, options.tournamentAssigned)) {
+    throw firebaseBroadcastError("broadcast-tournament-access-denied");
+  }
+  return {
+    uid,
+    role,
+    operation: operation === "publish" ? "publish" : "read",
+    tenantId: BROADCAST_SINGLE_TENANT_SCOPE_ID,
+    organizationId: null,
+    clientId: null,
+    tournamentId: context.tournamentId
+  };
+}
+
+async function readFirebaseBroadcastTournamentAssignment(profile, uid, tournamentId) {
+  if (profile?.tournamentAccess !== "selected") return true;
+  const snapshot = await get(ref(getFirebaseDatabase(), `charropro/userTournamentAccess/${uid}/${tournamentId}`));
+  return snapshot.val() === true;
+}
+
+function firebaseProfileHasTournamentAccess(profile, tournamentId, tournamentAssigned = false) {
+  if (profile.tournamentAccess !== "selected") return true;
+  if (tournamentAssigned === true) return true;
+  const ids = Array.isArray(profile.tournamentIds)
+    ? profile.tournamentIds
+    : Array.isArray(profile.assignedTournamentIds) ? profile.assignedTournamentIds : [];
+  return ids.map((id) => String(id || "").trim()).includes(tournamentId);
+}
+
+async function ensureFirebaseBroadcastSessionContext(sessionPath, context, access) {
+  let conflict = false;
+  const contextRef = ref(getFirebaseDatabase(), `${sessionPath}/context`);
+  const result = await runTransaction(contextRef, (current) => {
+    if (!current) {
+      const now = new Date().toISOString();
+      return { ...context, status: "active", revision: 1, createdAt: now, updatedAt: now, createdByUid: access.uid };
+    }
+    if (!sameFirebaseBroadcastContext(current, context)) {
+      conflict = true;
+      return;
+    }
+    if (current.status === "closed") {
+      return {
+        ...current,
+        status: "active",
+        revision: Number(current.revision || 0) + 1,
+        updatedAt: new Date().toISOString()
+      };
+    }
+    return current;
+  }, { applyLocally: false });
+  if (conflict || !result.committed && !result.snapshot.exists()) throw firebaseBroadcastError("broadcast-session-context-conflict");
+}
+
+async function validateExistingFirebaseBroadcastSessionContext(sessionPath, context, operation) {
+  const snapshot = await get(ref(getFirebaseDatabase(), `${sessionPath}/context`));
+  if (!snapshot.exists()) {
+    if (operation === "read") throw firebaseBroadcastError("broadcast-session-not-initialized");
+    return;
+  }
+  if (!sameFirebaseBroadcastContext(snapshot.val() || {}, context)) {
+    throw firebaseBroadcastError("broadcast-session-context-conflict");
+  }
+}
+
+async function setFirebaseBroadcastSessionStatus(value, status, options = {}) {
+  const context = normalizeFirebaseBroadcastContext(value);
+  await resolveFirebaseBroadcastAccess(context, "publish");
+  const sessionPath = getFirebaseBroadcastSessionPath(context.sessionId);
+  const session = await readFirebaseBroadcastSessionContext(context);
+  if (!session.exists) {
+    return Object.freeze({
+      ...context,
+      status: "not-found",
+      revision: 0,
+      alreadyClosed: false
+    });
+  }
+  if (session.value.status === status) {
+    return Object.freeze({
+      ...context,
+      status,
+      revision: Number(session.value.revision || 0),
+      alreadyClosed: status === "closed"
+    });
+  }
+  let conflict = null;
+  const baseline = cloneFirebaseBroadcastValue(session.value);
+  const result = await runTransaction(ref(getFirebaseDatabase(), `${sessionPath}/context`), (current) => {
+    const source = current || baseline;
+    if (!sameFirebaseBroadcastContext(source, context)) {
+      conflict = "broadcast-session-context-conflict";
+      return;
+    }
+    return {
+      ...source,
+      status,
+      revision: Number(source.revision || 0) + 1,
+      updatedAt: options.now ? new Date(options.now).toISOString() : new Date().toISOString()
+    };
+  }, { applyLocally: false });
+  if (conflict || !result.committed) throw firebaseBroadcastError(conflict || "broadcast-session-status-update-failed");
+  const next = result.snapshot.val() || {};
+  return Object.freeze({
+    ...normalizeFirebaseBroadcastContext(next),
+    status: next.status,
+    revision: Number(next.revision || 0),
+    alreadyClosed: false
+  });
+}
+
+async function readFirebaseBroadcastSessionContext(context) {
+  const sessionPath = getFirebaseBroadcastSessionPath(context.sessionId);
+  const snapshot = await get(ref(getFirebaseDatabase(), `${sessionPath}/context`));
+  if (!snapshot.exists()) return { exists: false, value: null };
+  const value = snapshot.val() || {};
+  if (!sameFirebaseBroadcastContext(value, context)) {
+    throw firebaseBroadcastError("broadcast-session-context-conflict");
+  }
+  return { exists: true, value };
+}
+
+async function revokeAllFirebaseBroadcastTemporaryAccess(context, options = {}) {
+  const sessionPath = getFirebaseBroadcastSessionPath(context.sessionId);
+  const accessRoot = ref(getFirebaseDatabase(), `${sessionPath}/access`);
+  const snapshot = await get(accessRoot);
+  const updates = {};
+  for (const [accessId, entry] of Object.entries(snapshot.val() || {})) {
+    const descriptor = entry?.descriptor;
+    if (!descriptor || descriptor.status !== "active") continue;
+    updates[`${accessId}/descriptor`] = cloneFirebaseBroadcastValue(
+      revokeBroadcastTemporaryAccessDescriptor(descriptor, { now: options.now })
+    );
+  }
+  if (Object.keys(updates).length) await update(accessRoot, updates);
+}
+
+async function publishFirebaseBroadcastTemporaryAccessCopies(sessionPath, channel, envelope) {
+  const cleanChannel = channel === "announcer" ? "announcer" : "program";
+  const outputType = cleanChannel === "program" ? "program_main" : "announcer_monitor";
+  const accessRoot = ref(getFirebaseDatabase(), `${sessionPath}/access`);
+  const snapshot = await get(accessRoot);
+  const updates = {};
+  for (const [accessId, entry] of Object.entries(snapshot.val() || {})) {
+    const descriptor = entry?.descriptor;
+    if (descriptor?.outputType !== outputType || !isBroadcastTemporaryAccessActive(descriptor)) continue;
+    if (!sameFirebaseBroadcastAccessContext(descriptor.context, envelope?.context)) continue;
+    const publicEnvelope = cloneFirebaseBroadcastValue(envelope);
+    publicEnvelope.context = cloneFirebaseBroadcastValue(descriptor.context);
+    updates[`${accessId}/${cleanChannel}/current`] = publicEnvelope;
+  }
+  if (Object.keys(updates).length) await update(accessRoot, updates);
+}
+
+function normalizeFirebaseBroadcastOutputType(value) {
+  const outputType = String(value || "").trim().toLowerCase();
+  if (!BROADCAST_TEMPORARY_ACCESS_TYPES.has(outputType)) {
+    throw firebaseBroadcastError("broadcast-temporary-access-output-invalid");
+  }
+  return outputType;
+}
+
+function sameFirebaseBroadcastAccessContext(left = {}, right = {}) {
+  return ["tournamentId", "competitionId", "activeCharreadaId", "sessionId"]
+    .every((key) => (left[key] || null) === (right[key] || null));
+}
+
+function cloneFirebaseBroadcastValue(value) {
+  return typeof globalThis.structuredClone === "function"
+    ? globalThis.structuredClone(value)
+    : cleanUndefined(value);
+}
+
+function encodeFirebaseBroadcastValue(value) {
+  if (Array.isArray(value)) return value.map(encodeFirebaseBroadcastValue);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value).map(([key, child]) => [
+    key.replace(/[~.#$/\[\]]/g, (character) => `~${character.codePointAt(0).toString(16).padStart(2, "0")}`),
+    encodeFirebaseBroadcastValue(child)
+  ]));
+}
+
+function decodeFirebaseBroadcastValue(value) {
+  if (Array.isArray(value)) return value.map(decodeFirebaseBroadcastValue);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value).map(([key, child]) => [
+    key.replace(/~([0-9a-f]{2})/gi, (_match, hex) => String.fromCodePoint(Number.parseInt(hex, 16))),
+    decodeFirebaseBroadcastValue(child)
+  ]));
+}
+
+async function publishFirebaseBroadcastValue(path, value, options = {}) {
+  const expectedRevision = options.expectedRevision;
+  const idempotencyKey = normalizeBroadcastContextId(options.idempotencyKey);
+  let conflict = null;
+  let duplicate = false;
+  const targetRef = ref(getFirebaseDatabase(), path);
+  const baselineSnapshot = await get(targetRef);
+  const baseline = baselineSnapshot.val();
+  const result = await runTransaction(targetRef, (current) => {
+    const source = current || baseline;
+    const currentRevision = Number(source?.revision || 0);
+    if (expectedRevision !== undefined && Number(expectedRevision) !== currentRevision) {
+      conflict = "broadcast-revision-conflict";
+      return;
+    }
+    if (idempotencyKey && source?.idempotencyKey === idempotencyKey) {
+      if (source?.messageId === value?.messageId) duplicate = true;
+      else conflict = "broadcast-idempotency-conflict";
+      return;
+    }
+    return cleanUndefined(value);
+  }, { applyLocally: false });
+  if (duplicate) return { ok: true, duplicate: true, revision: Number(result.snapshot.val()?.revision || value?.revision || 0) };
+  if (conflict) throw firebaseBroadcastError(conflict);
+  if (!result.committed) throw firebaseBroadcastError("broadcast-publish-aborted");
+  return { ok: true, revision: Number(result.snapshot.val()?.revision || value?.revision || 0) };
+}
+
+async function updateFirebaseBroadcastRevision(sessionPath, channel, revision, context) {
+  const cleanChannel = channel === "announcer" ? "announcer" : "program";
+  await set(ref(getFirebaseDatabase(), `${sessionPath}/revisions/${cleanChannel}`), {
+    revision: Number(revision || 0),
+    context,
+    updatedAt: new Date().toISOString()
+  });
+}
+
+function normalizeFirebaseBroadcastContext(value = {}, options = {}) {
+  const context = {
+    tenantId: normalizeBroadcastContextId(value.tenantId),
+    organizationId: normalizeBroadcastOptionalContextId(value.organizationId),
+    clientId: normalizeBroadcastOptionalContextId(value.clientId),
+    tournamentId: normalizeBroadcastContextId(value.tournamentId),
+    competitionId: normalizeBroadcastOptionalContextId(value.competitionId),
+    activeCharreadaId: normalizeBroadcastOptionalContextId(value.activeCharreadaId || value.charreadaId),
+    sessionId: normalizeBroadcastContextId(value.sessionId)
+  };
+  if ((options.requireTenant !== false && !context.tenantId) || !context.tournamentId || !context.sessionId) {
+    throw firebaseBroadcastError("broadcast-context-missing");
+  }
+  return context;
+}
+
+function normalizeFirebaseBroadcastRequestContext(value = {}) {
+  for (const key of ["tenantId", "organizationId", "clientId"]) {
+    if (value?.[key] !== undefined && value?.[key] !== null && value?.[key] !== "") {
+      throw firebaseBroadcastError("broadcast-external-identity-forbidden");
+    }
+  }
+  const context = {
+    tournamentId: normalizeBroadcastContextId(value.tournamentId),
+    competitionId: normalizeBroadcastOptionalContextId(value.competitionId),
+    activeCharreadaId: normalizeBroadcastOptionalContextId(value.activeCharreadaId || value.charreadaId),
+    sessionId: normalizeBroadcastContextId(value.sessionId)
+  };
+  if (!context.tournamentId) throw firebaseBroadcastError("broadcast-context-missing");
+  return context;
+}
+
+function sameFirebaseBroadcastContext(left = {}, right = {}) {
+  return ["tenantId", "organizationId", "clientId", "tournamentId", "competitionId", "activeCharreadaId", "sessionId"]
+    .every((key) => (left[key] || null) === (right[key] || null));
+}
+
+function requireFirebaseBroadcastSessionPath(path, sessionId) {
+  const expected = getFirebaseBroadcastSessionPath(sessionId);
+  if (!expected || path !== expected) throw firebaseBroadcastError("broadcast-session-path-invalid");
+  return expected;
+}
+
+function requireConnectedFirebaseBroadcastAdapterContext(connectedContext, requestedContext = connectedContext) {
+  if (!connectedContext || !requestedContext || !sameFirebaseBroadcastContext(connectedContext, requestedContext)) {
+    throw firebaseBroadcastError("broadcast-adapter-context-conflict");
+  }
+  return getFirebaseBroadcastSessionPath(connectedContext.sessionId);
+}
+
+function requireFirebaseBroadcastPath(path, sessionPath = "") {
+  const clean = String(path || "").trim().replace(/^\/+|\/+$/g, "");
+  const base = sessionPath || BROADCAST_STUDIO_SESSIONS_PATH;
+  if (!clean.startsWith(`${base}/`) && clean !== base) throw firebaseBroadcastError("broadcast-path-outside-namespace");
+  if (/\/(?:scores|publishedScores|audit|live|publicTournaments)(?:\/|$)/i.test(clean)) {
+    throw firebaseBroadcastError("broadcast-sports-path-forbidden");
+  }
+  return clean;
+}
+
+function normalizeBroadcastContextId(value) {
+  const clean = typeof value === "string" ? value.trim() : "";
+  return /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/.test(clean) ? clean : "";
+}
+
+function normalizeBroadcastOptionalContextId(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const clean = normalizeBroadcastContextId(value);
+  if (!clean) throw firebaseBroadcastError("broadcast-context-id-invalid");
+  return clean;
+}
+
+function normalizeFirebaseBroadcastError(error) {
+  return {
+    code: String(error?.code || "broadcast-firebase-error"),
+    message: String(error?.message || "broadcast-firebase-error").slice(0, 300)
+  };
+}
+
+function firebaseBroadcastError(code) {
+  const error = new Error(code);
+  error.code = code;
+  return error;
 }
 
 function compactLivePayload(payload = {}) {

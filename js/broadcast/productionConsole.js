@@ -212,10 +212,29 @@ import {
   synchronizeProgramMain,
   validateOutputSynchronizationSnapshot
 } from "./outputSynchronization.js?v=20260715-broadcast-access-and-sync-001-local-output-sync-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260715-broadcast-access-and-sync-001-local-output-sync-v1";
+import {
+  BROADCAST_REALTIME_TRANSPORT_VERSION,
+  buildBroadcastRealtimeSnapshot,
+  configureBroadcastRealtimeTransport,
+  connectBroadcastRealtimeTransport,
+  createBroadcastRealtimeTransport,
+  destroyBroadcastRealtimeTransport,
+  disconnectBroadcastRealtimeTransport,
+  publishBroadcastProjection
+} from "./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
+import {
+  LIVE_BINDINGS_VERSION,
+  applyLiveBindingsToProgram,
+  buildLiveBindingsSnapshot,
+  createLiveBindingsEngine,
+  destroyLiveBindingsEngine,
+  registerLiveBinding,
+  resolveLiveBindings
+} from "./liveBindings.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260715-broadcast-access-and-sync-001-local-output-sync-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260716-broadcast-context-resolution-001-real-context-v1";
 
 export const PRODUCTION_CONSOLE_OUTPUT_ROUTES = Object.freeze([
   Object.freeze({ routeId: "route-program-main", routeType: "program_main", outputId: "program-main", sourceType: "program_snapshot", visibility: "public", name: "Program Main" }),
@@ -309,6 +328,7 @@ const DEFAULT_OUTPUT_ID = "console_program";
 const PREVIEW_OUTPUT_ID = "console_preview";
 const DEFAULT_VISIBILITY = "production";
 const SESSION_SETTINGS_KEY = "charropro_production_console_preferences_v1";
+const ACTIVE_TOURNAMENT_CONTEXT_KEY = "charropro_tournament_active_v1";
 const VISIBILITIES = Object.freeze(["public", "production", "operational", "restricted"]);
 const VISIBILITY_RANK = Object.freeze({ public: 0, production: 1, operational: 2, restricted: 3 });
 const INSPECTOR_MAX_DEPTH = 14;
@@ -470,6 +490,21 @@ export function createProductionConsoleModel(options = {}) {
     outputSynchronizationSnapshot: null,
     outputSynchronizationWarnings: [],
     outputSynchronizationErrors: [],
+    realtimeTransportVersion: BROADCAST_REALTIME_TRANSPORT_VERSION,
+    realtimeTransportState: "uninitialized",
+    realtimeTransportSnapshot: null,
+    realtimeTransportWarnings: [],
+    realtimeTransportErrors: [],
+    realtimeContextSource: null,
+    realtimeContextRevision: 0,
+    realtimeContextResolvedAt: null,
+    liveBindingsVersion: LIVE_BINDINGS_VERSION,
+    liveBindingsState: "uninitialized",
+    liveBindingsSnapshot: null,
+    liveBindingsWarnings: [],
+    liveBindingsErrors: [],
+    realtimeSourceReady: false,
+    realtimeTemplateContextKey: null,
     themeSequence: PRODUCTION_CONSOLE_THEME_DEFINITIONS.length,
     selectedThemeId: themeRegistry.activeThemeId || "theme_default",
     themeSnapshot: null,
@@ -1071,6 +1106,7 @@ export function createProductionConsoleTemplateRendererIntegration(model, target
   assertModel(model);
   const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
   const sources = buildProductionConsoleTemplateRendererSources(model, options);
+  const identity = buildProductionConsoleTemplateIdentity(model, sources);
   return createTemplateRendererIntegration(target, {
     integrationId: options.integrationId || `production_console_template_renderer_${output.id}`,
     rendererId: options.rendererId || `production_console_template_component_renderer_${output.id}`,
@@ -1080,7 +1116,7 @@ export function createProductionConsoleTemplateRendererIntegration(model, target
     orientation: output.orientation,
     safeArea: output.safeArea,
     visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
-    tenantId: sources.broadcastContract?.tenant?.id,
+    tenantId: identity.tenantId,
     allowDisconnected: options.allowDisconnected === true,
     now: options.now
   });
@@ -1103,11 +1139,12 @@ export function prepareProductionConsoleTemplateRenderer(model, options = {}) {
   assertModel(model);
   const template = requireConsoleTemplate(model, options.templateId);
   const sources = buildProductionConsoleTemplateRendererSources(model, options);
+  const identity = buildProductionConsoleTemplateIdentity(model, sources);
   const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
   const templateInstanceId = options.templateInstanceId || `template_lab_instance_${template.templateId}`;
   const instance = instantiateBroadcastTemplate(template, sources, {
     visibility: model.templateRendererVisibility,
-    tenantId: sources.broadcastContract?.tenant?.id,
+    tenantId: identity.tenantId,
     templateInstanceId,
     now: normalizeNow(options.now)
   });
@@ -1120,7 +1157,7 @@ export function prepareProductionConsoleTemplateRenderer(model, options = {}) {
     orientation: output.orientation,
     safeArea: output.safeArea,
     visibility: model.templateRendererVisibility,
-    tenantId: sources.broadcastContract?.tenant?.id,
+    tenantId: identity.tenantId,
     now: normalizeNow(options.now)
   });
   return {
@@ -1218,8 +1255,7 @@ export function createProductionConsoleThemeTemplateIntegration(model, templateR
   if (!templateRendererIntegration) throw consoleError("console-template-renderer-not-ready");
   const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
   const sources = buildProductionConsoleTemplateRendererSources(model, options);
-  const sourceFixture = getFixtureDefinition(options.fixtureId || model.templateRendererContextId);
-  const source = buildPlaygroundFixture(sourceFixture.competitionType, sourceFixture.countOption);
+  const identity = buildProductionConsoleTemplateIdentity(model, sources);
   return createThemeTemplateIntegration({
     integrationId: options.integrationId || `production_console_theme_template_${output.id}`,
     themeRegistry: model.themeRegistry,
@@ -1239,13 +1275,13 @@ export function createProductionConsoleThemeTemplateIntegration(model, templateR
       safeArea: output.safeArea
     },
     visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
-    tenantId: source.organization?.tenantId,
-    organizationId: source.organization?.id,
-    clientId: source.organization?.clientId,
-    tournamentId: source.tournament?.id,
-    competitionId: source.competition?.id,
-    eventId: source.tournament?.id,
-    sessionId: "session_production_console",
+    tenantId: identity.tenantId,
+    organizationId: identity.organizationId,
+    clientId: identity.clientId,
+    tournamentId: identity.tournamentId,
+    competitionId: identity.competitionId,
+    eventId: identity.tournamentId,
+    sessionId: identity.sessionId,
     themeSelections: {
       sessionThemeId: options.sessionThemeId,
       outputThemeId: options.outputThemeId,
@@ -1340,8 +1376,8 @@ export function changeProductionConsoleThemeTemplate(model, integration, options
 
 function buildProductionConsoleThemeResolutionContext(model, options = {}) {
   const output = getComponentRendererOutput(options.outputId || model.templateRendererOutputId);
-  const sourceFixture = getFixtureDefinition(options.fixtureId || model.templateRendererContextId);
-  const source = buildPlaygroundFixture(sourceFixture.competitionType, sourceFixture.countOption);
+  const sources = buildProductionConsoleTemplateRendererSources(model, options);
+  const identity = buildProductionConsoleTemplateIdentity(model, sources);
   return {
     themeRegistry: model.themeRegistry,
     assetRegistry: model.assetRegistry,
@@ -1355,13 +1391,13 @@ function buildProductionConsoleThemeResolutionContext(model, options = {}) {
       safeArea: output.safeArea
     },
     visibility: normalizeVisibility(options.visibility || model.templateRendererVisibility),
-    tenantId: source.organization?.tenantId,
-    organizationId: source.organization?.id,
-    clientId: source.organization?.clientId,
-    tournamentId: source.tournament?.id,
-    competitionId: source.competition?.id,
-    eventId: source.tournament?.id,
-    sessionId: "session_production_console"
+    tenantId: identity.tenantId,
+    organizationId: identity.organizationId,
+    clientId: identity.clientId,
+    tournamentId: identity.tournamentId,
+    competitionId: identity.competitionId,
+    eventId: identity.tournamentId,
+    sessionId: identity.sessionId
   };
 }
 
@@ -1708,13 +1744,14 @@ function syncProductionConsoleOutputRoutingModel(model, engine, options = {}) {
 }
 
 function productionConsoleRoutingScope(model) {
+  const realtimeContext = model.realtimeTransportSnapshot?.context || {};
   return {
-    tenantId: model.fixtureSource?.organization?.tenantId || null,
-    organizationId: model.contract?.organization?.id || model.fixtureSource?.organization?.id || null,
-    clientId: model.fixtureSource?.organization?.clientId || null,
-    tournamentId: model.contract?.tournament?.id || null,
-    competitionId: model.contract?.competition?.id || null,
-    sessionId: model.state?.session?.id || "session_production_console"
+    tenantId: realtimeContext.tenantId || model.fixtureSource?.organization?.tenantId || null,
+    organizationId: realtimeContext.organizationId || model.contract?.organization?.id || model.fixtureSource?.organization?.id || null,
+    clientId: realtimeContext.clientId || model.fixtureSource?.organization?.clientId || null,
+    tournamentId: realtimeContext.tournamentId || model.contract?.tournament?.id || null,
+    competitionId: realtimeContext.competitionId || model.contract?.competition?.id || null,
+    sessionId: realtimeContext.sessionId || model.state?.session?.id || "session_production_console"
   };
 }
 
@@ -1910,6 +1947,394 @@ function disposeProductionConsoleOutputSynchronization(runtime, options = {}) {
   runtime.outputSynchronization = null;
   runtime.synchronizedProgramMainOutput = null;
   runtime.synchronizedAnnouncerMonitor = null;
+}
+
+export function resolveProductionConsoleRealtimeContext(model, overrides = {}, options = {}) {
+  assertModel(model);
+  assertNoProductionConsoleExternalIdentity(overrides, "console-realtime-identity-override-forbidden");
+  if (overrides.sessionId !== undefined && overrides.sessionId !== null && overrides.sessionId !== "") {
+    throw consoleError("console-realtime-session-override-forbidden");
+  }
+  const laboratory = options.allowFixture === true;
+  const contract = laboratory ? model.contract || {} : {};
+  const context = {
+    tournamentId: overrides.tournamentId || contract.tournament?.id || null,
+    competitionId: overrides.competitionId || contract.competition?.id || null,
+    activeCharreadaId: overrides.activeCharreadaId || overrides.charreadaId || contract.charreada?.id || null
+  };
+  if (!context.tournamentId) throw consoleError("console-realtime-context-unavailable");
+  return context;
+}
+
+export async function connectProductionConsoleRealtime(model, runtime, options = {}) {
+  assertModel(model);
+  const contextSeed = resolveProductionConsoleRealtimeContext(model, options.context || {}, {
+    allowFixture: options.allowFixture
+  });
+  if (runtime.realtimeTransport && runtime.realtimeTransport.status !== "destroyed") {
+    destroyBroadcastRealtimeTransport(runtime.realtimeTransport);
+  }
+  runtime.realtimeContractUnsubscribe?.();
+  runtime.realtimeContractUnsubscribe = null;
+  const firebaseApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
+  if (options.authorizedContext && !options.adapter) throw consoleError("console-realtime-authorized-context-injection-forbidden");
+  const context = options.authorizedContext || await firebaseApi.resolveCurrentBroadcastContext(contextSeed, {
+    operation: "publish",
+    now: options.now
+  });
+  const adapter = options.adapter || firebaseApi.createFirebaseBroadcastAdapter({
+    adapterId: `production-console-${context.sessionId}`,
+    accessMode: "publish"
+  });
+  const transport = createBroadcastRealtimeTransport({ transportId: `production-console-${context.sessionId}` }, { now: options.now });
+  runtime.realtimeTransport = transport;
+  configureBroadcastRealtimeTransport(transport, {
+    adapter,
+    context,
+    staleAfterMs: options.staleAfterMs || 15000,
+    onStatus: options.onStatus
+  }, { expectedRevision: 0, now: options.now });
+  try {
+    await connectBroadcastRealtimeTransport(transport, { expectedRevision: 1, now: options.now });
+    runtime.firebaseBroadcastApi = firebaseApi;
+    runtime.realtimeOfficialContext = context;
+    if (typeof firebaseApi.getOrCreateFirebaseBroadcastTemporaryAccess === "function") {
+      const [programAccess, announcerAccess] = await Promise.all([
+        firebaseApi.getOrCreateFirebaseBroadcastTemporaryAccess(context, "program_main", { now: options.now }),
+        firebaseApi.getOrCreateFirebaseBroadcastTemporaryAccess(context, "announcer_monitor", { now: options.now })
+      ]);
+      runtime.realtimeAccess = { program: programAccess, announcer: announcerAccess };
+    }
+    if (typeof adapter.subscribeContract === "function") {
+      runtime.realtimeContractUnsubscribe = adapter.subscribeContract({
+        context,
+        onValue: (contract) => contract && globalThis.setTimeout?.(() => options.onContract?.(contract), 0),
+        onError: (error) => options.onContractError?.(error)
+      });
+    }
+  } catch (error) {
+    destroyBroadcastRealtimeTransport(transport);
+    runtime.realtimeTransport = null;
+    runtime.realtimeAccess = null;
+    runtime.firebaseBroadcastApi = null;
+    runtime.realtimeOfficialContext = null;
+    throw error;
+  }
+  return {
+    ...syncProductionConsoleRealtimeModel(model, runtime, "realtime-connected", options),
+    realtimeContextSource: context.source || "firebase-authorized-context",
+    realtimeContextRevision: Number(context.revision || 0),
+    realtimeContextResolvedAt: context.resolvedAt || null
+  };
+}
+
+export function applyProductionConsoleRealtimeContract(model, runtime, contract, options = {}) {
+  assertModel(model);
+  let liveSourceContract = cloneValue(contract);
+  let validation = validateBroadcastDataContract(liveSourceContract);
+  if (!validation.valid && liveSourceContract?.contractVersion === BROADCAST_DATA_CONTRACT_VERSION) {
+    liveSourceContract = buildBroadcastDataContract(liveSourceContract, {
+      visibility: liveSourceContract.visibility || "production",
+      outputType: "program",
+      includeLegacyAliases: Boolean(liveSourceContract.legacyAliases)
+    });
+    validation = validateBroadcastDataContract(liveSourceContract);
+  }
+  if (!validation.valid) throw consoleError("console-realtime-contract-invalid", { errors: validation.errors });
+  const context = buildBroadcastRealtimeSnapshot(runtime.realtimeTransport, { now: options.now }).context;
+  if (liveSourceContract.tournament?.id !== context.tournamentId) throw consoleError("console-realtime-tournament-conflict");
+  if ((context.competitionId || null) !== (liveSourceContract.competition?.id || null)) throw consoleError("console-realtime-competition-conflict");
+  if ((context.activeCharreadaId || null) !== (liveSourceContract.charreada?.id || null)) {
+    throw consoleError("console-realtime-charreada-conflict");
+  }
+
+  if (runtime.liveBindingsEngine && runtime.liveBindingsEngine.status !== "destroyed") {
+    destroyLiveBindingsEngine(runtime.liveBindingsEngine, { now: options.now });
+  }
+  runtime.liveBindingsEngine = createProductionConsoleLiveBindingsEngine(options);
+  const resolution = resolveLiveBindings(runtime.liveBindingsEngine, liveSourceContract, { now: options.now });
+  const liveContract = applyLiveBindingsToProgram(runtime.liveBindingsEngine, liveSourceContract, resolution, { now: options.now });
+  for (const field of ["contractVersion", "generatedAt", "revision", "visibility", "source", "system", "warnings", "errors"]) {
+    if (Object.prototype.hasOwnProperty.call(liveSourceContract, field)) liveContract[field] = cloneValue(liveSourceContract[field]);
+  }
+
+  const transportSnapshot = buildBroadcastRealtimeSnapshot(runtime.realtimeTransport, { now: options.now });
+  const realtimeTemplateContextKey = buildProductionConsoleTemplateContextKey(context);
+  const sourceContextChanged = model.realtimeTemplateContextKey !== realtimeTemplateContextKey;
+  const sourceModel = sourceContextChanged
+    ? clearProductionConsoleFixtureComposition(model, runtime, options)
+    : model;
+  let next = {
+    ...sourceModel,
+    contract: liveContract,
+    fixtureSource: {
+      broadcastContract: cloneValue(liveContract),
+      tournament: cloneValue(liveContract.tournament),
+      competition: cloneValue(liveContract.competition),
+      organization: {
+        id: context.organizationId,
+        clientId: context.clientId,
+        tenantId: context.tenantId
+      },
+      metadata: { fixture: false, source: "firebase-broadcast-contract" }
+    },
+    variableRegistry: sourceContextChanged
+      ? registerConsoleVariables(
+        liveContract,
+        model.outputIds,
+        normalizeNow(options.now),
+        context.tenantId,
+        { allowFixtureDefaults: false }
+      )
+      : sourceModel.variableRegistry,
+    realtimeSourceReady: true,
+    realtimeTemplateContextKey,
+    liveBindingsState: resolution.status,
+    liveBindingsSnapshot: buildLiveBindingsSnapshot(runtime.liveBindingsEngine, { now: options.now }),
+    liveBindingsWarnings: cloneValue(resolution.warnings || []),
+    liveBindingsErrors: cloneValue(resolution.errors || []),
+    realtimeTransportState: transportSnapshot.status,
+    realtimeTransportSnapshot: transportSnapshot,
+    lastAction: "realtime-contract-applied",
+    lastActionError: null
+  };
+  next = applyLiveContractToProgramRoute(next, liveSourceContract);
+  if (runtime.outputRoutingEngine && runtime.outputRoutingEngine.state !== "destroyed") {
+    const currentRoute = getOutputRoute(runtime.outputRoutingEngine, "route-program-main", { now: options.now });
+    if (currentRoute?.tenantId !== context.tenantId) {
+      destroyOutputRoutingEngine(runtime.outputRoutingEngine, { now: options.now });
+      runtime.outputRoutingEngine = createProductionConsoleOutputRoutingEngine(next, options);
+      next = syncProductionConsoleOutputRoutingModel(next, runtime.outputRoutingEngine, {
+        lastAction: "realtime-output-routing-context-applied",
+        now: options.now
+      });
+    }
+    next = configureProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-announcer-monitor", options);
+    next = resolveProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-announcer-monitor", {
+      programEngine: runtime.officialProgramEngine,
+      update: true,
+      now: options.now
+    });
+  }
+  return syncProductionConsoleRealtimeModel(next, runtime, "realtime-live-bindings-applied", options);
+}
+
+export async function publishProductionConsoleRealtime(model, runtime, target = "all", options = {}) {
+  assertModel(model);
+  if (model.realtimeSourceReady !== true && options.allowFixture !== true) {
+    throw consoleError("console-realtime-source-not-ready");
+  }
+  const transport = runtime.realtimeTransport;
+  if (!transport || transport.status === "destroyed") throw consoleError("console-realtime-not-connected");
+  const targets = target === "all" ? ["program", "announcer"] : [target];
+  for (const channel of targets) {
+    const routeId = channel === "program" ? "route-program-main" : "route-announcer-monitor";
+    const route = model.outputRoutingResults?.[routeId];
+    if (!route) throw consoleError(`console-realtime-${channel}-projection-missing`);
+    const transportProjection = stripProductionConsoleRealtimeIdentity(route);
+    const snapshot = buildBroadcastRealtimeSnapshot(transport, { now: options.now });
+    const expectedRevision = snapshot.channels?.[channel]?.publishedRevision || 0;
+    await publishBroadcastProjection(transport, channel, transportProjection, {
+      expectedRevision,
+      idempotencyKey: options.idempotencyKey ? `${options.idempotencyKey}-${channel}` : null,
+      visibility: channel === "program" ? route.visibility || "production" : route.visibility || "operational",
+      status: route.status,
+      clear: options.clear === true,
+      now: options.now
+    });
+  }
+  return syncProductionConsoleRealtimeModel(model, runtime, `realtime-published-${target}`, options);
+}
+
+function resolveProductionConsoleRealtimeRoutes(model, runtime, options = {}) {
+  if (model.realtimeSourceReady !== true && options.allowFixture !== true) {
+    throw consoleError("console-realtime-source-not-ready");
+  }
+  let next = model;
+  if (!runtime.outputRoutingEngine || runtime.outputRoutingEngine.state === "destroyed") {
+    runtime.outputRoutingEngine = createProductionConsoleOutputRoutingEngine(next, options);
+  }
+  if (options.includeProgram !== false && runtime.officialProgramEngine && !isProgramDestroyed(runtime.officialProgramEngine)) {
+    next = configureProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-program-main", options);
+    next = resolveProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-program-main", {
+      programEngine: runtime.officialProgramEngine,
+      update: true,
+      now: options.now
+    });
+  }
+  next = configureProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-announcer-monitor", options);
+  return resolveProductionConsoleOutputRoute(next, runtime.outputRoutingEngine, "route-announcer-monitor", {
+    programEngine: runtime.officialProgramEngine,
+    update: true,
+    now: options.now
+  });
+}
+
+function queueProductionConsoleRealtimePublish(getModel, setModel, runtime, options = {}) {
+  if (!runtime.realtimeTransport || runtime.realtimeTransport.status === "destroyed") return;
+  runtime.realtimePublishQueue = (runtime.realtimePublishQueue || Promise.resolve())
+    .then(async () => {
+      let next = getModel();
+      if (
+        options.contract
+        && next.realtimeSourceReady === true
+        && Number(next.contract?.revision || 0) === Number(options.contract.revision || 0)
+        && (next.contract?.generatedAt || null) === (options.contract.generatedAt || null)
+      ) return;
+      if (options.contract) next = applyProductionConsoleRealtimeContract(next, runtime, options.contract, options);
+      else next = resolveProductionConsoleRealtimeRoutes(next, runtime, options);
+      setModel(next);
+      if (next.realtimeSourceReady !== true) return;
+      const hasProgram = Boolean(next.outputRoutingResults?.["route-program-main"]);
+      const target = hasProgram ? "all" : "announcer";
+      next = await publishProductionConsoleRealtime(next, runtime, target, {
+        idempotencyKey: options.idempotencyKey || `console-${target}-${Date.now()}`,
+        now: options.now
+      });
+      setModel(next);
+    })
+    .catch((error) => {
+      console.error("[production-console] realtime update failed", error);
+      setModel({
+        ...getModel(),
+        lastAction: "realtime-update-failed",
+        lastActionError: error?.code || error?.message || "console-realtime-update-failed"
+      });
+    });
+}
+
+export function disconnectProductionConsoleRealtime(model, runtime, options = {}) {
+  assertModel(model);
+  const transport = runtime.realtimeTransport;
+  if (!transport || transport.status === "destroyed") return model;
+  runtime.realtimeContractUnsubscribe?.();
+  runtime.realtimeContractUnsubscribe = null;
+  disconnectBroadcastRealtimeTransport(transport, { expectedRevision: transport.revision, now: options.now });
+  runtime.realtimeOfficialContext = null;
+  return syncProductionConsoleRealtimeModel(model, runtime, "realtime-disconnected", options);
+}
+
+export async function renewProductionConsoleRealtimeSession(model, runtime, options = {}) {
+  assertModel(model);
+  const api = runtime.firebaseBroadcastApi;
+  const context = runtime.realtimeTransport
+    ? buildBroadcastRealtimeSnapshot(runtime.realtimeTransport, { now: options.now }).context
+    : null;
+  if (!api || !context) throw consoleError("console-realtime-session-not-connected");
+  await api.renewFirebaseBroadcastSession(context, { now: options.now });
+  const [programAccess, announcerAccess] = await Promise.all([
+    api.getOrCreateFirebaseBroadcastTemporaryAccess(context, "program_main", { renew: true, now: options.now }),
+    api.getOrCreateFirebaseBroadcastTemporaryAccess(context, "announcer_monitor", { renew: true, now: options.now })
+  ]);
+  runtime.realtimeAccess = { program: programAccess, announcer: announcerAccess };
+  return syncProductionConsoleRealtimeModel(model, runtime, "realtime-session-renewed", options);
+}
+
+export async function closeProductionConsoleRealtimeSession(model, runtime, options = {}) {
+  assertModel(model);
+  const api = runtime.firebaseBroadcastApi;
+  const context = runtime.realtimeTransport
+    ? buildBroadcastRealtimeSnapshot(runtime.realtimeTransport, { now: options.now }).context
+    : null;
+  if (!api || !context) throw consoleError("console-realtime-session-not-connected");
+  await api.closeFirebaseBroadcastSession(context, { now: options.now });
+  runtime.realtimeAccess = null;
+  return disconnectProductionConsoleRealtime(model, runtime, options);
+}
+
+function createProductionConsoleLiveBindingsEngine(options = {}) {
+  const engine = createLiveBindingsEngine({ engineId: `production_console_live_${Date.now()}` }, { now: options.now });
+  const definitions = [
+    ["live-team", "current_team", "team", "team"],
+    ["live-participant", "current_participant", "participant", "participant"],
+    ["live-horse", "current_horse", "horse", "horse"],
+    ["live-suerte", "current_suerte", "suerte", "suerte"],
+    ["live-score", "current_score", "score", "score"],
+    ["live-ranking", "standings", "ranking", "ranking"],
+    ["live-timer", "official_timer", "timer", "timer"],
+    ["live-sponsor", "sponsor_mention", "sponsor.active", "sponsor.active"],
+    ["live-tournament", "tournament_context", "tournament", "tournament"]
+  ];
+  definitions.forEach(([bindingId, type, sourcePath, targetPath]) => {
+    registerLiveBinding(engine, { bindingId, type, sourcePath, targetPath, targets: ["preview", "program"] });
+  });
+  return engine;
+}
+
+function applyLiveContractToProgramRoute(model, contract) {
+  const current = model.outputRoutingResults?.["route-program-main"];
+  if (!current?.projection || !Array.isArray(current.projection.components)) return model;
+  const route = cloneValue(current);
+  const prepared = [
+    ...(Array.isArray(model.themeTemplatePreparation?.components) ? model.themeTemplatePreparation.components : []),
+    ...(Array.isArray(model.templateRendererPreparation?.components) ? model.templateRendererPreparation.components : [])
+  ];
+  const preparedById = new Map();
+  prepared.forEach((entry) => {
+    const instance = entry?.instance || entry;
+    [instance?.instanceId, instance?.componentId].filter(Boolean).forEach((id) => preparedById.set(id, instance));
+  });
+  route.projection.components.forEach((component) => {
+    const instance = preparedById.get(component.componentId) || preparedById.get(component.sourceComponentId);
+    const bindings = Array.isArray(instance?.bindings) ? instance.bindings : [];
+    bindings.forEach((binding) => {
+      if (binding?.source !== "broadcast_contract" || !liveBindingTypeForContractPath(binding.path)) return;
+      const value = getBroadcastField(contract, binding.path, undefined);
+      if (value === undefined) return;
+      if (!component.data || typeof component.data !== "object") component.data = {};
+      component.data[binding.target] = cloneValue(value);
+      const composed = route.projection.composition?.components?.find?.((item) => item.componentId === component.componentId);
+      if (composed) {
+        if (!composed.data || typeof composed.data !== "object") composed.data = {};
+        composed.data[binding.target] = cloneValue(value);
+      }
+    });
+  });
+  route.liveRevision = Number(contract.revision || 0);
+  route.liveUpdatedAt = contract.generatedAt || null;
+  return {
+    ...model,
+    outputRoutingResults: {
+      ...(model.outputRoutingResults || {}),
+      "route-program-main": route
+    }
+  };
+}
+
+function liveBindingTypeForContractPath(path) {
+  const root = String(path || "").split(".")[0];
+  return {
+    team: "current_team",
+    participant: "current_participant",
+    horse: "current_horse",
+    suerte: "current_suerte",
+    score: "current_score",
+    ranking: "standings",
+    timer: "official_timer",
+    sponsor: "sponsor_mention",
+    tournament: "tournament_context"
+  }[root] || null;
+}
+
+export function getProductionConsoleRealtimeClipboardSnapshot(model, runtime, options = {}) {
+  assertModel(model);
+  if (!runtime.realtimeTransport || runtime.realtimeTransport.status === "destroyed") return null;
+  return buildBroadcastRealtimeSnapshot(runtime.realtimeTransport, { now: options.now });
+}
+
+function syncProductionConsoleRealtimeModel(model, runtime, lastAction, options = {}) {
+  const snapshot = runtime.realtimeTransport && runtime.realtimeTransport.status !== "destroyed"
+    ? buildBroadcastRealtimeSnapshot(runtime.realtimeTransport, { now: options.now })
+    : null;
+  return {
+    ...model,
+    realtimeTransportState: snapshot?.status || "uninitialized",
+    realtimeTransportSnapshot: snapshot,
+    realtimeTransportWarnings: snapshot?.warnings || [],
+    realtimeTransportErrors: snapshot?.errors || [],
+    lastAction,
+    lastActionError: null
+  };
 }
 
 function buildProductionConsoleOfficialTimerState(model) {
@@ -2128,6 +2553,7 @@ export function setProductionConsoleVariableStatus(model, variableId, enabled, o
 
 export function loadProductionConsoleFixture(model, fixtureId, options = {}) {
   assertModel(model);
+  if (model.realtimeSourceReady === true) throw consoleError("console-fixture-disabled-in-realtime");
   const now = normalizeNow(options.now);
   const definition = getFixtureDefinition(fixtureId);
   const source = stampFixtureSource(buildPlaygroundFixture(definition.competitionType, definition.countOption), now);
@@ -2909,6 +3335,13 @@ export function initializeProductionConsole(root = document) {
     outputSynchronization: null,
     synchronizedProgramMainOutput: null,
     synchronizedAnnouncerMonitor: null,
+    realtimeTransport: null,
+    realtimeContractUnsubscribe: null,
+    realtimePublishQueue: Promise.resolve(),
+    realtimeAccess: null,
+    firebaseBroadcastApi: null,
+    realtimeOfficialContext: null,
+    liveBindingsEngine: null,
     controller
   };
   runtime.officialProgramEngine = createProductionConsoleOfficialProgramEngine(model);
@@ -2965,6 +3398,15 @@ export function initializeProductionConsole(root = document) {
         destroyOutputRoutingEngine(runtime.outputRoutingEngine);
       }
       disposeProductionConsoleOutputSynchronization(runtime);
+      runtime.realtimeContractUnsubscribe?.();
+      runtime.realtimeContractUnsubscribe = null;
+      runtime.realtimeOfficialContext = null;
+      if (runtime.realtimeTransport && runtime.realtimeTransport.status !== "destroyed") {
+        destroyBroadcastRealtimeTransport(runtime.realtimeTransport);
+      }
+      if (runtime.liveBindingsEngine && runtime.liveBindingsEngine.status !== "destroyed") {
+        destroyLiveBindingsEngine(runtime.liveBindingsEngine);
+      }
       if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
         destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
       }
@@ -3205,10 +3647,11 @@ function buildConsoleBaseThemeDefinition() {
   };
 }
 
-function registerConsoleVariables(contract, outputIds, now, sourceTenantId = null) {
-  const tenantId = sourceTenantId || contract.tenant?.id || "tenant_console_fixture";
-  const organizationId = contract.organization?.id || "organizacion_playground";
-  const tournamentId = contract.tournament?.id || "torneo_playground";
+function registerConsoleVariables(contract, outputIds, now, sourceTenantId = null, options = {}) {
+  const allowFixtureDefaults = options.allowFixtureDefaults !== false;
+  const tenantId = sourceTenantId || contract.tenant?.id || (allowFixtureDefaults ? "tenant_console_fixture" : null);
+  const organizationId = contract.organization?.id || (allowFixtureDefaults ? "organizacion_playground" : null);
+  const tournamentId = contract.tournament?.id || (allowFixtureDefaults ? "torneo_playground" : null);
   const base = {
     variablesVersion: PRODUCTION_VARIABLES_VERSION,
     revision: 0,
@@ -3555,9 +3998,14 @@ function withConsoleTemplateComponentProperties(fixture, properties) {
 
 function buildProductionConsoleTemplateRendererSources(model, options = {}) {
   const now = normalizeNow(options.now);
-  const fixture = getFixtureDefinition(options.fixtureId || model.templateRendererContextId);
-  const source = stampFixtureSource(buildPlaygroundFixture(fixture.competitionType, fixture.countOption), now);
   const visibility = normalizeVisibility(options.visibility || model.templateRendererVisibility);
+  let source;
+  if (model.realtimeSourceReady === true) {
+    source = cloneValue(model.contract);
+  } else {
+    const fixture = getFixtureDefinition(options.fixtureId || model.templateRendererContextId);
+    source = stampFixtureSource(buildPlaygroundFixture(fixture.competitionType, fixture.countOption), now);
+  }
   const contract = buildBroadcastDataContract(source, {
     visibility,
     outputType: "preview",
@@ -3569,6 +4017,70 @@ function buildProductionConsoleTemplateRendererSources(model, options = {}) {
     productionVariables: variables.snapshot,
     broadcastContract: contract,
     assetManager: model.assetRegistry
+  };
+}
+
+function buildProductionConsoleTemplateIdentity(model, sources) {
+  const scope = productionConsoleRoutingScope(model);
+  return {
+    tenantId: scope.tenantId,
+    organizationId: scope.organizationId || sources.broadcastContract?.organization?.id || null,
+    clientId: scope.clientId || null,
+    tournamentId: scope.tournamentId || sources.broadcastContract?.tournament?.id || null,
+    competitionId: scope.competitionId || sources.broadcastContract?.competition?.id || null,
+    sessionId: scope.sessionId
+  };
+}
+
+function buildProductionConsoleTemplateContextKey(context) {
+  return [
+    context.tenantId,
+    context.organizationId,
+    context.clientId,
+    context.tournamentId,
+    context.competitionId,
+    context.activeCharreadaId,
+    context.sessionId
+  ].map((value) => value || "").join("|");
+}
+
+function clearProductionConsoleFixtureComposition(model, runtime, options = {}) {
+  if (runtime.officialProgramEngine && !isProgramDestroyed(runtime.officialProgramEngine)) {
+    clearOfficialProgram(runtime.officialProgramEngine, { now: options.now });
+  }
+  if (runtime.officialPreviewEngine && !isOfficialPreviewEngineDestroyed(runtime.officialPreviewEngine)) {
+    clearOfficialPreview(runtime.officialPreviewEngine, { now: options.now });
+  }
+  if (runtime.officialPreviewPreparationStore) runtime.officialPreviewPreparationStore.preparation = null;
+  if (runtime.themeTemplateIntegration && runtime.themeTemplateIntegration.state !== "destroyed") {
+    clearThemeTemplateIntegration(runtime.themeTemplateIntegration, { now: options.now });
+  }
+  if (runtime.templateRendererIntegration && runtime.templateRendererIntegration.state !== "destroyed") {
+    clearTemplateRendererIntegration(runtime.templateRendererIntegration, { now: options.now });
+  }
+  const outputRoutingResults = { ...(model.outputRoutingResults || {}) };
+  delete outputRoutingResults["route-program-main"];
+  return {
+    ...model,
+    ...emptyTemplateRendererRuntimeState(),
+    templateRendererState: runtime.templateRendererIntegration?.state || "uninitialized",
+    themeTemplateState: runtime.themeTemplateIntegration?.state || "uninitialized",
+    officialPreviewState: runtime.officialPreviewEngine
+      ? getPreviewState(runtime.officialPreviewEngine)
+      : "uninitialized",
+    officialProgramState: runtime.officialProgramEngine
+      ? getProgramState(runtime.officialProgramEngine)
+      : "uninitialized",
+    officialProgram: null,
+    officialProgramSnapshot: runtime.officialProgramEngine && !isProgramDestroyed(runtime.officialProgramEngine)
+      ? getProgramSnapshot(runtime.officialProgramEngine, {
+        visibility: model.templateRendererVisibility,
+        now: options.now
+      })
+      : null,
+    officialProgramWarnings: [],
+    officialProgramErrors: [],
+    outputRoutingResults
   };
 }
 
@@ -3902,6 +4414,9 @@ function collectRefs(root) {
   return {
     root: id("production-console"),
     headerStatus: id("console-header-status"),
+    contextSource: id("console-context-source"),
+    contextTitle: id("console-context-title"),
+    contextSelectorLabel: id("console-context-selector-label"),
     fixture: id("console-fixture"),
     loadFixture: id("console-load-fixture"),
     context: id("console-context"),
@@ -3983,6 +4498,10 @@ function collectRefs(root) {
     outputSynchronizationTargets: id("console-output-synchronization-targets"),
     outputSynchronizationProgramHost: id("console-output-synchronization-program-host"),
     outputSynchronizationAnnouncerHost: id("console-output-synchronization-announcer-host"),
+    realtimeTransport: id("console-realtime-transport"),
+    realtimeTransportStatus: id("console-realtime-transport-status"),
+    realtimeTransportMetrics: id("console-realtime-transport-metrics"),
+    realtimeTransportLinks: id("console-realtime-transport-links"),
     componentRendererLab: id("console-component-renderer-lab"),
     componentRendererFixture: id("console-component-renderer-fixture"),
     componentRendererOutput: id("console-component-renderer-output"),
@@ -4027,6 +4546,14 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       setModel(callback(getModel()));
     } catch (error) {
       console.error("[production-console] action failed", error);
+      setModel({ ...getModel(), lastAction: "action-failed", lastActionError: error?.code || error?.message || "console-action-failed" });
+    }
+  };
+  const runAsync = async (callback) => {
+    try {
+      setModel(await callback(getModel()));
+    } catch (error) {
+      console.error("[production-console] async action failed", error);
       setModel({ ...getModel(), lastAction: "action-failed", lastActionError: error?.code || error?.message || "console-action-failed" });
     }
   };
@@ -4277,6 +4804,12 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       }
       return model;
     });
+    if (["take", "cut", "auto", "update", "clear"].includes(action)) {
+      queueProductionConsoleRealtimePublish(getModel, setModel, runtime, {
+        includeProgram: true,
+        idempotencyKey: `official-program-${action}-${Date.now()}`
+      });
+    }
   }, signal));
   listen(refs.outputRouting, "click", async (event) => {
     const button = event.target.closest("button[data-output-routing-action]");
@@ -4331,6 +4864,48 @@ function bindConsoleEvents(refs, getModel, setModel, runtime, signal) {
       runtime,
       button.dataset.outputSynchronizationAction
     ));
+  }, signal);
+  listen(refs.realtimeTransport, "click", async (event) => {
+    const button = event.target.closest("button[data-realtime-transport-action]");
+    if (!button) return;
+    const action = button.dataset.realtimeTransportAction;
+    if (action === "snapshot") {
+      const snapshot = getProductionConsoleRealtimeClipboardSnapshot(getModel(), runtime);
+      if (snapshot) await copyText(JSON.stringify(snapshot, null, 2));
+      return;
+    }
+    if (action === "copy-program-link" || action === "copy-announcer-link") {
+      const key = action === "copy-program-link" ? "program" : "announcer";
+      const link = buildProductionConsoleTemporaryAccessUrl(runtime.realtimeAccess?.[key]);
+      if (link) await copyText(link);
+      return;
+    }
+    await runAsync(async (model) => {
+      if (action === "disconnect") return disconnectProductionConsoleRealtime(model, runtime);
+      if (action === "renew-session") return renewProductionConsoleRealtimeSession(model, runtime);
+      if (action === "close-session") return closeProductionConsoleRealtimeSession(model, runtime);
+      if (action === "connect") {
+        return connectProductionConsoleRealtime(model, runtime, {
+          context: realtimeContextFromLocation(),
+          onStatus: () => setModel(syncProductionConsoleRealtimeModel(getModel(), runtime, "realtime-status-updated")),
+          onContract: (contract) => queueProductionConsoleRealtimePublish(getModel, setModel, runtime, {
+            contract,
+            includeProgram: false,
+            idempotencyKey: `live-contract-${contract.revision || 0}-${Date.now()}`
+          }),
+          onContractError: (error) => setModel({
+            ...getModel(),
+            lastAction: "realtime-contract-error",
+            lastActionError: error?.code || error?.message || "console-realtime-contract-error"
+          })
+        });
+      }
+      if (action === "resync") {
+        const next = resolveProductionConsoleRealtimeRoutes(model, runtime, { includeProgram: true });
+        return publishProductionConsoleRealtime(next, runtime, "all", { idempotencyKey: `console-${Date.now()}` });
+      }
+      return model;
+    });
   }, signal);
   listen(refs.componentRendererFixture, "change", () => run((model) => selectProductionComponentRendererFixture(model, refs.componentRendererFixture.value)), signal);
   listen(refs.componentRendererOutput, "change", () => run((model) => {
@@ -4459,12 +5034,14 @@ function renderConsole(refs, model, runtime = {}) {
   const previewProjection = buildProductionProjection(model, "preview");
   const programProjection = buildProductionProjection(model, "program");
   renderHeader(refs.headerStatus, model);
+  renderContextSource(refs, model);
   renderContext(refs.context, model.contract);
   renderGraphicLibrary(refs.graphicLibrary, model);
   renderStage(refs.preview, previewProjection, buildProductionRenderDescriptor(previewProjection, model.assetRegistry), "Preview");
   renderStage(refs.program, programProjection, buildProductionRenderDescriptor(programProjection, model.assetRegistry), "Program");
   renderOutputRouting(refs, model, runtime);
   renderOutputSynchronization(refs, model, runtime);
+  renderRealtimeTransport(refs, model, runtime);
   renderLayers(refs.layersBody, model);
   renderOutputs(refs.outputsList, model);
   renderQueue(refs.queueList, model);
@@ -4478,6 +5055,15 @@ function renderConsole(refs, model, runtime = {}) {
   renderOfficialProgramLab(refs, model, runtime);
   renderComponentRendererLab(refs, model, runtime);
   renderInspector(refs.inspector, model);
+}
+
+function renderContextSource(refs, model) {
+  const official = model.realtimeSourceReady === true;
+  if (refs.contextSource) refs.contextSource.textContent = official ? "Fuente oficial autorizada" : "Fuente local controlada";
+  if (refs.contextTitle) refs.contextTitle.textContent = official ? "Datos reales de la sesión" : "Contexto de prueba";
+  if (refs.contextSelectorLabel) refs.contextSelectorLabel.textContent = official ? "Fixture de laboratorio deshabilitado" : "Fixture";
+  if (refs.fixture) refs.fixture.disabled = official;
+  if (refs.loadFixture) refs.loadFixture.disabled = official;
 }
 
 function syncControls(refs, model) {
@@ -4519,6 +5105,7 @@ function renderHeader(root, model) {
     element("span", "console-meta", `Output ${BROADCAST_OUTPUT_VERSION}`),
     element("span", "console-meta", `Routing ${OUTPUT_ROUTING_VERSION}`),
     element("span", "console-meta", `Sync ${OUTPUT_SYNCHRONIZATION_VERSION}`),
+    element("span", "console-meta", `Realtime ${BROADCAST_REALTIME_TRANSPORT_VERSION}`),
     element("span", "console-meta", `Assets ${ASSET_MANAGER_VERSION}`),
     element("span", "console-meta", `Preview ${PREVIEW_ENGINE_VERSION}`),
     element("span", "console-meta", `Actions ${BROADCAST_ACTION_ENGINE_VERSION}`),
@@ -4893,6 +5480,99 @@ function renderOutputSynchronization(refs, model, runtime) {
       openLabel: "Abrir monitor"
     })
   );
+}
+
+function renderRealtimeTransport(refs, model, runtime) {
+  if (!refs.realtimeTransportMetrics) return;
+  const snapshot = runtime.realtimeTransport && runtime.realtimeTransport.status !== "destroyed"
+    ? buildBroadcastRealtimeSnapshot(runtime.realtimeTransport)
+    : model.realtimeTransportSnapshot;
+  const status = snapshot?.status || model.realtimeTransportState || "uninitialized";
+  refs.realtimeTransportStatus?.replaceChildren(
+    statusChip(readableLabel(status), status === "connected" ? "ok" : status === "stale" || status === "offline" ? "warning" : status === "error" ? "error" : "neutral")
+  );
+  refs.realtimeTransportMetrics.replaceChildren(
+    definitionItem("Sesión", snapshot?.context?.sessionId || "—"),
+    definitionItem("Program revision", snapshot?.channels?.program?.publishedRevision ?? "—"),
+    definitionItem("Announcer revision", snapshot?.channels?.announcer?.publishedRevision ?? "—"),
+    definitionItem("Última actualización", snapshot?.lastPublishedAt || snapshot?.lastReceivedAt || "—"),
+    definitionItem("Stale", snapshot?.status === "stale" ? "Sí" : "No"),
+    definitionItem("Reconexiones", snapshot?.reconnectCount ?? 0),
+    definitionItem("Warnings", snapshot?.warnings?.length ?? 0),
+    definitionItem("Errors", snapshot?.errors?.length ?? 0)
+  );
+  refs.realtimeTransportLinks?.replaceChildren();
+  if (!snapshot?.context || !runtime.realtimeAccess) return;
+  const programUrl = buildProductionConsoleTemporaryAccessUrl(runtime.realtimeAccess.program);
+  const announcerUrl = buildProductionConsoleTemporaryAccessUrl(runtime.realtimeAccess.announcer);
+  const programLink = element("a", "button button-small button-quiet", "Abrir Program Main");
+  programLink.href = programUrl || "#";
+  programLink.target = "_blank";
+  programLink.rel = "noopener noreferrer";
+  const copyProgram = element("button", "button button-small button-quiet", "Copiar enlace de Program");
+  copyProgram.type = "button";
+  copyProgram.dataset.realtimeTransportAction = "copy-program-link";
+  const announcerLink = element("a", "button button-small button-quiet", "Abrir Locutores");
+  announcerLink.href = announcerUrl || "#";
+  announcerLink.target = "_blank";
+  announcerLink.rel = "noopener noreferrer";
+  const copyAnnouncer = element("button", "button button-small button-quiet", "Copiar enlace de Locutores");
+  copyAnnouncer.type = "button";
+  copyAnnouncer.dataset.realtimeTransportAction = "copy-announcer-link";
+  refs.realtimeTransportLinks.append(programLink, copyProgram, announcerLink, copyAnnouncer);
+}
+
+function realtimeContextFromLocation() {
+  const params = new URLSearchParams(globalThis.location?.search || "");
+  for (const key of ["tenantId", "organizationId", "clientId"]) {
+    if (params.has(key)) throw consoleError("console-realtime-url-identity-forbidden", { key });
+  }
+  for (const key of ["competitionId", "activeCharreadaId", "charreadaId", "sessionId"]) {
+    if (params.has(key)) throw consoleError("console-realtime-url-context-override-forbidden", { key });
+  }
+  const storedTournamentId = readProductionConsoleActiveTournamentHint();
+  return {
+    tournamentId: storedTournamentId || params.get("tournamentId") || null
+  };
+}
+
+function readProductionConsoleActiveTournamentHint() {
+  try {
+    return String(globalThis.localStorage?.getItem(ACTIVE_TOURNAMENT_CONTEXT_KEY) || "").trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+function buildProductionConsoleTemporaryAccessUrl(descriptor = {}) {
+  if (!descriptor?.accessId || !descriptor?.sessionId || !descriptor?.outputType) return null;
+  const params = new URLSearchParams();
+  params.set("sessionId", descriptor.sessionId);
+  params.set("access", descriptor.accessId);
+  const page = descriptor.outputType === "program_main" ? "program-main-output.html" : "announcer-monitor.html";
+  return new URL(`./${page}?${params}`, globalThis.location?.href || "http://127.0.0.1/").href;
+}
+
+function assertNoProductionConsoleExternalIdentity(value, code) {
+  for (const key of ["tenantId", "organizationId", "clientId"]) {
+    if (value?.[key] !== undefined && value?.[key] !== null && value?.[key] !== "") {
+      throw consoleError(code, { key });
+    }
+  }
+}
+
+function stripProductionConsoleRealtimeIdentity(value) {
+  const identityKeys = new Set(["tenantid", "organizationid", "clientid"]);
+  const visit = (current) => {
+    if (Array.isArray(current)) return current.map(visit);
+    if (!current || typeof current !== "object") return current;
+    const output = {};
+    for (const [key, child] of Object.entries(current)) {
+      if (!identityKeys.has(key.toLowerCase())) output[key] = visit(child);
+    }
+    return output;
+  };
+  return visit(cloneValue(value));
 }
 
 function renderOutputSynchronizationTarget(definition) {

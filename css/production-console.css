@@ -2238,6 +2238,36 @@ input {
   display: none !important;
 }
 
+.console-realtime-transport-panel {
+  border-color: rgba(70, 168, 121, 0.42);
+}
+
+.console-realtime-transport-metrics {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 14px 0 0;
+}
+
+.console-realtime-transport-metrics .console-definition-item {
+  background: var(--console-panel-3);
+  border: 1px solid var(--console-border-soft);
+  min-width: 0;
+  padding: 8px;
+}
+
+.console-realtime-transport-metrics dt,
+.console-realtime-transport-metrics dd {
+  overflow-wrap: anywhere;
+}
+
+.console-realtime-transport-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .console-output-routing-grid {
   display: grid;
   gap: 10px;
@@ -2386,6 +2416,10 @@ input {
   .console-output-synchronization-grid {
     grid-template-columns: 1fr;
   }
+
+  .console-realtime-transport-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {
@@ -2415,6 +2449,10 @@ input {
   .console-output-synchronization-grid,
   .console-output-synchronization-metrics,
   .console-output-synchronization-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .console-realtime-transport-metrics {
     grid-template-columns: 1fr;
   }
 

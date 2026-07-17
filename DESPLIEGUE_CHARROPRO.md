@@ -545,6 +545,26 @@ Las URLs se generan desde el origen actual y solo aceptan archivos HTML internos
 - `browser-output.html` funciona únicamente como laboratorio técnico común con fixtures locales, display modes, orientaciones, safe areas, transparencia, fullscreen manual e inspector seguro.
 - Production Console incorpora un acceso mínimo al laboratorio, sin generar una URL productiva ni una Browser Source oficial.
 - No se agregaron Firebase, sockets, polling, persistencia, OBS, vMix, Wirecast ni conexión en tiempo real.
+
+## BROADCAST-REALTIME-LIVE-001
+
+Versión: `20260716-broadcast-context-resolution-001-real-context-v1`.
+
+Se agregó transporte Broadcast RTDB bajo `charropro/broadcastStudio/sessions/{sessionId}` y Live Bindings declarativos. Production Console publica únicamente proyecciones sanitizadas y revisiones monotónicas; Program Main y Announcer Monitor reciben copias limitadas mediante accesos temporales de solo lectura.
+
+`BROADCAST-SIMPLE-ACCESS-001` reutiliza el login y los roles existentes `supervisor` y `graficos`, siempre sujetos al acceso del torneo. La sesión se deriva automáticamente de torneo, competencia y charreada activa. No requiere perfiles nuevos, rol locutor, IDs manuales, `broadcastSessions`, `broadcastPublishSessions` ni identidad organizacional en el perfil.
+
+V1 usa el scope interno single-tenant `charropro-e8a68` y conserva aislamiento por torneo, competencia, charreada, sesión y tipo de salida. Los enlaces comparten solo `sessionId` y un `accessId` criptográfico, revocable, expirante y ligado a `program_main` o `announcer_monitor`; nunca incluyen UID, permisos, tenant, organización, cliente o credenciales.
+
+Las reglas de `charropro/broadcastStudio` se desplegaron de forma controlada en el proyecto `charropro-e8a68`; la verificación posterior confirmó igualdad con `firebase-rules-auditoria.json`. No se modificaron perfiles reales ni se crearon usuarios. Las reglas deportivas fuera del namespace Broadcast permanecieron sin cambios y la migración a multi-tenant oficial queda pendiente para una fase posterior.
+
+`BROADCAST-CONTEXT-RESOLUTION-001` centraliza la identidad productiva en `resolveCurrentBroadcastContext()`. Production Console solo aporta el torneo seleccionado como pista; Firebase valida acceso, torneo y charreada activa, deriva la competencia y crea un `sessionId` determinista. URL, `localStorage` y fixtures no pueden imponer competencia, charreada, sesión ni identidad organizacional. Live Bindings usa el contrato Firebase real como base y valida torneo, competencia y charreada antes de actualizar Output Routing.
+
+Al recibir el primer contrato real, Production Console invalida cualquier Preview, Program o ruta preparada en laboratorio. Templates, Themes, Official Preview y Official Program pasan a consumir exclusivamente el Broadcast Data Contract de la sesión; los fixtures no se reutilizan ni se publican en el contexto oficial.
+
+El cierre de sesión revoca primero Program Main y Announcer, después marca el contexto como cerrado y admite repetición idempotente. Una sesión inexistente devuelve `not-found` controlado; renovar revoca capacidades anteriores y crea accesos nuevos sobre la misma sesión determinista.
+
+Las pruebas automatizadas usan adapter falso y no escriben en Firebase de producción. Continúan fuera de alcance NDI, video, audio, Timer Display, OBS/vMix, WebSocket, polling y cualquier cambio al Core deportivo.
 - No se implementaron todavía las interfaces finales de Program Main, Announcer Monitor o Timer Display.
 - Contrato y limitaciones: `BROADCAST_BROWSER_OUTPUT_V1.md`.
 

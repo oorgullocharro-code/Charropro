@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import * as api from "../js/broadcast/announcerMonitor.js";
+import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js";
 import {
   ANNOUNCER_MONITOR_DISPLAY_MODES,
   ANNOUNCER_MONITOR_ERROR_CODES,
@@ -459,6 +460,126 @@ for (const operation of [
   () => getAnnouncerSnapshot(first.instance)
 ]) assert.throws(operation, (error) => error.code === ANNOUNCER_MONITOR_ERROR_CODES.DESTROYED);
 
+// A remote Announcer Monitor subscribes read-only and preserves the last valid view offline.
+const remote = mounted({ announcerMonitorId: "remote-monitor", browserOutputId: "remote-browser" });
+let remoteValue = null;
+let remoteStatus = null;
+let remoteWrites = 0;
+const remoteAdapter = {
+  async connect({ onStatus }) { remoteStatus = onStatus; onStatus({ connected: true, at: T1 }); return () => {}; },
+  subscribe({ onValue }) { remoteValue = onValue; return () => { remoteValue = null; }; },
+  async publish() { remoteWrites += 1; throw new Error("read-only-output"); },
+  async publishOutputState() { remoteWrites += 1; throw new Error("read-only-output"); }
+};
+const remoteContext = {
+  tenantId: "tenant-a",
+  organizationId: "organization-a",
+  clientId: "client-a",
+  tournamentId: "tournament-a",
+  competitionId: "competition-a",
+  sessionId: "session-a"
+};
+const remoteController = await api.connectAnnouncerMonitorRealtime(remote.instance, {
+  authorizedContext: remoteContext,
+  adapter: remoteAdapter,
+  transportApi: realtimeApi,
+  documentRef: remote.document
+});
+const remoteProjection = envelope({ revision: 1 });
+delete remoteProjection.tenantId;
+delete remoteProjection.organizationId;
+delete remoteProjection.clientId;
+delete remoteProjection.errors;
+delete remoteProjection.projection.notes;
+delete remoteProjection.projection.sponsorMention;
+remoteValue({
+  transportVersion: "1.0.0",
+  messageId: "announcer-remote-1",
+  sessionId: "session-a",
+  channel: "announcer",
+  revision: 1,
+  previousRevision: 0,
+  status: "routed",
+  visibility: "operational",
+  context: remoteContext,
+  projection: remoteProjection,
+  publishedAt: T1
+});
+assert.equal(getAnnouncerMonitor(remote.instance).status, "ready");
+assert.equal(getAnnouncerSnapshot(remote.instance, { now: T1 }).currentSummary.teamName, "Rancheros de Tijuana");
+remoteStatus({ connected: false, offline: true, at: T2 });
+assert.equal(getAnnouncerMonitor(remote.instance).status, "ready");
+assert.equal(remote.document.body.getAttribute("data-realtime-status"), "offline");
+assert.equal(remote.document.body.getAttribute("data-last-valid-projection"), "preserved");
+remoteStatus({ connected: true, at: T3 });
+remoteValue({
+  transportVersion: "1.0.0",
+  messageId: "announcer-remote-2",
+  sessionId: "session-a",
+  channel: "announcer",
+  revision: 2,
+  previousRevision: 1,
+  status: "cleared",
+  visibility: "operational",
+  context: remoteContext,
+  projection: null,
+  publishedAt: T3
+});
+assert.equal(getAnnouncerMonitor(remote.instance).status, "cleared");
+assert.equal(remoteWrites, 0);
+assert.equal("publish" in remoteController, false);
+remoteController.destroy();
+
+await assert.rejects(
+  () => api.connectAnnouncerMonitorRealtime(remote.instance, {
+    search: "?tournamentId=tournament-a&competitionId=competition-a&sessionId=session-a&organizationId=spoof",
+    adapter: remoteAdapter,
+    transportApi: realtimeApi,
+    documentRef: remote.document
+  }),
+  (error) => error.code === "announcer-monitor-url-identity-forbidden"
+);
+
+let resolvedRequest = null;
+let resolvedOutputType = null;
+let resolvedAdapterDefinition = null;
+const resolvedRemote = mounted({ announcerMonitorId: "resolved-remote-monitor", browserOutputId: "resolved-remote-browser" });
+const fakeFirebaseApi = {
+  async resolveFirebaseBroadcastTemporaryAccess(request, outputType) {
+    resolvedRequest = structuredClone(request);
+    resolvedOutputType = outputType;
+    return {
+      context: structuredClone(remoteContext),
+      descriptor: { accessId: "bca_announcer_test", sessionId: "session-a", outputType: "announcer_monitor", channel: "announcer", readOnly: true },
+      outputType: "announcer_monitor",
+      channel: "announcer"
+    };
+  },
+  createFirebaseBroadcastTemporaryAccessAdapter(definition, options) {
+    resolvedAdapterDefinition = structuredClone(definition);
+    assert.match(options.adapterId, /^announcer-access-/);
+    return remoteAdapter;
+  }
+};
+const resolvedController = await api.connectAnnouncerMonitorRealtime(resolvedRemote.instance, {
+  search: "?sessionId=session-a&access=bca_announcer_test",
+  firebaseApi: fakeFirebaseApi,
+  transportApi: realtimeApi,
+  documentRef: resolvedRemote.document
+});
+assert.deepEqual(resolvedRequest, {
+  sessionId: "session-a",
+  accessId: "bca_announcer_test"
+});
+assert.equal(resolvedOutputType, "announcer_monitor");
+assert.equal(resolvedAdapterDefinition.descriptor.readOnly, true);
+assert.equal("tenantId" in resolvedRequest, false);
+assert.equal("organizationId" in resolvedRequest, false);
+assert.equal("clientId" in resolvedRequest, false);
+assert.equal("tournamentId" in resolvedRequest, false);
+assert.equal("competitionId" in resolvedRequest, false);
+resolvedController.destroy();
+
 // Static surface stays isolated from Program, Preview, Firebase, media transport and timer controls.
 const [sourceText, html, css, docs] = await Promise.all([
   readFile(new URL("../js/broadcast/announcerMonitor.js", import.meta.url), "utf8"),
@@ -467,10 +588,12 @@ const [sourceText, html, css, docs] = await Promise.all([
   readFile(new URL("../BROADCAST_ANNOUNCER_MONITOR_V1.md", import.meta.url), "utf8")
 ]);
 assert.match(html, /data-announcer-monitor-page/);
-assert.match(html, /announcerMonitor\.js\?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1/);
-assert.match(html, /announcer-monitor\.css\?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1/);
+assert.match(html, /announcerMonitor\.js\?v=20260716-broadcast-context-resolution-001-real-context-v1/);
+assert.match(html, /announcer-monitor\.css\?v=20260716-broadcast-context-resolution-001-real-context-v1/);
+assert.equal(typeof api.connectAnnouncerMonitorRealtime, "function");
 assert.doesNotMatch(html, /<video\b|<iframe\b|autoplay|src="https?:|\bTake\b|\bCut\b|\bAuto\b/i);
 assert.doesNotMatch(sourceText, /from\s+["'][^"']*(?:programEngine|previewEngine|firebase|state\.js)/i);
+assert.match(sourceText, /createFirebaseBroadcastTemporaryAccessAdapter/);
 assert.doesNotMatch(sourceText, /\b(?:fetch|WebSocket|EventSource|BroadcastChannel|RTCPeerConnection|setInterval)\s*\(/);
 assert.doesNotMatch(sourceText, /createElement\(["'](?:video|iframe|audio|canvas)["']\)/i);
 assert.doesNotMatch(sourceText, /\.innerHTML\s*=|\.outerHTML\s*=|insertAdjacentHTML|document\.write|\beval\s*\(|new Function|\.cssText\s*=/);

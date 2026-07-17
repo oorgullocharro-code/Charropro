@@ -1402,8 +1402,122 @@ export function initializeProgramMainOutputPage(documentRef = globalThis.documen
   if (debug) {
     const fixture = params.get("fixture");
     if (new Set(["empty", "active-3", "active-4"]).has(fixture)) applyProgramMainProjection(instance, buildDebugProjection(fixture));
+  } else if (params.get("sessionId")) {
+    connectProgramMainRealtime(instance, { params, documentRef }).catch((error) => {
+      body.setAttribute("data-realtime-status", "error");
+      body.setAttribute("data-realtime-error", String(error?.code || error?.message || "broadcast-realtime-error").slice(0, 160));
+    });
   }
   return instance;
+}
+
+export async function connectProgramMainRealtime(instance, options = {}) {
+  const params = options.params instanceof URLSearchParams
+    ? options.params
+    : new URLSearchParams(options.search ?? globalThis.location?.search ?? "");
+  const requestContext = options.context || broadcastRealtimeContextFromParams(params);
+  assertNoProgramMainExternalIdentity(requestContext);
+  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
+  const accessId = params.get("access") || options.accessId || null;
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260716-broadcast-context-resolution-001-real-context-v1") : null);
+  if (options.authorizedContext && !options.adapter) throw outputError("program-main-output-authorized-context-injection-forbidden");
+  if (options.temporaryAccess && !options.adapter) throw outputError("program-main-output-temporary-access-injection-forbidden");
+  const temporaryAccess = accessId
+    ? options.temporaryAccess || await firebaseApi?.resolveFirebaseBroadcastTemporaryAccess({
+      sessionId: requestContext.sessionId,
+      accessId
+    }, "program_main")
+    : null;
+  const context = temporaryAccess?.context || options.authorizedContext || await firebaseApi?.resolveFirebaseBroadcastAuthorizedContext(requestContext, "read");
+  if (!context) throw outputError("program-main-output-authorized-context-required");
+  configureProgramMainOutput(instance, {
+    visibility: "production",
+    ...context
+  });
+  const adapter = options.adapter || (temporaryAccess
+    ? firebaseApi.createFirebaseBroadcastTemporaryAccessAdapter(temporaryAccess, {
+      adapterId: `program-main-access-${context.sessionId}`
+    })
+    : firebaseApi.createFirebaseBroadcastAdapter({
+      adapterId: `program-main-${context.sessionId}`,
+      accessMode: "read"
+    }));
+  const documentRef = options.documentRef || globalThis.document;
+  const transport = transportApi.createBroadcastRealtimeTransport({ transportId: `program-main-${context.sessionId}` });
+  let lastEnvelope = null;
+  transportApi.configureBroadcastRealtimeTransport(transport, {
+    adapter,
+    context,
+    staleAfterMs: options.staleAfterMs || 15000,
+    onStatus: (status) => {
+      documentRef?.body?.setAttribute?.("data-realtime-status", status.status);
+      if ((status.stale || status.offline) && lastEnvelope) documentRef?.body?.setAttribute?.("data-last-valid-projection", "preserved");
+    }
+  }, { expectedRevision: 0 });
+  await transportApi.connectBroadcastRealtimeTransport(transport, { expectedRevision: 1 });
+  const subscriptionId = transportApi.subscribeBroadcastProjection(transport, "program", (message) => {
+    if (message.status === "cleared" || !message.projection) {
+      clearProgramMainOutput(instance);
+      lastEnvelope = null;
+      return;
+    }
+    lastEnvelope = rehydrateProgramMainRealtimeEnvelope(message.projection);
+    applyProgramMainProjection(instance, lastEnvelope, {
+      visibility: message.visibility,
+      context
+    });
+  }, { subscriptionId: `program-main-${context.sessionId}` });
+  documentRef?.body?.setAttribute?.("data-realtime-status", "connected");
+  return Object.freeze({
+    transport,
+    subscriptionId,
+    getSnapshot: () => transportApi.buildBroadcastRealtimeSnapshot(transport),
+    disconnect: () => transportApi.disconnectBroadcastRealtimeTransport(transport, { expectedRevision: transport.revision }),
+    destroy: () => transportApi.destroyBroadcastRealtimeTransport(transport)
+  });
+}
+
+function rehydrateProgramMainRealtimeEnvelope(value) {
+  const envelope = cloneProgramMainOutputResult(value || {});
+  envelope.warnings = Array.isArray(envelope.warnings) ? envelope.warnings : [];
+  envelope.errors = Array.isArray(envelope.errors) ? envelope.errors : [];
+  if (!isRecord(envelope.projection)) return envelope;
+  const projection = envelope.projection;
+  projection.components = Array.isArray(projection.components) ? projection.components : [];
+  projection.layers = Array.isArray(projection.layers) ? projection.layers : [];
+  if (envelope.status === "controlled-empty" || projection.state === "controlled-empty") {
+    projection.composition = null;
+  } else if (isRecord(projection.composition)) {
+    projection.composition.components = Array.isArray(projection.composition.components)
+      ? projection.composition.components
+      : cloneProgramMainOutputResult(projection.components);
+    projection.composition.layers = Array.isArray(projection.composition.layers)
+      ? projection.composition.layers
+      : cloneProgramMainOutputResult(projection.layers);
+  }
+  projection.layers = projection.layers.map((layer) => isRecord(layer)
+    ? { ...layer, componentIds: Array.isArray(layer.componentIds) ? layer.componentIds : [] }
+    : layer);
+  return envelope;
+}
+
+function broadcastRealtimeContextFromParams(params) {
+  for (const key of ["tenantId", "organizationId", "clientId"]) {
+    if (params.has(key)) throw outputError("program-main-output-url-identity-forbidden", { key });
+  }
+  return {
+    tournamentId: params.get("tournamentId"),
+    competitionId: params.get("competitionId") || null,
+    sessionId: params.get("sessionId")
+  };
+}
+
+function assertNoProgramMainExternalIdentity(value) {
+  for (const key of ["tenantId", "organizationId", "clientId"]) {
+    if (value?.[key] !== undefined && value?.[key] !== null && value?.[key] !== "") {
+      throw outputError("program-main-output-context-identity-forbidden", { key });
+    }
+  }
 }
 
 if (typeof document !== "undefined") {

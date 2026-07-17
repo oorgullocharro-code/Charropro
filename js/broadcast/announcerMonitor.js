@@ -1771,8 +1771,109 @@ async function initializeAnnouncerMonitorPage() {
     if (fixture && DEBUG_FIXTURE_IDS.has(fixture)) {
       updateAnnouncerMonitor(instance, buildDebugEnvelope(fixture, 1));
     }
+  } else if (params.get("sessionId")) {
+    await connectAnnouncerMonitorRealtime(instance, { params, documentRef: document });
   }
   return instance;
+}
+
+export async function connectAnnouncerMonitorRealtime(instance, options = {}) {
+  const params = options.params instanceof URLSearchParams
+    ? options.params
+    : new URLSearchParams(options.search ?? globalThis.location?.search ?? "");
+  const requestContext = options.context || announcerRealtimeContextFromParams(params);
+  assertNoAnnouncerExternalIdentity(requestContext);
+  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
+  const accessId = params.get("access") || options.accessId || null;
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260716-broadcast-context-resolution-001-real-context-v1") : null);
+  if (options.authorizedContext && !options.adapter) throw monitorError("announcer-monitor-authorized-context-injection-forbidden");
+  if (options.temporaryAccess && !options.adapter) throw monitorError("announcer-monitor-temporary-access-injection-forbidden");
+  const temporaryAccess = accessId
+    ? options.temporaryAccess || await firebaseApi?.resolveFirebaseBroadcastTemporaryAccess({
+      sessionId: requestContext.sessionId,
+      accessId
+    }, "announcer_monitor")
+    : null;
+  const context = temporaryAccess?.context || options.authorizedContext || await firebaseApi?.resolveFirebaseBroadcastAuthorizedContext(requestContext, "read");
+  if (!context) throw monitorError("announcer-monitor-authorized-context-required");
+  configureAnnouncerMonitor(instance, {
+    visibility: "operational",
+    ...context
+  });
+  const adapter = options.adapter || (temporaryAccess
+    ? firebaseApi.createFirebaseBroadcastTemporaryAccessAdapter(temporaryAccess, {
+      adapterId: `announcer-access-${context.sessionId}`
+    })
+    : firebaseApi.createFirebaseBroadcastAdapter({
+      adapterId: `announcer-${context.sessionId}`,
+      accessMode: "read"
+    }));
+  const documentRef = options.documentRef || globalThis.document;
+  const transport = transportApi.createBroadcastRealtimeTransport({ transportId: `announcer-${context.sessionId}` });
+  let lastEnvelope = null;
+  transportApi.configureBroadcastRealtimeTransport(transport, {
+    adapter,
+    context,
+    staleAfterMs: options.staleAfterMs || 15000,
+    onStatus: (status) => {
+      documentRef?.body?.setAttribute?.("data-realtime-status", status.status);
+      if ((status.stale || status.offline) && lastEnvelope) documentRef?.body?.setAttribute?.("data-last-valid-projection", "preserved");
+    }
+  }, { expectedRevision: 0 });
+  await transportApi.connectBroadcastRealtimeTransport(transport, { expectedRevision: 1 });
+  const subscriptionId = transportApi.subscribeBroadcastProjection(transport, "announcer", (message) => {
+    if (message.status === "cleared" || !message.projection) {
+      clearAnnouncerMonitor(instance);
+      lastEnvelope = null;
+      return;
+    }
+    lastEnvelope = rehydrateAnnouncerRealtimeEnvelope(message.projection);
+    updateAnnouncerMonitor(instance, lastEnvelope, { context });
+  }, { subscriptionId: `announcer-${context.sessionId}` });
+  documentRef?.body?.setAttribute?.("data-realtime-status", "connected");
+  return Object.freeze({
+    transport,
+    subscriptionId,
+    getSnapshot: () => transportApi.buildBroadcastRealtimeSnapshot(transport),
+    disconnect: () => transportApi.disconnectBroadcastRealtimeTransport(transport, { expectedRevision: transport.revision }),
+    destroy: () => transportApi.destroyBroadcastRealtimeTransport(transport)
+  });
+}
+
+function rehydrateAnnouncerRealtimeEnvelope(value) {
+  const envelope = cloneAnnouncerSnapshot(value || {});
+  envelope.warnings = Array.isArray(envelope.warnings) ? envelope.warnings : [];
+  envelope.errors = Array.isArray(envelope.errors) ? envelope.errors : [];
+  if (!isRecord(envelope.projection)) return envelope;
+  const projection = envelope.projection;
+  projection.current = isRecord(projection.current) ? projection.current : {};
+  projection.next = isRecord(projection.next) ? projection.next : {};
+  projection.standings = Array.isArray(projection.standings) ? projection.standings : [];
+  projection.timer = isRecord(projection.timer) ? projection.timer : {};
+  projection.notes = Array.isArray(projection.notes) ? projection.notes : [];
+  projection.sponsorMention = isRecord(projection.sponsorMention) ? projection.sponsorMention : null;
+  projection.alerts = Array.isArray(projection.alerts) ? projection.alerts : [];
+  projection.context = isRecord(projection.context) ? projection.context : {};
+  return envelope;
+}
+
+function announcerRealtimeContextFromParams(params) {
+  for (const key of ["tenantId", "organizationId", "clientId"]) {
+    if (params.has(key)) throw monitorError("announcer-monitor-url-identity-forbidden", { key });
+  }
+  return {
+    tournamentId: params.get("tournamentId"),
+    competitionId: params.get("competitionId") || null,
+    sessionId: params.get("sessionId")
+  };
+}
+
+function assertNoAnnouncerExternalIdentity(value) {
+  for (const key of ["tenantId", "organizationId", "clientId"]) {
+    if (value?.[key] !== undefined && value?.[key] !== null && value?.[key] !== "") {
+      throw monitorError("announcer-monitor-context-identity-forbidden", { key });
+    }
+  }
 }
 
 const DEBUG_FIXTURE_IDS = new Set(["teams-3", "teams-4", "individual", "partial", "stale", "disabled", "unavailable", "restricted"]);

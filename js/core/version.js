@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260715-broadcast-access-and-sync-001-local-output-sync-v1";
+export const CHARROPRO_APP_VERSION = "20260716-broadcast-context-resolution-001-real-context-v1";
 
 let versionLogged = false;
 

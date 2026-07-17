@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio Control Center</title>
-  <link rel="stylesheet" href="./css/production-console.css?v=20260715-broadcast-access-and-sync-001-local-output-sync-v1">
+  <link rel="stylesheet" href="./css/production-console.css?v=20260716-broadcast-context-resolution-001-real-context-v1">
 </head>
 <body>
   <main id="production-console" class="production-console">
@@ -30,12 +30,12 @@
         <section class="console-panel">
           <div class="console-panel-heading">
             <div>
-              <p>Fuente local controlada</p>
-              <h2>Contexto de prueba</h2>
+              <p id="console-context-source">Fuente local controlada</p>
+              <h2 id="console-context-title">Contexto de prueba</h2>
             </div>
           </div>
           <label class="console-field">
-            <span>Fixture</span>
+            <span id="console-context-selector-label">Fixture</span>
             <select id="console-fixture"></select>
           </label>
           <button id="console-load-fixture" class="button button-primary" type="button">Cargar contexto</button>
@@ -120,6 +120,27 @@
             <div id="console-output-synchronization-program-host"></div>
             <div id="console-output-synchronization-announcer-host"></div>
           </div>
+        </section>
+
+        <section id="console-realtime-transport" class="console-panel console-realtime-transport-panel">
+          <div class="console-panel-heading">
+            <div>
+              <p>Firebase RTDB · sesión autorizada</p>
+              <h2>TRANSPORTE EN TIEMPO REAL</h2>
+            </div>
+            <div class="console-row-actions">
+              <div id="console-realtime-transport-status" aria-live="polite"></div>
+              <button class="button button-primary button-small" type="button" data-realtime-transport-action="connect">Conectar</button>
+              <button class="button button-quiet button-small" type="button" data-realtime-transport-action="disconnect">Desconectar</button>
+              <button class="button button-quiet button-small" type="button" data-realtime-transport-action="resync">Resincronizar</button>
+              <button class="button button-quiet button-small" type="button" data-realtime-transport-action="renew-session">Renovar sesión</button>
+              <button class="button button-danger button-small" type="button" data-realtime-transport-action="close-session">Cerrar sesión</button>
+              <button class="button button-quiet button-small" type="button" data-realtime-transport-action="snapshot">Copiar Snapshot</button>
+            </div>
+          </div>
+          <p class="console-output-synchronization-note">La sesión se resuelve automáticamente desde el torneo, la competencia y la charreada activa. Los accesos de salida son temporales y de solo lectura.</p>
+          <dl id="console-realtime-transport-metrics" class="console-realtime-transport-metrics"></dl>
+          <div id="console-realtime-transport-links" class="console-realtime-transport-links"></div>
         </section>
 
         <section class="console-panel console-geometry-panel">
@@ -411,6 +432,6 @@
       </aside>
     </div>
   </main>
-  <script type="module" src="./js/broadcast/productionConsole.js?v=20260715-broadcast-access-and-sync-001-local-output-sync-v1"></script>
+  <script type="module" src="./js/broadcast/productionConsole.js?v=20260716-broadcast-context-resolution-001-real-context-v1"></script>
 </body>
 </html>
