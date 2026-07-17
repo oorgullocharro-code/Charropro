@@ -632,3 +632,16 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - La vista del operador oculta contratos, snapshots, IDs, revisiones, bindings, variables, rutas y detalles Firebase; Production Console y Playground permanecen disponibles únicamente como herramientas técnicas heredadas.
 - El acceso principal de Producción ahora abre directamente `broadcast-studio.html`.
 - Cronómetro permanece como placeholder deshabilitado; siguen fuera de alcance NDI, OBS, vMix, Wirecast, editor visual, capas manuales, timeline y macros.
+
+# BROADCAST-WORKSPACE-CONTEXT-BRIDGE-001 — Contexto automático de la charreada activa
+
+- Versión de aplicación: `20260716-broadcast-workspace-context-bridge-001-auto-context-v1`.
+- La causa del bloqueo era que el Workspace solicitaba Realtime sin aportar un contexto oficial; la resolución productiva exigía `tournamentId` antes de esperar Auth y terminaba en `console-realtime-context-unavailable`.
+- `subscribeFirebaseBroadcastContext()` espera la sesión Firebase existente, valida los roles autorizados y resuelve el torneo con charreada activa usando únicamente índices y estado oficial accesibles para el usuario.
+- La resolución reutiliza `resolveCurrentBroadcastContext()` para obtener competencia, charreada y `sessionId` determinista. No usa URL, almacenamiento local, fixtures ni un tenant inventado como identidad productiva.
+- El Workspace observa cambios de Auth, torneo activo, `live/current` y conectividad sin polling. Al cambiar la charreada, limpia Preview y Program, publica el clear autorizado, revoca capacidades anteriores, destruye el runtime y conecta el nuevo contexto.
+- El encabezado muestra torneo, competencia, charreada, suerte y equipo en turno desde el Broadcast Data Contract. El turno se toma de `contract.team` o `contract.participant`; nunca se infiere del último score.
+- Program Main y Locutores mantienen capacidades temporales distintas, revocables y de solo lectura. Sus accesos aparecen únicamente cuando la sesión oficial está lista.
+- Se añadieron estados operativos explícitos para preparación, conexión, listo, sin contexto, offline, stale, no autorizado y error. Preview y las acciones de salida permanecen deshabilitados hasta que el contexto está listo.
+- No se modificaron reglas Firebase, reglas deportivas, scores, `publishedScores`, `publicTournaments`, página pública, cronómetro del juez ni cálculos oficiales.
+- La regresión automatizada cubre Auth tardío, deduplicación, cambio de charreada, limpieza de sesión, offline, no autorizado, inmutabilidad y ausencia de identidad por query/storage/fixtures.

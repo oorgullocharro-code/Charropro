@@ -353,18 +353,20 @@ export function createFirebaseBroadcastAdapter(options = {}) {
 }
 
 export async function resolveCurrentBroadcastContext(value = {}, options = {}) {
-  const input = normalizeFirebaseBroadcastRequestContext(value);
+  const input = normalizeFirebaseBroadcastRequestContext(value, { allowMissingTournament: true });
   const operation = options.operation === "publish" ? "publish" : "read";
   const user = await getFirebaseBroadcastAuthenticatedUser();
   if (!user?.uid) throw firebaseBroadcastError("broadcast-auth-required");
   const profileSnapshot = await get(ref(getFirebaseDatabase(), `${USERS_PATH}/${user.uid}`));
   const profile = profileSnapshot.val() || {};
-  const tournamentAssigned = await readFirebaseBroadcastTournamentAssignment(profile, user.uid, input.tournamentId);
-  const tournamentSnapshot = await get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${input.tournamentId}`));
+  validateFirebaseBroadcastProfileEligibility(profile, operation);
+  const selectedTournamentId = input.tournamentId || await resolveFirebaseBroadcastActiveTournamentId(profile, user.uid);
+  const tournamentAssigned = await readFirebaseBroadcastTournamentAssignment(profile, user.uid, selectedTournamentId);
+  const tournamentSnapshot = await get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${selectedTournamentId}`));
   if (!tournamentSnapshot.exists()) throw firebaseBroadcastError("broadcast-context-unavailable");
   const tournament = tournamentSnapshot.val() || {};
-  const officialTournamentId = normalizeBroadcastContextId(tournament.info?.id || input.tournamentId);
-  if (officialTournamentId !== input.tournamentId) throw firebaseBroadcastError("broadcast-context-mismatch");
+  const officialTournamentId = normalizeBroadcastContextId(tournament.info?.id || selectedTournamentId);
+  if (officialTournamentId !== selectedTournamentId) throw firebaseBroadcastError("broadcast-context-mismatch");
   const charreadas = arrayFromRecord(tournament.charreadas);
   const officialActiveCharreadaId = normalizeBroadcastContextId(
     tournament.meta?.activeCharreadaId ||
@@ -407,6 +409,137 @@ export async function resolveCurrentBroadcastContext(value = {}, options = {}) {
   };
   validateFirebaseBroadcastProfileAccess(profile, user.uid, context, operation, { tournamentAssigned });
   return Object.freeze(context);
+}
+
+export function subscribeFirebaseBroadcastContext(callback, options = {}) {
+  if (typeof callback !== "function" || !isFirebaseLiveConfigured()) return () => {};
+  const operation = options.operation === "publish" ? "publish" : "read";
+  let disposed = false;
+  let connected = null;
+  let authSession = null;
+  let resolveQueue = Promise.resolve();
+  let currentContext = null;
+  let authUnsubscribe = null;
+  let indexUnsubscribe = null;
+  let tournamentUnsubscribe = null;
+  let liveUnsubscribe = null;
+  let connectionUnsubscribe = null;
+
+  const emit = (status, detail = {}) => {
+    if (disposed) return;
+    callback(Object.freeze({
+      status,
+      context: detail.context ? Object.freeze(cloneFirebaseBroadcastValue(detail.context)) : null,
+      reason: detail.reason || null,
+      error: detail.error || null,
+      source: detail.source || "firebase-broadcast-context"
+    }));
+  };
+  const clearContextListeners = () => {
+    tournamentUnsubscribe?.();
+    liveUnsubscribe?.();
+    tournamentUnsubscribe = null;
+    liveUnsubscribe = null;
+  };
+  const watchResolvedContext = (context) => {
+    const changed = !currentContext || !sameFirebaseBroadcastContext(currentContext, context);
+    currentContext = context;
+    if (!changed) return;
+    clearContextListeners();
+    tournamentUnsubscribe = subscribeFirebaseTournamentState(context.tournamentId, (payload = {}) => {
+      if (disposed || payload.deleted === true) {
+        scheduleResolve("tournament-removed");
+        return;
+      }
+      const nextActiveId = normalizeBroadcastOptionalContextId(payload.activeCharreadaId);
+      if (nextActiveId !== context.activeCharreadaId) scheduleResolve("active-charreada-changed");
+    });
+    liveUnsubscribe = subscribeFirebaseLiveCurrent(context.tournamentId, (payload, error) => {
+      if (disposed) return;
+      if (error) {
+        emit("offline", { context: currentContext, reason: error.reason || "live-current-unavailable" });
+        return;
+      }
+      if (!payload) return;
+      const liveTournamentId = normalizeBroadcastOptionalContextId(
+        payload.broadcastContract?.tournament?.id || payload.tournament?.id || payload.liveChannel
+      );
+      const liveCharreadaId = normalizeBroadcastOptionalContextId(
+        payload.broadcastContract?.charreada?.id || payload.charreada?.id || payload.activeCharreadaId
+      );
+      if (liveTournamentId && liveTournamentId !== context.tournamentId) scheduleResolve("live-tournament-changed");
+      else if (liveCharreadaId && liveCharreadaId !== context.activeCharreadaId) scheduleResolve("live-charreada-changed");
+    });
+  };
+  const resolveAndEmit = async (reason) => {
+    try {
+      const context = await resolveCurrentBroadcastContext({}, { operation });
+      if (disposed) return;
+      watchResolvedContext(context);
+      emit("ready", { context, reason, source: context.source });
+    } catch (error) {
+      if (disposed) return;
+      const status = firebaseBroadcastContextStatusFromError(error);
+      if (status === "unauthorized" || status === "no_context") {
+        clearContextListeners();
+        currentContext = null;
+      }
+      emit(status, {
+        context: status === "offline" ? currentContext : null,
+        reason: error?.code || error?.message || "broadcast-context-unavailable",
+        error: normalizeFirebaseBroadcastError(error)
+      });
+    }
+  };
+  const scheduleResolve = (reason = "context-refresh") => {
+    resolveQueue = resolveQueue.then(() => resolveAndEmit(reason));
+    return resolveQueue;
+  };
+
+  emit("preparing", { reason: "auth-pending" });
+  connectionUnsubscribe = onValue(
+    ref(getFirebaseDatabase(), ".info/connected"),
+    (snapshot) => {
+      const nextConnected = snapshot.val() === true;
+      if (connected === nextConnected) return;
+      connected = nextConnected;
+      if (!nextConnected) emit("offline", { context: currentContext, reason: "firebase-disconnected" });
+      else if (authSession?.user) scheduleResolve("firebase-reconnected");
+    },
+    (error) => emit("offline", { context: currentContext, reason: "firebase-connection-error", error: normalizeFirebaseBroadcastError(error) })
+  );
+  authUnsubscribe = subscribeFirebaseAuthSession((session) => {
+    if (disposed) return;
+    authSession = session;
+    indexUnsubscribe?.();
+    indexUnsubscribe = null;
+    if (!session?.user) {
+      clearContextListeners();
+      currentContext = null;
+      emit("unauthorized", { reason: "broadcast-auth-required" });
+      return;
+    }
+    if (session.active !== true || !["supervisor", "graficos"].includes(normalizeRole(session.role))) {
+      clearContextListeners();
+      currentContext = null;
+      emit("unauthorized", { reason: session.active !== true ? "broadcast-user-inactive" : "broadcast-permission-denied" });
+      return;
+    }
+    indexUnsubscribe = subscribeFirebaseTournamentIndex(() => scheduleResolve("tournament-index-updated"), session);
+    scheduleResolve("auth-restored");
+  });
+
+  return () => {
+    disposed = true;
+    authUnsubscribe?.();
+    indexUnsubscribe?.();
+    connectionUnsubscribe?.();
+    clearContextListeners();
+    authUnsubscribe = null;
+    indexUnsubscribe = null;
+    connectionUnsubscribe = null;
+    currentContext = null;
+  };
 }
 
 export async function resolveFirebaseBroadcastAuthorizedContext(value = {}, operation = "read") {
@@ -2951,14 +3084,18 @@ async function resolveFirebaseBroadcastAccess(context, operation = "read") {
   return validateFirebaseBroadcastProfileAccess(profile, user.uid, context, operation, { tournamentAssigned });
 }
 
-function validateFirebaseBroadcastProfileAccess(profile, uid, context, operation = "read", options = {}) {
+function validateFirebaseBroadcastProfileEligibility(profile = {}, operation = "read") {
   if (profile.active !== true) throw firebaseBroadcastError("broadcast-user-inactive");
   const role = normalizeRole(profile.role);
-  const readRoles = new Set(["supervisor", "graficos"]);
-  const publishRoles = new Set(["supervisor", "graficos"]);
-  if (operation === "publish" ? !publishRoles.has(role) : !readRoles.has(role)) {
-    throw firebaseBroadcastError("broadcast-permission-denied");
-  }
+  const allowedRoles = operation === "publish"
+    ? new Set(["supervisor", "graficos"])
+    : new Set(["supervisor", "graficos"]);
+  if (!allowedRoles.has(role)) throw firebaseBroadcastError("broadcast-permission-denied");
+  return role;
+}
+
+function validateFirebaseBroadcastProfileAccess(profile, uid, context, operation = "read", options = {}) {
+  const role = validateFirebaseBroadcastProfileEligibility(profile, operation);
   if (context.tenantId !== BROADCAST_SINGLE_TENANT_SCOPE_ID || context.organizationId !== null || context.clientId !== null) {
     throw firebaseBroadcastError("broadcast-single-tenant-context-conflict");
   }
@@ -2974,6 +3111,96 @@ function validateFirebaseBroadcastProfileAccess(profile, uid, context, operation
     clientId: null,
     tournamentId: context.tournamentId
   };
+}
+
+async function resolveFirebaseBroadcastActiveTournamentId(profile = {}, uid = "") {
+  const [indexSnapshot, userAccessSnapshot] = await Promise.all([
+    get(ref(getFirebaseDatabase(), TOURNAMENT_INDEX_PATH)),
+    get(ref(getFirebaseDatabase(), `charropro/userTournamentAccess/${uid}`))
+  ]);
+  const indexById = indexSnapshot.val() || {};
+  const visibleIds = resolveVisibleTournamentIds(profile, profile, userAccessSnapshot.val() || {}, indexById);
+  const orderedIds = [...visibleIds]
+    .map(normalizeBroadcastContextId)
+    .filter(Boolean)
+    .sort((left, right) => {
+      const updatedDiff = Number(indexById[right]?.updatedAtMs || 0) - Number(indexById[left]?.updatedAtMs || 0);
+      return updatedDiff || left.localeCompare(right);
+    });
+  if (!orderedIds.length) throw firebaseBroadcastError("broadcast-context-unavailable");
+
+  const candidates = (await Promise.all(orderedIds.map(async (tournamentId) => {
+    const [tournamentSnapshot, liveSnapshot] = await Promise.all([
+      get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${tournamentId}`)),
+      get(ref(getFirebaseDatabase(), `${LIVE_ROOT_PATH}/${tournamentId}/current`))
+    ]);
+    const tournament = tournamentSnapshot.val() || {};
+    const activeCharreadaId = normalizeBroadcastOptionalContextId(
+      tournament.meta?.activeCharreadaId ||
+        tournament.info?.activeCharreadaId ||
+        tournament.tournamentState?.activeCharreadaId ||
+        tournament.activeCharreadaId
+    );
+    const charreadas = arrayFromRecord(tournament.charreadas);
+    if (!activeCharreadaId || !charreadas.some((entry) => normalizeBroadcastOptionalContextId(entry?.id) === activeCharreadaId)) {
+      return null;
+    }
+    const live = liveSnapshot.val() || {};
+    const liveTournamentId = normalizeBroadcastOptionalContextId(
+      live.broadcastContract?.tournament?.id || live.tournament?.id || live.liveChannel
+    );
+    const liveCharreadaId = normalizeBroadcastOptionalContextId(
+      live.broadcastContract?.charreada?.id || live.charreada?.id || live.activeCharreadaId
+    );
+    const liveMatches = liveTournamentId === tournamentId && liveCharreadaId === activeCharreadaId;
+    return {
+      tournamentId,
+      activeCharreadaId,
+      liveMatches,
+      liveUpdatedAtMs: firebaseBroadcastTimestampMs(live.firebaseUpdatedAt || live.timestamp || live.generatedAt),
+      indexUpdatedAtMs: Number(indexById[tournamentId]?.updatedAtMs || 0)
+    };
+  }))).filter(Boolean);
+  if (!candidates.length) throw firebaseBroadcastError("broadcast-context-unavailable");
+
+  const preferredIds = [
+    profile.activeTournamentId,
+    profile.currentTournamentId,
+    profile.tournamentId
+  ].map(normalizeBroadcastOptionalContextId).filter(Boolean);
+  const preferred = preferredIds
+    .map((id) => candidates.find((candidate) => candidate.tournamentId === id))
+    .find(Boolean);
+  if (preferred) return preferred.tournamentId;
+
+  const liveCandidates = candidates
+    .filter((candidate) => candidate.liveMatches)
+    .sort((left, right) =>
+      right.liveUpdatedAtMs - left.liveUpdatedAtMs ||
+      right.indexUpdatedAtMs - left.indexUpdatedAtMs ||
+      left.tournamentId.localeCompare(right.tournamentId)
+    );
+  if (liveCandidates.length) return liveCandidates[0].tournamentId;
+  if (candidates.length === 1) return candidates[0].tournamentId;
+  throw firebaseBroadcastError("broadcast-context-ambiguous");
+}
+
+function firebaseBroadcastTimestampMs(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const parsed = Date.parse(String(value || ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function firebaseBroadcastContextStatusFromError(error) {
+  const code = String(error?.code || error?.message || "");
+  if (["broadcast-auth-required", "broadcast-user-inactive", "broadcast-permission-denied", "broadcast-tournament-access-denied"].includes(code)) {
+    return "unauthorized";
+  }
+  if (["broadcast-context-unavailable", "broadcast-context-ambiguous", "broadcast-context-mismatch"].includes(code)) {
+    return "no_context";
+  }
+  if (/network|offline|disconnected|unavailable/i.test(code)) return "offline";
+  return "error";
 }
 
 async function readFirebaseBroadcastTournamentAssignment(profile, uid, tournamentId) {
@@ -3206,7 +3433,7 @@ function normalizeFirebaseBroadcastContext(value = {}, options = {}) {
   return context;
 }
 
-function normalizeFirebaseBroadcastRequestContext(value = {}) {
+function normalizeFirebaseBroadcastRequestContext(value = {}, options = {}) {
   for (const key of ["tenantId", "organizationId", "clientId"]) {
     if (value?.[key] !== undefined && value?.[key] !== null && value?.[key] !== "") {
       throw firebaseBroadcastError("broadcast-external-identity-forbidden");
@@ -3218,7 +3445,7 @@ function normalizeFirebaseBroadcastRequestContext(value = {}) {
     activeCharreadaId: normalizeBroadcastOptionalContextId(value.activeCharreadaId || value.charreadaId),
     sessionId: normalizeBroadcastContextId(value.sessionId)
   };
-  if (!context.tournamentId) throw firebaseBroadcastError("broadcast-context-missing");
+  if (!context.tournamentId && options.allowMissingTournament !== true) throw firebaseBroadcastError("broadcast-context-missing");
   return context;
 }
 

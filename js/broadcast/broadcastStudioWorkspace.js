@@ -3,6 +3,7 @@ import {
   autoProductionConsoleOfficialProgram,
   clearProductionConsoleOfficialPreview,
   clearProductionConsoleOfficialProgram,
+  closeProductionConsoleRealtimeSession,
   configureProductionConsoleOutputRoute,
   connectProductionConsoleRealtime,
   createProductionConsoleModel,
@@ -26,6 +27,7 @@ import {
 } from "./productionConsole.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
 import {
   applyProgramMainProjection,
+  clearProgramMainOutput,
   configureProgramMainOutput,
   createProgramMainOutput,
   destroyProgramMainOutput,
@@ -40,7 +42,7 @@ import { destroyBroadcastRealtimeTransport } from "./broadcastRealtimeTransport.
 import { destroyLiveBindingsEngine } from "./liveBindings.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
 
 export const BROADCAST_STUDIO_WORKSPACE_VERSION = "1.0.0";
-export const BROADCAST_STUDIO_APP_VERSION = "20260717-broadcast-studio-workspace-001-operator-workspace-v1";
+export const BROADCAST_STUDIO_APP_VERSION = "20260716-broadcast-workspace-context-bridge-001-auto-context-v1";
 
 export const BROADCAST_STUDIO_FILTERS = Object.freeze([
   Object.freeze({ id: "all", label: "Todos" }),
@@ -96,7 +98,7 @@ export function createBroadcastStudioController(options = {}) {
     query: "",
     filterId: "all",
     busy: false,
-    connectionState: options.ready === true ? "ready" : "connecting",
+    connectionState: options.ready === true ? "ready" : "preparing",
     context: null,
     lastAction: "initialized",
     operationStatus: "Iniciando Workspace",
@@ -200,7 +202,7 @@ export function createBroadcastStudioController(options = {}) {
       return execution.result;
     },
     setRuntimeStatus(runtime = {}) {
-      const connectionState = ["connecting", "ready", "error", "offline"].includes(runtime.connectionState)
+      const connectionState = ["preparing", "connecting", "ready", "error", "offline", "stale", "unauthorized", "no_context"].includes(runtime.connectionState)
         ? runtime.connectionState
         : state.connectionState;
       return publish({
@@ -221,6 +223,84 @@ export function createBroadcastStudioController(options = {}) {
       if (state.previewGraphicId === graphicId) return "preview";
       if (state.selectedGraphicId === graphicId) return "prepared";
       return "available";
+    }
+  });
+}
+
+export function createBroadcastStudioContextBridge(options = {}) {
+  const subscribe = typeof options.subscribe === "function" ? options.subscribe : () => () => {};
+  const connect = typeof options.connect === "function" ? options.connect : async () => null;
+  const teardown = typeof options.teardown === "function" ? options.teardown : async () => null;
+  const onStatus = typeof options.onStatus === "function" ? options.onStatus : () => {};
+  let activeContext = null;
+  let disposed = false;
+  let started = false;
+  let unsubscribe = null;
+  let queue = Promise.resolve();
+
+  const emit = (event = {}) => onStatus(cloneValue({
+    connectionState: normalizeBridgeStatus(event.status),
+    context: event.context || activeContext,
+    operationStatus: bridgeOperationStatus(event.status, event.reason),
+    error: event.error?.code || event.error?.message || event.error || null
+  }));
+  const handle = async (event = {}) => {
+    if (disposed) return null;
+    const status = normalizeBridgeStatus(event.status);
+    if (status === "ready") {
+      const nextContext = normalizeWorkspaceOfficialContext(event.context);
+      const previousKey = workspaceContextKey(activeContext);
+      const nextKey = workspaceContextKey(nextContext);
+      if (previousKey === nextKey) return cloneValue(activeContext);
+      if (activeContext) {
+        emit({ status: "stale", context: activeContext, reason: "active-charreada-changed" });
+        await teardown(cloneValue(activeContext), cloneValue(nextContext));
+        activeContext = null;
+      }
+      emit({ status: "connecting", context: nextContext, reason: event.reason || "official-context-resolved" });
+      await connect(cloneValue(nextContext));
+      activeContext = cloneValue(nextContext);
+      return cloneValue(activeContext);
+    }
+    if (status === "offline") {
+      emit({ ...event, status, context: activeContext });
+      return cloneValue(activeContext);
+    }
+    if (["unauthorized", "no_context", "error"].includes(status) && activeContext) {
+      await teardown(cloneValue(activeContext), null);
+      activeContext = null;
+    }
+    emit({ ...event, status, context: status === "preparing" ? null : activeContext });
+    return null;
+  };
+  const update = (event = {}) => {
+    queue = queue.then(() => handle(event)).catch((error) => {
+      emit({ status: "error", context: activeContext, error });
+      return null;
+    });
+    return queue;
+  };
+
+  return Object.freeze({
+    start() {
+      if (disposed) throw workspaceError("broadcast-studio-context-bridge-destroyed");
+      if (started) return queue;
+      started = true;
+      emit({ status: "preparing", reason: "auth-pending" });
+      unsubscribe = subscribe((event) => update(event));
+      return queue;
+    },
+    update,
+    flush: () => queue,
+    getContext: () => cloneValue(activeContext),
+    async dispose() {
+      if (disposed) return;
+      disposed = true;
+      unsubscribe?.();
+      unsubscribe = null;
+      await queue;
+      if (activeContext) await teardown(cloneValue(activeContext), null);
+      activeContext = null;
     }
   });
 }
@@ -248,7 +328,8 @@ export function createBroadcastStudioEngine(options = {}) {
     realtimeAccess: null,
     firebaseBroadcastApi: null,
     realtimeOfficialContext: null,
-    liveBindingsEngine: null
+    liveBindingsEngine: null,
+    contextBridge: null
   };
   const programOutput = createProgramMainOutput({
     programMainOutputId: "broadcast-studio-program-main",
@@ -292,6 +373,33 @@ export function createBroadcastStudioEngine(options = {}) {
       { engineId: "broadcast_studio_official_preview" }
     );
   };
+  const destroyVisualPipeline = () => {
+    if (runtime.officialPreviewEngine) destroyPreviewEngine(runtime.officialPreviewEngine);
+    if (runtime.themeTemplateIntegration) destroyThemeTemplateIntegration(runtime.themeTemplateIntegration);
+    if (runtime.templateRendererIntegration) destroyTemplateRendererIntegration(runtime.templateRendererIntegration);
+    runtime.officialPreviewEngine = null;
+    runtime.themeTemplateIntegration = null;
+    runtime.templateRendererIntegration = null;
+    runtime.officialPreviewPreparationStore = { preparation: null };
+  };
+  const resetProductionRuntime = () => {
+    destroyVisualPipeline();
+    if (runtime.liveBindingsEngine && runtime.liveBindingsEngine.status !== "destroyed") destroyLiveBindingsEngine(runtime.liveBindingsEngine);
+    if (runtime.officialProgramEngine && runtime.officialProgramEngine.status !== "destroyed") destroyProgramEngine(runtime.officialProgramEngine);
+    if (runtime.outputRoutingEngine && runtime.outputRoutingEngine.state !== "destroyed") destroyOutputRoutingEngine(runtime.outputRoutingEngine);
+    if (runtime.realtimeTransport && runtime.realtimeTransport.status !== "destroyed") destroyBroadcastRealtimeTransport(runtime.realtimeTransport);
+    model = createProductionConsoleModel({ safeMode: false, visibility: "production" });
+    runtime.officialProgramEngine = createProductionConsoleOfficialProgramEngine(model, { engineId: "broadcast_studio_official_program" });
+    runtime.outputRoutingEngine = createProductionConsoleOutputRoutingEngine(model, { engineId: "broadcast_studio_output_routing" });
+    runtime.realtimeTransport = null;
+    runtime.realtimeContractUnsubscribe = null;
+    runtime.realtimePublishQueue = Promise.resolve();
+    runtime.realtimeAccess = null;
+    runtime.realtimeOfficialContext = null;
+    runtime.liveBindingsEngine = null;
+    templateIds.clear();
+    clearProgramMainOutput(programOutput);
+  };
   const routeProgram = async (options = {}) => {
     model = configureProductionConsoleOutputRoute(model, runtime.outputRoutingEngine, "route-program-main");
     model = resolveProductionConsoleOutputRoute(model, runtime.outputRoutingEngine, "route-program-main", {
@@ -309,9 +417,70 @@ export function createBroadcastStudioEngine(options = {}) {
     }
     return envelope;
   };
+  const teardownOfficialContext = async () => {
+    if (model.realtimeSourceReady === true) {
+      try {
+        ensureVisualPipeline();
+        model = clearProductionConsoleOfficialPreview(model, runtime.officialPreviewEngine, runtime.officialPreviewPreparationStore);
+        model = clearProductionConsoleOfficialProgram(model, runtime.officialProgramEngine);
+        await routeProgram({ action: "context-clear", clear: true });
+      } catch {
+        // Context teardown continues so previous data cannot remain mounted.
+      }
+    }
+    try {
+      if (runtime.firebaseBroadcastApi && runtime.realtimeOfficialContext) {
+        model = await closeProductionConsoleRealtimeSession(model, runtime);
+      } else {
+        model = disconnectProductionConsoleRealtime(model, runtime);
+      }
+    } catch {
+      try {
+        model = disconnectProductionConsoleRealtime(model, runtime);
+      } catch {
+        // A disconnected transport is already isolated.
+      }
+    }
+    resetProductionRuntime();
+    emit({ connectionState: "stale", context: null, operationStatus: "Contexto anterior retirado", error: null });
+  };
+  const connectOfficialContext = async (context) => {
+    const firebaseApi = runtime.firebaseBroadcastApi;
+    if (!firebaseApi) throw workspaceError("broadcast-studio-firebase-api-unavailable");
+    model = await connectProductionConsoleRealtime(model, runtime, {
+      context: { tournamentId: context.tournamentId },
+      firebaseApi,
+      onStatus: (status) => {
+        if (status?.offline === true) emit({ connectionState: "offline", context: contextFromOfficialContext(context), operationStatus: "Sin conexión", error: null });
+        else if (status?.connected === true) emit({ connectionState: "connecting", context: contextFromOfficialContext(context), operationStatus: "Cargando datos oficiales", error: null });
+      },
+      onContract: applyContract,
+      onContractError: (error) => emit({ connectionState: "error", context: contextFromOfficialContext(context), error: error?.code || error?.message })
+    });
+    emit({
+      connectionState: "connecting",
+      context: contextFromOfficialContext(runtime.realtimeOfficialContext || context, runtime.realtimeAccess),
+      operationStatus: "Cargando datos oficiales",
+      error: null
+    });
+    return cloneValue(model.realtimeTransportSnapshot);
+  };
   const applyContract = (contract) => {
     contractQueue = contractQueue.then(async () => {
       if (disposed) return;
+      const currentContext = runtime.realtimeOfficialContext;
+      const contractTournamentId = contract?.tournament?.id || null;
+      const contractCompetitionId = contract?.competition?.id || null;
+      const contractCharreadaId = contract?.charreada?.id || null;
+      if (currentContext && (
+        contractTournamentId !== currentContext.tournamentId ||
+        (contractCompetitionId || null) !== (currentContext.competitionId || null) ||
+        (contractCharreadaId || null) !== (currentContext.activeCharreadaId || null)
+      )) {
+        const refreshed = await runtime.firebaseBroadcastApi.resolveCurrentBroadcastContext({}, { operation: "publish" });
+        await runtime.contextBridge?.update({ status: "ready", context: refreshed, reason: "live-contract-context-changed" });
+        return;
+      }
       model = applyProductionConsoleRealtimeContract(model, runtime, contract);
       ensureVisualPipeline();
       try {
@@ -319,12 +488,12 @@ export function createBroadcastStudioEngine(options = {}) {
           idempotencyKey: `broadcast-studio-announcer-${Date.now()}`
         });
       } catch (error) {
-        emit({ connectionState: "error", context: contextFromModel(model), error: error?.code || error?.message });
+        emit({ connectionState: "error", context: contextFromModel(model, runtime), error: error?.code || error?.message });
         return;
       }
       emit({
         connectionState: "ready",
-        context: contextFromModel(model),
+        context: contextFromModel(model, runtime),
         operationStatus: "Sesión oficial conectada",
         error: null
       });
@@ -343,15 +512,23 @@ export function createBroadcastStudioEngine(options = {}) {
     },
     async connect() {
       if (disposed) throw workspaceError("broadcast-studio-destroyed");
-      emit({ connectionState: "connecting", context: null, operationStatus: "Conectando sesión oficial", error: null });
+      emit({ connectionState: "preparing", context: null, operationStatus: "Esperando autenticación", error: null });
       try {
-        model = await connectProductionConsoleRealtime(model, runtime, {
-          onContract: applyContract,
-          onContractError: (error) => emit({ connectionState: "error", context: null, error: error?.code || error?.message })
+        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260716-broadcast-workspace-context-bridge-001-auto-context-v1");
+        if (typeof runtime.firebaseBroadcastApi.subscribeFirebaseBroadcastContext !== "function") {
+          throw workspaceError("broadcast-studio-context-subscriber-unavailable");
+        }
+        runtime.contextBridge = createBroadcastStudioContextBridge({
+          subscribe: (callback) => runtime.firebaseBroadcastApi.subscribeFirebaseBroadcastContext(callback, { operation: "publish" }),
+          connect: connectOfficialContext,
+          teardown: teardownOfficialContext,
+          onStatus: (status) => emit(status)
         });
+        await runtime.contextBridge.start();
         return cloneValue(model.realtimeTransportSnapshot);
       } catch (error) {
-        emit({ connectionState: "error", context: null, error: error?.code || error?.message || "broadcast-studio-connect-failed" });
+        const connectionState = workspaceConnectionStateFromError(error);
+        emit({ connectionState, context: null, operationStatus: bridgeOperationStatus(connectionState), error: error?.code || error?.message || "broadcast-studio-connect-failed" });
         throw error;
       }
     },
@@ -372,7 +549,7 @@ export function createBroadcastStudioEngine(options = {}) {
         runtime.themeTemplateIntegration
       );
       model = renderProductionConsoleOfficialPreview(model, runtime.officialPreviewEngine);
-      emit({ connectionState: "ready", context: contextFromModel(model), operationStatus: `${entry.name} en Preview`, error: null });
+      emit({ connectionState: "ready", context: contextFromModel(model, runtime), operationStatus: `${entry.name} en Preview`, error: null });
       return cloneValue(model.officialPreviewSnapshot);
     },
     async transition(mode, entry) {
@@ -383,7 +560,7 @@ export function createBroadcastStudioEngine(options = {}) {
       else if (mode === "auto") model = autoProductionConsoleOfficialProgram(model, runtime.officialProgramEngine);
       else model = takeProductionConsoleOfficialProgram(model, runtime.officialProgramEngine);
       const envelope = await routeProgram({ action: mode });
-      emit({ connectionState: "ready", context: contextFromModel(model), operationStatus: `${entry.name} al aire`, error: null });
+      emit({ connectionState: "ready", context: contextFromModel(model, runtime), operationStatus: `${entry.name} al aire`, error: null });
       return cloneValue(envelope);
     },
     async clear() {
@@ -392,13 +569,15 @@ export function createBroadcastStudioEngine(options = {}) {
       model = clearProductionConsoleOfficialPreview(model, runtime.officialPreviewEngine, runtime.officialPreviewPreparationStore);
       model = clearProductionConsoleOfficialProgram(model, runtime.officialProgramEngine);
       const envelope = await routeProgram({ action: "clear", clear: true });
-      emit({ connectionState: "ready", context: contextFromModel(model), operationStatus: "Preview y Program limpios", error: null });
+      emit({ connectionState: "ready", context: contextFromModel(model, runtime), operationStatus: "Preview y Program limpios", error: null });
       return cloneValue(envelope);
     },
     async dispose() {
       if (disposed) return;
       disposed = true;
       listeners.clear();
+      await runtime.contextBridge?.dispose?.();
+      runtime.contextBridge = null;
       try {
         model = disconnectProductionConsoleRealtime(model, runtime);
       } catch {
@@ -493,6 +672,9 @@ function collectWorkspaceRefs(documentRef, root) {
     catalogEmpty: id("broadcast-catalog-empty"),
     contextTitle: id("broadcast-context-title"),
     contextDetail: id("broadcast-context-detail"),
+    outputLinks: id("broadcast-output-links"),
+    programLink: id("broadcast-program-link"),
+    announcerLink: id("broadcast-announcer-link"),
     liveStatus: id("broadcast-live-status"),
     liveLabel: id("broadcast-live-label"),
     previewPanel: documentRef.querySelector(".broadcast-preview-panel"),
@@ -556,10 +738,29 @@ function renderWorkspace(refs, controller, state) {
 
 function renderRuntimeStatus(refs, state) {
   const context = state.context || {};
-  setText(refs.contextTitle, context.tournamentName || (state.connectionState === "ready" ? "Torneo conectado" : "Preparando sesión"));
-  setText(refs.contextDetail, [context.competitionName, context.charreadaName].filter(Boolean).join(" · ") || "Esperando torneo activo");
+  const fallback = workspaceContextFallback(state.connectionState);
+  setText(refs.contextTitle, context.tournamentName || fallback.title);
+  setText(refs.contextDetail, [
+    context.competitionName,
+    context.charreadaName,
+    context.suerteName,
+    context.teamName ? `Turno: ${context.teamName}` : ""
+  ].filter(Boolean).join(" · ") || fallback.detail);
   refs.liveStatus.className = `broadcast-live-status is-${state.connectionState === "ready" ? "live" : state.connectionState}`;
-  setText(refs.liveLabel, ({ ready: "EN VIVO", connecting: "CONECTANDO", offline: "SIN CONEXIÓN", error: "NO DISPONIBLE" })[state.connectionState] || "NO DISPONIBLE");
+  setText(refs.liveLabel, ({
+    ready: "CONECTADO",
+    preparing: "PREPARANDO SESIÓN",
+    connecting: "CONECTANDO",
+    offline: "SIN CONEXIÓN",
+    stale: "CONTEXTO DESACTUALIZADO",
+    unauthorized: "SESIÓN NO AUTORIZADA",
+    no_context: "SIN CHARREADA ACTIVA",
+    error: "NO DISPONIBLE"
+  })[state.connectionState] || "NO DISPONIBLE");
+  const showOutputLinks = state.connectionState === "ready" && Boolean(context.programUrl && context.announcerUrl);
+  refs.outputLinks.hidden = !showOutputLinks;
+  setSafeOutputLink(refs.programLink, showOutputLinks ? context.programUrl : "");
+  setSafeOutputLink(refs.announcerLink, showOutputLinks ? context.announcerUrl : "");
 }
 
 function renderCatalog(refs, controller, state) {
@@ -569,10 +770,15 @@ function renderCatalog(refs, controller, state) {
   refs.filters.querySelectorAll("[data-filter-id]").forEach((button) => {
     button.setAttribute("aria-pressed", button.dataset.filterId === state.filterId ? "true" : "false");
   });
-  refs.catalog.replaceChildren(...visible.map((entry) => graphicCard(refs.catalog.ownerDocument, controller, entry)));
+  refs.catalog.replaceChildren(...visible.map((entry) => graphicCard(
+    refs.catalog.ownerDocument,
+    controller,
+    entry,
+    state.connectionState === "ready"
+  )));
 }
 
-function graphicCard(documentRef, controller, entry) {
+function graphicCard(documentRef, controller, entry, contextReady = false) {
   const status = controller.getGraphicStatus(entry.id);
   const card = documentRef.createElement("article");
   card.className = [
@@ -609,8 +815,8 @@ function graphicCard(documentRef, controller, entry) {
   const actions = documentRef.createElement("div");
   actions.className = "broadcast-graphic-actions";
   actions.append(
-    cardButton(documentRef, "Vista previa", "preview", entry.id, entry.disabled),
-    cardButton(documentRef, "Preparar", "prepare", entry.id, entry.disabled, true)
+    cardButton(documentRef, "Vista previa", "preview", entry.id, entry.disabled || !contextReady),
+    cardButton(documentRef, "Preparar", "prepare", entry.id, entry.disabled || !contextReady, true)
   );
   footer.append(stateLabel, actions);
   body.append(category, title, description, footer);
@@ -656,12 +862,122 @@ function runControllerAction(action) {
   Promise.resolve().then(action).catch(() => {});
 }
 
-function contextFromModel(model) {
+function contextFromModel(model, runtime = {}) {
+  const access = runtime.realtimeAccess || {};
   return {
     tournamentName: model.contract?.tournament?.name || "Torneo conectado",
     competitionName: model.contract?.competition?.name || "Competencia activa",
-    charreadaName: model.contract?.charreada?.name || "Jornada activa"
+    charreadaName: model.contract?.charreada?.name || "Jornada activa",
+    suerteName: model.contract?.suerte?.name || model.contract?.suerte?.label || "",
+    teamName: model.contract?.team?.name || model.contract?.participant?.name || "",
+    programUrl: buildWorkspaceTemporaryAccessUrl(access.program),
+    announcerUrl: buildWorkspaceTemporaryAccessUrl(access.announcer)
   };
+}
+
+function contextFromOfficialContext(context = {}, access = {}) {
+  return {
+    tournamentId: context.tournamentId || null,
+    competitionId: context.competitionId || null,
+    activeCharreadaId: context.activeCharreadaId || null,
+    sessionId: context.sessionId || null,
+    programUrl: buildWorkspaceTemporaryAccessUrl(access.program),
+    announcerUrl: buildWorkspaceTemporaryAccessUrl(access.announcer)
+  };
+}
+
+function normalizeWorkspaceOfficialContext(value = {}) {
+  const context = {
+    tenantId: String(value.tenantId || "").trim() || null,
+    organizationId: String(value.organizationId || "").trim() || null,
+    clientId: String(value.clientId || "").trim() || null,
+    tournamentId: String(value.tournamentId || "").trim() || null,
+    competitionId: String(value.competitionId || "").trim() || null,
+    activeCharreadaId: String(value.activeCharreadaId || value.charreadaId || "").trim() || null,
+    sessionId: String(value.sessionId || "").trim() || null,
+    source: String(value.source || "firebase-authorized-context").trim(),
+    revision: Number(value.revision || 0),
+    resolvedAt: value.resolvedAt || null
+  };
+  if (!context.tournamentId || !context.competitionId || !context.activeCharreadaId || !context.sessionId) {
+    throw workspaceError("broadcast-studio-context-incomplete");
+  }
+  return context;
+}
+
+function workspaceContextKey(value = {}) {
+  if (!value) return "";
+  return [value.tenantId, value.tournamentId, value.competitionId, value.activeCharreadaId, value.sessionId]
+    .map((entry) => String(entry || "").trim())
+    .join("|");
+}
+
+function normalizeBridgeStatus(value) {
+  const status = String(value || "").trim().toLowerCase();
+  return ["preparing", "connecting", "ready", "offline", "stale", "unauthorized", "no_context", "error"].includes(status)
+    ? status
+    : "error";
+}
+
+function bridgeOperationStatus(status, reason = "") {
+  return ({
+    preparing: "Esperando autenticación",
+    connecting: "Conectando charreada activa",
+    ready: "Sesión oficial conectada",
+    offline: "Sin conexión",
+    stale: "Cambiando a la charreada activa",
+    unauthorized: "Sesión no autorizada",
+    no_context: "No hay charreada activa",
+    error: "No fue posible conectar Broadcast Studio"
+  })[normalizeBridgeStatus(status)] || String(reason || "Estado no disponible");
+}
+
+function workspaceConnectionStateFromError(error) {
+  const code = String(error?.code || error?.message || "");
+  if (/auth-required|user-inactive|permission-denied|access-denied/.test(code)) return "unauthorized";
+  if (/context-unavailable|context-ambiguous|context-incomplete/.test(code)) return "no_context";
+  if (/network|offline|disconnected/.test(code)) return "offline";
+  return "error";
+}
+
+function workspaceContextFallback(connectionState) {
+  return ({
+    preparing: { title: "Preparando sesión", detail: "Validando acceso y charreada activa" },
+    connecting: { title: "Conectando torneo autorizado", detail: "Cargando contexto deportivo oficial" },
+    offline: { title: "Sin conexión", detail: "La sesión se reconectará automáticamente" },
+    stale: { title: "Actualizando contexto", detail: "Retirando la charreada anterior" },
+    unauthorized: { title: "Sesión no autorizada", detail: "Inicia sesión como Supervisor o Gráficos" },
+    no_context: { title: "Sin charreada activa", detail: "Activa una charreada desde el torneo" },
+    error: { title: "Broadcast Studio no disponible", detail: "No fue posible cargar el contexto oficial" },
+    ready: { title: "Torneo conectado", detail: "Contexto oficial disponible" }
+  })[connectionState] || { title: "Broadcast Studio", detail: "Estado no disponible" };
+}
+
+function buildWorkspaceTemporaryAccessUrl(descriptor = {}) {
+  if (!descriptor?.accessId || !descriptor?.sessionId || !["program_main", "announcer_monitor"].includes(descriptor.outputType)) return "";
+  try {
+    const page = descriptor.outputType === "program_main" ? "program-main-output.html" : "announcer-monitor.html";
+    const url = new URL(`./${page}`, globalThis.location?.href || "http://127.0.0.1/");
+    url.searchParams.set("sessionId", descriptor.sessionId);
+    url.searchParams.set("access", descriptor.accessId);
+    return url.href;
+  } catch {
+    return "";
+  }
+}
+
+function setSafeOutputLink(link, value) {
+  if (!link) return;
+  try {
+    const url = new URL(String(value || ""), globalThis.location?.href || "http://127.0.0.1/");
+    const currentOrigin = globalThis.location?.origin || url.origin;
+    if (!["http:", "https:"].includes(url.protocol) || url.origin !== currentOrigin) throw new Error("unsafe-output-url");
+    link.href = url.href;
+    link.removeAttribute("aria-disabled");
+  } catch {
+    link.href = "#";
+    link.setAttribute("aria-disabled", "true");
+  }
 }
 
 function statusLabel(status) {
@@ -670,7 +986,8 @@ function statusLabel(status) {
 
 function readableWorkspaceError(error) {
   const code = error?.code || error?.message || "";
-  if (code.includes("context-unavailable")) return "No hay torneo activo disponible";
+  if (code.includes("context-unavailable") || code.includes("context-incomplete")) return "No hay charreada activa disponible";
+  if (code.includes("auth") || code.includes("permission")) return "Sesión no autorizada";
   if (code.includes("disabled")) return "Gráfico deshabilitado";
   if (code.includes("busy")) return "Operación en curso";
   return "No fue posible completar la operación";

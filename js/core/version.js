@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260716-broadcast-context-resolution-001-real-context-v1";
+export const CHARROPRO_APP_VERSION = "20260716-broadcast-workspace-context-bridge-001-auto-context-v1";
 
 let versionLogged = false;
 

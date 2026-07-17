@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260713-production-nav-001-broadcast-access1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260716-broadcast-workspace-context-bridge-001-auto-context-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -71,7 +71,7 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260713-asset-manager-001-assets-v1";
+} from "./core/firebaseSync.js?v=20260716-broadcast-workspace-context-bridge-001-auto-context-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,

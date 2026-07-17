@@ -7,7 +7,7 @@
 Versión de aplicación:
 
 ```text
-20260713-production-nav-001-broadcast-access1
+20260716-broadcast-workspace-context-bridge-001-auto-context-v1
 ```
 
 ## Alcance
@@ -81,6 +81,16 @@ La comprobación se aplica al menú, a la vista directa y a las acciones de abri
 
 La navegación ya no presenta contratos, módulos, revisiones, Console o Playground como decisiones operativas. Esas herramientas técnicas permanecen en el repositorio, pero el operador entra directamente al catálogo profesional, Preview, Program y botonera de Broadcast Studio.
 
+### Resolución automática del contexto
+
+`BROADCAST-WORKSPACE-CONTEXT-BRIDGE-001` conecta el Workspace directamente con el contexto productivo oficial. Al abrir `broadcast-studio.html`, la aplicación espera la sesión Firebase existente, valida el rol y el acceso del usuario, identifica el torneo con charreada activa y resuelve competencia, charreada y sesión Broadcast mediante `resolveCurrentBroadcastContext()`.
+
+El Workspace no requiere abrir antes Production Console y no acepta identidad productiva desde URL, `localStorage`, `sessionStorage` o fixtures. La sesión se mantiene alineada con `live/current` y con el Broadcast Data Contract real. Si cambia la charreada activa, se limpian Preview y Program, se revocan los accesos temporales anteriores, se destruye el runtime previo y se conecta una sesión nueva antes de habilitar la operación.
+
+Los estados visibles son `PREPARANDO`, `CONECTANDO`, `LISTO`, `SIN CONTEXTO`, `SIN CONEXIÓN`, `DESACTUALIZADO`, `SIN AUTORIZACIÓN` y `ERROR`. Una pérdida temporal de red conserva el último contexto válido solo como referencia visual; no crea otra sesión ni habilita publicación fuera del contexto autorizado.
+
+Program Main y Locutores conservan salidas separadas y accesos temporales de solo lectura. Los enlaces se generan únicamente después de resolver la sesión oficial y no muestran IDs, capacidades ni detalles Firebase en la interfaz.
+
 ## Seguridad
 
 Los destinos salen de una lista cerrada dentro de `js/app.js`. La resolución exige:
@@ -117,3 +127,4 @@ La integración conserva sin cambios:
 - No es Action Engine.
 - No agrega permisos reales nuevos.
 - La disponibilidad es declarativa y no comprueba archivos mediante red.
+- La detección automática requiere una charreada activa inequívoca dentro de los torneos autorizados del usuario; ante ambigüedad se muestra `SIN CONTEXTO` y no se elige una sesión silenciosamente.
