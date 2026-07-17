@@ -7,10 +7,103 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CharroPro Broadcast Studio</title>
-  <link rel="stylesheet" href="./css/broadcast-studio.css?v=20260716-broadcast-context-resolution-001-real-context-v1">
+  <link rel="stylesheet" href="./css/broadcast-studio.css?v=20260717-broadcast-studio-workspace-001-operator-workspace-v1">
 </head>
 <body>
-  <main id="broadcast-access-hub" data-access-hub-id="broadcast-access-hub"></main>
-  <script type="module" src="./js/broadcast/broadcastAccessHub.js?v=20260716-broadcast-context-resolution-001-real-context-v1"></script>
+  <main id="broadcast-studio-workspace" class="broadcast-workspace" data-workspace-state="loading">
+    <header class="broadcast-workspace-header">
+      <div class="broadcast-workspace-brand">
+        <span class="broadcast-workspace-product">CharroPro</span>
+        <h1>Broadcast Studio</h1>
+      </div>
+      <div class="broadcast-workspace-context" aria-live="polite">
+        <strong id="broadcast-context-title">Preparando sesión</strong>
+        <span id="broadcast-context-detail">Esperando torneo activo</span>
+      </div>
+      <div id="broadcast-live-status" class="broadcast-live-status is-connecting" role="status" aria-live="polite">
+        <span class="broadcast-live-dot" aria-hidden="true"></span>
+        <span id="broadcast-live-label">CONECTANDO</span>
+      </div>
+    </header>
+
+    <section class="broadcast-catalog-toolbar" aria-label="Herramientas del catálogo">
+      <label class="broadcast-search-field" for="broadcast-graphic-search">
+        <span>Buscar gráfico</span>
+        <input id="broadcast-graphic-search" type="search" autocomplete="off" placeholder="Nombre, categoría o etiqueta">
+      </label>
+      <div id="broadcast-category-filters" class="broadcast-filter-group" role="group" aria-label="Filtrar gráficos"></div>
+    </section>
+
+    <div class="broadcast-workspace-grid">
+      <aside class="broadcast-catalog-panel" aria-labelledby="broadcast-catalog-title">
+        <div class="broadcast-panel-heading">
+          <div>
+            <span>Biblioteca</span>
+            <h2 id="broadcast-catalog-title">Gráficos</h2>
+          </div>
+          <strong id="broadcast-catalog-count">0</strong>
+        </div>
+        <div id="broadcast-graphic-catalog" class="broadcast-graphic-catalog" aria-live="polite"></div>
+        <p id="broadcast-catalog-empty" class="broadcast-empty-message" hidden>No hay gráficos que coincidan con la búsqueda.</p>
+      </aside>
+
+      <section class="broadcast-stage-panel broadcast-preview-panel" aria-labelledby="broadcast-preview-title">
+        <div class="broadcast-panel-heading">
+          <div>
+            <span>Salida de trabajo</span>
+            <h2 id="broadcast-preview-title">Preview</h2>
+          </div>
+          <strong id="broadcast-preview-state" class="broadcast-stage-status">VACÍO</strong>
+        </div>
+        <div class="broadcast-stage-frame">
+          <div id="broadcast-preview-canvas" class="broadcast-stage-canvas" aria-label="Salida Preview oficial"></div>
+          <div id="broadcast-preview-empty" class="broadcast-stage-empty">
+            <strong>Preview listo</strong>
+            <span>Sin composición preparada</span>
+          </div>
+        </div>
+        <div class="broadcast-stage-meta">
+          <strong id="broadcast-preview-name">Sin gráfico</strong>
+          <span id="broadcast-preview-detail">Program permanece intacto</span>
+        </div>
+      </section>
+
+      <section class="broadcast-stage-panel broadcast-program-panel" aria-labelledby="broadcast-program-title">
+        <div class="broadcast-panel-heading">
+          <div>
+            <span>Salida oficial</span>
+            <h2 id="broadcast-program-title">Program</h2>
+          </div>
+          <strong id="broadcast-program-state" class="broadcast-stage-status is-program">FUERA DEL AIRE</strong>
+        </div>
+        <div class="broadcast-stage-frame broadcast-program-stage">
+          <div id="broadcast-program-canvas" class="broadcast-stage-canvas" aria-label="Salida Program oficial"></div>
+          <div id="broadcast-program-empty" class="broadcast-stage-empty">
+            <strong>Program limpio</strong>
+            <span>No hay ningún gráfico al aire.</span>
+          </div>
+        </div>
+        <div class="broadcast-stage-meta">
+          <strong id="broadcast-program-name">Sin gráfico</strong>
+          <span id="broadcast-program-detail">Salida oficial protegida</span>
+        </div>
+      </section>
+    </div>
+
+    <footer class="broadcast-control-bar" aria-label="Controles de emisión">
+      <div class="broadcast-control-primary">
+        <button type="button" class="broadcast-button is-prepare" data-workspace-action="prepare">PREPARAR</button>
+        <button type="button" class="broadcast-button is-take" data-workspace-action="take">TAKE</button>
+        <button type="button" class="broadcast-button is-cut" data-workspace-action="cut">CUT</button>
+        <button type="button" class="broadcast-button is-auto" data-workspace-action="auto">AUTO</button>
+        <button type="button" class="broadcast-button is-clear" data-workspace-action="clear">LIMPIAR</button>
+      </div>
+      <div class="broadcast-control-state">
+        <span>Estado</span>
+        <strong id="broadcast-operation-status" aria-live="polite">Iniciando Workspace</strong>
+      </div>
+    </footer>
+  </main>
+  <script type="module" src="./js/broadcast/broadcastStudioWorkspace.js?v=20260717-broadcast-studio-workspace-001-operator-workspace-v1"></script>
 </body>
 </html>

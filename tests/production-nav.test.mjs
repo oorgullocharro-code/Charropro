@@ -58,8 +58,7 @@ for (const role of [ROLES.JUEZ, ROLES.LOCUTOR, ROLES.LECTURA, ROLES.ORGANIZADOR,
 }
 
 // Only allowlisted same-origin HTML routes are resolved.
-assert.match(appSource, /route: "production-console\.html"/);
-assert.match(appSource, /route: "broadcast-playground\.html"/);
+assert.match(appSource, /route: "broadcast-studio\.html"/);
 assert.match(appSource, /!\/\^\[a-z0-9-\]\+\\\.html\$\/\.test\(target\.route\)/);
 assert.match(appSource, /!\["http:", "https:"\]\.includes\(url\.protocol\)/);
 assert.match(appSource, /url\.origin !== window\.location\.origin/);
@@ -76,11 +75,9 @@ const makeProductionResolver = (targets, href = "https://charropro.test/charropr
   `${resolverSource}; return getProductionTargetUrl;`
 )(targets, version, { location: new URL(href) });
 const safeResolver = makeProductionResolver({
-  console: { route: "production-console.html" },
-  playground: { route: "broadcast-playground.html" }
+  studio: { route: "broadcast-studio.html" }
 });
-assert.equal(safeResolver("console").href, `https://charropro.test/charropro/production-console.html?v=${version}`);
-assert.equal(safeResolver("playground").href, `https://charropro.test/charropro/broadcast-playground.html?v=${version}`);
+assert.equal(safeResolver("studio").href, `https://charropro.test/charropro/broadcast-studio.html?v=${version}`);
 assert.equal(safeResolver("unknown"), null);
 
 for (const unsafeRoute of [
@@ -95,10 +92,10 @@ for (const unsafeRoute of [
   assert.equal(unsafeResolver("candidate"), null, `${unsafeRoute} must be rejected`);
 }
 const fileOriginResolver = makeProductionResolver(
-  { console: { route: "production-console.html" } },
+  { studio: { route: "broadcast-studio.html" } },
   "file:///tmp/index.html"
 );
-assert.equal(fileOriginResolver("console"), null);
+assert.equal(fileOriginResolver("studio"), null);
 
 // Opening and copy behavior remains explicit and safe.
 assert.match(appSource, /window\.location\.assign\(url\.href\)/);
@@ -112,29 +109,22 @@ assert.doesNotMatch(productionSectionFor("copyProductionTargetUrl"), /innerHTML|
 // Cards, Connection shortcuts and declarative status are present without polling.
 for (const label of [
   "Broadcast Studio",
-  "Consola de Producción",
-  "Playground de Broadcast",
-  "V2 en desarrollo",
-  "Sin conexión real a OBS ni persistencia definitiva de Program.",
-  "Arquitectura maestra",
-  "Data Contract",
-  "Broadcast State",
-  "Output Engine",
-  "Asset Manager",
-  "Production Console"
+  "Operativo",
+  "Workspace oficial para operar gráficos, Preview y Program.",
+  "Producción en tiempo real",
+  "Abrir Broadcast Studio"
 ]) {
   assert.ok(appSource.includes(label), `Missing production label: ${label}`);
 }
-for (const moduleVersion of ["1.0.0", "V1"]) assert.ok(appSource.includes(`version: "${moduleVersion}"`));
 assert.match(appSource, /\$\{renderProductionQuickLinks\(\)\}/);
-assert.match(appSource, /data-production-target="console"/);
-assert.match(appSource, /data-production-target="playground"/);
+assert.match(appSource, /data-production-target="studio"/);
 
 const productionSection = appSource.slice(appSource.indexOf("function renderProductionNav"), appSource.indexOf("function renderGraphicsAccess"));
 assert.doesNotMatch(productionSection, /\bfetch\s*\(|setInterval\s*\(|EventSource|WebSocket/);
 assert.doesNotMatch(productionSection, /tenantId|sessionId|operatorId|password|token|secret/i);
 assert.equal((productionSection.match(/class="production-card"/g) || []).length, 1);
 assert.match(productionSection, /Object\.values\(PRODUCTION_NAV_TARGETS\)\.map\(renderProductionCard\)/);
+assert.doesNotMatch(productionSection, /production-module-list|Consola de Producción|Playground de Broadcast/);
 assert.match(appSource, /\$\{renderPublicPageLinksCard\(\)\}/);
 assert.match(appSource, /\$\{liveScreenGroups\.map\(renderLiveScreenGroup\)\.join\(""\)\}/);
 assert.match(appSource, /function renderGraphicsAccess\(\)/);
@@ -144,7 +134,6 @@ for (const className of [
   "production-nav",
   "production-card",
   "production-status",
-  "production-module-list",
   "production-quick-links"
 ]) {
   assert.match(cssSource, new RegExp(`\\.${className}\\b`));
@@ -155,10 +144,9 @@ assert.match(cssSource, /@media \(max-width: 640px\)[\s\S]*?\.production-card-ac
 
 // Documentation describes actual routes, permissions and current limitations.
 assert.match(documentation, /index\.html\?view=production/);
-assert.match(documentation, /production-console\.html/);
-assert.match(documentation, /broadcast-playground\.html/);
+assert.match(documentation, /broadcast-studio\.html/);
 assert.match(documentation, /no controla OBS/i);
-assert.match(documentation, /No existe persistencia definitiva de Program/i);
+assert.match(documentation, /Workspace oficial/i);
 
 console.log("production-nav.test.mjs: ok");
 

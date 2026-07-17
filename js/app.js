@@ -118,32 +118,15 @@ const PUBLIC_LINKS_PAGE_VERSION = "20260709-public-links-001";
 const PRODUCTION_NAV_VERSION = CHARROPRO_APP_VERSION;
 const PRODUCTION_NAV_VIEW = "production";
 const PRODUCTION_NAV_TARGETS = Object.freeze({
-  console: Object.freeze({
-    id: "console",
-    name: "Consola de Producción",
-    route: "production-console.html",
-    description: "Control Center para operar Preview, Program, layers, outputs, cola y recursos.",
+  studio: Object.freeze({
+    id: "studio",
+    name: "Broadcast Studio",
+    route: "broadcast-studio.html",
+    description: "Workspace oficial para operar gráficos, Preview y Program.",
     availability: "Disponible",
-    availabilityDetail: "V1 operativa con fixtures"
-  }),
-  playground: Object.freeze({
-    id: "playground",
-    name: "Playground de Broadcast",
-    route: "broadcast-playground.html",
-    description: "Banco visual de pruebas para validar datos, outputs, geometría, assets y separación Preview/Program.",
-    availability: "Disponible",
-    availabilityDetail: "Entorno de pruebas"
+    availabilityDetail: "Producción en tiempo real"
   })
 });
-const PRODUCTION_NAV_MODULES = Object.freeze([
-  Object.freeze({ name: "Arquitectura maestra", version: null, status: "Disponible", description: "Base documentada de Broadcast Studio." }),
-  Object.freeze({ name: "Data Contract", version: "1.0.0", status: "Disponible", description: "Contrato universal y sanitizado de datos." }),
-  Object.freeze({ name: "Broadcast State", version: "1.0.0", status: "Disponible", description: "Estado central de Preview, Program, layers y queue." }),
-  Object.freeze({ name: "Output Engine", version: "1.0.0", status: "Disponible", description: "Proyecciones y salidas universales en memoria." }),
-  Object.freeze({ name: "Asset Manager", version: "1.0.0", status: "Disponible", description: "Catálogo y resolución controlada de recursos." }),
-  Object.freeze({ name: "Playground", version: "V1", status: "Disponible", description: "Entorno visual de pruebas con fixtures." }),
-  Object.freeze({ name: "Production Console", version: "V1", status: "Disponible", description: "Control Center seguro con fixtures locales." })
-]);
 const APP_MODE = window.CHARROPRO_APP_MODE === "tournament" ? "tournament" : "portal";
 const IS_TOURNAMENT_APP = APP_MODE === "tournament";
 const scoringScrollSelectors = [".score-workspace", ".scoring-main", ".turn-panel", ".suertes-strip", ".scoring-shell", ".cp-scoring-shell"];
@@ -6529,31 +6512,16 @@ function renderProductionNav() {
         <div class="production-nav-copy">
           <div class="production-nav-title-row">
             <h2>Broadcast Studio</h2>
-            <span class="pill amber">V2 en desarrollo</span>
+            <span class="pill green">Operativo</span>
           </div>
           <p class="production-nav-subtitle">Centro de producción y gráficos en vivo</p>
-          <p>Controla Preview, Program, salidas, gráficos, capas y herramientas de prueba desde una interfaz dedicada.</p>
+          <p>Acceso oficial al Workspace de operación Broadcast.</p>
         </div>
       </header>
 
       <div class="production-nav-grid">
         ${Object.values(PRODUCTION_NAV_TARGETS).map(renderProductionCard).join("")}
       </div>
-
-      <section class="production-module-list" aria-labelledby="production-module-list-title">
-        <div class="production-module-list-header">
-          <div>
-            <h3 id="production-module-list-title">Estado general de Broadcast Studio</h3>
-            <p>Catálogo declarativo de módulos disponibles en esta versión.</p>
-          </div>
-          <span class="production-status is-available">Disponible</span>
-        </div>
-        <div class="production-module-list-body">
-          ${PRODUCTION_NAV_MODULES.map(renderProductionModuleStatus).join("")}
-        </div>
-      </section>
-
-      <p class="production-nav-note">Sin conexión real a OBS ni persistencia definitiva de Program.</p>
     </section>
   `;
 }
@@ -6591,21 +6559,6 @@ function renderProductionCard(target = {}) {
   `;
 }
 
-function renderProductionModuleStatus(module = {}) {
-  return html`
-    <article class="production-module-row">
-      <div>
-        <strong>${escapeHTML(module.name || "Módulo")}</strong>
-        <p>${escapeHTML(module.description || "")}</p>
-      </div>
-      <div class="production-module-meta">
-        <span>${escapeHTML(module.version || "—")}</span>
-        <span class="production-status is-available">${escapeHTML(module.status || "Pendiente")}</span>
-      </div>
-    </article>
-  `;
-}
-
 function renderProductionQuickLinks() {
   if (!canAccessProductionRole()) return "";
 
@@ -6619,8 +6572,7 @@ function renderProductionQuickLinks() {
         <button class="button small" data-view="${PRODUCTION_NAV_VIEW}">Ver Producción</button>
       </div>
       <div class="card-body production-quick-links-actions">
-        <button class="button primary" data-action="open-production-target" data-production-target="console">Consola de Producción</button>
-        <button class="button" data-action="open-production-target" data-production-target="playground">Playground</button>
+        <button class="button primary" data-action="open-production-target" data-production-target="studio">Abrir Broadcast Studio</button>
       </div>
     </article>
   `;

@@ -87,9 +87,11 @@ const sourceCode = await readFile(new URL("../js/broadcast/broadcastAccessHub.js
 for (const text of ["Consola de Producción", "Playground de Broadcast", "Program Main Output", "Announcer Monitor", "Browser Output Lab", "Portal de Jueces", "Portal de Supervisión"]) {
   assert.ok(sourceCode.includes(text), `missing access ${text}`);
 }
-assert.match(html, /20260716-broadcast-context-resolution-001-real-context-v1/);
-assert.match(css, /@media \(max-width: 900px\)/);
-assert.match(css, /@media \(max-width: 620px\)/);
+assert.match(html, /20260717-broadcast-studio-workspace-001-operator-workspace-v1/);
+assert.match(html, /broadcastStudioWorkspace\.js/);
+assert.match(css, /@media \(max-width: 1180px\)/);
+assert.match(css, /@media \(max-width: 820px\)/);
+assert.match(css, /@media \(max-width: 560px\)/);
 assert.doesNotMatch(sourceCode, /WebSocket|BroadcastChannel|EventSource|setInterval|fetch\s*\(|localStorage|sessionStorage|indexedDB|postMessage/);
 assert.doesNotMatch(sourceCode, /innerHTML|insertAdjacentHTML|document\.write|eval\s*\(|new Function/);
 

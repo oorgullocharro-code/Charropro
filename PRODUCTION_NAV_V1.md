@@ -2,7 +2,7 @@
 
 ## Propósito
 
-`PRODUCTION-NAV-001` integra Broadcast Studio en la navegación oficial de CharroPro sin incrustar ni modificar sus herramientas. La sección `production` funciona como punto de acceso y diagnóstico de solo lectura.
+`PRODUCTION-NAV-001` integra Broadcast Studio en la navegación oficial de CharroPro. Desde `BROADCAST-STUDIO-WORKSPACE-001`, la sección `production` funciona como punto de acceso directo a la aplicación operativa oficial.
 
 Versión de aplicación:
 
@@ -16,8 +16,7 @@ La integración agrega:
 
 - una opción `Producción` en la navegación principal y en el menú del torneo;
 - una vista `Broadcast Studio` dentro de CharroPro;
-- tarjetas para Consola de Producción y Broadcast Playground;
-- un catálogo declarativo del estado de los módulos Broadcast;
+- una tarjeta única para el Workspace oficial;
 - accesos rápidos desde `Conexión`;
 - validación central de roles y rutas internas.
 
@@ -37,16 +36,15 @@ Puede abrirse con la navegación de CharroPro o mediante:
 index.html?view=production
 ```
 
-La vista no abre automáticamente ninguna herramienta. Muestra el estado conocido de la versión instalada y permite elegir el destino.
+La vista presenta un único destino operativo y evita exponer herramientas técnicas al operador.
 
 ## Tarjetas y rutas
 
 | Tarjeta | Ruta interna autorizada | Estado mostrado |
 | --- | --- | --- |
-| Consola de Producción | `production-console.html` | Disponible — V1 operativa con fixtures |
-| Playground de Broadcast | `broadcast-playground.html` | Disponible — Entorno de pruebas |
+| Broadcast Studio | `broadcast-studio.html` | Disponible — Producción en tiempo real |
 
-Las páginas permanecen independientes. No se cargan en `iframe` ni se incorporan dentro de `index.html`.
+El Workspace permanece como aplicación independiente. No se carga en `iframe` ni se incorpora dentro de `index.html`.
 
 Cada tarjeta permite:
 
@@ -56,7 +54,7 @@ Cada tarjeta permite:
 
 ## Acceso rápido desde Conexión
 
-`Conexión` contiene una tarjeta compacta `Broadcast Studio` con accesos a Consola y Playground. La tarjeta no duplica el catálogo ni la vista completa y solo aparece cuando el rol tiene acceso a producción.
+`Conexión` contiene una tarjeta compacta `Broadcast Studio` con un acceso directo al Workspace. La tarjeta no duplica el catálogo y solo aparece cuando el rol tiene acceso a producción.
 
 ## Roles
 
@@ -79,19 +77,9 @@ Bloqueados:
 
 La comprobación se aplica al menú, a la vista directa y a las acciones de abrir/copiar.
 
-## Estado de módulos
+## Workspace oficial
 
-La vista presenta un catálogo declarativo local:
-
-- Arquitectura maestra;
-- Data Contract 1.0.0;
-- Broadcast State 1.0.0;
-- Output Engine 1.0.0;
-- Asset Manager 1.0.0;
-- Playground V1;
-- Production Console V1.
-
-No se consulta Firebase, archivos Markdown ni endpoints de salud. El catálogo expresa disponibilidad conocida por versión y no inventa conectividad.
+La navegación ya no presenta contratos, módulos, revisiones, Console o Playground como decisiones operativas. Esas herramientas técnicas permanecen en el repositorio, pero el operador entra directamente al catálogo profesional, Preview, Program y botonera de Broadcast Studio.
 
 ## Seguridad
 
@@ -113,9 +101,9 @@ Las tarjetas usan rejillas fluidas `minmax(0, 1fr)`. A 980 px pasan a una column
 
 ## Compatibilidad
 
-La integración es aditiva. Conserva sin cambios:
+La integración conserva sin cambios:
 
-- Production Console y Playground;
+- Production Console y Playground como herramientas técnicas heredadas;
 - Data Contract, State, Output y Asset Manager;
 - gráficos y OBS V1;
 - enlaces existentes de Conexión;
@@ -124,10 +112,8 @@ La integración es aditiva. Conserva sin cambios:
 
 ## Limitaciones
 
-- Production Console sigue siendo una página independiente con fixtures.
-- Playground sigue siendo una página independiente de pruebas.
+- Production Console y Playground no forman parte de la vista operativa principal.
 - La sección no controla OBS.
-- No existe persistencia definitiva de Program.
 - No es Action Engine.
 - No agrega permisos reales nuevos.
 - La disponibilidad es declarativa y no comprueba archivos mediante red.

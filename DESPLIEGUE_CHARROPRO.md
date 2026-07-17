@@ -620,3 +620,15 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - Jueces y Supervisión permanecen intactos.
 - Esta fase no usa Firebase, WebSocket, polling, BroadcastChannel, NDI ni transporte entre pestañas o computadoras.
 - Versión: `20260715-broadcast-access-and-sync-001-local-output-sync-v1`.
+
+# BROADCAST-STUDIO-WORKSPACE-001 — Workspace oficial de producción
+
+- Versión de la interfaz: `20260717-broadcast-studio-workspace-001-operator-workspace-v1`.
+- `broadcast-studio.html` deja de ser un directorio de módulos y se convierte en la aplicación operativa de Broadcast Studio.
+- El Workspace integra un catálogo de 15 gráficos, búsqueda, filtros, Preview, Program y botonera Prepare/Take/Cut/Auto/Limpiar en una sola pantalla.
+- El catálogo delega en Template Engine y Theme Engine; Preview y Program usan exclusivamente sus motores oficiales existentes.
+- La columna Program monta Program Main Output dentro del Workspace y recibe la proyección resuelta por Output Routing. No se creó renderer alterno.
+- El contexto se conecta mediante el transporte Realtime certificado y solo habilita operación cuando existe contrato oficial del torneo activo.
+- La vista del operador oculta contratos, snapshots, IDs, revisiones, bindings, variables, rutas y detalles Firebase; Production Console y Playground permanecen disponibles únicamente como herramientas técnicas heredadas.
+- El acceso principal de Producción ahora abre directamente `broadcast-studio.html`.
+- Cronómetro permanece como placeholder deshabilitado; siguen fuera de alcance NDI, OBS, vMix, Wirecast, editor visual, capas manuales, timeline y macros.
