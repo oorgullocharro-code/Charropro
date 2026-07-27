@@ -288,15 +288,24 @@ export function applyBrowserOutputProjection(instance, projection, options = {})
   });
   if (!validation.valid) throw browserOutputError(validation.code || "browser-output-projection-invalid", { errors: validation.errors });
   const normalized = normalizeProjectionEnvelope(projection, { visibility: validation.visibility });
-  assertProjectionRevisionOrder(instance, runtime, normalized);
+  const revisionBaselineReset = (
+    options.allowProgramRevisionBaselineReset === true
+    && canResetProgramRevisionBaseline(instance, runtime, normalized)
+  ) || (
+    options.allowAnnouncerRevisionBaselineReset === true
+    && canResetAnnouncerRevisionBaseline(instance, runtime, normalized)
+  );
   const fingerprint = stableFingerprint(normalized);
-  if (instance.routeRevision === normalized.routeRevision && instance.sourceRevision === normalized.sourceRevision) {
+  if (!revisionBaselineReset
+    && instance.routeRevision === normalized.routeRevision
+    && instance.sourceRevision === normalized.sourceRevision) {
     if (runtime.lastFingerprint === fingerprint) return getBrowserOutput(instance);
     throw browserOutputError("browser-output-revision-conflict", {
       routeRevision: normalized.routeRevision,
       sourceRevision: normalized.sourceRevision
     });
   }
+  assertProjectionRevisionOrder(instance, runtime, normalized, revisionBaselineReset);
 
   const now = normalizeNow(options.now || normalized.resolvedAt);
   const nextStatus = resolveProjectionState(normalized);
@@ -695,7 +704,17 @@ function normalizeProjectionEnvelope(projection, options = {}) {
   };
 }
 
-function assertProjectionRevisionOrder(instance, runtime, projection) {
+function assertProjectionRevisionOrder(instance, runtime, projection, revisionBaselineReset = false) {
+  const currentProgramId = normalizeNullableId(runtime.currentEnvelope?.projection?.programId);
+  const nextProgramId = normalizeNullableId(projection?.projection?.programId);
+  if (runtime.currentEnvelope && currentProgramId !== nextProgramId) {
+    const currentTime = Date.parse(runtime.currentEnvelope.resolvedAt || "");
+    const nextTime = Date.parse(projection.resolvedAt || "");
+    if (Number.isFinite(currentTime) && Number.isFinite(nextTime) && nextTime < currentTime) {
+      throw browserOutputError("browser-output-revision-regression", { field: "resolvedAt" });
+    }
+  }
+  if (revisionBaselineReset) return;
   if (instance.routeRevision !== null && projection.routeRevision < instance.routeRevision) {
     throw browserOutputError("browser-output-revision-regression", { field: "routeRevision" });
   }
@@ -706,6 +725,28 @@ function assertProjectionRevisionOrder(instance, runtime, projection) {
     && projection.sourceRevision !== instance.sourceRevision) {
     throw browserOutputError("browser-output-revision-conflict", { field: "sourceRevision" });
   }
+}
+
+function canResetProgramRevisionBaseline(instance, runtime, projection) {
+  if (!runtime.currentEnvelope || projection.routeType !== "program_main") return false;
+  const currentProgramId = normalizeNullableId(runtime.currentEnvelope?.projection?.programId);
+  const nextProgramId = normalizeNullableId(projection?.projection?.programId);
+  if (currentProgramId === nextProgramId) return false;
+  const routeDidNotAdvance = instance.routeRevision !== null && projection.routeRevision <= instance.routeRevision;
+  const sourceDidNotAdvance = instance.sourceRevision !== null && projection.sourceRevision <= instance.sourceRevision;
+  if (!routeDidNotAdvance && !sourceDidNotAdvance) return false;
+  const currentTime = Date.parse(runtime.currentEnvelope.resolvedAt || "");
+  const nextTime = Date.parse(projection.resolvedAt || "");
+  return Number.isFinite(currentTime) && Number.isFinite(nextTime) && nextTime > currentTime;
+}
+
+function canResetAnnouncerRevisionBaseline(instance, runtime, projection) {
+  if (!runtime.currentEnvelope || projection.routeType !== "announcer_monitor") return false;
+  if (instance.routeRevision === null || instance.sourceRevision === null) return false;
+  if (projection.routeRevision >= instance.routeRevision || projection.sourceRevision < instance.sourceRevision) return false;
+  const currentTime = Date.parse(runtime.currentEnvelope.resolvedAt || "");
+  const nextTime = Date.parse(projection.resolvedAt || "");
+  return Number.isFinite(currentTime) && Number.isFinite(nextTime) && nextTime > currentTime;
 }
 
 function resolveProjectionState(envelope) {

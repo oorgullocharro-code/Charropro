@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260716-broadcast-workspace-context-bridge-001-auto-context-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -42,7 +42,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260713-asset-manager-001-assets-v1";
+} from "./core/sync.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,

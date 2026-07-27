@@ -291,9 +291,12 @@ export function updateAnnouncerMonitor(instance, envelope, options = {}) {
     throw monitorError(validation.code || ANNOUNCER_MONITOR_ERROR_CODES.INVALID_PROJECTION, { errors: validation.errors });
   }
   const normalized = normalizeEnvelope(envelope, validation.visibility);
-  assertRevisionOrder(instance, runtime, normalized);
-  const fingerprint = stableFingerprint(normalized);
-  if (instance.routeRevision === normalized.routeRevision && instance.sourceRevision === normalized.sourceRevision) {
+  const revisionBaselineReset = canResetAnnouncerRevisionBaseline(instance, runtime, normalized);
+  assertRevisionOrder(instance, runtime, normalized, revisionBaselineReset);
+  const fingerprint = revisionFingerprint(normalized);
+  if (!revisionBaselineReset
+    && instance.routeRevision === normalized.routeRevision
+    && instance.sourceRevision === normalized.sourceRevision) {
     if (runtime.lastFingerprint === fingerprint) return getAnnouncerMonitor(instance);
     throw monitorError(ANNOUNCER_MONITOR_ERROR_CODES.REVISION_CONFLICT, {
       routeRevision: normalized.routeRevision,
@@ -314,7 +317,8 @@ export function updateAnnouncerMonitor(instance, envelope, options = {}) {
     applyBrowserOutputProjection(runtime.browserOutput, browserCompatibleEnvelope(normalized), {
       now,
       visibility: validation.visibility,
-      context: options.context
+      context: options.context,
+      allowAnnouncerRevisionBaselineReset: revisionBaselineReset
     });
     runtime.currentEnvelope = freezeDeep(cloneAnnouncerSnapshot(normalized));
     runtime.currentProjection = nextProjection ? freezeDeep(cloneAnnouncerSnapshot(nextProjection)) : null;
@@ -1332,6 +1336,9 @@ function applyRootAttributes(instance, runtime) {
   safeAttribute(runtime.root, "data-video-region-status", instance.videoRegionStatus);
   safeAttribute(runtime.root, "data-video-connected", "false");
   safeAttribute(runtime.root, "data-video-muted", "true");
+  safeAttribute(runtime.root, "data-projection-revision", String(instance.projectionRevision));
+  safeAttribute(runtime.root, "data-route-revision", instance.routeRevision === null ? "" : String(instance.routeRevision));
+  safeAttribute(runtime.root, "data-source-revision", instance.sourceRevision === null ? "" : String(instance.sourceRevision));
   safeAttribute(runtime.root, "data-debug", runtime.debug ? "true" : "false");
   if (runtime.root.style?.setProperty) runtime.root.style.setProperty("--announcer-text-scale", String(runtime.textScale));
 }
@@ -1411,7 +1418,8 @@ function summarizeContext(value) {
   };
 }
 
-function assertRevisionOrder(instance, runtime, envelope) {
+function assertRevisionOrder(instance, runtime, envelope, revisionBaselineReset = false) {
+  if (revisionBaselineReset) return;
   if (instance.routeRevision !== null && envelope.routeRevision < instance.routeRevision) {
     throw monitorError(ANNOUNCER_MONITOR_ERROR_CODES.REVISION_REGRESSION, { field: "routeRevision" });
   }
@@ -1421,6 +1429,14 @@ function assertRevisionOrder(instance, runtime, envelope) {
   if (runtime.currentEnvelope && envelope.routeRevision === instance.routeRevision && envelope.sourceRevision !== instance.sourceRevision) {
     throw monitorError(ANNOUNCER_MONITOR_ERROR_CODES.REVISION_CONFLICT, { field: "sourceRevision" });
   }
+}
+
+function canResetAnnouncerRevisionBaseline(instance, runtime, envelope) {
+  if (!runtime.currentEnvelope || instance.routeRevision === null || instance.sourceRevision === null) return false;
+  if (envelope.routeRevision >= instance.routeRevision || envelope.sourceRevision < instance.sourceRevision) return false;
+  const currentTime = Date.parse(runtime.currentEnvelope.resolvedAt || "");
+  const nextTime = Date.parse(envelope.resolvedAt || "");
+  return Number.isFinite(currentTime) && Number.isFinite(nextTime) && nextTime > currentTime;
 }
 
 function validateContextTransition(previous, next) {
@@ -1551,6 +1567,11 @@ function sanitizeVisibleText(value) {
 
 function stableFingerprint(value) {
   return JSON.stringify(sortValue(value));
+}
+
+function revisionFingerprint(envelope) {
+  const { resolvedAt: _resolvedAt, ...revisionPayload } = envelope;
+  return stableFingerprint(revisionPayload);
 }
 
 function sortValue(value) {

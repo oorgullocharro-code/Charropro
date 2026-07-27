@@ -15,6 +15,7 @@ import {
   preparePreview,
   renderPreview,
   updatePreview,
+  updatePreviewLiveData,
   validatePreview
 } from "../js/broadcast/previewEngine.js";
 
@@ -82,6 +83,12 @@ function themedPreparation(sourceRender, overrides = {}) {
         rows: [["Rancheros de Tijuana", 203], ["Charros de Jalisco", 202], ["Tres Regalos", 201]],
         alignments: ["left", "right"]
       },
+      bindings: [{
+        bindingId: "live-ranking",
+        source: "broadcast_contract",
+        path: "ranking.entries",
+        target: "properties.rows"
+      }],
       metadata: { layerId: "scoreboard" }
     },
     resolvedBindings: {
@@ -179,6 +186,24 @@ function harness() {
         ...(state.resultUpdatedAt ? { updatedAt: state.resultUpdatedAt } : {}),
         preparation: state.preparation,
         root
+      };
+    },
+    updateLive(active, contract) {
+      const preparation = structuredClone(state.preparation);
+      preparation.components[0].resolvedBindings["properties.rows"] = structuredClone(contract.ranking.entries);
+      state.preparation = preparation;
+      return {
+        themedRenderId: active.themeRenderId,
+        templateRenderId: active.templateRenderId,
+        templateId: active.templateId,
+        templateInstanceId: active.templateInstanceId,
+        themeId: active.themeId,
+        outputId: active.outputId,
+        visibility: active.visibility,
+        state: "rendered",
+        status: "rendered",
+        preparation,
+        root: state.roots[0]
       };
     },
     clear() {
@@ -299,6 +324,35 @@ assert.equal(cleared.state, "ready");
 assert.equal(hasPreview(engine), false);
 assert.equal(fixture.state.roots.length, 0);
 assert.equal(getPreviewSnapshot(engine, { now: T3 }).preview, null);
+
+const liveFixture = harness();
+const liveEngine = createPreviewEngine({ engineId: "official_preview_live", adapter: liveFixture.adapter, now: T0 });
+preparePreview(liveEngine, snapshot(), { now: T0 });
+const liveBefore = renderPreview(liveEngine, { now: T1 });
+const liveGeometry = structuredClone(liveBefore.components[0].geometry);
+const liveContract = {
+  revision: 10,
+  ranking: { entries: [{ position: 1, teamId: "team_tijuana", name: "Rancheros de Tijuana", total: 25 }] },
+  score: { total: 25 },
+  turn: { team: { id: "team_tijuana", name: "Rancheros de Tijuana" } }
+};
+const liveUpdated = updatePreviewLiveData(liveEngine, liveContract, { now: T2 });
+assert.equal(liveUpdated.previewId, liveBefore.previewId);
+assert.equal(liveUpdated.templateId, liveBefore.templateId);
+assert.equal(liveUpdated.themeId, liveBefore.themeId);
+assert.equal(liveUpdated.revision, liveBefore.revision + 1);
+assert.equal(liveUpdated.components[0].data["properties.rows"][0].total, 25);
+assert.equal(JSON.stringify(liveUpdated.components[0].geometry), JSON.stringify(liveGeometry));
+assert.equal(updatePreviewLiveData(liveEngine, structuredClone(liveContract), { now: T3 }).revision, liveUpdated.revision);
+assert.throws(
+  () => updatePreviewLiveData(liveEngine, { ...liveContract, score: { total: 33 } }, { now: T3 }),
+  (error) => error.code === "preview-live-revision-conflict"
+);
+assert.throws(
+  () => updatePreviewLiveData(liveEngine, { ...liveContract, revision: 9 }, { now: T3 }),
+  (error) => error.code === "preview-live-revision-regression"
+);
+destroyPreviewEngine(liveEngine, { now: T3 });
 
 // Dispose clears only Preview and leaves the engine reusable.
 preparePreview(engine, snapshot(), { now: T3 });

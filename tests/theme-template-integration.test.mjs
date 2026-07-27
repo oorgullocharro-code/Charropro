@@ -18,6 +18,7 @@ import {
   removeThemedTemplateRender,
   renderThemedTemplate,
   resolveThemeForTemplate,
+  updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateIntegrationContext,
   validateThemeTemplateSnapshot
@@ -356,6 +357,30 @@ for (const type of TEMPLATE_ENGINE_FIXTURE_TYPES) {
   assert.equal(changed.root, render.root, type);
   assert.equal(changed.root.textContent, renderedText, type);
   assert.equal(changed.root.parentNode.children.filter((node) => node.classList.contains("cp-template-render-root")).length, 1, type);
+  if (type === "ranking") {
+    const liveEntries = [
+      { position: 1, name: "Equipo actualizado", total: 33 },
+      { position: 2, name: "Equipo siguiente", total: 25 }
+    ];
+    const liveResult = updateThemedTemplateLiveData(
+      fixtureIntegration,
+      render.themedRenderId,
+      { revision: 1, ranking: { entries: liveEntries } },
+      { includeRoot: true, now: T1 }
+    );
+    assert.equal(liveResult.themeId, "theme_dark");
+    assert.equal(liveResult.templateId, changed.templateId);
+    assert.equal(liveResult.root, render.root);
+    assert.deepEqual(liveResult.preparation.components[0].resolvedBindings["properties.entries"], liveEntries);
+    assert.match(liveResult.root.textContent, /Equipo actualizado/);
+    const detachedPreparation = structuredClone(liveResult.preparation);
+    liveResult.preparation.components[0].resolvedBindings["properties.entries"][0].total = 999;
+    assert.deepEqual(
+      getThemedTemplateRender(fixtureIntegration, render.themedRenderId).preparation,
+      detachedPreparation,
+      "public live preparation remains detached"
+    );
+  }
   const fixtureSnapshot = buildThemeTemplateSnapshot(fixtureIntegration, render.themedRenderId, {
     visibility: "production",
     now: T1

@@ -5,6 +5,7 @@ import {
   getPreviewSnapshot,
   preparePreview,
   renderPreview,
+  updatePreviewLiveData,
   updatePreview
 } from "../js/broadcast/previewEngine.js";
 import {
@@ -14,7 +15,8 @@ import {
   getProgram,
   getProgramSnapshot,
   prepareProgram,
-  takeProgram
+  takeProgram,
+  updateProgramLiveData
 } from "../js/broadcast/programEngine.js";
 import {
   createOutputRoute,
@@ -27,7 +29,7 @@ import {
   createThemeTemplateIntegration,
   destroyThemeTemplateIntegration,
   getThemedTemplateRender
-} from "../js/broadcast/themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
+} from "../js/broadcast/themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   createTemplateRendererIntegration,
   destroyTemplateRendererIntegration,
@@ -339,7 +341,15 @@ function buildRealBasePreparation(teams, suffix) {
   template.components = teams.map((team, index) => ({
     ...structuredClone(row),
     instanceId: `real_score_row_${suffix}_${team.id}`,
-    bindings: [],
+    bindings: index === 0 ? [{
+      bindingId: `live_score_${suffix}`,
+      target: "properties.value",
+      source: "broadcast_contract",
+      path: "score.total",
+      fallback: team.total,
+      required: false,
+      visibility: "production"
+    }] : [],
     properties: { label: team.name, value: team.total },
     layout: {
       ...row.layout,
@@ -376,7 +386,11 @@ function buildRealBasePreparation(teams, suffix) {
     teams: teams.map((team) => ({ ...team }))
   };
   base.components.forEach((component, index) => {
-    component.resolvedBindings = { team: { ...teams[index] }, position: index + 1 };
+    component.resolvedBindings = {
+      team: { ...teams[index] },
+      position: index + 1,
+      ...(index === 0 ? { "properties.value": teams[index].total } : {})
+    };
     component.resolvedContent = {
       name: teams[index].name,
       score: teams[index].total,
@@ -740,6 +754,122 @@ function runRealThemeProjection(teams, suffix) {
   assert.equal(routedB.projection.components.length, teams.length);
   assert.deepEqual(routedB.projection.components.map((component) => component.data.team.name), teams.map((team) => team.name));
 
+  const livePreviewId = previewB.previewId;
+  const liveProgramId = programs.take.result.programId;
+  const liveTemplateId = programs.take.result.templateId;
+  const liveThemeId = programs.take.result.themeId;
+  const liveGeometry = structuredClone(programs.take.result.components[0].geometry);
+  let previousPreviewRevision = previewB.revision;
+  let previousProgramRevision = programs.take.result.revision;
+  let liveRouted = routedB;
+  for (const [index, total] of [0, 10, 25, 33].entries()) {
+    const contract = {
+      revision: 10 + index,
+      score: {
+        id: `score_live_${index}`,
+        total,
+        teamId: "team_jalisco",
+        teamName: "Charros de Jalisco",
+        published: true
+      },
+      ranking: {
+        entries: teams.map((team, teamIndex) => ({
+          position: teamIndex + 1,
+          teamId: team.id,
+          name: team.name,
+          total: teamIndex === 0 ? total : team.total
+        }))
+      },
+      competition: {
+        id: "competition_teams",
+        type: "equipos_completo",
+        scope: "team"
+      },
+      team: {
+        id: "team_tijuana",
+        name: "Rancheros de Tijuana"
+      },
+      production: {
+        currentTurnId: "team_tijuana",
+        currentTurnName: "Rancheros de Tijuana",
+        updatedAt: `2026-07-27T12:00:0${index}.000Z`
+      },
+      timer: { revision: 10 + index, status: "running", display: `00:0${index}.0`, elapsed: index * 1000 }
+    };
+    const livePreview = updatePreviewLiveData(realPreviewEngine, contract, { now: T4 });
+    const liveProgram = updateProgramLiveData(programs.take.engine, contract, { now: T4 });
+    assert.equal(livePreview.previewId, livePreviewId);
+    assert.equal(liveProgram.programId, liveProgramId);
+    assert.equal(liveProgram.templateId, liveTemplateId);
+    assert.equal(liveProgram.themeId, liveThemeId);
+    assert.equal(livePreview.revision, previousPreviewRevision + 1);
+    assert.equal(liveProgram.revision, previousProgramRevision + 1);
+    assert.equal(livePreview.components[0].data["properties.value"], total);
+    assert.equal(liveProgram.components[0].data["properties.value"], total);
+    assert.equal(JSON.stringify(liveProgram.components[0].geometry), JSON.stringify(liveGeometry));
+    assert.equal(liveProgram.composition.data.turn.team.name, "Rancheros de Tijuana");
+    assert.equal(liveProgram.components.length, teams.length);
+    liveRouted = routeProgramToOutput(
+      routing,
+      `route_program_real_${suffix}`,
+      getProgramSnapshot(programs.take.engine, { visibility: "production", now: T4 }),
+      { now: T4, context: REAL_CONTEXT }
+    );
+    assert.equal(liveRouted.projection.programId, liveProgramId);
+    assert.equal(liveRouted.projection.components[0].data["properties.value"], total);
+    assert.equal(JSON.stringify(liveRouted.projection.components[0].geometry), JSON.stringify(liveGeometry));
+    assert.equal(liveRouted.projection.composition.data.turn.team.name, "Rancheros de Tijuana");
+    previousPreviewRevision = livePreview.revision;
+    previousProgramRevision = liveProgram.revision;
+  }
+  const previewBeforeTimestampOnly = getPreview(realPreviewEngine);
+  const programBeforeTimestampOnly = getProgram(programs.take.engine);
+  const timestampOnly = {
+    revision: 14,
+    score: {
+      id: "score_live_3",
+      total: 33,
+      teamId: "team_jalisco",
+      teamName: "Charros de Jalisco",
+      published: true
+    },
+    ranking: {
+      entries: teams.map((team, teamIndex) => ({
+        position: teamIndex + 1,
+        teamId: team.id,
+        name: team.name,
+        total: teamIndex === 0 ? 33 : team.total
+      }))
+    },
+    competition: {
+      id: "competition_teams",
+      type: "equipos_completo",
+      scope: "team"
+    },
+    team: {
+      id: "team_tijuana",
+      name: "Rancheros de Tijuana"
+    },
+    production: {
+      currentTurnId: "team_tijuana",
+      currentTurnName: "Rancheros de Tijuana",
+      updatedAt: "2026-07-27T12:00:59.000Z"
+    },
+    timer: { revision: 13, status: "running", display: "00:03.0", elapsed: 3000 }
+  };
+  assert.equal(updatePreviewLiveData(realPreviewEngine, timestampOnly, { now: T4 }).revision, previewBeforeTimestampOnly.revision);
+  assert.equal(updateProgramLiveData(programs.take.engine, timestampOnly, { now: T4 }).revision, programBeforeTimestampOnly.revision);
+  const previewBeforeStructuralContract = getPreview(realPreviewEngine);
+  const programBeforeStructuralContract = getProgram(programs.take.engine);
+  const structuralOnly = {
+    revision: 15,
+    template: { id: "template_not_live" },
+    theme: { id: "theme_not_live" }
+  };
+  assert.equal(updatePreviewLiveData(realPreviewEngine, structuralOnly, { now: T4 }).revision, previewBeforeStructuralContract.revision);
+  assert.equal(updateProgramLiveData(programs.take.engine, structuralOnly, { now: T4 }).revision, programBeforeStructuralContract.revision);
+  assert.equal(liveRouted.projection.components.length, teams.length);
+
   if (teams.length === 3) {
     assert.equal(previewB.composition.data.turn.team.name, "Rancheros de Tijuana");
     assert.equal(previewB.composition.data.lastScoredTeam.name, "Charros de Jalisco");
@@ -748,7 +878,7 @@ function runRealThemeProjection(teams, suffix) {
     assert.equal(programs.take.result.components.find((component) => component.data.team.name === "Charros de Jalisco").properties.value, 202);
   }
 
-  const programBeforePreviewChange = structuredClone(programs.take.result);
+  const programBeforePreviewChange = structuredClone(getProgram(programs.take.engine));
   updatePreview(realPreviewEngine, { themeId: "theme_dark" }, { now: T4 });
   assert.equal(getPreview(realPreviewEngine).themeId, "theme_dark");
   assert.equal(JSON.stringify(getProgram(programs.take.engine)), JSON.stringify(programBeforePreviewChange));

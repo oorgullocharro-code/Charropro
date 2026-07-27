@@ -1,4 +1,4 @@
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260708-recovery-001b-panel-status1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 window.CHARROPRO_APP_MODE = "tournament";
 

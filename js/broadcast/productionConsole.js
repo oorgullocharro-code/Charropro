@@ -135,7 +135,7 @@ import {
   resolveThemeForTemplate,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
+} from "./themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   PREVIEW_ENGINE_VERSION,
   clearPreview as clearOfficialPreview,
@@ -145,8 +145,9 @@ import {
   getPreviewState,
   preparePreview as prepareOfficialPreview,
   renderPreview as renderOfficialPreview,
+  updatePreviewLiveData as updateOfficialPreviewLiveData,
   updatePreview as updateOfficialPreview
-} from "./previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
+} from "./previewEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   PROGRAM_ENGINE_VERSION,
   autoProgram as autoOfficialProgram,
@@ -159,9 +160,10 @@ import {
   isProgramDestroyed,
   prepareProgram as prepareOfficialProgram,
   takeProgram as takeOfficialProgram,
+  updateProgramLiveData as updateOfficialProgramLiveData,
   updateProgram as updateOfficialProgram,
   validateProgram
-} from "./programEngine.js?v=20260715-program-engine-001-official-program-v1";
+} from "./programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   OUTPUT_ROUTING_VERSION,
   buildOutputRoutingSnapshot,
@@ -181,21 +183,21 @@ import {
   routeTimerDisplay,
   updateOutputRoute,
   validateOutputRoutingSnapshot
-} from "./outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
+} from "./outputRouting.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   destroyProgramMainOutput,
   mountProgramMainOutput
-} from "./programMainOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+} from "./programMainOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   configureAnnouncerMonitor,
   createAnnouncerMonitor,
   destroyAnnouncerMonitor,
   getAnnouncerSnapshot,
   mountAnnouncerMonitor
-} from "./announcerMonitor.js?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
+} from "./announcerMonitor.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   OUTPUT_SYNCHRONIZATION_VERSION,
   buildOutputSynchronizationSnapshot,
@@ -211,7 +213,7 @@ import {
   synchronizeAnnouncerMonitor,
   synchronizeProgramMain,
   validateOutputSynchronizationSnapshot
-} from "./outputSynchronization.js?v=20260715-broadcast-access-and-sync-001-local-output-sync-v1";
+} from "./outputSynchronization.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   BROADCAST_REALTIME_TRANSPORT_VERSION,
   buildBroadcastRealtimeSnapshot,
@@ -230,11 +232,11 @@ import {
   destroyLiveBindingsEngine,
   registerLiveBinding,
   resolveLiveBindings
-} from "./liveBindings.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
+} from "./liveBindings.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
-export const PRODUCTION_CONSOLE_APP_VERSION = "20260716-broadcast-context-resolution-001-real-context-v1";
+export const PRODUCTION_CONSOLE_APP_VERSION = "20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const PRODUCTION_CONSOLE_OUTPUT_ROUTES = Object.freeze([
   Object.freeze({ routeId: "route-program-main", routeType: "program_main", outputId: "program-main", sourceType: "program_snapshot", visibility: "public", name: "Program Main" }),
@@ -1477,6 +1479,12 @@ export function updateProductionConsoleOfficialPreview(model, engine, options = 
   return officialPreviewModelResult(model, engine, preview, "official-preview-updated", options);
 }
 
+export function updateProductionConsoleOfficialPreviewLiveData(model, engine, contract, options = {}) {
+  assertModel(model);
+  const preview = updateOfficialPreviewLiveData(engine, contract, { now: options.now });
+  return officialPreviewModelResult(model, engine, preview, "official-preview-live-updated", options);
+}
+
 export function clearProductionConsoleOfficialPreview(model, engine, preparationStore = {}, options = {}) {
   assertModel(model);
   clearOfficialPreview(engine, { now: options.now });
@@ -1570,6 +1578,12 @@ export function updateProductionConsoleOfficialProgram(model, programEngine, pre
     now: options.now
   });
   return officialProgramModelResult(model, programEngine, program, "official-program-updated", options);
+}
+
+export function updateProductionConsoleOfficialProgramLiveData(model, programEngine, contract, options = {}) {
+  assertModel(model);
+  const program = updateOfficialProgramLiveData(programEngine, contract, { now: options.now });
+  return officialProgramModelResult(model, programEngine, program, "official-program-live-updated", options);
 }
 
 export function clearProductionConsoleOfficialProgram(model, engine, options = {}) {
@@ -2048,10 +2062,9 @@ export function applyProductionConsoleRealtimeContract(model, runtime, contract,
     throw consoleError("console-realtime-charreada-conflict");
   }
 
-  if (runtime.liveBindingsEngine && runtime.liveBindingsEngine.status !== "destroyed") {
-    destroyLiveBindingsEngine(runtime.liveBindingsEngine, { now: options.now });
+  if (!runtime.liveBindingsEngine || runtime.liveBindingsEngine.status === "destroyed") {
+    runtime.liveBindingsEngine = createProductionConsoleLiveBindingsEngine(options);
   }
-  runtime.liveBindingsEngine = createProductionConsoleLiveBindingsEngine(options);
   const resolution = resolveLiveBindings(runtime.liveBindingsEngine, liveSourceContract, { now: options.now });
   const liveContract = applyLiveBindingsToProgram(runtime.liveBindingsEngine, liveSourceContract, resolution, { now: options.now });
   for (const field of ["contractVersion", "generatedAt", "revision", "visibility", "source", "system", "warnings", "errors"]) {
@@ -2091,6 +2104,7 @@ export function applyProductionConsoleRealtimeContract(model, runtime, contract,
     realtimeTemplateContextKey,
     liveBindingsState: resolution.status,
     liveBindingsSnapshot: buildLiveBindingsSnapshot(runtime.liveBindingsEngine, { now: options.now }),
+    realtimeContractRevision: Number(liveSourceContract.revision || 0),
     liveBindingsWarnings: cloneValue(resolution.warnings || []),
     liveBindingsErrors: cloneValue(resolution.errors || []),
     realtimeTransportState: transportSnapshot.status,
@@ -2250,9 +2264,13 @@ function createProductionConsoleLiveBindingsEngine(options = {}) {
     ["live-horse", "current_horse", "horse", "horse"],
     ["live-suerte", "current_suerte", "suerte", "suerte"],
     ["live-score", "current_score", "score", "score"],
+    ["live-team-scores", "team_scores", "ranking.entries", "teamScores"],
     ["live-ranking", "standings", "ranking", "ranking"],
     ["live-timer", "official_timer", "timer", "timer"],
+    ["live-next-team", "next_team", "turn.nextTeam", "turn.nextTeam"],
+    ["live-next-participant", "next_participant", "turn.nextParticipant", "turn.nextParticipant"],
     ["live-sponsor", "sponsor_mention", "sponsor.active", "sponsor.active"],
+    ["live-production-message", "production_message", "production.message", "production.message"],
     ["live-tournament", "tournament_context", "tournament", "tournament"]
   ];
   definitions.forEach(([bindingId, type, sourcePath, targetPath]) => {

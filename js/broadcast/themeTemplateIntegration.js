@@ -23,6 +23,9 @@ import {
   getBroadcastAsset,
   resolveBroadcastAsset
 } from "./assetManager.js?v=20260713-asset-manager-001-assets-v1";
+import {
+  applyLiveBindingsToPreparation
+} from "./liveBindings.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const THEME_TEMPLATE_INTEGRATION_VERSION = "1.0.0";
 
@@ -52,7 +55,8 @@ export const THEME_TEMPLATE_INTEGRATION_ERROR_CODES = Object.freeze({
   RENDER_NOT_FOUND: "theme-template-render-not-found",
   RENDER_DUPLICATE: "theme-template-render-duplicate",
   SNAPSHOT_INVALID: "theme-template-snapshot-invalid",
-  UNSAFE_INPUT: "theme-template-unsafe-input"
+  UNSAFE_INPUT: "theme-template-unsafe-input",
+  LIVE_REVISION_CONFLICT: "theme-template-live-revision-conflict"
 });
 
 const CONTEXTS = new WeakMap();
@@ -606,6 +610,91 @@ export function updateThemedTemplateRender(integration, themedRenderId, nextThem
     setState(integration, runtime, renderResult.state === "partially_rendered" ? "partially_rendered" : "rendered", now);
     syncRenderedIds(integration, runtime);
     return options.includeRoot === true ? { ...cloneThemedTemplateResult(result), root: renderResult.root || null } : cloneThemedTemplateResult(result);
+  } catch (error) {
+    restoreTemplateRenderAfterFailedUpdate(runtime, record, options);
+    restoreIntegrationState(integration, runtime, previousIntegration, previousRuntimeState);
+    throw error;
+  }
+}
+
+export function updateThemedTemplateLiveData(integration, themedRenderId, broadcastContract, options = {}) {
+  const runtime = requireIntegration(integration);
+  const id = normalizeId(themedRenderId);
+  const record = runtime.renders.get(id);
+  if (!record) throw integrationError(THEME_TEMPLATE_INTEGRATION_ERROR_CODES.RENDER_NOT_FOUND, { themedRenderId: id });
+  const sourceRevision = nonNegativeInteger(broadcastContract?.revision);
+  const previousSourceRevision = nonNegativeInteger(record.liveSourceRevision);
+  const baseResult = applyLiveBindingsToPreparation(record.basePreparation, broadcastContract, options);
+  const themedResult = applyLiveBindingsToPreparation(record.themedPreparation, broadcastContract, options);
+  const changed = baseResult.changed || themedResult.changed;
+
+  if (sourceRevision !== null && previousSourceRevision !== null) {
+    if (sourceRevision < previousSourceRevision || (sourceRevision === previousSourceRevision && changed)) {
+      throw integrationError(THEME_TEMPLATE_INTEGRATION_ERROR_CODES.LIVE_REVISION_CONFLICT, {
+        expectedAtLeast: previousSourceRevision,
+        actual: sourceRevision
+      });
+    }
+    if (sourceRevision === previousSourceRevision) {
+      return {
+        ...cloneThemedTemplateResult(record.result),
+        preparation: exportThemedPreparation(record.themedPreparation, record.result.visibility),
+        liveSourceRevision: sourceRevision,
+        liveChanged: false
+      };
+    }
+  }
+
+  if (!changed) {
+    runtime.renders.set(id, { ...record, liveSourceRevision: sourceRevision });
+    return {
+      ...cloneThemedTemplateResult(record.result),
+      preparation: exportThemedPreparation(record.themedPreparation, record.result.visibility),
+      liveSourceRevision: sourceRevision,
+      liveChanged: false
+    };
+  }
+
+  const nextBasePreparation = safeClone(baseResult.value).value;
+  if (!isTemplatePreparation(nextBasePreparation)) {
+    throw integrationError(THEME_TEMPLATE_INTEGRATION_ERROR_CODES.PREPARATION_INVALID);
+  }
+  const nextThemedPreparation = normalizeThemedPreparation(themedResult.value);
+  assertLivePreparationIdentity(record.themedPreparation, nextThemedPreparation);
+  const previousIntegration = safeClone(integration).value;
+  const previousRuntimeState = runtime.state;
+  setState(integration, runtime, "updating", options.now);
+  try {
+    const renderResult = updateTemplateRender(
+      runtime.templateRendererIntegration,
+      record.result.templateRenderId,
+      nextThemedPreparation,
+      {
+        now: options.now,
+        includeRoot: true,
+        resolvedAssets: buildRendererResolvedAssets(runtime.assetRegistry, nextThemedPreparation, options)
+      }
+    );
+    applyThemeRootVisual(renderResult.root, nextThemedPreparation.themeBackground);
+    const now = normalizeNow(options.now);
+    const result = {
+      ...buildThemedRenderResult(id, nextThemedPreparation, renderResult, record.result.createdAt, now),
+      liveSourceRevision: sourceRevision,
+      liveChanged: true
+    };
+    runtime.renders.set(id, {
+      ...record,
+      basePreparation: safeClone(nextBasePreparation).value,
+      themedPreparation: safeClone(nextThemedPreparation).value,
+      result: safeClone(result).value,
+      liveSourceRevision: sourceRevision
+    });
+    runtime.lastPreparation = safeClone(nextThemedPreparation).value;
+    setState(integration, runtime, renderResult.state === "partially_rendered" ? "partially_rendered" : "rendered", now);
+    syncRenderedIds(integration, runtime);
+    return options.includeRoot === true
+      ? { ...cloneThemedTemplateResult(result), root: renderResult.root || null }
+      : cloneThemedTemplateResult(result);
   } catch (error) {
     restoreTemplateRenderAfterFailedUpdate(runtime, record, options);
     restoreIntegrationState(integration, runtime, previousIntegration, previousRuntimeState);
@@ -1307,6 +1396,27 @@ function assertPreparationCompatible(preparation, context) {
   }
 }
 
+function assertLivePreparationIdentity(previous, next) {
+  const previousComponents = Array.isArray(previous?.components) ? previous.components : [];
+  const nextComponents = Array.isArray(next?.components) ? next.components : [];
+  const identityMatches = previous?.templateId === next?.templateId
+    && previous?.templateInstanceId === next?.templateInstanceId
+    && previous?.themeId === next?.themeId
+    && previousComponents.length === nextComponents.length
+    && previousComponents.every((component, index) => {
+      const candidate = nextComponents[index];
+      return component?.instance?.instanceId === candidate?.instance?.instanceId
+        && component?.instance?.componentType === candidate?.instance?.componentType
+        && JSON.stringify(component?.instance?.layout || {}) === JSON.stringify(candidate?.instance?.layout || {})
+        && JSON.stringify(component?.instance?.style || {}) === JSON.stringify(candidate?.instance?.style || {});
+    });
+  if (!identityMatches) {
+    throw integrationError(THEME_TEMPLATE_INTEGRATION_ERROR_CODES.LIVE_REVISION_CONFLICT, {
+      reason: "theme-template-live-structure-change-forbidden"
+    });
+  }
+}
+
 function assertTenantCompatible(left, right, source) {
   if (left && right && left !== right) throw integrationError(THEME_TEMPLATE_INTEGRATION_ERROR_CODES.TENANT_MISMATCH, { source, expected: right, actual: left });
 }
@@ -1591,6 +1701,11 @@ function buildId(prefix, now, random = Math.random) {
 
 function uniqueStrings(values) {
   return [...new Set((Array.isArray(values) ? values : []).filter((value) => typeof value === "string" && value.length).map((value) => value.slice(0, 500)))];
+}
+
+function nonNegativeInteger(value) {
+  const number = Number(value);
+  return Number.isInteger(number) && number >= 0 ? number : null;
 }
 
 function isRecord(value) {

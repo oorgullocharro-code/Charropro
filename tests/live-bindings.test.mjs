@@ -6,6 +6,7 @@ assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
   "LIVE_BINDINGS_VERSION", "LIVE_BINDING_TYPES", "LIVE_BINDING_STATES", "LIVE_BINDING_ERROR_CODES",
   "BroadcastLiveBindingError", "createLiveBindingsEngine", "registerLiveBinding", "updateLiveBinding",
   "removeLiveBinding", "resolveLiveBindings", "applyLiveBindingsToPreview", "applyLiveBindingsToProgram",
+  "getLiveBindingTypeForContractPath", "applyLiveBindingsToPreparation", "applyLiveBindingsToProjection",
   "buildLiveBindingsSnapshot", "destroyLiveBindingsEngine"
 ].forEach((name) => assert.ok(name in api, `missing export ${name}`));
 
@@ -16,6 +17,7 @@ api.registerLiveBinding(engine, { bindingId: "timer", type: "official_timer", ta
 api.registerLiveBinding(engine, { bindingId: "standings", type: "standings", targetPath: "projection.live.standings" });
 
 const source = {
+  revision: 1,
   turn: { team: { id: "team-b", name: "Equipo B" } },
   score: { total: 0 },
   timer: { status: "running", display: "00:04.21", elapsed: 4210 },
@@ -38,6 +40,51 @@ assert.equal(program.projection.live.team, undefined);
 const preview = api.applyLiveBindingsToPreview(engine, program, resolution);
 assert.equal(preview.projection.live.team.name, "Equipo B");
 assert.equal(preview.projection.live.score, undefined, "program-only binding does not update Preview");
+
+const declaredProjection = {
+  components: [{
+    componentId: "score",
+    bindings: [
+      { bindingId: "score-total", source: "broadcast_contract", path: "score.total", target: "properties.value" },
+      { bindingId: "ranking", source: "broadcast_contract", path: "ranking.entries", target: "properties.rows" }
+    ],
+    data: { "properties.value": 25, "properties.rows": [] }
+  }],
+  composition: {
+    components: [{
+      componentId: "score",
+      bindings: [{ bindingId: "score-total", source: "broadcast_contract", path: "score.total", target: "properties.value" }],
+      data: { "properties.value": 25 }
+    }],
+    data: {}
+  }
+};
+const declaredSource = {
+  revision: 2,
+  score: { total: 0, published: false },
+  ranking: { entries: [{ position: 1, teamId: "team-b", total: 0 }] },
+  production: { message: "" }
+};
+const declaredResult = api.applyLiveBindingsToProjection(declaredProjection, declaredSource);
+assert.equal(declaredResult.changed, true);
+assert.equal(declaredResult.value.components[0].data["properties.value"], 0);
+assert.equal(declaredResult.value.components[0].data["properties.rows"][0].total, 0);
+assert.equal(declaredResult.value.composition.components[0].data["properties.value"], 0);
+assert.equal(declaredResult.value.composition.data.score.published, false);
+assert.equal(declaredResult.value.composition.data.production.message, "");
+assert.equal(declaredProjection.components[0].data["properties.value"], 25, "declarative projection remains immutable");
+assert.equal(api.getLiveBindingTypeForContractPath("score.total"), "current_score");
+assert.equal(api.getLiveBindingTypeForContractPath("ranking.entries"), "team_scores");
+
+assert.deepEqual(api.resolveLiveBindings(engine, structuredClone(source)), resolution, "same revision is idempotent");
+assert.throws(
+  () => api.resolveLiveBindings(engine, { ...source, score: { total: 10 } }),
+  (error) => error.code === api.LIVE_BINDING_ERROR_CODES.REVISION_CONFLICT
+);
+assert.throws(
+  () => api.resolveLiveBindings(engine, { ...source, revision: 0 }),
+  (error) => error.code === api.LIVE_BINDING_ERROR_CODES.REVISION_CONFLICT
+);
 
 assert.throws(
   () => api.registerLiveBinding(engine, { bindingId: "bad", type: "current_score", sourcePath: "score.penalties", targetPath: "projection.score" }),

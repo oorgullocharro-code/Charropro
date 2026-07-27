@@ -2,7 +2,7 @@ export const LIVE_BINDINGS_VERSION = "1.0.0";
 
 export const LIVE_BINDING_TYPES = Object.freeze([
   "current_team", "current_participant", "current_horse", "current_suerte", "current_score",
-  "standings", "official_timer", "next_team", "next_participant", "sponsor_mention",
+  "team_scores", "standings", "official_timer", "next_team", "next_participant", "sponsor_mention",
   "production_message", "tournament_context"
 ]);
 
@@ -34,11 +34,12 @@ const MAX_OBJECT_KEYS = 700;
 const MAX_TEXT_LENGTH = 12000;
 
 const TYPE_PATHS = Object.freeze({
-  current_team: Object.freeze(["turn.team", "team", "team.id", "team.name", "team.shortName", "team.total", "team.position"]),
+  current_team: Object.freeze(["turn.team", "team", "team.id", "team.name", "team.shortName", "team.total", "team.position", "team.members"]),
   current_participant: Object.freeze(["turn.participant", "participant", "participant.id", "participant.name", "participant.alias", "participant.category", "participant.association", "participant.total", "participant.position"]),
   current_horse: Object.freeze(["turn.horse", "horse", "horse.id", "horse.name", "horse.category"]),
   current_suerte: Object.freeze(["turn.suerte", "suerte", "suerte.id", "suerte.name", "suerte.status", "suerte.attempt", "charreada.currentSuerte"]),
   current_score: Object.freeze(["score.total", "score", "score.value", "score.time", "score.status", "score.published", "score.timestamp"]),
+  team_scores: Object.freeze(["ranking.entries", "statistics.standings"]),
   standings: Object.freeze(["statistics.standings", "ranking", "ranking.entries"]),
   official_timer: Object.freeze(["timer", "timer.value", "timer.elapsed", "timer.remaining", "timer.running", "timer.paused", "timer.status", "timer.display", "timer.revision"]),
   next_team: Object.freeze(["turn.nextTeam"]),
@@ -69,7 +70,14 @@ export function createLiveBindingsEngine(definition = {}, options = {}) {
     warnings: [],
     errors: []
   };
-  ENGINES.set(engine, { bindings: new Map(), lastResolution: null, destroyed: false });
+  ENGINES.set(engine, {
+    bindings: new Map(),
+    lastResolution: null,
+    lastSourceFingerprint: null,
+    lastSourceRevision: null,
+    resolutionRevision: 0,
+    destroyed: false
+  });
   engine.status = "ready";
   return engine;
 }
@@ -115,6 +123,25 @@ export function resolveLiveBindings(engine, source = {}, options = {}) {
   const runtime = requireEngine(engine);
   const safeSource = safeClone(source);
   if (safeSource.errors.length) throw bindingError(LIVE_BINDING_ERROR_CODES.UNSAFE, { errors: safeSource.errors });
+  const sourceRevision = nonNegativeInteger(safeSource.value?.revision);
+  const sourceFingerprint = stableFingerprint(safeSource.value);
+  if (runtime.lastResolution) {
+    if (sourceRevision !== null && runtime.lastSourceRevision !== null && sourceRevision < runtime.lastSourceRevision) {
+      throw bindingError(LIVE_BINDING_ERROR_CODES.REVISION_CONFLICT, {
+        expectedAtLeast: runtime.lastSourceRevision,
+        actual: sourceRevision
+      });
+    }
+    if (sourceRevision !== null && sourceRevision === runtime.lastSourceRevision) {
+      if (sourceFingerprint !== runtime.lastSourceFingerprint) {
+        throw bindingError(LIVE_BINDING_ERROR_CODES.REVISION_CONFLICT, { sourceRevision });
+      }
+      return cloneValue(runtime.lastResolution);
+    }
+    if (sourceRevision === null && sourceFingerprint === runtime.lastSourceFingerprint) {
+      return cloneValue(runtime.lastResolution);
+    }
+  }
   const values = Object.create(null);
   const missing = [];
   for (const binding of runtime.bindings.values()) {
@@ -128,10 +155,12 @@ export function resolveLiveBindings(engine, source = {}, options = {}) {
     values[binding.bindingId] = cloneValue(value);
   }
   const now = normalizeNow(options.now);
+  runtime.resolutionRevision += 1;
   const result = {
     liveBindingsVersion: LIVE_BINDINGS_VERSION,
     engineId: engine.engineId,
-    revision: engine.revision,
+    revision: runtime.resolutionRevision,
+    sourceRevision,
     status: missing.length ? "partial" : "resolved",
     values,
     missing,
@@ -140,6 +169,8 @@ export function resolveLiveBindings(engine, source = {}, options = {}) {
     errors: []
   };
   runtime.lastResolution = freezeDeep(cloneValue(result));
+  runtime.lastSourceFingerprint = sourceFingerprint;
+  runtime.lastSourceRevision = sourceRevision;
   engine.status = result.status;
   engine.updatedAt = now;
   engine.warnings = result.warnings;
@@ -154,6 +185,54 @@ export function applyLiveBindingsToProgram(engine, programProjection, resolution
   return applyBindings(engine, programProjection, resolution, { ...options, target: "program" });
 }
 
+export function getLiveBindingTypeForContractPath(path) {
+  const normalized = typeof path === "string" ? path.trim() : "";
+  if (!SAFE_PATH.test(normalized) || normalized.split(".").some((key) => DANGEROUS_KEYS.has(key))) return null;
+  for (const [type, paths] of Object.entries(TYPE_PATHS)) {
+    if (paths.includes(normalized)) return type;
+  }
+  return null;
+}
+
+export function applyLiveBindingsToPreparation(preparation, source, options = {}) {
+  return applyDeclaredComponentBindings(preparation, source, {
+    ...options,
+    componentPath: "components",
+    bindingPath: "instance.bindings",
+    valuePath: "resolvedBindings"
+  });
+}
+
+export function applyLiveBindingsToProjection(projection, source, options = {}) {
+  const safeSource = safeClone(source);
+  if (safeSource.errors.length) {
+    throw bindingError(LIVE_BINDING_ERROR_CODES.UNSAFE, { errors: safeSource.errors });
+  }
+  const result = applyDeclaredComponentBindings(projection, safeSource.value, {
+    ...options,
+    componentPath: "components",
+    bindingPath: "bindings",
+    valuePath: "data"
+  });
+  const compositionResult = applyDeclaredComponentBindings(result.value?.composition, safeSource.value, {
+    ...options,
+    componentPath: "components",
+    bindingPath: "bindings",
+    valuePath: "data"
+  });
+  if (result.value?.composition && compositionResult.value) result.value.composition = compositionResult.value;
+  const compositionDataChanges = applyLiveCompositionData(result.value?.composition, safeSource.value);
+  return {
+    ...result,
+    changed: result.changed || compositionResult.changed || compositionDataChanges.length > 0,
+    changedBindings: uniqueStrings([
+      ...(result.changedBindings || []),
+      ...(compositionResult.changedBindings || []),
+      ...compositionDataChanges
+    ])
+  };
+}
+
 export function buildLiveBindingsSnapshot(engine, options = {}) {
   const runtime = requireEngine(engine);
   return cloneValue({
@@ -162,6 +241,8 @@ export function buildLiveBindingsSnapshot(engine, options = {}) {
     engineId: engine.engineId,
     status: engine.status,
     revision: engine.revision,
+    resolutionRevision: runtime.resolutionRevision,
+    sourceRevision: runtime.lastSourceRevision,
     bindings: [...runtime.bindings.values()].map((binding) => ({
       bindingId: binding.bindingId,
       type: binding.type,
@@ -186,6 +267,9 @@ export function destroyLiveBindingsEngine(engine, options = {}) {
   const runtime = requireEngine(engine);
   runtime.bindings.clear();
   runtime.lastResolution = null;
+  runtime.lastSourceFingerprint = null;
+  runtime.lastSourceRevision = null;
+  runtime.resolutionRevision = 0;
   runtime.destroyed = true;
   engine.status = "destroyed";
   engine.revision += 1;
@@ -205,6 +289,82 @@ function applyBindings(engine, projection, resolution, options) {
     setPath(output, binding.targetPath, safeResolution.value.values[binding.bindingId]);
   }
   return output;
+}
+
+function applyDeclaredComponentBindings(input, source, options) {
+  const safeInput = safeClone(input);
+  const safeSource = safeClone(source);
+  if (safeInput.errors.length || safeSource.errors.length) {
+    throw bindingError(LIVE_BINDING_ERROR_CODES.UNSAFE, {
+      errors: uniqueStrings([...(safeInput.errors || []), ...(safeSource.errors || [])])
+    });
+  }
+  const value = safeInput.value;
+  const components = getPath(value, options.componentPath);
+  if (!Array.isArray(components)) {
+    return { value, changed: false, changedBindings: [], sourceRevision: nonNegativeInteger(safeSource.value?.revision) };
+  }
+  const changedBindings = [];
+  components.forEach((component) => {
+    const bindings = getPath(component, options.bindingPath);
+    if (!Array.isArray(bindings)) return;
+    let target = getPath(component, options.valuePath);
+    if (!isRecord(target)) {
+      target = Object.create(null);
+      setPath(component, options.valuePath, target);
+    }
+    bindings.forEach((binding) => {
+      if (!isRecord(binding) || binding.source !== "broadcast_contract") return;
+      if (!getLiveBindingTypeForContractPath(binding.path) || !SAFE_PATH.test(String(binding.target || ""))) return;
+      const nextValue = getPath(safeSource.value, binding.path);
+      if (nextValue === undefined) return;
+      const previousFingerprint = stableFingerprint(target[binding.target]);
+      const nextFingerprint = stableFingerprint(nextValue);
+      if (previousFingerprint === nextFingerprint) return;
+      target[binding.target] = cloneValue(nextValue);
+      changedBindings.push(binding.bindingId || `${binding.path}:${binding.target}`);
+    });
+  });
+  return {
+    value,
+    changed: changedBindings.length > 0,
+    changedBindings: uniqueStrings(changedBindings),
+    sourceRevision: nonNegativeInteger(safeSource.value?.revision)
+  };
+}
+
+function applyLiveCompositionData(composition, source) {
+  if (!isRecord(composition) || !isRecord(source)) return [];
+  if (!isRecord(composition.data)) composition.data = Object.create(null);
+  const changed = [];
+  const replaceData = (path, value) => {
+    if (value === undefined || stableFingerprint(getPath(composition.data, path)) === stableFingerprint(value)) return;
+    setPath(composition.data, path, cloneValue(value));
+    changed.push(`composition.data.${path}`);
+  };
+
+  for (const root of [
+    "team", "participant", "horse", "suerte", "score", "ranking", "statistics",
+    "timer", "tournament"
+  ]) {
+    replaceData(root, source[root]);
+  }
+
+  replaceData("sponsor.active", source.sponsor?.active);
+  replaceData("production.message", source.production?.message);
+  replaceData("production.messages", source.production?.messages);
+  replaceData("production.notes", source.production?.notes);
+  replaceData("production.sponsorMention", source.production?.sponsorMention);
+  replaceData("production.currentTurnId", source.production?.currentTurnId);
+  replaceData("production.currentTurnName", source.production?.currentTurnName);
+
+  replaceData("turn.team", source.team);
+  replaceData("turn.participant", source.participant);
+  replaceData("turn.horse", source.horse);
+  replaceData("turn.suerte", source.suerte);
+  replaceData("turn.nextTeam", source.turn?.nextTeam);
+  replaceData("turn.nextParticipant", source.turn?.nextParticipant);
+  return changed;
 }
 
 function normalizeBinding(definition) {
@@ -324,6 +484,21 @@ function isRecord(value) {
 
 function uniqueStrings(value) {
   return [...new Set((Array.isArray(value) ? value : []).filter((item) => typeof item === "string" && item))];
+}
+
+function nonNegativeInteger(value) {
+  const number = Number(value);
+  return Number.isInteger(number) && number >= 0 ? number : null;
+}
+
+function stableFingerprint(value) {
+  return JSON.stringify(sortForFingerprint(value));
+}
+
+function sortForFingerprint(value) {
+  if (Array.isArray(value)) return value.map(sortForFingerprint);
+  if (!isRecord(value)) return value;
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortForFingerprint(value[key])]));
 }
 
 function bindingError(code, details = {}) {

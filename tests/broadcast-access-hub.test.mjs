@@ -87,7 +87,7 @@ const sourceCode = await readFile(new URL("../js/broadcast/broadcastAccessHub.js
 for (const text of ["Consola de Producción", "Playground de Broadcast", "Program Main Output", "Announcer Monitor", "Browser Output Lab", "Portal de Jueces", "Portal de Supervisión"]) {
   assert.ok(sourceCode.includes(text), `missing access ${text}`);
 }
-assert.match(html, /20260716-broadcast-workspace-context-bridge-001-auto-context-v1/);
+assert.match(html, /20260727-broadcast-live-graphics-001-live-data-geometry-v1e/);
 assert.match(html, /broadcastStudioWorkspace\.js/);
 assert.match(css, /@media \(max-width: 1180px\)/);
 assert.match(css, /@media \(max-width: 820px\)/);

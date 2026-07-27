@@ -8,13 +8,14 @@ import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournam
 import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
 import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260713-asset-manager-001-assets-v1";
 import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260713-asset-manager-001-assets-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
 const SYNC_OWNER_KEY = "sync_owner_v1";
 const SYNC_CLIENT_ID = getSyncClientId();
 let lastBroadcastLogFingerprint = "";
+let lastBroadcastContractRevision = 0;
 
 function isIndividualTournament(tournament = getActiveTournament()) {
   return ["caladero", "coleadero", "pialadero"].includes(tournament?.type);
@@ -22,6 +23,7 @@ function isIndividualTournament(tournament = getActiveTournament()) {
 
 export function buildLivePayload(options = {}) {
   const timestamp = new Date().toISOString();
+  const contractRevision = nextBroadcastContractRevision(timestamp);
   const context = getCurrentContext();
   const charreada = getActiveCharreada();
   const tournament = context?.tournament || getActiveTournament();
@@ -35,7 +37,8 @@ export function buildLivePayload(options = {}) {
     tournament,
     leaderboard,
     published,
-    timer
+    timer,
+    revision: contractRevision
   });
   const broadcastContract = buildBroadcastDataContract(broadcastContext, {
     generatedAt: timestamp,
@@ -174,6 +177,9 @@ export function buildBroadcastContext(source = {}) {
   const phase = charreada?.phase || charreada?.fase || "";
 
   return cloneBroadcastValue({
+    revision: Number.isInteger(Number(source.revision)) && Number(source.revision) >= 0
+      ? Number(source.revision)
+      : 0,
     tournament: tournament
       ? {
           id: tournament.id || "",
@@ -223,6 +229,15 @@ export function buildBroadcastContext(source = {}) {
       updatedAt: new Date().toISOString()
     }
   });
+}
+
+function nextBroadcastContractRevision(timestamp) {
+  const wallClockRevision = Date.parse(timestamp);
+  lastBroadcastContractRevision = Math.max(
+    lastBroadcastContractRevision + 1,
+    Number.isFinite(wallClockRevision) ? wallClockRevision : Date.now()
+  );
+  return lastBroadcastContractRevision;
 }
 
 function buildBroadcastFlatFields(broadcast = {}) {

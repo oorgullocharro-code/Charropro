@@ -645,3 +645,17 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - Se añadieron estados operativos explícitos para preparación, conexión, listo, sin contexto, offline, stale, no autorizado y error. Preview y las acciones de salida permanecen deshabilitados hasta que el contexto está listo.
 - No se modificaron reglas Firebase, reglas deportivas, scores, `publishedScores`, `publicTournaments`, página pública, cronómetro del juez ni cálculos oficiales.
 - La regresión automatizada cubre Auth tardío, deduplicación, cambio de charreada, limpieza de sesión, offline, no autorizado, inmutabilidad y ausencia de identidad por query/storage/fixtures.
+
+# BROADCAST-LIVE-GRAPHICS-001 — Datos live y geometría oficial
+
+- Versión de aplicación: `20260727-broadcast-live-graphics-001-live-data-geometry-v1e`.
+- La auditoría real confirmó que el Workspace resolvía Live Bindings únicamente durante `PREPARAR`: cada contrato recreaba el motor, Preview y Program no recibían actualizaciones de datos y solo Announcer volvía a publicarse.
+- El Broadcast Data Contract ahora recibe una revisión monotónica propia del sobre Broadcast. No cambia scores, rankings, tiempos ni reglas deportivas.
+- Live Bindings conserva estado durante la sesión y acepta únicamente `current_team`, `current_participant`, `current_horse`, `current_suerte`, `current_score`, `team_scores`, `standings`, `official_timer`, `next_team`, `next_participant`, `sponsor_mention`, `production_message` y `tournament_context`.
+- Preview y Program aplican actualizaciones `data-only` atómicas: conservan identidad, Template, Theme, capas y geometría. Program incrementa su revisión y se republica sin ejecutar Take, Cut o Auto.
+- El turno se deriva de `team` o `participant` del contrato oficial; nunca del último score. `production.updatedAt` no genera por sí solo una revisión visual.
+- Program Main acepta el mismo `programId` con una revisión superior, actualiza componentes en la raíz existente y conserva la última vista válida ante desconexión o datos stale.
+- Announcer continúa independiente de Preview y Program, y publica cada nueva proyección autorizada del contrato.
+- La geometría declara su unidad. Coordenadas normalizadas se aplican una sola vez contra el design space 16:9; coordenadas legacy en píxeles se convierten una sola vez. Preview y Program Main comparten la misma transformación hacia el viewport.
+- Cambios de Template, Theme, estructura, capas, geometría, visibilidad o permisos siguen requiriendo `PREPARAR` y una operación oficial Take, Cut o Auto.
+- No se agregaron Layer Manager, Layout Editor, Timer Display, NDI, cálculos deportivos ni cambios en Firebase Rules.

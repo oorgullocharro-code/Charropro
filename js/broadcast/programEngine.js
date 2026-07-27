@@ -1,7 +1,10 @@
 import {
   PREVIEW_ENGINE_VERSION,
   validatePreview
-} from "./previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
+} from "./previewEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import {
+  applyLiveBindingsToProjection
+} from "./liveBindings.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 
@@ -64,6 +67,8 @@ export function createProgramEngine(options = {}) {
     program: null,
     prepared: null,
     activeRuntime: null,
+    lastLiveSourceRevision: null,
+    lastLiveSourceFingerprint: null,
     sequence: 0
   });
   return engine;
@@ -135,11 +140,80 @@ export function updateProgram(engine, previewSnapshot, options = {}) {
   }
 }
 
+export function updateProgramLiveData(engine, broadcastContract, options = {}) {
+  const runtime = requireEngine(engine);
+  if (!runtime.program || !runtime.activeRuntime) throw programError("program-not-active");
+  const safeContract = safeClone(broadcastContract);
+  if (safeContract.errors.length) throw programError("program-live-source-unsafe", { errors: safeContract.errors });
+  const sourceRevision = Number(safeContract.value?.revision);
+  const sourceFingerprint = stableFingerprint(safeContract.value);
+  if (!Number.isInteger(sourceRevision) || sourceRevision < 0) {
+    throw programError("program-live-source-revision-invalid");
+  }
+  if (runtime.lastLiveSourceRevision !== null) {
+    if (sourceRevision < runtime.lastLiveSourceRevision) throw programError("program-live-revision-regression");
+    if (sourceRevision === runtime.lastLiveSourceRevision) {
+      if (sourceFingerprint !== runtime.lastLiveSourceFingerprint) throw programError("program-live-revision-conflict");
+      return cloneProgram(runtime.program);
+    }
+  }
+  const patched = applyLiveBindingsToProjection(runtime.program, safeContract.value, options);
+  if (!patched.changed) {
+    runtime.lastLiveSourceRevision = sourceRevision;
+    runtime.lastLiveSourceFingerprint = sourceFingerprint;
+    return cloneProgram(runtime.program);
+  }
+  const previous = captureRuntime(runtime, engine);
+  setEngineState(engine, runtime, "updating", options.now, false);
+  try {
+    const now = normalizeNow(options.now);
+    const next = {
+      ...patched.value,
+      programId: runtime.program.programId,
+      previewId: runtime.program.previewId,
+      templateId: runtime.program.templateId,
+      themeId: runtime.program.themeId,
+      templateInstanceId: runtime.program.templateInstanceId,
+      revision: runtime.program.revision + 1,
+      programRevision: runtime.program.revision + 1,
+      sourceRevision,
+      liveSourceRevision: sourceRevision,
+      transitionMode: "live",
+      createdAt: runtime.program.createdAt,
+      updatedAt: now,
+      generatedAt: now
+    };
+    if (next.composition) {
+      next.composition.metadata = {
+        ...(next.composition.metadata || {}),
+        liveSourceRevision: sourceRevision
+      };
+    }
+    const validation = validateProgram(next);
+    if (!validation.valid) throw programError("program-live-update-invalid", { errors: validation.errors });
+    runtime.program = next;
+    runtime.lastLiveSourceRevision = sourceRevision;
+    runtime.lastLiveSourceFingerprint = sourceFingerprint;
+    runtime.activeRuntime = {
+      ...runtime.activeRuntime,
+      runtimeId: `program_runtime_${next.programId}_${next.revision}`,
+      transitionMode: "live"
+    };
+    setEngineState(engine, runtime, "program", now);
+    return cloneProgram(next);
+  } catch (error) {
+    restoreRuntime(runtime, engine, previous);
+    throw normalizeError(error, "program-live-update-failed");
+  }
+}
+
 export function clearProgram(engine, options = {}) {
   const runtime = requireEngine(engine);
   runtime.program = null;
   runtime.prepared = null;
   runtime.activeRuntime = null;
+  runtime.lastLiveSourceRevision = null;
+  runtime.lastLiveSourceFingerprint = null;
   setEngineState(engine, runtime, "cleared", options.now);
   setEngineState(engine, runtime, "ready", options.now, false);
   return { cleared: true, state: engine.state, revision: engine.revision };
@@ -458,6 +532,8 @@ function captureRuntime(runtime, engine) {
     program: runtime.program,
     prepared: runtime.prepared,
     activeRuntime: runtime.activeRuntime,
+    lastLiveSourceRevision: runtime.lastLiveSourceRevision,
+    lastLiveSourceFingerprint: runtime.lastLiveSourceFingerprint,
     sequence: runtime.sequence
   };
 }
@@ -468,6 +544,8 @@ function restoreRuntime(runtime, engine, previous) {
   runtime.program = previous.program;
   runtime.prepared = previous.prepared;
   runtime.activeRuntime = previous.activeRuntime;
+  runtime.lastLiveSourceRevision = previous.lastLiveSourceRevision;
+  runtime.lastLiveSourceFingerprint = previous.lastLiveSourceFingerprint;
   runtime.sequence = previous.sequence;
 }
 
@@ -571,7 +649,8 @@ function safeClone(value, options = {}, state = { depth: 0, ancestors: new WeakS
       state.errors.push(`program-accessor-forbidden:${state.path}.${key}`);
       return;
     }
-    if (RUNTIME_KEYS.has(normalized) || SECRET_KEYS.has(normalized)) {
+    if ((RUNTIME_KEYS.has(normalized) && !isDeclarativeBindingTarget(key, state.path, descriptor.value))
+      || SECRET_KEYS.has(normalized)) {
       state.errors.push(`program-field-forbidden:${state.path}.${key}`);
       return;
     }
@@ -583,8 +662,24 @@ function safeClone(value, options = {}, state = { depth: 0, ancestors: new WeakS
   return { value: result, errors: state.errors };
 }
 
+function isDeclarativeBindingTarget(key, path, value) {
+  return key === "target"
+    && typeof value === "string"
+    && /(?:^|\.)bindings\.\d+$/.test(path);
+}
+
 function moreRestrictiveVisibility(left, right) {
   return VISIBILITY_RANK[left] >= VISIBILITY_RANK[right] ? left : right;
+}
+
+function stableFingerprint(value) {
+  return JSON.stringify(sortFingerprintKeys(value));
+}
+
+function sortFingerprintKeys(value) {
+  if (Array.isArray(value)) return value.map(sortFingerprintKeys);
+  if (!isRecord(value)) return value;
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortFingerprintKeys(value[key])]));
 }
 
 function normalizeVisibility(value) {

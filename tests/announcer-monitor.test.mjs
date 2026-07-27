@@ -277,6 +277,9 @@ assert.deepEqual(source, sourceClone);
 assert.deepEqual(getAnnouncerWarnings(base.instance), []);
 assert.deepEqual(getAnnouncerErrors(base.instance), []);
 assert.equal(getAnnouncerStatus(base.instance).status, "ready");
+assert.equal(root.getAttribute("data-projection-revision"), "1");
+assert.equal(root.getAttribute("data-route-revision"), "1");
+assert.equal(root.getAttribute("data-source-revision"), "1");
 
 // Real Output Routing nested projection shape is normalized without changing scope semantics.
 const nested = envelope({ revision: 2 });
@@ -299,6 +302,9 @@ nested.projection.standings = [
 nested.projection.timer = { id: "timer-real", status: "paused", display: "", elapsedMs: 0, remainingMs: 0, revision: 0 };
 nested.projection.context = { tournamentId: "tournament-a", competitionId: "competition-a", sessionId: "session-a", progress: 0 };
 updateAnnouncerMonitor(base.instance, nested, { now: T2 });
+assert.equal(root.getAttribute("data-projection-revision"), "2");
+assert.equal(root.getAttribute("data-route-revision"), "2");
+assert.equal(root.getAttribute("data-source-revision"), "2");
 const zeroSnapshot = getAnnouncerSnapshot(base.instance, { now: T2 });
 assert.equal(zeroSnapshot.currentSummary.participantName, "Juan Pérez");
 assert.equal(zeroSnapshot.currentSummary.teamName, null);
@@ -358,12 +364,37 @@ updateAnnouncerMonitor(revisions.instance, envelope({ revision: 2 }), { now: T1 
 const stableBefore = getAnnouncerSnapshot(revisions.instance, { now: T2 });
 updateAnnouncerMonitor(revisions.instance, envelope({ revision: 2 }), { now: T2 });
 assert.equal(getAnnouncerMonitor(revisions.instance).projectionRevision, stableBefore.projectionRevision);
+const republished = envelope({ revision: 2 });
+republished.resolvedAt = T2;
+updateAnnouncerMonitor(revisions.instance, republished, { now: T2 });
+assert.equal(getAnnouncerMonitor(revisions.instance).projectionRevision, stableBefore.projectionRevision);
 assert.throws(() => updateAnnouncerMonitor(revisions.instance, envelope({ revision: 1 })), (error) => error.code === ANNOUNCER_MONITOR_ERROR_CODES.REVISION_REGRESSION);
 const conflict = envelope({ revision: 2 });
 conflict.projection.current.teamName = "Cambio sin revisión";
 assert.throws(() => updateAnnouncerMonitor(revisions.instance, conflict), (error) => error.code === ANNOUNCER_MONITOR_ERROR_CODES.REVISION_CONFLICT);
 assert.throws(() => updateAnnouncerMonitor(revisions.instance, envelope({ revision: 3, tenantId: "tenant-b" })), (error) => error.code === ANNOUNCER_MONITOR_ERROR_CODES.CONTEXT_CONFLICT);
 assert.deepEqual(getAnnouncerSnapshot(revisions.instance, { now: T2 }).currentSummary, stableBefore.currentSummary);
+
+// A reconnected authorized publisher may reset its route counter while the contract source advances.
+const reconnected = mounted({ announcerMonitorId: "reconnected-monitor", browserOutputId: "reconnected-browser" });
+const previousPublisher = envelope({ revision: 34 });
+previousPublisher.sourceRevision = 100;
+previousPublisher.resolvedAt = T1;
+updateAnnouncerMonitor(reconnected.instance, previousPublisher, { now: T1 });
+const nextPublisher = envelope({ revision: 2 });
+nextPublisher.sourceRevision = 101;
+nextPublisher.resolvedAt = T2;
+nextPublisher.projection.current.teamName = "Turno reconectado";
+updateAnnouncerMonitor(reconnected.instance, nextPublisher, { now: T2 });
+assert.equal(getAnnouncerMonitor(reconnected.instance).routeRevision, 2);
+assert.equal(getAnnouncerMonitor(reconnected.instance).sourceRevision, 101);
+assert.equal(getAnnouncerSnapshot(reconnected.instance).currentSummary.teamName, "Turno reconectado");
+const reconnectedState = getAnnouncerSnapshot(reconnected.instance, { now: T2 });
+assert.throws(
+  () => updateAnnouncerMonitor(reconnected.instance, previousPublisher, { now: T2 }),
+  (error) => error.code === ANNOUNCER_MONITOR_ERROR_CODES.REVISION_REGRESSION
+);
+assert.deepEqual(getAnnouncerSnapshot(reconnected.instance, { now: T2 }), reconnectedState);
 
 // Restricted notes are available only to a restricted monitor; visibility never elevates.
 const restricted = mounted({ announcerMonitorId: "restricted-monitor", browserOutputId: "restricted-browser", visibility: "restricted" });
@@ -588,8 +619,8 @@ const [sourceText, html, css, docs] = await Promise.all([
   readFile(new URL("../BROADCAST_ANNOUNCER_MONITOR_V1.md", import.meta.url), "utf8")
 ]);
 assert.match(html, /data-announcer-monitor-page/);
-assert.match(html, /announcerMonitor\.js\?v=20260716-broadcast-context-resolution-001-real-context-v1/);
-assert.match(html, /announcer-monitor\.css\?v=20260716-broadcast-context-resolution-001-real-context-v1/);
+assert.match(html, /announcerMonitor\.js\?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e/);
+assert.match(html, /announcer-monitor\.css\?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e/);
 assert.equal(typeof api.connectAnnouncerMonitorRealtime, "function");
 assert.doesNotMatch(html, /<video\b|<iframe\b|autoplay|src="https?:|\bTake\b|\bCut\b|\bAuto\b/i);
 assert.doesNotMatch(sourceText, /from\s+["'][^"']*(?:programEngine|previewEngine|firebase|state\.js)/i);

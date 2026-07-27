@@ -324,6 +324,33 @@ assert.throws(
 );
 assert.deepEqual(getBrowserOutput(lifecycle.instance), beforeRegression);
 
+// Program Main may explicitly establish a fresh local revision baseline after publisher restart.
+const restartedPublisher = routeEnvelope("program_main", {
+  sourceRevision: 5,
+  routeRevision: 6,
+  resolvedAt: "2026-07-15T20:00:04.000Z",
+  projection: {
+    ...reapplied.projection,
+    programId: "program_restarted",
+    generatedAt: "2026-07-15T20:00:04.000Z"
+  }
+});
+applyBrowserOutputProjection(lifecycle.instance, restartedPublisher, {
+  now: "2026-07-15T20:00:04.000Z",
+  allowProgramRevisionBaselineReset: true
+});
+assert.equal(lifecycle.instance.routeRevision, 6);
+assert.equal(lifecycle.instance.sourceRevision, 5);
+const restartedPublisherState = getBrowserOutput(lifecycle.instance);
+assert.throws(
+  () => applyBrowserOutputProjection(lifecycle.instance, reapplied, {
+    now: "2026-07-15T20:00:04.000Z",
+    allowProgramRevisionBaselineReset: true
+  }),
+  (error) => ["browser-output-revision-regression", "browser-output-revision-conflict"].includes(error.code)
+);
+assert.deepEqual(getBrowserOutput(lifecycle.instance), restartedPublisherState);
+
 // Projection contract rejects direct or incompatible sources.
 assert.equal(validateBrowserOutputProjection(routeEnvelope()).valid, true);
 assert.equal(validateBrowserOutputProjection({ programId: "direct_program" }).valid, false);

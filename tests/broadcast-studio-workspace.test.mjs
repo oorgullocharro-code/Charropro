@@ -11,7 +11,7 @@ import {
 } from "../js/broadcast/broadcastStudioWorkspace.js";
 
 assert.equal(BROADCAST_STUDIO_WORKSPACE_VERSION, "1.0.0");
-assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260716-broadcast-workspace-context-bridge-001-auto-context-v1");
+assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260727-broadcast-live-graphics-001-live-data-geometry-v1e");
 assert.equal(BROADCAST_STUDIO_GRAPHICS.length, 15);
 assert.equal(new Set(BROADCAST_STUDIO_GRAPHICS.map((entry) => entry.id)).size, 15);
 assert.deepEqual(BROADCAST_STUDIO_FILTERS.map((entry) => entry.label), [
@@ -166,7 +166,7 @@ assert.match(html, /id="broadcast-announcer-link"[^>]*>Abrir Locutores/);
 for (const action of ["prepare", "take", "cut", "auto", "clear"]) {
   assert.match(html, new RegExp(`data-workspace-action="${action}"`));
 }
-assert.match(html, /broadcastStudioWorkspace\.js\?v=20260716-broadcast-workspace-context-bridge-001-auto-context-v1/);
+assert.match(html, /broadcastStudioWorkspace\.js\?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e/);
 assert.doesNotMatch(html, /Snapshot|Contract|Variables|Bindings|Themes|Templates|Firebase|Output Routing|Revisiones|IDs/);
 assert.doesNotMatch(html, /contexto oficial|Program Main activo/i);
 

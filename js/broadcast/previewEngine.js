@@ -2,9 +2,14 @@ import {
   getThemedTemplateRender,
   removeThemedTemplateRender,
   renderThemedTemplate,
+  updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
+} from "./themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import {
+  applyLiveBindingsToProjection,
+  getLiveBindingTypeForContractPath
+} from "./liveBindings.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 
@@ -67,6 +72,8 @@ export function createPreviewEngine(options = {}) {
     preview: null,
     prepared: null,
     activeRuntime: null,
+    lastLiveSourceRevision: null,
+    lastLiveSourceFingerprint: null,
     sequence: 0,
     state: "ready"
   });
@@ -234,12 +241,84 @@ export function updatePreview(engine, changes = {}, options = {}) {
   }
 }
 
+export function updatePreviewLiveData(engine, broadcastContract, options = {}) {
+  const runtime = requireEngine(engine);
+  if (runtime.state !== "rendered" || !runtime.preview || !runtime.activeRuntime) {
+    throw previewError("preview-not-rendered");
+  }
+  const safeContract = safeClone(broadcastContract);
+  if (safeContract.errors.length) throw previewError("preview-live-source-unsafe", { errors: safeContract.errors });
+  const sourceRevision = Number(safeContract.value?.revision);
+  const sourceFingerprint = stableFingerprint(safeContract.value);
+  if (!Number.isInteger(sourceRevision) || sourceRevision < 0) {
+    throw previewError("preview-live-source-revision-invalid");
+  }
+  if (runtime.lastLiveSourceRevision !== null) {
+    if (sourceRevision < runtime.lastLiveSourceRevision) throw previewError("preview-live-revision-regression");
+    if (sourceRevision === runtime.lastLiveSourceRevision) {
+      if (sourceFingerprint !== runtime.lastLiveSourceFingerprint) throw previewError("preview-live-revision-conflict");
+      return clonePreview(runtime.preview);
+    }
+  }
+  const patched = applyLiveBindingsToProjection(runtime.preview, safeContract.value, options);
+  if (!patched.changed) {
+    runtime.lastLiveSourceRevision = sourceRevision;
+    runtime.lastLiveSourceFingerprint = sourceFingerprint;
+    return clonePreview(runtime.preview);
+  }
+  if (typeof runtime.adapter.updateLive !== "function") throw previewError("preview-live-update-unsupported");
+
+  const previous = captureRuntime(runtime, engine);
+  setEngineState(engine, runtime, "updating", options.now, false);
+  try {
+    const result = runtime.adapter.updateLive(runtime.activeRuntime, safeContract.value, options);
+    const now = normalizeNow(options.now);
+    const nextPrepared = resolveOperationPreparation(runtime.prepared, result, {
+      operation: "live-update",
+      expectedThemeId: runtime.preview.themeId,
+      expectedTemplateId: runtime.preview.templateId,
+      requireFresh: true
+    });
+    const next = {
+      ...patched.value,
+      previewId: runtime.preview.previewId,
+      revision: runtime.preview.revision + 1,
+      sourceRevision,
+      liveSourceRevision: sourceRevision,
+      updatedAt: now,
+      status: "rendered",
+      warnings: uniqueStrings([...(runtime.preview.warnings || []), ...(result?.warnings || [])]),
+      errors: uniqueStrings(result?.errors || [])
+    };
+    if (next.composition) {
+      next.composition.metadata = {
+        ...(next.composition.metadata || {}),
+        liveSourceRevision: sourceRevision
+      };
+    }
+    const validation = validatePreview(next);
+    if (!validation.valid) throw previewError("preview-live-update-invalid", { errors: validation.errors });
+    runtime.preview = next;
+    runtime.prepared = nextPrepared;
+    runtime.activeRuntime = buildActiveRuntime(result, nextPrepared);
+    runtime.lastLiveSourceRevision = sourceRevision;
+    runtime.lastLiveSourceFingerprint = sourceFingerprint;
+    setEngineState(engine, runtime, "rendered", now);
+    return clonePreview(next);
+  } catch (error) {
+    restoreRuntime(runtime, engine, previous);
+    throw normalizeError(error, "preview-live-update-failed");
+  }
+}
+
 export function clearPreview(engine, options = {}) {
   const runtime = requireEngine(engine);
   clearRuntime(runtime, options);
   runtime.preview = null;
   runtime.prepared = null;
   runtime.activeRuntime = null;
+  runtime.lastLiveSourceRevision = null;
+  runtime.lastLiveSourceFingerprint = null;
   setEngineState(engine, runtime, "cleared", options.now);
   setEngineState(engine, runtime, "ready", options.now, false);
   return { cleared: true, state: engine.state, revision: engine.revision };
@@ -316,7 +395,12 @@ function normalizeAdapter(options) {
     for (const method of ["prepare", "render", "update", "clear"]) {
       if (typeof options.adapter[method] !== "function") throw previewError(`preview-adapter-${method}-required`);
     }
-    return options.adapter;
+    return {
+      ...options.adapter,
+      updateLive: typeof options.adapter.updateLive === "function"
+        ? options.adapter.updateLive
+        : null
+    };
   }
   const integration = options.themeTemplateIntegration;
   const resolvePreparation = options.resolvePreparation;
@@ -349,6 +433,14 @@ function normalizeAdapter(options) {
         includeRoot: true
       });
       return result;
+    },
+    updateLive(activeRuntime, broadcastContract, updateOptions) {
+      return updateThemedTemplateLiveData(
+        integration,
+        activeRuntime.themeRenderId,
+        broadcastContract,
+        { ...updateOptions, includeRoot: true }
+      );
     },
     clear(activeRuntime, clearOptions) {
       if (!activeRuntime?.themeRenderId) return { removed: false };
@@ -645,6 +737,7 @@ function buildDeclarativeComponent(input, fallbackOrder, orderIndex) {
     order: nonNegativeInteger(input.order, declared),
     visibility: normalizeComponentVisibility(input.visibility ?? instance.visibility),
     geometry: {
+      unit: normalizeGeometryUnit(rawGeometry),
       x: finite(rawGeometry.x, 0),
       y: finite(rawGeometry.y, 0),
       width: nonNegativeFinite(rawGeometry.width, 0),
@@ -657,6 +750,7 @@ function buildDeclarativeComponent(input, fallbackOrder, orderIndex) {
       responsive: cloneProjectionValue(rawGeometry.responsive ?? {}, {}, `component.${componentId}.responsive`)
     },
     opacity: opacityValue(input.opacity ?? style.opacity, 1),
+    bindings: normalizeLiveComponentBindings(instance.bindings ?? input.bindings),
     style,
     properties: cloneProjectionValue(instance.properties ?? input.properties ?? {}, {}, `component.${componentId}.properties`),
     content: cloneProjectionValue(input.resolvedContent ?? input.content ?? {}, {}, `component.${componentId}.content`),
@@ -664,6 +758,34 @@ function buildDeclarativeComponent(input, fallbackOrder, orderIndex) {
     assetRefs,
     metadata
   };
+}
+
+function normalizeGeometryUnit(geometry) {
+  const declared = String(geometry?.unit || geometry?.units || geometry?.coordinateSpace || "").trim().toLowerCase();
+  if (["normalized", "relative", "ratio"].includes(declared)) return "normalized";
+  if (["pixel", "pixels", "px", "design"].includes(declared)) return "pixel";
+  const values = ["x", "y", "width", "height"].map((field) => Number(geometry?.[field]));
+  return values.every(Number.isFinite) && values.every((value) => Math.abs(value) <= 2)
+    ? "normalized"
+    : "pixel";
+}
+
+function normalizeLiveComponentBindings(value) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 50).flatMap((binding) => {
+    if (!isRecord(binding) || binding.source !== "broadcast_contract") return [];
+    const path = typeof binding.path === "string" ? binding.path.trim() : "";
+    const target = typeof binding.target === "string" ? binding.target.trim() : "";
+    if (!getLiveBindingTypeForContractPath(path) || !/^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_-]+){0,7}$/.test(target)) return [];
+    return [{
+      bindingId: normalizeId(binding.bindingId) || `binding_${path.replaceAll(".", "_")}`,
+      source: "broadcast_contract",
+      path,
+      target,
+      required: binding.required === true,
+      visibility: normalizeVisibility(binding.visibility)
+    }];
+  });
 }
 
 function compareDeclarativeComponents(left, right) {
@@ -861,6 +983,8 @@ function captureRuntime(runtime, engine) {
     preview: runtime.preview,
     prepared: runtime.prepared,
     activeRuntime: runtime.activeRuntime,
+    lastLiveSourceRevision: runtime.lastLiveSourceRevision,
+    lastLiveSourceFingerprint: runtime.lastLiveSourceFingerprint,
     state: runtime.state,
     sequence: runtime.sequence
   };
@@ -871,6 +995,8 @@ function restoreRuntime(runtime, engine, previous) {
   runtime.preview = previous.preview;
   runtime.prepared = previous.prepared;
   runtime.activeRuntime = previous.activeRuntime;
+  runtime.lastLiveSourceRevision = previous.lastLiveSourceRevision;
+  runtime.lastLiveSourceFingerprint = previous.lastLiveSourceFingerprint;
   runtime.state = previous.state;
   runtime.sequence = previous.sequence;
 }
@@ -987,6 +1113,16 @@ function isDeclarativeBindingTarget(key, path, value) {
   return key === "target"
     && typeof value === "string"
     && /(?:^|\.)bindings\.\d+$/.test(path);
+}
+
+function stableFingerprint(value) {
+  return JSON.stringify(sortFingerprintKeys(value));
+}
+
+function sortFingerprintKeys(value) {
+  if (Array.isArray(value)) return value.map(sortFingerprintKeys);
+  if (!isRecord(value)) return value;
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortFingerprintKeys(value[key])]));
 }
 
 function moreRestrictiveVisibility(left, right) {

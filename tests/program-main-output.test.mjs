@@ -452,6 +452,102 @@ const beforeIdempotent = getProgramMainOutput(lifecycle);
 result = updateProgramMainOutput(lifecycle, structuredClone(programA), { now: T2 });
 assert.equal(result.projectionRevision, beforeIdempotent.projectionRevision);
 
+// Normalized Template geometry is preserved once, and live data updates reuse the mounted renderer.
+const normalized = activeEnvelope({ revision: 1, name: "normalized", resolvedAt: T1 });
+normalized.projection.components.forEach((entry) => {
+  entry.geometry = {
+    ...entry.geometry,
+    unit: "normalized",
+    x: entry.geometry.x / 1920,
+    y: entry.geometry.y / 1080,
+    width: entry.geometry.width / 1920,
+    height: entry.geometry.height / 1080
+  };
+  const liveValue = entry.content.value ?? entry.properties.value ?? 0;
+  if (Object.prototype.hasOwnProperty.call(entry.content, "value")) {
+    const { value: _value, ...contentWithoutValue } = entry.content;
+    entry.content = contentWithoutValue;
+  }
+  entry.data = { "properties.value": liveValue };
+});
+normalized.projection.composition.components = structuredClone(normalized.projection.components);
+const normalizedHarness = mounted({
+  programMainOutputId: "normalized",
+  browserOutputId: "browser-normalized"
+});
+applyProgramMainProjection(normalizedHarness.instance, normalized, { now: T1 });
+const normalizedHost = normalizedHarness.container.querySelector(".program-main-output-render-host");
+const normalizedNode = normalizedHarness.container.querySelector('[data-render-id="program-main-score-laurel"]');
+assert.equal(normalizedNode.style.left, "6.25%");
+assert.match(normalizedNode.style.width, /^58\.333/);
+const normalizedGeometry = {
+  left: normalizedNode.style.left,
+  top: normalizedNode.style.top,
+  width: normalizedNode.style.width,
+  height: normalizedNode.style.height,
+  transform: normalizedNode.style.transform
+};
+const normalizedLive = structuredClone(normalized);
+normalizedLive.sourceRevision = 2;
+normalizedLive.routeRevision = 2;
+normalizedLive.resolvedAt = T2;
+normalizedLive.projection.revision = 2;
+normalizedLive.projection.sourceRevision = 20;
+normalizedLive.projection.programRevision = 2;
+normalizedLive.projection.transitionMode = "live";
+normalizedLive.projection.components.forEach((entry) => {
+  entry.data["properties.value"] = 33;
+});
+normalizedLive.projection.composition.components = structuredClone(normalizedLive.projection.components);
+normalizedLive.projection.composition.data.score = { total: 33 };
+applyProgramMainProjection(normalizedHarness.instance, normalizedLive, { now: T2 });
+assert.equal(normalizedHarness.container.querySelector(".program-main-output-render-host"), normalizedHost);
+assert.equal(
+  normalizedHarness.container.querySelector('[data-render-id="program-main-score-laurel"]'),
+  normalizedNode
+);
+assert.deepEqual({
+  left: normalizedNode.style.left,
+  top: normalizedNode.style.top,
+  width: normalizedNode.style.width,
+  height: normalizedNode.style.height,
+  transform: normalizedNode.style.transform
+}, normalizedGeometry);
+assert.match(normalizedNode.textContent, /33/);
+assert.equal(normalizedHarness.container.querySelectorAll(".program-main-output-render-host").length, 1);
+assert.equal(normalizedHarness.container.querySelector("[data-program-main-output-id]").getAttribute("data-route-revision"), "2");
+for (const viewport of [
+  { width: 1920, height: 1080, scale: 1 },
+  { width: 1440, height: 900, scale: 0.75 },
+  { width: 1024, height: 768, scale: 1024 / 1920 },
+  { width: 390, height: 844, scale: 390 / 1920 }
+]) {
+  setProgramMainOutputViewport(normalizedHarness.instance, viewport);
+  const canvas = normalizedHarness.container.querySelector(".cp-component-renderer-canvas");
+  assert.equal(canvas.style.transform, `scale(${viewport.scale})`);
+  assert.deepEqual({
+    left: normalizedNode.style.left,
+    top: normalizedNode.style.top,
+    width: normalizedNode.style.width,
+    height: normalizedNode.style.height,
+    transform: normalizedNode.style.transform
+  }, normalizedGeometry);
+}
+
+// A restarted authorized publisher may establish a newer Program with a fresh local revision baseline.
+const restartedPublisher = activeEnvelope({ revision: 2, name: "publisher-restart", resolvedAt: T3 });
+const restartedRoot = normalizedHarness.container.querySelector("[data-program-main-output-id]");
+applyProgramMainProjection(normalizedHarness.instance, restartedPublisher, { now: T3 });
+assert.equal(getProgramMainOutput(normalizedHarness.instance).programId, "program-publisher-restart");
+assert.equal(restartedRoot.getAttribute("data-route-revision"), "2");
+assert.equal(normalizedHarness.container.querySelectorAll("[data-program-main-output-id]").length, 1);
+const restartedState = getProgramMainOutput(normalizedHarness.instance);
+assert.throws(
+  () => applyProgramMainProjection(normalizedHarness.instance, normalizedLive, { now: T3 }),
+  (error) => [PROGRAM_MAIN_OUTPUT_ERROR_CODES.REVISION_REGRESSION, PROGRAM_MAIN_OUTPUT_ERROR_CODES.REVISION_CONFLICT].includes(error.code)
+);
+assert.deepEqual(getProgramMainOutput(normalizedHarness.instance), restartedState);
+
 // Program B removes sponsor, adds lower third and timer, and leaves no A residue.
 const extrasB = [
   component("lower-third", "text", "lower-third", 10, { x: 140, y: 820, width: 900, height: 100, zIndex: 50 }, { text: "Final por equipos" }, { text: "Final por equipos" }),
@@ -503,7 +599,9 @@ assert.equal(four.container.querySelectorAll("[data-render-id]").filter((node) =
 
 // Empty, disabled and unavailable clear old visual content without destroying the root.
 const empty = emptyEnvelope(5);
-result = applyProgramMainProjection(lifecycle, empty, { now: T3 });
+empty.resolvedAt = T4;
+empty.projection.generatedAt = T4;
+result = applyProgramMainProjection(lifecycle, empty, { now: T4 });
 assert.equal(result.status, "empty");
 assert.equal(root.getAttribute("data-layer-count"), "0");
 assert.equal(lifecycleContainer.querySelectorAll("[data-render-id]").length, 0);
@@ -517,11 +615,15 @@ assert.equal(lifecycleContainer.querySelectorAll("[data-render-id]").length, 0);
 const disabled = emptyEnvelope(7);
 disabled.status = "disabled";
 disabled.projection.state = "disabled";
+disabled.resolvedAt = T4;
+disabled.projection.generatedAt = T4;
 result = applyProgramMainProjection(lifecycle, disabled, { now: T4 });
 assert.equal(result.status, "disabled");
 const unavailable = emptyEnvelope(8);
 unavailable.status = "unavailable";
 unavailable.projection.state = "unavailable";
+unavailable.resolvedAt = T4;
+unavailable.projection.generatedAt = T4;
 result = applyProgramMainProjection(lifecycle, unavailable, { now: T4 });
 assert.equal(result.status, "unavailable");
 

@@ -2,22 +2,22 @@ import {
   getOutputRoute,
   routeAnnouncerMonitor,
   routeProgramToOutput
-} from "./outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
-import { getProgramSnapshot } from "./programEngine.js?v=20260715-program-engine-001-official-program-v1";
+} from "./outputRouting.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import { getProgramSnapshot } from "./programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   applyProgramMainProjection,
   buildProgramMainOutputSnapshot,
   clearProgramMainOutput,
   getProgramMainOutputStatus,
   validateProgramMainProjection
-} from "./programMainOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+} from "./programMainOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   clearAnnouncerMonitor,
   getAnnouncerSnapshot,
   getAnnouncerStatus,
   updateAnnouncerMonitor,
   validateAnnouncerProjection
-} from "./announcerMonitor.js?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
+} from "./announcerMonitor.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const OUTPUT_SYNCHRONIZATION_VERSION = "1.0.0";
 

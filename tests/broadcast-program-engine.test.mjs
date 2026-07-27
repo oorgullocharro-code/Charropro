@@ -18,6 +18,7 @@ import {
   prepareProgram,
   takeProgram,
   updateProgram,
+  updateProgramLiveData,
   validateProgram
 } from "../js/broadcast/programEngine.js";
 
@@ -125,6 +126,7 @@ assert.deepEqual(Object.keys(programApi).sort(), [
   "prepareProgram",
   "takeProgram",
   "updateProgram",
+  "updateProgramLiveData",
   "validateProgram"
 ].sort());
 assert.equal(PROGRAM_ENGINE_VERSION, "1.0.0");
@@ -281,6 +283,43 @@ assert.equal(cleared.state, "ready");
 assert.equal(hasProgram(engine), false);
 assert.equal(getProgramSnapshot(engine, { now: T4 }).program, null);
 assert.throws(() => takeProgram(engine), (error) => error.code === "program-not-prepared");
+
+const liveEngine = createProgramEngine({ engineId: "official_program_live", now: T0 });
+const liveSource = previewSnapshot();
+liveSource.preview.components[0].bindings = [{
+  bindingId: "live-ranking",
+  source: "broadcast_contract",
+  path: "ranking.entries",
+  target: "properties.rows"
+}];
+liveSource.preview.composition.components = structuredClone(liveSource.preview.components);
+prepareProgram(liveEngine, liveSource, { now: T1, rendererId: "renderer_live" });
+const liveBefore = takeProgram(liveEngine, { now: T2 });
+const liveGeometry = structuredClone(liveBefore.components[0].geometry);
+const liveContract = {
+  revision: 10,
+  ranking: { entries: [{ position: 1, teamId: "team_tijuana", name: "Rancheros de Tijuana", total: 25 }] },
+  score: { total: 25 },
+  turn: { team: { id: "team_tijuana", name: "Rancheros de Tijuana" } }
+};
+const liveUpdated = updateProgramLiveData(liveEngine, liveContract, { now: T3 });
+assert.equal(liveUpdated.programId, liveBefore.programId);
+assert.equal(liveUpdated.templateId, liveBefore.templateId);
+assert.equal(liveUpdated.themeId, liveBefore.themeId);
+assert.equal(liveUpdated.transitionMode, "live");
+assert.equal(liveUpdated.revision, liveBefore.revision + 1);
+assert.equal(liveUpdated.components[0].data["properties.rows"][0].total, 25);
+assert.equal(JSON.stringify(liveUpdated.components[0].geometry), JSON.stringify(liveGeometry));
+assert.equal(updateProgramLiveData(liveEngine, structuredClone(liveContract), { now: T4 }).revision, liveUpdated.revision);
+assert.throws(
+  () => updateProgramLiveData(liveEngine, { ...liveContract, ranking: { entries: [] } }, { now: T4 }),
+  (error) => error.code === "program-live-revision-conflict"
+);
+assert.throws(
+  () => updateProgramLiveData(liveEngine, { ...liveContract, revision: 9 }, { now: T4 }),
+  (error) => error.code === "program-live-revision-regression"
+);
+destroyProgramEngine(liveEngine, { now: T4 });
 
 prepareProgram(engine, previewSnapshot(), { now: T4 });
 takeProgram(engine, { now: T4 });

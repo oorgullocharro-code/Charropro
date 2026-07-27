@@ -9,13 +9,14 @@ import {
   setBrowserOutputDisplayMode,
   setBrowserOutputViewport,
   validateBrowserOutputProjection
-} from "./browserOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+} from "./browserOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   clearBroadcastComponentRenderer,
   createComponentRenderer,
   destroyComponentRenderer,
   getComponentRenderWarnings,
-  renderBroadcastComponent
+  renderBroadcastComponent,
+  updateBroadcastComponentRender
 } from "./componentRenderer.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
 import {
   buildComponentInstance,
@@ -283,15 +284,18 @@ export function applyProgramMainProjection(instance, envelope, options = {}) {
     throw outputError(validation.code || PROGRAM_MAIN_OUTPUT_ERROR_CODES.PROJECTION_INVALID, { errors: validation.errors });
   }
   const normalized = normalizeEnvelope(envelope, validation.visibility);
-  assertRevisionOrder(instance, runtime, normalized);
+  const revisionBaselineReset = canResetProgramRevisionBaseline(instance, runtime, normalized);
   const fingerprint = stableFingerprint(normalized);
-  if (instance.routeRevision === normalized.routeRevision && instance.sourceRevision === normalized.sourceRevision) {
+  if (!revisionBaselineReset
+    && instance.routeRevision === normalized.routeRevision
+    && instance.sourceRevision === normalized.sourceRevision) {
     if (runtime.lastFingerprint === fingerprint) return getProgramMainOutput(instance);
     throw outputError(PROGRAM_MAIN_OUTPUT_ERROR_CODES.REVISION_CONFLICT, {
       routeRevision: normalized.routeRevision,
       sourceRevision: normalized.sourceRevision
     });
   }
+  assertRevisionOrder(instance, runtime, normalized, revisionBaselineReset);
 
   const now = normalizeNow(options.now || normalized.resolvedAt);
   const nextState = projectionState(normalized);
@@ -299,14 +303,19 @@ export function applyProgramMainProjection(instance, envelope, options = {}) {
     ? runtime.lastValidProjection ? cloneProgramMainOutputResult(runtime.lastValidProjection) : null
     : normalized.projection;
   let preparedRender = null;
-  if (nextState === "ready") preparedRender = prepareRender(runtime, instance, nextProjection, now);
+  if (nextState === "ready") {
+    preparedRender = canUpdateRenderedComposition(runtime, nextProjection)
+      ? prepareLiveRenderUpdate(runtime, nextProjection, now)
+      : prepareRender(runtime, instance, nextProjection, now);
+  }
 
   syncInstance(instance, { status: "applying", renderStatus: "rendering", updatedAt: now });
   try {
     applyBrowserOutputProjection(runtime.browserOutput, browserCompatibleEnvelope(normalized), {
       now,
       visibility: validation.visibility,
-      context: options.context
+      context: options.context,
+      allowProgramRevisionBaselineReset: revisionBaselineReset
     });
     if (nextState === "ready") commitPreparedRender(runtime, preparedRender);
     else if (nextState !== "stale") clearRenderedComposition(runtime, now);
@@ -833,6 +842,7 @@ function prepareRender(runtime, instance, projection, now) {
       });
     });
     return {
+      mode: "replace",
       host,
       renderer,
       warnings: getComponentRenderWarnings(renderer),
@@ -845,10 +855,51 @@ function prepareRender(runtime, instance, projection, now) {
   }
 }
 
+function prepareLiveRenderUpdate(runtime, projection, now) {
+  const orderedNext = orderComponents(projection.components, projection.layers);
+  const orderedCurrent = orderComponents(runtime.currentProjection.components, runtime.currentProjection.layers);
+  const currentById = new Map(orderedCurrent.map((component) => [component.componentId, component]));
+  const updates = orderedNext.map((component) => {
+    const current = currentById.get(component.componentId);
+    if (!current) throw outputError(PROGRAM_MAIN_OUTPUT_ERROR_CODES.RENDER_FAILED, { componentId: component.componentId });
+    return {
+      renderId: `program-main-${component.componentId}`,
+      next: componentToRendererUpdate(component, projection.composition, projection.visibility, now),
+      previous: componentToRendererUpdate(
+        current,
+        runtime.currentProjection.composition,
+        runtime.currentProjection.visibility,
+        now
+      )
+    };
+  });
+  return {
+    mode: "live",
+    renderer: runtime.renderer,
+    updates,
+    warnings: [],
+    errors: []
+  };
+}
+
+function componentToRendererUpdate(component, composition, visibility, now) {
+  return {
+    instance: componentToRendererInstance(component, composition, visibility, now),
+    options: {
+      resolvedContent: cloneProgramMainOutputResult(component.content || {}),
+      resolvedBindings: cloneProgramMainOutputResult(component.data || {}),
+      resolvedAssets: {},
+      visibility,
+      now
+    }
+  };
+}
+
 function componentToRendererInstance(component, composition, visibility, now) {
   const width = Number(composition.geometry.width) || 1920;
   const height = Number(composition.geometry.height) || 1080;
   const raw = component.geometry || {};
+  const normalizedGeometry = normalizeRendererGeometry(raw, width, height);
   const definition = createBroadcastComponent({
     componentId: normalizeId(component.sourceComponentId) || normalizeId(component.componentId),
     name: normalizeText(component.metadata?.name) || normalizeText(component.componentType) || "Program component",
@@ -861,10 +912,10 @@ function componentToRendererInstance(component, composition, visibility, now) {
       ? "disabled" : "active",
     style: { ...(component.style || {}), opacity: Number(component.opacity) },
     layout: {
-      x: Number(raw.x) / width,
-      y: Number(raw.y) / height,
-      width: Number(raw.width) / width,
-      height: Number(raw.height) / height,
+      x: normalizedGeometry.x,
+      y: normalizedGeometry.y,
+      width: normalizedGeometry.width,
+      height: normalizedGeometry.height,
       rotation: Number(raw.rotation) || 0,
       anchor: normalizeId(raw.anchor) || "center",
       scale: Number(raw.scale) || 1,
@@ -890,6 +941,29 @@ function componentToRendererInstance(component, composition, visibility, now) {
   }, { now });
 }
 
+function normalizeRendererGeometry(raw, designWidth, designHeight) {
+  const declared = String(raw?.unit || raw?.units || raw?.coordinateSpace || "").trim().toLowerCase();
+  const values = ["x", "y", "width", "height"].map((field) => Number(raw?.[field]));
+  const normalized = ["normalized", "relative", "ratio"].includes(declared)
+    || (!["pixel", "pixels", "px", "design"].includes(declared)
+      && values.every(Number.isFinite)
+      && values.every((value) => Math.abs(value) <= 2));
+  if (normalized) {
+    return {
+      x: Number(raw.x),
+      y: Number(raw.y),
+      width: Number(raw.width),
+      height: Number(raw.height)
+    };
+  }
+  return {
+    x: Number(raw.x) / designWidth,
+    y: Number(raw.y) / designHeight,
+    width: Number(raw.width) / designWidth,
+    height: Number(raw.height) / designHeight
+  };
+}
+
 function orderComponents(components, layers) {
   const layerMap = new Map((layers || []).map((layer) => [layer.layerId, layer]));
   return components.map((component) => ({
@@ -907,6 +981,35 @@ function orderComponents(components, layers) {
 
 function commitPreparedRender(runtime, prepared) {
   if (!prepared) return;
+  if (prepared.mode === "live") {
+    const applied = [];
+    try {
+      prepared.updates.forEach((update) => {
+        updateBroadcastComponentRender(
+          prepared.renderer,
+          update.renderId,
+          update.next.instance,
+          update.next.options
+        );
+        applied.push(update);
+      });
+      prepared.warnings = getComponentRenderWarnings(prepared.renderer);
+      prepared.errors = uniqueStrings(prepared.renderer.errors || []);
+      return;
+    } catch (error) {
+      applied.reverse().forEach((update) => {
+        try {
+          updateBroadcastComponentRender(
+            prepared.renderer,
+            update.renderId,
+            update.previous.instance,
+            update.previous.options
+          );
+        } catch { /* preserve the last valid renderer when rollback is partial */ }
+      });
+      throw error;
+    }
+  }
   const previousRenderer = runtime.renderer;
   const previousHost = runtime.rendererHost;
   prepared.host.className = "program-main-output-render-host";
@@ -918,8 +1021,55 @@ function commitPreparedRender(runtime, prepared) {
 
 function discardPreparedRender(prepared) {
   if (!prepared) return;
+  if (prepared.mode === "live") return;
   try { destroyComponentRenderer(prepared.renderer); } catch { /* already discarded */ }
   prepared.host?.remove?.();
+}
+
+function canUpdateRenderedComposition(runtime, projection) {
+  if (!runtime.renderer || !runtime.rendererHost || !runtime.currentProjection) return false;
+  if (projection.transitionMode !== "live") return false;
+  return stableFingerprint(projectionStructure(runtime.currentProjection))
+    === stableFingerprint(projectionStructure(projection));
+}
+
+function projectionStructure(projection) {
+  const composition = projection?.composition || {};
+  return {
+    programId: projection?.programId,
+    previewId: projection?.previewId,
+    templateId: projection?.templateId,
+    themeId: projection?.themeId,
+    appliedThemeId: projection?.appliedThemeId,
+    visibility: projection?.visibility,
+    composition: {
+      compositionId: composition.compositionId,
+      rootComponentId: composition.rootComponentId,
+      templateId: composition.templateId,
+      themeId: composition.themeId,
+      geometry: composition.geometry,
+      safeArea: composition.safeArea,
+      transparentBackground: composition.transparentBackground,
+      background: composition.background
+    },
+    layers: projection?.layers,
+    components: (projection?.components || []).map((component) => ({
+      componentId: component.componentId,
+      sourceComponentId: component.sourceComponentId,
+      componentType: component.componentType,
+      parentId: component.parentId,
+      layerId: component.layerId,
+      order: component.order,
+      visibility: component.visibility,
+      geometry: component.geometry,
+      opacity: component.opacity,
+      bindings: component.bindings,
+      style: component.style,
+      properties: component.properties,
+      assetRefs: component.assetRefs,
+      metadata: component.metadata
+    }))
+  };
 }
 
 function clearRenderedComposition(runtime, now) {
@@ -976,6 +1126,16 @@ function applyRootPresentation(instance, runtime) {
   safeAttribute(root, "data-route-id", instance.routeId);
   safeAttribute(root, "data-output-id", instance.outputId);
   safeAttribute(root, "data-program-id", instance.programId || "");
+  safeAttribute(root, "data-projection-revision", String(instance.projectionRevision));
+  safeAttribute(root, "data-route-revision", instance.routeRevision === null ? "" : String(instance.routeRevision));
+  safeAttribute(root, "data-source-revision", instance.sourceRevision === null ? "" : String(instance.sourceRevision));
+  safeAttribute(
+    root,
+    "data-live-source-revision",
+    runtime.currentProjection?.sourceRevision === null || runtime.currentProjection?.sourceRevision === undefined
+      ? ""
+      : String(runtime.currentProjection.sourceRevision)
+  );
   safeAttribute(root, "data-layer-count", String(Array.isArray(runtime.currentProjection?.layers) ? runtime.currentProjection.layers.length : 0));
   safeAttribute(root, "data-display-mode", instance.displayMode);
   safeAttribute(root, "data-orientation", instance.orientation);
@@ -1013,7 +1173,17 @@ function updateRendererScale(instance, runtime) {
   canvas.style.transform = `scale(${Math.max(0.0001, scale)})`;
 }
 
-function assertRevisionOrder(instance, runtime, envelope) {
+function assertRevisionOrder(instance, runtime, envelope, revisionBaselineReset = false) {
+  const currentProgramId = normalizeNullableId(instance.programId);
+  const nextProgramId = normalizeNullableId(envelope?.projection?.programId);
+  if (runtime.currentEnvelope && currentProgramId !== nextProgramId) {
+    const currentTime = Date.parse(runtime.currentEnvelope.resolvedAt || "");
+    const nextTime = Date.parse(envelope.resolvedAt || "");
+    if (Number.isFinite(currentTime) && Number.isFinite(nextTime) && nextTime < currentTime) {
+      throw outputError(PROGRAM_MAIN_OUTPUT_ERROR_CODES.REVISION_REGRESSION, { field: "resolvedAt" });
+    }
+  }
+  if (revisionBaselineReset) return;
   if (instance.routeRevision !== null && envelope.routeRevision < instance.routeRevision) {
     throw outputError(PROGRAM_MAIN_OUTPUT_ERROR_CODES.REVISION_REGRESSION, { field: "routeRevision" });
   }
@@ -1024,6 +1194,19 @@ function assertRevisionOrder(instance, runtime, envelope) {
     && envelope.sourceRevision !== instance.sourceRevision) {
     throw outputError(PROGRAM_MAIN_OUTPUT_ERROR_CODES.REVISION_CONFLICT, { field: "sourceRevision" });
   }
+}
+
+function canResetProgramRevisionBaseline(instance, runtime, envelope) {
+  if (!runtime.currentEnvelope) return false;
+  const currentProgramId = normalizeNullableId(instance.programId);
+  const nextProgramId = normalizeNullableId(envelope?.projection?.programId);
+  if (currentProgramId === nextProgramId) return false;
+  const routeDidNotAdvance = instance.routeRevision !== null && envelope.routeRevision <= instance.routeRevision;
+  const sourceDidNotAdvance = instance.sourceRevision !== null && envelope.sourceRevision <= instance.sourceRevision;
+  if (!routeDidNotAdvance && !sourceDidNotAdvance) return false;
+  const currentTime = Date.parse(runtime.currentEnvelope.resolvedAt || "");
+  const nextTime = Date.parse(envelope.resolvedAt || "");
+  return Number.isFinite(currentTime) && Number.isFinite(nextTime) && nextTime > currentTime;
 }
 
 function contextConflictErrors(config, envelope, extraContext) {
@@ -1168,7 +1351,9 @@ function safeClone(value, options = {}, state = null) {
     if (entries.length > MAX_OBJECT_KEYS) context.errors.push(`${context.path}:object-limit`);
     for (const [key, descriptor] of entries.slice(0, MAX_OBJECT_KEYS)) {
       const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (DANGEROUS_KEYS.has(key) || FORBIDDEN_KEYS.has(normalizedKey) || SECRET_KEYS.has(normalizedKey)) {
+      if (DANGEROUS_KEYS.has(key)
+        || (FORBIDDEN_KEYS.has(normalizedKey) && !isDeclarativeBindingTarget(key, context.path, descriptor.value))
+        || SECRET_KEYS.has(normalizedKey)) {
         if (options.rejectUnsafe !== false) context.errors.push(`${context.path}.${key}:key-forbidden`);
         continue;
       }
@@ -1186,6 +1371,12 @@ function safeClone(value, options = {}, state = null) {
   }
   context.ancestors.delete(value);
   return { value: result, errors: uniqueStrings(context.errors), warnings: uniqueStrings(context.warnings) };
+}
+
+function isDeclarativeBindingTarget(key, path, value) {
+  return key === "target"
+    && typeof value === "string"
+    && /(?:^|\.)bindings\[\d+]$/.test(path);
 }
 
 function stableFingerprint(value) {

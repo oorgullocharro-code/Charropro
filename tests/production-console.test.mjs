@@ -111,13 +111,13 @@ import {
   createBroadcastRealtimeTransport,
   destroyBroadcastRealtimeTransport
 } from "../js/broadcast/broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
-import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
-import { destroyProgramEngine, validateProgram } from "../js/broadcast/programEngine.js?v=20260715-program-engine-001-official-program-v1";
+import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import { destroyProgramEngine, validateProgram } from "../js/broadcast/programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   destroyOutputRoutingEngine,
   listOutputRoutes,
   validateOutputRoutingSnapshot
-} from "../js/broadcast/outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
+} from "../js/broadcast/outputRouting.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   configureOutputSynchronization,
   createOutputSynchronization,
@@ -129,7 +129,7 @@ import {
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
@@ -154,7 +154,7 @@ import {
   THEME_TEMPLATE_INTEGRATION_VERSION,
   destroyThemeTemplateIntegration,
   validateThemeTemplateSnapshot
-} from "../js/broadcast/themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
+} from "../js/broadcast/themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -163,7 +163,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260716-broadcast-context-resolution-001-real-context-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260727-broadcast-live-graphics-001-live-data-geometry-v1e");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");
@@ -868,6 +868,7 @@ const liveTemplateText = JSON.stringify(liveTemplateModel.templateRendererPrepar
 assert.equal(liveTemplateText.includes("Clasificación Oficial en Vivo"), true, "official Templates consume the live Broadcast Data Contract");
 assert.equal(liveTemplateText.includes("Cuenca del Papaloapan"), false, "official Templates never retain the laboratory team");
 const sparseFirebaseContract = structuredClone(liveContract);
+sparseFirebaseContract.revision = liveContractUpdate.revision + 1;
 for (const field of ["organization", "sponsor", "branding", "customFields", "warnings", "errors"]) delete sparseFirebaseContract[field];
 const sparseLiveModel = applyProductionConsoleRealtimeContract(liveModel, liveRuntime, sparseFirebaseContract, { now: T4 });
 assert.equal(validateBroadcastDataContract(sparseLiveModel.contract).valid, true, "RTDB empty-node omissions are rehydrated through the canonical contract builder");

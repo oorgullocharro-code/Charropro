@@ -23,8 +23,10 @@ import {
   resolveProductionConsoleOutputRoute,
   selectProductionConsoleTemplate,
   selectProductionConsoleTemplateFixture,
-  takeProductionConsoleOfficialProgram
-} from "./productionConsole.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
+  takeProductionConsoleOfficialProgram,
+  updateProductionConsoleOfficialPreviewLiveData,
+  updateProductionConsoleOfficialProgramLiveData
+} from "./productionConsole.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   applyProgramMainProjection,
   clearProgramMainOutput,
@@ -32,17 +34,17 @@ import {
   createProgramMainOutput,
   destroyProgramMainOutput,
   mountProgramMainOutput
-} from "./programMainOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+} from "./programMainOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import { destroyTemplateRendererIntegration } from "./templateRendererIntegration.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
-import { destroyThemeTemplateIntegration } from "./themeTemplateIntegration.js?v=20260714-theme-template-integration-001-themed-compositions-v1";
-import { destroyPreviewEngine } from "./previewEngine.js?v=20260715-preview-engine-001-official-preview-v1";
-import { destroyProgramEngine } from "./programEngine.js?v=20260715-program-engine-001-official-program-v1";
-import { destroyOutputRoutingEngine } from "./outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
+import { destroyThemeTemplateIntegration } from "./themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import { destroyPreviewEngine } from "./previewEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import { destroyProgramEngine } from "./programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+import { destroyOutputRoutingEngine } from "./outputRouting.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import { destroyBroadcastRealtimeTransport } from "./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
-import { destroyLiveBindingsEngine } from "./liveBindings.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
+import { destroyLiveBindingsEngine } from "./liveBindings.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const BROADCAST_STUDIO_WORKSPACE_VERSION = "1.0.0";
-export const BROADCAST_STUDIO_APP_VERSION = "20260716-broadcast-workspace-context-bridge-001-auto-context-v1";
+export const BROADCAST_STUDIO_APP_VERSION = "20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 export const BROADCAST_STUDIO_FILTERS = Object.freeze([
   Object.freeze({ id: "all", label: "Todos" }),
@@ -412,7 +414,7 @@ export function createBroadcastStudioEngine(options = {}) {
     if (model.realtimeSourceReady === true && runtime.realtimeTransport) {
       model = await publishProductionConsoleRealtime(model, runtime, "all", {
         clear: options.clear === true,
-        idempotencyKey: `broadcast-studio-${options.action || "program"}-${Date.now()}`
+        idempotencyKey: options.idempotencyKey || `broadcast-studio-${options.action || "program"}-${Date.now()}`
       });
     }
     return envelope;
@@ -481,12 +483,39 @@ export function createBroadcastStudioEngine(options = {}) {
         await runtime.contextBridge?.update({ status: "ready", context: refreshed, reason: "live-contract-context-changed" });
         return;
       }
+      const previousContractRevision = Number(model.realtimeContractRevision);
       model = applyProductionConsoleRealtimeContract(model, runtime, contract);
       ensureVisualPipeline();
+      const contractRevision = Number(model.realtimeContractRevision);
+      const revisionAdvanced = !Number.isInteger(previousContractRevision)
+        || contractRevision > previousContractRevision;
       try {
-        model = await publishProductionConsoleRealtime(model, runtime, "announcer", {
-          idempotencyKey: `broadcast-studio-announcer-${Date.now()}`
-        });
+        if (revisionAdvanced && model.officialPreview?.status === "rendered") {
+          model = updateProductionConsoleOfficialPreviewLiveData(
+            model,
+            runtime.officialPreviewEngine,
+            contract
+          );
+        }
+        const previousProgramRevision = Number(model.officialProgram?.revision);
+        if (revisionAdvanced && model.officialProgram?.status === "program") {
+          model = updateProductionConsoleOfficialProgramLiveData(
+            model,
+            runtime.officialProgramEngine,
+            contract
+          );
+        }
+        const programRevisionAdvanced = Number(model.officialProgram?.revision) > previousProgramRevision;
+        if (revisionAdvanced && programRevisionAdvanced) {
+          await routeProgram({
+            action: "live",
+            idempotencyKey: `broadcast-studio-live-${runtime.realtimeOfficialContext?.sessionId || "session"}-${contractRevision}`
+          });
+        } else if (revisionAdvanced) {
+          model = await publishProductionConsoleRealtime(model, runtime, "announcer", {
+            idempotencyKey: `broadcast-studio-announcer-${runtime.realtimeOfficialContext?.sessionId || "session"}-${contractRevision}`
+          });
+        }
       } catch (error) {
         emit({ connectionState: "error", context: contextFromModel(model, runtime), error: error?.code || error?.message });
         return;
@@ -514,7 +543,7 @@ export function createBroadcastStudioEngine(options = {}) {
       if (disposed) throw workspaceError("broadcast-studio-destroyed");
       emit({ connectionState: "preparing", context: null, operationStatus: "Esperando autenticación", error: null });
       try {
-        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260716-broadcast-workspace-context-bridge-001-auto-context-v1");
+        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e");
         if (typeof runtime.firebaseBroadcastApi.subscribeFirebaseBroadcastContext !== "function") {
           throw workspaceError("broadcast-studio-context-subscriber-unavailable");
         }

@@ -4,25 +4,25 @@ import * as api from "../js/broadcast/outputSynchronization.js";
 import {
   createOutputRoute,
   createOutputRoutingEngine
-} from "../js/broadcast/outputRouting.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
+} from "../js/broadcast/outputRouting.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   createProgramEngine,
   getProgramSnapshot,
   prepareProgram,
   takeProgram
-} from "../js/broadcast/programEngine.js?v=20260715-program-engine-001-official-program-v1";
+} from "../js/broadcast/programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import {
   configureAnnouncerMonitor,
   createAnnouncerMonitor,
   getAnnouncerSnapshot,
   mountAnnouncerMonitor
-} from "../js/broadcast/announcerMonitor.js?v=20260715-announcer-monitor-001-operational-monitor-ndi-ready-v1";
+} from "../js/broadcast/announcerMonitor.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";
