@@ -20,6 +20,7 @@ assert.match(publicRules[".validate"], /metadata/);
 assert.match(publicRules[".validate"], /overview/);
 assert.match(publicRules[".validate"], /program/);
 assert.match(publicRules[".validate"], /live/);
+assert.match(publicRules[".validate"], /liveFeed/);
 assert.match(publicRules[".validate"], /competitions/);
 assert.match(publicRules[".validate"], /results/);
 assert.match(publicRules[".validate"], /rankings/);
@@ -37,6 +38,11 @@ assert.equal(publicRules.results.scopes.$scopeId.$other[".validate"].includes("p
 assert.equal(publicRules.live.turn.$other[".validate"].includes("pendingNote"), false);
 assert.equal(publicRules.live.currentResult.$other[".validate"].includes("notes"), false);
 assert.equal(publicRules.live.standings.$itemId.$other[".validate"].includes("operatorId"), false);
+assert.match(publicRules.liveFeed.items.$eventId[".validate"], /score_published/);
+assert.match(publicRules.liveFeed.items.$eventId[".validate"], /sequence/);
+assert.match(publicRules.liveFeed.items.$eventId[".validate"], /revision/);
+assert.equal(publicRules.liveFeed.items.$eventId.$other[".validate"].includes("judge"), false);
+assert.equal(publicRules.liveFeed.items.$eventId.$other[".validate"].includes("html"), false);
 
 assert.notEqual(liveRules[".read"], true, "live/current is no longer public");
 for (const role of ["supervisor", "operador", "juez", "locutor", "graficos"]) {

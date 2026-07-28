@@ -6,6 +6,7 @@ export const PUBLIC_PORTAL_VIEWS = Object.freeze([
   "resultados",
   "sabana"
 ]);
+export const PUBLIC_PORTAL_FEED_FILTERS = Object.freeze(["all", "score", "turn", "penalty", "timer"]);
 
 const VIEW_SET = new Set(PUBLIC_PORTAL_VIEWS);
 const ID_PATTERN = /^[A-Za-z0-9._:@/-]{1,180}$/;
@@ -31,7 +32,8 @@ export function parsePublicPortalRoute(input, fallback = {}) {
     competitionId: sanitizePortalId(params.get("competitionId") || params.get("competition")),
     categoryId: sanitizePortalId(params.get("categoryId")),
     phaseId: sanitizePortalId(params.get("phaseId")),
-    charreadaId: sanitizePortalId(params.get("charreadaId"))
+    charreadaId: sanitizePortalId(params.get("charreadaId")),
+    feed: sanitizePortalFeedFilter(params.get("feed"))
   };
 }
 
@@ -48,6 +50,7 @@ export function buildPublicPortalUrl(input, patch = {}) {
   setParam(url.searchParams, "categoryId", next.categoryId);
   setParam(url.searchParams, "phaseId", next.phaseId);
   setParam(url.searchParams, "charreadaId", next.charreadaId);
+  setParam(url.searchParams, "feed", next.feed === "all" ? "" : next.feed);
   url.searchParams.delete("competition");
   for (const alias of TOURNAMENT_ALIASES) {
     if (alias !== "tournamentId") url.searchParams.delete(alias);
@@ -69,6 +72,11 @@ export function isPublicPortalView(value) {
   return VIEW_SET.has(String(value || ""));
 }
 
+export function sanitizePortalFeedFilter(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  return PUBLIC_PORTAL_FEED_FILTERS.includes(normalized) ? normalized : "all";
+}
+
 function sanitizeRoutePatch(patch) {
   const clean = {};
   if (Object.prototype.hasOwnProperty.call(patch, "tournamentId")) {
@@ -79,6 +87,9 @@ function sanitizeRoutePatch(patch) {
   }
   for (const key of ["competitionId", "categoryId", "phaseId", "charreadaId"]) {
     if (Object.prototype.hasOwnProperty.call(patch, key)) clean[key] = sanitizePortalId(patch[key]);
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, "feed")) {
+    clean.feed = sanitizePortalFeedFilter(patch.feed);
   }
   return clean;
 }

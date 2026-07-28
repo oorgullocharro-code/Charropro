@@ -8,7 +8,11 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260727-public-foundation-001-projection-v2";
+} from "./publicProjectionSchema.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import {
+  buildPublicLiveFeed,
+  mergePublicLiveFeeds
+} from "./publicLiveFeed.js?v=20260727-public-portal-ux-001-live-feed-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
@@ -111,6 +115,13 @@ export function buildPublicProjection(source = {}, options = {}) {
       standings: liveStandings,
       updatedAt: dateText(liveCurrent.timestamp || liveCurrent.updatedAt || sourceUpdatedAt)
     },
+    liveFeed: buildPublicLiveFeed(tournament, {
+      active,
+      turn,
+      liveCurrent,
+      sourceUpdatedAt,
+      status
+    }),
     competitions: {
       revision: 0,
       status: competitions.length ? "ready" : "empty",
@@ -126,8 +137,14 @@ export function buildPublicProjection(source = {}, options = {}) {
 }
 
 export function reconcilePublicProjection(previous, candidate, options = {}) {
-  const cleanCandidate = sanitizePublicProjectionValue(candidate);
   const previousIsV2 = Number(previous?.schemaVersion) === PUBLIC_PROJECTION_SCHEMA_VERSION;
+  const mergedCandidate = previousIsV2
+    ? {
+      ...candidate,
+      liveFeed: mergePublicLiveFeeds(previous.liveFeed, candidate?.liveFeed)
+    }
+    : candidate;
+  const cleanCandidate = sanitizePublicProjectionValue(mergedCandidate);
   const nowMs = finiteTimestamp(options.nowMs) || Date.now();
   const nowIso = new Date(nowMs).toISOString();
 

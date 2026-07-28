@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260727-public-foundation-001-projection-v2";
+import { logCharroProVersion } from "./version.js?v=20260727-public-portal-ux-001-live-feed-v1";
 
 logCharroProVersion("runtime");
 

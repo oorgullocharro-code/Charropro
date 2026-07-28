@@ -16,7 +16,8 @@ assert.deepEqual(initial, {
   competitionId: "charro-libre",
   categoryId: "",
   phaseId: "",
-  charreadaId: "final-1"
+  charreadaId: "final-1",
+  feed: "all"
 });
 
 assert.equal(parsePublicPortalRoute("/torneo-publico.html?tournamentId=torneo_1&view=desconocida").view, "inicio");
@@ -29,6 +30,8 @@ assert.equal(sanitizePortalId("<img src=x onerror=alert(1)>"), "");
 assert.equal(sanitizePortalId("javascript:alert(1)"), "");
 assert.equal(isPublicPortalView("sabana"), true);
 assert.equal(isPublicPortalView("admin"), false);
+assert.equal(parsePublicPortalRoute("/torneo-publico.html?view=en-vivo&feed=score").feed, "score");
+assert.equal(parsePublicPortalRoute("/torneo-publico.html?view=en-vivo&feed=<script>").feed, "all");
 
 const sharedUrl = buildPublicPortalUrl(
   "https://example.test/torneo-publico.html?tournamentId=torneo_1&view=resultados&competition=equipos",
@@ -45,6 +48,10 @@ assert.equal(
   "/torneo-publico.html?tournamentId=torneo_1&view=sabana&competitionId=charro-libre&categoryId=libre&phaseId=final&charreadaId=charreada-3"
 );
 assert.equal(sharedUrl.includes("competition="), false);
+assert.equal(
+  buildPublicPortalUrl("/torneo-publico.html?tournamentId=torneo_1&view=en-vivo", { feed: "timer" }),
+  "/torneo-publico.html?tournamentId=torneo_1&view=en-vivo&feed=timer"
+);
 
 const history = [
   buildPublicPortalUrl("/torneo-publico.html?tournamentId=torneo_1", { view: "programa" }),

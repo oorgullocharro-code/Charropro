@@ -20,13 +20,13 @@ import {
 import {
   buildPublicProjection,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260727-public-foundation-001-projection-v2";
+} from "../public/publicProjection.js?v=20260727-public-portal-ux-001-live-feed-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260727-public-foundation-001-projection-v2";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260727-public-portal-ux-001-live-feed-v1";
 import {
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260727-public-foundation-001-projection-v2";
+} from "../public/publicProjectionSchema.js?v=20260727-public-portal-ux-001-live-feed-v1";
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD1GjI5EJYAMhe1JRM7nETHQSqHceiBBD8",

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Fixture responsive Portal Publico UX</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #20242b;
+    }
+
+    iframe {
+      height: 844px;
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #596273;
+      background: #090b10;
+    }
+
+    #mobile-live {
+      width: 435px;
+    }
+
+    #mobile-sheet {
+      width: 365px;
+      height: 568px;
+    }
+  </style>
+</head>
+<body>
+  <iframe
+    id="mobile-live"
+    title="Portal Publico En Vivo movil"
+    src="./public-portal-ux.html?fixtureView=en-vivo"
+  ></iframe>
+  <iframe
+    id="mobile-sheet"
+    title="Sabana publica movil"
+    src="./public-portal-ux.html?fixtureView=sabana"
+  ></iframe>
+</body>
+</html>

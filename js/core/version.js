@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260727-public-foundation-001-projection-v2";
+export const CHARROPRO_APP_VERSION = "20260727-public-portal-ux-001-live-feed-v1";
 
 let versionLogged = false;
 

@@ -1,4 +1,5 @@
 import { getCompetitionType } from "../data/competitionTypes.js?v=20260727-public-foundation-001-projection-v2";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260727-public-portal-ux-001-live-feed-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },
@@ -69,7 +70,7 @@ export function buildPortalSheet(results = [], competition = null) {
 export function getPortalViewDependencies(view) {
   const dependencies = {
     inicio: ["metadata", "overview", "live", "program", "competitions", "results"],
-    "en-vivo": ["overview", "live"],
+    "en-vivo": ["overview", "live", "liveFeed"],
     programa: ["overview", "program", "competitions"],
     competencias: ["overview", "program", "competitions", "results"],
     resultados: ["overview", "competitions", "results"],
@@ -103,6 +104,15 @@ function buildV2PortalModel(snapshot, options) {
     ? program.filter((item) => item.charreadaId === filters.charreadaId)
     : program;
   const live = normalizeV2Live(snapshot.live, snapshot.overview, competitions, program);
+  const liveFeed = buildPublicLiveFeedModel(snapshot.liveFeed, {
+    live,
+    program,
+    results: rawResults
+  }, {
+    filter: options.feed,
+    connection: options.connection,
+    nowMs: options.nowMs
+  });
   const sheet = buildPortalSheet(results, selectedCompetition);
   const resultFilters = buildResultFilters(rawResults, selectedCompetitionId);
   return {
@@ -129,6 +139,7 @@ function buildV2PortalModel(snapshot, options) {
       turn: normalizeTurnSummary(snapshot.overview?.turn)
     },
     live,
+    liveFeed,
     program: selectedProgram,
     competitions,
     selectedCompetition,
@@ -219,6 +230,11 @@ function buildLegacyPortalModel(snapshot, options) {
       turn: live.turn
     },
     live,
+    liveFeed: buildPublicLiveFeedModel({}, { live, program, results: rawResults }, {
+      filter: options.feed,
+      connection: options.connection,
+      nowMs: options.nowMs
+    }),
     program,
     competitions,
     selectedCompetition,
@@ -262,6 +278,11 @@ function buildEmptyPortalModel(options) {
       turn: normalizeTurnSummary()
     },
     live: normalizeV2Live(),
+    liveFeed: buildPublicLiveFeedModel({}, {}, {
+      filter: options.feed,
+      connection: options.connection,
+      nowMs: options.nowMs
+    }),
     program: [],
     competitions: [],
     selectedCompetition: null,
@@ -555,7 +576,7 @@ function buildHomeSummary(snapshot, competitions, program, results, live) {
 
 function readSectionRevisions(snapshot) {
   const output = {};
-  for (const key of ["metadata", "overview", "program", "live", "competitions", "results"]) {
+  for (const key of ["metadata", "overview", "program", "live", "liveFeed", "competitions", "results"]) {
     output[key] = integer(snapshot[key]?.revision, 0);
   }
   return output;

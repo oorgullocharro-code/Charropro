@@ -3,21 +3,21 @@ import {
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260727-public-foundation-001-projection-v2";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260727-public-foundation-001-projection-v2";
+} from "../public/publicPortalClient.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260727-public-portal-ux-001-live-feed-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
-} from "./portalRouter.js?v=20260727-public-portal-core-001-v1";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260727-public-portal-core-001-v1";
+} from "./portalRouter.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260727-public-portal-ux-001-live-feed-v1";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260727-public-portal-core-001-v1";
+} from "./portalRender.js?v=20260727-public-portal-ux-001-live-feed-v1";
 
-export const PUBLIC_PORTAL_CORE_VERSION = "1.0.0";
+export const PUBLIC_PORTAL_CORE_VERSION = "1.1.0";
 
 let activePortal = null;
 
@@ -49,7 +49,9 @@ export function createPublicPortalApp(options = {}) {
     startedAt: performanceNow(),
     renderCount: 0,
     projectionListenerCount: 0,
-    connectionListenerCount: 0
+    connectionListenerCount: 0,
+    displayedFeedIds: new Set(),
+    pendingFeedIds: new Set()
   };
 
   function initialize() {
@@ -59,6 +61,7 @@ export function createPublicPortalApp(options = {}) {
       logoUrl: "./assets/obs/logo-och-original.png"
     });
     runtime.model = buildModel();
+    applyFeedVisibility(runtime.model, false);
     render({ forceView: true });
     root.addEventListener("click", handleClick);
     root.addEventListener("change", handleChange);
@@ -119,6 +122,7 @@ export function createPublicPortalApp(options = {}) {
     runtime.availability = "ready";
     const previousSignatures = runtime.resultSignatures;
     runtime.model = buildModel();
+    applyFeedVisibility(runtime.model, shouldDeferFeedUpdates());
     reconcileResolvedRoute();
     runtime.resultSignatures = buildResultSignatures(runtime.model.allResults);
     const updatedResultIds = compareResultSignatures(previousSignatures, runtime.resultSignatures);
@@ -142,9 +146,22 @@ export function createPublicPortalApp(options = {}) {
     if (!target || !root.contains(target)) return;
     const view = target.dataset.portalView || target.dataset.portalViewTarget;
     const competitionId = target.dataset.portalCompetitionChoice;
-    if (!view && !competitionId) return;
+    const feed = target.dataset.portalFeedFilter;
+    if (target.dataset.portalFeedShowNew !== undefined) {
+      runtime.pendingFeedIds.clear();
+      runtime.model = buildModel();
+      applyFeedVisibility(runtime.model, false);
+      render({ forceView: true });
+      runtime.shell.main.querySelector("[data-portal-feed-list]")?.scrollIntoView({
+        behavior: reducedMotion(environment) ? "auto" : "smooth",
+        block: "start"
+      });
+      return;
+    }
+    if (!view && !competitionId && !feed) return;
     const patch = {};
     if (view) patch.view = view;
+    if (feed) patch.feed = feed;
     if (competitionId) {
       patch.competitionId = competitionId;
       patch.categoryId = "";
@@ -178,10 +195,12 @@ export function createPublicPortalApp(options = {}) {
     });
     runtime.model = buildModel();
     reconcileResolvedRoute({ updateUrl: false });
+    applyFeedVisibility(runtime.model, false);
     render({ forceView: true });
   }
 
   function updateRoute(patch, options = {}) {
+    if (Object.prototype.hasOwnProperty.call(patch, "feed")) runtime.pendingFeedIds.clear();
     const nextUrl = buildPublicPortalUrl(environment.location.href, patch);
     if (options.replace) environment.history.replaceState({ publicPortal: true }, "", nextUrl);
     else environment.history.pushState({ publicPortal: true }, "", nextUrl);
@@ -189,6 +208,7 @@ export function createPublicPortalApp(options = {}) {
       tournamentId: runtime.route.tournamentId
     });
     runtime.model = buildModel();
+    applyFeedVisibility(runtime.model, false);
     reconcileResolvedRoute({ updateUrl: false });
     render({ forceView: true });
   }
@@ -204,6 +224,7 @@ export function createPublicPortalApp(options = {}) {
       charreadaId: ""
     };
     runtime.model = buildModel();
+    applyFeedVisibility(runtime.model, false);
     if (options.updateUrl === false) return;
     const nextUrl = buildPublicPortalUrl(environment.location.href, runtime.route);
     environment.history.replaceState({ publicPortal: true }, "", nextUrl);
@@ -211,18 +232,55 @@ export function createPublicPortalApp(options = {}) {
 
   function checkStale() {
     if (runtime.disposed) return;
+    const previousConnection = runtime.client.connection;
+    const previousFreshness = runtime.model?.liveFeed?.freshness;
     const next = evaluatePublicPortalStale(runtime.client);
-    if (next.connection === runtime.client.connection) return;
     runtime.client = next;
-    renderPublicPortalConnection(runtime.shell, runtime.client.connection);
-    announcePublicPortalChange(runtime.shell, runtime.model, runtime.client.connection);
+    runtime.model = buildModel();
+    applyFeedVisibility(runtime.model, true);
+    if (
+      next.connection !== previousConnection ||
+      previousFreshness !== runtime.model?.liveFeed?.freshness
+    ) {
+      render({ changedSections: ["liveFeed"] });
+      announcePublicPortalChange(runtime.shell, runtime.model, runtime.client.connection);
+    } else {
+      renderPublicPortalConnection(runtime.shell, runtime.client.connection);
+    }
   }
 
   function buildModel() {
     return buildPublicPortalModel(runtime.projection, {
       ...runtime.route,
-      availability: runtime.availability
+      availability: runtime.availability,
+      connection: runtime.client.connection,
+      nowMs: Date.now()
     });
+  }
+
+  function applyFeedVisibility(model, deferNewEvents) {
+    const allItems = model?.liveFeed?.items || [];
+    const allIds = new Set(allItems.map((item) => item.eventId));
+    if (!deferNewEvents) runtime.pendingFeedIds.clear();
+    if (!runtime.displayedFeedIds.size) {
+      runtime.displayedFeedIds = allIds;
+    } else {
+      for (const eventId of allIds) {
+        if (!runtime.displayedFeedIds.has(eventId) && deferNewEvents) runtime.pendingFeedIds.add(eventId);
+        else runtime.displayedFeedIds.add(eventId);
+      }
+    }
+    for (const eventId of [...runtime.pendingFeedIds]) {
+      if (!allIds.has(eventId)) runtime.pendingFeedIds.delete(eventId);
+    }
+    model.liveFeed.items = allItems.filter((item) => !runtime.pendingFeedIds.has(item.eventId));
+    model.liveFeed.pendingCount = runtime.pendingFeedIds.size;
+  }
+
+  function shouldDeferFeedUpdates() {
+    if (runtime.route.view !== "en-vivo" || !runtime.displayedFeedIds.size) return false;
+    const list = runtime.shell?.main?.querySelector("[data-portal-feed-list]");
+    return Boolean(list && list.getBoundingClientRect().top < 80);
   }
 
   function render(renderOptions = {}) {
@@ -271,6 +329,10 @@ export function createPublicPortalApp(options = {}) {
       };
     }
   };
+}
+
+function reducedMotion(environment) {
+  return Boolean(environment.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
 }
 
 function hasUnsupportedSchema(snapshot) {

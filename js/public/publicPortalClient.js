@@ -4,8 +4,8 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260727-public-foundation-001-projection-v2";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260727-public-foundation-001-projection-v2";
+} from "./publicProjectionSchema.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260727-public-portal-ux-001-live-feed-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

@@ -1,9 +1,12 @@
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260727-public-portal-ux-001-live-feed-v1";
+
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([
   "metadata",
   "overview",
   "program",
   "live",
+  "liveFeed",
   "competitions",
   "results",
   "rankings",
@@ -68,6 +71,7 @@ const SECTION_FIELDS = Object.freeze({
     "standings",
     "updatedAt"
   ]),
+  liveFeed: new Set(["revision", "status", "updatedAt", "current", "items"]),
   competitions: new Set(["revision", "status", "items"]),
   results: new Set(["revision", "status", "scopes", "items"]),
   rankings: new Set(["revision", "status", "items"]),
@@ -262,6 +266,8 @@ export function validatePublicProjection(projection) {
     else validateAllowedKeys(projection.live.currentResult, CURRENT_RESULT_FIELDS, "live.currentResult", errors);
   }
   validateItemArray(projection.live?.standings, STANDING_FIELDS, "live.standings", errors);
+  const liveFeedValidation = validatePublicLiveFeed(projection.liveFeed);
+  if (!liveFeedValidation.valid) errors.push(...liveFeedValidation.errors);
   for (const sectionName of ["rankings", "statistics", "search"]) {
     if (projection[sectionName]?.status !== "unavailable") errors.push(`${sectionName}-must-be-unavailable`);
     if (!Array.isArray(projection[sectionName]?.items) || projection[sectionName].items.length) {
@@ -286,6 +292,14 @@ export function validatePublicProjection(projection) {
 export function normalizePublicProjectionCollections(projection) {
   const normalized = sanitizePublicProjectionValue(projection);
   if (!isPlainObject(normalized)) return normalized;
+  if (!isPlainObject(normalized.liveFeed)) {
+    normalized.liveFeed = {
+      revision: 1,
+      status: "empty",
+      current: {},
+      items: {}
+    };
+  }
   for (const sectionName of ["program", "competitions", "rankings", "statistics", "search"]) {
     const section = normalized[sectionName];
     if (isPlainObject(section) && (section.items === null || section.items === undefined)) {
@@ -299,6 +313,8 @@ export function normalizePublicProjectionCollections(projection) {
   if (isPlainObject(normalized.live) && (normalized.live.standings === null || normalized.live.standings === undefined)) {
     normalized.live.standings = [];
   }
+  if (normalized.liveFeed.current === null || normalized.liveFeed.current === undefined) normalized.liveFeed.current = {};
+  if (normalized.liveFeed.items === null || normalized.liveFeed.items === undefined) normalized.liveFeed.items = {};
   return normalized;
 }
 

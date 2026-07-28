@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260727-public-portal-core-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260727-public-portal-ux-001-live-feed-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",
@@ -245,6 +245,7 @@ function renderPortalView(shell, model, uiState, options) {
 
 function renderAvailability(model, uiState) {
   if (model.availability === "ready") return null;
+  if (model.availability === "loading" && uiState.view === "en-vivo") return renderLiveSkeleton();
   const messages = {
     loading: ["Cargando evento", "Esperando la primera actualización pública."],
     "not-found": ["Evento no encontrado", "Verifica el enlace público del torneo."],
@@ -271,7 +272,7 @@ function renderAvailability(model, uiState) {
 function renderView(model, uiState, options) {
   switch (uiState.view) {
     case "en-vivo":
-      return renderLiveView(model);
+      return renderLiveView(model, uiState);
     case "programa":
       return renderProgramView(model);
     case "competencias":
@@ -362,7 +363,7 @@ function renderCompetitionSummary(model) {
   return section;
 }
 
-function renderLiveView(model) {
+function renderLiveView(model, uiState) {
   const fragment = document.createDocumentFragment();
   const heading = viewHeading(
     "En Vivo",
@@ -372,18 +373,23 @@ function renderLiveView(model) {
   fragment.append(heading);
 
   const turn = model.live.turn || {};
-  const main = element("section", "public-portal-live-stage");
+  const main = element("section", "public-portal-live-stage public-portal-now");
+  main.setAttribute("aria-labelledby", "public-portal-now-title");
   const identity = element("div", "public-portal-live-identity");
+  const nowLabel = element("span", "public-portal-kicker", "Ahora");
+  nowLabel.id = "public-portal-now-title";
   identity.append(
-    element("span", "public-portal-kicker", turn.participant?.name ? "Participante en turno" : "Equipo en turno"),
+    nowLabel,
+    element("span", "public-portal-now-context", nowContext(model)),
     element("h3", "", turn.participant?.name || turn.team?.name || "Sin turno oficial")
   );
   const association = turn.participant?.association || turn.team?.association;
   if (association) identity.append(element("p", "", association));
   const suerte = element("div", "public-portal-live-suerte");
   suerte.append(
-    element("span", "", "Suerte"),
-    element("strong", "", turn.suerteName || "No disponible")
+    element("span", "", turn.participant?.name ? "Actividad oficial" : "Suerte"),
+    element("strong", "", turn.suerteName || nowEmptyMessage(model)),
+    renderNowResult(model)
   );
   main.append(identity, suerte);
   fragment.append(main);
@@ -398,7 +404,84 @@ function renderLiveView(model) {
   const standings = sectionPanel("Marcador publicado", model.selectedCompetition?.displayName || "");
   standings.append(renderStandingsTable(model.live.standings));
   fragment.append(standings);
+  fragment.append(renderLiveFeed(model, uiState));
   return fragment;
+}
+
+function renderLiveFeed(model, uiState) {
+  const section = element("section", "public-portal-feed");
+  section.setAttribute("aria-labelledby", "public-portal-feed-title");
+  const header = element("div", "public-portal-feed-heading");
+  const headingCopy = element("div");
+  const kicker = element("span", "public-portal-kicker", "Seguimiento oficial");
+  const title = element("h3", "", "Minuto a minuto");
+  title.id = "public-portal-feed-title";
+  headingCopy.append(kicker, title);
+  const summary = element("span", "public-portal-feed-summary", `${model.liveFeed.totalCount} eventos recientes`);
+  header.append(headingCopy, summary);
+  section.append(header, renderLiveFeedFilters(model.liveFeed.filter || uiState.feed));
+
+  if (model.liveFeed.pendingCount > 0) {
+    const updates = buttonElement(
+      `${model.liveFeed.pendingCount} ${model.liveFeed.pendingCount === 1 ? "actualización nueva" : "actualizaciones nuevas"}`,
+      "public-portal-feed-updates"
+    );
+    updates.dataset.portalFeedShowNew = "";
+    updates.dataset.portalFocusKey = "feed-new-updates";
+    section.append(updates);
+  }
+
+  const freshness = renderFeedFreshness(model.liveFeed);
+  if (freshness) section.append(freshness);
+  if (!model.liveFeed.items.length) {
+    section.append(emptyMessage(feedEmptyMessage(model.liveFeed)));
+    return section;
+  }
+
+  const list = element("ol", "public-portal-feed-list");
+  list.dataset.portalFeedList = "";
+  for (const item of model.liveFeed.items) list.append(renderLiveFeedItem(item));
+  section.append(list);
+  return section;
+}
+
+function renderLiveFeedFilters(activeFilter) {
+  const filters = element("div", "public-portal-feed-filters");
+  filters.setAttribute("aria-label", "Filtrar minuto a minuto");
+  const definitions = [
+    ["all", "Todos"],
+    ["score", "Calificaciones"],
+    ["turn", "Cambios de turno"],
+    ["penalty", "Incidencias"],
+    ["timer", "Cronómetro"]
+  ];
+  for (const [value, label] of definitions) {
+    const button = buttonElement(label, "public-portal-feed-filter");
+    button.dataset.portalFeedFilter = value;
+    button.dataset.portalFocusKey = `feed-${value}`;
+    button.classList.toggle("is-active", value === (activeFilter || "all"));
+    button.setAttribute("aria-pressed", String(value === (activeFilter || "all")));
+    filters.append(button);
+  }
+  return filters;
+}
+
+function renderLiveFeedItem(item) {
+  const row = element("li", "public-portal-feed-item");
+  row.dataset.eventId = item.eventId;
+  const marker = element("span", "public-portal-feed-marker");
+  marker.setAttribute("aria-hidden", "true");
+  const content = element("article", "public-portal-feed-content");
+  const meta = element("div", "public-portal-feed-meta");
+  const time = element("time", "", formatEventTime(item.publishedAt || item.occurredAt));
+  time.dateTime = dateTimeValue(item.publishedAt || item.occurredAt);
+  const state = element("span", "public-portal-feed-state", item.label);
+  state.dataset.kind = item.official ? "official" : "running";
+  meta.append(time, state);
+  content.append(meta, element("h4", "", item.title), element("p", "", item.description));
+  if (item.detail) content.append(element("p", "public-portal-feed-detail", item.detail));
+  row.append(marker, content);
+  return row;
 }
 
 function renderProgramView(model) {
@@ -540,18 +623,21 @@ function renderSheetView(model, uiState, options) {
     headerRow.append(th);
   }
   for (const column of model.sheet.columns) {
-    const th = element("th", "", column.label);
+    const th = element("th");
     th.scope = "col";
+    th.append(abbreviation(column.id, column.label));
     headerRow.append(th);
   }
   if (model.sheet.showPenalty) {
-    const th = element("th", "", "Penalizaciones");
+    const th = element("th");
     th.scope = "col";
+    th.append(abbreviation("PEN", "Penalizaciones"));
     headerRow.append(th);
   }
-  for (const label of ["Total oficial", "Posición oficial"]) {
-    const th = element("th", "", label);
+  for (const [shortLabel, label] of [["TOTAL", "Total oficial"], ["POS", "Posición oficial"]]) {
+    const th = element("th");
     th.scope = "col";
+    th.append(abbreviation(shortLabel, label));
     headerRow.append(th);
   }
   thead.append(groupRow, headerRow);
@@ -666,6 +752,88 @@ function appendScoreCell(row, officialTotal, subtotal) {
   row.append(cell);
 }
 
+function renderNowResult(model) {
+  const result = model.live.currentResult;
+  const container = element("div", "public-portal-now-result");
+  if (!result) {
+    container.append(element("span", "", "Marcador oficial"), element("strong", "", "Sin publicación reciente"));
+    return container;
+  }
+  container.append(
+    element("span", "", "Marcador oficial reciente"),
+    element("strong", "", result.score === null ? "Publicado" : `${formatScore(result.score)} puntos`)
+  );
+  const standing = model.live.standings.find((row) => row.active) || null;
+  if (standing?.total !== null && standing?.total !== undefined) {
+    container.append(element("small", "", `Total oficial: ${formatScore(standing.total)} puntos`));
+  }
+  if (standing?.officialPosition) {
+    container.append(element("small", "", `Posición oficial: ${standing.officialPosition}.º`));
+  }
+  return container;
+}
+
+function nowContext(model) {
+  return [
+    liveStatusLabel(model.live.status),
+    model.live.competitionName,
+    model.live.charreadaName
+  ].filter(Boolean).join(" · ");
+}
+
+function nowEmptyMessage(model) {
+  const status = String(model.live.status || "").toLowerCase();
+  if (["finished", "completed"].includes(status)) return "La competencia terminó";
+  if (["ready", "scheduled", "programada"].includes(status)) return "La competencia está programada";
+  if (status === "paused") return "La competencia está en pausa";
+  return "No hay una competencia en vivo";
+}
+
+function renderFeedFreshness(feed) {
+  const messages = {
+    stale: "Esperando actualización oficial.",
+    "stale-important": "Los datos pueden estar desactualizados.",
+    offline: "Sin conexión. Se conserva la última información oficial disponible."
+  };
+  const message = messages[feed.freshness];
+  return message ? element("p", "public-portal-feed-freshness", message) : null;
+}
+
+function feedEmptyMessage(feed) {
+  if (feed.filter !== "all" && feed.totalCount) return "No hay eventos de este tipo en el historial reciente.";
+  if (feed.status === "finished") return "La competencia terminó. Consulta los resultados oficiales.";
+  if (feed.status === "ready") return "La competencia está programada y todavía no ha comenzado.";
+  return "El seguimiento minuto a minuto comenzará cuando se publique la primera actividad.";
+}
+
+function renderLiveSkeleton() {
+  const section = element("section", "public-portal-live-skeleton");
+  section.setAttribute("aria-label", "Cargando información en vivo");
+  const now = element("div", "public-portal-skeleton-card");
+  now.append(skeletonLine("wide"), skeletonLine("medium"), skeletonLine("short"));
+  const feed = element("div", "public-portal-skeleton-feed");
+  for (let index = 0; index < 4; index += 1) {
+    const row = element("div", "public-portal-skeleton-row");
+    row.append(skeletonLine("short"), skeletonLine("wide"), skeletonLine("medium"));
+    feed.append(row);
+  }
+  section.append(now, feed);
+  return section;
+}
+
+function skeletonLine(size) {
+  const line = element("span", `public-portal-skeleton-line is-${size}`);
+  line.setAttribute("aria-hidden", "true");
+  return line;
+}
+
+function abbreviation(shortLabel, fullLabel) {
+  const node = element("abbr", "public-portal-column-abbr", shortLabel);
+  node.title = fullLabel;
+  node.setAttribute("aria-label", fullLabel);
+  return node;
+}
+
 function sectionPanel(title, meta = "") {
   const section = element("section", "public-portal-section");
   const heading = element("div", "public-portal-section-heading");
@@ -764,6 +932,20 @@ function formatTime(value) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(date);
+}
+
+function formatEventTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Hora no disponible";
+  return new Intl.DateTimeFormat("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function dateTimeValue(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
 }
 
 function formatTimer(timer = {}) {

@@ -164,6 +164,16 @@
   background: #102a21;
 }
 
+.public-portal-event-status[data-state="live"]::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: public-portal-live-pulse 1.8s ease-in-out infinite;
+}
+
 .public-portal-event-status[data-state="finished"] {
   color: var(--public-portal-silver);
 }
@@ -503,6 +513,14 @@
   color: var(--public-portal-muted);
 }
 
+.public-portal-now-context {
+  margin-top: 9px;
+  color: var(--public-portal-muted);
+  font-size: 13px;
+  font-weight: 750;
+  text-transform: none;
+}
+
 .public-portal-live-suerte {
   border-left: 1px solid var(--public-portal-border);
   background: var(--public-portal-wine-soft);
@@ -519,6 +537,230 @@
   margin-top: 8px;
   font-size: 25px;
   line-height: 1.2;
+}
+
+.public-portal-now-result {
+  display: grid;
+  gap: 5px;
+  margin-top: 24px;
+  border-top: 1px solid #663047;
+  padding-top: 18px;
+}
+
+.public-portal-now-result span,
+.public-portal-now-result small {
+  color: #d4a6b8;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.public-portal-now-result strong {
+  margin: 0;
+  color: #fff;
+  font-size: 21px;
+}
+
+.public-portal-feed {
+  min-width: 0;
+  border-top: 1px solid var(--public-portal-border);
+  padding-top: 26px;
+}
+
+.public-portal-feed-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.public-portal-feed-heading h3 {
+  margin: 5px 0 0;
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.public-portal-feed-summary {
+  color: var(--public-portal-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.public-portal-feed-filters {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.public-portal-feed-filter {
+  min-height: 44px;
+  flex: 0 0 auto;
+  border: 1px solid var(--public-portal-border);
+  border-radius: 6px;
+  padding: 9px 13px;
+  color: var(--public-portal-muted);
+  background: var(--public-portal-surface);
+  font-weight: 800;
+}
+
+.public-portal-feed-filter.is-active {
+  border-color: #7193e8;
+  color: #fff;
+  background: var(--public-portal-blue-soft);
+}
+
+.public-portal-feed-updates {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 14px;
+  border: 1px solid #7193e8;
+  border-radius: 6px;
+  color: #dbe5ff;
+  background: #162952;
+  font-weight: 850;
+}
+
+.public-portal-feed-freshness {
+  margin: 14px 0 0;
+  border-left: 3px solid var(--public-portal-warning);
+  padding: 9px 12px;
+  color: #f0d399;
+  background: #211c13;
+}
+
+.public-portal-feed-list {
+  display: grid;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.public-portal-feed-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.public-portal-feed-marker {
+  width: 11px;
+  height: 11px;
+  position: relative;
+  margin: 21px auto 0;
+  border: 2px solid #9bb5f2;
+  border-radius: 50%;
+  background: var(--public-portal-bg);
+}
+
+.public-portal-feed-item:not(:last-child) .public-portal-feed-marker::after {
+  content: "";
+  width: 1px;
+  height: calc(100% + 67px);
+  position: absolute;
+  top: 10px;
+  left: 3px;
+  background: var(--public-portal-border-strong);
+}
+
+.public-portal-feed-content {
+  min-width: 0;
+  margin-bottom: 12px;
+  border: 1px solid var(--public-portal-border);
+  border-radius: 7px;
+  padding: 15px 16px;
+  background: var(--public-portal-surface);
+}
+
+.public-portal-feed-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--public-portal-muted);
+  font-size: 12px;
+}
+
+.public-portal-feed-state {
+  border: 1px solid #6b7584;
+  border-radius: 3px;
+  padding: 4px 6px;
+  color: var(--public-portal-silver);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.public-portal-feed-state[data-kind="official"] {
+  border-color: #348664;
+  color: #a5ebce;
+  background: #102a21;
+}
+
+.public-portal-feed-content h4 {
+  margin: 10px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 17px;
+}
+
+.public-portal-feed-content p {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--public-portal-muted);
+  line-height: 1.5;
+}
+
+.public-portal-feed-content .public-portal-feed-detail {
+  color: var(--public-portal-silver);
+  font-weight: 750;
+}
+
+.public-portal-column-abbr {
+  border: 0;
+  text-decoration: none;
+  cursor: help;
+}
+
+.public-portal-live-skeleton {
+  display: grid;
+  gap: 20px;
+}
+
+.public-portal-skeleton-card,
+.public-portal-skeleton-row {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--public-portal-border);
+  border-radius: 8px;
+  padding: 24px;
+  background: var(--public-portal-surface);
+}
+
+.public-portal-skeleton-feed {
+  display: grid;
+  gap: 10px;
+}
+
+.public-portal-skeleton-row {
+  padding: 16px;
+}
+
+.public-portal-skeleton-line {
+  width: 100%;
+  height: 14px;
+  display: block;
+  border-radius: 3px;
+  background: var(--public-portal-surface-soft);
+  animation: public-portal-skeleton 1.5s ease-in-out infinite;
+}
+
+.public-portal-skeleton-line.is-medium {
+  width: 64%;
+}
+
+.public-portal-skeleton-line.is-short {
+  width: 32%;
 }
 
 .public-portal-detail-grid {
@@ -821,6 +1063,16 @@
   100% { background: transparent; }
 }
 
+@keyframes public-portal-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .45; transform: scale(.78); }
+}
+
+@keyframes public-portal-skeleton {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
+}
+
 @media (max-width: 1024px) {
   .public-portal-masthead,
   .public-portal-event-meta,
@@ -1012,6 +1264,16 @@
     font-size: 29px;
   }
 
+  .public-portal-feed-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .public-portal-feed-content {
+    padding: 13px;
+  }
+
   .public-portal-detail-grid,
   .public-portal-detail-grid-wide {
     grid-template-columns: 1fr;
@@ -1050,7 +1312,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .public-portal-skip,
-  .public-portal-table tr.is-updated {
+  .public-portal-table tr.is-updated,
+  .public-portal-event-status[data-state="live"]::before,
+  .public-portal-skeleton-line {
     animation: none;
     transition: none;
   }

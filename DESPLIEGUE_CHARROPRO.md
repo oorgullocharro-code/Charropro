@@ -696,3 +696,16 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - Limitaciones: Top, estadísticas, búsqueda, perfiles, SEO avanzado e histórico permanecen fuera de alcance; la actualización parcial sustituye la vista activa, no celdas individuales.
 - No se desplegaron Firebase Rules, Hosting, Functions, RTDB ni servicios. El siguiente paso es revisar y autorizar por separado el push y cualquier despliegue.
 - Arquitectura, rutas, seguridad, accesibilidad y limitaciones: `PUBLIC_PORTAL_CORE_V1.md`.
+
+# PUBLIC-PORTAL-UX-001 - Seguimiento oficial en vivo
+
+- Cache-buster público: `20260727-public-portal-ux-001-live-feed-v1`; versión del Portal: `1.1.0`.
+- En Vivo se organiza en `AHORA` y `MINUTO A MINUTO`, con historial persistido dentro de `publicTournaments/{tournamentId}/liveFeed`.
+- El feed usa eventos tipados, IDs determinísticos, revisión propia, orden estable, deduplicación y retención máxima de 200 entradas; el cliente renderiza 50.
+- Los mensajes nacen de plantillas cerradas en el cliente. No se guarda narración libre ni se leen rutas privadas.
+- Stale leve se informa a los 60 segundos, stale importante a los 180 y offline conserva la última información oficial.
+- Los filtros `all`, `score`, `turn`, `penalty` y `timer` participan en History API mediante `feed=`.
+- La Sábana muestra encabezados abreviados `CC`, `P`, `C`, `JT`, `LC`, `PR`, `JY`, `MP`, `MC`, `PM`, `TOTAL` con nombres completos accesibles.
+- `firebase-rules-auditoria.json` queda preparado para validar `liveFeed`, pero no se desplegó.
+- No se modificaron reglas deportivas, cálculos, calificador, Broadcast Studio, scores privados ni el turno oficial.
+- Contrato, seguridad, accesibilidad, responsive y limitaciones: `PUBLIC_PORTAL_UX_V1.md`.
