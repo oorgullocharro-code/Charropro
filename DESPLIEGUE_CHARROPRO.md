@@ -723,3 +723,16 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - `firebase-rules-auditoria.json` queda preparado para la metadata enriquecida de Programa, pero no se desplegó.
 - No se ejecutaron commit, push, Hosting, Functions ni despliegue de reglas. El favicon continúa fuera de alcance.
 - Contrato, compatibilidad, seguridad y limitaciones: `PUBLIC_PORTAL_PROGRAM_UX_V1.md`.
+
+# PUBLIC-PORTAL-DESIGN-SYSTEM-V2-001 - Identidad deportiva pública V2
+
+- Cache-buster público: `20260728-public-portal-design-system-v2-001-sports-ui-v2`; versión del Portal: `2.0.0`.
+- El rediseño es exclusivamente presentacional y mantiene Public Projection V2, compatibilidad V1, rutas públicas, History API y una sola suscripción a `publicTournaments/{tournamentId}`.
+- Inicio incorpora hero deportivo, estado actual, accesos rápidos, siguiente actividad y líderes publicados. En Vivo utiliza una sola tarjeta `Ahora` para evitar mensajes contradictorios.
+- Resultados agrega tarjetas, puntos destacados y podio sin retirar la tabla accesible. Rankings reutiliza las filas oficiales en el orden recibido y conserva `competencias` como ruta legacy.
+- La Sábana mantiene `CC P C JT LC PR JY MP MC PM PEN TOTAL POS`, cero como `0`, ausencia como `—`, abreviaturas accesibles y scroll local.
+- Timeline distingue eventos de score, corrección, penalización, turno, cronómetro y competencia mediante SVG internos y etiquetas textuales.
+- Los tokens `--cp-*`, componentes, estados, responsive, accesibilidad, seguridad y restricciones se documentan en `PUBLIC_PORTAL_DESIGN_SYSTEM_V2.md`.
+- Los fixtures públicos cubren más de diez equipos, PM `24`, PEN `-4`, cero, ausencia, corrección, penalización, torneo programado/finalizado, stale, offline y contenido largo.
+- No se modificaron Core deportivo, Firebase Rules, cálculos, resultados oficiales, página privada, Broadcast Studio, calificador, juez, supervisor, operador ni favicon.
+- No se ejecutaron commit, push, deploy, staging ni cambios de reglas.

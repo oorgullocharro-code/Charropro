@@ -1,7 +1,7 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260728-public-portal-design-system-v2-001-sports-ui-v2";
 import {
   buildPublicPortalModel
 } from "../../js/publicPortal/portalSelectors.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
@@ -121,15 +121,12 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
       score: 26,
       publishedAt: "2026-07-27T17:59:50.000Z"
     },
-    standings: [{
-      resultId: "resultado-1",
-      teamId: "rancho-norte",
-      teamName: "Rancho Norte",
-      total: 278,
-      officialPosition: 1,
-      positionStatus: "official",
-      active: true
-    }],
+    standings: [
+      liveStanding("resultado-1", "rancho-norte", "Rancho Norte", 278, 1, true),
+      liveStanding("resultado-2", "hacienda-real", "Hacienda Real", 274, 2),
+      liveStanding("resultado-3", "charros-del-sol", "Charros del Sol", 269, 3),
+      liveStanding("resultado-4", "rancho-grande", "Rancho Grande", 260, 4)
+    ],
     updatedAt: "2026-07-27T17:59:55.000Z"
   },
   liveFeed: {
@@ -147,6 +144,30 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
       timerState: "running"
     },
     items: {
+      evt8: feedEvent("evt8", 8, "score_corrected", {
+        participantId: "charro-uno",
+        suerteId: "manganas_pie",
+        attemptNumber: 2,
+        previousScore: 24,
+        score: 26,
+        correctionReason: "Corrección oficial publicada"
+      }),
+      evt7: feedEvent("evt7", 7, "penalty_published", {
+        participantId: "charro-uno",
+        suerteId: "manganas_pie",
+        penalty: -4,
+        officialTotal: 278
+      }),
+      evt6: feedEvent("evt6", 6, "timer_finished", {
+        participantId: "charro-uno",
+        suerteId: "manganas_pie",
+        timeMs: 45000,
+        timeText: "0:45"
+      }),
+      evt5: feedEvent("evt5", 5, "official_position_changed", {
+        participantId: "charro-uno",
+        officialPosition: 1
+      }),
       evt4: feedEvent("evt4", 4, "score_published", {
         participantId: "charro-uno",
         suerteId: "manganas_pie",
@@ -180,35 +201,46 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
       charreadaIds: ["charreada-3"],
       competitionScope: "team",
       legacy: false
+    }, {
+      competitionId: "charro-completo",
+      competitionType: "charro_completo",
+      name: "Charro Completo",
+      categoryId: "libre",
+      phaseId: "final",
+      order: 2,
+      status: "scheduled",
+      suerteIds: ["cala", "piales", "colas", "toro", "manganas_pie", "manganas_caballo", "paso"],
+      charreadaIds: ["charreada-final"],
+      competitionScope: "individual",
+      legacy: false
     }]
   },
   results: {
     revision: 2,
     status: "ready",
     scopes: {},
-    items: [{
-      resultId: "resultado-1",
-      teamId: "rancho-norte",
-      teamName: "Rancho Norte",
-      categoryId: "aaa",
-      categoryName: "AAA",
-      competitionId: "equipos",
-      competitionType: "equipos_completo",
-      phaseId: "final",
-      phaseName: "Final",
-      charreadaId: "charreada-3",
-      participantScope: "team",
-      scores: { CC: 35, P: 28, C: 75, JT: 18, LC: 25, PR: 20, JY: 19, MP: 26, MC: 22, PM: 24 },
-      subtotal: 278,
-      teamPenaltyTotal: -4,
-      officialTotal: 278,
-      officialPosition: 1,
-      positionStatus: "official",
-      resultStatus: "published",
-      publishedAt: "2026-07-27T17:59:50.000Z",
-      sourceRevision: 1,
-      displayOrder: 1
-    }]
+    items: [
+      fixtureResult("resultado-1", "rancho-norte", "Rancho Norte", 1, 278, {
+        scores: { CC: 35, P: 28, C: 75, JT: 18, LC: 25, PR: 20, JY: 19, MP: 26, MC: 22, PM: 24 },
+        teamPenaltyTotal: -4
+      }),
+      fixtureResult("resultado-2", "hacienda-real", "Hacienda Real", 2, 274),
+      fixtureResult("resultado-3", "charros-del-sol", "Charros del Sol", 3, 269),
+      fixtureResult("resultado-4", "rancho-grande", "Rancho Grande", 4, 260, {
+        scores: { CC: 0, P: 27, C: 72, JT: 17, LC: 24, PR: 18, JY: 20, MP: 27, MC: 24, PM: 24 }
+      }),
+      fixtureResult("resultado-5", "hacienda-larga", "Hacienda de Nuestra Señora del Camino Real de los Altos", 5, 256),
+      fixtureResult("resultado-6", "charros-bajio", "Charros Unidos del Bajío", 6, 252),
+      fixtureResult("resultado-7", "rancho-estrella", "Rancho La Estrella", 7, 248),
+      fixtureResult("resultado-8", "asociados-centro", "Equipo del Centro", 8, 244),
+      fixtureResult("resultado-9", "tres-potillos", "Tres Potrillos", 9, 239),
+      fixtureResult("resultado-10", "hacienda-sur", "Hacienda del Sur", 10, 235),
+      fixtureResult("resultado-11", "charros-valle", "Charros del Valle", 11, 229),
+      fixtureResult("resultado-12", "rancho-sierra", "Rancho de la Sierra", 12, null, {
+        subtotal: 224,
+        scores: { CC: 31, P: 25, C: 68, JT: 16, LC: 22, PR: 17, JY: 18, MP: 27, MC: 0 }
+      })
+    ]
   },
   rankings: { revision: 0, status: "unavailable", items: [] },
   statistics: { revision: 0, status: "unavailable", items: [] },
@@ -218,7 +250,8 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
 export function mountPublicPortalUxFixture(view = "en-vivo", options = {}) {
   const root = document.getElementById("public-portal-root");
   const shell = createPublicPortalShell(root, { logoUrl: "/assets/obs/logo-och-original.png" });
-  const model = buildPublicPortalModel(PUBLIC_PORTAL_UX_FIXTURE, {
+  const snapshot = buildFixtureScenario(options.scenario);
+  const model = buildPublicPortalModel(snapshot, {
     competitionId: "equipos",
     programDay: options.programDay || "",
     programPhaseId: options.programPhaseId || "",
@@ -250,8 +283,37 @@ export function mountPublicPortalUxFixture(view = "en-vivo", options = {}) {
   return { shell, model };
 }
 
+function buildFixtureScenario(scenario = "live") {
+  const snapshot = structuredClone(PUBLIC_PORTAL_UX_FIXTURE);
+  if (scenario === "scheduled" || scenario === "empty-live") {
+    snapshot.status = "ready";
+    snapshot.live.status = "scheduled";
+    snapshot.live.turn = { status: "unavailable" };
+    snapshot.live.currentResult = null;
+    snapshot.live.standings = [];
+    snapshot.liveFeed.status = "ready";
+    snapshot.liveFeed.items = {};
+  }
+  if (scenario === "finished") {
+    snapshot.status = "finished";
+    snapshot.overview.status = "finished";
+    snapshot.live.status = "finished";
+    snapshot.live.turn = { status: "unavailable" };
+    snapshot.live.currentResult = null;
+    snapshot.live.timer = { status: "unavailable", running: false };
+    snapshot.liveFeed.status = "finished";
+  }
+  if (scenario === "long-content") {
+    snapshot.metadata.name = "Gran Campeonato Nacional de Charrería y Tradición Deportiva de México";
+    snapshot.overview.name = snapshot.metadata.name;
+    snapshot.overview.venue = "Lienzo Charro Metropolitano de la Región de los Altos de Jalisco";
+  }
+  return snapshot;
+}
+
 function feedEvent(eventId, sequence, eventType, overrides = {}) {
-  const publishedAt = Date.parse(`2026-07-27T17:5${sequence}:00.000Z`);
+  const minute = String(Math.min(59, 49 + sequence)).padStart(2, "0");
+  const publishedAt = Date.parse(`2026-07-27T17:${minute}:00.000Z`);
   return {
     eventId,
     sequence,
@@ -263,6 +325,56 @@ function feedEvent(eventId, sequence, eventType, overrides = {}) {
     teamId: "rancho-norte",
     status: "official",
     revision: 1,
+    ...overrides
+  };
+}
+
+function liveStanding(resultId, teamId, teamName, total, officialPosition, active = false) {
+  return {
+    resultId,
+    teamId,
+    teamName,
+    total,
+    officialPosition,
+    positionStatus: "official",
+    active
+  };
+}
+
+function fixtureResult(resultId, teamId, teamName, officialPosition, officialTotal, overrides = {}) {
+  return {
+    resultId,
+    teamId,
+    teamName,
+    categoryId: "aaa",
+    categoryName: "AAA",
+    competitionId: "equipos",
+    competitionType: "equipos_completo",
+    phaseId: "final",
+    phaseName: "Final",
+    charreadaId: "charreada-3",
+    participantScope: "team",
+    scores: {
+      CC: 32,
+      P: 26,
+      C: 70,
+      JT: 17,
+      LC: 23,
+      PR: 18,
+      JY: 18,
+      MP: 25,
+      MC: 23,
+      PM: 24
+    },
+    subtotal: officialTotal,
+    teamPenaltyTotal: 0,
+    officialTotal,
+    officialPosition,
+    positionStatus: "official",
+    resultStatus: "published",
+    publishedAt: "2026-07-27T17:59:50.000Z",
+    sourceRevision: 1,
+    displayOrder: officialPosition,
     ...overrides
   };
 }
@@ -310,6 +422,7 @@ if (typeof document !== "undefined" && document.getElementById("public-portal-ro
     connection: fixtureUrl.searchParams.get("connection") || "online",
     programDay: fixtureUrl.searchParams.get("day") || "",
     programPhaseId: fixtureUrl.searchParams.get("phase") || "",
-    charreadaId: fixtureUrl.searchParams.get("charreadaId") || ""
+    charreadaId: fixtureUrl.searchParams.get("charreadaId") || "",
+    scenario: fixtureUrl.searchParams.get("scenario") || "live"
   });
 }

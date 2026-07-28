@@ -10,8 +10,8 @@ const render = read("js/publicPortal/portalRender.js");
 const css = read("css/public-portal.css");
 
 assert.match(html, /id="public-portal-root"/);
-assert.match(html, /public-portal\.css\?v=20260727-public-portal-program-ux-001-program-phase-pm-v1/);
-assert.match(html, /torneo-publico\.js\?v=20260727-public-portal-program-ux-001-program-phase-pm-v1/);
+assert.match(html, /public-portal\.css\?v=20260728-public-portal-design-system-v2-001-sports-ui-v2/);
+assert.match(html, /torneo-publico\.js\?v=20260728-public-portal-design-system-v2-001-sports-ui-v2/);
 assert.match(entry, /bootstrapPublicPortal/);
 assert.ok(entry.split("\n").length <= 5, "legacy view entrypoint remains thin");
 

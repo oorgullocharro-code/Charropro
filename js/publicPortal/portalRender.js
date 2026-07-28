@@ -4,9 +4,37 @@ const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",
   "en-vivo": "En Vivo",
   programa: "Programa",
-  competencias: "Competencias",
+  competencias: "Rankings",
   resultados: "Resultados",
   sabana: "Sábana"
+});
+
+const VIEW_ICONS = Object.freeze({
+  inicio: "home",
+  "en-vivo": "broadcast",
+  programa: "calendar",
+  competencias: "trophy",
+  resultados: "score",
+  sabana: "sheet"
+});
+
+const ICON_PATHS = Object.freeze({
+  home: ["M3 10.5 12 3l9 7.5", "M5.5 9.5V21h13V9.5", "M9.5 21v-7h5v7"],
+  broadcast: ["M8.5 8.5a5 5 0 0 0 0 7", "M5.5 5.5a9 9 0 0 0 0 13", "M12 12h.01"],
+  calendar: ["M6 3v3", "M18 3v3", "M4 8h16", "M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"],
+  trophy: ["M8 4h8v4a4 4 0 0 1-8 0V4Z", "M8 6H4v1a4 4 0 0 0 4 4", "M16 6h4v1a4 4 0 0 1-4 4", "M12 12v5", "M8 21h8", "M9 17h6v4"],
+  score: ["M4 5h16v14H4Z", "M8 9h3", "M8 13h8", "M8 16h6", "M16 8v2"],
+  sheet: ["M5 3h14v18H5Z", "M5 8h14", "M9 8v13", "M14 8v13", "M5 13h14", "M5 17h14"],
+  location: ["M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z", "M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"],
+  clock: ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z", "M12 7v5l3 2"],
+  users: ["M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z", "M3.5 20a5.5 5.5 0 0 1 11 0", "M16 8a2.5 2.5 0 0 1 0 5", "M16 15a4.5 4.5 0 0 1 4.5 4.5"],
+  status: ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z", "M12 8v4", "M12 16h.01"],
+  offline: ["M3 3l18 18", "M8.5 8.5A7 7 0 0 0 5 11", "M15.5 8.5A7 7 0 0 1 19 11", "M8 15a6 6 0 0 1 8 0", "M12 19h.01"],
+  arrow: ["M5 12h14", "M15 8l4 4-4 4"],
+  medal: ["M8 3h8l-1 7-3 2-3-2Z", "M12 12a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"],
+  empty: ["M5 7h14v12H5Z", "M8 4h8v3", "M9 12h6"],
+  correction: ["M4 12a8 8 0 0 1 14-5", "M18 3v4h-4", "M20 12a8 8 0 0 1-14 5", "M6 21v-4h4"],
+  penalty: ["M12 3 3 20h18Z", "M12 9v4", "M12 17h.01"]
 });
 
 const CONNECTION_LABELS = Object.freeze({
@@ -44,7 +72,7 @@ export function createPublicPortalShell(root, options = {}) {
   logo.width = 68;
   logo.height = 68;
   const brandCopy = element("div", "public-portal-brand-copy");
-  const brandName = element("span", "public-portal-brand-name", "CharroPro");
+  const brandName = element("span", "public-portal-brand-name", "CharroPro Deportes");
   const eventName = element("h1", "public-portal-event-name", "Portal Público");
   brandCopy.append(brandName, eventName);
   brand.append(logo, brandCopy);
@@ -69,7 +97,7 @@ export function createPublicPortalShell(root, options = {}) {
   navigation.setAttribute("aria-label", "Secciones del Portal Público");
   const navButtons = new Map();
   for (const [view, label] of Object.entries(VIEW_LABELS)) {
-    const button = buttonElement(label, "public-portal-nav-button");
+    const button = iconButton(VIEW_ICONS[view], label, "public-portal-nav-button");
     button.dataset.portalView = view;
     button.dataset.portalFocusKey = `nav-${view}`;
     navButtons.set(view, button);
@@ -142,14 +170,29 @@ export function renderPublicPortal(shell, model, uiState = {}, options = {}) {
   };
 }
 
-export function renderPublicPortalConnection(shell, connection = "connecting") {
+export function renderPublicPortalConnection(shell, connection = "connecting", model = null) {
   const state = CONNECTION_LABELS[connection] ? connection : "connecting";
   shell.connection.textContent = CONNECTION_LABELS[state];
   shell.connection.dataset.state = state;
   const showNotice = !["online", "connecting"].includes(state);
   shell.connectionNotice.hidden = !showNotice;
   shell.connectionNotice.dataset.state = state;
-  shell.connectionNotice.textContent = showNotice ? CONNECTION_MESSAGES[state] : "";
+  shell.connectionNotice.replaceChildren();
+  if (showNotice) {
+    shell.connectionNotice.append(
+      publicIcon(state === "offline" || state === "error" ? "offline" : "status"),
+      element("span", "", CONNECTION_MESSAGES[state])
+    );
+  }
+  const nowCard = shell.main?.querySelector(".public-portal-now");
+  const nowLabel = nowCard?.querySelector(".public-portal-now-label");
+  if (nowCard && nowLabel) {
+    const cardState = connectionCardState(state) || liveCardState(model?.live?.status);
+    nowCard.dataset.state = cardState;
+    const labelText = nowLabel.querySelector("span");
+    if (labelText) labelText.textContent = nowStatusLabel(cardState);
+    else nowLabel.lastChild.textContent = nowStatusLabel(cardState);
+  }
 }
 
 export function announcePublicPortalChange(shell, model, connection = "connecting") {
@@ -187,7 +230,7 @@ function renderPortalChrome(shell, model, uiState) {
   shell.eventUpdated.textContent = updated ? `Actualizado ${updated}` : "";
   shell.eventUpdated.dateTime = model.event?.sourceUpdatedAt || model.event?.generatedAt || "";
   shell.eventUpdated.hidden = !updated;
-  renderPublicPortalConnection(shell, uiState.connection);
+  renderPublicPortalConnection(shell, uiState.connection, model);
   renderNavigation(shell, uiState.view);
   renderCompetitionSelector(shell, model);
   shell.footerStatus.textContent = model.legacy
@@ -245,7 +288,7 @@ function renderPortalView(shell, model, uiState, options) {
 
 function renderAvailability(model, uiState) {
   if (model.availability === "ready") return null;
-  if (model.availability === "loading" && uiState.view === "en-vivo") return renderLiveSkeleton();
+  if (model.availability === "loading") return renderPortalSkeleton(uiState.view);
   const messages = {
     loading: ["Cargando evento", "Esperando la primera actualización pública."],
     "not-found": ["Evento no encontrado", "Verifica el enlace público del torneo."],
@@ -258,11 +301,13 @@ function renderAvailability(model, uiState) {
   const [title, description] = messages[model.availability] || messages.error;
   const section = element("section", "public-portal-state");
   section.setAttribute("aria-labelledby", "public-portal-state-title");
+  section.dataset.state = model.availability;
+  const icon = publicIcon(stateIcon(model.availability), "public-portal-state-icon");
   const eyebrow = element("span", "public-portal-kicker", "CharroPro");
   const heading = element("h2", "", title);
   heading.id = "public-portal-state-title";
   const copy = element("p", "", description);
-  section.append(eyebrow, heading, copy);
+  section.append(icon, eyebrow, heading, copy);
   if (uiState.connection === "offline") {
     section.append(element("p", "public-portal-state-note", CONNECTION_MESSAGES.offline));
   }
@@ -282,23 +327,42 @@ function renderView(model, uiState, options) {
     case "sabana":
       return renderSheetView(model, uiState, options);
     default:
-      return renderHomeView(model);
+      return renderHomeView(model, uiState);
   }
 }
 
-function renderHomeView(model) {
+function renderHomeView(model, uiState) {
   const fragment = document.createDocumentFragment();
-  const intro = element("section", "public-portal-intro");
-  const copy = element("div");
+  const intro = element("section", "public-portal-intro public-portal-hero");
+  intro.setAttribute("aria-labelledby", "public-portal-home-title");
+  const copy = element("div", "public-portal-hero-copy");
+  const state = eventStatusState(model.event?.status, model.live?.status);
+  const status = element("span", "public-portal-hero-status", eventStatusLabel(model.event?.status, model.live?.status));
+  status.dataset.state = state;
+  const title = element("h2", "", model.event?.name || "CharroPro");
+  title.id = "public-portal-home-title";
   copy.append(
-    element("span", "public-portal-kicker", "Estado del evento"),
-    element("h2", "", homeHeadline(model)),
-    element("p", "", homeContext(model))
+    element("span", "public-portal-kicker", "Competencia oficial"),
+    title,
+    element("p", "public-portal-hero-headline", homeHeadline(model)),
+    element("p", "public-portal-hero-context", homeContext(model))
   );
-  const quickLive = buttonElement("Ver En Vivo", "public-portal-primary-action");
+  const actions = element("div", "public-portal-hero-actions");
+  const quickLive = iconButton("broadcast", "Ver En Vivo", "public-portal-primary-action");
   quickLive.dataset.portalView = "en-vivo";
   quickLive.dataset.portalFocusKey = "home-live";
-  intro.append(copy, quickLive);
+  const quickProgram = iconButton("calendar", "Ver programa", "public-portal-secondary-action");
+  quickProgram.dataset.portalView = "programa";
+  const quickResults = iconButton("score", "Ver resultados", "public-portal-secondary-action");
+  quickResults.dataset.portalView = "resultados";
+  actions.append(quickLive, quickProgram, quickResults);
+  const identity = element("div", "public-portal-hero-identity");
+  identity.append(
+    status,
+    iconMeta("location", formatEventLocation(model.event) || "Sede y fecha por confirmar"),
+    iconMeta("trophy", model.overview?.activeCompetitionName || "Competencia por confirmar")
+  );
+  intro.append(copy, actions, identity);
   fragment.append(intro);
 
   const metrics = element("section", "public-portal-metrics");
@@ -312,28 +376,22 @@ function renderHomeView(model) {
   fragment.append(metrics);
 
   const overview = element("div", "public-portal-home-grid");
-  overview.append(renderLiveSummary(model), renderNextProgram(model), renderCompetitionSummary(model));
+  overview.append(
+    renderNowCard(model, { compact: true, connection: uiState.connection }),
+    renderNextProgram(model),
+    renderHomeLeaders(model),
+    renderCompetitionSummary(model)
+  );
   fragment.append(overview);
   return fragment;
 }
 
-function renderLiveSummary(model) {
-  const section = sectionPanel("En Vivo", model.live.competitionName || "Actividad oficial");
-  const turn = model.live.turn || {};
-  const grid = element("dl", "public-portal-detail-grid");
-  addDetail(grid, "En turno", turn.participant?.name || turn.team?.name || "Sin turno");
-  addDetail(grid, "Suerte", turn.suerteName || "No disponible");
-  addDetail(grid, "Charreada", model.live.charreadaName || "No disponible");
-  addDetail(grid, "Tiempo", formatTimer(model.live.timer));
-  section.append(grid);
-  return section;
-}
-
 function renderNextProgram(model) {
   const item = model.home.nextProgramItem;
-  const section = sectionPanel("Siguiente en programa", item?.scheduledTime || "Por confirmar");
+  const section = sectionPanel("Siguiente en programa", item?.scheduledTime || "Por confirmar", "calendar");
+  section.classList.add("public-portal-next-card");
   if (!item) {
-    section.append(emptyMessage("No hay una siguiente actividad publicada."));
+    section.append(emptyMessage("No hay una siguiente actividad publicada.", "calendar"));
     return section;
   }
   const title = element("h3", "public-portal-feature-title", item.name);
@@ -342,12 +400,14 @@ function renderNextProgram(model) {
     item.phaseName,
     participantCountLabel(item)
   ].filter(Boolean).join(" · "));
-  section.append(title, meta);
+  const action = buttonElement("Ver programa", "public-portal-text-action");
+  action.dataset.portalView = "programa";
+  section.append(title, meta, action);
   return section;
 }
 
 function renderCompetitionSummary(model) {
-  const section = sectionPanel("Competencias", `${model.competitions.length} publicadas`);
+  const section = sectionPanel("Competencias", `${model.competitions.length} publicadas`, "trophy");
   const list = element("div", "public-portal-compact-list");
   for (const competition of model.competitions.slice(0, 4)) {
     const row = element("button", "public-portal-compact-row");
@@ -359,38 +419,20 @@ function renderCompetitionSummary(model) {
     row.append(name, count);
     list.append(row);
   }
-  section.append(list.children.length ? list : emptyMessage("No hay competencias publicadas."));
+  section.append(list.children.length ? list : emptyMessage("No hay competencias publicadas.", "trophy"));
   return section;
 }
 
 function renderLiveView(model, uiState) {
   const fragment = document.createDocumentFragment();
+  const turn = model.live.turn || {};
   const heading = viewHeading(
     "En Vivo",
     [model.live.competitionName, model.live.categoryName, model.live.phaseName].filter(Boolean).join(" · "),
     model.live.status
   );
   fragment.append(heading);
-
-  const turn = model.live.turn || {};
-  const main = element("section", "public-portal-live-stage public-portal-now");
-  main.setAttribute("aria-labelledby", "public-portal-now-title");
-  const identity = element("div", "public-portal-live-identity");
-  const nowLabel = element("span", "public-portal-kicker", "Ahora");
-  nowLabel.id = "public-portal-now-title";
-  identity.append(
-    nowLabel,
-    element("span", "public-portal-now-context", nowContext(model)),
-    element("h3", "", turn.participant?.name || turn.team?.name || "Sin turno oficial")
-  );
-  const suerte = element("div", "public-portal-live-suerte");
-  suerte.append(
-    element("span", "", turn.participant?.name ? "Actividad oficial" : "Suerte"),
-    element("strong", "", turn.suerteName || nowEmptyMessage(model)),
-    renderNowResult(model)
-  );
-  main.append(identity, suerte);
-  fragment.append(main);
+  fragment.append(renderNowCard(model, { connection: uiState.connection }));
 
   const detail = element("dl", "public-portal-detail-grid public-portal-detail-grid-wide");
   addDetail(detail, "Charreada", model.live.charreadaName || "No disponible");
@@ -467,8 +509,9 @@ function renderLiveFeedFilters(activeFilter) {
 function renderLiveFeedItem(item) {
   const row = element("li", "public-portal-feed-item");
   row.dataset.eventId = item.eventId;
+  row.dataset.eventType = item.eventType || "informational";
   const marker = element("span", "public-portal-feed-marker");
-  marker.setAttribute("aria-hidden", "true");
+  marker.append(publicIcon(liveFeedIcon(item.eventType)));
   const content = element("article", "public-portal-feed-content");
   const meta = element("div", "public-portal-feed-meta");
   const time = element("time", "", formatEventTime(item.publishedAt || item.occurredAt));
@@ -700,10 +743,30 @@ function renderProgramActions(item, expanded = false) {
 
 function renderCompetitionsView(model) {
   const fragment = document.createDocumentFragment();
-  fragment.append(viewHeading("Competencias", `${model.competitions.length} disponibles`));
+  fragment.append(viewHeading("Rankings", `${model.competitions.length} competencias disponibles`));
   if (!model.competitions.length) {
-    fragment.append(emptyState("Sin competencias", "Aún no hay competencias publicadas."));
+    fragment.append(emptyState("Sin rankings", "Los rankings aparecerán cuando existan competencias publicadas.", "trophy"));
     return fragment;
+  }
+  const selectedResults = model.results || [];
+  if (selectedResults.length) {
+    const ranking = element("section", "public-portal-ranking-feature");
+    ranking.append(
+      sectionHeading(
+        "Ranking oficial",
+        model.selectedCompetition?.displayName || "Competencia seleccionada",
+        "trophy"
+      ),
+      renderPodium(selectedResults),
+      renderRankingList(selectedResults.slice(3), model)
+    );
+    fragment.append(ranking);
+  } else {
+    fragment.append(emptyState(
+      "Ranking pendiente",
+      "La competencia seleccionada todavía no tiene posiciones oficiales publicadas.",
+      "trophy"
+    ));
   }
   const grid = element("section", "public-portal-competition-grid");
   grid.setAttribute("aria-label", "Competencias disponibles");
@@ -724,9 +787,9 @@ function renderCompetitionsView(model) {
       .map(suerteLabel)
       .join(" · ") || "Modalidad sin suertes publicadas");
     const actions = element("div", "public-portal-card-actions");
-    const results = buttonElement("Ver resultados", "public-portal-secondary-action");
+    const results = buttonElement("Abrir ranking", "public-portal-secondary-action");
     results.dataset.portalCompetitionChoice = competition.competitionId;
-    results.dataset.portalViewTarget = "resultados";
+    results.dataset.portalViewTarget = "competencias";
     actions.append(results);
     article.append(type, name, meta, stats, suertes, actions);
     grid.append(article);
@@ -742,10 +805,16 @@ function renderResultsView(model, uiState, options) {
     model.selectedCompetition?.displayName || "Competencia no seleccionada"
   ));
   fragment.append(renderResultFilters(model, uiState));
-  const section = sectionPanel("Resultados oficiales publicados", `${model.results.length} registros`);
+  const section = sectionPanel("Resultados oficiales publicados", `${model.results.length} registros`, "score");
   if (!model.results.length) {
-    section.append(emptyMessage("No hay resultados publicados para esta selección."));
+    section.append(emptyMessage("No hay resultados publicados para esta selección.", "score"));
   } else {
+    section.append(renderPodium(model.results));
+    const cards = element("div", "public-portal-result-cards");
+    for (const row of model.results) cards.append(renderScoreCard(row, model, options));
+    section.append(cards);
+    const tableHeading = element("h3", "public-portal-secondary-table-title", "Tabla accesible");
+    section.append(tableHeading);
     const table = createTable(["Posición oficial", resultEntityLabel(model), "Categoría", "Total oficial", "Estado"]);
     for (const row of model.results) {
       const tr = element("tr");
@@ -771,9 +840,9 @@ function renderSheetView(model, uiState, options) {
     model.selectedCompetition?.displayName || "Competencia no seleccionada"
   ));
   fragment.append(renderResultFilters(model, uiState));
-  const section = sectionPanel("Detalle oficial", `${model.sheet.rows.length} registros`);
+  const section = sectionPanel("Detalle oficial", `${model.sheet.rows.length} registros`, "sheet");
   if (!model.sheet.rows.length) {
-    section.append(emptyMessage("No hay resultados publicados para construir la sábana."));
+    section.append(emptyMessage("No hay resultados publicados para construir la sábana.", "sheet"));
     fragment.append(section);
     return fragment;
   }
@@ -830,7 +899,9 @@ function renderSheetView(model, uiState, options) {
     tbody.append(tr);
   }
   table.append(thead, tbody);
-  section.append(wrapTable(table));
+  const scrollHint = element("p", "public-portal-table-hint");
+  scrollHint.append(publicIcon("arrow"), element("span", "", "Desliza horizontalmente para ver todas las suertes."));
+  section.append(scrollHint, wrapTable(table));
   fragment.append(section);
   return fragment;
 }
@@ -880,6 +951,119 @@ function renderStandingsTable(rows = []) {
     table.tbody.append(tr);
   }
   return wrapTable(table.table);
+}
+
+function renderNowCard(model, options = {}) {
+  const turn = model.live.turn || {};
+  const state = connectionCardState(options.connection) || liveCardState(model.live.status);
+  const section = element("section", options.compact
+    ? "public-portal-live-stage public-portal-now is-compact"
+    : "public-portal-live-stage public-portal-now");
+  section.setAttribute("aria-labelledby", options.compact
+    ? "public-portal-home-now-title"
+    : "public-portal-now-title");
+  section.dataset.state = state;
+
+  const identity = element("div", "public-portal-live-identity");
+  const label = element("span", "public-portal-now-label", nowStatusLabel(state));
+  label.id = options.compact ? "public-portal-home-now-title" : "public-portal-now-title";
+  label.prepend(publicIcon(state === "live" ? "broadcast" : "status"));
+  identity.append(
+    label,
+    element("span", "public-portal-now-context", nowContext(model)),
+    element("h3", "", turn.participant?.name || turn.team?.name || nowEmptyMessage(model))
+  );
+
+  const detail = element("div", "public-portal-live-suerte");
+  detail.append(
+    element("span", "", turn.participant?.name ? "Suerte oficial" : "Actividad"),
+    element("strong", "", turn.suerteName || model.live.charreadaName || nowEmptyMessage(model)),
+    renderNowResult(model)
+  );
+  if (!options.compact) {
+    detail.append(iconMeta(
+      "clock",
+      `Actualizado ${formatTime(model.live.updatedAt || model.event.sourceUpdatedAt) || "pendiente"}`
+    ));
+  }
+  section.append(identity, detail);
+  return section;
+}
+
+function renderHomeLeaders(model) {
+  const rows = model.results || model.allResults || [];
+  const section = sectionPanel("Líderes publicados", rows.length ? "Top oficial" : "Pendiente", "medal");
+  section.classList.add("public-portal-home-leaders");
+  if (!rows.length) {
+    section.append(emptyMessage("Los líderes aparecerán con los primeros resultados oficiales.", "medal"));
+    return section;
+  }
+  section.append(renderRankingList(rows.slice(0, 3), model, { compact: true }));
+  const action = buttonElement("Ver rankings", "public-portal-text-action");
+  action.dataset.portalView = "competencias";
+  section.append(action);
+  return section;
+}
+
+function renderPodium(rows = []) {
+  const podiumRows = rows.filter((row) => {
+    const position = Number(row.officialPosition);
+    return Number.isSafeInteger(position) && position >= 1 && position <= 3;
+  });
+  if (!podiumRows.length) return element("div", "public-portal-podium is-empty");
+  const podium = element("div", "public-portal-podium");
+  podium.setAttribute("aria-label", "Podio oficial");
+  for (const row of podiumRows) {
+    const position = Number(row.officialPosition);
+    const card = element("article", "public-portal-podium-card");
+    card.dataset.position = String(position);
+    card.append(
+      element("span", "public-portal-podium-position", positionLabel(position)),
+      publicIcon("medal", "public-portal-podium-icon"),
+      element("h3", "", row.displayName || "No registrado"),
+      element("strong", "public-portal-podium-score", scoreWithUnit(row.officialTotal)),
+      element("span", "public-portal-podium-context", [row.categoryName, row.phaseName].filter(Boolean).join(" · ") || "Resultado oficial")
+    );
+    podium.append(card);
+  }
+  return podium;
+}
+
+function renderRankingList(rows, model, options = {}) {
+  const list = element("ol", options.compact
+    ? "public-portal-ranking-list is-compact"
+    : "public-portal-ranking-list");
+  for (const row of rows) {
+    const item = element("li", "public-portal-ranking-row");
+    const position = element("span", "public-portal-ranking-position", formatOfficialPosition(row.officialPosition));
+    const identity = element("span", "public-portal-ranking-identity");
+    identity.append(
+      element("strong", "", row.displayName || "No registrado"),
+      element("small", "", [row.categoryName, row.phaseName].filter(Boolean).join(" · ") || resultEntityLabel(model))
+    );
+    item.append(position, identity, element("strong", "public-portal-ranking-score", scoreWithUnit(row.officialTotal)));
+    list.append(item);
+  }
+  return list;
+}
+
+function renderScoreCard(row, model, options = {}) {
+  const card = element("article", "public-portal-score-card");
+  if (options.updatedResultIds?.has(row.resultId)) card.classList.add("is-updated");
+  card.dataset.resultId = row.resultId;
+  const position = element("span", "public-portal-score-position", positionLabel(row.officialPosition));
+  const copy = element("div", "public-portal-score-identity");
+  copy.append(
+    element("h3", "", row.displayName),
+    element("p", "", [row.categoryName, row.phaseName, resultStatusLabel(row)].filter(Boolean).join(" · "))
+  );
+  const score = element("div", "public-portal-score-value");
+  score.append(
+    element("strong", "", formatScore(row.officialTotal)),
+    element("span", "", row.officialTotal === null || row.officialTotal === undefined ? "Sin total oficial" : "puntos")
+  );
+  card.append(position, copy, score);
+  return card;
 }
 
 function createTable(headers) {
@@ -982,13 +1166,14 @@ function feedEmptyMessage(feed) {
   return "El seguimiento minuto a minuto comenzará cuando se publique la primera actividad.";
 }
 
-function renderLiveSkeleton() {
+function renderPortalSkeleton(view = "inicio") {
   const section = element("section", "public-portal-live-skeleton");
-  section.setAttribute("aria-label", "Cargando información en vivo");
+  section.setAttribute("aria-label", `Cargando ${VIEW_LABELS[view] || "portal público"}`);
   const now = element("div", "public-portal-skeleton-card");
   now.append(skeletonLine("wide"), skeletonLine("medium"), skeletonLine("short"));
   const feed = element("div", "public-portal-skeleton-feed");
-  for (let index = 0; index < 4; index += 1) {
+  const rowCount = view === "sabana" ? 8 : 4;
+  for (let index = 0; index < rowCount; index += 1) {
     const row = element("div", "public-portal-skeleton-row");
     row.append(skeletonLine("short"), skeletonLine("wide"), skeletonLine("medium"));
     feed.append(row);
@@ -1010,33 +1195,47 @@ function abbreviation(shortLabel, fullLabel) {
   return node;
 }
 
-function sectionPanel(title, meta = "") {
+function sectionPanel(title, meta = "", iconName = "") {
   const section = element("section", "public-portal-section");
-  const heading = element("div", "public-portal-section-heading");
-  heading.append(element("h2", "", title));
-  if (meta) heading.append(element("span", "", meta));
-  section.append(heading);
+  section.append(sectionHeading(title, meta, iconName));
   return section;
+}
+
+function sectionHeading(title, meta = "", iconName = "") {
+  const heading = element("div", "public-portal-section-heading");
+  const titleWrap = element("div", "public-portal-section-title");
+  if (iconName) titleWrap.append(publicIcon(iconName));
+  titleWrap.append(element("h2", "", title));
+  heading.append(titleWrap);
+  if (meta) heading.append(element("span", "", meta));
+  return heading;
 }
 
 function viewHeading(title, context = "", status = "") {
   const header = element("header", "public-portal-view-heading");
   const copy = element("div");
-  copy.append(element("span", "public-portal-kicker", "Portal Público"), element("h2", "", title));
+  copy.append(element("span", "public-portal-kicker", "CharroPro Deportes"), element("h2", "", title));
   if (context) copy.append(element("p", "", context));
   header.append(copy);
   if (status) header.append(element("span", "public-portal-view-status", liveStatusLabel(status)));
   return header;
 }
 
-function emptyState(title, description) {
+function emptyState(title, description, iconName = "empty") {
   const section = element("section", "public-portal-state public-portal-state-inline");
-  section.append(element("h3", "", title), element("p", "", description));
+  section.append(
+    publicIcon(iconName, "public-portal-state-icon"),
+    element("h3", "", title),
+    element("p", "", description)
+  );
   return section;
 }
 
-function emptyMessage(message) {
-  return element("p", "public-portal-empty-message", message);
+function emptyMessage(message, iconName = "") {
+  if (!iconName) return element("p", "public-portal-empty-message", message);
+  const wrap = element("div", "public-portal-empty-message public-portal-empty-message-with-icon");
+  wrap.append(publicIcon(iconName), element("p", "", message));
+  return wrap;
 }
 
 function metric(label, value) {
@@ -1055,6 +1254,39 @@ function buttonElement(label, className = "") {
   const button = element("button", className, label);
   button.type = "button";
   return button;
+}
+
+function iconButton(iconName, label, className = "") {
+  const button = buttonElement("", className);
+  button.setAttribute("aria-label", label);
+  button.append(publicIcon(iconName), element("span", "", label));
+  return button;
+}
+
+function iconMeta(iconName, text) {
+  const node = element("span", "public-portal-icon-meta");
+  node.append(publicIcon(iconName), element("span", "", text));
+  return node;
+}
+
+function publicIcon(iconName, className = "") {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.classList.add("public-portal-icon");
+  if (className) svg.classList.add(...className.split(/\s+/).filter(Boolean));
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.8");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  for (const pathValue of ICON_PATHS[iconName] || ICON_PATHS.status) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", pathValue);
+    svg.append(path);
+  }
+  return svg;
 }
 
 function element(tagName, className = "", textContent = null) {
@@ -1152,6 +1384,16 @@ function formatOfficialPosition(value) {
   return Number.isSafeInteger(position) && position > 0 ? String(position) : "—";
 }
 
+function positionLabel(value) {
+  const position = Number(value);
+  return Number.isSafeInteger(position) && position > 0 ? `${position}.º` : "—";
+}
+
+function scoreWithUnit(value) {
+  const formatted = formatScore(value);
+  return formatted === "—" ? formatted : `${formatted} pts`;
+}
+
 function groupProgramByDate(program) {
   const groups = new Map();
   for (const item of program) {
@@ -1234,6 +1476,53 @@ function homeContext(model) {
     model.live?.charreadaName || model.overview?.activeCharreadaName,
     model.live?.turn?.suerteName
   ].filter(Boolean).join(" · ") || "Programa, competencias y resultados publicados.";
+}
+
+function liveCardState(status) {
+  const normalized = String(status || "").toLowerCase();
+  if (["live", "active", "en vivo"].includes(normalized)) return "live";
+  if (["scheduled", "ready", "programada", "prepared"].includes(normalized)) return "scheduled";
+  if (["paused", "pausada"].includes(normalized)) return "paused";
+  if (["finished", "completed", "terminada"].includes(normalized)) return "finished";
+  if (["stale", "offline"].includes(normalized)) return normalized;
+  return "unavailable";
+}
+
+function connectionCardState(connection) {
+  const normalized = String(connection || "").toLowerCase();
+  if (["offline", "error", "reconnecting"].includes(normalized)) return "offline";
+  if (normalized === "stale") return "stale";
+  return "";
+}
+
+function nowStatusLabel(state) {
+  const labels = {
+    live: "En Vivo",
+    scheduled: "Programado",
+    paused: "Pausado",
+    finished: "Finalizado",
+    stale: "Información atrasada",
+    offline: "Sin conexión",
+    unavailable: "Sin actividad en vivo"
+  };
+  return labels[state] || labels.unavailable;
+}
+
+function stateIcon(state) {
+  if (["offline", "error"].includes(state)) return "offline";
+  if (state === "loading") return "broadcast";
+  return "status";
+}
+
+function liveFeedIcon(type) {
+  const normalized = String(type || "").toLowerCase();
+  if (normalized.includes("correct")) return "correction";
+  if (normalized.includes("penalty") || normalized.includes("incident")) return "penalty";
+  if (normalized.includes("score")) return "score";
+  if (normalized.includes("timer")) return "clock";
+  if (normalized.includes("turn") || normalized.includes("participant")) return "users";
+  if (normalized.includes("competition")) return "trophy";
+  return "status";
 }
 
 function eventStatusState(eventStatus, liveStatus) {

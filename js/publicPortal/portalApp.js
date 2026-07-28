@@ -15,9 +15,9 @@ import {
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "./portalRender.js?v=20260728-public-portal-design-system-v2-001-sports-ui-v2";
 
-export const PUBLIC_PORTAL_CORE_VERSION = "1.2.0";
+export const PUBLIC_PORTAL_CORE_VERSION = "2.0.0";
 
 let activePortal = null;
 
@@ -92,7 +92,7 @@ export function createPublicPortalApp(options = {}) {
     if (runtime.disposed) return;
     if (status.event === "connection") {
       runtime.client = applyPublicPortalConnection(runtime.client, status.connected);
-      renderPublicPortalConnection(runtime.shell, runtime.client.connection);
+      renderPublicPortalConnection(runtime.shell, runtime.client.connection, runtime.model);
       announcePublicPortalChange(runtime.shell, runtime.model, runtime.client.connection);
       return;
     }
@@ -112,7 +112,7 @@ export function createPublicPortalApp(options = {}) {
         runtime.model = buildModel();
         render({ forceView: true });
       } else {
-        renderPublicPortalConnection(runtime.shell, runtime.client.connection);
+        renderPublicPortalConnection(runtime.shell, runtime.client.connection, runtime.model);
       }
       return;
     }
