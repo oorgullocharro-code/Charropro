@@ -1,5 +1,5 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260727-public-foundation-001-projection-v2";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },
@@ -15,6 +15,18 @@ export const PUBLIC_SHEET_COLUMNS = Object.freeze([
 ]);
 
 const COMPLETED_PROGRAM_STATES = new Set(["completed", "terminada", "terminado", "finalizada", "finalizado"]);
+const SCORE_ALIASES = Object.freeze({
+  CC: ["CC", "cc", "cala", "calaCaballo", "cala_de_caballo"],
+  P: ["P", "p", "piales", "pial"],
+  C: ["C", "c", "colas", "coleadero"],
+  JT: ["JT", "jt", "toro", "jineteoToro", "jineteo_toro"],
+  LC: ["LC", "lc", "lazoCabeza", "lazoCabecero", "lazo_cabeza", "lazo_cabecero"],
+  PR: ["PR", "pr", "pialRuedo", "pialDeRuedo", "pial_ruedo", "pial_de_ruedo"],
+  JY: ["JY", "jy", "yegua", "jineteoYegua", "jineteo_yegua"],
+  MP: ["MP", "mp", "manganasPie", "manganas_pie"],
+  MC: ["MC", "mc", "manganasCaballo", "manganas_caballo"],
+  PM: ["PM", "pm", "paso", "pasoMuerte", "pasoDeLaMuerte", "paso_muerte", "paso_de_la_muerte"]
+});
 
 export function buildPublicPortalModel(snapshot, options = {}) {
   if (!snapshot || typeof snapshot !== "object") {
@@ -46,17 +58,14 @@ export function selectPortalResults(results = [], filters = {}) {
 
 export function buildPortalSheet(results = [], competition = null) {
   const suerteIds = new Set(asArray(competition?.suerteIds));
-  const eligibleColumns = PUBLIC_SHEET_COLUMNS.filter((column) => suerteIds.has(column.suerteId));
-  const columns = eligibleColumns.filter((column) => results.some((row) => hasScoreValue(row.scores?.[column.id])));
-  const showPenalty = results.some((row) => hasScoreValue(row.teamPenaltyTotal));
+  const columns = PUBLIC_SHEET_COLUMNS.filter((column) => suerteIds.has(column.suerteId));
   return {
     participantLabel: competition?.competitionScope === "individual" ? "Participante" : "Equipo",
     columns,
-    showPenalty,
+    showPenalty: true,
     rows: results.map((row) => ({
       resultId: row.resultId,
       name: row.displayName,
-      association: row.association,
       categoryName: row.categoryName,
       scores: Object.fromEntries(columns.map((column) => [column.id, scoreOrNull(row.scores?.[column.id])])),
       teamPenaltyTotal: scoreOrNull(row.teamPenaltyTotal),
@@ -64,6 +73,38 @@ export function buildPortalSheet(results = [], competition = null) {
       officialPosition: officialPosition(row.officialPosition),
       positionStatus: row.positionStatus || "unavailable"
     }))
+  };
+}
+
+export function selectPortalProgram(program = [], filters = {}) {
+  return asArray(program).filter((item) => {
+    if (filters.day && programDateKey(item.scheduledDate) !== filters.day) return false;
+    if (filters.phaseId && item.phaseId !== filters.phaseId) return false;
+    return true;
+  });
+}
+
+export function buildProgramFilters(program = [], requested = {}) {
+  const days = [];
+  const phases = [];
+  const seenDays = new Set();
+  const seenPhases = new Set();
+  for (const item of asArray(program)) {
+    const day = programDateKey(item.scheduledDate);
+    if (day && !seenDays.has(day)) {
+      seenDays.add(day);
+      days.push({ value: day, label: day });
+    }
+    if (item.phaseId && !seenPhases.has(item.phaseId)) {
+      seenPhases.add(item.phaseId);
+      phases.push({ value: item.phaseId, label: item.phaseName || "Fase" });
+    }
+  }
+  return {
+    days,
+    phases,
+    day: seenDays.has(requested.day) ? requested.day : "",
+    phaseId: seenPhases.has(requested.phaseId) ? requested.phaseId : ""
   };
 }
 
@@ -80,11 +121,13 @@ export function getPortalViewDependencies(view) {
 }
 
 function buildV2PortalModel(snapshot, options) {
-  const program = asArray(snapshot.program?.items).map(normalizeProgramItem);
+  const normalizedProgram = normalizeProgramItems(snapshot.program?.items);
   const rawResults = asArray(snapshot.results?.items).map(normalizeResultItem);
+  const activeCharreadaId = text(snapshot.overview?.activeCharreadaId);
+  const programAll = enrichProgramAvailability(normalizedProgram, rawResults, activeCharreadaId);
   const competitions = enrichCompetitions(
     asArray(snapshot.competitions?.items).map(normalizeCompetitionItem),
-    program,
+    programAll,
     rawResults
   );
   const selectedCompetitionId = resolvePortalCompetitionId(
@@ -100,13 +143,19 @@ function buildV2PortalModel(snapshot, options) {
     charreadaId: String(options.charreadaId || "")
   };
   const results = selectPortalResults(rawResults, filters);
-  const selectedProgram = filters.charreadaId
-    ? program.filter((item) => item.charreadaId === filters.charreadaId)
-    : program;
-  const live = normalizeV2Live(snapshot.live, snapshot.overview, competitions, program);
+  const programFilters = buildProgramFilters(programAll, {
+    day: text(options.programDay),
+    phaseId: text(options.programPhaseId)
+  });
+  const program = selectPortalProgram(programAll, programFilters);
+  const programDetail = program.find((item) => (
+    item.charreadaId &&
+    item.charreadaId === text(options.charreadaId)
+  )) || null;
+  const live = normalizeV2Live(snapshot.live, snapshot.overview, competitions, programAll);
   const liveFeed = buildPublicLiveFeedModel(snapshot.liveFeed, {
     live,
-    program,
+    program: programAll,
     results: rawResults
   }, {
     filter: options.feed,
@@ -140,7 +189,18 @@ function buildV2PortalModel(snapshot, options) {
     },
     live,
     liveFeed,
-    program: selectedProgram,
+    program,
+    programAll,
+    programFilters: {
+      days: programFilters.days,
+      phases: programFilters.phases
+    },
+    activeProgramFilters: {
+      day: programFilters.day,
+      phaseId: programFilters.phaseId
+    },
+    programFeatured: selectFeaturedProgramItem(program, activeCharreadaId),
+    programDetail,
     competitions,
     selectedCompetition,
     selectedCompetitionId,
@@ -149,40 +209,60 @@ function buildV2PortalModel(snapshot, options) {
     resultFilters,
     activeFilters: filters,
     sheet,
-    home: buildHomeSummary(snapshot, competitions, program, rawResults, live),
+    home: buildHomeSummary(snapshot, competitions, programAll, rawResults, live),
     sectionRevisions: readSectionRevisions(snapshot)
   };
 }
 
 function buildLegacyPortalModel(snapshot, options) {
-  const program = asArray(snapshot.schedule).map((item, index) => normalizeProgramItem({
+  const normalizedProgram = normalizeProgramItems(asArray(snapshot.schedule).map((item, index) => ({
     scheduleId: item.id || item.charreadaId,
     charreadaId: item.charreadaId || item.id,
     competitionId: item.competitionId || item.competitionType || "equipos_completo",
     competitionType: item.competitionType || "equipos_completo",
+    competitionScope: item.competitionScope,
+    competitionName: item.competitionName,
     categoryId: item.categoryId,
+    categoryName: item.categoryName || item.category,
     phaseId: item.phaseId,
     phaseName: item.phase || item.phaseName,
     name: item.nombre || item.name,
+    shortTitle: item.shortTitle,
     scheduledDate: item.fecha || item.date,
     scheduledTime: item.hora || item.time,
+    endTime: item.endTime,
+    sequence: item.sequence,
     order: item.order ?? index + 1,
     status: item.status,
-    participants: item.equipos || item.individualParticipants || [],
+    venueId: item.venueId,
+    venueName: item.venueName || item.venue || item.sede,
+    publicNotes: item.publicNotes,
+    liveAvailable: item.liveAvailable,
+    resultsAvailable: item.resultsAvailable,
+    revision: item.revision,
+    updatedAt: item.updatedAt,
+    participants: item.participants || (
+      item.competitionScope === "individual"
+        ? item.individualParticipants
+        : item.equipos
+    ) || item.individualParticipants || item.equipos || [],
     legacy: true
-  }));
+  })));
   const rawResults = asArray(snapshot.scoresheet || snapshot.generalRanking).map((item, index) => normalizeResultItem({
     ...item,
     resultId: item.resultId || item.id || `legacy_result_${index + 1}`,
     participantScope: item.competitionScope || (item.participantId ? "individual" : "team"),
     competitionId: item.competitionId || item.competitionType || "equipos_completo",
     competitionType: item.competitionType || "equipos_completo",
-    scores: item.scores || Object.fromEntries(PUBLIC_SHEET_COLUMNS.map((column) => [column.id, item[column.id]])),
+    scores: normalizeScores({ ...item, ...(item.scores || {}) }),
+    teamPenaltyTotal: item.teamPenaltyTotal ?? item.PEN ?? item.penaltyTotal ?? item.penalties,
     officialTotal: item.officialTotal ?? item.TOTAL ?? item.total,
     officialPosition: item.officialPosition ?? item.position,
     resultStatus: "published",
     displayOrder: index + 1
   }));
+  const activeCharreadaId = text(snapshot.activeCharreada?.charreadaId || snapshot.activeCharreada?.id);
+  const programAll = enrichProgramAvailability(normalizedProgram, rawResults, activeCharreadaId);
   const rawCompetitions = asArray(snapshot.competitions);
   const competitionSeeds = rawCompetitions.length ? rawCompetitions : [{
     competitionId: snapshot.info?.type || "equipos_completo",
@@ -192,7 +272,7 @@ function buildLegacyPortalModel(snapshot, options) {
   }];
   const competitions = enrichCompetitions(
     competitionSeeds.map(normalizeCompetitionItem),
-    program,
+    programAll,
     rawResults
   );
   const activeCompetitionId = text(snapshot.activeCharreada?.competitionId);
@@ -205,6 +285,15 @@ function buildLegacyPortalModel(snapshot, options) {
     charreadaId: String(options.charreadaId || "")
   };
   const results = selectPortalResults(rawResults, filters);
+  const programFilters = buildProgramFilters(programAll, {
+    day: text(options.programDay),
+    phaseId: text(options.programPhaseId)
+  });
+  const program = selectPortalProgram(programAll, programFilters);
+  const programDetail = program.find((item) => (
+    item.charreadaId &&
+    item.charreadaId === text(options.charreadaId)
+  )) || null;
   const live = normalizeLegacyLive(snapshot, competitions);
   return {
     schemaVersion: 1,
@@ -230,12 +319,23 @@ function buildLegacyPortalModel(snapshot, options) {
       turn: live.turn
     },
     live,
-    liveFeed: buildPublicLiveFeedModel({}, { live, program, results: rawResults }, {
+    liveFeed: buildPublicLiveFeedModel({}, { live, program: programAll, results: rawResults }, {
       filter: options.feed,
       connection: options.connection,
       nowMs: options.nowMs
     }),
     program,
+    programAll,
+    programFilters: {
+      days: programFilters.days,
+      phases: programFilters.phases
+    },
+    activeProgramFilters: {
+      day: programFilters.day,
+      phaseId: programFilters.phaseId
+    },
+    programFeatured: selectFeaturedProgramItem(program, activeCharreadaId),
+    programDetail,
     competitions,
     selectedCompetition,
     selectedCompetitionId,
@@ -247,7 +347,8 @@ function buildLegacyPortalModel(snapshot, options) {
     home: {
       competitionsCount: competitions.length,
       resultsCount: rawResults.length,
-      nextProgramItem: program.find((item) => !COMPLETED_PROGRAM_STATES.has(item.status)) || null
+      nextProgramItem: programAll.find((item) => !COMPLETED_PROGRAM_STATES.has(item.status)) || null,
+      programCount: programAll.length
     },
     sectionRevisions: { legacy: 1 }
   };
@@ -284,6 +385,11 @@ function buildEmptyPortalModel(options) {
       nowMs: options.nowMs
     }),
     program: [],
+    programAll: [],
+    programFilters: { days: [], phases: [] },
+    activeProgramFilters: { day: "", phaseId: "" },
+    programFeatured: null,
+    programDetail: null,
     competitions: [],
     selectedCompetition: null,
     selectedCompetitionId: "",
@@ -352,34 +458,77 @@ function enrichCompetitions(competitions, program, results) {
     .sort((left, right) => left.order - right.order || left.competitionId.localeCompare(right.competitionId, "es"));
 }
 
-function normalizeProgramItem(item = {}) {
+function normalizeProgramItems(value) {
+  return asArray(value)
+    .map((item, index) => normalizeProgramItem(item, index))
+    .sort((left, right) => (
+      left.scheduledDate.localeCompare(right.scheduledDate) ||
+      left.scheduledTime.localeCompare(right.scheduledTime) ||
+      left.order - right.order ||
+      left.sourceIndex - right.sourceIndex
+    ));
+}
+
+function normalizeProgramItem(item = {}, sourceIndex = 0) {
   return {
     scheduleId: text(item.scheduleId || item.charreadaId),
     charreadaId: text(item.charreadaId),
     competitionId: text(item.competitionId),
     competitionType: text(item.competitionType),
+    competitionScope: text(item.competitionScope || item.participantType),
+    competitionName: text(item.competitionName),
     categoryId: text(item.categoryId),
     categoryName: text(item.categoryName),
     phaseId: text(item.phaseId),
     phaseName: text(item.phaseName),
     name: text(item.name) || "Jornada",
+    shortTitle: text(item.shortTitle),
     scheduledDate: text(item.scheduledDate),
     scheduledTime: text(item.scheduledTime),
+    endTime: text(item.endTime),
+    sequence: integer(item.sequence ?? item.order, sourceIndex + 1),
     order: integer(item.order, 0),
-    status: text(item.status) || "unavailable",
-    participants: asArray(item.participants).map(normalizeProgramParticipant),
-    association: text(item.association),
+    status: normalizeProgramStatus(item.status),
+    venueId: text(item.venueId),
+    venueName: text(item.venueName),
+    participantType: text(item.participantType || item.competitionScope),
+    participants: normalizeProgramParticipants(item.participants),
+    publicNotes: text(item.publicNotes),
+    liveAvailable: Boolean(item.liveAvailable),
+    resultsAvailable: Boolean(item.resultsAvailable),
+    revision: integer(item.revision, 0),
+    updatedAt: text(item.updatedAt),
+    sourceIndex,
     legacy: Boolean(item.legacy)
   };
 }
 
-function normalizeProgramParticipant(item = {}) {
+function normalizeProgramParticipants(value) {
+  const seen = new Set();
+  return asArray(value)
+    .map((item, index) => normalizeProgramParticipant(item, index))
+    .filter((item) => {
+      if (!item.id) return Boolean(item.name);
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    })
+    .sort((left, right) => left.order - right.order || left.sourceIndex - right.sourceIndex)
+    .map(({ sourceIndex, ...item }) => item);
+}
+
+function normalizeProgramParticipant(item = {}, sourceIndex = 0) {
+  const type = text(item.type) || (item.participantId ? "individual" : "team");
   return {
     id: text(item.teamId || item.participantId || item.id),
     name: text(item.teamName || item.participantName || item.name),
-    association: text(item.association),
-    categoryName: text(item.categoryName || item.category),
-    horseName: text(item.horseName || item.horse)
+    type: ["team", "individual", "exhibition"].includes(type) ? type : "team",
+    order: integer(item.order, sourceIndex + 1),
+    shortName: text(item.shortName || item.abbreviation),
+    logoUrl: safePublicUrl(item.logoUrl || item.logo),
+    region: text(item.region),
+    status: text(item.status) || "ready",
+    sourceIndex
   };
 }
 
@@ -397,7 +546,6 @@ function normalizeResultItem(item = {}, index = 0) {
     displayName: participantScope === "individual"
       ? text(item.participantName) || "Participante no registrado"
       : text(item.teamName) || "Equipo no registrado",
-    association: text(item.association),
     categoryId: text(item.categoryId),
     categoryName: text(item.categoryName),
     competitionId: text(item.competitionId),
@@ -423,7 +571,8 @@ function normalizeScores(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   const output = {};
   for (const column of PUBLIC_SHEET_COLUMNS) {
-    if (Object.prototype.hasOwnProperty.call(value, column.id)) output[column.id] = scoreOrNull(value[column.id]);
+    const alias = SCORE_ALIASES[column.id].find((key) => Object.prototype.hasOwnProperty.call(value, key));
+    if (alias) output[column.id] = scoreOrNull(value[alias]);
   }
   return output;
 }
@@ -533,7 +682,6 @@ function normalizeEntity(value = {}) {
   return {
     id: text(value?.id || value?.teamId || value?.participantId || value?.horseId),
     name: text(value?.name || value?.teamName || value?.participantName || value?.horseName),
-    association: text(value?.association),
     category: text(value?.category)
   };
 }
@@ -594,8 +742,52 @@ function countValues(values) {
   return counts;
 }
 
-function hasScoreValue(value) {
-  return value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
+function enrichProgramAvailability(program, results, activeCharreadaId) {
+  return program.map((item) => ({
+    ...item,
+    liveAvailable: item.liveAvailable || Boolean(item.charreadaId && item.charreadaId === activeCharreadaId),
+    resultsAvailable: item.resultsAvailable || results.some((row) => row.charreadaId === item.charreadaId)
+  }));
+}
+
+function selectFeaturedProgramItem(program, activeCharreadaId) {
+  return program.find((item) => item.charreadaId && item.charreadaId === activeCharreadaId) ||
+    program.find((item) => item.status === "live") ||
+    program.find((item) => !COMPLETED_PROGRAM_STATES.has(item.status)) ||
+    program[0] ||
+    null;
+}
+
+function normalizeProgramStatus(value) {
+  const normalized = text(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_");
+  if (["programada", "programado", "scheduled", "ready"].includes(normalized)) return "scheduled";
+  if (["proxima", "upcoming", "preparando"].includes(normalized)) return "upcoming";
+  if (["en_vivo", "live", "active", "en_curso"].includes(normalized)) return "live";
+  if (["terminada", "terminado", "finalizada", "finalizado", "completed", "finished"].includes(normalized)) {
+    return "completed";
+  }
+  if (["pospuesta", "pospuesto", "postponed", "pausada", "pausado", "suspendida", "suspendido"].includes(normalized)) {
+    return "postponed";
+  }
+  if (["cancelada", "cancelado", "cancelled", "canceled"].includes(normalized)) return "cancelled";
+  return "unavailable";
+}
+
+function programDateKey(value) {
+  const match = text(value).match(/^(\d{4}-\d{2}-\d{2})/);
+  return match?.[1] || "";
+}
+
+function safePublicUrl(value) {
+  const clean = text(value);
+  if (!clean || /^(?:javascript|data|file|vbscript):/i.test(clean)) return "";
+  if (/^(?:https?:\/\/|\/|\.\/)/i.test(clean)) return clean;
+  if (!clean.includes(":") && !clean.split("/").includes("..")) return clean;
+  return "";
 }
 
 function scoreOrNull(value) {
@@ -616,12 +808,24 @@ function integer(value, fallback) {
 
 function text(value) {
   if (value === null || value === undefined) return "";
-  return String(value).slice(0, 4000);
+  return String(value)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+    .replace(/[<>]/g, "")
+    .slice(0, 4000);
 }
 
 function asArray(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
-  if (value && typeof value === "object") return Object.values(value).filter(Boolean);
+  if (value && typeof value === "object") {
+    const output = [];
+    for (const key of Object.keys(value)) {
+      if (["__proto__", "constructor", "prototype"].includes(key)) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (!descriptor || descriptor.get || descriptor.set || !descriptor.value) continue;
+      output.push(descriptor.value);
+    }
+    return output;
+  }
   return [];
 }
 

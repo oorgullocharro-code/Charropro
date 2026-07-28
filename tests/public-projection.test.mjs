@@ -30,6 +30,18 @@ assert.notEqual(initial.projection.live.turn.team.id, "team-a", "last scored tea
 assert.equal(initial.projection.overview.activeCharreadaId, "charreada-team");
 assert.equal(initial.projection.overview.activeCompetitionId, "competition-team-aa");
 assert.equal(initial.projection.overview.contextConsistency, "live-current-preferred");
+const teamProgramItem = initial.projection.program.items.find((item) => item.charreadaId === "charreada-team");
+assert.equal(teamProgramItem.competitionName, "Competencia por equipos");
+assert.equal(teamProgramItem.categoryName, "AA");
+assert.equal(teamProgramItem.phaseName, "Clasificatoria");
+assert.equal(teamProgramItem.venueName, "Lienzo Norte");
+assert.equal(teamProgramItem.endTime, "17:00");
+assert.equal(teamProgramItem.liveAvailable, true);
+assert.equal(teamProgramItem.resultsAvailable, true);
+assert.deepEqual(teamProgramItem.participants.map((participant) => participant.name), ["Equipo B", "Equipo A"]);
+assert.deepEqual(teamProgramItem.participants.map((participant) => participant.order), [1, 2]);
+assert.equal("association" in teamProgramItem, false);
+assert.equal("association" in teamProgramItem.participants[0], false);
 
 assert.equal(initial.projection.results.items.length, 3, "superseded score and private raw score are excluded");
 assert.equal(initial.projection.results.items.some((row) => row.subtotal === 999), false, "private raw score is absent");
@@ -45,6 +57,8 @@ assert.equal(individualResult.teamId, null, "individual competition never invent
 assert.equal(individualResult.participantName, "Ana Charra");
 assert.equal(individualResult.horseName, "Relámpago");
 assert.equal(individualResult.competitionType, "charro_completo");
+assert.equal(individualResult.scores.PM, 24);
+assert.equal(individualResult.teamPenaltyTotal, -4);
 
 const competitionIds = initial.projection.competitions.items.map((row) => row.competitionId);
 assert.ok(competitionIds.includes("competition-team-aa"));
@@ -62,7 +76,16 @@ assert.equal(initial.projection.statistics.status, "unavailable");
 assert.equal(initial.projection.search.status, "unavailable");
 
 const serialized = JSON.stringify(initial.projection);
-for (const privateTerm of ["private@example.test", "pendingNote", "operatorId", "broadcastState", "<script>"]) {
+for (const privateTerm of [
+  "private@example.test",
+  "pendingNote",
+  "operatorId",
+  "broadcastState",
+  "<script>",
+  "Asociación Norte",
+  "Asociación Sur",
+  "Asociación Centro"
+]) {
   assert.equal(serialized.includes(privateTerm), false, `${privateTerm} is not public`);
 }
 
@@ -180,8 +203,8 @@ function buildSource() {
         broadcastState: { operatorId: "private" }
       },
       teams: [
-        { id: "team-a", name: "Equipo A", category: "AA", association: "Asociación Norte" },
-        { id: "team-b", name: "Equipo B", category: "AA", association: "Asociación Sur" }
+        { id: "team-a", name: "Equipo A", category: "AA", association: "Asociación Norte", order: 2, region: "Norte" },
+        { id: "team-b", name: "Equipo B", category: "AA", association: "Asociación Sur", order: 1, region: "Sur" }
       ],
       charreadas: [
         {
@@ -190,9 +213,15 @@ function buildSource() {
           competitionId: "competition-team-aa",
           competitionType: "equipos_completo",
           categoryId: "aa",
-          phaseId: "phase-1",
+          categoryName: "AA",
+          phase: "Clasificatoria",
           teamIds: ["team-a", "team-b"],
           suerteIds: ["cala", "piales"],
+          date: "2026-07-27",
+          startTime: "15:00",
+          endTime: "17:00",
+          venue: "Lienzo Norte",
+          publicNotes: "Acceso desde las 14:00.",
           order: 1
         },
         {
@@ -269,6 +298,18 @@ function buildSource() {
           breakdown: { total: 42 },
           total: 42,
           publishedAt: "2026-07-27T13:00:03.000Z"
+        },
+        individualPaso: {
+          id: "published-individual-paso",
+          attemptKey: "participant-1-paso",
+          revision: 1,
+          charreada: { id: "charreada-charro" },
+          competition: { id: "competition-charro-libre", type: "charro_completo" },
+          team: { id: "participant-1", name: "Ana Charra", participantName: "Ana Charra", horseName: "Relámpago" },
+          suerte: { id: "paso_de_la_muerte" },
+          breakdown: { total: 24 },
+          teamPenaltyTotal: -4,
+          publishedAt: "2026-07-27T13:00:03.500Z"
         },
         juvenile: {
           id: "published-juvenile",

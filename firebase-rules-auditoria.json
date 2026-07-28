@@ -213,8 +213,15 @@
             ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1",
             "items": {
               "$itemId": {
+                "participants": {
+                  "$participantId": {
+                    "$other": {
+                      ".validate": "$other === 'id' || $other === 'type' || $other === 'order' || $other === 'name' || $other === 'shortName' || $other === 'logoUrl' || $other === 'region' || $other === 'status' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'categoryId' || $other === 'categoryName' || $other === 'horseId' || $other === 'horseName' || $other === 'association'"
+                    }
+                  }
+                },
                 "$other": {
-                  ".validate": "$other === 'scheduleId' || $other === 'competitionId' || $other === 'competitionType' || $other === 'categoryId' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'name' || $other === 'scheduledDate' || $other === 'scheduledTime' || $other === 'order' || $other === 'status' || $other === 'participants' || $other === 'association' || $other === 'legacy'"
+                  ".validate": "$other === 'scheduleId' || $other === 'sequence' || $other === 'competitionId' || $other === 'competitionType' || $other === 'competitionScope' || $other === 'competitionName' || $other === 'categoryId' || $other === 'categoryName' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'name' || $other === 'shortTitle' || $other === 'scheduledDate' || $other === 'scheduledTime' || $other === 'endTime' || $other === 'order' || $other === 'status' || $other === 'venueId' || $other === 'venueName' || $other === 'participantType' || $other === 'participants' || $other === 'publicNotes' || $other === 'liveAvailable' || $other === 'resultsAvailable' || $other === 'revision' || $other === 'updatedAt' || $other === 'association' || $other === 'legacy'"
                 }
               }
             },

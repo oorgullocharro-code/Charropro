@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 
@@ -20,17 +20,51 @@ export function adaptPublicProjectionToLegacy(snapshot) {
     id: item.charreadaId || item.scheduleId,
     charreadaId: item.charreadaId,
     nombre: item.name,
+    shortTitle: item.shortTitle,
     fecha: item.scheduledDate,
     hora: item.scheduledTime,
+    endTime: item.endTime,
+    sequence: item.sequence,
     order: item.order,
     status: item.status,
     phase: item.phaseName || "",
     competitionId: item.competitionId,
     competitionType: item.competitionType,
+    competitionScope: item.competitionScope,
+    competitionName: item.competitionName,
     categoryId: item.categoryId,
+    categoryName: item.categoryName,
     phaseId: item.phaseId,
-    equipos: (item.participants || []).filter((entry) => entry.teamId),
-    individualParticipants: (item.participants || []).filter((entry) => entry.participantId),
+    venueId: item.venueId,
+    venueName: item.venueName,
+    publicNotes: item.publicNotes,
+    liveAvailable: Boolean(item.liveAvailable),
+    resultsAvailable: Boolean(item.resultsAvailable),
+    revision: item.revision,
+    updatedAt: item.updatedAt,
+    participants: item.participants || [],
+    equipos: (item.participants || [])
+      .filter((entry) => (entry.type || (entry.teamId ? "team" : "")) === "team")
+      .map((entry) => ({
+        teamId: entry.id || entry.teamId,
+        teamName: entry.name || entry.teamName,
+        order: entry.order,
+        shortName: entry.shortName,
+        logoUrl: entry.logoUrl,
+        region: entry.region,
+        status: entry.status
+      })),
+    individualParticipants: (item.participants || [])
+      .filter((entry) => (entry.type || (entry.participantId ? "individual" : "")) === "individual")
+      .map((entry) => ({
+        participantId: entry.id || entry.participantId,
+        participantName: entry.name || entry.participantName,
+        order: entry.order,
+        shortName: entry.shortName,
+        logoUrl: entry.logoUrl,
+        region: entry.region,
+        status: entry.status
+      })),
     totalParticipants: (item.participants || []).length,
     legacy: Boolean(item.legacy)
   }));
@@ -41,7 +75,6 @@ export function adaptPublicProjectionToLegacy(snapshot) {
     teamName: item.teamName,
     participantId: item.participantId,
     participantName: item.participantName,
-    association: item.association,
     categoryId: item.categoryId,
     categoryName: item.categoryName,
     competitionId: item.competitionId,
@@ -154,7 +187,6 @@ export function adaptPublicProjectionToLegacyLive(snapshot, tournamentId = "") {
       team: {
         id: turn.team?.id || "",
         name: turn.team?.name || "",
-        association: turn.team?.association || "",
         category: turn.team?.category || ""
       },
       participant: {

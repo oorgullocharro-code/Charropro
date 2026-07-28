@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260727-public-portal-ux-001-live-feed-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260727-public-portal-ux-001-live-feed-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,
@@ -41,22 +41,61 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   program: {
     revision: 1,
     status: "ready",
-    items: [{
-      scheduleId: "charreada-3",
-      charreadaId: "charreada-3",
-      competitionId: "equipos",
-      competitionType: "equipos_completo",
-      categoryId: "aaa",
-      phaseId: "final",
-      phaseName: "Final",
-      name: "Charreada 3",
-      scheduledDate: "2026-07-27",
-      scheduledTime: "17:00",
-      order: 1,
-      status: "active",
-      participants: [{ teamId: "rancho-norte", teamName: "Rancho Norte" }],
-      legacy: false
-    }]
+    items: [
+      programItem({
+        charreadaId: "charreada-1",
+        name: "Charreada clasificatoria",
+        date: "2026-07-27",
+        time: "11:00",
+        phaseId: "clasificatoria",
+        phaseName: "Clasificatoria",
+        order: 1,
+        status: "completed",
+        participants: [
+          participant("equipo-centro", "Equipo Centro", 1, "Centro"),
+          participant("equipo-bajio", "Equipo Bajío", 2, "Bajío"),
+          participant("equipo-sur", "Equipo Sur", 3, "Sur")
+        ],
+        resultsAvailable: true
+      }),
+      programItem({
+        charreadaId: "charreada-3",
+        name: "Semifinal por equipos",
+        date: "2026-07-28",
+        time: "17:00",
+        phaseId: "semifinal",
+        phaseName: "Semifinal",
+        order: 2,
+        status: "live",
+        participants: [
+          participant("rancho-norte", "Rancho Norte", 1, "Norte"),
+          participant("hacienda-real", "Hacienda Real", 2, "Centro"),
+          participant("charros-del-sol", "Charros del Sol", 3, "Occidente"),
+          participant("rancho-grande", "Rancho Grande", 4, "Bajío")
+        ],
+        liveAvailable: true,
+        resultsAvailable: true
+      }),
+      programItem({
+        charreadaId: "charreada-final",
+        name: "Final Charro Completo",
+        date: "2026-07-29",
+        time: "19:00",
+        phaseId: "final",
+        phaseName: "Final",
+        order: 3,
+        status: "scheduled",
+        competitionId: "charro-completo",
+        competitionType: "charro_completo",
+        competitionScope: "individual",
+        competitionName: "Charro Completo",
+        categoryName: "Libre",
+        participants: [
+          participant("charro-uno", "Alejandro Pérez", 1, "Jalisco", "individual"),
+          participant("charro-dos", "Daniel Robles", 2, "Hidalgo", "individual")
+        ]
+      })
+    ]
   },
   live: {
     revision: 3,
@@ -65,8 +104,8 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
     charreadaId: "charreada-3",
     turn: {
       status: "available",
-      team: { id: "rancho-norte", name: "Rancho Norte", association: "Asociacion Centro" },
-      participant: { id: "charro-uno", name: "Charro Uno", association: "Asociacion Centro" },
+      team: { id: "rancho-norte", name: "Rancho Norte" },
+      participant: { id: "charro-uno", name: "Charro Uno" },
       horse: { id: "caballo-uno", name: "Lucero" },
       suerteId: "manganas_pie",
       suerteName: "Manganas a pie"
@@ -151,7 +190,6 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
       resultId: "resultado-1",
       teamId: "rancho-norte",
       teamName: "Rancho Norte",
-      association: "Asociacion Centro",
       categoryId: "aaa",
       categoryName: "AAA",
       competitionId: "equipos",
@@ -160,9 +198,9 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
       phaseName: "Final",
       charreadaId: "charreada-3",
       participantScope: "team",
-      scores: { CC: 35, P: 28, C: 75, JT: 18, LC: 25, PR: 20, JY: 19, MP: 26, MC: 22, PM: 10 },
+      scores: { CC: 35, P: 28, C: 75, JT: 18, LC: 25, PR: 20, JY: 19, MP: 26, MC: 22, PM: 24 },
       subtotal: 278,
-      teamPenaltyTotal: 0,
+      teamPenaltyTotal: -4,
       officialTotal: 278,
       officialPosition: 1,
       positionStatus: "official",
@@ -182,6 +220,9 @@ export function mountPublicPortalUxFixture(view = "en-vivo", options = {}) {
   const shell = createPublicPortalShell(root, { logoUrl: "/assets/obs/logo-och-original.png" });
   const model = buildPublicPortalModel(PUBLIC_PORTAL_UX_FIXTURE, {
     competitionId: "equipos",
+    programDay: options.programDay || "",
+    programPhaseId: options.programPhaseId || "",
+    charreadaId: options.charreadaId || "",
     feed: options.feed || "all",
     availability: "ready",
     connection: options.connection || "online",
@@ -190,6 +231,9 @@ export function mountPublicPortalUxFixture(view = "en-vivo", options = {}) {
   renderPublicPortal(shell, model, {
     view,
     competitionId: "equipos",
+    programDay: options.programDay || "",
+    programPhaseId: options.programPhaseId || "",
+    charreadaId: options.charreadaId || "",
     feed: options.feed || "all",
     connection: options.connection || "online"
   }, { forceView: true });
@@ -223,10 +267,49 @@ function feedEvent(eventId, sequence, eventType, overrides = {}) {
   };
 }
 
+function programItem(options) {
+  return {
+    scheduleId: options.charreadaId,
+    sequence: options.order,
+    charreadaId: options.charreadaId,
+    competitionId: options.competitionId || "equipos",
+    competitionType: options.competitionType || "equipos_completo",
+    competitionScope: options.competitionScope || "team",
+    competitionName: options.competitionName || "Competencia por equipos",
+    categoryId: "aaa",
+    categoryName: options.categoryName || "AAA",
+    phaseId: options.phaseId,
+    phaseName: options.phaseName,
+    name: options.name,
+    shortTitle: options.name,
+    scheduledDate: options.date,
+    scheduledTime: options.time,
+    endTime: "",
+    order: options.order,
+    status: options.status,
+    venueName: "Lienzo Nacional",
+    participantType: options.competitionScope || "team",
+    participants: options.participants || [],
+    publicNotes: options.order === 3 ? "Acceso sujeto a disponibilidad." : "",
+    liveAvailable: Boolean(options.liveAvailable),
+    resultsAvailable: Boolean(options.resultsAvailable),
+    revision: 1,
+    updatedAt: "2026-07-27T17:59:55.000Z",
+    legacy: false
+  };
+}
+
+function participant(id, name, order, region, type = "team") {
+  return { id, type, name, order, region, status: "ready" };
+}
+
 if (typeof document !== "undefined" && document.getElementById("public-portal-root")) {
   const fixtureUrl = new URL(location.href);
   mountPublicPortalUxFixture(fixtureUrl.searchParams.get("fixtureView") || "en-vivo", {
     feed: fixtureUrl.searchParams.get("feed") || "all",
-    connection: fixtureUrl.searchParams.get("connection") || "online"
+    connection: fixtureUrl.searchParams.get("connection") || "online",
+    programDay: fixtureUrl.searchParams.get("day") || "",
+    programPhaseId: fixtureUrl.searchParams.get("phase") || "",
+    charreadaId: fixtureUrl.searchParams.get("charreadaId") || ""
   });
 }

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",
@@ -274,7 +274,7 @@ function renderView(model, uiState, options) {
     case "en-vivo":
       return renderLiveView(model, uiState);
     case "programa":
-      return renderProgramView(model);
+      return renderProgramView(model, uiState);
     case "competencias":
       return renderCompetitionsView(model);
     case "resultados":
@@ -383,8 +383,6 @@ function renderLiveView(model, uiState) {
     element("span", "public-portal-now-context", nowContext(model)),
     element("h3", "", turn.participant?.name || turn.team?.name || "Sin turno oficial")
   );
-  const association = turn.participant?.association || turn.team?.association;
-  if (association) identity.append(element("p", "", association));
   const suerte = element("div", "public-portal-live-suerte");
   suerte.append(
     element("span", "", turn.participant?.name ? "Actividad oficial" : "Suerte"),
@@ -484,11 +482,21 @@ function renderLiveFeedItem(item) {
   return row;
 }
 
-function renderProgramView(model) {
+function renderProgramView(model, uiState) {
   const fragment = document.createDocumentFragment();
-  fragment.append(viewHeading("Programa", `${model.program.length} actividades publicadas`));
+  const total = model.programAll?.length || model.program.length;
+  fragment.append(viewHeading("Programa", `${model.program.length} de ${total} actividades publicadas`));
+  const filters = renderProgramFilters(model, uiState);
+  if (filters) fragment.append(filters);
+  if (model.programFeatured) fragment.append(renderFeaturedProgram(model.programFeatured, model));
+  if (model.programDetail) fragment.append(renderProgramDetail(model.programDetail, model));
   if (!model.program.length) {
-    fragment.append(emptyState("Sin programa", "El programa todavía no está disponible."));
+    fragment.append(emptyState(
+      total ? "Sin coincidencias" : "Sin programa",
+      total
+        ? "No hay actividades para el día y la fase seleccionados."
+        : "El programa todavía no está disponible."
+    ));
     return fragment;
   }
   const groups = groupProgramByDate(model.program);
@@ -502,20 +510,192 @@ function renderProgramView(model) {
       const article = element("article", "public-portal-program-item");
       article.classList.toggle("is-active", active);
       if (active) article.setAttribute("aria-current", "true");
+      const schedule = element("div", "public-portal-program-schedule");
       const time = element("time", "public-portal-program-time", item.scheduledTime || "Por confirmar");
+      time.dateTime = programDateTime(item);
+      schedule.append(time);
+      if (item.endTime) schedule.append(element("span", "", `a ${item.endTime}`));
       const content = element("div", "public-portal-program-content");
-      content.append(
-        element("h4", "", item.name),
-        element("p", "", programItemContext(item, model.competitions))
+      const identity = element("div", "public-portal-program-identity");
+      identity.append(
+        element("span", "public-portal-kicker", programSequenceLabel(item)),
+        element("h4", "", item.name)
       );
-      const state = element("span", "public-portal-program-status", active ? "En curso" : programStatusLabel(item.status));
-      article.append(time, content, state);
+      const context = element("p", "public-portal-program-context", programItemContext(item, model.competitions));
+      content.append(identity, context);
+      if (item.venueName) content.append(element("p", "public-portal-program-venue", item.venueName));
+      content.append(renderProgramParticipants(item));
+      const aside = element("div", "public-portal-program-aside");
+      const state = element(
+        "span",
+        "public-portal-program-status",
+        active ? "En vivo" : programStatusLabel(item.status)
+      );
+      state.dataset.state = active ? "live" : item.status;
+      aside.append(state, renderProgramActions(item));
+      article.append(schedule, content, aside);
       list.append(article);
     }
     section.append(header, list);
     fragment.append(section);
   }
   return fragment;
+}
+
+function renderProgramFilters(model, uiState) {
+  const days = model.programFilters?.days || [];
+  const phases = model.programFilters?.phases || [];
+  if (days.length < 2 && phases.length < 2) return null;
+  const section = element("section", "public-portal-program-filters");
+  section.setAttribute("aria-label", "Filtros del programa");
+  if (days.length >= 2) {
+    section.append(renderProgramFilterGroup(
+      "Día",
+      [{ value: "", label: "Todos los días" }, ...days.map((day) => ({
+        value: day.value,
+        label: compactDate(day.value)
+      }))],
+      model.activeProgramFilters?.day || uiState.programDay || "",
+      "portalProgramDay"
+    ));
+  }
+  if (phases.length >= 2) {
+    section.append(renderProgramFilterGroup(
+      "Fase",
+      [{ value: "", label: "Todas" }, ...phases],
+      model.activeProgramFilters?.phaseId || uiState.programPhaseId || "",
+      "portalProgramPhase"
+    ));
+  }
+  return section;
+}
+
+function renderProgramFilterGroup(label, options, activeValue, datasetKey) {
+  const group = element("div", "public-portal-program-filter-group");
+  group.append(element("span", "public-portal-program-filter-label", label));
+  const controls = element("div", "public-portal-program-filter-options");
+  for (const option of options) {
+    const button = buttonElement(option.label, "public-portal-program-filter-button");
+    button.dataset[datasetKey] = option.value;
+    const active = option.value === activeValue;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+    if (active) button.setAttribute("aria-current", "page");
+    controls.append(button);
+  }
+  group.append(controls);
+  return group;
+}
+
+function renderFeaturedProgram(item, model) {
+  const active = item.charreadaId && item.charreadaId === model.overview.activeCharreadaId;
+  const section = element("section", "public-portal-program-featured");
+  const copy = element("div");
+  copy.append(
+    element("span", "public-portal-kicker", active ? "Ahora en el programa" : "Sigue"),
+    element("h3", "", item.name),
+    element("p", "", [
+      displayDate(item.scheduledDate),
+      item.scheduledTime,
+      item.categoryName,
+      item.phaseName,
+      participantCountLabel(item)
+    ].filter(Boolean).join(" · "))
+  );
+  const action = buttonElement("Ver detalle", "public-portal-secondary-action");
+  action.dataset.portalProgramDetail = item.charreadaId;
+  action.dataset.portalFocusKey = `program-feature-${item.charreadaId}`;
+  section.append(copy, action);
+  return section;
+}
+
+function renderProgramDetail(item, model) {
+  const section = element("section", "public-portal-program-detail");
+  section.setAttribute("aria-labelledby", "public-portal-program-detail-title");
+  const heading = element("div", "public-portal-section-heading");
+  const copy = element("div");
+  copy.append(
+    element("span", "public-portal-kicker", "Detalle de competencia"),
+    element("h3", "", item.name)
+  );
+  copy.querySelector("h3").id = "public-portal-program-detail-title";
+  const close = buttonElement("Cerrar detalle", "public-portal-secondary-action");
+  close.dataset.portalProgramDetail = "";
+  heading.append(copy, close);
+  const details = element("dl", "public-portal-detail-grid public-portal-detail-grid-wide");
+  addDetail(details, "Fecha", displayDate(item.scheduledDate) || "Por confirmar");
+  addDetail(details, "Horario", programTimeRange(item));
+  addDetail(details, "Modalidad", programCompetitionLabel(item, model.competitions));
+  addDetail(details, "Categoría", item.categoryName || "Sin categoría publicada");
+  addDetail(details, "Fase", item.phaseName || "Sin fase publicada");
+  addDetail(details, "Sede", item.venueName || "Sin sede publicada");
+  addDetail(details, "Participantes", participantCountLabel(item));
+  addDetail(details, "Estado", programStatusLabel(item.status));
+  section.append(heading, details);
+  const participants = element("div", "public-portal-program-detail-participants");
+  participants.append(element("h4", "", "Orden de participación"), renderProgramParticipants(item, true));
+  section.append(participants);
+  if (item.publicNotes) {
+    section.append(element("p", "public-portal-program-public-notes", item.publicNotes));
+  }
+  section.append(renderProgramActions(item, true));
+  return section;
+}
+
+function renderProgramParticipants(item, expanded = false) {
+  const wrap = element("div", expanded
+    ? "public-portal-program-participants is-expanded"
+    : "public-portal-program-participants");
+  if (!item.participants?.length) {
+    wrap.append(element("p", "", "Participantes por confirmar"));
+    return wrap;
+  }
+  const list = element("ol", "public-portal-program-participant-list");
+  const visible = expanded ? item.participants : item.participants.slice(0, 6);
+  for (const participant of visible) {
+    const row = element("li", "public-portal-program-participant");
+    const order = element("span", "public-portal-program-participant-order", String(participant.order));
+    const identity = element("span", "public-portal-program-participant-name");
+    if (participant.logoUrl) {
+      const logo = element("img", "public-portal-program-participant-logo");
+      logo.src = participant.logoUrl;
+      logo.alt = "";
+      logo.width = 28;
+      logo.height = 28;
+      identity.append(logo);
+    }
+    identity.append(element("span", "", participant.name || "Participante no registrado"));
+    row.append(order, identity);
+    if (participant.region) row.append(element("span", "public-portal-program-participant-region", participant.region));
+    list.append(row);
+  }
+  wrap.append(list);
+  if (!expanded && item.participants.length > visible.length) {
+    wrap.append(element("p", "public-portal-program-participant-more", `y ${item.participants.length - visible.length} más`));
+  }
+  return wrap;
+}
+
+function renderProgramActions(item, expanded = false) {
+  const actions = element("div", "public-portal-program-actions");
+  if (!expanded) {
+    const detail = buttonElement("Ver detalle", "public-portal-secondary-action");
+    detail.dataset.portalProgramDetail = item.charreadaId;
+    actions.append(detail);
+  }
+  if (item.liveAvailable) {
+    const live = buttonElement("Ver En Vivo", "public-portal-secondary-action");
+    live.dataset.portalProgramLive = item.charreadaId;
+    live.dataset.portalCompetitionChoice = item.competitionId;
+    actions.append(live);
+  }
+  if (item.resultsAvailable) {
+    const results = buttonElement("Ver resultados", "public-portal-secondary-action");
+    results.dataset.portalProgramResults = item.charreadaId;
+    results.dataset.portalCompetitionChoice = item.competitionId;
+    actions.append(results);
+  }
+  return actions;
 }
 
 function renderCompetitionsView(model) {
@@ -566,14 +746,13 @@ function renderResultsView(model, uiState, options) {
   if (!model.results.length) {
     section.append(emptyMessage("No hay resultados publicados para esta selección."));
   } else {
-    const table = createTable(["Posición oficial", resultEntityLabel(model), "Asociación", "Categoría", "Total oficial", "Estado"]);
+    const table = createTable(["Posición oficial", resultEntityLabel(model), "Categoría", "Total oficial", "Estado"]);
     for (const row of model.results) {
       const tr = element("tr");
       if (options.updatedResultIds?.has(row.resultId)) tr.classList.add("is-updated");
       tr.dataset.resultId = row.resultId;
       appendCell(tr, formatOfficialPosition(row.officialPosition), { header: true });
       appendCell(tr, row.displayName);
-      appendCell(tr, row.association || "—");
       appendCell(tr, row.categoryName || "—");
       appendScoreCell(tr, row.officialTotal, row.subtotal);
       appendCell(tr, resultStatusLabel(row));
@@ -602,7 +781,7 @@ function renderSheetView(model, uiState, options) {
   const thead = element("thead");
   const groupRow = element("tr");
   const participantGroup = element("th", "", "Participante");
-  participantGroup.colSpan = 2;
+  participantGroup.colSpan = 1;
   participantGroup.scope = "colgroup";
   groupRow.append(participantGroup);
   if (model.sheet.columns.length) {
@@ -617,11 +796,9 @@ function renderSheetView(model, uiState, options) {
   resultGroup.scope = "colgroup";
   groupRow.append(resultGroup);
   const headerRow = element("tr");
-  for (const label of [model.sheet.participantLabel, "Asociación"]) {
-    const th = element("th", "", label);
-    th.scope = "col";
-    headerRow.append(th);
-  }
+  const participantHeader = element("th", "", model.sheet.participantLabel);
+  participantHeader.scope = "col";
+  headerRow.append(participantHeader);
   for (const column of model.sheet.columns) {
     const th = element("th");
     th.scope = "col";
@@ -646,7 +823,6 @@ function renderSheetView(model, uiState, options) {
     const tr = element("tr");
     if (options.updatedResultIds?.has(row.resultId)) tr.classList.add("is-updated");
     appendCell(tr, row.name, { header: true, sticky: true });
-    appendCell(tr, row.association || "—");
     for (const column of model.sheet.columns) appendCell(tr, formatScore(row.scores[column.id]), { numeric: true });
     if (model.sheet.showPenalty) appendCell(tr, formatScore(row.teamPenaltyTotal), { numeric: true });
     appendCell(tr, formatScore(row.officialTotal), { numeric: true, strong: true });
@@ -902,7 +1078,8 @@ function formatDateRange(start, end) {
 
 function displayDate(value) {
   if (!value) return "";
-  const date = new Date(value);
+  const clean = String(value);
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(clean) ? `${clean}T12:00:00` : clean);
   if (Number.isNaN(date.getTime())) return String(value);
   return new Intl.DateTimeFormat("es-MX", {
     weekday: "short",
@@ -985,10 +1162,44 @@ function groupProgramByDate(program) {
   return groups;
 }
 
-function programItemContext(item, competitions) {
+function compactDate(value) {
+  if (!value) return "Fecha";
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("es-MX", {
+    weekday: "short",
+    day: "numeric",
+    month: "short"
+  }).format(date);
+}
+
+function programDateTime(item) {
+  const day = String(item.scheduledDate || "").slice(0, 10);
+  if (!day || !item.scheduledTime) return day;
+  return `${day}T${item.scheduledTime}`;
+}
+
+function programTimeRange(item) {
+  if (!item.scheduledTime) return "Por confirmar";
+  return item.endTime ? `${item.scheduledTime} a ${item.endTime}` : item.scheduledTime;
+}
+
+function programSequenceLabel(item) {
+  const sequence = Number(item.sequence);
+  const prefix = item.competitionScope === "individual" ? "Jornada" : "Charreada";
+  return Number.isSafeInteger(sequence) && sequence > 0 ? `${prefix} ${sequence}` : prefix;
+}
+
+function programCompetitionLabel(item, competitions) {
   const competition = competitions.find((entry) => entry.competitionId === item.competitionId);
+  return item.competitionName ||
+    competition?.displayName ||
+    competitionTypeLabel(item.competitionType);
+}
+
+function programItemContext(item, competitions) {
   return [
-    competition?.displayName,
+    programCompetitionLabel(item, competitions),
     item.categoryName,
     item.phaseName,
     participantCountLabel(item)
@@ -1054,15 +1265,19 @@ function liveStatusLabel(status) {
 function programStatusLabel(status) {
   const labels = {
     upcoming: "Próxima",
+    scheduled: "Programada",
     programada: "Programada",
-    active: "En curso",
-    "en vivo": "En curso",
+    active: "En vivo",
+    live: "En vivo",
+    "en vivo": "En vivo",
     completed: "Finalizada",
     terminada: "Finalizada",
-    unavailable: "No disponible",
+    postponed: "Pospuesta",
+    cancelled: "Cancelada",
+    unavailable: "Sin información",
     legacy: "Publicada"
   };
-  return labels[String(status || "").toLowerCase()] || String(status || "Publicada");
+  return labels[String(status || "").toLowerCase()] || "Sin información";
 }
 
 function competitionTypeLabel(type) {
@@ -1072,7 +1287,13 @@ function competitionTypeLabel(type) {
     caladero: "Caladero",
     coleadero: "Coleadero",
     pialadero: "Pialadero",
-    exhibicion: "Exhibición"
+    exhibicion: "Exhibición",
+    individual: "Competencia individual",
+    escaramuza: "Escaramuza",
+    ceremonia: "Ceremonia",
+    descanso: "Descanso",
+    semifinal: "Semifinal",
+    final: "Final"
   };
   return labels[type] || "Competencia";
 }

@@ -3,6 +3,7 @@ import {
   buildPublicPortalUrl,
   isPublicPortalView,
   parsePublicPortalRoute,
+  sanitizePortalDay,
   sanitizePortalId,
   sanitizePortalView
 } from "../js/publicPortal/portalRouter.js";
@@ -17,6 +18,8 @@ assert.deepEqual(initial, {
   categoryId: "",
   phaseId: "",
   charreadaId: "final-1",
+  programDay: "",
+  programPhaseId: "",
   feed: "all"
 });
 
@@ -28,6 +31,9 @@ assert.equal(sanitizePortalView("<script>"), "");
 assert.equal(sanitizePortalId("competition:final/1"), "competition:final/1");
 assert.equal(sanitizePortalId("<img src=x onerror=alert(1)>"), "");
 assert.equal(sanitizePortalId("javascript:alert(1)"), "");
+assert.equal(sanitizePortalDay("2026-08-15"), "2026-08-15");
+assert.equal(sanitizePortalDay("2026-02-31"), "");
+assert.equal(sanitizePortalDay("<script>"), "");
 assert.equal(isPublicPortalView("sabana"), true);
 assert.equal(isPublicPortalView("admin"), false);
 assert.equal(parsePublicPortalRoute("/torneo-publico.html?view=en-vivo&feed=score").feed, "score");
@@ -52,6 +58,16 @@ assert.equal(
   buildPublicPortalUrl("/torneo-publico.html?tournamentId=torneo_1&view=en-vivo", { feed: "timer" }),
   "/torneo-publico.html?tournamentId=torneo_1&view=en-vivo&feed=timer"
 );
+const programUrl = buildPublicPortalUrl(
+  "/torneo-publico.html?tournamentId=torneo_1&view=programa",
+  { programDay: "2026-08-15", programPhaseId: "semifinal" }
+);
+assert.equal(
+  programUrl,
+  "/torneo-publico.html?tournamentId=torneo_1&view=programa&day=2026-08-15&phase=semifinal"
+);
+assert.equal(parsePublicPortalRoute(programUrl).programDay, "2026-08-15");
+assert.equal(parsePublicPortalRoute(programUrl).programPhaseId, "semifinal");
 
 const history = [
   buildPublicPortalUrl("/torneo-publico.html?tournamentId=torneo_1", { view: "programa" }),
@@ -71,11 +87,15 @@ assert.equal(parsePublicPortalRoute(history[2]).view, "sabana");
 const maliciousUrl = buildPublicPortalUrl("/torneo-publico.html?tournamentId=torneo_1", {
   view: "<iframe>",
   competitionId: "data:text/html",
-  charreadaId: "constructor[prototype]"
+  charreadaId: "constructor[prototype]",
+  programDay: "2026-99-99",
+  programPhaseId: "__proto__"
 });
 const maliciousRoute = parsePublicPortalRoute(maliciousUrl);
 assert.equal(maliciousRoute.view, "inicio");
 assert.equal(maliciousRoute.competitionId, "");
 assert.equal(maliciousRoute.charreadaId, "");
+assert.equal(maliciousRoute.programDay, "");
+assert.equal(maliciousRoute.programPhaseId, "");
 
 console.log("public-portal-router.test.mjs: ok");

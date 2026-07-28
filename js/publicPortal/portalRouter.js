@@ -33,6 +33,8 @@ export function parsePublicPortalRoute(input, fallback = {}) {
     categoryId: sanitizePortalId(params.get("categoryId")),
     phaseId: sanitizePortalId(params.get("phaseId")),
     charreadaId: sanitizePortalId(params.get("charreadaId")),
+    programDay: sanitizePortalDay(params.get("day")),
+    programPhaseId: sanitizePortalId(params.get("phase")),
     feed: sanitizePortalFeedFilter(params.get("feed"))
   };
 }
@@ -50,6 +52,8 @@ export function buildPublicPortalUrl(input, patch = {}) {
   setParam(url.searchParams, "categoryId", next.categoryId);
   setParam(url.searchParams, "phaseId", next.phaseId);
   setParam(url.searchParams, "charreadaId", next.charreadaId);
+  setParam(url.searchParams, "day", next.programDay);
+  setParam(url.searchParams, "phase", next.programPhaseId);
   setParam(url.searchParams, "feed", next.feed === "all" ? "" : next.feed);
   url.searchParams.delete("competition");
   for (const alias of TOURNAMENT_ALIASES) {
@@ -66,6 +70,18 @@ export function sanitizePortalView(value) {
 export function sanitizePortalId(value) {
   const normalized = String(value || "").trim();
   return ID_PATTERN.test(normalized) && !UNSAFE_ID_PATTERN.test(normalized) ? normalized : "";
+}
+
+export function sanitizePortalDay(value) {
+  const normalized = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return "";
+  const [year, month, day] = normalized.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  ) ? normalized : "";
 }
 
 export function isPublicPortalView(value) {
@@ -87,6 +103,12 @@ function sanitizeRoutePatch(patch) {
   }
   for (const key of ["competitionId", "categoryId", "phaseId", "charreadaId"]) {
     if (Object.prototype.hasOwnProperty.call(patch, key)) clean[key] = sanitizePortalId(patch[key]);
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, "programDay")) {
+    clean.programDay = sanitizePortalDay(patch.programDay);
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, "programPhaseId")) {
+    clean.programPhaseId = sanitizePortalId(patch.programPhaseId);
   }
   if (Object.prototype.hasOwnProperty.call(patch, "feed")) {
     clean.feed = sanitizePortalFeedFilter(patch.feed);

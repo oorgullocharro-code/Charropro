@@ -10,8 +10,8 @@ const render = read("js/publicPortal/portalRender.js");
 const css = read("css/public-portal.css");
 
 assert.match(html, /id="public-portal-root"/);
-assert.match(html, /public-portal\.css\?v=20260727-public-portal-ux-001-live-feed-v1/);
-assert.match(html, /torneo-publico\.js\?v=20260727-public-portal-ux-001-live-feed-v1/);
+assert.match(html, /public-portal\.css\?v=20260727-public-portal-program-ux-001-program-phase-pm-v1/);
+assert.match(html, /torneo-publico\.js\?v=20260727-public-portal-program-ux-001-program-phase-pm-v1/);
 assert.match(entry, /bootstrapPublicPortal/);
 assert.ok(entry.split("\n").length <= 5, "legacy view entrypoint remains thin");
 
@@ -29,6 +29,8 @@ for (const view of ["inicio", "en-vivo", "programa", "competencias", "resultados
 }
 assert.match(router, /competitionId/);
 assert.match(router, /charreadaId/);
+assert.match(router, /programDay/);
+assert.match(router, /programPhaseId/);
 assert.match(router, /pushState|buildPublicPortalUrl/);
 assert.match(render, /aria-live/);
 assert.match(render, /aria-current/);
@@ -38,6 +40,8 @@ assert.match(render, /replaceChildren/);
 assert.match(render, /Minuto a minuto/);
 assert.match(render, /data-portal-feed-list|portalFeedList/);
 assert.match(render, /public-portal-column-abbr/);
+assert.match(render, /Orden de participación/);
+assert.equal(render.includes("Asociación"), false);
 assert.equal(render.includes("innerHTML"), false, "public data is never inserted through innerHTML");
 
 const publicModules = [app, router, selectors, render, entry].join("\n");

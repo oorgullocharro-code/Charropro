@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260727-public-portal-ux-001-live-feed-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([
@@ -80,20 +80,53 @@ const SECTION_FIELDS = Object.freeze({
 });
 const PROGRAM_ITEM_FIELDS = new Set([
   "scheduleId",
+  "sequence",
   "competitionId",
   "competitionType",
+  "competitionScope",
+  "competitionName",
   "categoryId",
+  "categoryName",
   "phaseId",
   "phaseName",
   "charreadaId",
   "name",
+  "shortTitle",
   "scheduledDate",
   "scheduledTime",
+  "endTime",
   "order",
   "status",
+  "venueId",
+  "venueName",
+  "participantType",
   "participants",
+  "publicNotes",
+  "liveAvailable",
+  "resultsAvailable",
+  "revision",
+  "updatedAt",
   "association",
   "legacy"
+]);
+const PROGRAM_PARTICIPANT_FIELDS = new Set([
+  "id",
+  "type",
+  "order",
+  "name",
+  "shortName",
+  "logoUrl",
+  "region",
+  "status",
+  "teamId",
+  "teamName",
+  "participantId",
+  "participantName",
+  "categoryId",
+  "categoryName",
+  "horseId",
+  "horseName",
+  "association"
 ]);
 const COMPETITION_ITEM_FIELDS = new Set([
   "competitionId",
@@ -241,6 +274,9 @@ export function validatePublicProjection(projection) {
   if (!Array.isArray(projection.results?.items)) errors.push("results-items-invalid");
   if (!isPlainObject(projection.results?.scopes)) errors.push("results-scopes-invalid");
   validateItemArray(projection.program?.items, PROGRAM_ITEM_FIELDS, "program.items", errors);
+  for (const [itemIndex, item] of (projection.program?.items || []).entries()) {
+    validateItemArray(item?.participants, PROGRAM_PARTICIPANT_FIELDS, `program.items.${itemIndex}.participants`, errors);
+  }
   validateItemArray(projection.competitions?.items, COMPETITION_ITEM_FIELDS, "competitions.items", errors);
   validateItemArray(projection.results?.items, RESULT_ITEM_FIELDS, "results.items", errors);
   for (const [scopeKey, scope] of Object.entries(projection.results?.scopes || {})) {

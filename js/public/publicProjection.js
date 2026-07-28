@@ -8,11 +8,11 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260727-public-portal-ux-001-live-feed-v1";
+} from "./publicProjectionSchema.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260727-public-portal-ux-001-live-feed-v1";
+} from "./publicLiveFeed.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
@@ -61,7 +61,10 @@ export function buildPublicProjection(source = {}, options = {}) {
   const sourceUpdatedAt = resolveSourceUpdatedAt(tournament, liveCurrent, published, charreadas);
   const status = resolveProjectionStatus(tournament, active);
   const turn = normalizeOfficialTurn(liveCurrent.turn);
-  const programItems = charreadas.map(buildProgramItem);
+  const programItems = charreadas.map((charreada) => buildProgramItem(charreada, {
+    active,
+    results: results.items
+  }));
   const liveStandings = buildLiveStandings(results.items, active, turn);
 
   const candidate = {
@@ -242,7 +245,10 @@ function normalizeTeam(team, index) {
   return {
     id: id(team?.id || team?.teamId),
     name: text(team?.name || team?.nombre || team?.teamName, 180),
-    association: text(team?.association || team?.asociacion, 180),
+    shortName: text(team?.shortName || team?.teamShortName || team?.abbreviation || team?.abreviatura, 80),
+    logoUrl: publicUrl(team?.logoUrl || team?.logo),
+    region: text(team?.region || team?.state || team?.estado, 120),
+    status: normalizeStatus(team?.status || team?.estadoParticipacion || "ready"),
     categoryId: id(team?.categoryId),
     categoryName: text(team?.categoryName || team?.category || team?.categoria, 120),
     order: finiteInteger(team?.order ?? team?.orden, index + 1),
@@ -256,9 +262,16 @@ function normalizeCharreada(charreada, tournament, teams, index) {
   const competitionType = id(charreada.competitionType || config.type || legacyType.type) || "equipos_completo";
   const explicitCompetitionId = id(charreada.competitionId);
   const categoryId = id(charreada.categoryId);
-  const categoryName = text(charreada.categoryName || charreada.category || charreada.categoria, 120);
-  const phaseId = id(charreada.phaseId);
-  const phaseName = text(charreada.phaseName || charreada.phase || charreada.fase || "Ronda única", 120);
+  const categoryName = text(
+    charreada.categoryName ||
+    charreada.category ||
+    charreada.categoria ||
+    categoryId,
+    120
+  );
+  const publishedPhaseName = text(charreada.phaseName || charreada.phase || charreada.fase, 120);
+  const phaseId = id(charreada.phaseId) || (publishedPhaseName ? buildPublicPhaseId(publishedPhaseName) : null);
+  const phaseName = publishedPhaseName || text(phaseId, 120) || "Ronda única";
   const competitionName = text(charreada.competitionName || config.label || charreada.tipoCompetencia, 160);
   const derivedSeed = [
     competitionType,
@@ -268,35 +281,41 @@ function normalizeCharreada(charreada, tournament, teams, index) {
   const competitionId = explicitCompetitionId || `legacy_${buildPublicContentSignature(derivedSeed).slice(4)}`;
   const participantRecords = collection(charreada.individualParticipants);
   const teamIds = collection(charreada.teamIds || charreada.equipos).map((entry) => id(entry?.id || entry?.teamId || entry)).filter(Boolean);
-  const participants = config.scope === "individual"
-    ? participantRecords.map((entry) => ({
-      participantId: id(entry.id || entry.participantId),
-      participantName: text(entry.name || entry.participantName, 180),
-      association: text(entry.association || entry.asociacion, 180),
-      categoryId: id(entry.categoryId) || categoryId,
-      categoryName: text(entry.category || entry.categoryName, 120) || categoryName,
-      horseId: id(entry.horseId),
-      horseName: text(entry.horseName || entry.horse, 180),
-      order: finiteInteger(entry.order, null)
+  const competitionScope = charreada.competitionScope || config.scope || "team";
+  const participants = (competitionScope === "individual"
+    ? participantRecords.map((entry, participantIndex) => ({
+      id: id(entry.id || entry.participantId),
+      type: "individual",
+      order: finiteInteger(entry.order ?? entry.orden, participantIndex + 1),
+      name: text(entry.name || entry.participantName, 180),
+      shortName: text(entry.shortName || entry.abbreviation, 80),
+      logoUrl: publicUrl(entry.logoUrl || entry.logo),
+      region: text(entry.region || entry.state || entry.estado, 120),
+      status: normalizeStatus(entry.status || entry.estadoParticipacion || "ready")
     }))
     : teamIds.map((teamId) => {
       const team = teams.find((candidate) => candidate.id === teamId);
       return {
-        teamId,
-        teamName: team?.name || "",
-        association: team?.association || "",
-        categoryId: team?.categoryId || categoryId,
-        categoryName: team?.categoryName || categoryName,
-        order: team?.order ?? null
+        id: teamId,
+        type: "team",
+        order: team?.order ?? null,
+        name: team?.name || "",
+        shortName: team?.shortName || "",
+        logoUrl: team?.logoUrl || "",
+        region: team?.region || "",
+        status: team?.status || "ready"
       };
-    });
+    })).sort((left, right) => (
+      (left.order ?? Number.MAX_SAFE_INTEGER) -
+      (right.order ?? Number.MAX_SAFE_INTEGER)
+    ));
   return {
     scheduleId: id(charreada.scheduleId || charreada.id || charreada.charreadaId) || `schedule_${index + 1}`,
     charreadaId: id(charreada.id || charreada.charreadaId) || null,
     name: text(charreada.nombre || charreada.name || `Jornada ${index + 1}`, 180),
     competitionId,
     competitionType,
-    competitionScope: config.scope || charreada.competitionScope || "team",
+    competitionScope,
     competitionName,
     categoryId,
     categoryName,
@@ -304,10 +323,15 @@ function normalizeCharreada(charreada, tournament, teams, index) {
     phaseName,
     scheduledDate: dateText(charreada.fecha || charreada.date || charreada.scheduledDate),
     scheduledTime: text(charreada.hora || charreada.time || charreada.scheduledTime, 40),
+    endTime: text(charreada.endTime || charreada.scheduledEndTime || charreada.horaTermino, 40),
     order: finiteInteger(charreada.order ?? charreada.orden, index + 1),
-    status: normalizeStatus(charreada.status || charreada.estado || "programada"),
+    status: normalizeStatus(charreada.operationalStatus || charreada.status || charreada.estado || "programada"),
     participants,
-    association: text(charreada.association || charreada.asociacion, 180),
+    shortTitle: text(charreada.shortTitle || charreada.shortName || charreada.nombreCorto, 100),
+    venueId: id(charreada.venueId || charreada.lienzoId),
+    venueName: text(charreada.venue || charreada.sede || charreada.lienzo, 180),
+    publicNotes: text(charreada.publicNotes || charreada.notasPublicas, 500),
+    revision: Math.max(0, finiteInteger(charreada.revision, 0)),
     suerteIds: normalizeSuerteIds(charreada.suerteIds, config.suerteIds),
     legacy: !explicitCompetitionId || !id(charreada.id || charreada.charreadaId),
     sourceIndex: index,
@@ -389,7 +413,6 @@ function normalizePublishedScore(record, sourceKey, context) {
       : "",
     horseId: participantScope === "individual" ? id(record.horseId || record.horse?.id || record.team?.horseId) : null,
     horseName: participantScope === "individual" ? text(record.horseName || record.horse?.name || record.team?.horseName, 180) : "",
-    association: text(record.association || record.asociacion || record.team?.association || team?.association, 180),
     categoryId: id(record.categoryId || record.category?.id || charreada?.categoryId),
     categoryName: text(record.categoryName || record.category || record.categoria || charreada?.categoryName, 120),
     competitionId,
@@ -430,7 +453,6 @@ function buildResults(published, charreadas) {
         participantName: score.competitionScope === "individual" ? score.participantName : "",
         horseId: score.competitionScope === "individual" ? score.horseId : null,
         horseName: score.competitionScope === "individual" ? score.horseName : "",
-        association: score.association,
         categoryId: score.categoryId,
         categoryName: score.categoryName,
         competitionId,
@@ -596,10 +618,7 @@ function normalizePublicEntity(value, type) {
     id: id(record.id || record[`${type}Id`]),
     name: text(record.name || record.nombre || record[`${type}Name`], 180)
   };
-  if (type === "team") {
-    result.association = text(record.association || record.asociacion, 180);
-    result.category = text(record.category || record.categoria || record.categoryName, 120);
-  }
+  if (type === "team") result.category = text(record.category || record.categoria || record.categoryName, 120);
   return result;
 }
 
@@ -649,22 +668,40 @@ function buildLiveStandings(rows, active, turn) {
     }));
 }
 
-function buildProgramItem(charreada) {
+function buildProgramItem(charreada, context = {}) {
+  const resultsAvailable = context.results?.some((row) => row.charreadaId === charreada.charreadaId) || false;
+  const liveAvailable = Boolean(
+    charreada.charreadaId &&
+    charreada.charreadaId === context.active?.charreadaId
+  );
   return {
     scheduleId: charreada.scheduleId,
+    sequence: charreada.order,
     competitionId: charreada.competitionId,
     competitionType: charreada.competitionType,
+    competitionScope: charreada.competitionScope,
+    competitionName: charreada.competitionName,
     categoryId: charreada.categoryId,
+    categoryName: charreada.categoryName,
     phaseId: charreada.phaseId,
     phaseName: charreada.phaseName,
     charreadaId: charreada.charreadaId,
     name: charreada.name,
+    shortTitle: charreada.shortTitle,
     scheduledDate: charreada.scheduledDate,
     scheduledTime: charreada.scheduledTime,
+    endTime: charreada.endTime,
     order: charreada.order,
     status: charreada.status,
+    venueId: charreada.venueId,
+    venueName: charreada.venueName,
+    participantType: charreada.competitionScope,
     participants: charreada.participants,
-    association: charreada.association,
+    publicNotes: charreada.publicNotes,
+    liveAvailable,
+    resultsAvailable,
+    revision: charreada.revision,
+    updatedAt: charreada.updatedAt,
     legacy: charreada.legacy
   };
 }
@@ -758,7 +795,10 @@ function normalizeSuerteId(value) {
     mp: "manganas_pie",
     mc: "manganas_caballo",
     pm: "paso",
-    paso_muerte: "paso"
+    paso_muerte: "paso",
+    paso_de_muerte: "paso",
+    paso_de_la_muerte: "paso",
+    pasodelamuerte: "paso"
   };
   return aliases[clean] || (PUBLIC_SCORE_COLUMNS[clean] ? clean : null);
 }
@@ -800,6 +840,8 @@ function text(value, maxLength) {
 
 function dateText(value) {
   if (value === null || value === undefined || value === "") return "";
+  const raw = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
   const timestamp = finiteTimestamp(value);
   return timestamp ? new Date(timestamp).toISOString() : text(value, 80);
 }
@@ -837,6 +879,20 @@ function legacyIdentityPart(value) {
     .replace(/[^a-z0-9]+/g, " ")
     .trim()
     .replace(/\s+/g, "_");
+}
+
+function buildPublicPhaseId(value) {
+  const slug = legacyIdentityPart(value).slice(0, 120);
+  return slug ? `phase_${slug}` : null;
+}
+
+function publicUrl(value) {
+  const clean = text(value, 500);
+  if (!clean) return "";
+  if (/^(?:javascript|data|file|vbscript):/i.test(clean)) return "";
+  if (/^(?:https?:\/\/|\/|\.\/)/i.test(clean)) return clean;
+  if (!clean.includes(":") && !clean.split("/").includes("..")) return clean;
+  return "";
 }
 
 function isRecord(value) {

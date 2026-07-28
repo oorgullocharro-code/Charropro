@@ -3,21 +3,21 @@ import {
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260727-public-portal-ux-001-live-feed-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260727-public-portal-ux-001-live-feed-v1";
+} from "../public/publicPortalClient.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
-} from "./portalRouter.js?v=20260727-public-portal-ux-001-live-feed-v1";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260727-public-portal-ux-001-live-feed-v1";
+} from "./portalRouter.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260727-public-portal-ux-001-live-feed-v1";
+} from "./portalRender.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 
-export const PUBLIC_PORTAL_CORE_VERSION = "1.1.0";
+export const PUBLIC_PORTAL_CORE_VERSION = "1.2.0";
 
 let activePortal = null;
 
@@ -147,6 +147,11 @@ export function createPublicPortalApp(options = {}) {
     const view = target.dataset.portalView || target.dataset.portalViewTarget;
     const competitionId = target.dataset.portalCompetitionChoice;
     const feed = target.dataset.portalFeedFilter;
+    const hasProgramDay = target.dataset.portalProgramDay !== undefined;
+    const hasProgramPhase = target.dataset.portalProgramPhase !== undefined;
+    const hasProgramDetail = target.dataset.portalProgramDetail !== undefined;
+    const programResults = target.dataset.portalProgramResults;
+    const programLive = target.dataset.portalProgramLive;
     if (target.dataset.portalFeedShowNew !== undefined) {
       runtime.pendingFeedIds.clear();
       runtime.model = buildModel();
@@ -158,15 +163,38 @@ export function createPublicPortalApp(options = {}) {
       });
       return;
     }
-    if (!view && !competitionId && !feed) return;
+    if (
+      !view &&
+      !competitionId &&
+      !feed &&
+      !hasProgramDay &&
+      !hasProgramPhase &&
+      !hasProgramDetail &&
+      !programResults &&
+      !programLive
+    ) return;
     const patch = {};
     if (view) patch.view = view;
     if (feed) patch.feed = feed;
+    if (hasProgramDay) {
+      patch.programDay = target.dataset.portalProgramDay;
+      patch.charreadaId = "";
+    }
+    if (hasProgramPhase) {
+      patch.programPhaseId = target.dataset.portalProgramPhase;
+      patch.charreadaId = "";
+    }
+    if (hasProgramDetail) patch.charreadaId = target.dataset.portalProgramDetail;
+    if (programResults) {
+      patch.view = "resultados";
+      patch.charreadaId = programResults;
+    }
+    if (programLive) patch.view = "en-vivo";
     if (competitionId) {
       patch.competitionId = competitionId;
       patch.categoryId = "";
       patch.phaseId = "";
-      patch.charreadaId = "";
+      if (!hasProgramDetail && !programResults) patch.charreadaId = "";
     }
     updateRoute(patch);
   }
@@ -194,7 +222,7 @@ export function createPublicPortalApp(options = {}) {
       tournamentId: runtime.route.tournamentId
     });
     runtime.model = buildModel();
-    reconcileResolvedRoute({ updateUrl: false });
+    reconcileResolvedRoute();
     applyFeedVisibility(runtime.model, false);
     render({ forceView: true });
   }
@@ -214,14 +242,36 @@ export function createPublicPortalApp(options = {}) {
   }
 
   function reconcileResolvedRoute(options = {}) {
-    if (!runtime.model?.selectedCompetitionId) return;
-    if (runtime.route.competitionId === runtime.model.selectedCompetitionId) return;
+    const currentUrl = new URL(environment.location.href);
+    const resolvedCompetitionId = runtime.model?.selectedCompetitionId || "";
+    const resolvedProgramDay = runtime.model?.activeProgramFilters?.day || "";
+    const resolvedProgramPhaseId = runtime.model?.activeProgramFilters?.phaseId || "";
+    const competitionChanged = Boolean(
+      resolvedCompetitionId &&
+      runtime.route.competitionId !== resolvedCompetitionId
+    );
+    const programDayChanged = (
+      runtime.route.programDay !== resolvedProgramDay ||
+      (currentUrl.searchParams.has("day") && !runtime.route.programDay)
+    );
+    const programPhaseChanged = (
+      runtime.route.programPhaseId !== resolvedProgramPhaseId ||
+      (currentUrl.searchParams.has("phase") && !runtime.route.programPhaseId)
+    );
+    const programDetailChanged = Boolean(
+      runtime.route.view === "programa" &&
+      runtime.route.charreadaId &&
+      !runtime.model?.programDetail
+    );
+    if (!competitionChanged && !programDayChanged && !programPhaseChanged && !programDetailChanged) return;
     runtime.route = {
       ...runtime.route,
-      competitionId: runtime.model.selectedCompetitionId,
-      categoryId: "",
-      phaseId: "",
-      charreadaId: ""
+      competitionId: competitionChanged ? resolvedCompetitionId : runtime.route.competitionId,
+      categoryId: competitionChanged ? "" : runtime.route.categoryId,
+      phaseId: competitionChanged ? "" : runtime.route.phaseId,
+      charreadaId: competitionChanged || programDetailChanged ? "" : runtime.route.charreadaId,
+      programDay: resolvedProgramDay,
+      programPhaseId: resolvedProgramPhaseId
     };
     runtime.model = buildModel();
     applyFeedVisibility(runtime.model, false);
