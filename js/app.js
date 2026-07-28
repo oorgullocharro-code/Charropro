@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260728-app-supervisor-navigation-recovery-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -80,6 +80,16 @@ import {
   getTournamentIdFromUrl,
   setTournamentContext
 } from "./core/tournamentContext.js?v=20260708-recovery-001b-panel-status1";
+import {
+  SUPERVISOR_OVERVIEW_VIEW,
+  SUPERVISOR_TOURNAMENTS_VIEW,
+  buildSupervisorPortalSearch,
+  isSupervisorGlobalView,
+  normalizeSupervisorGlobalView,
+  readSupervisorNavigationRequest,
+  resolveSupervisorEntryNavigation,
+  shouldUseSupervisorPortalNavigation
+} from "./core/supervisorNavigation.js?v=20260728-app-supervisor-navigation-recovery-001-v1";
 import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260708-recovery-001b-panel-status1";
 import {
   createRoster,
@@ -129,6 +139,12 @@ const PRODUCTION_NAV_TARGETS = Object.freeze({
 });
 const APP_MODE = window.CHARROPRO_APP_MODE === "tournament" ? "tournament" : "portal";
 const IS_TOURNAMENT_APP = APP_MODE === "tournament";
+let portalNavigationRequest = IS_TOURNAMENT_APP
+  ? readSupervisorNavigationRequest("")
+  : readSupervisorNavigationRequest(window.location.search);
+let portalTournamentIndexReady = false;
+let portalEntryRouteApplied = false;
+const portalUrlAfterCacheLoad = isolatePortalTournamentUrlFromCacheLoad();
 const scoringScrollSelectors = [".score-workspace", ".scoring-main", ".turn-panel", ".suertes-strip", ".scoring-shell", ".cp-scoring-shell"];
 const SIDEBAR_STORAGE_KEY = "sidebar_collapsed";
 const TURN_PANEL_STORAGE_KEY = "turn_panel_collapsed";
@@ -358,6 +374,7 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
 ]);
 
 const routeMeta = {
+  [SUPERVISOR_OVERVIEW_VIEW]: ["Vista General", "Resumen operativo y accesos globales del supervisor."],
   tournaments: ["Torneos", "Crea uno nuevo o abre un torneo existente."],
   dashboard: ["Panel", "Estado general del torneo activo."],
   teams: ["Equipos", "Alta de equipos y alineaciones."],
@@ -615,6 +632,7 @@ let supervisorLiveControlEnabled = false;
 let lastPermissionsMenuLogKey = "";
 
 loadState();
+if (portalUrlAfterCacheLoad) window.history.replaceState({}, "", portalUrlAfterCacheLoad);
 clearStaleLocalTournamentCache();
 applyLaunchParams();
 applyDefaultEntryView();
@@ -626,6 +644,17 @@ subscribeFirebaseAccess();
 subscribeExternalTimerControl();
 subscribeGlobalRuleOverridesUpdates();
 subscribeGlobalScoringButtonLayoutUpdates();
+
+function isolatePortalTournamentUrlFromCacheLoad() {
+  if (IS_TOURNAMENT_APP || !portalNavigationRequest.hasExplicitTournament) return "";
+  const originalUrl = `${window.location.pathname}${window.location.search}${window.location.hash || ""}`;
+  const cacheUrl = new URL(window.location.href);
+  ["tournamentId", "canal", "channel", "id", "torneo", "tournament", "evento", "event"].forEach((key) => {
+    cacheUrl.searchParams.delete(key);
+  });
+  window.history.replaceState({}, "", `${cacheUrl.pathname}${cacheUrl.search}${cacheUrl.hash}`);
+  return originalUrl;
+}
 
 function render({ preserveScoringScroll = false } = {}) {
   if (!isActiveAccessSession(firebaseAccess)) {
@@ -671,7 +700,7 @@ function render({ preserveScoringScroll = false } = {}) {
           <div class="topbar-actions">
             ${renderAccessWidget()}
             ${tournamentScoped
-              ? html`${IS_TOURNAMENT_APP ? "" : renderTournamentPicker()}${firebaseAccess.role === ROLES.JUEZ ? "" : html`<a class="button" href="./index.html">Vista general</a>`}`
+              ? html`${IS_TOURNAMENT_APP ? "" : renderTournamentPicker()}${renderTournamentExitActions()}`
               : state.view === "tournaments" ? "" : html`<button class="button" data-view="tournaments">Torneos</button>`}
           </div>
         </header>
@@ -680,6 +709,20 @@ function render({ preserveScoringScroll = false } = {}) {
 	    </div>
 	  `;
   queuePreparationGate();
+}
+
+function renderTournamentExitActions() {
+  if (firebaseAccess.role === ROLES.JUEZ) return "";
+  if (!IS_TOURNAMENT_APP) {
+    return html`<a class="button" href="./index.html${buildSupervisorPortalSearch(SUPERVISOR_OVERVIEW_VIEW, CHARROPRO_APP_VERSION)}">Vista General</a>`;
+  }
+  if (firebaseAccess.role === ROLES.SUPERVISOR) {
+    return html`
+      <a class="button" href="./index.html${buildSupervisorPortalSearch(SUPERVISOR_TOURNAMENTS_VIEW, CHARROPRO_APP_VERSION)}">Volver a Torneos</a>
+      <a class="button" href="./index.html${buildSupervisorPortalSearch(SUPERVISOR_OVERVIEW_VIEW, CHARROPRO_APP_VERSION)}">Vista General</a>
+    `;
+  }
+  return html`<a class="button" href="./index.html">Vista general</a>`;
 }
 
 function renderTournamentShellError(title, message) {
@@ -693,7 +736,8 @@ function renderTournamentShellError(title, message) {
         </div>
         <article class="card access-card">
           <div class="card-body topbar-actions">
-            <a class="button primary" href="./index.html">Volver al portal</a>
+            <a class="button primary" href="./index.html${buildSupervisorPortalSearch(SUPERVISOR_TOURNAMENTS_VIEW, CHARROPRO_APP_VERSION)}">Volver a Torneos</a>
+            <a class="button" href="./index.html${buildSupervisorPortalSearch(SUPERVISOR_OVERVIEW_VIEW, CHARROPRO_APP_VERSION)}">Vista General</a>
             ${firebaseAccess.user ? html`<button class="button" data-action="sign-out-access">Salir</button>` : ""}
           </div>
         </article>
@@ -837,9 +881,16 @@ function applyLaunchParams() {
   }
 
   clearTournamentContext();
+  portalNavigationRequest = readSupervisorNavigationRequest(window.location.search);
   if (admin === "botoneras" || admin === "reglamento") {
     state.view = "rulesAdmin";
     launchRequestedAdmin = true;
+    portalNavigationRequest = {
+      ...portalNavigationRequest,
+      view: "rulesAdmin",
+      rawView: "rulesAdmin",
+      hasExplicitView: true
+    };
     saveState({ silent: true });
     window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash || ""}`);
     return;
@@ -848,16 +899,18 @@ function applyLaunchParams() {
     const tournament = state.tournaments.find((item) => item.id === tournamentId);
     if (tournament) {
       state.activeTournamentId = tournament.id;
-      if (view && routeMeta[view]) state.view = isTournamentScopedView(view) ? "tournaments" : view;
-      saveState({ silent: true });
-      window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash || ""}`);
-      return;
+    } else if (state.activeTournamentId === tournamentId) {
+      state.activeTournamentId = null;
+      state.activeCharreadaId = null;
     }
+    if (view && routeMeta[view] && !isTournamentScopedView(view)) state.view = view;
+    else state.view = SUPERVISOR_TOURNAMENTS_VIEW;
+    saveState({ silent: true });
+    return;
   }
   if (view && routeMeta[view] && !charreadaId) {
     state.view = view;
     saveState({ silent: true });
-    window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash || ""}`);
     return;
   }
   if (!charreadaId) return;
@@ -885,7 +938,13 @@ function applyDefaultEntryView() {
     saveState({ silent: true });
     return;
   }
-  state.view = "tournaments";
+  if (portalNavigationRequest.hasExplicitTournament) {
+    state.view = SUPERVISOR_OVERVIEW_VIEW;
+  } else if (portalNavigationRequest.view && isSupervisorGlobalView(portalNavigationRequest.view)) {
+    state.view = portalNavigationRequest.view;
+  } else {
+    state.view = SUPERVISOR_TOURNAMENTS_VIEW;
+  }
   saveState({ silent: true });
 }
 
@@ -989,6 +1048,7 @@ function getSidebarFooterLinks() {
 
 function getVisibleGeneralNavItems() {
   const items = [
+    [SUPERVISOR_OVERVIEW_VIEW, "Vista General", "home"],
     ["tournaments", "Torneos", "folder"],
     [PRODUCTION_NAV_VIEW, "Producción", "monitor"],
     ["globalStats", "Est. global", "chart"],
@@ -1023,6 +1083,7 @@ function getVisibleTournamentNavItems(labels) {
 function canShowNavView(view) {
   if (!isActiveAccessSession(firebaseAccess)) return false;
   const role = firebaseAccess.role;
+  if (view === SUPERVISOR_OVERVIEW_VIEW) return !IS_TOURNAMENT_APP && role === ROLES.SUPERVISOR;
   if (view === PRODUCTION_NAV_VIEW) return canAccessProductionRole(role);
   if (IS_TOURNAMENT_APP) {
     if (role === ROLES.SUPERVISOR || role === ROLES.OPERADOR) return true;
@@ -1364,6 +1425,9 @@ function subscribeFirebaseAccess() {
       startFirebaseUsersSubscription();
       startFirebaseStatHistorySubscription();
       subscribeGlobalScoringButtonLayoutUpdates();
+    }
+    if (isPreparationComplete() && isSupervisorPortalAccess(firebaseAccess) && !portalEntryRouteApplied) {
+      if (routeUserAfterLogin(firebaseAccess)) return;
     }
     render({ preserveScoringScroll: state.view === "scoring" });
   });
@@ -1777,6 +1841,7 @@ async function prepareSyncWithCharroPro() {
 function getPreparationTargetTournamentId() {
   const contextId = getTournamentContext().tournamentId || "";
   if (contextId) return contextId;
+  if (isSupervisorPortalAccess(firebaseAccess)) return "";
   const access = normalizeTournamentAccess(firebaseAccess);
   if (access.tournamentAccess === "selected" && access.tournamentIds?.length === 1) return access.tournamentIds[0];
   return "";
@@ -1797,6 +1862,7 @@ function stopPreparationSubscriptions() {
 
 function routeUserAfterLogin(profile = firebaseAccess) {
   if (!isActiveAccessSession(profile)) return false;
+  if (isSupervisorPortalAccess(profile) && !launchRequestedScoring) return routeSupervisorPortalEntry(profile);
   const tournamentId = resolvePostLoginTournamentId(profile);
 
   if (!tournamentId) {
@@ -1812,7 +1878,7 @@ function routeUserAfterLogin(profile = firebaseAccess) {
     return true;
   }
 
-  const href = buildTournamentUrl("torneo.html", tournamentId, { view: "dashboard" });
+  const href = buildTournamentUrl("torneo.html", tournamentId, { view: "dashboard", v: CHARROPRO_APP_VERSION });
   console.info("[route] usuario enviado a panel del torneo", {
     uid: profile.uid || "",
     role: profile.role || "",
@@ -1831,6 +1897,128 @@ function routeUserAfterLogin(profile = firebaseAccess) {
 
   window.location.href = href;
   return true;
+}
+
+function isSupervisorPortalAccess(profile = firebaseAccess) {
+  return shouldUseSupervisorPortalNavigation(profile.role, APP_MODE);
+}
+
+function isSupervisorTournamentAccess(profile = firebaseAccess) {
+  return IS_TOURNAMENT_APP && profile.role === ROLES.SUPERVISOR;
+}
+
+function routeSupervisorPortalEntry(profile = firebaseAccess) {
+  const visibleTournamentIds = getVisibleTournaments()
+    .filter((tournament) => hasTournamentAccess(profile, tournament.id))
+    .map((tournament) => tournament.id);
+  const resolution = resolveSupervisorEntryNavigation({
+    requestedView: portalNavigationRequest.rawView || portalNavigationRequest.view,
+    requestedTournamentId: portalNavigationRequest.tournamentId,
+    tournamentIds: visibleTournamentIds,
+    tournamentIndexReady: portalTournamentIndexReady || !portalNavigationRequest.hasExplicitTournament,
+    lastTournamentId: state.activeTournamentId || ""
+  });
+
+  if (resolution.target === "pending") return false;
+  portalEntryRouteApplied = true;
+
+  if (resolution.target === "tournament") {
+    const requestedTournamentView = isTournamentScopedView(portalNavigationRequest.rawView)
+      ? portalNavigationRequest.rawView
+      : "dashboard";
+    const href = buildTournamentUrl("torneo.html", resolution.tournamentId, {
+      view: requestedTournamentView,
+      v: CHARROPRO_APP_VERSION
+    });
+    console.info("[supervisor-navigation] ruta explícita de torneo", {
+      tournamentId: resolution.tournamentId,
+      source: resolution.reason
+    });
+    window.location.replace(href);
+    return true;
+  }
+
+  navigateSupervisorPortalView(resolution.view, { replace: true, renderView: false });
+  console.info("[supervisor-navigation] ruta global aplicada", {
+    view: resolution.view,
+    source: resolution.reason,
+    rememberedTournamentId: state.activeTournamentId || ""
+  });
+  render();
+  return true;
+}
+
+function navigateSupervisorPortalView(view, { replace = false, renderView = true } = {}) {
+  const resolvedView = normalizeSupervisorGlobalView(view) || SUPERVISOR_OVERVIEW_VIEW;
+  state.view = resolvedView;
+  saveState({ silent: true });
+  const nextUrl = `${window.location.pathname}${buildSupervisorPortalSearch(resolvedView, CHARROPRO_APP_VERSION)}${window.location.hash || ""}`;
+  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash || ""}`;
+  if (nextUrl !== currentUrl) {
+    window.history[replace ? "replaceState" : "pushState"]({}, "", nextUrl);
+  }
+  portalNavigationRequest = readSupervisorNavigationRequest(window.location.search);
+  if (renderView) render();
+}
+
+function navigateTournamentAppView(view, { replace = false, renderView = true } = {}) {
+  const resolvedView = isTournamentScopedView(view) || view === "scoring" ? view : "dashboard";
+  state.view = resolvedView;
+  saveState({ silent: true });
+  const url = new URL(window.location.href);
+  url.searchParams.set("view", resolvedView);
+  url.searchParams.set("v", CHARROPRO_APP_VERSION);
+  if (resolvedView === "scoring" && state.activeCharreadaId) {
+    url.searchParams.set("charreada", state.activeCharreadaId);
+  } else {
+    url.searchParams.delete("charreada");
+    url.searchParams.delete("charreadaId");
+  }
+  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash || ""}`;
+  if (nextUrl !== currentUrl) {
+    window.history[replace ? "replaceState" : "pushState"]({}, "", nextUrl);
+  }
+  if (renderView) render();
+}
+
+function restoreAppHistoryRoute() {
+  if (!IS_TOURNAMENT_APP) {
+    restoreSupervisorPortalHistoryRoute();
+    return;
+  }
+  if (!isSupervisorTournamentAccess(firebaseAccess)) return;
+  const requestedView = new URLSearchParams(window.location.search).get("view") || "";
+  state.view = isTournamentScopedView(requestedView) || requestedView === "scoring"
+    ? requestedView
+    : "dashboard";
+  saveState({ silent: true });
+  render();
+}
+
+function restoreSupervisorPortalHistoryRoute() {
+  if (!isSupervisorPortalAccess(firebaseAccess)) return;
+  portalNavigationRequest = readSupervisorNavigationRequest(window.location.search);
+  const resolution = resolveSupervisorEntryNavigation({
+    requestedView: portalNavigationRequest.rawView || portalNavigationRequest.view,
+    requestedTournamentId: portalNavigationRequest.tournamentId,
+    tournamentIds: getVisibleTournaments().map((tournament) => tournament.id),
+    tournamentIndexReady: true,
+    lastTournamentId: state.activeTournamentId || ""
+  });
+  if (resolution.target === "tournament") {
+    const requestedTournamentView = isTournamentScopedView(portalNavigationRequest.rawView)
+      ? portalNavigationRequest.rawView
+      : "dashboard";
+    window.location.href = buildTournamentUrl("torneo.html", resolution.tournamentId, {
+      view: requestedTournamentView,
+      v: CHARROPRO_APP_VERSION
+    });
+    return;
+  }
+  state.view = resolution.view || SUPERVISOR_OVERVIEW_VIEW;
+  saveState({ silent: true });
+  render();
 }
 
 function resolvePostLoginTournamentId(profile = firebaseAccess) {
@@ -1867,6 +2055,7 @@ function applyPreparationSnapshot(snapshot = {}) {
   const targetTournamentId = getPreparationTargetTournamentId();
   const tournaments = (snapshot.tournamentIndex || [])
     .filter((tournament) => !targetTournamentId || tournament.id === targetTournamentId);
+  if (!IS_TOURNAMENT_APP) portalTournamentIndexReady = true;
   const remoteIds = new Set(tournaments.map((tournament) => tournament.id).filter(Boolean));
   state.tournaments = tournaments.map((tournament) => {
     const local = state.tournaments.find((item) => item.id === tournament.id) || {};
@@ -2372,6 +2561,7 @@ function applyRemoteTournamentIndex(tournaments = []) {
   const newest = tournaments.reduce((max, tournament) => Math.max(max, Number(tournament.updatedAtMs || 0)), 0);
   if (newest && newest <= lastRemoteAppStateAt) return;
   applyingRemoteAppState = true;
+  portalTournamentIndexReady = true;
   lastRemoteAppStateAt = newest || Date.now();
   const remoteIds = new Set(tournaments.map((tournament) => tournament.id).filter(Boolean));
   state.tournaments = tournaments
@@ -2387,11 +2577,18 @@ function applyRemoteTournamentIndex(tournaments = []) {
   if (!IS_TOURNAMENT_APP) clearPortalTournamentDetailCache(remoteIds);
   saveState({ silent: true });
   applyingRemoteAppState = false;
-  if (["tournaments", "history", "globalStats"].includes(state.view)) render();
+  if (isSupervisorPortalAccess(firebaseAccess) && !portalEntryRouteApplied) {
+    if (routeUserAfterLogin(firebaseAccess)) return;
+  }
+  if ([SUPERVISOR_OVERVIEW_VIEW, "tournaments", "history", "globalStats"].includes(state.view)) render();
 }
 
 function applyRemoteTournamentState(payload = {}) {
   if (payload?.deleted) {
+    if (IS_TOURNAMENT_APP && firebaseAccess.role === ROLES.SUPERVISOR) {
+      window.location.replace(`./index.html${buildSupervisorPortalSearch(SUPERVISOR_TOURNAMENTS_VIEW, CHARROPRO_APP_VERSION)}`);
+      return;
+    }
     removeLocalTournamentData(payload.tournamentId || getTournamentContext().tournamentId || state.activeTournamentId);
     saveState({ silent: true });
     render({ preserveScoringScroll: state.view === "scoring" });
@@ -2624,6 +2821,7 @@ function renderTournamentPicker() {
 function renderCurrentView() {
   if (!canAccessCurrentView()) return renderRoleAccessHome();
   if (IS_TOURNAMENT_APP) return renderTournamentAppView();
+  if (state.view === SUPERVISOR_OVERVIEW_VIEW) return renderSupervisorOverview();
   if (state.view === "tournaments") return renderTournamentEntry();
   if (state.view === "rulesAdmin") return renderRules("global");
   if (state.view === "users") return renderUsersAdmin();
@@ -2682,7 +2880,8 @@ function renderTournamentShellInlineError(title, message) {
       <div class="empty">
         <h2>${escapeHTML(title)}</h2>
         <p>${escapeHTML(message)}</p>
-        <a class="button primary" href="./index.html">Volver al portal</a>
+        <a class="button primary" href="./index.html${buildSupervisorPortalSearch(SUPERVISOR_TOURNAMENTS_VIEW, CHARROPRO_APP_VERSION)}">Volver a Torneos</a>
+        <a class="button" href="./index.html${buildSupervisorPortalSearch(SUPERVISOR_OVERVIEW_VIEW, CHARROPRO_APP_VERSION)}">Vista General</a>
       </div>
     </section>
   `;
@@ -2705,6 +2904,7 @@ function canAccessTournamentId(tournamentId) {
 function canAccessCurrentView() {
   if (!isActiveAccessSession(firebaseAccess)) return true;
   const role = firebaseAccess.role;
+  if (state.view === SUPERVISOR_OVERVIEW_VIEW) return !IS_TOURNAMENT_APP && role === ROLES.SUPERVISOR;
   if (state.view === PRODUCTION_NAV_VIEW) return canAccessProductionRole(role);
   if (IS_TOURNAMENT_APP) {
     if (role === ROLES.SUPERVISOR || role === ROLES.OPERADOR) return true;
@@ -2783,7 +2983,7 @@ function renderJudgeTournamentAccessHome() {
 }
 
 function buildJudgeTournamentHref(tournamentId) {
-  return buildTournamentUrl("torneo.html", tournamentId, { view: "dashboard" });
+  return buildTournamentUrl("torneo.html", tournamentId, { view: "dashboard", v: CHARROPRO_APP_VERSION });
 }
 
 function renderRoleShortcut(title, message, href) {
@@ -2793,6 +2993,59 @@ function renderRoleShortcut(title, message, href) {
         <h2>${escapeHTML(title)}</h2>
         <p>${escapeHTML(message)}</p>
         <a class="button primary" href="${escapeHTML(href)}">Abrir pagina</a>
+      </div>
+    </section>
+  `;
+}
+
+function renderSupervisorOverview() {
+  const tournaments = getVisibleTournaments();
+  const rememberedTournament = tournaments.find((tournament) => tournament.id === state.activeTournamentId) || null;
+  const liveCount = tournaments.filter((tournament) => tournament.status === "en_vivo").length;
+  const preparingCount = tournaments.filter((tournament) => !tournament.status || tournament.status === "preparacion").length;
+  const indexedTeams = tournaments.reduce((total, tournament) => total + Math.max(0, Number(tournament.teamCount) || 0), 0);
+  const indexedCharreadas = tournaments.reduce((total, tournament) => total + Math.max(0, Number(tournament.charreadaCount) || 0), 0);
+
+  return html`
+    <section class="content">
+      <div class="stat-row">
+        <div class="stat"><span>Torneos disponibles</span><strong>${tournaments.length}</strong></div>
+        <div class="stat"><span>En vivo</span><strong>${liveCount}</strong></div>
+        <div class="stat"><span>En preparación</span><strong>${preparingCount}</strong></div>
+        <div class="stat"><span>Equipos registrados</span><strong>${indexedTeams}</strong></div>
+        <div class="stat"><span>Charreadas</span><strong>${indexedCharreadas}</strong></div>
+      </div>
+      <div class="grid cols-2">
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Operación general</h2>
+              <p class="card-subtitle">Consulta el panorama global antes de entrar a un torneo.</p>
+            </div>
+          </div>
+          <div class="card-body grid">
+            <button class="button primary" data-view="${SUPERVISOR_TOURNAMENTS_VIEW}">Ver Torneos</button>
+            <button class="button" data-view="globalStats">Estadísticas globales</button>
+            <button class="button" data-view="history">Historial</button>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Último torneo recordado</h2>
+              <p class="card-subtitle">Recordarlo no abre el torneo automáticamente.</p>
+            </div>
+          </div>
+          <div class="card-body grid">
+            ${rememberedTournament
+              ? html`
+                  <strong>${escapeHTML(rememberedTournament.name || rememberedTournament.id)}</strong>
+                  <span class="card-subtitle">${escapeHTML(formatTournamentStatus(rememberedTournament.status))}</span>
+                  <button class="button" data-action="open-tournament" data-id="${escapeHTML(rememberedTournament.id)}">Abrir torneo</button>
+                `
+              : html`<div class="empty">Aún no hay un torneo recordado.</div>`}
+          </div>
+        </article>
       </div>
     </section>
   `;
@@ -7164,15 +7417,21 @@ function renderScoring({ preserveScroll = false } = {}) {
       `;
       return;
     }
-    setView("program");
-    render();
+    if (isSupervisorTournamentAccess(firebaseAccess)) navigateTournamentAppView("program", { replace: true });
+    else {
+      setView("program");
+      render();
+    }
     return;
   }
   if (launchRequestedScoring) launchRequestedScoring = false;
   if (isCharreadaFrozen(charreada)) {
-    setView("results");
     showToast("Resultados congelados. Se abrio modo consulta.");
-    render();
+    if (isSupervisorTournamentAccess(firebaseAccess)) navigateTournamentAppView("results", { replace: true });
+    else {
+      setView("results");
+      render();
+    }
     return;
   }
   if (isSupervisorAccess()) enterSupervisorScoringReviewMode();
@@ -7214,8 +7473,11 @@ function renderScoring({ preserveScroll = false } = {}) {
   if (state.scoringSuerteIdx >= suertes.length) state.scoringSuerteIdx = 0;
   const context = getCurrentContext();
   if (!context) {
-    setView("program");
-    render();
+    if (isSupervisorTournamentAccess(firebaseAccess)) navigateTournamentAppView("program", { replace: true });
+    else {
+      setView("program");
+      render();
+    }
     return;
   }
   const charroName = getCharroName(context);
@@ -9024,6 +9286,8 @@ function showCharreadaModal(charreadaId = null) {
 }
 
 function wireGlobalEvents() {
+  window.addEventListener("popstate", restoreAppHistoryRoute);
+
   document.addEventListener("submit", (event) => {
     const form = event.target.closest("#access-login-form");
     if (!form) return;
@@ -9042,6 +9306,15 @@ function wireGlobalEvents() {
     const view = target.dataset.view;
 
     if (view) {
+      if (isSupervisorPortalAccess(firebaseAccess) && isSupervisorGlobalView(view)) {
+        portalEntryRouteApplied = true;
+        navigateSupervisorPortalView(view);
+        return;
+      }
+      if (isSupervisorTournamentAccess(firebaseAccess) && (isTournamentScopedView(view) || view === "scoring")) {
+        navigateTournamentAppView(view);
+        return;
+      }
       setView(view);
       render();
       return;
@@ -9188,8 +9461,11 @@ function handleAction(action, target) {
     "exit-scoring": () => {
       stopTimer();
       exitSupervisorScoringReviewMode();
-      setView("dashboard");
-      render();
+      if (isSupervisorTournamentAccess(firebaseAccess)) navigateTournamentAppView("dashboard");
+      else {
+        setView("dashboard");
+        render();
+      }
     },
     "select-suerte": () => {
       stopTimer(true);
@@ -9502,7 +9778,7 @@ function openTournament(tournamentId, view = "dashboard") {
     return;
   }
   if (!IS_TOURNAMENT_APP) {
-    window.location.href = buildTournamentUrl("torneo.html", tournamentId, { view });
+    window.location.href = buildTournamentUrl("torneo.html", tournamentId, { view, v: CHARROPRO_APP_VERSION });
     return;
   }
   setActiveTournament(tournamentId);
@@ -10433,7 +10709,10 @@ function activateCharreada(charreadaId, options = {}) {
   ensureScoresForCharreada(charreadaId);
   resetScoringPointer();
   stopTimer(true);
-  if (options.scoring) state.view = "scoring";
+  if (options.scoring) {
+    state.view = "scoring";
+    if (isSupervisorTournamentAccess(firebaseAccess)) navigateTournamentAppView("scoring", { renderView: false });
+  }
   claimGoogleSyncControl();
   saveState();
   if (isSupervisorAccess() && !options.scoring) {
@@ -10492,6 +10771,7 @@ function startScoring(charreadaId = null) {
   ensureScoresForCharreada(charreada.id);
   resetScoringPointer();
   state.view = "scoring";
+  if (isSupervisorTournamentAccess(firebaseAccess)) navigateTournamentAppView("scoring", { renderView: false });
   claimGoogleSyncControl();
   saveState();
   syncCurrentLiveState();
