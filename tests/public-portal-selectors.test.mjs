@@ -164,6 +164,57 @@ assert.equal(legacy.legacy, true);
 assert.equal(legacy.selectedCompetitionId, "equipos_completo");
 assert.deepEqual(legacy.programFilters.phases, []);
 
+const legacyKeySuerte = buildPublicPortalModel({
+  info: { id: "legacy-key", nombre: "Legacy Key" },
+  activeCharreada: {
+    id: "charreada-key",
+    status: "en_vivo",
+    currentTeam: { id: "team-key", name: "Equipo Key" },
+    currentSuerte: { key: "CC" }
+  },
+  schedule: [],
+  scoresheet: [],
+  generatedAt: "2026-07-27T12:00:00.000Z"
+});
+assert.equal(legacyKeySuerte.live.status, "live");
+assert.equal(legacyKeySuerte.live.turn.team.name, "Equipo Key");
+assert.equal(legacyKeySuerte.live.turn.suerteId, "cala");
+assert.equal(legacyKeySuerte.live.turn.suerteName, "Cala");
+
+const legacyIdSuerte = buildPublicPortalModel({
+  info: { id: "legacy-id", nombre: "Legacy ID" },
+  activeCharreada: {
+    id: "charreada-id",
+    currentTeam: { id: "team-id", name: "Equipo ID" },
+    currentSuerte: { id: "CC", name: "Cala de Caballo" }
+  },
+  schedule: [],
+  scoresheet: []
+});
+assert.equal(legacyIdSuerte.live.turn.suerteId, "cala");
+assert.equal(legacyIdSuerte.live.turn.suerteName, "Cala de Caballo");
+
+const legacyNamedSuerte = buildPublicPortalModel({
+  info: { id: "legacy-name", nombre: "Legacy Nombre" },
+  activeCharreada: {
+    id: "charreada-name",
+    currentSuerte: { nombre: "Cala de Caballo" }
+  },
+  schedule: [],
+  scoresheet: []
+});
+assert.equal(legacyNamedSuerte.live.turn.suerteId, "");
+assert.equal(legacyNamedSuerte.live.turn.suerteName, "Cala de Caballo");
+
+const legacyMissingSuerte = buildPublicPortalModel({
+  info: { id: "legacy-missing", nombre: "Legacy Sin Suerte" },
+  activeCharreada: { id: "charreada-missing" },
+  schedule: [],
+  scoresheet: []
+});
+assert.equal(legacyMissingSuerte.live.turn.suerteId, "");
+assert.equal(legacyMissingSuerte.live.turn.suerteName, "");
+
 const legacyPm = buildPublicPortalModel({
   info: { id: "legacy-pm", nombre: "Legacy PM" },
   competitions: [{

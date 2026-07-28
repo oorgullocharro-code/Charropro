@@ -621,6 +621,7 @@ function normalizeV2Live(live = {}, overview = {}, competitions = [], program = 
 function normalizeLegacyLive(snapshot, competitions) {
   const active = snapshot.activeCharreada || {};
   const competitionId = text(active.competitionId || competitions[0]?.competitionId);
+  const currentSuerte = resolveLegacyCurrentSuerte(active.currentSuerte);
   return {
     status: active.id || active.charreadaId ? "live" : "unavailable",
     competitionId,
@@ -634,8 +635,8 @@ function normalizeLegacyLive(snapshot, competitions) {
       team: normalizeEntity(active.currentTeam),
       participant: normalizeEntity(active.currentParticipant),
       horse: normalizeEntity(active.currentHorse),
-      suerteId: text(active.currentSuerte?.id),
-      suerteName: text(active.currentSuerte?.name || active.currentSuerte?.nombre)
+      suerteId: currentSuerte.id,
+      suerteName: currentSuerte.name
     },
     timer: {
       status: active.timer ? "available" : "unavailable",
@@ -653,6 +654,29 @@ function normalizeLegacyLive(snapshot, competitions) {
       active: Boolean(row.active)
     })),
     updatedAt: text(snapshot.generatedAt)
+  };
+}
+
+function resolveLegacyCurrentSuerte(value = {}) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { id: "", name: "" };
+  }
+  const sourceId = text(
+    value.id ||
+    value.key ||
+    value.suerteId ||
+    value.discipline ||
+    value.activeSuerte
+  );
+  const normalizedId = sourceId.toLowerCase();
+  const column = PUBLIC_SHEET_COLUMNS.find((item) => (
+    item.id.toLowerCase() === normalizedId ||
+    item.suerteId.toLowerCase() === normalizedId
+  )) || null;
+  const explicitName = text(value.name || value.nombre || value.label);
+  return {
+    id: column?.suerteId || sourceId,
+    name: explicitName || column?.label || sourceId
   };
 }
 

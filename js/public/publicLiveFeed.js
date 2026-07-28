@@ -97,8 +97,9 @@ const CURRENT_FIELDS = Object.freeze([
 
 export function buildPublicLiveFeed(source = {}, context = {}, options = {}) {
   const maxEvents = positiveInteger(options.maxEvents, PUBLIC_LIVE_FEED_MAX_EVENTS);
+  const sourceFeed = source.publicLiveFeed || source.liveFeed || {};
   const explicitFeed = normalizePublicLiveFeed(
-    source.publicLiveFeed || source.liveFeed || {},
+    sourceFeed,
     { maxEvents }
   );
   const derivedEvents = derivePublishedScoreEvents(source.publishedScores);
@@ -124,7 +125,7 @@ export function buildPublicLiveFeed(source = {}, context = {}, options = {}) {
   return {
     revision: 0,
     status: normalizeFeedStatus(
-      explicitFeed.status,
+      sourceFeed.status,
       context.status,
       Object.keys(items).length,
       current
@@ -143,11 +144,12 @@ export function normalizePublicLiveFeed(input = {}, options = {}) {
     const event = normalizePublicLiveFeedEvent(value, { sourceKey });
     if (event) normalizedItems.push(event);
   }
+  const current = normalizePublicLiveFeedCurrent(input?.current);
   return {
     revision: nonNegativeInteger(input?.revision, 0),
-    status: normalizeFeedStatus(input?.status, "", normalizedItems.length),
+    status: normalizeFeedStatus(input?.status, "", normalizedItems.length, current),
     updatedAt: timestampOrEmpty(input?.updatedAt),
-    current: normalizePublicLiveFeedCurrent(input?.current),
+    current,
     items: eventsToMap(selectCanonicalEvents(normalizedItems).slice(0, maxEvents))
   };
 }
@@ -420,7 +422,6 @@ function eventsToMap(events) {
 }
 
 function normalizeFeedStatus(primary, fallback, eventCount, current = {}) {
-  const candidate = safeString(primary || fallback, 40).toLowerCase();
   const aliases = {
     active: "live",
     "en vivo": "live",
@@ -430,10 +431,30 @@ function normalizeFeedStatus(primary, fallback, eventCount, current = {}) {
     terminada: "finished",
     terminado: "finished"
   };
-  const normalized = aliases[candidate] || candidate;
-  if (["empty", "ready", "live", "paused", "finished", "unavailable"].includes(normalized)) return normalized;
-  if (current.competitionId || current.charreadaId) return "live";
-  return eventCount ? "ready" : "empty";
+  const allowed = new Set(["empty", "ready", "live", "paused", "finished", "unavailable"]);
+  const normalize = (value) => {
+    const candidate = safeString(value, 40).toLowerCase();
+    const normalized = aliases[candidate] || candidate;
+    return allowed.has(normalized) ? normalized : "";
+  };
+  const primaryStatus = normalize(primary);
+  const fallbackStatus = normalize(fallback);
+  const candidate = primaryStatus && primaryStatus !== "empty"
+    ? primaryStatus
+    : fallbackStatus && fallbackStatus !== "empty"
+      ? fallbackStatus
+      : primaryStatus || fallbackStatus;
+  const hasActiveContext = Boolean(current.competitionId || current.charreadaId);
+
+  if (hasActiveContext) {
+    if (["paused", "finished", "unavailable"].includes(candidate)) return candidate;
+    return "live";
+  }
+  if (eventCount) {
+    if (["paused", "finished", "unavailable"].includes(candidate)) return candidate;
+    return "ready";
+  }
+  return candidate || "empty";
 }
 
 function readAttemptNumber(liveCurrent) {

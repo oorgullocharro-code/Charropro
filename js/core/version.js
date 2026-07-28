@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260727-public-portal-program-ux-001-program-phase-pm-v1";
+export const CHARROPRO_APP_VERSION = "20260728-public-live-feed-integration-001-fix-001-v1";
 
 let versionLogged = false;
 

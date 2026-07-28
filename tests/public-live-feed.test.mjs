@@ -109,6 +109,33 @@ const limited = buildPublicLiveFeed({ publicLiveFeed: { status: "live", items: m
 assert.equal(Object.keys(limited.items).length, PUBLIC_LIVE_FEED_MAX_EVENTS);
 assert.equal(listPublicLiveFeedEvents(limited)[0].sequence, 260);
 
+const activeWithItems = buildPublicLiveFeed({
+  publicLiveFeed: {
+    status: "empty",
+    items: { score: event({ eventId: "score", sequence: 1 }) }
+  }
+}, {
+  active: { competitionId: "competition-a", charreadaId: "charreada-a" },
+  status: "live"
+});
+assert.equal(activeWithItems.status, "live", "active context and items cannot remain empty");
+
+const activeWithoutItems = buildPublicLiveFeed({}, {
+  active: { competitionId: "competition-a", charreadaId: "charreada-a" },
+  status: "live"
+});
+assert.equal(activeWithoutItems.status, "live", "active context without items remains live");
+
+const historicalItems = buildPublicLiveFeed({
+  publicLiveFeed: {
+    status: "empty",
+    items: { score: event({ eventId: "score", sequence: 1 }) }
+  }
+});
+assert.equal(historicalItems.status, "ready", "events without active context are not empty");
+assert.equal(buildPublicLiveFeed({}).status, "empty");
+assert.equal(buildPublicLiveFeed({ publicLiveFeed: { status: "unavailable" } }).status, "unavailable");
+
 const outOfOrder = buildPublicLiveFeed({
   publicLiveFeed: {
     status: "finished",

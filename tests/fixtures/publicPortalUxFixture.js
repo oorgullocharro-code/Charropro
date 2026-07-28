@@ -4,7 +4,7 @@ import {
 } from "../../js/publicPortal/portalRender.js?v=20260728-public-portal-design-system-v2-001-sports-ui-v2";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

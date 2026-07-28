@@ -4,12 +4,12 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale
 } from "../public/publicPortalClient.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
 } from "./portalRouter.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,

@@ -8,11 +8,11 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "./publicProjectionSchema.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "./publicLiveFeed.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType

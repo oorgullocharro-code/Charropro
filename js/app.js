@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -71,7 +71,7 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "./core/firebaseSync.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -11213,6 +11213,44 @@ async function publishOfficialScoreForContext(context) {
   }
 
   const savedAtMs = Date.now();
+  const publicSnapshotFailed = result.partialFailure === true || result.publicSnapshot?.ok === false;
+  if (publicSnapshotFailed) {
+    const publicFailureReason = result.publicSnapshot?.reason || "public-snapshot-sync-failed";
+    setLastFirebaseError("public-snapshot-sync-failed", publicFailureReason);
+    updatePublishedScoreDiagnostics(scoreNode.tournamentId, published, result);
+    updatePublishedScoreErrorDiagnostics(scoreNode.tournamentId, {
+      reason: publicFailureReason
+    });
+    setScoreSaveStatus({
+      state: "warning",
+      label: "Guardado; portal pendiente",
+      detail: "La calificación fue guardada, pero el portal público no se actualizó.",
+      savedAtMs,
+      scoreId: scoreNode.id
+    });
+    console.warn("[publish-atomic-c003] publicacion oficial parcial", {
+      tournamentId: scoreNode.tournamentId,
+      scoreId: scoreNode.id,
+      publishedScoreId: published.id || result.id || "",
+      publicSnapshotReason: publicFailureReason
+    });
+    logJudgeScore("publicacion oficial parcial", {
+      scorePath: result.scorePath || "",
+      publishedPath: result.publishedPath || result.path || "",
+      auditPath: result.auditPath || "",
+      publicSnapshotReason: publicFailureReason
+    });
+    showToast("La calificación fue guardada, pero no pudo actualizarse el portal público.");
+    saveState({ silent: true });
+    return {
+      ...result,
+      complete: false,
+      partialFailure: true,
+      published,
+      scoreId: scoreNode.id
+    };
+  }
+
   setScoreSaveStatus({
     state: "saved",
     label: "Guardado en CharroPro",

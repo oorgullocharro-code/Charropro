@@ -20,7 +20,7 @@ import {
 import {
   buildPublicProjection,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "../public/publicProjection.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
 } from "../public/publicProjectionLegacyAdapter.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
@@ -734,22 +734,49 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
     if (options.livePayload) console.info("[publish-atomic-c003] live path:", livePath);
 
     await update(ref(getFirebaseDatabase()), cleanUndefined(updates));
-    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, null, { source: "officialScoreAtomic" });
+    const privateWrite = {
+      ok: true,
+      scorePath,
+      publishedPath,
+      auditPath,
+      livePath: options.livePayload ? livePath : ""
+    };
+    const publicSnapshot = normalizePublicSnapshotPublicationResult(
+      await publishPublicTournamentSnapshot(cleanTournamentId, null, { source: "officialScoreAtomic" })
+    );
+    const partialFailure = publicSnapshot.ok !== true;
     console.info("[publish-atomic-c003] multipath update exitoso", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
       publishedScoreId,
-      publicSnapshot
+      privateWrite: privateWrite.ok,
+      publicSnapshot: publicSnapshot.ok,
+      partialFailure,
+      publicSnapshotReason: partialFailure ? publicSnapshot.reason : "",
+      projectionRevision: publicSnapshot.projectionRevision || 0,
+      changedSections: publicSnapshot.changedSections || []
     });
+    if (partialFailure) {
+      console.warn("[publish-atomic-c003] sincronizacion publica pendiente", {
+        tournamentId: cleanTournamentId,
+        scoreId: cleanScoreId,
+        publishedScoreId,
+        reason: publicSnapshot.reason,
+        errorCode: publicSnapshot.errorCode
+      });
+    }
     return {
       ok: true,
+      complete: !partialFailure,
+      partialFailure,
+      privateWrite,
+      publicSnapshot,
       id: publishedScoreId,
       scorePath,
       path: publishedPath,
       publishedPath,
       auditPath,
-      livePath: options.livePayload ? livePath : "",
-      publicSnapshot
+      livePath: privateWrite.livePath
     };
   } catch (error) {
     console.error("[publish-atomic-c003] error firebase update", {
@@ -758,8 +785,43 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       publishedScoreId: publishedScore?.id || "",
       reason: normalizeFirebaseFailureReason(error)
     });
-    return { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }) };
+    return {
+      ok: false,
+      complete: false,
+      partialFailure: false,
+      privateWrite: { ok: false },
+      publicSnapshot: {
+        ok: false,
+        skipped: true,
+        reason: "not-attempted",
+        errorCode: "not-attempted",
+        errorMessage: "La proyección pública no se intentó porque falló la escritura privada."
+      },
+      reason: normalizeFirebaseFailureReason(error),
+      detail: normalizeErrorDetail({ error })
+    };
   }
+}
+
+function normalizePublicSnapshotPublicationResult(result = {}) {
+  const ok = result?.ok === true;
+  const reason = String(result?.reason || (ok ? "updated" : "public-snapshot-failed")).slice(0, 120);
+  const changedSections = Array.isArray(result?.changedSections)
+    ? result.changedSections.map((section) => String(section || "").slice(0, 80)).filter(Boolean)
+    : [];
+  return cleanUndefined({
+    ok,
+    skipped: Boolean(result?.skipped),
+    reason,
+    errorCode: ok ? "" : reason,
+    errorMessage: ok ? "" : "No se pudo actualizar la proyección pública.",
+    path: String(result?.path || "").slice(0, 300),
+    source: String(result?.source || "").slice(0, 80),
+    projectionRevision: Number.isSafeInteger(result?.projectionRevision)
+      ? result.projectionRevision
+      : 0,
+    changedSections
+  });
 }
 
 export async function readFirebaseActiveCharreadaSnapshot(tournamentId) {
