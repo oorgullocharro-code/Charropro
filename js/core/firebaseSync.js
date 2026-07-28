@@ -17,6 +17,16 @@ import {
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
 } from "../broadcast/broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
+import {
+  buildPublicProjection,
+  reconcilePublicProjection
+} from "../public/publicProjection.js?v=20260727-public-foundation-001-projection-v2";
+import {
+  adaptPublicProjectionToLegacyLive
+} from "../public/publicProjectionLegacyAdapter.js?v=20260727-public-foundation-001-projection-v2";
+import {
+  validatePublicProjection
+} from "../public/publicProjectionSchema.js?v=20260727-public-foundation-001-projection-v2";
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD1GjI5EJYAMhe1JRM7nETHQSqHceiBBD8",
@@ -454,7 +464,7 @@ export function subscribeFirebaseBroadcastContext(callback, options = {}) {
       const nextActiveId = normalizeBroadcastOptionalContextId(payload.activeCharreadaId);
       if (nextActiveId !== context.activeCharreadaId) scheduleResolve("active-charreada-changed");
     });
-    liveUnsubscribe = subscribeFirebaseLiveCurrent(context.tournamentId, (payload, error) => {
+    liveUnsubscribe = subscribeFirebaseOperationalLiveCurrent(context.tournamentId, (payload, error) => {
       if (disposed) return;
       if (error) {
         emit("offline", { context: currentContext, reason: error.reason || "live-current-unavailable" });
@@ -586,7 +596,8 @@ export async function publishFirebaseLive(payload, options = {}) {
   try {
     const liveChannel = requireLiveChannel(payload, options);
     await writeLiveSet(buildLiveRootPayload({ ...payload, liveChannel }), liveChannel);
-    return { ok: true };
+    const publicSnapshot = await publishPublicTournamentSnapshot(liveChannel, null, { source: "live" });
+    return { ok: true, publicSnapshot };
   } catch (error) {
     return { ok: false, reason: error.message };
   }
@@ -665,10 +676,8 @@ export async function publishFirebasePublishedScore(tournamentId, publishedScore
   } catch (error) {
     console.error("[publishedScore] error al publicar", {
       tournamentId: cleanTournamentId,
-      publishedScore,
-      actor,
-      options,
-      error
+      publishedScoreId: publishedScore?.id || "",
+      reason: normalizeFirebaseFailureReason(error)
     });
     return { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }) };
   }
@@ -746,9 +755,8 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
     console.error("[publish-atomic-c003] error firebase update", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
-      publishedScore,
-      actor,
-      error
+      publishedScoreId: publishedScore?.id || "",
+      reason: normalizeFirebaseFailureReason(error)
     });
     return { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }) };
   }
@@ -993,7 +1001,8 @@ export async function publishFirebaseTurn(payload, options = {}) {
     if (Array.isArray(payload.leaderboard)) nextPayload.leaderboard = payload.leaderboard.map(compactLeaderboardItem);
     if (payload.teamStandings) nextPayload.teamStandings = compactTeamStandings(payload.teamStandings);
     await writeLiveUpdate(buildLivePartialUpdate(nextPayload), liveChannel);
-    return { ok: true };
+    const publicSnapshot = await publishPublicTournamentSnapshot(liveChannel, null, { source: "turn" });
+    return { ok: true, publicSnapshot };
   } catch (error) {
     return { ok: false, reason: error.message };
   }
@@ -1095,7 +1104,8 @@ export async function publishFirebaseTimer(timer, options = {}) {
       liveChannel,
       timestamp: new Date().toISOString()
     }, liveChannel);
-    return { ok: true };
+    const publicSnapshot = await publishPublicTournamentSnapshot(liveChannel, null, { source: "timer" });
+    return { ok: true, publicSnapshot };
   } catch (error) {
     return { ok: false, reason: error.message };
   }
@@ -1136,16 +1146,36 @@ export function subscribeFirebaseLive(callback, options = {}) {
     const liveChannel = resolveLiveChannel(null, options) || getLiveChannelFromUrl();
     const path = getFirebaseLivePath(liveChannel);
     if (!path) return () => {};
-    return onValue(ref(getFirebaseDatabase(), path), (snapshot) => {
+    let fallbackUnsubscribe = null;
+    const unsubscribe = onValue(ref(getFirebaseDatabase(), path), (snapshot) => {
       const payload = unpackLiveRootPayload(snapshot.val());
       if (payload) callback(payload);
+    }, (error) => {
+      if (normalizeFirebaseFailureReason(error) !== "permission-denied" || fallbackUnsubscribe) return;
+      fallbackUnsubscribe = subscribePublicProjectionAsLegacyLive(liveChannel, callback);
     });
+    return () => {
+      unsubscribe();
+      fallbackUnsubscribe?.();
+    };
   } catch {
     return () => {};
   }
 }
 
 export function subscribeFirebaseLiveCurrent(tournamentId, callback) {
+  let fallbackUnsubscribe = null;
+  const unsubscribe = subscribeFirebaseOperationalLiveCurrent(tournamentId, callback, (liveChannel) => {
+    if (fallbackUnsubscribe) return;
+    fallbackUnsubscribe = subscribePublicProjectionAsLegacyLive(liveChannel, callback);
+  });
+  return () => {
+    unsubscribe();
+    fallbackUnsubscribe?.();
+  };
+}
+
+function subscribeFirebaseOperationalLiveCurrent(tournamentId, callback, permissionFallback = null) {
   if (!isFirebaseLiveConfigured()) return () => {};
 
   const liveChannel = normalizeLiveChannel(tournamentId || getLiveChannelFromUrl());
@@ -1168,15 +1198,23 @@ export function subscribeFirebaseLiveCurrent(tournamentId, callback) {
       });
       const publishedScoreId = current.publishedScoreId || current.published?.id || "";
 
-      console.info("[live/current] recibido desde CharroPro", current);
-      console.info("[live/current] último publishedScoreId:", publishedScoreId);
+      console.info("[live/current] actualización operativa recibida", {
+        tournamentId: liveChannel,
+        publishedScoreId,
+        hasTurn: Boolean(current.turn?.team?.id || current.turn?.team?.name)
+      });
       callback(current);
     }, (error) => {
+      const reason = normalizeFirebaseFailureReason(error);
       console.error("[live/current] error de listener:", {
         path,
-        error
+        reason
       });
-      callback(null, { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }) });
+      if (reason === "permission-denied" && permissionFallback) {
+        permissionFallback(liveChannel);
+        return;
+      }
+      callback(null, { ok: false, reason, detail: normalizeErrorDetail({ error }) });
     });
   } catch (error) {
     console.error("[live/current] error de listener:", {
@@ -1185,6 +1223,22 @@ export function subscribeFirebaseLiveCurrent(tournamentId, callback) {
     });
     return () => {};
   }
+}
+
+function subscribePublicProjectionAsLegacyLive(tournamentId, callback) {
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  if (!cleanTournamentId) return () => {};
+  const path = `${PUBLIC_TOURNAMENTS_PATH}/${cleanTournamentId}`;
+  return onValue(ref(getFirebaseDatabase(), path), (snapshot) => {
+    const current = adaptPublicProjectionToLegacyLive(snapshot.val(), cleanTournamentId);
+    if (current) callback(current);
+  }, (error) => {
+    callback(null, {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      detail: normalizeErrorDetail({ error })
+    });
+  });
 }
 
 export function subscribePublicTournamentSnapshot(tournamentId, callback) {
@@ -1197,13 +1251,18 @@ export function subscribePublicTournamentSnapshot(tournamentId, callback) {
   console.info("[publicTournament] ruta escuchada:", path);
 
   try {
-    return onValue(ref(getFirebaseDatabase(), path), (snapshot) => {
+    let hasValidSnapshot = false;
+    let previouslyConnected = null;
+    const unsubscribeProjection = onValue(ref(getFirebaseDatabase(), path), (snapshot) => {
       const payload = snapshot.val();
+      hasValidSnapshot = Boolean(payload);
       callback(payload || null, {
         ok: Boolean(payload),
         exists: Boolean(payload),
         path,
-        tournamentId: cleanTournamentId
+        tournamentId: cleanTournamentId,
+        connection: payload ? "online" : "connecting",
+        event: "projection"
       });
     }, (error) => {
       console.warn("[publicTournament] lectura no disponible:", {
@@ -1216,9 +1275,31 @@ export function subscribePublicTournamentSnapshot(tournamentId, callback) {
         path,
         tournamentId: cleanTournamentId,
         reason: normalizeFirebaseFailureReason(error),
+        connection: "error",
+        event: "projection",
         detail: normalizeErrorDetail({ error })
       });
     });
+    const unsubscribeConnection = onValue(ref(getFirebaseDatabase(), ".info/connected"), (snapshot) => {
+      const connected = snapshot.val() === true;
+      const connection = connected
+        ? previouslyConnected === false && hasValidSnapshot ? "reconnecting" : hasValidSnapshot ? "online" : "connecting"
+        : "offline";
+      previouslyConnected = connected;
+      callback(undefined, {
+        ok: connected,
+        exists: hasValidSnapshot,
+        path,
+        tournamentId: cleanTournamentId,
+        connected,
+        connection,
+        event: "connection"
+      });
+    });
+    return () => {
+      unsubscribeProjection();
+      unsubscribeConnection();
+    };
   } catch (error) {
     console.warn("[publicTournament] listener no iniciado:", {
       path,
@@ -1236,7 +1317,22 @@ export function subscribePublicTournamentSnapshot(tournamentId, callback) {
   }
 }
 
-export function buildPublicTournamentSnapshot(tournamentState = {}) {
+export function buildPublicTournamentSnapshot(tournamentState = {}, options = {}) {
+  const candidate = buildPublicProjection({
+    tournament: tournamentState,
+    liveCurrent: options.liveCurrent || {}
+  }, {
+    tournamentId: options.tournamentId,
+    nowMs: options.nowMs
+  });
+  const result = reconcilePublicProjection(options.previous || null, candidate, { nowMs: options.nowMs });
+  if (!result.ok || !result.projection) {
+    throw new Error(result.reason || "public-projection-build-failed");
+  }
+  return result.projection;
+}
+
+function buildPublicTournamentSnapshotV1(tournamentState = {}) {
   publicSnapshotBuildCount += 1;
   console.log("[public-core] build start");
   console.log("[public-core] build count", publicSnapshotBuildCount);
@@ -1325,19 +1421,9 @@ export function buildPublicTournamentSnapshot(tournamentState = {}) {
 
 export async function publishPublicTournamentSnapshot(tournamentId, tournamentState = null, options = {}) {
   publicSnapshotPublishCount += 1;
-  console.log("[public-core] publish start", tournamentId);
-  console.log("[public-core] publish count", publicSnapshotPublishCount);
   const cleanTournamentId = normalizeLiveChannel(tournamentId);
-  if (!cleanTournamentId) {
-    console.log("[public-core] skipped:", { reason: "missing tournamentId" });
-    console.log("[public-core] publish finished", tournamentId);
-    return { ok: false, reason: "missing-tournament" };
-  }
-  if (!isFirebaseLiveConfigured()) {
-    console.log("[public-core] skipped:", { reason: "missing firebase" });
-    console.log("[public-core] publish finished", cleanTournamentId);
-    return { ok: false, reason: "missing-firebase" };
-  }
+  if (!cleanTournamentId) return { ok: false, reason: "missing-tournament" };
+  if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase" };
 
   const path = `${PUBLIC_TOURNAMENTS_PATH}/${cleanTournamentId}`;
   try {
@@ -1347,55 +1433,63 @@ export async function publishPublicTournamentSnapshot(tournamentId, tournamentSt
       source = privateSnapshot.val() || null;
     }
     if (!source) {
-      console.log("[public-core] skipped:", { reason: "tournament undefined", path });
-      console.log("[public-core] publish finished", cleanTournamentId);
       return { ok: false, reason: "missing-tournament-data", path };
     }
 
-    const snapshot = buildPublicTournamentSnapshot(source);
-    const existingSnapshot = await get(ref(getFirebaseDatabase(), path));
-    const existing = existingSnapshot.val() || null;
-    const nextSignature = buildPublicSnapshotSignature(snapshot);
-    const previousSignature = buildPublicSnapshotSignature(existing);
-    if (existing && previousSignature === nextSignature) {
-      console.log("[public-core] skipped:", {
-        reason: "snapshot unchanged",
-        path
-      });
-      console.info("[public-core] snapshot published", {
-        path,
-        skipped: true,
-        source: options.source || ""
-      });
-      console.log("[public-core] publish finished", cleanTournamentId);
-      return { ok: true, skipped: true, path, source: options.source || "" };
-    }
-
-    console.log("[public-core] set start", path);
-    await set(ref(getFirebaseDatabase(), path), cleanUndefined(snapshot));
-    publicSnapshotSetCount += 1;
-    console.log("[public-core] set finished", {
-      path,
-      setCount: publicSnapshotSetCount
+    const liveSnapshot = await get(ref(getFirebaseDatabase(), `${LIVE_ROOT_PATH}/${cleanTournamentId}/current`));
+    const candidate = buildPublicProjection({
+      tournament: source,
+      liveCurrent: liveSnapshot.val() || {}
+    }, {
+      tournamentId: cleanTournamentId,
+      nowMs: options.nowMs
     });
-    console.info("[public-core] snapshot published", {
-      path,
-      skipped: false,
+    let reconciliation = null;
+    const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (current) => {
+      reconciliation = reconcilePublicProjection(current, candidate, { nowMs: options.nowMs });
+      return reconciliation.ok && reconciliation.changed ? reconciliation.projection : undefined;
+    }, { applyLocally: false });
+    if (reconciliation && !reconciliation.ok) {
+      return {
+        ok: false,
+        skipped: true,
+        reason: reconciliation.reason,
+        path,
+        source: options.source || "",
+        projectionRevision: reconciliation.projection?.projectionRevision || 0
+      };
+    }
+    const projection = transaction.snapshot?.val() || reconciliation?.projection || null;
+    const validation = projection
+      ? validatePublicProjection(projection)
+      : { valid: false, errors: ["missing-projection"] };
+    if (!validation.valid) {
+      return { ok: false, reason: "invalid-public-projection", errors: validation.errors, path };
+    }
+    if (transaction.committed) publicSnapshotSetCount += 1;
+    console.info("[public-foundation-001] projection publication", {
+      tournamentId: cleanTournamentId,
+      schemaVersion: projection.schemaVersion,
+      projectionRevision: projection.projectionRevision,
+      changedSections: reconciliation?.changedSections || [],
+      result: transaction.committed ? "updated" : reconciliation?.reason || "unchanged",
       source: options.source || ""
     });
-    console.log("[public-core] publish finished", cleanTournamentId);
-    return { ok: true, skipped: false, path, source: options.source || "" };
+    return {
+      ok: true,
+      skipped: !transaction.committed,
+      reason: reconciliation?.reason || (transaction.committed ? "updated" : "unchanged"),
+      path,
+      source: options.source || "",
+      projectionRevision: projection.projectionRevision,
+      changedSections: reconciliation?.changedSections || []
+    };
   } catch (error) {
     console.error("[public-core] snapshot publish failed", {
       path,
       source: options.source || "",
-      error
+      reason: normalizeFirebaseFailureReason(error)
     });
-    console.log("[public-core] skipped:", {
-      reason: normalizeFirebaseFailureReason(error),
-      path
-    });
-    console.log("[public-core] publish finished", cleanTournamentId);
     return { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }), path };
   }
 }
@@ -1731,9 +1825,7 @@ function normalizePublicScores(tournamentState = {}, teams = [], charreadas = []
     }))
     .filter(isPublicScoreUsable);
 
-  const rawScores = publishedScores.length ? [] : normalizePublicRawScores(tournamentState.scores, teamsById, charreadasById);
-  const selected = publishedScores.length ? publishedScores : rawScores;
-  return dedupePublicScores(selected)
+  return dedupePublicScores(publishedScores)
     .sort((a, b) => publicDateValue(a.updatedAt) - publicDateValue(b.updatedAt) || a._order - b._order);
 }
 
@@ -2827,14 +2919,12 @@ export async function publishFirebaseScore(tournamentId, scoreId, scorePayload, 
       "meta/updatedBy": meta.updatedBy,
       "meta/updatedByName": meta.updatedByName
     }));
-    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, null, { source: "score" });
     console.info("[score] guardado en CharroPro por nodo individual", {
       path: `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}`,
       tournamentId: cleanTournamentId,
-      scoreId: cleanScoreId,
-      publicSnapshot
+      scoreId: cleanScoreId
     });
-    return { ok: true, path: `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}`, publicSnapshot };
+    return { ok: true, path: `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}` };
   } catch (error) {
     console.error("[CharroPro] publishFirebaseScore failed", {
       tournamentId: cleanTournamentId,

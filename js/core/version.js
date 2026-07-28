@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+export const CHARROPRO_APP_VERSION = "20260727-public-foundation-001-projection-v2";
 
 let versionLogged = false;
 

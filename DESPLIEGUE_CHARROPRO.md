@@ -659,3 +659,21 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - La geometría declara su unidad. Coordenadas normalizadas se aplican una sola vez contra el design space 16:9; coordenadas legacy en píxeles se convierten una sola vez. Preview y Program Main comparten la misma transformación hacia el viewport.
 - Cambios de Template, Theme, estructura, capas, geometría, visibilidad o permisos siguen requiriendo `PREPARAR` y una operación oficial Take, Cut o Auto.
 - No se agregaron Layer Manager, Layout Editor, Timer Display, NDI, cálculos deportivos ni cambios en Firebase Rules.
+
+# PUBLIC-FOUNDATION-001 - Fundación pública segura y versionada
+
+- Versión de aplicación: `20260727-public-foundation-001-projection-v2`.
+- `publicTournaments/{tournamentId}` adopta `schemaVersion: 2` con revisiones monotónicas globales y por sección.
+- El productor público se separó de `firebaseSync.js` en módulos puros de proyección, sanitización, validación, compatibilidad legacy y estado del cliente.
+- `turn.team` de `live/current` es la única fuente oficial del turno público; `meta.scoringTeamIdx` y el último score no se usan.
+- Solo `publishedScores` válidos y no sustituidos alimentan resultados. `scores` privados, drafts y audit quedan fuera.
+- Los resultados se separan por competencia, categoría, fase, charreada y scope, sin generar posiciones ni desempates.
+- La publicación usa una transacción idempotente, firmas estables y rechazo de regresiones.
+- `live/{tournamentId}` deja de ser público; roles internos autorizados conservan acceso y consumidores legacy públicos reciben una adaptación segura desde la proyección.
+- El Portal conserva su vista ante desconexión y maneja `connecting`, `online`, `stale`, `offline`, `reconnecting` y `error`.
+- `rankings`, `statistics` y `search` permanecen explícitamente `unavailable`.
+- Archivos centrales: `js/public/*`, `js/core/firebaseSync.js`, `js/views/torneo-publico.js`, `firebase-rules-auditoria.json` y `PUBLIC_FOUNDATION_V1.md`.
+- Las 35 suites `tests/*.test.mjs`, las verificaciones `node --check`, la validación JSON y `git diff --check` aprobaron.
+- Firebase Emulator no se ejecutó porque Java no está disponible. Las reglas no se despliegan desde este cierre y deben pasar Emulator Suite antes de despliegue.
+- Siguiente paso recomendado: validar Rules en Emulator Suite y, después de su despliegue autorizado, continuar con `PUBLIC-PORTAL-CORE-001`.
+- Contrato, seguridad, compatibilidad y limitaciones: `PUBLIC_FOUNDATION_V1.md`.

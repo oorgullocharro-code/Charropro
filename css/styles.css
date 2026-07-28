@@ -8332,6 +8332,35 @@ html.graphic-page #graphic-root {
   background: rgba(148, 163, 184, .08);
 }
 
+.public-connection {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 28px;
+  padding: 5px 8px;
+}
+
+.public-connection.online {
+  border-color: #31c48d;
+  color: #86efac;
+}
+
+.public-connection.stale,
+.public-connection.reconnecting {
+  border-color: #f4b740;
+  color: #f4b740;
+}
+
+.public-connection.offline,
+.public-connection.error {
+  border-color: #ef6461;
+  color: #fca5a5;
+}
+
 .public-competition-selector {
   border: 1px solid rgba(244, 183, 64, .2);
   border-radius: 14px;

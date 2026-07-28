@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260713-asset-manager-001-assets-v1";
+import { logCharroProVersion } from "./version.js?v=20260727-public-foundation-001-projection-v2";
 
 logCharroProVersion("runtime");
 

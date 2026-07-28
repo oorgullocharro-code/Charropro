@@ -56,7 +56,7 @@
       },
       "live": {
         "$tournamentId": {
-          ".read": true,
+          ".read": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez' || root.child('charropro/users/' + auth.uid + '/role').val() === 'locutor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'graficos') && (root.child('charropro/users/' + auth.uid + '/tournamentAccess').val() !== 'selected' || root.child('charropro/userTournamentAccess/' + auth.uid + '/' + $tournamentId).val() === true)",
           ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' && !newData.exists()",
           "current": {
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez')"
@@ -172,7 +172,163 @@
       "publicTournaments": {
         "$tournamentId": {
           ".read": true,
-          ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'admin' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador') && newData.exists()"
+          ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez') && (root.child('charropro/users/' + auth.uid + '/tournamentAccess').val() !== 'selected' || root.child('charropro/userTournamentAccess/' + auth.uid + '/' + $tournamentId).val() === true) && newData.exists() && newData.child('schemaVersion').val() === 2 && newData.child('metadata/tournamentId').val() === $tournamentId && newData.child('projectionRevision').isNumber() && newData.child('projectionRevision').val() >= 1 && (!data.exists() || data.child('schemaVersion').val() !== 2 || newData.child('projectionRevision').val() > data.child('projectionRevision').val())",
+          ".validate": "newData.hasChildren(['schemaVersion', 'projectionRevision', 'generatedAt', 'generatedAtMs', 'sourceUpdatedAt', 'status', 'metadata', 'overview', 'program', 'live', 'competitions', 'results', 'rankings', 'statistics', 'search']) && newData.child('schemaVersion').val() === 2 && newData.child('projectionRevision').isNumber() && newData.child('projectionRevision').val() >= 1 && newData.child('generatedAt').isString() && newData.child('generatedAtMs').isNumber() && newData.child('sourceUpdatedAt').isString() && newData.child('status').isString()",
+          "schemaVersion": {
+            ".validate": "newData.isNumber() && newData.val() === 2"
+          },
+          "projectionRevision": {
+            ".validate": "newData.isNumber() && newData.val() >= 1"
+          },
+          "generatedAt": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "generatedAtMs": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "sourceUpdatedAt": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'ready' || newData.val() === 'live' || newData.val() === 'finished' || newData.val() === 'unavailable')"
+          },
+          "metadata": {
+            ".validate": "newData.hasChildren(['revision', 'status', 'tournamentId', 'name', 'schemaVersion', 'visibility', 'timezone', 'generatedAt', 'generatedAtMs', 'sourceUpdatedAt']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1 && newData.child('tournamentId').val() === $tournamentId && newData.child('schemaVersion').val() === 2",
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'tournamentId' || $other === 'name' || $other === 'slug' || $other === 'schemaVersion' || $other === 'visibility' || $other === 'timezone' || $other === 'generatedAt' || $other === 'generatedAtMs' || $other === 'sourceUpdatedAt'"
+            }
+          },
+          "overview": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1",
+            "turn": {
+              "$other": {
+                ".validate": "$other === 'status' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'suerteId' || $other === 'suerteName'"
+              }
+            },
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'name' || $other === 'venue' || $other === 'startDate' || $other === 'endDate' || $other === 'activeCompetitionId' || $other === 'activeCharreadaId' || $other === 'activeCompetitionName' || $other === 'activeCharreadaName' || $other === 'turn' || $other === 'contextConsistency' || $other === 'updatedAt'"
+            }
+          },
+          "program": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1",
+            "items": {
+              "$itemId": {
+                "$other": {
+                  ".validate": "$other === 'scheduleId' || $other === 'competitionId' || $other === 'competitionType' || $other === 'categoryId' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'name' || $other === 'scheduledDate' || $other === 'scheduledTime' || $other === 'order' || $other === 'status' || $other === 'participants' || $other === 'association' || $other === 'legacy'"
+                }
+              }
+            },
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'items'"
+            }
+          },
+          "live": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1",
+            "turn": {
+              "team": {
+                "$other": {
+                  ".validate": "$other === 'id' || $other === 'name' || $other === 'association' || $other === 'category'"
+                }
+              },
+              "participant": {
+                "$other": {
+                  ".validate": "$other === 'id' || $other === 'name' || $other === 'association' || $other === 'category'"
+                }
+              },
+              "horse": {
+                "$other": {
+                  ".validate": "$other === 'id' || $other === 'name' || $other === 'association' || $other === 'category'"
+                }
+              },
+              "$other": {
+                ".validate": "$other === 'status' || $other === 'team' || $other === 'participant' || $other === 'horse' || $other === 'suerteId' || $other === 'suerteName'"
+              }
+            },
+            "timer": {
+              "$other": {
+                ".validate": "$other === 'status' || $other === 'timeMs' || $other === 'timeText' || $other === 'running'"
+              }
+            },
+            "currentResult": {
+              "$other": {
+                ".validate": "$other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'suerteId' || $other === 'score' || $other === 'publishedAt'"
+              }
+            },
+            "standings": {
+              "$itemId": {
+                "$other": {
+                  ".validate": "$other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'total' || $other === 'officialPosition' || $other === 'positionStatus' || $other === 'active'"
+                }
+              }
+            },
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'competitionId' || $other === 'charreadaId' || $other === 'turn' || $other === 'timer' || $other === 'currentResult' || $other === 'standings' || $other === 'updatedAt'"
+            }
+          },
+          "competitions": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1",
+            "items": {
+              "$itemId": {
+                "$other": {
+                  ".validate": "$other === 'competitionId' || $other === 'competitionType' || $other === 'name' || $other === 'categoryId' || $other === 'phaseId' || $other === 'order' || $other === 'status' || $other === 'suerteIds' || $other === 'charreadaIds' || $other === 'competitionScope' || $other === 'legacy'"
+                }
+              }
+            },
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'items'"
+            }
+          },
+          "results": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1",
+            "scopes": {
+              "$scopeId": {
+                "resultIds": {
+                  "$itemId": {
+                    ".validate": "newData.isString() && newData.val().length <= 180"
+                  }
+                },
+                "$other": {
+                  ".validate": "$other === 'competitionId' || $other === 'categoryId' || $other === 'categoryName' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'participantScope' || $other === 'resultIds'"
+                }
+              }
+            },
+            "items": {
+              "$itemId": {
+                "scores": {
+                  "$suerteId": {
+                    ".validate": "newData.isNumber()"
+                  }
+                },
+                "$other": {
+                  ".validate": "$other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName' || $other === 'association' || $other === 'categoryId' || $other === 'categoryName' || $other === 'competitionId' || $other === 'competitionType' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'participantScope' || $other === 'scores' || $other === 'subtotal' || $other === 'teamPenaltyTotal' || $other === 'officialTotal' || $other === 'officialPosition' || $other === 'positionStatus' || $other === 'resultStatus' || $other === 'publishedAt' || $other === 'sourceRevision' || $other === 'displayOrder'"
+                }
+              }
+            },
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'scopes' || $other === 'items'"
+            }
+          },
+          "rankings": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 0 && newData.child('status').val() === 'unavailable'",
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'items'"
+            }
+          },
+          "statistics": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 0 && newData.child('status').val() === 'unavailable'",
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'items'"
+            }
+          },
+          "search": {
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 0 && newData.child('status').val() === 'unavailable'",
+            "$other": {
+              ".validate": "$other === 'revision' || $other === 'status' || $other === 'items'"
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       },
       "settings": {

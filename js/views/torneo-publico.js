@@ -1,9 +1,16 @@
-import { COMPETITION_TYPES, getCompetitionType } from "../data/competitionTypes.js?v=20260709-public-competitions-001";
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260709-public-competitions-001";
+import { COMPETITION_TYPES, getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260727-public-foundation-001-projection-v2";
 import {
   getLiveChannelFromUrl,
   subscribePublicTournamentSnapshot
-} from "../core/firebaseSync.js?v=20260709-public-competitions-001";
+} from "../core/firebaseSync.js?v=20260727-public-foundation-001-projection-v2";
+import {
+  applyPublicPortalConnection,
+  applyPublicPortalSnapshot,
+  createPublicPortalClientState,
+  evaluatePublicPortalStale,
+  getPublicPortalViewSnapshot
+} from "../public/publicPortalClient.js?v=20260727-public-foundation-001-projection-v2";
 
 const UNAVAILABLE_MESSAGE = "Información pública no disponible todavía";
 const OFFICIAL_SCORESHEET_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
@@ -24,6 +31,9 @@ const state = {
   tournamentId: "",
   publicSnapshot: null,
   publicStatus: null,
+  client: createPublicPortalClientState(),
+  unsubscribe: null,
+  staleTimer: null,
   activeTab: "resumen",
   selectedCompetitionId: ""
 };
@@ -31,6 +41,7 @@ const state = {
 initPublicTournamentPage();
 
 function initPublicTournamentPage() {
+  disposePublicTournamentPage();
   state.tournamentId = getTournamentIdFromUrl();
   state.selectedCompetitionId = getCompetitionFromUrl();
   console.info("[public-c001] loading tournament");
@@ -41,16 +52,28 @@ function initPublicTournamentPage() {
     return;
   }
 
-  subscribePublicTournamentSnapshot(state.tournamentId, (snapshot, status) => {
-    state.publicSnapshot = snapshot;
+  state.unsubscribe = subscribePublicTournamentSnapshot(state.tournamentId, (snapshot, status = {}) => {
     state.publicStatus = status;
-    console.info("[public-ui-001] snapshot keys", snapshot ? Object.keys(snapshot) : []);
-    console.info("[public-ui-001] scoresheet columns", snapshot?.scoresheetColumns || []);
-    console.info("[public-ui-001] scoresheet sample", objectToArray(snapshot?.scoresheet)[0] || null);
-    console.info("[public-ui-001] live sample", {
-      activeCharreada: snapshot?.activeCharreada || null,
-      lastScore: objectToArray(snapshot?.lastScores)[0] || null,
-      currentScoreboard: objectToArray(snapshot?.currentScoreboard).slice(0, 3)
+    if (status.event === "connection") {
+      state.client = applyPublicPortalConnection(state.client, status.connected);
+      state.publicStatus = { ...status, connection: state.client.connection };
+      renderPublicConnectionStatus();
+      return;
+    }
+    const result = applyPublicPortalSnapshot(state.client, snapshot);
+    state.client = result.state;
+    state.publicStatus = { ...status, connection: state.client.connection, reason: result.reason || status.reason || "" };
+    if (!result.accepted) {
+      renderPublicConnectionStatus();
+      return;
+    }
+    state.publicSnapshot = getPublicPortalViewSnapshot(state.client);
+    console.info("[public-foundation-001] projection received", {
+      tournamentId: state.tournamentId,
+      schemaVersion: snapshot?.schemaVersion || 1,
+      projectionRevision: snapshot?.projectionRevision || 0,
+      changedSections: result.changedSections,
+      legacy: Boolean(result.legacy)
     });
     renderPublicTournamentPage(normalizePublicTournamentData({
       tournamentId: state.tournamentId,
@@ -58,6 +81,21 @@ function initPublicTournamentPage() {
       publicStatus: state.publicStatus
     }));
   });
+  state.staleTimer = window.setInterval(() => {
+    const next = evaluatePublicPortalStale(state.client);
+    if (next.connection === state.client.connection) return;
+    state.client = next;
+    state.publicStatus = { ...(state.publicStatus || {}), connection: next.connection };
+    renderPublicConnectionStatus();
+  }, 15000);
+  window.addEventListener("beforeunload", disposePublicTournamentPage, { once: true });
+}
+
+function disposePublicTournamentPage() {
+  state.unsubscribe?.();
+  state.unsubscribe = null;
+  if (state.staleTimer) window.clearInterval(state.staleTimer);
+  state.staleTimer = null;
 }
 
 function getTournamentIdFromUrl() {
@@ -94,7 +132,8 @@ function normalizePublicTournamentData(raw = {}) {
       leaders: [],
       awards: [],
       lastScores: [],
-      readWarning: raw.publicStatus?.reason || ""
+      readWarning: raw.publicStatus?.reason || "",
+      connection: raw.publicStatus?.connection || state.client.connection
     };
   }
 
@@ -160,13 +199,15 @@ function normalizePublicTournamentData(raw = {}) {
     awards,
     lastScores,
     lastScore,
-    readWarning: raw.publicStatus?.reason || ""
+    readWarning: raw.publicStatus?.reason || "",
+    connection: raw.publicStatus?.connection || state.client.connection,
+    rankingStatus: snapshot.rankingStatus || "available"
   };
 }
 
 function normalizeScoreboardRow(row = {}, index = 0) {
   return {
-    position: Number(row.position || index + 1),
+    position: normalizeOfficialPosition(row.position),
     charreadaId: row.charreadaId || row.charreada?.id || "",
     teamId: row.teamId || "",
     teamName: row.teamName || row.participantName || row.name || "Equipo",
@@ -180,7 +221,7 @@ function normalizeScoreboardRow(row = {}, index = 0) {
 
 function normalizeRankingRow(row = {}, index = 0) {
   return {
-    position: Number(row.position || index + 1),
+    position: normalizeOfficialPosition(row.position),
     teamId: row.teamId || row.participantId || row.entryId || row.id || "",
     teamName: row.teamName || row.participantName || row.name || row.charro || "Equipo",
     total: numberOrZero(row.total),
@@ -192,7 +233,7 @@ function normalizeRankingRow(row = {}, index = 0) {
 
 function normalizeScoreSheetRow(row = {}, index = 0) {
   return {
-    position: Number(row.position || index + 1),
+    position: normalizeOfficialPosition(row.position),
     teamId: row.teamId || row.participantId || row.entryId || row.id || "",
     teamName: row.teamName || row.participantName || row.name || row.charro || "Equipo",
     CC: nullableScore(row.CC),
@@ -212,7 +253,7 @@ function normalizeScoreSheetRow(row = {}, index = 0) {
 
 function normalizeTeamRow(row = {}, index = 0) {
   return {
-    position: Number(row.position || index + 1),
+    position: normalizeOfficialPosition(row.position),
     teamId: row.teamId || row.participantId || row.entryId || row.id || "",
     teamName: row.teamName || row.participantName || row.name || `Equipo ${index + 1}`,
     categoryName: row.category || row.categoryName || "",
@@ -324,11 +365,13 @@ function buildPublicCompetitionView(snapshot = {}, selectedCompetition = null) {
     .map(normalizeLastScoreRow);
   const scoreSheetColumns = normalizeCompetitionScoreSheetColumns(snapshot.scoresheetColumns, selectedCompetition);
   const leaders = normalizeLeadersForCompetition(snapshot.leaders, selectedCompetition, scoreSheetColumns);
-  const awards = ranking.slice(0, 3).map((row, index) => ({
-    position: index + 1,
+  const awards = snapshot.rankingStatus === "available"
+    ? ranking.filter((row) => row.position !== null).slice(0, 3).map((row) => ({
+    position: row.position,
     name: row.teamName,
     total: row.total
-  }));
+  }))
+    : [];
 
   return {
     activeCharreada,
@@ -374,10 +417,12 @@ function matchesPublicCompetition(row = {}, selectedCompetition = null, schedule
   const rowCompetitionId = fields.competitionId || scheduleCompetition?.competitionId || "";
   const rowCompetitionType = fields.competitionType || scheduleCompetition?.competitionType || "";
   if (!rowCompetitionId && !rowCompetitionType) return isLegacyCompetitionView(selectedCompetition);
-  return rowCompetitionId === selectedCompetition.id ||
-    rowCompetitionId === selectedCompetition.type ||
-    rowCompetitionType === selectedCompetition.type ||
-    rowCompetitionType === selectedCompetition.id;
+  if (rowCompetitionId) {
+    if (rowCompetitionId === selectedCompetition.id) return true;
+    if (!isLegacyCompetitionView(selectedCompetition)) return false;
+    return rowCompetitionId === selectedCompetition.type || rowCompetitionType === selectedCompetition.type;
+  }
+  return rowCompetitionType === selectedCompetition.type || rowCompetitionType === selectedCompetition.id;
 }
 
 function getScheduleCompetition(row = {}, schedule = []) {
@@ -514,7 +559,7 @@ function renderUnavailable(data) {
         <h1>${escapeHTML(data.tournamentId || "Portal publico")}</h1>
         <p>${escapeHTML(UNAVAILABLE_MESSAGE)}</p>
       </div>
-      <span class="public-badge muted">Sin datos publicos</span>
+      <span class="public-badge muted" data-public-connection>${escapeHTML(connectionLabel(data.connection))}</span>
     </section>
   `;
 }
@@ -530,6 +575,9 @@ function renderHero(data) {
       </div>
       <div class="public-hero-status">
         <span class="public-badge">${escapeHTML(summary.status || "EN VIVO")}</span>
+        <span class="public-connection ${escapeHTML(data.connection || "connecting")}" data-public-connection>
+          ${escapeHTML(connectionLabel(data.connection))}
+        </span>
         <small>Datos publicos oficiales</small>
         <small>${escapeHTML(summary.lastUpdated ? `Actualizado: ${summary.lastUpdated}` : "")}</small>
       </div>
@@ -577,10 +625,9 @@ function renderCompetitionSelector(data) {
 
 function renderSummaryCards(data) {
   const summary = data.summary || {};
-  const leader = data.ranking?.[0] || {};
   const cards = [
     [summary.entityLabel || "Equipos", summary.totalTeams || data.teams.length || data.ranking.length || "-"],
-    ["Lider", leader.teamName || "-"],
+    ["Resultados publicados", data.ranking.length || "-"],
     ["Suerte actual", summary.currentSuerte || "-"],
     ["Equipo en turno", summary.currentTeamName || "-"]
   ];
@@ -608,7 +655,7 @@ function renderLiveScoreboard(data) {
         <div class="public-scoreboard-list">
           ${rows.map((team) => html`
             <div class="public-scoreboard-row ${team.active ? "active" : ""}">
-              <span>${moneylessNumber(team.position)}</span>
+              <span>${escapeHTML(formatPosition(team.position))}</span>
               <strong>${escapeHTML(team.teamName)}</strong>
               <b>${moneylessNumber(team.total)}</b>
             </div>
@@ -620,15 +667,16 @@ function renderLiveScoreboard(data) {
 }
 
 function renderRanking(data) {
+  const entityLabel = data.selectedCompetition?.scope === "individual" ? "Participante" : "Equipo";
   return html`
     <section class="public-panel">
       <div class="public-panel-head">
-        <h2>${escapeHTML(data.selectedCompetition?.scope === "individual" ? "Ranking individual" : "Top 10 general")}</h2>
-        <span>${escapeHTML(data.selectedCompetition?.label || "Ranking publico")}</span>
+        <h2>Resultados publicados</h2>
+        <span>${escapeHTML(data.selectedCompetition?.label || "Resultados oficiales publicados")}</span>
       </div>
       ${renderSimpleTable(
-        ["Pos.", "Equipo", "Total"],
-        data.ranking.slice(0, 10).map((row) => [row.position, row.teamName, moneylessNumber(row.total)])
+        ["Pos. oficial", entityLabel, "Total publicado"],
+        data.ranking.slice(0, 10).map((row) => [formatPosition(row.position), row.teamName, moneylessNumber(row.total)])
       )}
     </section>
   `;
@@ -658,9 +706,10 @@ function renderCurrentTurn(data) {
 
 function renderScoreSheet(data) {
   const columns = data.scoreSheetColumns || OFFICIAL_SCORESHEET_COLUMNS;
-  const headers = ["Pos.", "Equipo", ...columns];
+  const entityLabel = data.selectedCompetition?.scope === "individual" ? "Participante" : "Equipo";
+  const headers = ["Pos. oficial", entityLabel, ...columns];
   const rows = data.scoreSheet.map((row) => [
-    row.position,
+    formatPosition(row.position),
     row.teamName,
     ...columns.map((column) => formatScore(row[column]))
   ]);
@@ -813,6 +862,26 @@ function setupCompetitionSelector() {
   });
 }
 
+function renderPublicConnectionStatus() {
+  document.querySelectorAll("[data-public-connection]").forEach((element) => {
+    element.textContent = connectionLabel(state.client.connection);
+    element.classList.remove("connecting", "online", "stale", "offline", "reconnecting", "error");
+    element.classList.add(state.client.connection || "connecting");
+  });
+}
+
+function connectionLabel(connection = "connecting") {
+  const labels = {
+    connecting: "Conectando",
+    online: "En linea",
+    stale: "Datos sin actualizacion reciente",
+    offline: "Sin conexion",
+    reconnecting: "Reconectando",
+    error: "Error de conexion"
+  };
+  return labels[connection] || labels.connecting;
+}
+
 function updateCompetitionUrl(competitionId = "") {
   try {
     const url = new URL(window.location.href);
@@ -838,6 +907,15 @@ function nullableScore(value) {
   if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function normalizeOfficialPosition(value) {
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number > 0 ? number : null;
+}
+
+function formatPosition(value) {
+  return normalizeOfficialPosition(value) ?? "-";
 }
 
 function numberOrZero(value) {
