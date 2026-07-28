@@ -677,3 +677,22 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - Firebase Emulator no se ejecutó porque Java no está disponible. Las reglas no se despliegan desde este cierre y deben pasar Emulator Suite antes de despliegue.
 - Siguiente paso recomendado: validar Rules en Emulator Suite y, después de su despliegue autorizado, continuar con `PUBLIC-PORTAL-CORE-001`.
 - Contrato, seguridad, compatibilidad y limitaciones: `PUBLIC_FOUNDATION_V1.md`.
+
+# PUBLIC-PORTAL-CORE-001 - Portal Público V2
+
+- Versión del módulo: `1.0.0`; cache-buster público: `20260727-public-portal-core-001-v1`.
+- El Portal se organiza en Inicio, En Vivo, Programa, Competencias, Resultados y Sábana, con navegación History API y URLs compartibles.
+- La interfaz consume directamente `schemaVersion: 2` mediante `publicPortalClient`; la compatibilidad V1 permanece encapsulada.
+- La selección usa `competitionId`, conserva instancias del mismo tipo y actualiza Resultados y Sábana sin recargar.
+- Resultados conserva `officialTotal`, `officialPosition`, cero y null sin recalcular posiciones, totales o desempates.
+- La Sábana construye columnas desde `suerteIds` y datos publicados; Charro Completo no incluye Terna ni Jineteo de Yegua.
+- El shell, navegación y selector permanecen montados; `changedSections` limita la actualización a la vista afectada.
+- El DOM usa `textContent`, los parámetros URL están restringidos y no existen lecturas privadas ni escrituras Firebase.
+- El CSS está aislado en `css/public-portal.css` y cubre escritorio, tableta y móvil con tabla desplazable y objetivos táctiles de 44 px.
+- No se modificaron Firebase Rules, Core deportivo, calificador, Broadcast, Program Main ni Announcer.
+- La validación visual se realizó con datos públicos reales en escritorio y en emulación móvil de `332 x 744`: las seis vistas, navegación, selector, tablas, foco, Back y Forward se mantuvieron utilizables y sin overflow global.
+- El snapshot público real disponible durante la validación era legacy; la adaptación V1 se verificó en navegador y el contrato `schemaVersion: 2` quedó cubierto por pruebas unitarias y de integración.
+- Las 38 suites `tests/*.test.mjs`, las verificaciones `node --check` y `git diff --check` aprobaron sin fallos ni pruebas omitidas.
+- Limitaciones: Top, estadísticas, búsqueda, perfiles, SEO avanzado e histórico permanecen fuera de alcance; la actualización parcial sustituye la vista activa, no celdas individuales.
+- No se desplegaron Firebase Rules, Hosting, Functions, RTDB ni servicios. El siguiente paso es revisar y autorizar por separado el push y cualquier despliegue.
+- Arquitectura, rutas, seguridad, accesibilidad y limitaciones: `PUBLIC_PORTAL_CORE_V1.md`.
