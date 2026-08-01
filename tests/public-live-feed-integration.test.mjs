@@ -35,6 +35,12 @@ const tournamentId = "tournament-feed-integration";
 const charreadaId = "charreada-feed-integration";
 const teamId = "team-feed-integration";
 
+assert.equal(
+  firebaseSync.getFirebasePublicProjectionOutboxJobPath(tournamentId, "../projection"),
+  "",
+  "projection paths reject ambiguous identifiers"
+);
+
 firebase.seed({
   charropro: {
     tournaments: {
@@ -77,7 +83,8 @@ const first = await publishOfficial({
   scoreId: "score-integration-1",
   suerteId: "cala",
   total: 10,
-  publishedAt: "2026-07-28T10:01:00.000Z"
+  publishedAt: "2026-07-28T10:01:00.000Z",
+  actorUid: "forged-user"
 });
 assert.equal(first.ok, true);
 assert.equal(first.complete, true);
@@ -85,6 +92,11 @@ assert.equal(first.partialFailure, false);
 assert.equal(first.privateWrite.ok, true);
 assert.equal(first.publicSnapshot.ok, true);
 assert.equal(firebase.privateWriteCount, 1, "private score is written once");
+assert.equal(
+  firebase.read(`${first.projectionOutboxPath}/intent/createdBy/uid`),
+  "test-user",
+  "the authenticated Firebase user overrides a forged actor uid"
+);
 
 const publicPath = `charropro/publicTournaments/${tournamentId}`;
 const firstProjection = firebase.read(publicPath);
@@ -149,10 +161,259 @@ assert.deepEqual(firebase.read(publicPath), beforePartialProjection, "failed pub
 assert.equal(JSON.stringify(partial).includes("AIza"), false);
 assert.equal(JSON.stringify(partial).includes("credentials"), false);
 
+const partialOutboxPath = partial.projectionOutboxPath;
+const partialJob = firebase.read(partialOutboxPath);
+assert.equal(partialJob.intent.projectionId, partial.projectionId);
+assert.equal(partialJob.intent.sourceId, "published-integration-3");
+assert.equal(partialJob.intent.scoreId, "score-integration-3");
+assert.equal(partialJob.intent.sourceRevision, 1);
+assert.equal(partialJob.intent.targetPath, publicPath);
+assert.equal(partialJob.state.status, "RETRY_WAIT");
+assert.equal(partialJob.state.attempts, 1);
+assert.equal(partialJob.state.lastErrorCode, "permission-denied");
+assert.ok(partialJob.state.nextRetryAtMs > partialJob.state.lastAttemptAtMs);
+assert.equal(JSON.stringify(partialJob).includes("AIza"), false);
+assert.equal(JSON.stringify(partialJob).includes("credentials"), false);
+
+firebase.failPublicTransactions = false;
+const restartedFirebaseSync = await import(`../js/core/firebaseSync.js?public-feed-restart=${Date.now()}`);
+const recovered = await restartedFirebaseSync.reconcileFirebasePublicProjectionOutbox(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor", clientId: "new-browser" },
+  {
+    nowMs: partialJob.state.nextRetryAtMs + 1,
+    jitter: false
+  }
+);
+assert.equal(recovered.ok, true, "a new module instance recovers the durable job");
+assert.equal(recovered.jobs.find((job) => job.projectionId === partial.projectionId)?.status, "CLIENT_CONFIRMED");
+assert.equal(firebase.read(`${partialOutboxPath}/state`).status, "CLIENT_CONFIRMED");
+assert.equal(firebase.read(publicPath).projectionRevision, 3);
+assert.equal(listPublicLiveFeedEvents(firebase.read(publicPath).liveFeed).length, 3);
+
+const outboxBeforeDuplicate = firebase.read(`charropro/projectionOutbox/${tournamentId}`);
+const duplicate = await publishOfficial({
+  publishedId: "published-integration-3",
+  scoreId: "score-integration-3",
+  suerteId: "colas",
+  total: 33,
+  publishedAt: "2026-07-28T10:03:00.000Z"
+});
+assert.equal(duplicate.projectionId, partial.projectionId, "equivalent publication reuses projection identity");
+assert.equal(duplicate.projectionJob.status, "CLIENT_CONFIRMED");
+assert.equal(
+  Object.keys(firebase.read(`charropro/projectionOutbox/${tournamentId}`)).length,
+  Object.keys(outboxBeforeDuplicate).length,
+  "equivalent publication does not create another durable job"
+);
+assert.equal(
+  Object.keys(firebase.read(`charropro/tournaments/${tournamentId}/publishedScores`)).length,
+  3,
+  "equivalent publication does not duplicate the official score"
+);
+
+firebase.failAfterPublicCommitOnce = true;
+const uncertain = await publishOfficial({
+  publishedId: "published-integration-4",
+  scoreId: "score-integration-4",
+  suerteId: "toro",
+  total: 41,
+  publishedAt: "2026-07-28T10:04:00.000Z"
+});
+assert.equal(uncertain.ok, true);
+assert.equal(uncertain.partialFailure, true, "a timeout after the public commit stays pending");
+assert.equal(firebase.read(`${uncertain.projectionOutboxPath}/state`).status, "RETRY_WAIT");
+const uncertainRetry = await restartedFirebaseSync.reconcileFirebasePublicProjectionOutbox(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    projectionIds: [uncertain.projectionId],
+    manual: true,
+    nowMs: Date.parse("2026-07-28T10:04:05.000Z"),
+    jitter: false
+  }
+);
+assert.equal(uncertainRetry.ok, true);
+assert.equal(firebase.read(`${uncertain.projectionOutboxPath}/state`).status, "CLIENT_CONFIRMED");
+assert.equal(
+  Object.keys(firebase.read(`charropro/tournaments/${tournamentId}/publishedScores`)).length,
+  4,
+  "retry after uncertain public commit never rewrites or duplicates the private score"
+);
+
+firebase.failPublicTransactions = true;
+const staleRevision = await publishOfficial({
+  publishedId: "published-correction-1",
+  scoreId: "score-correction",
+  suerteId: "piales",
+  total: 18,
+  revision: 1,
+  attemptKey: `${charreadaId}:${teamId}:correction`,
+  publishedAt: "2026-07-28T10:05:00.000Z"
+});
+assert.equal(staleRevision.partialFailure, true);
+firebase.failPublicTransactions = false;
+const currentRevision = await publishOfficial({
+  publishedId: "published-correction-2",
+  scoreId: "score-correction",
+  suerteId: "piales",
+  total: 28,
+  revision: 2,
+  attemptKey: `${charreadaId}:${teamId}:correction`,
+  publishedAt: "2026-07-28T10:06:00.000Z"
+});
+assert.equal(currentRevision.complete, true);
+assert.notEqual(currentRevision.projectionId, staleRevision.projectionId);
+assert.equal(firebase.read(`${staleRevision.projectionOutboxPath}/state`).status, "SUPERSEDED");
+assert.equal(
+  firebase.read(`${staleRevision.projectionOutboxPath}/state`).supersededBy,
+  currentRevision.projectionId
+);
+assert.equal(firebase.read(`${currentRevision.projectionOutboxPath}/state`).status, "CLIENT_CONFIRMED");
+const staleRetry = await restartedFirebaseSync.reconcileFirebasePublicProjectionOutbox(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    projectionIds: [staleRevision.projectionId],
+    manual: true,
+    nowMs: Date.parse("2026-07-28T10:07:00.000Z")
+  }
+);
+assert.equal(staleRetry.jobs[0].status, "SUPERSEDED");
+assert.equal(
+  firebase.read(`${staleRevision.projectionOutboxPath}/state`).status,
+  "SUPERSEDED",
+  "an old projection can never replace the current revision"
+);
+
+firebase.failPublicTransactions = true;
+const missingSource = await publishOfficial({
+  publishedId: "published-missing-source",
+  scoreId: "score-missing-source",
+  suerteId: "manganas_pie",
+  total: 12,
+  attemptKey: `${charreadaId}:${teamId}:missing-source`,
+  publishedAt: "2026-07-28T10:08:00.000Z"
+});
+const missingSourcePath = `charropro/tournaments/${tournamentId}/publishedScores/published-missing-source`;
+const missingSourceRecord = firebase.read(missingSourcePath);
+firebase.write(missingSourcePath, null);
+firebase.failPublicTransactions = false;
+const deadLetter = await restartedFirebaseSync.reconcileFirebasePublicProjectionOutbox(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    projectionIds: [missingSource.projectionId],
+    manual: true,
+    nowMs: Date.parse("2026-07-28T10:09:00.000Z"),
+    jitter: false
+  }
+);
+assert.equal(deadLetter.jobs[0].status, "DEAD_LETTER");
+const deadLetterState = firebase.read(`${missingSource.projectionOutboxPath}/state`);
+assert.equal(deadLetterState.deadLetterReason, "missing-projection-source");
+assert.equal(deadLetterState.nextRetryAtMs, 0, "non-recoverable error has no retry loop");
+assert.equal(JSON.stringify(deadLetterState).includes("credentials"), false);
+
+const unauthorizedRetry = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  missingSource.projectionId,
+  { uid: "announcer", role: "locutor" }
+);
+assert.equal(unauthorizedRetry.ok, false);
+assert.equal(unauthorizedRetry.reason, "projection-recovery-not-authorized");
+
+firebase.write(missingSourcePath, missingSourceRecord);
+const repaired = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  missingSource.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:00.000Z"),
+    jitter: false
+  }
+);
+assert.equal(repaired.ok, true, "authorized manual repair converges after the source is restored");
+assert.equal(firebase.read(`${missingSource.projectionOutboxPath}/state`).status, "CLIENT_CONFIRMED");
+const verifiedAgain = await restartedFirebaseSync.verifyFirebasePublicProjectionJob(
+  tournamentId,
+  missingSource.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  { nowMs: Date.parse("2026-07-28T10:11:00.000Z") }
+);
+assert.equal(verifiedAgain.ok, true);
+assert.equal(verifiedAgain.clientConfirmed, true);
+assert.equal(verifiedAgain.authoritativelyVerified, false);
+assert.equal(verifiedAgain.status, "CLIENT_CONFIRMED");
+assert.equal(
+  firebase.read(`${missingSource.projectionOutboxPath}/state`).status,
+  "CLIENT_CONFIRMED",
+  "diagnostic readback does not mutate the job to VERIFIED"
+);
+
+firebase.failOutboxTransactionsOnce = true;
+const claimFailure = await publishOfficial({
+  publishedId: "published-claim-failure",
+  scoreId: "score-claim-failure",
+  suerteId: "manganas_caballo",
+  total: 17,
+  attemptKey: `${charreadaId}:${teamId}:claim-failure`,
+  publishedAt: "2026-07-28T10:12:00.000Z"
+});
+assert.equal(claimFailure.ok, true, "a claim failure does not misreport the completed private write");
+assert.equal(claimFailure.privateWrite.ok, true);
+assert.equal(claimFailure.partialFailure, true);
+assert.equal(firebase.read(claimFailure.projectionOutboxPath).intent.projectionId, claimFailure.projectionId);
+assert.equal(firebase.read(`${claimFailure.projectionOutboxPath}/state`), undefined);
+const recoveredClaimFailure = await restartedFirebaseSync.reconcileFirebasePublicProjectionOutbox(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    projectionIds: [claimFailure.projectionId],
+    manual: true,
+    nowMs: Date.parse("2026-07-28T10:12:05.000Z"),
+    jitter: false
+  }
+);
+assert.equal(recoveredClaimFailure.ok, true);
+assert.equal(firebase.read(`${claimFailure.projectionOutboxPath}/state`).status, "CLIENT_CONFIRMED");
+
+const backlog = await restartedFirebaseSync.readFirebasePublicProjectionOutbox(tournamentId);
+assert.equal(backlog.ok, true);
+assert.equal(backlog.pending, 0);
+assert.equal(backlog.retry, 0);
+assert.equal(backlog.deadLetter, 0);
+assert.ok(backlog.clientConfirmed >= 5);
+assert.equal(backlog.verified, 0);
+assert.ok(backlog.counts.SUPERSEDED >= 1);
+
 assert.match(appSource, /result\.publicSnapshot\?\.ok === false/);
 assert.match(appSource, /result\.partialFailure === true/);
-assert.match(appSource, /Guardado; portal pendiente/);
-assert.match(appSource, /La calificación fue guardada, pero no pudo actualizarse el portal público\./);
+assert.match(appSource, /Guardado; recuperación pública pendiente/);
+assert.match(appSource, /La recuperación del Portal Público quedó programada\./);
+assert.match(appSource, /schedulePublicProjectionRecovery\(1500\)/);
+assert.match(appSource, /window\.setInterval\(\(\) => \{[\s\S]*?runPublicProjectionRecovery[\s\S]*?30000/);
+assert.match(appSource, /window\.addEventListener\("online"[\s\S]*?schedulePublicProjectionRecovery\(250\)/);
+assert.match(appSource, /configurePublicProjectionRecovery\(\)/);
+assert.match(appSource, /retryFirebasePublicProjectionJob/);
+assert.match(appSource, /retryAllFirebasePublicProjectionJobs/);
+assert.match(appSource, /verifyFirebasePublicProjectionJob/);
+assert.match(appSource, />Proyección pública</);
+assert.match(appSource, />Proyección escrita</);
+assert.match(appSource, />Verificación autoritativa pendiente</);
+assert.match(appSource, />Verificados por autoridad</);
+assert.match(appSource, />Diagnosticar</);
+assert.doesNotMatch(appSource, />Verificar</);
+assert.doesNotMatch(appSource, /reparada y verificada/);
+assert.doesNotMatch(appSource, /elegibles quedaron verificadas/);
+const diagnosticSource = String(
+  restartedFirebaseSync.verifyFirebasePublicProjectionJob
+);
+assert.doesNotMatch(
+  diagnosticSource,
+  /transitionFirebaseProjectionState|PUBLIC_PROJECTION_STATUSES\.VERIFIED/,
+  "the manual verification action remains a read-only diagnostic"
+);
 assert.equal(
   appSource.slice(
     appSource.indexOf("async function publishOfficialScoreForContext"),
@@ -164,16 +425,25 @@ assert.equal(
 delete globalThis[TEST_STATE_KEY];
 console.log("public-live-feed-integration.test.mjs: ok");
 
-async function publishOfficial({ publishedId, scoreId, suerteId, total, publishedAt }) {
+async function publishOfficial({
+  publishedId,
+  scoreId,
+  suerteId,
+  total,
+  publishedAt,
+  revision = 1,
+  attemptKey = `${charreadaId}:${teamId}:${suerteId}`,
+  actorUid = "test-user"
+}) {
   return firebaseSync.publishFirebaseOfficialScoreAtomic(
     tournamentId,
     scoreId,
     [{ total }],
     {
       id: publishedId,
-      attemptKey: `${charreadaId}:${teamId}:${suerteId}`,
+      attemptKey,
       publishedAt,
-      revision: 1,
+      revision,
       tournament: { id: tournamentId, name: "Torneo Feed Integration" },
       charreada: {
         id: charreadaId,
@@ -191,8 +461,10 @@ async function publishOfficial({ publishedId, scoreId, suerteId, total, publishe
       attempt: { total },
       total
     },
-    { uid: "test-user", role: "supervisor" },
+    { uid: actorUid, role: "supervisor" },
     {
+      nowMs: Date.parse(publishedAt),
+      jitter: false,
       livePayload: {
         tournament: { id: tournamentId, name: "Torneo Feed Integration" },
         charreada: { id: charreadaId, name: "Charreada Integration" },
@@ -240,18 +512,27 @@ function firebaseModuleSource(moduleName) {
 
 function createFirebaseTestAdapter() {
   let data = {};
+  let authUser = { uid: "test-user" };
   const app = { name: "test-app" };
   const database = { name: "test-database" };
   return {
     privateWriteCount: 0,
     failPublicTransactions: false,
+    failAfterPublicCommitOnce: false,
+    failOutboxTransactionsOnce: false,
     seed(value) {
       data = structuredClone(value);
       this.privateWriteCount = 0;
       this.failPublicTransactions = false;
+      this.failAfterPublicCommitOnce = false;
+      this.failOutboxTransactionsOnce = false;
+      authUser = { uid: "test-user" };
     },
     read(path) {
       return structuredClone(readPath(data, path));
+    },
+    write(path, value) {
+      writePath(data, path, structuredClone(value));
     },
     getApps() {
       return [app];
@@ -279,6 +560,12 @@ function createFirebaseTestAdapter() {
       }
     },
     async runTransaction(target, handler) {
+      if (this.failOutboxTransactionsOnce && target.path.includes("/projectionOutbox/")) {
+        this.failOutboxTransactionsOnce = false;
+        const error = new Error("permission denied while claiming projection");
+        error.code = "PERMISSION_DENIED";
+        throw error;
+      }
       if (this.failPublicTransactions && target.path.includes("/publicTournaments/")) {
         const error = new Error("permission denied");
         error.code = "PERMISSION_DENIED";
@@ -290,6 +577,12 @@ function createFirebaseTestAdapter() {
         return { committed: false, snapshot: snapshot(current) };
       }
       writePath(data, target.path, structuredClone(next));
+      if (this.failAfterPublicCommitOnce && target.path.includes("/publicTournaments/")) {
+        this.failAfterPublicCommitOnce = false;
+        const error = new Error("timeout after public commit");
+        error.code = "TIMEOUT";
+        throw error;
+      }
       return { committed: true, snapshot: snapshot(next) };
     },
     onValue(_target, callback) {
@@ -301,12 +594,12 @@ function createFirebaseTestAdapter() {
     },
     getAuth() {
       return {
-        currentUser: null,
+        currentUser: authUser,
         authStateReady: async () => {}
       };
     },
     onAuthStateChanged(_auth, callback) {
-      callback(null);
+      callback(authUser);
       return () => {};
     },
     async signInWithEmailAndPassword() {

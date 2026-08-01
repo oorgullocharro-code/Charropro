@@ -19,6 +19,7 @@ import {
 } from "../broadcast/broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
 import {
   buildPublicProjection,
+  getPublicProjectionSignature,
   reconcilePublicProjection
 } from "../public/publicProjection.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
 import {
@@ -27,6 +28,23 @@ import {
 import {
   validatePublicProjection
 } from "../public/publicProjectionSchema.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import {
+  PUBLIC_PROJECTION_LEASE_MS,
+  PUBLIC_PROJECTION_MAX_ATTEMPTS,
+  PUBLIC_PROJECTION_STATUSES,
+  buildPublicProjectionFailureState,
+  buildPublicProjectionIntent,
+  buildPublicProjectionOutboxSnapshot,
+  buildPublicProjectionState,
+  claimPublicProjectionState,
+  comparePublicProjectionJobs,
+  isPublicProjectionJobEligible,
+  normalizePublicProjectionJob,
+  normalizePublicProjectionState,
+  sanitizeProjectionActor,
+  sanitizeProjectionErrorCode,
+  sanitizeProjectionErrorMessage
+} from "./publicProjectionOutbox.js?v=20260729-public-projection-recovery-001-v1";
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD1GjI5EJYAMhe1JRM7nETHQSqHceiBBD8",
@@ -48,6 +66,7 @@ const GLOBAL_SCORING_BUTTON_LAYOUTS_PATH = "charropro/settings/scoringButtonLayo
 const JUDGE_SESSIONS_PATH = "charropro/judges/sessions";
 const JUDGE_EVENTS_PATH = "charropro/judges/events";
 const AUDIT_PUBLISHED_SCORES_PATH = "charropro/audit/publishedScores";
+const PUBLIC_PROJECTION_OUTBOX_PATH = "charropro/projectionOutbox";
 const HISTORY_STATISTICS_PATH = "charropro/history/statistics";
 const BROADCAST_STUDIO_SESSIONS_PATH = "charropro/broadcastStudio/sessions";
 const BROADCAST_TEMPORARY_ACCESS_TYPES = new Set(["program_main", "announcer_monitor"]);
@@ -691,7 +710,7 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
   if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase" };
 
   try {
-    const now = Date.now();
+    const now = Number(options.nowMs || Date.now());
     const record = compactPublishedScore({
       ...publishedScore,
       id: publishedScore?.id || createId("publicado")
@@ -703,11 +722,35 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
     const publishedPath = `${TOURNAMENTS_PATH}/${cleanTournamentId}/publishedScores/${publishedScoreId}`;
     const auditPath = `${AUDIT_PUBLISHED_SCORES_PATH}/${cleanTournamentId}/${publishedScoreId}`;
     const livePath = `${LIVE_ROOT_PATH}/${cleanTournamentId}/current`;
-    const actorRecord = compactActor(actor);
+    const actorRecord = await resolveAuthenticatedProjectionActor(actor);
+    if (!actorRecord?.uid) {
+      return { ok: false, reason: "projection-auth-required" };
+    }
+    const projectionIntent = buildPublicProjectionIntent({
+      tournamentId: cleanTournamentId,
+      charreadaId: record.charreada?.id || "",
+      competitionId: record.competition?.id || record.charreada?.competitionId || "",
+      sourceId: publishedScoreId,
+      scoreId: cleanScoreId,
+      attemptKey: record.attemptKey,
+      sourceRevision: record.revision,
+      publishedAt: record.publishedAt,
+      total: record.total,
+      targetPath: `${PUBLIC_TOURNAMENTS_PATH}/${cleanTournamentId}`,
+      actor: actorRecord
+    }, { nowMs: now });
+    if (!projectionIntent) {
+      return { ok: false, reason: "invalid-projection-intent" };
+    }
+    const projectionOutboxPath = getFirebasePublicProjectionOutboxJobPath(
+      cleanTournamentId,
+      projectionIntent.projectionId
+    );
     const updates = {
       [scorePath]: scorePayload,
       [publishedPath]: record,
       [auditPath]: record,
+      [`${projectionOutboxPath}/intent`]: projectionIntent,
       [`${TOURNAMENTS_PATH}/${cleanTournamentId}/meta/updatedAt`]: new Date(now).toISOString(),
       [`${TOURNAMENTS_PATH}/${cleanTournamentId}/meta/updatedAtMs`]: now,
       [`${TOURNAMENTS_PATH}/${cleanTournamentId}/meta/updatedBy`]: actorRecord,
@@ -731,6 +774,7 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
     console.info("[publish-atomic-c003] score path:", scorePath);
     console.info("[publish-atomic-c003] published path:", publishedPath);
     console.info("[publish-atomic-c003] audit path:", auditPath);
+    console.info("[projection-recovery-001] outbox intent path:", `${projectionOutboxPath}/intent`);
     if (options.livePayload) console.info("[publish-atomic-c003] live path:", livePath);
 
     await update(ref(getFirebaseDatabase()), cleanUndefined(updates));
@@ -741,10 +785,38 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       auditPath,
       livePath: options.livePayload ? livePath : ""
     };
+    const recovery = await reconcileFirebasePublicProjectionOutbox(cleanTournamentId, actorRecord, {
+      projectionIds: [projectionIntent.projectionId],
+      manual: true,
+      nowMs: now,
+      jitter: options.jitter
+    });
+    const projectionJob = recovery.jobs.find((job) => job.projectionId === projectionIntent.projectionId) || {
+      projectionId: projectionIntent.projectionId,
+      status: "PENDING",
+      ok: false,
+      reason: recovery.reason || "projection-pending"
+    };
     const publicSnapshot = normalizePublicSnapshotPublicationResult(
-      await publishPublicTournamentSnapshot(cleanTournamentId, null, { source: "officialScoreAtomic" })
+      projectionJob.publicSnapshot || {
+        ok: [
+          PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+          PUBLIC_PROJECTION_STATUSES.VERIFIED
+        ].includes(projectionJob.status),
+        clientConfirmed: projectionJob.status === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+        verified: projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED,
+        authoritativelyVerified: projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED,
+        reason: projectionJob.reason || recovery.reason || "projection-pending"
+      }
     );
-    const partialFailure = publicSnapshot.ok !== true;
+    const projectionConfirmed = (
+      projectionJob.status === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED
+      && publicSnapshot.clientConfirmed === true
+    ) || (
+      projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED
+      && publicSnapshot.verified === true
+    );
+    const partialFailure = !projectionConfirmed;
     console.info("[publish-atomic-c003] multipath update exitoso", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
@@ -754,7 +826,9 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       partialFailure,
       publicSnapshotReason: partialFailure ? publicSnapshot.reason : "",
       projectionRevision: publicSnapshot.projectionRevision || 0,
-      changedSections: publicSnapshot.changedSections || []
+      changedSections: publicSnapshot.changedSections || [],
+      projectionId: projectionIntent.projectionId,
+      projectionStatus: projectionJob.status
     });
     if (partialFailure) {
       console.warn("[publish-atomic-c003] sincronizacion publica pendiente", {
@@ -762,7 +836,9 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
         scoreId: cleanScoreId,
         publishedScoreId,
         reason: publicSnapshot.reason,
-        errorCode: publicSnapshot.errorCode
+        errorCode: publicSnapshot.errorCode,
+        projectionId: projectionIntent.projectionId,
+        projectionStatus: projectionJob.status
       });
     }
     return {
@@ -771,6 +847,9 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       partialFailure,
       privateWrite,
       publicSnapshot,
+      projectionJob,
+      projectionId: projectionIntent.projectionId,
+      projectionOutboxPath,
       id: publishedScoreId,
       scorePath,
       path: publishedPath,
@@ -817,11 +896,627 @@ function normalizePublicSnapshotPublicationResult(result = {}) {
     errorMessage: ok ? "" : "No se pudo actualizar la proyección pública.",
     path: String(result?.path || "").slice(0, 300),
     source: String(result?.source || "").slice(0, 80),
+    projected: Boolean(result?.projected),
+    clientConfirmed: Boolean(result?.clientConfirmed || result?.verified),
+    verified: Boolean(result?.authoritativelyVerified),
     projectionRevision: Number.isSafeInteger(result?.projectionRevision)
       ? result.projectionRevision
       : 0,
+    targetRevision: Number.isSafeInteger(result?.targetRevision)
+      ? result.targetRevision
+      : Number.isSafeInteger(result?.projectionRevision) ? result.projectionRevision : 0,
+    sourceUpdatedAt: String(result?.sourceUpdatedAt || "").slice(0, 40),
+    targetFingerprint: String(result?.targetFingerprint || "").slice(0, 80),
     changedSections
   });
+}
+
+export function getFirebasePublicProjectionOutboxPath(tournamentId = "") {
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  return cleanTournamentId
+    ? `${PUBLIC_PROJECTION_OUTBOX_PATH}/${cleanTournamentId}`
+    : "";
+}
+
+export function getFirebasePublicProjectionOutboxJobPath(tournamentId = "", projectionId = "") {
+  const outboxPath = getFirebasePublicProjectionOutboxPath(tournamentId);
+  const cleanProjectionId = String(projectionId || "").trim();
+  if (!/^[A-Za-z0-9_-]{1,180}$/.test(cleanProjectionId)) return "";
+  return outboxPath && cleanProjectionId ? `${outboxPath}/${cleanProjectionId}` : "";
+}
+
+export async function readFirebasePublicProjectionOutbox(tournamentId = "", options = {}) {
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  const path = getFirebasePublicProjectionOutboxPath(cleanTournamentId);
+  if (!cleanTournamentId) return { ok: false, reason: "missing-tournament", path: "" };
+  if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase", path };
+  try {
+    const snapshot = await get(ref(getFirebaseDatabase(), path));
+    return {
+      ok: true,
+      path,
+      ...buildPublicProjectionOutboxSnapshot(snapshot.val() || {}, {
+        tournamentId: cleanTournamentId,
+        nowMs: options.nowMs
+      })
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      path,
+      tournamentId: cleanTournamentId,
+      reason: normalizeFirebaseFailureReason(error),
+      errorCode: sanitizeProjectionErrorCode(normalizeFirebaseFailureReason(error)),
+      errorMessage: sanitizeProjectionErrorMessage(error?.message)
+    };
+  }
+}
+
+export async function reconcileFirebasePublicProjectionOutbox(tournamentId = "", actor = {}, options = {}) {
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  if (!cleanTournamentId) return { ok: false, reason: "missing-tournament", jobs: [] };
+  if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase", jobs: [] };
+  const actorRecord = await resolveAuthenticatedProjectionActor(actor);
+  if (!actorRecord?.uid || !isAuthorizedProjectionRecoveryActor(actorRecord)) {
+    return { ok: false, reason: "projection-recovery-not-authorized", jobs: [] };
+  }
+  try {
+    return await runFirebasePublicProjectionReconciliation(cleanTournamentId, actorRecord, options);
+  } catch (error) {
+    return {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      errorCode: sanitizeProjectionErrorCode(normalizeFirebaseFailureReason(error)),
+      errorMessage: sanitizeProjectionErrorMessage(error?.message),
+      tournamentId: cleanTournamentId,
+      jobs: []
+    };
+  }
+}
+
+async function runFirebasePublicProjectionReconciliation(tournamentId, actor, options = {}) {
+  const listed = await readFirebasePublicProjectionOutbox(tournamentId, options);
+  if (!listed.ok) return { ...listed, jobs: [] };
+  const workerId = buildProjectionWorkerId(actor);
+  const superseded = await supersedeStaleFirebaseProjectionJobs(tournamentId, listed.jobs, {
+    nowMs: options.nowMs,
+    workerId,
+    actor
+  });
+  const requestedIds = new Set(
+    Array.isArray(options.projectionIds)
+      ? options.projectionIds.map(String).filter(Boolean)
+      : []
+  );
+  const candidates = listed.jobs
+    .filter((job) => !requestedIds.size || requestedIds.has(job.projectionId))
+    .sort((left, right) => left.intent.createdAtMs - right.intent.createdAtMs)
+    .slice(0, Math.max(1, Math.min(25, Number(options.limit || 10))));
+  const results = [];
+
+  for (const job of candidates) {
+    const supersededResult = superseded.get(job.projectionId);
+    if (supersededResult) {
+      results.push(supersededResult);
+      continue;
+    }
+    if ([
+      PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+      PUBLIC_PROJECTION_STATUSES.VERIFIED
+    ].includes(job.state.status)) {
+      const authoritativelyVerified = job.state.status === PUBLIC_PROJECTION_STATUSES.VERIFIED;
+      results.push({
+        ok: true,
+        projectionId: job.projectionId,
+        status: job.state.status,
+        reason: authoritativelyVerified ? "already-verified" : "already-client-confirmed",
+        publicSnapshot: {
+          ok: true,
+          projected: true,
+          clientConfirmed: !authoritativelyVerified,
+          verified: authoritativelyVerified,
+          authoritativelyVerified,
+          reason: authoritativelyVerified ? "already-verified" : "already-client-confirmed",
+          projectionRevision: job.state.targetRevision,
+          targetRevision: job.state.targetRevision,
+          targetFingerprint: job.state.targetFingerprint
+        }
+      });
+      continue;
+    }
+    if (!isPublicProjectionJobEligible(job, options)) {
+      results.push({
+        ok: false,
+        projectionId: job.projectionId,
+        status: job.state.status,
+        reason: "projection-not-eligible"
+      });
+      continue;
+    }
+    results.push(await processFirebasePublicProjectionJob(tournamentId, job, actor, {
+      ...options,
+      workerId,
+      actor
+    }));
+  }
+
+  const finalSnapshot = await readFirebasePublicProjectionOutbox(tournamentId, options);
+  const failed = results.filter((result) => (
+    result.status !== PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED &&
+    result.status !== PUBLIC_PROJECTION_STATUSES.VERIFIED &&
+    result.status !== PUBLIC_PROJECTION_STATUSES.SUPERSEDED
+  ));
+  console.info("[projection-recovery-001] reconciliation completed", {
+    tournamentId,
+    processed: results.length,
+    clientConfirmed: results.filter((result) => result.status === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED).length,
+    verified: results.filter((result) => result.status === PUBLIC_PROJECTION_STATUSES.VERIFIED).length,
+    superseded: results.filter((result) => result.status === PUBLIC_PROJECTION_STATUSES.SUPERSEDED).length,
+    pending: finalSnapshot.pending || 0,
+    retry: finalSnapshot.retry || 0,
+    deadLetter: finalSnapshot.deadLetter || 0
+  });
+  return {
+    ok: failed.length === 0,
+    reason: failed.length ? "projection-recovery-incomplete" : "projection-recovery-complete",
+    tournamentId,
+    jobs: results,
+    snapshot: finalSnapshot
+  };
+}
+
+export async function retryFirebasePublicProjectionJob(tournamentId = "", projectionId = "", actor = {}, options = {}) {
+  const actorRecord = await resolveAuthenticatedProjectionActor(actor);
+  if (!actorRecord?.uid || !isAuthorizedProjectionRecoveryActor(actorRecord)) {
+    return { ok: false, reason: "projection-recovery-not-authorized" };
+  }
+  const path = getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId);
+  if (!path) return { ok: false, reason: "invalid-projection-job" };
+  const statePath = `${path}/state`;
+  let resetState = null;
+  try {
+    const transaction = await runTransaction(ref(getFirebaseDatabase(), statePath), (current) => {
+      const state = normalizePublicProjectionState(current || {});
+      if ([
+        PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+        PUBLIC_PROJECTION_STATUSES.VERIFIED,
+        PUBLIC_PROJECTION_STATUSES.SUPERSEDED,
+        PUBLIC_PROJECTION_STATUSES.CANCELLED
+      ].includes(state.status)) {
+        return undefined;
+      }
+      resetState = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PENDING, state, {
+        nextRetryAt: "",
+        nextRetryAtMs: 0,
+        lastErrorCode: "",
+        lastErrorMessage: "",
+        deadLetterReason: "",
+        retriedBy: actorRecord,
+        updatedBy: actorRecord
+      }, { nowMs: options.nowMs, force: true });
+      return resetState || undefined;
+    }, { applyLocally: false });
+    if (!transaction.committed || !resetState) {
+      return { ok: false, reason: "projection-retry-not-allowed", projectionId };
+    }
+    return reconcileFirebasePublicProjectionOutbox(tournamentId, actorRecord, {
+      ...options,
+      manual: true,
+      projectionIds: [projectionId]
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      errorMessage: sanitizeProjectionErrorMessage(error?.message),
+      projectionId
+    };
+  }
+}
+
+export async function retryAllFirebasePublicProjectionJobs(tournamentId = "", actor = {}, options = {}) {
+  const actorRecord = await resolveAuthenticatedProjectionActor(actor);
+  if (!actorRecord?.uid || !isAuthorizedProjectionRecoveryActor(actorRecord)) {
+    return { ok: false, reason: "projection-recovery-not-authorized", jobs: [] };
+  }
+  const listed = await readFirebasePublicProjectionOutbox(tournamentId, options);
+  if (!listed.ok) return { ...listed, jobs: [] };
+  const retryable = listed.jobs
+    .filter((job) => [
+      PUBLIC_PROJECTION_STATUSES.PENDING,
+      PUBLIC_PROJECTION_STATUSES.RETRY_WAIT,
+      PUBLIC_PROJECTION_STATUSES.FAILED,
+      PUBLIC_PROJECTION_STATUSES.DEAD_LETTER
+    ].includes(job.state.status))
+    .slice(0, Math.max(1, Math.min(25, Number(options.limit || 10))));
+  const resetResults = [];
+  for (const job of retryable) {
+    const path = `${getFirebasePublicProjectionOutboxJobPath(tournamentId, job.projectionId)}/state`;
+    let nextState = null;
+    const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (current) => {
+      const state = normalizePublicProjectionState(current || {}, job.intent);
+      nextState = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PENDING, state, {
+        nextRetryAt: "",
+        nextRetryAtMs: 0,
+        lastErrorCode: "",
+        lastErrorMessage: "",
+        deadLetterReason: "",
+        retriedBy: actorRecord,
+        updatedBy: actorRecord
+      }, { nowMs: options.nowMs, force: true });
+      return nextState || undefined;
+    }, { applyLocally: false });
+    resetResults.push({ projectionId: job.projectionId, reset: transaction.committed });
+  }
+  const reconciliation = await reconcileFirebasePublicProjectionOutbox(tournamentId, actorRecord, {
+    ...options,
+    manual: true,
+    projectionIds: retryable.map((job) => job.projectionId)
+  });
+  return { ...reconciliation, resetResults };
+}
+
+export async function verifyFirebasePublicProjectionJob(tournamentId = "", projectionId = "", actor = {}, options = {}) {
+  const actorRecord = await resolveAuthenticatedProjectionActor(actor);
+  if (!actorRecord?.uid || !isAuthorizedProjectionRecoveryActor(actorRecord)) {
+    return { ok: false, reason: "projection-recovery-not-authorized" };
+  }
+  const jobPath = getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId);
+  if (!jobPath) return { ok: false, reason: "invalid-projection-job" };
+  try {
+    const [jobSnapshot, tournamentSnapshot, liveSnapshot, targetSnapshot] = await Promise.all([
+      get(ref(getFirebaseDatabase(), jobPath)),
+      get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${normalizeLiveChannel(tournamentId)}`)),
+      get(ref(getFirebaseDatabase(), `${LIVE_ROOT_PATH}/${normalizeLiveChannel(tournamentId)}/current`)),
+      get(ref(getFirebaseDatabase(), `${PUBLIC_TOURNAMENTS_PATH}/${normalizeLiveChannel(tournamentId)}`))
+    ]);
+    const job = normalizePublicProjectionJob(jobSnapshot.val() || {});
+    if (!job) return { ok: false, reason: "invalid-projection-intent", projectionId };
+    const source = tournamentSnapshot.val() || null;
+    if (!source) return { ok: false, reason: "missing-projection-source", projectionId };
+    const candidate = buildPublicProjection({
+      tournament: source,
+      liveCurrent: liveSnapshot.val() || {}
+    }, {
+      tournamentId: normalizeLiveChannel(tournamentId),
+      nowMs: options.nowMs
+    });
+    const current = targetSnapshot.val() || null;
+    const reconciliation = reconcilePublicProjection(current, candidate, { nowMs: options.nowMs });
+    const converged = reconciliation.ok === true && reconciliation.changed === false;
+    if (!converged) {
+      return {
+        ok: false,
+        clientConfirmed: false,
+        reason: reconciliation.reason || "public-projection-not-verified",
+        projectionId,
+        status: job.state.status
+      };
+    }
+    const fingerprint = getPublicProjectionSignature(current);
+    return {
+      ok: true,
+      clientConfirmed: true,
+      authoritativelyVerified: false,
+      reason: "client-readback-confirmed",
+      projectionId,
+      status: job.state.status,
+      targetRevision: Number(current.projectionRevision || 0),
+      targetFingerprint: fingerprint
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      errorMessage: sanitizeProjectionErrorMessage(error?.message),
+      projectionId
+    };
+  }
+}
+
+async function processFirebasePublicProjectionJob(tournamentId, inputJob, actor, options = {}) {
+  const job = normalizePublicProjectionJob(inputJob);
+  if (!job) {
+    return { ok: false, projectionId: "", status: "DEAD_LETTER", reason: "invalid-projection-intent" };
+  }
+  const projectionId = job.projectionId;
+  const claimed = await claimFirebaseProjectionJob(tournamentId, job, {
+    ...options,
+    actor
+  });
+  if (!claimed) {
+    return {
+      ok: false,
+      projectionId,
+      status: job.state.status,
+      reason: "projection-claim-not-acquired"
+    };
+  }
+  if (claimed.status === PUBLIC_PROJECTION_STATUSES.DEAD_LETTER) {
+    return {
+      ok: false,
+      projectionId,
+      status: claimed.status,
+      reason: claimed.deadLetterReason || "attempts-exhausted"
+    };
+  }
+
+  try {
+    const sourceSnapshot = await get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${tournamentId}`));
+    const source = sourceSnapshot.val() || null;
+    if (!source) {
+      return failFirebaseProjectionJob(tournamentId, job, claimed, {
+        reason: "missing-projection-source",
+        message: "No existe la fuente oficial del torneo."
+      }, options);
+    }
+    const sourceCheck = inspectProjectionSource(job, source.publishedScores);
+    if (!sourceCheck.ok && sourceCheck.supersededBy) {
+      const state = await transitionFirebaseProjectionState(
+        tournamentId,
+        projectionId,
+        PUBLIC_PROJECTION_STATUSES.SUPERSEDED,
+        { supersededBy: sourceCheck.supersededBy },
+        { ...options, actor }
+      );
+      return {
+        ok: true,
+        projectionId,
+        status: state?.status || PUBLIC_PROJECTION_STATUSES.SUPERSEDED,
+        reason: "projection-superseded",
+        supersededBy: sourceCheck.supersededBy
+      };
+    }
+    if (!sourceCheck.ok) {
+      return failFirebaseProjectionJob(tournamentId, job, claimed, {
+        reason: sourceCheck.reason,
+        message: sourceCheck.message
+      }, options);
+    }
+
+    const publicSnapshot = normalizePublicSnapshotPublicationResult(
+      await publishPublicTournamentSnapshot(tournamentId, source, {
+        source: "projectionOutbox",
+        nowMs: options.nowMs
+      })
+    );
+    let latestState = claimed;
+    if (publicSnapshot.projected) {
+      latestState = await transitionFirebaseProjectionState(
+        tournamentId,
+        projectionId,
+        PUBLIC_PROJECTION_STATUSES.PROJECTED,
+        {
+          projectedAt: new Date(Number(options.nowMs || Date.now())).toISOString(),
+          targetRevision: publicSnapshot.targetRevision || publicSnapshot.projectionRevision,
+          targetFingerprint: publicSnapshot.targetFingerprint
+        },
+        { ...options, actor }
+      ) || latestState;
+    }
+    if (publicSnapshot.ok && publicSnapshot.clientConfirmed) {
+      const clientConfirmedState = await transitionFirebaseProjectionState(
+        tournamentId,
+        projectionId,
+        PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+        {
+          clientConfirmedAt: new Date(Number(options.nowMs || Date.now())).toISOString(),
+          targetRevision: publicSnapshot.targetRevision || publicSnapshot.projectionRevision,
+          targetFingerprint: publicSnapshot.targetFingerprint
+        },
+        { ...options, actor }
+      );
+      if (!clientConfirmedState) {
+        return {
+          ok: false,
+          projectionId,
+          status: latestState.status,
+          reason: "projection-verification-state-conflict",
+          publicSnapshot
+        };
+      }
+      return {
+        ok: true,
+        projectionId,
+        status: clientConfirmedState.status,
+        reason: "projection-client-confirmed",
+        attempts: clientConfirmedState.attempts,
+        publicSnapshot
+      };
+    }
+    return failFirebaseProjectionJob(tournamentId, job, latestState, {
+      reason: publicSnapshot.reason || "public-projection-not-verified",
+      message: publicSnapshot.errorMessage || "No se pudo verificar la proyección pública."
+    }, {
+      ...options,
+      publicSnapshot
+    });
+  } catch (error) {
+    return failFirebaseProjectionJob(tournamentId, job, claimed, error, options);
+  }
+}
+
+async function claimFirebaseProjectionJob(tournamentId, job, options = {}) {
+  const statePath = `${getFirebasePublicProjectionOutboxJobPath(tournamentId, job.projectionId)}/state`;
+  let claimed = null;
+  const transaction = await runTransaction(ref(getFirebaseDatabase(), statePath), (current) => {
+    claimed = claimPublicProjectionState(current || job.state, {
+      nowMs: options.nowMs,
+      manual: options.manual,
+      maxAttempts: options.maxAttempts || PUBLIC_PROJECTION_MAX_ATTEMPTS,
+      leaseMs: options.leaseMs || PUBLIC_PROJECTION_LEASE_MS,
+      leaseOwner: options.workerId,
+      actor: options.actor
+    });
+    return claimed || undefined;
+  }, { applyLocally: false });
+  return transaction.committed ? normalizePublicProjectionState(transaction.snapshot.val() || claimed, job.intent) : null;
+}
+
+async function failFirebaseProjectionJob(tournamentId, job, previousState, error, options = {}) {
+  const failureState = buildPublicProjectionFailureState(previousState, error, {
+    nowMs: options.nowMs,
+    maxAttempts: options.maxAttempts || PUBLIC_PROJECTION_MAX_ATTEMPTS,
+    jitter: options.jitter,
+    seed: job.projectionId,
+    actor: options.actor
+  });
+  const state = await setFirebaseProjectionState(tournamentId, job.projectionId, failureState, options);
+  console.warn("[projection-recovery-001] projection pending", {
+    tournamentId,
+    projectionId: job.projectionId,
+    status: state?.status || failureState.status,
+    attempts: state?.attempts || failureState.attempts,
+    nextRetryAt: state?.nextRetryAt || failureState.nextRetryAt,
+    reason: state?.lastErrorCode || failureState.lastErrorCode
+  });
+  return {
+    ok: false,
+    projectionId: job.projectionId,
+    status: state?.status || failureState.status,
+    reason: state?.lastErrorCode || failureState.lastErrorCode,
+    attempts: state?.attempts || failureState.attempts,
+    nextRetryAt: state?.nextRetryAt || failureState.nextRetryAt,
+    publicSnapshot: options.publicSnapshot || null
+  };
+}
+
+async function supersedeStaleFirebaseProjectionJobs(tournamentId, jobs = [], options = {}) {
+  const latestByAttempt = new Map();
+  for (const job of jobs) {
+    const key = `${job.intent.projectionType}|${job.intent.attemptKey}`;
+    const latest = latestByAttempt.get(key);
+    if (!latest || comparePublicProjectionJobs(job, latest) > 0) latestByAttempt.set(key, job);
+  }
+  const results = new Map();
+  for (const job of jobs) {
+    const key = `${job.intent.projectionType}|${job.intent.attemptKey}`;
+    const latest = latestByAttempt.get(key);
+    if (!latest || latest.projectionId === job.projectionId) continue;
+    if ([
+      PUBLIC_PROJECTION_STATUSES.SUPERSEDED,
+      PUBLIC_PROJECTION_STATUSES.CANCELLED
+    ].includes(job.state.status)) continue;
+    const state = await transitionFirebaseProjectionState(
+      tournamentId,
+      job.projectionId,
+      PUBLIC_PROJECTION_STATUSES.SUPERSEDED,
+      { supersededBy: latest.projectionId },
+      options
+    );
+    if (state) {
+      results.set(job.projectionId, {
+        ok: true,
+        projectionId: job.projectionId,
+        status: state.status,
+        reason: "projection-superseded",
+        supersededBy: latest.projectionId
+      });
+    }
+  }
+  return results;
+}
+
+async function transitionFirebaseProjectionState(tournamentId, projectionId, status, patch = {}, options = {}) {
+  const path = `${getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId)}/state`;
+  let nextState = null;
+  const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (current) => {
+    nextState = buildPublicProjectionState(status, current || {}, {
+      ...patch,
+      updatedBy: options.actor
+    }, {
+      nowMs: options.nowMs,
+      force: options.force,
+      authority: options.authority
+    });
+    return nextState || undefined;
+  }, { applyLocally: false });
+  return transaction.committed
+    ? normalizePublicProjectionState(transaction.snapshot.val() || nextState)
+    : null;
+}
+
+async function setFirebaseProjectionState(tournamentId, projectionId, state, options = {}) {
+  if (!state) return null;
+  const path = `${getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId)}/state`;
+  let nextState = null;
+  const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (current) => {
+    const normalized = normalizePublicProjectionState(current || {});
+    if ([
+      PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+      PUBLIC_PROJECTION_STATUSES.VERIFIED,
+      PUBLIC_PROJECTION_STATUSES.SUPERSEDED,
+      PUBLIC_PROJECTION_STATUSES.CANCELLED
+    ].includes(normalized.status)) {
+      return undefined;
+    }
+    nextState = buildPublicProjectionState(state.status, normalized, {
+      ...state,
+      updatedBy: options.actor
+    }, {
+      nowMs: options.nowMs
+    });
+    return nextState || undefined;
+  }, { applyLocally: false });
+  return transaction.committed
+    ? normalizePublicProjectionState(transaction.snapshot.val() || nextState)
+    : null;
+}
+
+function inspectProjectionSource(job, value) {
+  const records = Object.entries(value || {})
+    .map(([key, record]) => ({ ...(record || {}), id: record?.id || key }))
+    .filter((record) => record && typeof record === "object")
+    .filter((record) => String(record.attemptKey || "") === job.intent.attemptKey)
+    .sort(compareProjectionSourceRecords);
+  const source = records.find((record) => String(record.id || "") === job.intent.sourceId);
+  if (!source) {
+    return {
+      ok: false,
+      reason: "missing-projection-source",
+      message: "No existe el publishedScore asociado al trabajo."
+    };
+  }
+  const latest = records.at(-1) || source;
+  if (
+    String(latest.id || "") !== job.intent.sourceId ||
+    source.superseded === true ||
+    String(source.supersededBy || "")
+  ) {
+    return {
+      ok: false,
+      reason: "projection-superseded",
+      supersededBy: String(latest.id || source.supersededBy || "")
+    };
+  }
+  if (Number(source.revision || 1) !== job.intent.sourceRevision) {
+    return {
+      ok: false,
+      reason: "projection-source-mismatch",
+      message: "La revisión de la fuente no coincide con la intención durable."
+    };
+  }
+  return { ok: true, source };
+}
+
+function compareProjectionSourceRecords(left, right) {
+  return (
+    Number(left?.revision || 1) - Number(right?.revision || 1) ||
+    (Date.parse(left?.publishedAt || "") || 0) - (Date.parse(right?.publishedAt || "") || 0) ||
+    String(left?.id || "").localeCompare(String(right?.id || ""))
+  );
+}
+
+function isAuthorizedProjectionRecoveryActor(actor = {}) {
+  return ["supervisor", "operador", "juez"].includes(normalizeRole(actor.role));
+}
+
+function buildProjectionWorkerId(actor = {}) {
+  return [
+    String(actor.clientId || "").trim(),
+    String(actor.uid || actor.id || "").trim(),
+    normalizeRole(actor.role)
+  ].filter(Boolean).join(":").slice(0, 180) || "projection-worker";
 }
 
 export async function readFirebaseActiveCharreadaSnapshot(tournamentId) {
@@ -1488,6 +2183,8 @@ export async function publishPublicTournamentSnapshot(tournamentId, tournamentSt
   if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase" };
 
   const path = `${PUBLIC_TOURNAMENTS_PATH}/${cleanTournamentId}`;
+  let projected = false;
+  let projectedRevision = 0;
   try {
     let source = tournamentState;
     if (!source) {
@@ -1528,6 +2225,26 @@ export async function publishPublicTournamentSnapshot(tournamentId, tournamentSt
     if (!validation.valid) {
       return { ok: false, reason: "invalid-public-projection", errors: validation.errors, path };
     }
+    projected = true;
+    projectedRevision = Number(projection.projectionRevision || 0);
+    const confirmationSnapshot = await get(ref(getFirebaseDatabase(), path));
+    const confirmation = confirmationSnapshot.val() || null;
+    const verification = verifyPublicProjectionConfirmation(projection, confirmation, cleanTournamentId);
+    if (!verification.ok) {
+      return {
+        ok: false,
+        projected: true,
+        clientConfirmed: false,
+        verified: false,
+        reason: verification.reason,
+        path,
+        source: options.source || "",
+        projectionRevision: projectedRevision,
+        targetRevision: verification.targetRevision,
+        sourceUpdatedAt: projection.sourceUpdatedAt || "",
+        targetFingerprint: verification.targetFingerprint
+      };
+    }
     if (transaction.committed) publicSnapshotSetCount += 1;
     console.info("[public-foundation-001] projection publication", {
       tournamentId: cleanTournamentId,
@@ -1539,11 +2256,18 @@ export async function publishPublicTournamentSnapshot(tournamentId, tournamentSt
     });
     return {
       ok: true,
+      projected: true,
+      clientConfirmed: true,
+      verified: false,
+      verificationAuthority: "client-readback",
       skipped: !transaction.committed,
       reason: reconciliation?.reason || (transaction.committed ? "updated" : "unchanged"),
       path,
       source: options.source || "",
       projectionRevision: projection.projectionRevision,
+      targetRevision: verification.targetRevision,
+      sourceUpdatedAt: confirmation.sourceUpdatedAt || projection.sourceUpdatedAt || "",
+      targetFingerprint: verification.targetFingerprint,
       changedSections: reconciliation?.changedSections || []
     };
   } catch (error) {
@@ -1552,8 +2276,53 @@ export async function publishPublicTournamentSnapshot(tournamentId, tournamentSt
       source: options.source || "",
       reason: normalizeFirebaseFailureReason(error)
     });
-    return { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }), path };
+    return {
+      ok: false,
+      projected,
+      verified: false,
+      projectionRevision: projectedRevision,
+      reason: normalizeFirebaseFailureReason(error),
+      detail: normalizeErrorDetail({ error }),
+      path
+    };
   }
+}
+
+function verifyPublicProjectionConfirmation(expected, actual, tournamentId) {
+  const validation = actual
+    ? validatePublicProjection(actual)
+    : { valid: false, errors: ["missing-projection"] };
+  if (!validation.valid) {
+    return {
+      ok: false,
+      reason: "public-projection-not-verified",
+      targetRevision: Number(actual?.projectionRevision || 0),
+      targetFingerprint: ""
+    };
+  }
+  if (String(actual.metadata?.tournamentId || "") !== String(tournamentId || "")) {
+    return {
+      ok: false,
+      reason: "projection-source-mismatch",
+      targetRevision: Number(actual.projectionRevision || 0),
+      targetFingerprint: ""
+    };
+  }
+  const expectedFingerprint = getPublicProjectionSignature(expected);
+  const targetFingerprint = getPublicProjectionSignature(actual);
+  const expectedRevision = Number(expected?.projectionRevision || 0);
+  const targetRevision = Number(actual?.projectionRevision || 0);
+  const expectedSourceMs = Date.parse(expected?.sourceUpdatedAt || "") || 0;
+  const targetSourceMs = Date.parse(actual?.sourceUpdatedAt || "") || 0;
+  const exact = expectedFingerprint === targetFingerprint && targetRevision >= expectedRevision;
+  const newer = targetRevision > expectedRevision && targetSourceMs >= expectedSourceMs;
+  return {
+    ok: exact || newer,
+    reason: exact ? "verified" : newer ? "verified-newer-projection" : "public-projection-not-verified",
+    expectedFingerprint,
+    targetFingerprint,
+    targetRevision
+  };
 }
 
 function normalizePublicTournamentState(tournamentState = {}) {
@@ -3213,6 +3982,17 @@ function getFirebaseAuth() {
   if (!appInstance) appInstance = getApps()[0] || initializeApp(FIREBASE_CONFIG);
   if (!authInstance) authInstance = getAuth(appInstance);
   return authInstance;
+}
+
+async function resolveAuthenticatedProjectionActor(actor = {}) {
+  const auth = getFirebaseAuth();
+  if (typeof auth.authStateReady === "function") await auth.authStateReady();
+  const uid = String(auth.currentUser?.uid || "").trim();
+  if (!uid) return null;
+  return sanitizeProjectionActor({
+    ...actor,
+    uid
+  });
 }
 
 async function getFirebaseBroadcastAuthenticatedUser() {

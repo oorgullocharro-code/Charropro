@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260728-app-supervisor-navigation-recovery-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260729-public-projection-recovery-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -56,7 +56,11 @@ import {
   publishFirebaseTournamentState,
   readFirebaseActiveCharreadaSnapshot,
   readFirebasePreparationSnapshot,
+  readFirebasePublicProjectionOutbox,
   readFirebaseTournamentSafetySnapshot,
+  reconcileFirebasePublicProjectionOutbox,
+  retryAllFirebasePublicProjectionJobs,
+  retryFirebasePublicProjectionJob,
   saveFirebaseAuthUserProfile,
   saveFirebaseUserProfile,
   publishFirebaseTimer,
@@ -70,8 +74,9 @@ import {
   subscribeFirebaseStatHistory,
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
-  subscribeFirebaseUsers
-} from "./core/firebaseSync.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
+  subscribeFirebaseUsers,
+  verifyFirebasePublicProjectionJob
+} from "./core/firebaseSync.js?v=20260729-public-projection-recovery-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -258,6 +263,7 @@ const READ_ACTIONS = new Set([
   "export-json",
   "create-full-backup",
   "clear-recovery-history",
+  "refresh-public-projection-backlog",
   "clear-local-cache",
   "prepare-clear-cache",
   "prepare-sync",
@@ -321,6 +327,9 @@ const ACTION_CAPABILITIES = {
   "reset-rule-editor": "rules",
   "save-settings": "settings",
   "create-full-backup": "settings",
+  "retry-public-projection": "sync",
+  "retry-all-public-projections": "sync",
+  "verify-public-projection": "sync",
   "new-user-profile": "users",
   "edit-user-profile": "users",
   "save-user-profile": "users",
@@ -589,6 +598,21 @@ let firebaseAccessUnsubscribe = null;
 let firebaseAppStateTimer = null;
 let firebaseUsersUnsubscribe = null;
 let firebaseStatHistoryUnsubscribe = null;
+let publicProjectionRecoveryTimer = null;
+let publicProjectionRecoveryTimeout = null;
+let publicProjectionRecoveryTournamentId = "";
+let publicProjectionRecoveryInFlight = false;
+let publicProjectionRecoverySnapshot = {
+  ok: true,
+  tournamentId: "",
+  total: 0,
+  pending: 0,
+  retry: 0,
+  deadLetter: 0,
+  clientConfirmed: 0,
+  verified: 0,
+  jobs: []
+};
 let applyingRemoteAppState = false;
 let suppressNextSharedAppStatePublish = false;
 let isScoringDirty = false;
@@ -601,7 +625,8 @@ let lastScoreSaveStatus = {
   label: "Conectado",
   detail: "",
   savedAtMs: 0,
-  scoreId: ""
+  scoreId: "",
+  projectionId: ""
 };
 let lastRemoteAppStateAt = 0;
 let lastRemoteTournamentStateAt = 0;
@@ -1425,6 +1450,7 @@ function subscribeFirebaseAccess() {
       startFirebaseUsersSubscription();
       startFirebaseStatHistorySubscription();
       subscribeGlobalScoringButtonLayoutUpdates();
+      configurePublicProjectionRecovery();
     }
     if (isPreparationComplete() && isSupervisorPortalAccess(firebaseAccess) && !portalEntryRouteApplied) {
       if (routeUserAfterLogin(firebaseAccess)) return;
@@ -1541,6 +1567,7 @@ async function signInAccess() {
     startFirebaseUsersSubscription();
     startFirebaseStatHistorySubscription();
     subscribeGlobalScoringButtonLayoutUpdates();
+    configurePublicProjectionRecovery();
     if (routeUserAfterLogin(firebaseAccess)) return;
   }
   render({ preserveScoringScroll: state.view === "scoring" });
@@ -1573,6 +1600,7 @@ async function signOutAccess() {
   firebaseUsersUnsubscribe = null;
   firebaseStatHistoryUnsubscribe = null;
   globalScoringLayoutsUnsubscribe = null;
+  stopPublicProjectionRecovery();
   firebaseUsers = [];
   showToast("Sesion cerrada.");
   render({ preserveScoringScroll: state.view === "scoring" });
@@ -1609,7 +1637,10 @@ function logJudgeScore(message, detail) {
 function setScoreSaveStatus(next = {}) {
   lastScoreSaveStatus = {
     ...lastScoreSaveStatus,
-    ...next
+    ...next,
+    projectionId: Object.prototype.hasOwnProperty.call(next, "projectionId")
+      ? next.projectionId
+      : next.state === "saving" ? "" : lastScoreSaveStatus.projectionId
   };
 }
 
@@ -1619,7 +1650,8 @@ function resetScoreSaveStatusForDraft() {
     label: "Conectado",
     detail: "",
     savedAtMs: 0,
-    scoreId: ""
+    scoreId: "",
+    projectionId: ""
   });
 }
 
@@ -1642,6 +1674,159 @@ function isPermissionFailure(result = {}) {
 
 function setLastFirebaseError(reason = "", detail = "") {
   lastFirebaseError = reason ? `${reason}${detail ? ` / ${detail}` : ""}` : "";
+}
+
+function getPublicProjectionRecoveryTournamentId() {
+  return IS_TOURNAMENT_APP
+    ? getTournamentContext().tournamentId || state.activeTournamentId || ""
+    : state.activeTournamentId || "";
+}
+
+function configurePublicProjectionRecovery() {
+  const tournamentId = getPublicProjectionRecoveryTournamentId();
+  if (!isActiveAccessSession(firebaseAccess) || !tournamentId) {
+    stopPublicProjectionRecovery();
+    return;
+  }
+  if (
+    publicProjectionRecoveryTournamentId === tournamentId &&
+    publicProjectionRecoveryTimer
+  ) {
+    return;
+  }
+  stopPublicProjectionRecovery();
+  publicProjectionRecoveryTournamentId = tournamentId;
+  void refreshPublicProjectionRecoverySnapshot({ renderAfter: state.view === "recovery" });
+  if (!roleCan(firebaseAccess.role, "sync")) return;
+  schedulePublicProjectionRecovery(250);
+  publicProjectionRecoveryTimer = window.setInterval(() => {
+    void runPublicProjectionRecovery({ source: "interval" });
+  }, 30000);
+}
+
+function stopPublicProjectionRecovery() {
+  if (publicProjectionRecoveryTimer) window.clearInterval(publicProjectionRecoveryTimer);
+  if (publicProjectionRecoveryTimeout) window.clearTimeout(publicProjectionRecoveryTimeout);
+  publicProjectionRecoveryTimer = null;
+  publicProjectionRecoveryTimeout = null;
+  publicProjectionRecoveryTournamentId = "";
+  publicProjectionRecoveryInFlight = false;
+}
+
+function schedulePublicProjectionRecovery(delay = 1000) {
+  if (!roleCan(firebaseAccess.role, "sync")) return;
+  if (publicProjectionRecoveryTimeout) window.clearTimeout(publicProjectionRecoveryTimeout);
+  publicProjectionRecoveryTimeout = window.setTimeout(() => {
+    publicProjectionRecoveryTimeout = null;
+    void runPublicProjectionRecovery({ source: "scheduled" });
+  }, Math.max(0, Number(delay || 0)));
+}
+
+async function refreshPublicProjectionRecoverySnapshot({ renderAfter = true } = {}) {
+  const tournamentId = getPublicProjectionRecoveryTournamentId();
+  if (!tournamentId || !isActiveAccessSession(firebaseAccess)) return null;
+  const snapshot = await readFirebasePublicProjectionOutbox(tournamentId);
+  publicProjectionRecoverySnapshot = snapshot.ok
+    ? snapshot
+    : {
+      ...publicProjectionRecoverySnapshot,
+      ok: false,
+      tournamentId,
+      reason: snapshot.reason || "projection-backlog-unavailable"
+    };
+  if (renderAfter && state.view === "recovery") render();
+  return publicProjectionRecoverySnapshot;
+}
+
+async function runPublicProjectionRecovery(options = {}) {
+  const tournamentId = getPublicProjectionRecoveryTournamentId();
+  if (
+    publicProjectionRecoveryInFlight ||
+    !tournamentId ||
+    !isActiveAccessSession(firebaseAccess) ||
+    !roleCan(firebaseAccess.role, "sync")
+  ) {
+    return { ok: false, reason: "projection-recovery-not-ready" };
+  }
+  publicProjectionRecoveryInFlight = true;
+  try {
+    const result = await reconcileFirebasePublicProjectionOutbox(
+      tournamentId,
+      getAccessActor(),
+      { limit: 10 }
+    );
+    if (result.snapshot?.ok) publicProjectionRecoverySnapshot = result.snapshot;
+    else await refreshPublicProjectionRecoverySnapshot({ renderAfter: false });
+    const recovered = (result.jobs || []).find((job) => (
+      ["CLIENT_CONFIRMED", "VERIFIED"].includes(job.status) &&
+      job.projectionId === lastScoreSaveStatus.projectionId
+    ));
+    if (recovered) {
+      setScoreSaveStatus({
+        state: "saved",
+        label: "Publicado; confirmación cliente",
+        detail: "La lectura del cliente confirma que el Portal Público coincide con el score oficial.",
+        savedAtMs: Date.now()
+      });
+      showToast("La proyección pública pendiente fue recuperada y confirmada por lectura cliente.");
+    }
+    console.info("[projection-recovery-001] automatic reconciliation", {
+      tournamentId,
+      source: options.source || "manual",
+      ok: result.ok,
+      pending: publicProjectionRecoverySnapshot.pending || 0,
+      retry: publicProjectionRecoverySnapshot.retry || 0,
+      deadLetter: publicProjectionRecoverySnapshot.deadLetter || 0
+    });
+    if (state.view === "recovery" || recovered && state.view === "scoring") {
+      render({ preserveScoringScroll: state.view === "scoring" });
+    }
+    return result;
+  } finally {
+    publicProjectionRecoveryInFlight = false;
+  }
+}
+
+async function retryPublicProjectionJob(projectionId = "") {
+  const tournamentId = getPublicProjectionRecoveryTournamentId();
+  if (!tournamentId || !projectionId) return;
+  const result = await retryFirebasePublicProjectionJob(
+    tournamentId,
+    projectionId,
+    getAccessActor()
+  );
+  if (!result.ok) showToast("La reparación no pudo completarse; el trabajo conserva su diagnóstico.");
+  else showToast("Proyección pública reparada y confirmada por lectura cliente.");
+  await refreshPublicProjectionRecoverySnapshot();
+}
+
+async function retryAllPublicProjectionJobs() {
+  const tournamentId = getPublicProjectionRecoveryTournamentId();
+  if (!tournamentId) return;
+  const result = await retryAllFirebasePublicProjectionJobs(
+    tournamentId,
+    getAccessActor(),
+    { limit: 10 }
+  );
+  if (!result.ok) showToast("Algunas proyecciones siguen pendientes o requieren intervención.");
+  else showToast("Las proyecciones elegibles quedaron confirmadas por lectura cliente.");
+  await refreshPublicProjectionRecoverySnapshot();
+}
+
+async function verifyPublicProjectionJob(projectionId = "") {
+  const tournamentId = getPublicProjectionRecoveryTournamentId();
+  if (!tournamentId || !projectionId) return;
+  const result = await verifyFirebasePublicProjectionJob(
+    tournamentId,
+    projectionId,
+    getAccessActor()
+  );
+  showToast(
+    result.clientConfirmed
+      ? "La lectura cliente confirma que el destino público coincide."
+      : "La proyección pública aún no coincide según el diagnóstico."
+  );
+  await refreshPublicProjectionRecoverySnapshot();
 }
 
 function formatDeleteTournamentError(result = {}) {
@@ -1831,6 +2016,7 @@ async function prepareSyncWithCharroPro() {
   subscribeExternalTimerControl();
   subscribeGlobalRuleOverridesUpdates();
   subscribeGlobalScoringButtonLayoutUpdates();
+  configurePublicProjectionRecovery();
   closeModal();
   console.info("[prepare-22C] ready", { tournamentId: state.activeTournamentId || "" });
   showToast("CharroPro sincronizado correctamente.");
@@ -1891,6 +2077,7 @@ function routeUserAfterLogin(profile = firebaseAccess) {
     state.activeTournamentId = tournamentId;
     state.view = "dashboard";
     saveState({ silent: true });
+    configurePublicProjectionRecovery();
     render();
     return true;
   }
@@ -6055,6 +6242,7 @@ function renderRecoveryCenterCard({ compact = false } = {}) {
           <button class="button" disabled>Restaurar respaldo — Proximamente</button>
         </div>
         ${renderRecoveryHealthPanel(tournamentId, summary)}
+        ${renderPublicProjectionRecoveryPanel(tournamentId)}
         ${renderRecoveryBackupHistory(tournamentId)}
       </div>
     </article>
@@ -6092,6 +6280,76 @@ function renderRecoveryHealthIndicator(indicator = {}) {
       <div>
         <strong>${escapeHTML(indicator.title)}</strong>
         <p>${escapeHTML(indicator.message)}</p>
+      </div>
+    </article>
+  `;
+}
+
+function renderPublicProjectionRecoveryPanel(tournamentId = "") {
+  const snapshot = publicProjectionRecoverySnapshot.tournamentId === tournamentId
+    ? publicProjectionRecoverySnapshot
+    : null;
+  const jobs = Array.isArray(snapshot?.jobs) ? snapshot.jobs.slice(0, 10) : [];
+  const canRepair = roleCan(firebaseAccess.role, "sync");
+  const attentionCount = Number(snapshot?.pending || 0) + Number(snapshot?.retry || 0) + Number(snapshot?.deadLetter || 0);
+  const projectedCount = Number(snapshot?.counts?.PROJECTED || 0);
+  const clientConfirmedCount = Number(snapshot?.clientConfirmed || 0);
+  const authorityPendingCount = projectedCount + clientConfirmedCount;
+  return html`
+    <section class="recovery-history">
+      <div class="recovery-history-header">
+        <div>
+          <h3>Proyección pública</h3>
+          <p class="card-subtitle">Estado durable de publicación hacia Portal Público y Live Feed.</p>
+        </div>
+        <div class="topbar-actions compact-actions">
+          <button class="button small" data-action="refresh-public-projection-backlog">Actualizar</button>
+          <button class="button small" data-action="retry-all-public-projections" ${canRepair && attentionCount ? "" : "disabled"}>Reintentar elegibles</button>
+        </div>
+      </div>
+      ${snapshot
+        ? html`
+          <div class="recovery-summary-grid">
+            <div class="stat"><span>Pendientes</span><strong>${Number(snapshot.pending || 0)}</strong></div>
+            <div class="stat"><span>En espera</span><strong>${Number(snapshot.retry || 0)}</strong></div>
+            <div class="stat"><span>Intervención</span><strong>${Number(snapshot.deadLetter || 0)}</strong></div>
+            <div class="stat"><span>Proyección escrita</span><strong>${projectedCount + clientConfirmedCount + Number(snapshot.verified || 0)}</strong></div>
+            <div class="stat"><span>Confirmados por cliente</span><strong>${clientConfirmedCount}</strong></div>
+            <div class="stat"><span>Verificación autoritativa pendiente</span><strong>${authorityPendingCount}</strong></div>
+            <div class="stat"><span>Verificados por autoridad</span><strong>${Number(snapshot.verified || 0)}</strong></div>
+          </div>
+          ${jobs.length
+            ? html`<div class="recovery-history-list">${jobs.map((job) => renderPublicProjectionRecoveryJob(job, canRepair)).join("")}</div>`
+            : html`<div class="empty compact">No existen trabajos de proyección para este torneo.</div>`}
+        `
+        : html`<div class="empty compact">Actualiza para consultar el backlog de proyección pública.</div>`}
+    </section>
+  `;
+}
+
+function renderPublicProjectionRecoveryJob(job = {}, canRepair = false) {
+  const intent = job.intent || {};
+  const projectionState = job.state || {};
+  const status = String(projectionState.status || "PENDING");
+  const retryAllowed = ["PENDING", "RETRY_WAIT", "FAILED", "DEAD_LETTER"].includes(status);
+  const verifyAllowed = !["SUPERSEDED", "CANCELLED"].includes(status);
+  const tone = ["CLIENT_CONFIRMED", "VERIFIED"].includes(status)
+    ? "green"
+    : status === "DEAD_LETTER" ? "red" : status === "SUPERSEDED" ? "" : "amber";
+  return html`
+    <article class="recovery-history-item">
+      <div>
+        <strong>${escapeHTML(intent.sourceId || job.projectionId || "Proyección")}</strong>
+        <span>${escapeHTML(intent.attemptKey || "Sin attemptKey")}</span>
+      </div>
+      <div class="recovery-history-file">
+        <span class="pill ${tone}">${escapeHTML(status)}</span>
+        <strong>Intentos ${Number(projectionState.attempts || 0)} · Revisión ${Number(intent.sourceRevision || 0)}</strong>
+        <span>${escapeHTML(projectionState.lastErrorMessage || projectionState.lastErrorCode || projectionState.clientConfirmedAt || projectionState.verifiedAt || projectionState.nextRetryAt || "Sin error")}</span>
+      </div>
+      <div class="topbar-actions compact-actions">
+        <button class="button small" data-action="verify-public-projection" data-id="${escapeHTML(job.projectionId || "")}" ${canRepair && verifyAllowed ? "" : "disabled"}>Diagnosticar</button>
+        <button class="button small" data-action="retry-public-projection" data-id="${escapeHTML(job.projectionId || "")}" ${canRepair && retryAllowed ? "" : "disabled"}>Reintentar</button>
       </div>
     </article>
   `;
@@ -9287,6 +9545,10 @@ function showCharreadaModal(charreadaId = null) {
 
 function wireGlobalEvents() {
   window.addEventListener("popstate", restoreAppHistoryRoute);
+  window.addEventListener("online", () => {
+    configurePublicProjectionRecovery();
+    schedulePublicProjectionRecovery(250);
+  });
 
   document.addEventListener("submit", (event) => {
     const form = event.target.closest("#access-login-form");
@@ -9317,6 +9579,9 @@ function wireGlobalEvents() {
       }
       setView(view);
       render();
+      if (view === "recovery") {
+        void refreshPublicProjectionRecoverySnapshot();
+      }
       return;
     }
 
@@ -9334,6 +9599,7 @@ function wireGlobalEvents() {
         return;
       }
       setActiveTournament(target.value);
+      configurePublicProjectionRecovery();
       queueSharedAppStatePublish(150);
       render();
     }
@@ -9530,6 +9796,10 @@ function handleAction(action, target) {
     "export-json": exportBackupJson,
     "create-full-backup": createRecoveryFullBackup,
     "clear-recovery-history": clearRecoveryBackupHistory,
+    "refresh-public-projection-backlog": () => refreshPublicProjectionRecoverySnapshot(),
+    "retry-public-projection": () => retryPublicProjectionJob(target.dataset.id),
+    "retry-all-public-projections": retryAllPublicProjectionJobs,
+    "verify-public-projection": () => verifyPublicProjectionJob(target.dataset.id),
     "clear-local-cache": clearLocalCacheAndReload,
     "copy-live-url": () => copyLiveUrl(target.dataset.target),
     "copy-public-url": () => copyLiveUrl(target.dataset.target),
@@ -9784,6 +10054,7 @@ function openTournament(tournamentId, view = "dashboard") {
   setActiveTournament(tournamentId);
   state.view = view;
   saveState({ silent: true });
+  configurePublicProjectionRecovery();
   render();
 }
 
@@ -11503,10 +11774,11 @@ async function publishOfficialScoreForContext(context) {
     });
     setScoreSaveStatus({
       state: "warning",
-      label: "Guardado; portal pendiente",
-      detail: "La calificación fue guardada, pero el portal público no se actualizó.",
+      label: "Guardado; recuperación pública pendiente",
+      detail: "El score oficial está guardado y su proyección durable será reintentada.",
       savedAtMs,
-      scoreId: scoreNode.id
+      scoreId: scoreNode.id,
+      projectionId: result.projectionId || ""
     });
     console.warn("[publish-atomic-c003] publicacion oficial parcial", {
       tournamentId: scoreNode.tournamentId,
@@ -11520,7 +11792,9 @@ async function publishOfficialScoreForContext(context) {
       auditPath: result.auditPath || "",
       publicSnapshotReason: publicFailureReason
     });
-    showToast("La calificación fue guardada, pero no pudo actualizarse el portal público.");
+    showToast("Score oficial guardado. La recuperación del Portal Público quedó programada.");
+    schedulePublicProjectionRecovery(1500);
+    void refreshPublicProjectionRecoverySnapshot({ renderAfter: false });
     saveState({ silent: true });
     return {
       ...result,
@@ -11533,11 +11807,13 @@ async function publishOfficialScoreForContext(context) {
 
   setScoreSaveStatus({
     state: "saved",
-    label: "Guardado en CharroPro",
-    detail: `Guardado ${formatScoreSaveTime(savedAtMs)}`,
+    label: "Publicado; confirmación cliente",
+    detail: `Destino público confirmado por lectura cliente ${formatScoreSaveTime(savedAtMs)}`,
     savedAtMs,
-    scoreId: scoreNode.id
+    scoreId: scoreNode.id,
+    projectionId: result.projectionId || ""
   });
+  void refreshPublicProjectionRecoverySnapshot({ renderAfter: false });
   updatePublishedScoreDiagnostics(scoreNode.tournamentId, published, result);
   logJudgeScore("publicacion oficial exitosa", {
     scorePath: result.scorePath || "",
