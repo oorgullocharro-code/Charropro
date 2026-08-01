@@ -1,5 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onValueWritten } = require("firebase-functions/v2/database");
+const { onValueCreated, onValueWritten } = require("firebase-functions/v2/database");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
 const {
   ALLOWED_ROLES,
@@ -9,8 +10,17 @@ const {
   markOfficialScoreFanoutFailed,
   prepareOfficialScoreRequest
 } = require("./officialScoreConcurrency");
+const {
+  createBackupRuntime,
+  createFirebaseBackupAdapter
+} = require("./backupService");
+const { BackupFoundationError } = require("./backupFoundation");
 
 admin.initializeApp();
+
+const backupRuntime = createBackupRuntime(createFirebaseBackupAdapter(admin), {
+  appVersion: "20260801-backup-foundation-001-v1"
+});
 
 const USERS_PATH = "charropro/users";
 const USER_TOURNAMENT_ACCESS_PATH = "charropro/userTournamentAccess";
@@ -154,6 +164,59 @@ exports.deliverCharroProOfficialScoreFanout = onValueWritten({
   }
 });
 
+exports.requestCharroProBackup = onCall({
+  region: "us-central1",
+  timeoutSeconds: 60
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para generar un respaldo.");
+  try {
+    const authorization = await requireBackupActor(callerUid, request.data || {});
+    return await backupRuntime.requestBackup({
+      ...(request.data || {}),
+      mode: "manual",
+      backupType: "full",
+      organizationId: authorization.actor.organizationId
+    }, authorization.actor, authorization.context);
+  } catch (error) {
+    throw toBackupHttpsError(error);
+  }
+});
+
+exports.cancelCharroProBackup = onCall({
+  region: "us-central1",
+  timeoutSeconds: 30
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para cancelar un respaldo.");
+  try {
+    const authorization = await requireBackupActor(callerUid, request.data || {}, { cancellation: true });
+    return await backupRuntime.cancelBackup(request.data || {}, authorization.actor);
+  } catch (error) {
+    throw toBackupHttpsError(error);
+  }
+});
+
+exports.executeCharroProBackup = onValueCreated({
+  ref: "/charropro/backupFoundation/control/{scopeKey}/jobs/{backupId}",
+  region: "us-central1",
+  retry: true,
+  memory: "1GiB",
+  timeoutSeconds: 540
+}, async (event) => {
+  const result = await backupRuntime.executeBackup(event.params.scopeKey, event.params.backupId);
+  if (result?.terminal === true || result?.status === "COMPLETED") return result;
+  return result;
+});
+
+exports.scheduleCharroProBackups = onSchedule({
+  schedule: "every day 03:00",
+  timeZone: "America/Mexico_City",
+  region: "us-central1",
+  memory: "512MiB",
+  timeoutSeconds: 540
+}, async () => backupRuntime.enqueueAutomaticBackups());
+
 async function requireOfficialScoreActor(uid, tournamentId) {
   const cleanTournamentId = normalizeKey(tournamentId);
   const [profileSnapshot, selectedAccessSnapshot] = await Promise.all([
@@ -193,6 +256,71 @@ async function requireOfficialScoreActor(uid, tournamentId) {
     tenantId: String(profile.tenantId || "").slice(0, 128),
     organizationId: String(profile.organizationId || "").slice(0, 128)
   };
+}
+
+async function requireBackupActor(uid, data = {}, options = {}) {
+  const scopeType = String(data.scopeType || "tournament").trim().toLowerCase();
+  const tournamentId = normalizeKey(data.tournamentId);
+  const profileSnapshot = await admin.database().ref(`${USERS_PATH}/${uid}`).get();
+  const profile = profileSnapshot.val() || {};
+  if (profile.active !== true) {
+    throw new BackupFoundationError("backup-user-inactive");
+  }
+  const role = String(profile.role || "").toLowerCase();
+  if (!new Set(["supervisor", "operador"]).has(role)) {
+    throw new BackupFoundationError("backup-role-denied");
+  }
+
+  let tournament = null;
+  let hasTournamentAccess = role === "supervisor";
+  if (!options.cancellation && scopeType === "tournament") {
+    const [tournamentSnapshot, selectedAccessSnapshot] = await Promise.all([
+      admin.database().ref(`charropro/tournaments/${tournamentId}`).get(),
+      admin.database().ref(`${USER_TOURNAMENT_ACCESS_PATH}/${uid}/${tournamentId}`).get()
+    ]);
+    tournament = tournamentSnapshot.val();
+    const profileTournamentIds = Array.isArray(profile.tournamentIds)
+      ? profile.tournamentIds
+      : Object.values(profile.tournamentIds || {});
+    hasTournamentAccess = role === "supervisor"
+      || profile.tournamentAccess !== "selected"
+      || selectedAccessSnapshot.val() === true
+      || profileTournamentIds.map(String).includes(tournamentId);
+  }
+  const tournamentTenantId = String(tournament?.info?.tenantId || tournament?.meta?.tenantId || "").slice(0, 180);
+  const tournamentOrganizationId = String(tournament?.info?.organizationId || tournament?.meta?.organizationId || "").slice(0, 180);
+  const profileTenantId = String(profile.tenantId || "").slice(0, 180);
+  const profileOrganizationId = String(profile.organizationId || "").slice(0, 180);
+  if (tournamentTenantId && profileTenantId && tournamentTenantId !== profileTenantId) {
+    throw new BackupFoundationError("backup-tenant-mismatch");
+  }
+  if (tournamentOrganizationId && profileOrganizationId && tournamentOrganizationId !== profileOrganizationId) {
+    throw new BackupFoundationError("backup-organization-mismatch");
+  }
+  return {
+    actor: {
+      uid,
+      name: String(profile.name || profile.email || "").slice(0, 160),
+      role,
+      tenantId: tournamentTenantId || profileTenantId,
+      organizationId: tournamentOrganizationId || profileOrganizationId,
+      platformAdmin: profile.platformAdmin === true
+    },
+    context: { tournament, hasTournamentAccess }
+  };
+}
+
+function toBackupHttpsError(error) {
+  if (error instanceof HttpsError) return error;
+  const reason = String(error?.code || error?.message || "backup-error").slice(0, 160);
+  const denied = reason.includes("denied") || reason.includes("unauthorized") || reason.includes("mismatch") || reason.includes("inactive");
+  const conflict = reason.includes("conflict") || reason.includes("busy") || reason.includes("aborted");
+  const invalid = reason.includes("invalid") || reason.includes("required") || reason.includes("not-found") || reason.includes("not-supported");
+  const code = denied ? "permission-denied" : conflict ? "aborted" : invalid ? "invalid-argument" : "internal";
+  return new HttpsError(code, "No se pudo procesar la operacion de respaldo.", {
+    reason,
+    details: error instanceof BackupFoundationError ? error.details : undefined
+  });
 }
 
 async function deliverOfficialScoreFanout(tournamentId, recordId, job) {
