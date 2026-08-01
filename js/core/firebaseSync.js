@@ -1,7 +1,7 @@
-import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { get, getDatabase, onValue, push, ref, runTransaction, set, update } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-functions.js";
+import {
+  getBootstrapConfigurationValue,
+  loadConfigurationBootstrap
+} from "./configurationBootstrap.js?v=20260801-configuration-management-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
@@ -45,29 +45,34 @@ import {
   sanitizeProjectionErrorMessage
 } from "./publicProjectionOutbox.js?v=20260729-public-projection-recovery-001-v1";
 
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyD1GjI5EJYAMhe1JRM7nETHQSqHceiBBD8",
-  authDomain: "charropro-e8a68.firebaseapp.com",
-  databaseURL: "https://charropro-e8a68-default-rtdb.firebaseio.com",
-  projectId: "charropro-e8a68",
-  storageBucket: "charropro-e8a68.firebasestorage.app",
-  messagingSenderId: "956248612215",
-  appId: "1:956248612215:web:48645013025eddba905572"
-};
-
-const LIVE_ROOT_PATH = "charropro/live";
-const PUBLIC_TOURNAMENTS_PATH = "charropro/publicTournaments";
-const TOURNAMENT_INDEX_PATH = "charropro/tournamentIndex";
-const TOURNAMENTS_PATH = "charropro/tournaments";
-const USERS_PATH = "charropro/users";
-const GLOBAL_RULE_OVERRIDES_PATH = "charropro/settings/globalRuleOverrides";
-const GLOBAL_SCORING_BUTTON_LAYOUTS_PATH = "charropro/settings/scoringButtonLayouts";
-const JUDGE_SESSIONS_PATH = "charropro/judges/sessions";
-const JUDGE_EVENTS_PATH = "charropro/judges/events";
-const AUDIT_PUBLISHED_SCORES_PATH = "charropro/audit/publishedScores";
-const PUBLIC_PROJECTION_OUTBOX_PATH = "charropro/projectionOutbox";
-const HISTORY_STATISTICS_PATH = "charropro/history/statistics";
-const BROADCAST_STUDIO_SESSIONS_PATH = "charropro/broadcastStudio/sessions";
+const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
+const FIREBASE_SDK_VERSION = requireConfigurationValue("firebase.sdkVersion");
+const FIREBASE_SDK_ROOT = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
+const [firebaseAppApi, firebaseAuthApi, firebaseDatabaseApi, firebaseFunctionsApi] = await Promise.all([
+  import(`${FIREBASE_SDK_ROOT}/firebase-app.js`),
+  import(`${FIREBASE_SDK_ROOT}/firebase-auth.js`),
+  import(`${FIREBASE_SDK_ROOT}/firebase-database.js`),
+  import(`${FIREBASE_SDK_ROOT}/firebase-functions.js`)
+]);
+const { getApps, initializeApp } = firebaseAppApi;
+const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } = firebaseAuthApi;
+const { get, getDatabase, onValue, push, ref, runTransaction, set, update } = firebaseDatabaseApi;
+const { getFunctions, httpsCallable } = firebaseFunctionsApi;
+const FIREBASE_CONFIG = Object.freeze({ ...requireConfigurationValue("firebase.client") });
+const FIREBASE_FUNCTIONS_REGION = requireConfigurationValue("firebase.functionsRegion");
+const LIVE_ROOT_PATH = requireConfigurationValue("firebase.paths.live");
+const PUBLIC_TOURNAMENTS_PATH = requireConfigurationValue("firebase.paths.publicTournaments");
+const TOURNAMENT_INDEX_PATH = requireConfigurationValue("firebase.paths.tournamentIndex");
+const TOURNAMENTS_PATH = requireConfigurationValue("firebase.paths.tournaments");
+const USERS_PATH = requireConfigurationValue("firebase.paths.users");
+const GLOBAL_RULE_OVERRIDES_PATH = requireConfigurationValue("firebase.paths.globalRuleOverrides");
+const GLOBAL_SCORING_BUTTON_LAYOUTS_PATH = requireConfigurationValue("firebase.paths.scoringButtonLayouts");
+const JUDGE_SESSIONS_PATH = requireConfigurationValue("firebase.paths.judgeSessions");
+const JUDGE_EVENTS_PATH = requireConfigurationValue("firebase.paths.judgeEvents");
+const AUDIT_PUBLISHED_SCORES_PATH = requireConfigurationValue("firebase.paths.auditPublishedScores");
+const PUBLIC_PROJECTION_OUTBOX_PATH = requireConfigurationValue("firebase.paths.projectionOutbox");
+const HISTORY_STATISTICS_PATH = requireConfigurationValue("firebase.paths.historyStatistics");
+const BROADCAST_STUDIO_SESSIONS_PATH = requireConfigurationValue("firebase.paths.broadcastStudioSessions");
 const BROADCAST_TEMPORARY_ACCESS_TYPES = new Set(["program_main", "announcer_monitor"]);
 const PUBLIC_SNAPSHOT_VERSION = 1;
 const PUBLIC_SUERTES = [
@@ -103,8 +108,28 @@ let publicSnapshotBuildCount = 0;
 let publicSnapshotPublishCount = 0;
 let publicSnapshotSetCount = 0;
 
+function requireConfigurationValue(path) {
+  const value = getBootstrapConfigurationValue(CONFIGURATION_BOOTSTRAP, path, undefined);
+  if (value === undefined || value === null || value === "") {
+    throw new Error(`configuration-bootstrap-required:${path}`);
+  }
+  return value;
+}
+
 export function isFirebaseLiveConfigured() {
   return Boolean(FIREBASE_CONFIG.databaseURL);
+}
+
+export async function readFirebaseConfiguration(request = {}) {
+  const callable = httpsCallable(getFirebaseFunctions(), "getCharroProConfiguration");
+  const response = await callable(cloneFirebaseBroadcastValue(request));
+  return cloneFirebaseBroadcastValue(response?.data || {});
+}
+
+export async function publishFirebaseConfiguration(request = {}) {
+  const callable = httpsCallable(getFirebaseFunctions(), "publishCharroProConfiguration");
+  const response = await callable(cloneFirebaseBroadcastValue(request));
+  return cloneFirebaseBroadcastValue(response?.data || {});
 }
 
 export function getFirebaseBroadcastSessionPath(sessionId = "") {
@@ -4146,7 +4171,7 @@ async function getFirebaseBroadcastAuthenticatedUser() {
 
 function getFirebaseFunctions() {
   if (!appInstance) appInstance = getApps()[0] || initializeApp(FIREBASE_CONFIG);
-  if (!functionsInstance) functionsInstance = getFunctions(appInstance, "us-central1");
+  if (!functionsInstance) functionsInstance = getFunctions(appInstance, FIREBASE_FUNCTIONS_REGION);
   return functionsInstance;
 }
 

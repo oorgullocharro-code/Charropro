@@ -20,16 +20,46 @@ const {
   createRestoreRuntime
 } = require("./restoreService");
 const { RestoreEngineError } = require("./restoreEngine");
+const configurationDefaults = require("./configuration.defaults.json");
+const {
+  ConfigurationEngineError,
+  getConfigurationValue,
+  validateRuntimeConfigurationBaseline
+} = require("./configurationEngine");
+const {
+  createConfigurationRuntime,
+  createFirebaseConfigurationAdapter
+} = require("./configurationService");
 
 admin.initializeApp();
 
+const baselineValidation = validateRuntimeConfigurationBaseline(configurationDefaults);
+if (!baselineValidation.valid) {
+  throw new ConfigurationEngineError("configuration-baseline-invalid", { errors: baselineValidation.errors });
+}
+const baselineConfiguration = baselineValidation.configuration;
+const FIREBASE_PATHS = getConfigurationValue(baselineConfiguration, "firebase.paths", {});
+const FUNCTIONS_CONFIG = getConfigurationValue(baselineConfiguration, "firebase.functions", {});
+const APPLICATION_CONFIG = getConfigurationValue(baselineConfiguration, "application", {});
+const FUNCTIONS_REGION = getConfigurationValue(baselineConfiguration, "firebase.functionsRegion", "");
+const CONFIGURATION_ROOT_PATH = FIREBASE_PATHS.configurationManagement;
+const CHARROPRO_ROOT_PATH = FIREBASE_PATHS.root;
+if (!FUNCTIONS_REGION || !CONFIGURATION_ROOT_PATH || !CHARROPRO_ROOT_PATH) {
+  throw new ConfigurationEngineError("configuration-bootstrap-required");
+}
 const backupRuntime = createBackupRuntime(createFirebaseBackupAdapter(admin), {
-  appVersion: "20260801-backup-foundation-001-v1"
+  appVersion: FUNCTIONS_CONFIG.backupCompatibilityAppVersion
 });
 const restoreRuntime = createRestoreRuntime(createFirebaseRestoreAdapter(admin));
+const configurationRuntime = createConfigurationRuntime(createFirebaseConfigurationAdapter(admin, {
+  rootPath: CONFIGURATION_ROOT_PATH
+}), { baseline: baselineConfiguration });
 
-const USERS_PATH = "charropro/users";
-const USER_TOURNAMENT_ACCESS_PATH = "charropro/userTournamentAccess";
+const USERS_PATH = FIREBASE_PATHS.users;
+const USER_TOURNAMENT_ACCESS_PATH = FIREBASE_PATHS.userTournamentAccess;
+const TOURNAMENTS_PATH = FIREBASE_PATHS.tournaments;
+const AUDIT_PUBLISHED_SCORES_PATH = FIREBASE_PATHS.auditPublishedScores;
+const PROJECTION_OUTBOX_PATH = FIREBASE_PATHS.projectionOutbox;
 const VALID_ROLES = new Set([
   "supervisor",
   "operador",
@@ -40,7 +70,7 @@ const VALID_ROLES = new Set([
   "lectura"
 ]);
 
-exports.upsertCharroProUser = onCall({ region: "us-central1" }, async (request) => {
+exports.upsertCharroProUser = onCall({ region: FUNCTIONS_REGION }, async (request) => {
   const callerUid = request.auth && request.auth.uid;
   if (!callerUid) {
     throw new HttpsError("unauthenticated", "Inicia sesion para administrar usuarios.");
@@ -77,7 +107,7 @@ exports.upsertCharroProUser = onCall({ region: "us-central1" }, async (request) 
   };
 });
 
-exports.publishCharroProOfficialScore = onCall({ region: "us-central1" }, async (request) => {
+exports.publishCharroProOfficialScore = onCall({ region: FUNCTIONS_REGION }, async (request) => {
   const callerUid = request.auth && request.auth.uid;
   if (!callerUid) {
     throw new HttpsError("unauthenticated", "Inicia sesion para publicar una calificacion oficial.");
@@ -93,7 +123,7 @@ exports.publishCharroProOfficialScore = onCall({ region: "us-central1" }, async 
   }
 
   const officialRequest = prepared.request;
-  const tournamentRef = admin.database().ref(`charropro/tournaments/${officialRequest.tournamentId}`);
+  const tournamentRef = admin.database().ref(`${TOURNAMENTS_PATH}/${officialRequest.tournamentId}`);
   let transactionOutcome = null;
   const transaction = await tournamentRef.transaction((current) => {
     const applied = applyOfficialScoreTransaction(current || {}, officialRequest);
@@ -143,21 +173,21 @@ exports.publishCharroProOfficialScore = onCall({ region: "us-central1" }, async 
     id: transactionOutcome.recordId,
     revision: transactionOutcome.revision,
     published: transactionOutcome.record,
-    scorePath: `charropro/tournaments/${officialRequest.tournamentId}/scores/${officialRequest.scoreId}`,
-    publishedPath: `charropro/tournaments/${officialRequest.tournamentId}/publishedScores/${transactionOutcome.recordId}`,
-    auditPath: `charropro/audit/publishedScores/${officialRequest.tournamentId}/${transactionOutcome.recordId}`,
+    scorePath: `${TOURNAMENTS_PATH}/${officialRequest.tournamentId}/scores/${officialRequest.scoreId}`,
+    publishedPath: `${TOURNAMENTS_PATH}/${officialRequest.tournamentId}/publishedScores/${transactionOutcome.recordId}`,
+    auditPath: `${AUDIT_PUBLISHED_SCORES_PATH}/${officialRequest.tournamentId}/${transactionOutcome.recordId}`,
     projectionId: fanoutJob?.projectionIntent?.projectionId || "",
     projectionOutboxPath: fanoutJob?.projectionIntent?.projectionId
-      ? `charropro/projectionOutbox/${officialRequest.tournamentId}/${fanoutJob.projectionIntent.projectionId}`
+      ? `${PROJECTION_OUTBOX_PATH}/${officialRequest.tournamentId}/${fanoutJob.projectionIntent.projectionId}`
       : "",
     fanout
   };
 });
 
 exports.deliverCharroProOfficialScoreFanout = onValueWritten({
-  ref: "/charropro/tournaments/{tournamentId}/officialScoreFanout/{recordId}",
-  region: "us-central1",
-  retry: true
+  ref: `/${TOURNAMENTS_PATH}/{tournamentId}/officialScoreFanout/{recordId}`,
+  region: FUNCTIONS_REGION,
+  retry: APPLICATION_CONFIG.retry.firebaseWorkers
 }, async (event) => {
   const job = event.data.after.val();
   if (!job || job.status === "DELIVERED") return;
@@ -171,8 +201,8 @@ exports.deliverCharroProOfficialScoreFanout = onValueWritten({
 });
 
 exports.requestCharroProBackup = onCall({
-  region: "us-central1",
-  timeoutSeconds: 60
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
 }, async (request) => {
   const callerUid = request.auth && request.auth.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para generar un respaldo.");
@@ -190,8 +220,8 @@ exports.requestCharroProBackup = onCall({
 });
 
 exports.cancelCharroProBackup = onCall({
-  region: "us-central1",
-  timeoutSeconds: 30
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.cancelSeconds
 }, async (request) => {
   const callerUid = request.auth && request.auth.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para cancelar un respaldo.");
@@ -204,11 +234,11 @@ exports.cancelCharroProBackup = onCall({
 });
 
 exports.executeCharroProBackup = onValueCreated({
-  ref: "/charropro/backupFoundation/control/{scopeKey}/jobs/{backupId}",
-  region: "us-central1",
-  retry: true,
-  memory: "1GiB",
-  timeoutSeconds: 540
+  ref: `/${FIREBASE_PATHS.backupFoundation}/control/{scopeKey}/jobs/{backupId}`,
+  region: FUNCTIONS_REGION,
+  retry: APPLICATION_CONFIG.retry.firebaseWorkers,
+  memory: FUNCTIONS_CONFIG.workerMemory,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.workerSeconds
 }, async (event) => {
   const result = await backupRuntime.executeBackup(event.params.scopeKey, event.params.backupId);
   if (result?.terminal === true || result?.status === "COMPLETED") return result;
@@ -216,17 +246,17 @@ exports.executeCharroProBackup = onValueCreated({
 });
 
 exports.scheduleCharroProBackups = onSchedule({
-  schedule: "every day 03:00",
-  timeZone: "America/Mexico_City",
-  region: "us-central1",
-  memory: "512MiB",
-  timeoutSeconds: 540
+  schedule: FUNCTIONS_CONFIG.backupSchedule,
+  timeZone: FUNCTIONS_CONFIG.backupTimeZone,
+  region: FUNCTIONS_REGION,
+  memory: FUNCTIONS_CONFIG.scheduleMemory,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.workerSeconds
 }, async () => backupRuntime.enqueueAutomaticBackups());
 
 exports.validateCharroProRestore = onCall({
-  region: "us-central1",
-  memory: "1GiB",
-  timeoutSeconds: 540
+  region: FUNCTIONS_REGION,
+  memory: FUNCTIONS_CONFIG.workerMemory,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.workerSeconds
 }, async (request) => {
   const callerUid = request.auth && request.auth.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para validar una restauracion.");
@@ -239,8 +269,8 @@ exports.validateCharroProRestore = onCall({
 });
 
 exports.requestCharroProRestore = onCall({
-  region: "us-central1",
-  timeoutSeconds: 60
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
 }, async (request) => {
   const callerUid = request.auth && request.auth.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para confirmar una restauracion.");
@@ -253,8 +283,8 @@ exports.requestCharroProRestore = onCall({
 });
 
 exports.cancelCharroProRestore = onCall({
-  region: "us-central1",
-  timeoutSeconds: 30
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.cancelSeconds
 }, async (request) => {
   const callerUid = request.auth && request.auth.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para cancelar una restauracion.");
@@ -267,15 +297,43 @@ exports.cancelCharroProRestore = onCall({
 });
 
 exports.executeCharroProRestore = onValueCreated({
-  ref: "/charropro/restoreFoundation/control/{scopeKey}/jobs/{restoreId}",
-  region: "us-central1",
-  retry: true,
-  memory: "1GiB",
-  timeoutSeconds: 540
+  ref: `/${FIREBASE_PATHS.restoreFoundation}/control/{scopeKey}/jobs/{restoreId}`,
+  region: FUNCTIONS_REGION,
+  retry: APPLICATION_CONFIG.retry.firebaseWorkers,
+  memory: FUNCTIONS_CONFIG.workerMemory,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.workerSeconds
 }, async (event) => {
   const result = await restoreRuntime.executeRestore(event.params.scopeKey, event.params.restoreId);
   if (result?.pending === true) throw new Error("restore-worker-already-running");
   return result;
+});
+
+exports.getCharroProConfiguration = onCall({
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para consultar configuracion.");
+  try {
+    const actor = await requireConfigurationActor(callerUid, request.data || {}, "read");
+    return await configurationRuntime.readConfiguration(request.data || {}, actor);
+  } catch (error) {
+    throw toConfigurationHttpsError(error);
+  }
+});
+
+exports.publishCharroProConfiguration = onCall({
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para publicar configuracion.");
+  try {
+    const actor = await requireConfigurationActor(callerUid, request.data || {}, "write");
+    return await configurationRuntime.publishConfiguration(request.data || {}, actor);
+  } catch (error) {
+    throw toConfigurationHttpsError(error);
+  }
 });
 
 async function requireOfficialScoreActor(uid, tournamentId) {
@@ -336,7 +394,7 @@ async function requireBackupActor(uid, data = {}, options = {}) {
   let hasTournamentAccess = role === "supervisor";
   if (!options.cancellation && scopeType === "tournament") {
     const [tournamentSnapshot, selectedAccessSnapshot] = await Promise.all([
-      admin.database().ref(`charropro/tournaments/${tournamentId}`).get(),
+      admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}`).get(),
       admin.database().ref(`${USER_TOURNAMENT_ACCESS_PATH}/${uid}/${tournamentId}`).get()
     ]);
     tournament = tournamentSnapshot.val();
@@ -381,7 +439,7 @@ async function requireRestoreActor(uid, data = {}) {
 
   let tournament = null;
   if (tournamentId) {
-    const tournamentSnapshot = await admin.database().ref(`charropro/tournaments/${tournamentId}`).get();
+    const tournamentSnapshot = await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}`).get();
     tournament = tournamentSnapshot.val();
   }
   const tournamentTenantId = String(tournament?.info?.tenantId || tournament?.meta?.tenantId || "").slice(0, 180);
@@ -405,6 +463,55 @@ async function requireRestoreActor(uid, data = {}) {
       id: String(data.device?.id || "").slice(0, 180),
       name: String(data.device?.name || "").slice(0, 180)
     }
+  };
+}
+
+async function requireConfigurationActor(uid, data = {}, operation = "read") {
+  const profileSnapshot = await admin.database().ref(`${USERS_PATH}/${uid}`).get();
+  const profile = profileSnapshot.val() || {};
+  if (profile.active !== true) throw new ConfigurationEngineError("configuration-user-inactive");
+  const role = String(profile.role || "").toLowerCase();
+  const requestedOrganizationId = String(
+    data.organizationId || data.scope?.organizationId || profile.organizationId || ""
+  ).slice(0, 128);
+  const profileOrganizationId = String(profile.organizationId || "").slice(0, 128);
+  if (requestedOrganizationId && !profileOrganizationId && profile.platformAdmin !== true) {
+    throw new ConfigurationEngineError("configuration-organization-unresolved");
+  }
+  if (requestedOrganizationId && profileOrganizationId && requestedOrganizationId !== profileOrganizationId) {
+    throw new ConfigurationEngineError("configuration-organization-denied");
+  }
+  const requestedTenantId = String(data.tenantId || data.scope?.tenantId || profile.tenantId || "").slice(0, 128);
+  const profileTenantId = String(profile.tenantId || "").slice(0, 128);
+  if (requestedTenantId && !profileTenantId && profile.platformAdmin !== true) {
+    throw new ConfigurationEngineError("configuration-tenant-unresolved");
+  }
+  if (requestedTenantId && profileTenantId && requestedTenantId !== profileTenantId) {
+    throw new ConfigurationEngineError("configuration-tenant-denied");
+  }
+  const tournamentId = normalizeOptionalKey(data.tournamentId || data.scope?.tournamentId);
+  if (tournamentId) {
+    const selectedAccess = await admin.database().ref(`${USER_TOURNAMENT_ACCESS_PATH}/${uid}/${tournamentId}`).get();
+    const profileTournamentIds = Array.isArray(profile.tournamentIds)
+      ? profile.tournamentIds
+      : Object.values(profile.tournamentIds || {});
+    const hasAccess = role === "supervisor"
+      || profile.tournamentAccess !== "selected"
+      || selectedAccess.val() === true
+      || profileTournamentIds.map(String).includes(tournamentId);
+    if (!hasAccess) throw new ConfigurationEngineError("configuration-tournament-denied");
+  }
+  if (operation === "write" && role !== "supervisor" && profile.platformAdmin !== true) {
+    throw new ConfigurationEngineError("configuration-write-role-denied");
+  }
+  return {
+    uid,
+    name: String(profile.name || profile.email || "").slice(0, 180),
+    role,
+    tenantId: requestedTenantId || profileTenantId,
+    organizationId: requestedOrganizationId || profileOrganizationId,
+    platformAdmin: profile.platformAdmin === true,
+    active: true
   };
 }
 
@@ -434,11 +541,24 @@ function toRestoreHttpsError(error) {
   });
 }
 
+function toConfigurationHttpsError(error) {
+  if (error instanceof HttpsError) return error;
+  const reason = String(error?.code || error?.message || "configuration-error").slice(0, 180);
+  const denied = reason.includes("denied") || reason.includes("required") || reason.includes("inactive") || reason.includes("unresolved");
+  const conflict = reason.includes("conflict") || reason.includes("aborted") || reason.includes("duplicate");
+  const invalid = reason.includes("invalid") || reason.includes("mismatch") || reason.includes("not-found") || reason.includes("limit");
+  const code = denied ? "permission-denied" : conflict ? "aborted" : invalid ? "invalid-argument" : "internal";
+  return new HttpsError(code, "No se pudo procesar la configuracion.", {
+    reason,
+    details: error instanceof ConfigurationEngineError ? error.details : undefined
+  });
+}
+
 async function deliverOfficialScoreFanout(tournamentId, recordId, job) {
   const updates = buildOfficialScoreFanoutUpdates(tournamentId, job);
   if (!updates) throw new Error("official-score-fanout-invalid");
-  await admin.database().ref("charropro").update(updates);
-  const jobRef = admin.database().ref(`charropro/tournaments/${tournamentId}/officialScoreFanout/${recordId}`);
+  await admin.database().ref(CHARROPRO_ROOT_PATH).update(updates);
+  const jobRef = admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/officialScoreFanout/${recordId}`);
   await jobRef.transaction((current) => {
     if (!current || current.status === "DELIVERED") return current;
     const container = { officialScoreFanout: { [recordId]: current } };
@@ -447,7 +567,7 @@ async function deliverOfficialScoreFanout(tournamentId, recordId, job) {
 }
 
 async function markFanoutFailure(tournamentId, recordId, error) {
-  const jobRef = admin.database().ref(`charropro/tournaments/${tournamentId}/officialScoreFanout/${recordId}`);
+  const jobRef = admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/officialScoreFanout/${recordId}`);
   await jobRef.transaction((current) => {
     if (!current || current.status === "DELIVERED") return current;
     const container = { officialScoreFanout: { [recordId]: current } };
@@ -543,4 +663,9 @@ function normalizeKey(value) {
     .replace(/[^A-Za-z0-9_-]/g, "_")
     .replace(/_+/g, "_")
     .replace(/^_+|_+$/g, "") || "current";
+}
+
+function normalizeOptionalKey(value) {
+  const raw = String(value || "").trim();
+  return raw ? normalizeKey(raw) : "";
 }

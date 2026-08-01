@@ -1,4 +1,17 @@
-export const CHARROPRO_APP_VERSION = "20260801-official-score-concurrency-001-v1";
+import {
+  getBootstrapConfigurationValue,
+  loadConfigurationBootstrap
+} from "./configurationBootstrap.js?v=20260801-configuration-management-001-v1";
+
+const configurationBootstrap = await loadConfigurationBootstrap();
+
+export const CHARROPRO_APP_VERSION = getBootstrapConfigurationValue(
+  configurationBootstrap,
+  "system.appVersion",
+  ""
+);
+
+if (!CHARROPRO_APP_VERSION) throw new Error("configuration-bootstrap-required:system.appVersion");
 
 let versionLogged = false;
 

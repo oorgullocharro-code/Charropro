@@ -479,6 +479,10 @@
         ".read": false,
         ".write": false
       },
+      "configurationManagement": {
+        ".read": false,
+        ".write": false
+      },
       "audit": {
         ".read": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'organizador')",
         "publishedScores": {

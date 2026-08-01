@@ -1,0 +1,121 @@
+{
+  "configurationEngineVersion": "1.0.0",
+  "schemaVersion": "charropro-configuration/1",
+  "configurationId": "charropro-runtime",
+  "scope": {
+    "type": "system",
+    "id": "system",
+    "tenantId": "",
+    "organizationId": "",
+    "tournamentId": "",
+    "userId": "",
+    "sessionId": ""
+  },
+  "scopeKey": "system__shared__system",
+  "version": 1,
+  "parentVersion": null,
+  "status": "published",
+  "createdAt": "2026-08-01T00:00:00.000Z",
+  "updatedAt": "2026-08-01T00:00:00.000Z",
+  "author": {
+    "uid": "system:configuration-baseline",
+    "name": "CharroPro Configuration Baseline",
+    "role": "system",
+    "tenantId": "",
+    "organizationId": "",
+    "platformAdmin": true,
+    "active": true
+  },
+  "values": {
+    "system": {
+      "appVersion": "20260801-official-score-concurrency-001-v1",
+      "environment": "production",
+      "production": true,
+      "development": false,
+      "testing": false
+    },
+    "firebase": {
+      "sdkVersion": "12.13.0",
+      "functionsRegion": "us-central1",
+      "client": {
+        "apiKey": "AIzaSyD1GjI5EJYAMhe1JRM7nETHQSqHceiBBD8",
+        "authDomain": "charropro-e8a68.firebaseapp.com",
+        "databaseURL": "https://charropro-e8a68-default-rtdb.firebaseio.com",
+        "projectId": "charropro-e8a68",
+        "storageBucket": "charropro-e8a68.firebasestorage.app",
+        "messagingSenderId": "956248612215",
+        "appId": "1:956248612215:web:48645013025eddba905572"
+      },
+      "paths": {
+        "root": "charropro",
+        "users": "charropro/users",
+        "userTournamentAccess": "charropro/userTournamentAccess",
+        "tournaments": "charropro/tournaments",
+        "tournamentIndex": "charropro/tournamentIndex",
+        "live": "charropro/live",
+        "publicTournaments": "charropro/publicTournaments",
+        "globalRuleOverrides": "charropro/settings/globalRuleOverrides",
+        "scoringButtonLayouts": "charropro/settings/scoringButtonLayouts",
+        "judgeSessions": "charropro/judges/sessions",
+        "judgeEvents": "charropro/judges/events",
+        "auditPublishedScores": "charropro/audit/publishedScores",
+        "projectionOutbox": "charropro/projectionOutbox",
+        "historyStatistics": "charropro/history/statistics",
+        "broadcastStudioSessions": "charropro/broadcastStudio/sessions",
+        "configurationManagement": "charropro/configurationManagement",
+        "backupFoundation": "charropro/backupFoundation",
+        "restoreFoundation": "charropro/restoreFoundation"
+      },
+      "functions": {
+        "workerMemory": "1GiB",
+        "scheduleMemory": "512MiB",
+        "backupSchedule": "every day 03:00",
+        "backupTimeZone": "America/Mexico_City",
+        "backupCompatibilityAppVersion": "20260801-backup-foundation-001-v1"
+      }
+    },
+    "application": {
+      "limits": {},
+      "timeouts": {
+        "callableSeconds": 60,
+        "cancelSeconds": 30,
+        "workerSeconds": 540
+      },
+      "retry": {
+        "firebaseWorkers": true
+      },
+      "cache": {},
+      "heartbeat": {}
+    },
+    "broadcast": {
+      "outputs": {},
+      "preview": {},
+      "program": {},
+      "announcer": {},
+      "timers": {},
+      "overlays": {}
+    },
+    "publicPortal": {
+      "branding": {},
+      "urls": {},
+      "domains": [],
+      "colors": {},
+      "assets": {}
+    },
+    "organization": {
+      "name": "",
+      "identity": {},
+      "configuration": {},
+      "permissions": {}
+    },
+    "federation": {
+      "activeRulebookId": null,
+      "convocatorias": [],
+      "officialConfiguration": {}
+    }
+  },
+  "migration": null,
+  "previousChecksum": null,
+  "checksum": "0308a08555a073de14c89f9898886d8d8030c5baedbdfa797aa83f57f7109615",
+  "fingerprint": "0308a08555a073de14c89f9898886d8d8030c5baedbdfa797aa83f57f7109615"
+}
