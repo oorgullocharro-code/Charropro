@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      // The local laboratory starts closed. Storage permissions are deliberately
+      // not inferred from product rules or production configuration.
+      allow read, write: if false;
+    }
+  }
+}

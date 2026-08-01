@@ -2,6 +2,9 @@
   "database": {
     "rules": "firebase-rules-auditoria.json"
   },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "functions": [
     {
       "source": "functions",
@@ -13,5 +16,30 @@
         "firebase-debug.*.log"
       ]
     }
-  ]
+  ],
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "database": {
+      "port": 9000
+    },
+    "functions": {
+      "port": 5001
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "hub": {
+      "port": 4400
+    },
+    "logging": {
+      "port": 4500
+    },
+    "singleProjectMode": true
+  }
 }

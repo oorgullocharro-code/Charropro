@@ -1,1 +1,16 @@
 .DS_Store
+node_modules/
+functions/node_modules/
+.firebase/
+.local/
+.env
+.env.*
+!.env.example
+!.env.local.example
+!.env.staging.example
+!.env.production.example
+firebase-debug.log
+firebase-debug.*.log
+ui-debug.log
+ui-debug.*.log
+*.log
