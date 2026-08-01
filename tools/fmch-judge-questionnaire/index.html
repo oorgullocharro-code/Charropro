@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Herramienta offline para entrevistar jueces sobre la Hoja Oficial de Calificación por Equipo FMCH 2024-2028.">
+    <title>Validación de Hoja Oficial FMCH</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <noscript>
+      <main class="noscript-message">
+        <h1>Se requiere JavaScript local</h1>
+        <p>Esta herramienta funciona sin internet, pero necesita JavaScript habilitado en este dispositivo para guardar y exportar la entrevista.</p>
+      </main>
+    </noscript>
+    <div id="app" class="application-shell" aria-live="polite"></div>
+    <input id="import-file" type="file" accept="application/json,.json" hidden>
+    <script src="questionnaire-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
