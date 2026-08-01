@@ -1,4 +1,4 @@
-export const CHARROPRO_APP_VERSION = "20260729-public-projection-recovery-001-v1";
+export const CHARROPRO_APP_VERSION = "20260801-official-score-concurrency-001-v1";
 
 let versionLogged = false;
 

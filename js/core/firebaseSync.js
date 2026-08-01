@@ -33,7 +33,6 @@ import {
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
   PUBLIC_PROJECTION_STATUSES,
   buildPublicProjectionFailureState,
-  buildPublicProjectionIntent,
   buildPublicProjectionOutboxSnapshot,
   buildPublicProjectionState,
   claimPublicProjectionState,
@@ -182,8 +181,8 @@ export async function closeFirebaseBroadcastSession(value = {}, options = {}) {
       status: "not-found",
       revision: 0,
       alreadyClosed: false
-    });
-  }
+  });
+}
   await revokeAllFirebaseBroadcastTemporaryAccess(context, options);
   return setFirebaseBroadcastSessionStatus(context, "closed", options);
 }
@@ -715,69 +714,65 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       ...publishedScore,
       id: publishedScore?.id || createId("publicado")
     });
-    const publishedScoreId = String(record?.id || "").trim();
-    if (!publishedScoreId) return { ok: false, reason: "missing-published-score" };
-
-    const scorePath = `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}`;
-    const publishedPath = `${TOURNAMENTS_PATH}/${cleanTournamentId}/publishedScores/${publishedScoreId}`;
-    const auditPath = `${AUDIT_PUBLISHED_SCORES_PATH}/${cleanTournamentId}/${publishedScoreId}`;
-    const livePath = `${LIVE_ROOT_PATH}/${cleanTournamentId}/current`;
+    if (!record?.attemptKey) return { ok: false, reason: "missing-published-score" };
     const actorRecord = await resolveAuthenticatedProjectionActor(actor);
     if (!actorRecord?.uid) {
-      return { ok: false, reason: "projection-auth-required" };
+      return { ok: false, reason: "official-score-auth-required" };
     }
-    const projectionIntent = buildPublicProjectionIntent({
-      tournamentId: cleanTournamentId,
-      charreadaId: record.charreada?.id || "",
-      competitionId: record.competition?.id || record.charreada?.competitionId || "",
-      sourceId: publishedScoreId,
-      scoreId: cleanScoreId,
-      attemptKey: record.attemptKey,
-      sourceRevision: record.revision,
-      publishedAt: record.publishedAt,
-      total: record.total,
-      targetPath: `${PUBLIC_TOURNAMENTS_PATH}/${cleanTournamentId}`,
-      actor: actorRecord
-    }, { nowMs: now });
-    if (!projectionIntent) {
-      return { ok: false, reason: "invalid-projection-intent" };
-    }
-    const projectionOutboxPath = getFirebasePublicProjectionOutboxJobPath(
-      cleanTournamentId,
-      projectionIntent.projectionId
-    );
-    const updates = {
-      [scorePath]: scorePayload,
-      [publishedPath]: record,
-      [auditPath]: record,
-      [`${projectionOutboxPath}/intent`]: projectionIntent,
-      [`${TOURNAMENTS_PATH}/${cleanTournamentId}/meta/updatedAt`]: new Date(now).toISOString(),
-      [`${TOURNAMENTS_PATH}/${cleanTournamentId}/meta/updatedAtMs`]: now,
-      [`${TOURNAMENTS_PATH}/${cleanTournamentId}/meta/updatedBy`]: actorRecord,
-      [`${TOURNAMENTS_PATH}/${cleanTournamentId}/meta/updatedByName`]: actor.name || actor.email || ""
-    };
-
-    if (options.livePayload) {
-      updates[livePath] = compactLivePayload({
+    const expectedRevision = Math.max(0, Number(record.revision || 1) - 1);
+    const operation = getOrCreateOfficialScoreOperation(record, scorePayload, expectedRevision);
+    const livePayload = options.livePayload
+      ? compactLivePayload({
         ...options.livePayload,
         liveChannel: cleanTournamentId,
         published: record,
         timestamp: new Date(now).toISOString()
-      });
-    }
+      })
+      : null;
 
-    console.info("[publish-atomic-c003] preparando publicacion oficial", {
+    console.info("[official-score-concurrency-001] solicitando publicacion oficial", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
-      publishedScoreId
+      attemptKey: record.attemptKey,
+      expectedRevision,
+      idempotencyKey: operation.idempotencyKey
     });
-    console.info("[publish-atomic-c003] score path:", scorePath);
-    console.info("[publish-atomic-c003] published path:", publishedPath);
-    console.info("[publish-atomic-c003] audit path:", auditPath);
-    console.info("[projection-recovery-001] outbox intent path:", `${projectionOutboxPath}/intent`);
-    if (options.livePayload) console.info("[publish-atomic-c003] live path:", livePath);
-
-    await update(ref(getFirebaseDatabase()), cleanUndefined(updates));
+    const authorityResult = await callOfficialScoreAuthority({
+      tournamentId: cleanTournamentId,
+      scoreId: cleanScoreId,
+      scorePayload,
+      publishedScore: record,
+      expectedRevision: operation.expectedRevision,
+      idempotencyKey: operation.idempotencyKey,
+      source: "charropro-calificador",
+      device: getOfficialScoreDevice(),
+      livePayload
+    }, options);
+    if (!authorityResult?.ok) {
+      if (authorityResult?.conflict) clearOfficialScoreOperation(record.attemptKey);
+      return {
+        ok: false,
+        complete: false,
+        partialFailure: false,
+        conflict: Boolean(authorityResult?.conflict),
+        reason: authorityResult?.reason || "official-score-authority-failed",
+        revision: Number(authorityResult?.revision || 0),
+        expectedRevision: operation.expectedRevision,
+        detail: authorityResult?.detail || {}
+      };
+    }
+    clearOfficialScoreOperation(record.attemptKey);
+    const canonicalRecord = compactPublishedScore(authorityResult.published || record);
+    const publishedScoreId = String(canonicalRecord?.id || authorityResult.id || "").trim();
+    const scorePath = authorityResult.scorePath || `${TOURNAMENTS_PATH}/${cleanTournamentId}/scores/${cleanScoreId}`;
+    const publishedPath = authorityResult.publishedPath || `${TOURNAMENTS_PATH}/${cleanTournamentId}/publishedScores/${publishedScoreId}`;
+    const auditPath = authorityResult.auditPath || `${AUDIT_PUBLISHED_SCORES_PATH}/${cleanTournamentId}/${publishedScoreId}`;
+    const livePath = livePayload ? `${LIVE_ROOT_PATH}/${cleanTournamentId}/current` : "";
+    const projectionId = String(authorityResult.projectionId || "");
+    const projectionOutboxPath = authorityResult.projectionOutboxPath || getFirebasePublicProjectionOutboxJobPath(
+      cleanTournamentId,
+      projectionId
+    );
     const privateWrite = {
       ok: true,
       scorePath,
@@ -785,14 +780,16 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       auditPath,
       livePath: options.livePayload ? livePath : ""
     };
-    const recovery = await reconcileFirebasePublicProjectionOutbox(cleanTournamentId, actorRecord, {
-      projectionIds: [projectionIntent.projectionId],
-      manual: true,
-      nowMs: now,
-      jitter: options.jitter
-    });
-    const projectionJob = recovery.jobs.find((job) => job.projectionId === projectionIntent.projectionId) || {
-      projectionId: projectionIntent.projectionId,
+    const recovery = projectionId
+      ? await reconcileFirebasePublicProjectionOutbox(cleanTournamentId, actorRecord, {
+        projectionIds: [projectionId],
+        manual: true,
+        nowMs: now,
+        jitter: options.jitter
+      })
+      : { ok: false, reason: authorityResult.fanout?.reason || "official-score-fanout-pending", jobs: [] };
+    const projectionJob = recovery.jobs.find((job) => job.projectionId === projectionId) || {
+      projectionId,
       status: "PENDING",
       ok: false,
       reason: recovery.reason || "projection-pending"
@@ -817,17 +814,19 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       && publicSnapshot.verified === true
     );
     const partialFailure = !projectionConfirmed;
-    console.info("[publish-atomic-c003] multipath update exitoso", {
+    console.info("[official-score-concurrency-001] autoridad confirmada", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
       publishedScoreId,
+      revision: Number(canonicalRecord?.revision || authorityResult.revision || 0),
+      idempotent: Boolean(authorityResult.idempotent),
       privateWrite: privateWrite.ok,
       publicSnapshot: publicSnapshot.ok,
       partialFailure,
       publicSnapshotReason: partialFailure ? publicSnapshot.reason : "",
       projectionRevision: publicSnapshot.projectionRevision || 0,
       changedSections: publicSnapshot.changedSections || [],
-      projectionId: projectionIntent.projectionId,
+      projectionId,
       projectionStatus: projectionJob.status
     });
     if (partialFailure) {
@@ -837,7 +836,7 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
         publishedScoreId,
         reason: publicSnapshot.reason,
         errorCode: publicSnapshot.errorCode,
-        projectionId: projectionIntent.projectionId,
+        projectionId,
         projectionStatus: projectionJob.status
       });
     }
@@ -848,9 +847,12 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       privateWrite,
       publicSnapshot,
       projectionJob,
-      projectionId: projectionIntent.projectionId,
+      projectionId,
       projectionOutboxPath,
       id: publishedScoreId,
+      published: canonicalRecord,
+      revision: Number(canonicalRecord?.revision || authorityResult.revision || 0),
+      idempotent: Boolean(authorityResult.idempotent),
       scorePath,
       path: publishedPath,
       publishedPath,
@@ -858,11 +860,14 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       livePath: privateWrite.livePath
     };
   } catch (error) {
-    console.error("[publish-atomic-c003] error firebase update", {
+    const authorityFailure = normalizeOfficialScoreAuthorityError(error);
+    if (authorityFailure.conflict) clearOfficialScoreOperation(publishedScore?.attemptKey || "");
+    console.error("[official-score-concurrency-001] publicacion rechazada", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
       publishedScoreId: publishedScore?.id || "",
-      reason: normalizeFirebaseFailureReason(error)
+      reason: authorityFailure.reason,
+      conflict: authorityFailure.conflict
     });
     return {
       ok: false,
@@ -876,10 +881,135 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
         errorCode: "not-attempted",
         errorMessage: "La proyección pública no se intentó porque falló la escritura privada."
       },
-      reason: normalizeFirebaseFailureReason(error),
-      detail: normalizeErrorDetail({ error })
+      conflict: authorityFailure.conflict,
+      reason: authorityFailure.reason,
+      revision: authorityFailure.revision,
+      expectedRevision: authorityFailure.expectedRevision,
+      detail: normalizeErrorDetail({ error, authority: authorityFailure })
     };
   }
+}
+
+async function callOfficialScoreAuthority(payload, options = {}) {
+  const callable = httpsCallable(getFirebaseFunctions(), "publishCharroProOfficialScore");
+  const retryDelays = Array.isArray(options.officialScoreRetryDelays)
+    ? options.officialScoreRetryDelays
+    : [0, 250, 750];
+  let lastError = null;
+  for (let index = 0; index < retryDelays.length; index += 1) {
+    if (retryDelays[index] > 0) await new Promise((resolve) => setTimeout(resolve, retryDelays[index]));
+    try {
+      const response = await callable(payload);
+      return response?.data || { ok: false, reason: "official-score-empty-response" };
+    } catch (error) {
+      lastError = error;
+      const normalized = normalizeOfficialScoreAuthorityError(error);
+      if (normalized.conflict || !isRetryableOfficialScoreFailure(normalized.reason)) throw error;
+    }
+  }
+  throw lastError || new Error("official-score-authority-unavailable");
+}
+
+function normalizeOfficialScoreAuthorityError(error = {}) {
+  const details = error?.details || error?.customData?.details || error?.data || {};
+  const rawReason = String(details.reason || error?.code || error?.message || "official-score-authority-failed");
+  const reason = rawReason.replace(/^functions\//, "").slice(0, 160);
+  return {
+    reason,
+    conflict: Boolean(details.conflict || reason.includes("conflict") || reason.includes("mismatch") || reason.includes("superseded") || reason === "aborted"),
+    revision: Number(details.revision || 0),
+    expectedRevision: Number(details.expectedRevision || 0)
+  };
+}
+
+function isRetryableOfficialScoreFailure(reason = "") {
+  const clean = String(reason || "").toLowerCase();
+  return ["unavailable", "timeout", "network", "internal", "deadline", "disconnected", "aborted"].some((token) => clean.includes(token));
+}
+
+function getOrCreateOfficialScoreOperation(record = {}, scorePayload = null, expectedRevision = 0) {
+  const attemptKey = String(record.attemptKey || "");
+  const storageKey = `charropro.officialScoreOperation.v1.${stableOfficialScoreDigest(attemptKey)}`;
+  const fingerprint = stableOfficialScoreDigest(stableOfficialScoreStringify({
+    attemptKey,
+    expectedRevision,
+    scorePayload,
+    total: record.total,
+    attempt: record.attempt,
+    breakdown: record.breakdown
+  }));
+  const stored = readOfficialScoreStorage(storageKey);
+  if (stored?.fingerprint === fingerprint && stored?.idempotencyKey) return stored;
+  const operation = {
+    fingerprint,
+    expectedRevision,
+    idempotencyKey: `score:${stableOfficialScoreDigest(`${attemptKey}|${record.id || createId("request")}`)}`,
+    createdAt: new Date().toISOString()
+  };
+  writeOfficialScoreStorage(storageKey, operation);
+  return operation;
+}
+
+function clearOfficialScoreOperation(attemptKey = "") {
+  if (!attemptKey || typeof localStorage === "undefined") return;
+  try {
+    localStorage.removeItem(`charropro.officialScoreOperation.v1.${stableOfficialScoreDigest(attemptKey)}`);
+  } catch {
+    // Storage is an optimization for retries; server idempotency remains authoritative.
+  }
+}
+
+function getOfficialScoreDevice() {
+  const storageKey = "charropro.officialScoreDevice.v1";
+  const stored = readOfficialScoreStorage(storageKey);
+  const deviceId = stored?.deviceId || `device_${stableOfficialScoreDigest(createId("device"))}`;
+  if (!stored?.deviceId) writeOfficialScoreStorage(storageKey, { deviceId });
+  return {
+    deviceId,
+    platform: typeof navigator !== "undefined" ? String(navigator.platform || "").slice(0, 80) : "",
+    userAgent: typeof navigator !== "undefined" ? String(navigator.userAgent || "").slice(0, 240) : ""
+  };
+}
+
+function readOfficialScoreStorage(key) {
+  if (typeof localStorage === "undefined") return null;
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "null");
+    return value && typeof value === "object" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeOfficialScoreStorage(key, value) {
+  if (typeof localStorage === "undefined") return;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // A blocked storage API must not prevent an authorized publication.
+  }
+}
+
+function stableOfficialScoreDigest(value = "") {
+  const text = String(value || "");
+  let left = 2166136261;
+  let right = 2246822507;
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    left ^= code;
+    left = Math.imul(left, 16777619);
+    right ^= code + index;
+    right = Math.imul(right, 3266489909);
+  }
+  return `${(left >>> 0).toString(16).padStart(8, "0")}${(right >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+function stableOfficialScoreStringify(value) {
+  if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "null";
+  if (Array.isArray(value)) return `[${value.map(stableOfficialScoreStringify).join(",")}]`;
+  if (!value || typeof value !== "object") return "null";
+  return `{${Object.keys(value).sort().filter((key) => !["__proto__", "constructor", "prototype"].includes(key)).map((key) => `${JSON.stringify(key)}:${stableOfficialScoreStringify(value[key])}`).join(",")}}`;
 }
 
 function normalizePublicSnapshotPublicationResult(result = {}) {
@@ -3774,7 +3904,8 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
     const cleanTournamentId = normalizeLiveChannel(tournamentId);
     const path = `${TOURNAMENTS_PATH}/${cleanTournamentId}`;
     const snapshot = await get(ref(getFirebaseDatabase(), path));
-    const remote = snapshot.val()?.meta || {};
+    const remoteRecord = snapshot.val() || {};
+    const remote = remoteRecord.meta || {};
     const version = Number(remote.version || 0) + 1;
     const now = Date.now();
     const record = compactTournamentRecord(cleanTournamentId, appState);
@@ -3791,10 +3922,22 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
       ...record,
       meta
     });
+    const authoritativeRecord = cleanUndefined({
+      ...payload,
+      meta: {
+        ...meta,
+        lastPublishedScore: remote.lastPublishedScore || null
+      },
+      publishedScores: remoteRecord.publishedScores || {}
+    });
+    const { meta: payloadMeta, ...statePayload } = payload;
+    for (const [key, value] of Object.entries(payloadMeta || {})) {
+      statePayload[`meta/${key}`] = value;
+    }
 
-    await update(ref(getFirebaseDatabase(), path), payload);
-    await update(ref(getFirebaseDatabase(), `${TOURNAMENT_INDEX_PATH}/${cleanTournamentId}`), compactTournamentIndex(payload));
-    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, payload, { source: "tournamentState" });
+    await update(ref(getFirebaseDatabase(), path), statePayload);
+    await update(ref(getFirebaseDatabase(), `${TOURNAMENT_INDEX_PATH}/${cleanTournamentId}`), compactTournamentIndex(authoritativeRecord));
+    const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, authoritativeRecord, { source: "tournamentState" });
     return { ok: true, version, publicSnapshot };
   } catch (error) {
     console.error("[CharroPro] publishFirebaseTournamentState failed", {
@@ -4580,9 +4723,6 @@ function compactTournamentRecord(tournamentId, appState = {}) {
   const scores = Object.fromEntries(
     Object.entries(appState.scores || {}).filter(([key]) => scoreKeyBelongsToTournament(key, charreadaIds, teamIds))
   );
-  const publishedScores = (appState.publishedScores || []).filter((score) =>
-    publishedScoreBelongsToTournament(score, cleanTournamentId, charreadaIds, teamIds)
-  );
   const history = (appState.statHistorySnapshots || []).filter((snapshot) =>
     (snapshot.tournament?.id || snapshot.tournamentId || "") === cleanTournamentId
   );
@@ -4592,7 +4732,6 @@ function compactTournamentRecord(tournamentId, appState = {}) {
     teams: teams.map(compactStoredTeam),
     charreadas: charreadas.map(compactStoredCharreada),
     scores,
-    publishedScores: publishedScores.map(compactPublishedScore),
     history: history.map(compactStatHistorySnapshot),
     settings: {
       googleSheetsUrl: settings.googleSheetsUrl || "",
@@ -4611,10 +4750,7 @@ function compactTournamentRecord(tournamentId, appState = {}) {
       scoringAttemptIdx: Number(appState.scoringAttemptIdx || 0),
       scoringColeadorIdx: Number(appState.scoringColeadorIdx || 0),
       ruleEditorSuerteId: appState.ruleEditorSuerteId || "cala",
-      liveTimer: compactTimer(appState.liveTimer),
-      lastPublishedScore: publishedScoreBelongsToTournament(appState.lastPublishedScore, cleanTournamentId, charreadaIds, teamIds)
-        ? compactPublishedScore(appState.lastPublishedScore)
-        : null
+      liveTimer: compactTimer(appState.liveTimer)
     }
   });
 }
@@ -4912,22 +5048,36 @@ function compactColeadero(coleadero) {
 function compactPublishedScore(score) {
   if (!score) return null;
   const suerte = score.suerte || {};
-	  return cleanUndefined({
-	    id: score.id || "",
-	    attemptKey: score.attemptKey || "",
-	    publishedAt: score.publishedAt || "",
-	    publishedBy: compactPublishedBy(score.publishedBy),
-	    revision: Number(score.revision || 1),
-	    correction: Boolean(score.correction),
-	    correctedRecordId: score.correctedRecordId || "",
-	    previousTotal: score.previousTotal === null || score.previousTotal === undefined ? null : Number(score.previousTotal || 0),
-	    superseded: Boolean(score.superseded),
-	    supersededBy: score.supersededBy || "",
-	    supersededAt: score.supersededAt || "",
-	    tournament: compactTournament(score.tournament),
-	    charreada: compactCharreada(score.charreada),
-	    competition: score.competition || null,
-	    team: compactTeam(score.team),
+  return cleanUndefined({
+    id: score.id || "",
+    attemptKey: score.attemptKey || "",
+    publishedAt: score.publishedAt || "",
+    publishedBy: compactPublishedBy(score.publishedBy),
+    revision: Number(score.revision || 1),
+    correction: Boolean(score.correction),
+    correctedRecordId: score.correctedRecordId || "",
+    previousTotal: score.previousTotal === null || score.previousTotal === undefined ? null : Number(score.previousTotal || 0),
+    superseded: Boolean(score.superseded),
+    supersededBy: score.supersededBy || "",
+    supersededAt: score.supersededAt || "",
+    ledgerVersion: score.ledgerVersion || "",
+    version: Number(score.version || 1),
+    createdAt: score.createdAt || score.publishedAt || "",
+    updatedAt: score.updatedAt || score.publishedAt || "",
+    timestamp: score.timestamp || score.updatedAt || score.publishedAt || "",
+    timestampMs: Number(score.timestampMs || 0),
+    actor: score.actor || null,
+    authUid: score.authUid || "",
+    device: score.device || null,
+    idempotencyKey: score.idempotencyKey || "",
+    source: score.source || "",
+    sourceFingerprint: score.sourceFingerprint || "",
+    status: score.status || "",
+    officialStatus: score.officialStatus || "",
+    tournament: compactTournament(score.tournament),
+    charreada: compactCharreada(score.charreada),
+    competition: score.competition || null,
+    team: compactTeam(score.team),
     suerte: {
       id: suerte.id || "",
       name: suerte.name || "",

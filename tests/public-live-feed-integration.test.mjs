@@ -2,6 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { registerHooks } from "node:module";
 import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js";
+
+const {
+  applyOfficialScoreTransaction,
+  buildOfficialScoreFanoutUpdates,
+  prepareOfficialScoreRequest
+} = officialScoreConcurrency;
 
 const TEST_STATE_KEY = "__charroProPublicFeedFirebaseTest";
 const firebase = createFirebaseTestAdapter();
@@ -164,8 +171,8 @@ assert.equal(JSON.stringify(partial).includes("credentials"), false);
 const partialOutboxPath = partial.projectionOutboxPath;
 const partialJob = firebase.read(partialOutboxPath);
 assert.equal(partialJob.intent.projectionId, partial.projectionId);
-assert.equal(partialJob.intent.sourceId, "published-integration-3");
-assert.equal(partialJob.intent.scoreId, "score-integration-3");
+assert.equal(partialJob.intent.sourceId, partial.id);
+assert.equal(partialJob.intent.scoreId, `${charreadaId}__${teamId}__colas`);
 assert.equal(partialJob.intent.sourceRevision, 1);
 assert.equal(partialJob.intent.targetPath, publicPath);
 assert.equal(partialJob.state.status, "RETRY_WAIT");
@@ -247,8 +254,7 @@ const staleRevision = await publishOfficial({
   scoreId: "score-correction",
   suerteId: "piales",
   total: 18,
-  revision: 1,
-  attemptKey: `${charreadaId}:${teamId}:correction`,
+  revision: 2,
   publishedAt: "2026-07-28T10:05:00.000Z"
 });
 assert.equal(staleRevision.partialFailure, true);
@@ -258,8 +264,7 @@ const currentRevision = await publishOfficial({
   scoreId: "score-correction",
   suerteId: "piales",
   total: 28,
-  revision: 2,
-  attemptKey: `${charreadaId}:${teamId}:correction`,
+  revision: 3,
   publishedAt: "2026-07-28T10:06:00.000Z"
 });
 assert.equal(currentRevision.complete, true);
@@ -292,10 +297,9 @@ const missingSource = await publishOfficial({
   scoreId: "score-missing-source",
   suerteId: "manganas_pie",
   total: 12,
-  attemptKey: `${charreadaId}:${teamId}:missing-source`,
   publishedAt: "2026-07-28T10:08:00.000Z"
 });
-const missingSourcePath = `charropro/tournaments/${tournamentId}/publishedScores/published-missing-source`;
+const missingSourcePath = missingSource.publishedPath;
 const missingSourceRecord = firebase.read(missingSourcePath);
 firebase.write(missingSourcePath, null);
 firebase.failPublicTransactions = false;
@@ -357,7 +361,6 @@ const claimFailure = await publishOfficial({
   scoreId: "score-claim-failure",
   suerteId: "manganas_caballo",
   total: 17,
-  attemptKey: `${charreadaId}:${teamId}:claim-failure`,
   publishedAt: "2026-07-28T10:12:00.000Z"
 });
 assert.equal(claimFailure.ok, true, "a claim failure does not misreport the completed private write");
@@ -432,12 +435,13 @@ async function publishOfficial({
   total,
   publishedAt,
   revision = 1,
-  attemptKey = `${charreadaId}:${teamId}:${suerteId}`,
+  attemptKey = `${tournamentId}__${charreadaId}__${teamId}__${suerteId}__0__0`,
   actorUid = "test-user"
 }) {
+  const canonicalScoreId = `${charreadaId}__${teamId}__${suerteId}`;
   return firebaseSync.publishFirebaseOfficialScoreAtomic(
     tournamentId,
-    scoreId,
+    canonicalScoreId,
     [{ total }],
     {
       id: publishedId,
@@ -609,8 +613,58 @@ function createFirebaseTestAdapter() {
     getFunctions() {
       return {};
     },
-    httpsCallable() {
-      return async () => ({ data: null });
+    httpsCallable(_functions, name) {
+      if (name !== "publishCharroProOfficialScore") return async () => ({ data: null });
+      return async (payload) => {
+        const prepared = prepareOfficialScoreRequest(payload, {
+          uid: authUser.uid,
+          name: "Test User",
+          email: "test@example.test",
+          role: "supervisor",
+          clientId: "test-client"
+        }, {
+          nowMs: Date.parse(payload.publishedScore?.publishedAt || "") || Date.now()
+        });
+        if (!prepared.valid) throw callableError("functions/invalid-argument", prepared.errors[0], {
+          reason: prepared.errors[0],
+          errors: prepared.errors
+        });
+        const request = prepared.request;
+        const tournamentPath = `charropro/tournaments/${request.tournamentId}`;
+        const applied = applyOfficialScoreTransaction(readPath(data, tournamentPath), request);
+        writePath(data, tournamentPath, structuredClone(applied.tournament));
+        if (!applied.outcome.ok) {
+          throw callableError("functions/aborted", applied.outcome.reason, applied.outcome);
+        }
+        this.privateWriteCount += applied.outcome.idempotent ? 0 : 1;
+        const fanoutJob = applied.tournament.officialScoreFanout[applied.outcome.recordId];
+        const updates = buildOfficialScoreFanoutUpdates(request.tournamentId, fanoutJob);
+        for (const [path, value] of Object.entries(updates || {})) {
+          writePath(data, joinPath("charropro", path), structuredClone(value));
+        }
+        return {
+          data: {
+            ok: true,
+            complete: true,
+            partialFailure: false,
+            idempotent: applied.outcome.idempotent,
+            conflict: false,
+            reason: applied.outcome.reason,
+            tournamentId: request.tournamentId,
+            scoreId: request.scoreId,
+            attemptId: applied.outcome.attemptId,
+            id: applied.outcome.recordId,
+            revision: applied.outcome.revision,
+            published: applied.outcome.record,
+            scorePath: `${tournamentPath}/scores/${request.scoreId}`,
+            publishedPath: `${tournamentPath}/publishedScores/${applied.outcome.recordId}`,
+            auditPath: `charropro/audit/publishedScores/${request.tournamentId}/${applied.outcome.recordId}`,
+            projectionId: fanoutJob.projectionIntent.projectionId,
+            projectionOutboxPath: `charropro/projectionOutbox/${request.tournamentId}/${fanoutJob.projectionIntent.projectionId}`,
+            fanout: { ok: true, pending: false, reason: "official-score-fanout-delivered" }
+          }
+        };
+      };
     }
   };
 }
@@ -621,6 +675,13 @@ function snapshot(value) {
     exists: () => copy !== null && copy !== undefined,
     val: () => structuredClone(copy)
   };
+}
+
+function callableError(code, message, details = {}) {
+  const error = new Error(message);
+  error.code = code;
+  error.details = details;
+  return error;
 }
 
 function readPath(root, path) {

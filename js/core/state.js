@@ -965,12 +965,16 @@ export function recordPublishedScore(score = {}) {
 
   const previousRecords = state.publishedScores.filter((record) => record.attemptKey === attemptKey);
   const activePrevious = [...previousRecords].reverse().find((record) => !record.superseded) || null;
+  const previousRevision = previousRecords.reduce(
+    (maximum, record) => Math.max(maximum, Number(record.revision || 0)),
+    0
+  );
   const record = normalizePublishedScore({
     ...score,
     id: score.id || uid("publicado"),
     attemptKey,
     publishedAt: now,
-    revision: previousRecords.length + 1,
+    revision: previousRevision + 1,
     correction: Boolean(activePrevious),
     correctedRecordId: activePrevious?.id || "",
     previousTotal: activePrevious ? Number(activePrevious.total || 0) : null,

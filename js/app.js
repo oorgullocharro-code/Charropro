@@ -1,6 +1,6 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260729-public-projection-recovery-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -76,7 +76,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260729-public-projection-recovery-001-v1";
+} from "./core/firebaseSync.js?v=20260801-official-score-concurrency-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -11749,26 +11749,35 @@ async function publishOfficialScoreForContext(context) {
     state.lastPublishedScore = previousLastPublishedScore || null;
     setLastFirebaseError(result.reason || "official-publish-failed", result.detail?.error?.message || result.detail?.message || "");
     updatePublishedScoreErrorDiagnostics(scoreNode.tournamentId, result);
+    const conflict = result.conflict === true;
     setScoreSaveStatus({
       state: "error",
-      label: "Error al publicar",
-      detail: result.reason || "No se pudo publicar.",
+      label: conflict ? "Conflicto de publicación" : "Error al publicar",
+      detail: conflict
+        ? "Otro dispositivo confirmó una revisión oficial. Sincroniza antes de volver a publicar."
+        : result.reason || "No se pudo publicar.",
       savedAtMs: 0,
       scoreId: scoreNode.id
     });
     console.error("[publish-atomic-c003] publicacion oficial fallida", result);
-    if (isPermissionFailure(result)) showToast("Firebase rechazó la publicación oficial por permisos.");
+    if (conflict) showToast("La calificación oficial cambió en otro dispositivo. Sincroniza y revisa antes de continuar.");
+    else if (isPermissionFailure(result)) showToast("Firebase rechazó la publicación oficial por permisos.");
     else showToast("No se pudo publicar la calificación oficial en CharroPro.");
     saveState({ silent: true });
     return result;
   }
+
+  const committedPublished = reconcileCommittedOfficialScore(
+    previousPublishedScores,
+    result.published || published
+  );
 
   const savedAtMs = Date.now();
   const publicSnapshotFailed = result.partialFailure === true || result.publicSnapshot?.ok === false;
   if (publicSnapshotFailed) {
     const publicFailureReason = result.publicSnapshot?.reason || "public-snapshot-sync-failed";
     setLastFirebaseError("public-snapshot-sync-failed", publicFailureReason);
-    updatePublishedScoreDiagnostics(scoreNode.tournamentId, published, result);
+    updatePublishedScoreDiagnostics(scoreNode.tournamentId, committedPublished, result);
     updatePublishedScoreErrorDiagnostics(scoreNode.tournamentId, {
       reason: publicFailureReason
     });
@@ -11783,7 +11792,7 @@ async function publishOfficialScoreForContext(context) {
     console.warn("[publish-atomic-c003] publicacion oficial parcial", {
       tournamentId: scoreNode.tournamentId,
       scoreId: scoreNode.id,
-      publishedScoreId: published.id || result.id || "",
+      publishedScoreId: committedPublished.id || result.id || "",
       publicSnapshotReason: publicFailureReason
     });
     logJudgeScore("publicacion oficial parcial", {
@@ -11800,7 +11809,7 @@ async function publishOfficialScoreForContext(context) {
       ...result,
       complete: false,
       partialFailure: true,
-      published,
+      published: committedPublished,
       scoreId: scoreNode.id
     };
   }
@@ -11814,13 +11823,35 @@ async function publishOfficialScoreForContext(context) {
     projectionId: result.projectionId || ""
   });
   void refreshPublicProjectionRecoverySnapshot({ renderAfter: false });
-  updatePublishedScoreDiagnostics(scoreNode.tournamentId, published, result);
+  updatePublishedScoreDiagnostics(scoreNode.tournamentId, committedPublished, result);
   logJudgeScore("publicacion oficial exitosa", {
     scorePath: result.scorePath || "",
     publishedPath: result.publishedPath || result.path || "",
     auditPath: result.auditPath || ""
   });
-  return { ...result, published, scoreId: scoreNode.id };
+  return { ...result, published: committedPublished, scoreId: scoreNode.id };
+}
+
+function reconcileCommittedOfficialScore(previousRecords = [], committed = {}) {
+  const record = cloneJson(committed || {});
+  const attemptKey = String(record.attemptKey || "");
+  const recordId = String(record.id || "");
+  const next = (Array.isArray(previousRecords) ? cloneJson(previousRecords) : [])
+    .filter((entry) => String(entry?.id || "") !== recordId)
+    .map((entry) => {
+      if (!attemptKey || entry?.attemptKey !== attemptKey || entry?.superseded) return entry;
+      return {
+        ...entry,
+        superseded: true,
+        supersededBy: recordId,
+        supersededAt: record.publishedAt || record.updatedAt || new Date().toISOString(),
+        officialStatus: "historical"
+      };
+    });
+  next.push(record);
+  state.publishedScores = next;
+  state.lastPublishedScore = record;
+  return record;
 }
 
 function continueOfficialScoreFlowAfterPublish() {

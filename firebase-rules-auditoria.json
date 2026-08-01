@@ -21,7 +21,7 @@
       "tournaments": {
         "$tournamentId": {
           ".read": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/tournamentAccess').val() !== 'selected' || root.child('charropro/userTournamentAccess/' + auth.uid + '/' + $tournamentId).val() === true || root.child('charropro/users/' + auth.uid + '/tournamentIds/0').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/1').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/2').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/3').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/4').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/5').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/6').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/7').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/8').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/9').val() === $tournamentId)",
-          ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' && newData.exists())",
+          ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' && !newData.exists() && !data.child('publishedScores').exists() && !data.child('officialScoreLedger').exists() && !data.child('officialScoreAudit').exists()",
           "info": {
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador')"
           },
@@ -38,13 +38,22 @@
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez')"
           },
           "publishedScores": {
-            ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez')"
+            ".write": false
           },
           "history": {
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez')"
           },
           "meta": {
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez')"
+          },
+          "officialScoreLedger": {
+            ".write": false
+          },
+          "officialScoreAudit": {
+            ".write": false
+          },
+          "officialScoreFanout": {
+            ".write": false
           }
         }
       },
@@ -465,9 +474,9 @@
         ".read": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'organizador')",
         "publishedScores": {
           "$tournamentId": {
-            ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' && !newData.exists()",
+            ".write": false,
             "$recordId": {
-              ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador' || root.child('charropro/users/' + auth.uid + '/role').val() === 'juez') && newData.exists() && newData.child('id').val() === $recordId"
+              ".write": false
             }
           }
         }
