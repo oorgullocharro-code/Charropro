@@ -1,0 +1,5981 @@
+{
+  "schemaVersion": "1.0.0",
+  "fieldCount": 239,
+  "lifecycles": [
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.FEDERATION_LOGO",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.FEDERATION_NAME",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.EVENT_NAME",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "ANTES_DE_LA_COMPETENCIA",
+          "authority": "EVENT_SECRETARIAT_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.EVENT_TIME",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "ANTES_DE_LA_COMPETENCIA",
+          "authority": "EVENT_SECRETARIAT_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.TEAM_NAME",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "ANTES_DE_LA_COMPETENCIA",
+          "authority": "EVENT_SECRETARIAT_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.EVENT_DATE",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "ANTES_DE_LA_COMPETENCIA",
+          "authority": "EVENT_SECRETARIAT_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.CAPTAIN_NAME",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "ANTES_DE_LA_COMPETENCIA",
+          "authority": "EVENT_SECRETARIAT_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.VENUE_NAME",
+      "section": "HEADER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "ANTES_DE_LA_COMPETENCIA",
+          "authority": "EVENT_SECRETARIAT_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.SIDE_BAD_POINTS_SUM_CONTROL",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.PARTICIPANT_NAME",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.SUBSTITUTE_NAME",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.METERS",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-CALA-PUNTA",
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.TIMES",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-CALA-PUNTA",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BASE",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.P",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.T",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.LD",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.LI",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.MD",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.MI",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.PC",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.TOTAL",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-CALA-SECTION",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_01",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_02",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_03",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_04",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_05",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_06",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_07",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_08",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINTS_TOTAL",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-CALA-BAD-POINTS",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.PARTIAL_POINTS",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-CALA-PARTIAL",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.TEAM_INFRACTION",
+      "section": "CALA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_CALA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.SIDE_CONTROL",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.PARTICIPANT_NAME",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.SUBSTITUTE_NAME",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_1.GOOD",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_1.BAD",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_1.TOTAL",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_2.GOOD",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_2.BAD",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_2.TOTAL",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_3.GOOD",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_3.BAD",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_3.TOTAL",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.TOTAL",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-PIALES-SECTION",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.TEAM_INFRACTION",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PIALES",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_01",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_02",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_03",
+      "section": "PIALES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.SIDE_SUM_CONTROL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_01.NAME",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_02.NAME",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_03.NAME",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_04.NAME",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.SUBSTITUTE_NAME",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_01.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_01.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_01.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_02.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_02.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_02.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_03.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_03.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_03.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_04.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_04.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_04.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_01.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_01.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_01.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_02.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_02.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_02.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_03.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_03.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_03.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_04.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_04.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_04.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_01.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_01.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_01.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_02.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_02.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_02.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_03.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_03.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_03.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_04.GOOD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_04.BAD",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_04.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.TOTAL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-COLEADERO-SECTION",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_01",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.SUM_CONTROL",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_03",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_04",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.TEAM_INFRACTION",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_COLEADERO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.POST_INFRACTION_CONTROL_01",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.POST_INFRACTION_CONTROL_02",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.POST_INFRACTION_CONTROL_03",
+      "section": "COLEADERO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SIDE_CONTROL",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.PARTICIPANT_NAME",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SUBSTITUTE_NAME",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.BASE",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.PRETAL_DE_GASA",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.ONE_HAND",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.LEGS",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.TENTE_MOSO",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.VERIJERO",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.PRETAL",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.CAERSE_Y_LEVANTARSE",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.BAJARSE_SIN_SER_LAZADO",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.TOTAL_01",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-JINETEO-PARTIAL",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.MALOS",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.T",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.TOTAL_02",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-JINETEO-FINAL",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.COMPLETION_TIME",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.TEAM_INFRACTION",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_TORO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.POST_INFRACTION_CONTROL_01",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.POST_INFRACTION_CONTROL_02",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.POST_INFRACTION_CONTROL_03",
+      "section": "JINETEO_TORO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.SIDE_CONTROL",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.PARTICIPANT_01.NAME",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.PARTICIPANT_02.NAME",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.PARTICIPANT_03.NAME",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.SUBSTITUTE_NAME",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_01",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.REMATE_01",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_02",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.REMATE_02",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_01",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.REMATE_01",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_02",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.REMATE_02",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.BASE_ADDITIONALES_01",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.REMATE_01",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.BASE_ADDITIONALES_02",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.REMATE_02",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.MALOS",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.T",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.TOTAL",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-TERNA-ROW",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.MALOS",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.T",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.TOTAL",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-TERNA-ROW",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.MALOS",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.T",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.TOTAL",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-TERNA-ROW",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.COMPLETION_TIME",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.TEAM_INFRACTION",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_TERNA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_01",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_02",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_03",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_04",
+      "section": "TERNA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SIDE_CONTROL",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.PARTICIPANT_NAME",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SUBSTITUTE_NAME",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.BASE",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.PRETAL_DE_GASA",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.LEGS",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.ONE_HAND",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.TENTE_MOSO",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.VERIJERO",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.PRETAL",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.CAERSE_Y_LEVANTARSE",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.BAJAR_OREJA_C_PIERN",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.TOTAL_01",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-JINETEO-PARTIAL",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.MALOS",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.T",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.TOTAL_02",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-JINETEO-FINAL",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.COMPLETION_TIME",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.TEAM_INFRACTION",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_JINETEO_YEGUA",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.POST_INFRACTION_CONTROL_01",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.POST_INFRACTION_CONTROL_02",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.POST_INFRACTION_CONTROL_03",
+      "section": "JINETEO_YEGUA",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.SIDE_CONTROL",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.PARTICIPANT_NAME",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.SUBSTITUTE_NAME",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_1.GOOD",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_1.BAD",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_1.TOTAL",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_2.GOOD",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_2.BAD",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_2.TOTAL",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_3.GOOD",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_3.BAD",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_3.TOTAL",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.T",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.TOTAL",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-MANGANAS-SECTION",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.COMPLETION_TIME",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.TEAM_INFRACTION",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_PIE",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.POST_INFRACTION_CONTROL_01",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.POST_INFRACTION_CONTROL_02",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.POST_INFRACTION_CONTROL_03",
+      "section": "MANGANAS_PIE",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.SIDE_CONTROL",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.PARTICIPANT_NAME",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.SUBSTITUTE_NAME",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_1.GOOD",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_1.BAD",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_1.TOTAL",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_2.GOOD",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_2.BAD",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_2.TOTAL",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_3.GOOD",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_3.BAD",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_3.TOTAL",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.T",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.TOTAL",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-MANGANAS-SECTION",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.COMPLETION_TIME",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.TEAM_INFRACTION",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_MANGANAS_CABALLO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.POST_INFRACTION_CONTROL_01",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.POST_INFRACTION_CONTROL_02",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.POST_INFRACTION_CONTROL_03",
+      "section": "MANGANAS_CABALLO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SIDE_CONTROL",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.PARTICIPANT_NAME",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SUBSTITUTE_NAME",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "TEAM_OR_EVENT_RECORD_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_FROM_AUTHORIZED_EVENT_RECORD"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.FIRST_LAP_BASE",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.SECOND_LAP_BASE",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.DISTANCE",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.FOURTH",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.REPAIRS",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.EAR_C_LEG",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SPORTS_INFERENCE"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.MALOS",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.TOTAL",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-PASO-SECTION",
+      "confidence": "SPORTS_INFERENCE",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.TIME_OUT",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.TEAM_INFRACTION",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DURANTE_PASO",
+          "authority": "JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "CAPTURED_BY_JUDGE_OR_AUTHORIZED_RECORDER"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.POST_INFRACTION_CONTROL_01",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.POST_INFRACTION_CONTROL_02",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.POST_INFRACTION_CONTROL_03",
+      "section": "PASO",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "PENDING_VALIDATION",
+          "authority": "JUDGE_WORKFLOW_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DO_NOT_CAPTURE_PENDING_VALIDATION"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CLOSING.TOTAL_BAD_POINTS",
+      "section": "CLOSING_TOTALS",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-CLOSING-BAD-POINTS",
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CLOSING.FINAL_SCORE",
+      "section": "CLOSING_TOTALS",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "DESPUES_DE_CAPTURA_DE_DEPENDENCIAS",
+          "authority": "AUTHORIZED_CALCULATION_AFTER_SPORTS_VALIDATION"
+        },
+        {
+          "state": "CALCULATED_AFTER_DEPENDENCIES",
+          "authority": "CALCULATED"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": "FORM-CLOSING-FINAL",
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.JUDGE_01",
+      "section": "SIGNATURES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "CIERRE_Y_VALIDACION_DOCUMENTAL",
+          "authority": "JUDGE_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SIGNATURE_PENDING_PROTOCOL"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.JUDGE_02",
+      "section": "SIGNATURES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "CIERRE_Y_VALIDACION_DOCUMENTAL",
+          "authority": "JUDGE_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SIGNATURE_PENDING_PROTOCOL"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.JUDGE_03",
+      "section": "SIGNATURES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "CIERRE_Y_VALIDACION_DOCUMENTAL",
+          "authority": "JUDGE_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SIGNATURE_PENDING_PROTOCOL"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.CAPTAIN",
+      "section": "SIGNATURES",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "CIERRE_Y_VALIDACION_DOCUMENTAL",
+          "authority": "TEAM_CAPTAIN_PENDING_VALIDATION"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "SIGNATURE_PENDING_PROTOCOL"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION",
+      "gate": "BLOCK_EXPORTER"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.CONADE_LOGO",
+      "section": "FOOTER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.CONADE_NAME",
+      "section": "FOOTER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.SPORTS_SECRETARIAT_PERIOD",
+      "section": "FOOTER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.INSTITUTIONAL_QUOTE",
+      "section": "FOOTER",
+      "lifecycle": [
+        {
+          "state": "DEFINED_BY_FORMAT",
+          "authority": "FMCH-FORM-2024-2028"
+        },
+        {
+          "state": "GENERACION_DEL_DOCUMENTO",
+          "authority": "FMCH_FORMAT_PROFILE"
+        },
+        {
+          "state": "RECORDED_OR_RENDERED",
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "state": "IMMUTABLE_OFFICIAL_DOCUMENT_SNAPSHOT",
+          "authority": "PENDING_OFFICIAL_EXPORTER"
+        }
+      ],
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED",
+      "gate": "REQUIRES_FIELD_LEVEL_VALIDATION"
+    }
+  ]
+}

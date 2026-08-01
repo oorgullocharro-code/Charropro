@@ -1,0 +1,1361 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceManifest": {
+    "sourceDocuments": [
+      {
+        "id": "FMCH-FORM-2024-2028",
+        "title": "Hoja de Calificación Equipo Charros 2024-2028",
+        "officialLandingPage": "https://fmcharreria.org.mx/formatos-oficiales-2025/hojas-de-calificacion-equipos-y-charros-completos/",
+        "directUrl": "https://fmcharreria.org.mx/wp-content/uploads/HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028.pdf",
+        "sha256": "3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7",
+        "verification": "El PDF local es byte a byte idéntico a la descarga oficial FMCH el 2026-08-01."
+      },
+      {
+        "id": "FMCH-REGULATION-2026",
+        "title": "Reglamento Oficial General para Competencias de Charros 2024-2028, edición 2026",
+        "directUrl": "https://fmcharreria.org.mx/wp-content/uploads/Reglamento-Oficial-Charros-Libre-y-Juvenil-24-28-VF2-2026.pdf",
+        "sha256": "1343e2205c7b6599a2ab7e93a809a5a45bd5ab1aadaba2f5a25bf43db8b4af2b",
+        "verification": "El PDF local es byte a byte idéntico a la descarga oficial FMCH el 2026-08-01."
+      }
+    ]
+  },
+  "formulas": [
+    {
+      "formulaId": "FORM-CALA-PUNTA",
+      "title": "Adicionales de punta de cala",
+      "expression": "puntos por tiempos + metros válidos por encima de seis, sujeto a requisitos reglamentarios.",
+      "status": "OFFICIAL_REGULATION",
+      "references": [
+        "Reglamento 2026, art. 94 y Calificaciones de Cala, p. 38"
+      ],
+      "implementationStatus": "REQUIRES_FULL_CONDITION_CATALOG"
+    },
+    {
+      "formulaId": "FORM-CALA-BAD-POINTS",
+      "title": "Suma puntos malos de Cala",
+      "expression": "SUM(casillas de malos aplicables).",
+      "status": "PENDING_VALIDATION",
+      "references": [
+        "Formato oficial: ocho casillas y TOTAL MALOS, sin catálogo por casilla."
+      ],
+      "implementationStatus": "BLOCKED"
+    },
+    {
+      "formulaId": "FORM-CALA-PARTIAL",
+      "title": "Puntos parciales de Cala",
+      "expression": "Subtotal de componentes de Cala antes del cierre de sección.",
+      "status": "SPORTS_INFERENCE",
+      "references": [
+        "Formato oficial y Reglamento 2026, pp. 38-43."
+      ],
+      "implementationStatus": "BLOCKED_PENDING_JUDGE_CONFIRMATION"
+    },
+    {
+      "formulaId": "FORM-CALA-SECTION",
+      "title": "Total de Cala",
+      "expression": "base + adicionales validados - infracciones validadas - infracción de equipo aplicable.",
+      "status": "SPORTS_INFERENCE",
+      "references": [
+        "Reglamento 2026, p. 38; formato oficial."
+      ],
+      "implementationStatus": "BLOCKED_PENDING_ABBREVIATION_MAPPING"
+    },
+    {
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "title": "Total neto de oportunidad o pasada",
+      "expression": "BUENO - MALOS de la misma oportunidad o pasada.",
+      "status": "SPORTS_INFERENCE",
+      "references": [
+        "Formato oficial: BUENO, MALOS y TOTAL; capítulo de la suerte."
+      ],
+      "implementationStatus": "BLOCKED_PENDING_FORMULA_CERTIFICATION"
+    },
+    {
+      "formulaId": "FORM-PIALES-SECTION",
+      "title": "Total de Piales",
+      "expression": "SUM(tres oportunidades) más componentes certificables de tiempo e infracción.",
+      "status": "SPORTS_INFERENCE",
+      "references": [
+        "Reglamento 2026, arts. 95-110, pp. 45-49."
+      ],
+      "implementationStatus": "BLOCKED_PENDING_T_COLUMN_CONFIRMATION"
+    },
+    {
+      "formulaId": "FORM-COLEADERO-SECTION",
+      "title": "Total de Coleadero",
+      "expression": "Agregación de pasadas y participantes según topología oficial.",
+      "status": "PENDING_VALIDATION",
+      "references": [
+        "Reglamento 2026, arts. 111-133; formato oficial."
+      ],
+      "implementationStatus": "BLOCKED"
+    },
+    {
+      "formulaId": "FORM-JINETEO-PARTIAL",
+      "title": "Subtotal de Jineteo",
+      "expression": "base de clasificación + adicionales de tabla aplicable.",
+      "status": "OFFICIAL_REGULATION",
+      "references": [
+        "Toro p. 59; Yegua p. 77 del Reglamento 2026."
+      ],
+      "implementationStatus": "REQUIRES_TABLE_ENCODING"
+    },
+    {
+      "formulaId": "FORM-JINETEO-FINAL",
+      "title": "Total final de Jineteo",
+      "expression": "subtotal - malos + T o tiempo cuando su vínculo sea confirmado.",
+      "status": "SPORTS_INFERENCE",
+      "references": [
+        "Reglamento 2026, pp. 59 y 77; formato oficial."
+      ],
+      "implementationStatus": "BLOCKED_PENDING_T_COLUMN_CONFIRMATION"
+    },
+    {
+      "formulaId": "FORM-TERNA-ROW",
+      "title": "Total de fila de Terna",
+      "expression": "base/adicionales + remate - malos + T, con asignación pendiente por participante.",
+      "status": "PENDING_VALIDATION",
+      "references": [
+        "Reglamento 2026, arts. 149-170; formato oficial."
+      ],
+      "implementationStatus": "BLOCKED"
+    },
+    {
+      "formulaId": "FORM-MANGANAS-SECTION",
+      "title": "Total de Manganas",
+      "expression": "SUM(tres oportunidades) + T o tiempo si se certifica - infracciones.",
+      "status": "SPORTS_INFERENCE",
+      "references": [
+        "Reglamento 2026, arts. 186-217, pp. 81-92."
+      ],
+      "implementationStatus": "BLOCKED_PENDING_T_COLUMN_CONFIRMATION"
+    },
+    {
+      "formulaId": "FORM-PASO-SECTION",
+      "title": "Total de Paso",
+      "expression": "base de vuelta + adicionales aplicables - malos - infracciones.",
+      "status": "SPORTS_INFERENCE",
+      "references": [
+        "Reglamento 2026, arts. 218-239, pp. 93-100."
+      ],
+      "implementationStatus": "BLOCKED_PENDING_COLUMN_MAPPING"
+    },
+    {
+      "formulaId": "FORM-CLOSING-BAD-POINTS",
+      "title": "TOTAL, PUNTOS MALOS",
+      "expression": "Agregación de puntos malos por reglas aprobadas.",
+      "status": "PENDING_VALIDATION",
+      "references": [
+        "Formato oficial, celda de cierre sin operador."
+      ],
+      "implementationStatus": "BLOCKED"
+    },
+    {
+      "formulaId": "FORM-CLOSING-FINAL",
+      "title": "PUNTUACIÓN FINAL",
+      "expression": "Total oficial de hoja después de todas las reglas autorizadas.",
+      "status": "PENDING_VALIDATION",
+      "references": [
+        "Formato oficial y Reglamento 2026, sin fórmula de cierre vinculada."
+      ],
+      "implementationStatus": "BLOCKED"
+    }
+  ],
+  "fieldFormulaMap": [
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.FEDERATION_LOGO",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.FEDERATION_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.EVENT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.EVENT_TIME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.TEAM_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.EVENT_DATE",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.CAPTAIN_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.HEADER.VENUE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.SIDE_BAD_POINTS_SUM_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.PARTICIPANT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.METERS",
+      "formulaId": "FORM-CALA-PUNTA",
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.TIMES",
+      "formulaId": "FORM-CALA-PUNTA",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BASE",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.P",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.T",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.LD",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.LI",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.MD",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.MI",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.PC",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.TOTAL",
+      "formulaId": "FORM-CALA-SECTION",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_04",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_05",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_06",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_07",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINT_08",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.BAD_POINTS_TOTAL",
+      "formulaId": "FORM-CALA-BAD-POINTS",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.PARTIAL_POINTS",
+      "formulaId": "FORM-CALA-PARTIAL",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CALA.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.SIDE_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.PARTICIPANT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_1.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_1.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_1.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_2.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_2.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_2.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_3.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_3.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.ATTEMPT_3.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.TOTAL",
+      "formulaId": "FORM-PIALES-SECTION",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.SIDE_SUM_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_01.NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_02.NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_03.NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_04.NAME",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_01.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_01.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_01.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_02.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_02.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_02.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_03.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_03.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_03.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_04.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_04.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_1.ROW_04.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_01.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_01.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_01.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_02.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_02.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_02.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_03.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_03.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_03.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_04.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_04.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_2.ROW_04.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_01.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_01.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_01.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_02.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_02.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_02.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_03.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_03.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_03.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_04.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_04.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.PASS_3.ROW_04.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.TOTAL",
+      "formulaId": "FORM-COLEADERO-SECTION",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.SUM_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_04",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.POST_INFRACTION_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.POST_INFRACTION_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.COLEADERO.POST_INFRACTION_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SIDE_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.PARTICIPANT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.BASE",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.PRETAL_DE_GASA",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.ONE_HAND",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.LEGS",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.TENTE_MOSO",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.VERIJERO",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.PRETAL",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.CAERSE_Y_LEVANTARSE",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.BAJARSE_SIN_SER_LAZADO",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.TOTAL_01",
+      "formulaId": "FORM-JINETEO-PARTIAL",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.MALOS",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.T",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.SCORE.TOTAL_02",
+      "formulaId": "FORM-JINETEO-FINAL",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.COMPLETION_TIME",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.POST_INFRACTION_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.POST_INFRACTION_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_TORO.POST_INFRACTION_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.SIDE_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.PARTICIPANT_01.NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.PARTICIPANT_02.NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.PARTICIPANT_03.NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.REMATE_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.REMATE_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.REMATE_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.REMATE_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.BASE_ADDITIONALES_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.REMATE_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.BASE_ADDITIONALES_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.REMATE_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.MALOS",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.T",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_01.TOTAL",
+      "formulaId": "FORM-TERNA-ROW",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.MALOS",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.T",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_02.TOTAL",
+      "formulaId": "FORM-TERNA-ROW",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.MALOS",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.T",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.ROW_03.TOTAL",
+      "formulaId": "FORM-TERNA-ROW",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.COMPLETION_TIME",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.TERNA.AUXILIARY_CONTROL_04",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SIDE_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.PARTICIPANT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.BASE",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.PRETAL_DE_GASA",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.LEGS",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.ONE_HAND",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.TENTE_MOSO",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.VERIJERO",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.PRETAL",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.CAERSE_Y_LEVANTARSE",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.BAJAR_OREJA_C_PIERN",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.TOTAL_01",
+      "formulaId": "FORM-JINETEO-PARTIAL",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.MALOS",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.T",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.SCORE.TOTAL_02",
+      "formulaId": "FORM-JINETEO-FINAL",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.COMPLETION_TIME",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.POST_INFRACTION_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.POST_INFRACTION_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.JINETEO_YEGUA.POST_INFRACTION_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.SIDE_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.PARTICIPANT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_1.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_1.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_1.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_2.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_2.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_2.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_3.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_3.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.ATTEMPT_3.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.T",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.TOTAL",
+      "formulaId": "FORM-MANGANAS-SECTION",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.COMPLETION_TIME",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.POST_INFRACTION_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.POST_INFRACTION_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_PIE.POST_INFRACTION_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.SIDE_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.PARTICIPANT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_1.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_1.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_1.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_2.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_2.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_2.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_3.GOOD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_3.BAD",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.ATTEMPT_3.TOTAL",
+      "formulaId": "FORM-OPPORTUNITY-NET",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.T",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.TOTAL",
+      "formulaId": "FORM-MANGANAS-SECTION",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.COMPLETION_TIME",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.POST_INFRACTION_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.POST_INFRACTION_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.MANGANAS_CABALLO.POST_INFRACTION_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SIDE_CONTROL",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.PARTICIPANT_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SUBSTITUTE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.FIRST_LAP_BASE",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.SECOND_LAP_BASE",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.DISTANCE",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.FOURTH",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.REPAIRS",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.EAR_C_LEG",
+      "formulaId": null,
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.MALOS",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.SCORE.TOTAL",
+      "formulaId": "FORM-PASO-SECTION",
+      "confidence": "SPORTS_INFERENCE"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.TIME_OUT",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.TEAM_INFRACTION",
+      "formulaId": null,
+      "confidence": "OFFICIAL_REGULATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.POST_INFRACTION_CONTROL_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.POST_INFRACTION_CONTROL_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.PASO.POST_INFRACTION_CONTROL_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CLOSING.TOTAL_BAD_POINTS",
+      "formulaId": "FORM-CLOSING-BAD-POINTS",
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.CLOSING.FINAL_SCORE",
+      "formulaId": "FORM-CLOSING-FINAL",
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.JUDGE_01",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.JUDGE_02",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.JUDGE_03",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.SIGNATURES.CAPTAIN",
+      "formulaId": null,
+      "confidence": "PENDING_VALIDATION"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.CONADE_LOGO",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.CONADE_NAME",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.SPORTS_SECRETARIAT_PERIOD",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.INSTITUTIONAL_QUOTE",
+      "formulaId": null,
+      "confidence": "FORM_OFFICIAL_VERIFIED"
+    }
+  ]
+}
