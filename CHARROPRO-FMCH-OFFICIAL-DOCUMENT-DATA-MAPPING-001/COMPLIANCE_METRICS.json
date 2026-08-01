@@ -1,0 +1,348 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedFrom": "FIELD_MAPPING.json",
+  "generatedAt": "2026-08-01T21:23:57.602Z",
+  "sourceFieldCount": 239,
+  "mappedFieldCount": 239,
+  "unmappedFieldCount": 0,
+  "countsByStatus": {
+    "EXACT": 0,
+    "EQUIVALENT": 41,
+    "DERIVED": 61,
+    "PARTIAL": 65,
+    "PRESENT_NOT_PERSISTED": 0,
+    "PRESENT_ONLY_IN_UI": 0,
+    "PRESENT_ONLY_IN_EXPORT": 1,
+    "LEGACY": 0,
+    "DUPLICATED": 0,
+    "AMBIGUOUS": 19,
+    "MISSING": 14,
+    "NOT_APPLICABLE_PENDING_VALIDATION": 38
+  },
+  "countsByCompatibility": {
+    "FULL": 4,
+    "FUNCTIONAL_WITH_TRANSFORMATION": 1,
+    "PARTIAL": 30,
+    "NONE": 14,
+    "PENDING_SPORTS_VALIDATION": 190
+  },
+  "countsBySection": {
+    "HEADER": {
+      "total": 8,
+      "compatibility": {
+        "FULL": 4,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 1,
+        "PARTIAL": 2,
+        "NONE": 1,
+        "PENDING_SPORTS_VALIDATION": 0
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 5,
+        "DERIVED": 0,
+        "PARTIAL": 1,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 1,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 1,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 0
+      }
+    },
+    "CALA": {
+      "total": 25,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 3,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 22
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 4,
+        "DERIVED": 3,
+        "PARTIAL": 10,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 7,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 1
+      }
+    },
+    "PIALES": {
+      "total": 17,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 2,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 15
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 3,
+        "DERIVED": 8,
+        "PARTIAL": 2,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 4
+      }
+    },
+    "COLEADERO": {
+      "total": 51,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 5,
+        "NONE": 9,
+        "PENDING_SPORTS_VALIDATION": 37
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 9,
+        "DERIVED": 20,
+        "PARTIAL": 5,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 9,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 8
+      }
+    },
+    "JINETEO_TORO": {
+      "total": 21,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 2,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 19
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 3,
+        "DERIVED": 3,
+        "PARTIAL": 11,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 4
+      }
+    },
+    "TERNA": {
+      "total": 32,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 4,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 28
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 4,
+        "DERIVED": 4,
+        "PARTIAL": 7,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 12,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 5
+      }
+    },
+    "JINETEO_YEGUA": {
+      "total": 21,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 2,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 19
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 3,
+        "DERIVED": 3,
+        "PARTIAL": 11,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 4
+      }
+    },
+    "MANGANAS_PIE": {
+      "total": 19,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 2,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 17
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 4,
+        "DERIVED": 8,
+        "PARTIAL": 3,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 4
+      }
+    },
+    "MANGANAS_CABALLO": {
+      "total": 19,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 2,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 17
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 4,
+        "DERIVED": 8,
+        "PARTIAL": 3,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 4
+      }
+    },
+    "PASO": {
+      "total": 16,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 2,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 14
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 2,
+        "DERIVED": 2,
+        "PARTIAL": 8,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 4
+      }
+    },
+    "CLOSING_TOTALS": {
+      "total": 2,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 0,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 2
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 0,
+        "DERIVED": 2,
+        "PARTIAL": 0,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 0
+      }
+    },
+    "SIGNATURES": {
+      "total": 4,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 4,
+        "NONE": 0,
+        "PENDING_SPORTS_VALIDATION": 0
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 0,
+        "DERIVED": 0,
+        "PARTIAL": 4,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 0,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 0
+      }
+    },
+    "FOOTER": {
+      "total": 4,
+      "compatibility": {
+        "FULL": 0,
+        "FUNCTIONAL_WITH_TRANSFORMATION": 0,
+        "PARTIAL": 0,
+        "NONE": 4,
+        "PENDING_SPORTS_VALIDATION": 0
+      },
+      "status": {
+        "EXACT": 0,
+        "EQUIVALENT": 0,
+        "DERIVED": 0,
+        "PARTIAL": 0,
+        "PRESENT_NOT_PERSISTED": 0,
+        "PRESENT_ONLY_IN_UI": 0,
+        "PRESENT_ONLY_IN_EXPORT": 0,
+        "LEGACY": 0,
+        "DUPLICATED": 0,
+        "AMBIGUOUS": 0,
+        "MISSING": 4,
+        "NOT_APPLICABLE_PENDING_VALIDATION": 0
+      }
+    }
+  },
+  "strictCompliancePercentage": 1.67,
+  "functionalCompliancePercentage": 2.09,
+  "extendedCoveragePercentage": 94.14,
+  "criticalGapCount": 6,
+  "sportsValidationPendingCount": 190
+}
