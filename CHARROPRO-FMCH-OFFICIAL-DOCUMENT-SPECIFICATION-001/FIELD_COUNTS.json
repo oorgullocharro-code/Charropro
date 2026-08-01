@@ -1,0 +1,8 @@
+{
+  "sourceDocumentSha256": "3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7",
+  "visualBlockCount": 14,
+  "semanticSectionCount": 13,
+  "fieldDefinitionCount": 239,
+  "physicalCellInstanceCount": 239,
+  "countingMethod": "fieldDefinitionCount is fields.length and equals physicalCellInstanceCount because every repeated visible cell is expanded into its own fieldId. CLOSING_TOTALS is one semantic section containing two visual blocks."
+}
