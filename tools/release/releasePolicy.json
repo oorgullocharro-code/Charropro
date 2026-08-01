@@ -1,0 +1,238 @@
+{
+  "policyVersion": "1.0.0",
+  "manifestSchemaVersion": "charropro-release/1",
+  "versioning": {
+    "strategy": "semantic-versioning",
+    "format": "MAJOR.MINOR.PATCH",
+    "prereleaseAllowed": true,
+    "buildMetadataAllowed": true,
+    "rules": {
+      "major": "Cambios incompatibles en contratos publicos, datos o integraciones.",
+      "minor": "Capacidades compatibles agregadas al producto.",
+      "patch": "Correcciones compatibles, seguridad y mantenimiento sin ruptura.",
+      "prerelease": "Candidatos no productivos identificados con sufijos como rc.1.",
+      "contracts": "Los contratos y esquemas conservan version independiente y se registran en compatibilidad."
+    }
+  },
+  "statuses": [
+    "draft",
+    "validating",
+    "approved",
+    "deploying",
+    "verifying",
+    "completed",
+    "failed",
+    "rolling_back",
+    "rolled_back",
+    "cancelled"
+  ],
+  "statusTransitions": {
+    "draft": ["validating", "cancelled"],
+    "validating": ["approved", "failed", "cancelled"],
+    "approved": ["deploying", "cancelled"],
+    "deploying": ["verifying", "failed", "rolling_back"],
+    "verifying": ["completed", "failed", "rolling_back"],
+    "failed": ["validating", "rolling_back", "cancelled"],
+    "rolling_back": ["rolled_back", "failed"],
+    "rolled_back": [],
+    "completed": [],
+    "cancelled": []
+  },
+  "gateStatuses": ["pending", "passed", "failed", "blocked", "waived"],
+  "gates": [
+    {
+      "gateId": "source",
+      "label": "Fuente congelada",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["commit", "treeHash", "branch", "clean", "checkedAt"]
+    },
+    {
+      "gateId": "tests",
+      "label": "Pruebas completas",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["suiteId", "passed", "failed", "command", "checkedAt"]
+    },
+    {
+      "gateId": "backup",
+      "label": "Backup valido",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["backupId", "scope", "checksum", "storageRef", "verifiedAt"]
+    },
+    {
+      "gateId": "restore",
+      "label": "Restore validado",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["restoreValidationId", "backupId", "target", "result", "verifiedAt"]
+    },
+    {
+      "gateId": "configuration",
+      "label": "Configuracion validada",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["configurationId", "version", "checksum", "result", "verifiedAt"]
+    },
+    {
+      "gateId": "emulator",
+      "label": "Firebase Emulator",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["suiteId", "projectId", "production", "result", "verifiedAt"]
+    },
+    {
+      "gateId": "rules",
+      "label": "Firebase Rules",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["suiteId", "rulesHash", "result", "verifiedAt"]
+    },
+    {
+      "gateId": "iam",
+      "label": "IAM",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["reviewId", "projectId", "reviewedBy", "result", "verifiedAt"]
+    },
+    {
+      "gateId": "storage",
+      "label": "Storage",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["validationId", "bucket", "rulesHash", "result", "verifiedAt"]
+    },
+    {
+      "gateId": "json",
+      "label": "JSON valido",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["files", "passed", "failed", "checkedAt"]
+    },
+    {
+      "gateId": "security",
+      "label": "Seguridad",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["reportId", "secretsFound", "criticalFindings", "result", "checkedAt"]
+    },
+    {
+      "gateId": "audit",
+      "label": "Auditoria",
+      "required": true,
+      "critical": true,
+      "evidenceFields": ["auditId", "auditor", "result", "checkedAt"]
+    }
+  ],
+  "deploySequence": [
+    {
+      "order": 1,
+      "stepId": "freeze",
+      "label": "Congelar candidato",
+      "requires": ["source", "tests", "configuration", "emulator", "rules", "iam", "storage", "json", "security", "audit"]
+    },
+    {
+      "order": 2,
+      "stepId": "backup",
+      "label": "Crear y verificar backup pre-deploy",
+      "requires": ["backup", "restore"]
+    },
+    {
+      "order": 3,
+      "stepId": "rules",
+      "label": "Desplegar Rules retrocompatibles",
+      "requires": ["emulator", "rules", "iam", "security"]
+    },
+    {
+      "order": 4,
+      "stepId": "functions",
+      "label": "Desplegar Functions versionadas",
+      "requires": ["tests", "configuration", "iam"]
+    },
+    {
+      "order": 5,
+      "stepId": "configuration",
+      "label": "Activar configuracion versionada mediante CAS",
+      "requires": ["configuration", "backup", "restore"]
+    },
+    {
+      "order": 6,
+      "stepId": "client",
+      "label": "Publicar cliente inmutable",
+      "requires": ["tests", "json", "security"]
+    },
+    {
+      "order": 7,
+      "stepId": "verify",
+      "label": "Ejecutar validacion post-deploy",
+      "requires": ["audit"]
+    },
+    {
+      "order": 8,
+      "stepId": "monitor",
+      "label": "Observar estabilidad y cerrar release",
+      "requires": ["audit"]
+    }
+  ],
+  "rollbackSequence": [
+    {
+      "order": 1,
+      "stepId": "freeze-rollout",
+      "label": "Detener el rollout y preservar evidencia"
+    },
+    {
+      "order": 2,
+      "stepId": "client",
+      "label": "Reactivar el artefacto cliente inmutable anterior"
+    },
+    {
+      "order": 3,
+      "stepId": "configuration",
+      "label": "Publicar una nueva revision de configuracion con valores anteriores"
+    },
+    {
+      "order": 4,
+      "stepId": "functions",
+      "label": "Desplegar el artefacto Functions anterior compatible"
+    },
+    {
+      "order": 5,
+      "stepId": "rules",
+      "label": "Restaurar Rules anteriores solo despues de validar compatibilidad"
+    },
+    {
+      "order": 6,
+      "stepId": "documentation",
+      "label": "Publicar documentacion correspondiente a la version restaurada"
+    },
+    {
+      "order": 7,
+      "stepId": "validate",
+      "label": "Validar integridad; restaurar datos solo con autorizacion y evidencia"
+    }
+  ],
+  "postDeployChecks": [
+    "system-health",
+    "public-portal",
+    "broadcast-studio",
+    "firebase-connectivity",
+    "database-rules",
+    "official-score-concurrency",
+    "public-projection-recovery",
+    "backup-foundation",
+    "restore-engine",
+    "configuration-management",
+    "audit-integrity"
+  ],
+  "limits": {
+    "maxDepth": 16,
+    "maxArrayLength": 2000,
+    "maxObjectKeys": 500,
+    "maxNodes": 20000,
+    "maxStringLength": 50000,
+    "maxModules": 500,
+    "maxTickets": 500,
+    "maxAuditEvents": 5000
+  }
+}
