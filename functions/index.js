@@ -15,12 +15,18 @@ const {
   createFirebaseBackupAdapter
 } = require("./backupService");
 const { BackupFoundationError } = require("./backupFoundation");
+const {
+  createFirebaseRestoreAdapter,
+  createRestoreRuntime
+} = require("./restoreService");
+const { RestoreEngineError } = require("./restoreEngine");
 
 admin.initializeApp();
 
 const backupRuntime = createBackupRuntime(createFirebaseBackupAdapter(admin), {
   appVersion: "20260801-backup-foundation-001-v1"
 });
+const restoreRuntime = createRestoreRuntime(createFirebaseRestoreAdapter(admin));
 
 const USERS_PATH = "charropro/users";
 const USER_TOURNAMENT_ACCESS_PATH = "charropro/userTournamentAccess";
@@ -217,6 +223,61 @@ exports.scheduleCharroProBackups = onSchedule({
   timeoutSeconds: 540
 }, async () => backupRuntime.enqueueAutomaticBackups());
 
+exports.validateCharroProRestore = onCall({
+  region: "us-central1",
+  memory: "1GiB",
+  timeoutSeconds: 540
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para validar una restauracion.");
+  try {
+    const actor = await requireRestoreActor(callerUid, request.data || {});
+    return await restoreRuntime.validateRestore(request.data || {}, actor);
+  } catch (error) {
+    throw toRestoreHttpsError(error);
+  }
+});
+
+exports.requestCharroProRestore = onCall({
+  region: "us-central1",
+  timeoutSeconds: 60
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para confirmar una restauracion.");
+  try {
+    const actor = await requireRestoreActor(callerUid, request.data || {});
+    return await restoreRuntime.requestRestore(request.data || {}, actor);
+  } catch (error) {
+    throw toRestoreHttpsError(error);
+  }
+});
+
+exports.cancelCharroProRestore = onCall({
+  region: "us-central1",
+  timeoutSeconds: 30
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para cancelar una restauracion.");
+  try {
+    const actor = await requireRestoreActor(callerUid, request.data || {});
+    return await restoreRuntime.cancelRestore(request.data || {}, actor);
+  } catch (error) {
+    throw toRestoreHttpsError(error);
+  }
+});
+
+exports.executeCharroProRestore = onValueCreated({
+  ref: "/charropro/restoreFoundation/control/{scopeKey}/jobs/{restoreId}",
+  region: "us-central1",
+  retry: true,
+  memory: "1GiB",
+  timeoutSeconds: 540
+}, async (event) => {
+  const result = await restoreRuntime.executeRestore(event.params.scopeKey, event.params.restoreId);
+  if (result?.pending === true) throw new Error("restore-worker-already-running");
+  return result;
+});
+
 async function requireOfficialScoreActor(uid, tournamentId) {
   const cleanTournamentId = normalizeKey(tournamentId);
   const [profileSnapshot, selectedAccessSnapshot] = await Promise.all([
@@ -310,6 +371,43 @@ async function requireBackupActor(uid, data = {}, options = {}) {
   };
 }
 
+async function requireRestoreActor(uid, data = {}) {
+  const tournamentId = normalizeKey(data.tournamentId);
+  const profileSnapshot = await admin.database().ref(`${USERS_PATH}/${uid}`).get();
+  const profile = profileSnapshot.val() || {};
+  if (profile.active !== true) throw new RestoreEngineError("restore-user-inactive");
+  const role = String(profile.role || "").toLowerCase();
+  if (role !== "supervisor") throw new RestoreEngineError("restore-role-denied");
+
+  let tournament = null;
+  if (tournamentId) {
+    const tournamentSnapshot = await admin.database().ref(`charropro/tournaments/${tournamentId}`).get();
+    tournament = tournamentSnapshot.val();
+  }
+  const tournamentTenantId = String(tournament?.info?.tenantId || tournament?.meta?.tenantId || "").slice(0, 180);
+  const tournamentOrganizationId = String(tournament?.info?.organizationId || tournament?.meta?.organizationId || "").slice(0, 180);
+  const profileTenantId = String(profile.tenantId || "").slice(0, 180);
+  const profileOrganizationId = String(profile.organizationId || "").slice(0, 180);
+  if (tournamentTenantId && profileTenantId && tournamentTenantId !== profileTenantId) {
+    throw new RestoreEngineError("restore-tenant-mismatch");
+  }
+  if (tournamentOrganizationId && profileOrganizationId && tournamentOrganizationId !== profileOrganizationId) {
+    throw new RestoreEngineError("restore-organization-mismatch");
+  }
+  return {
+    uid,
+    name: String(profile.name || profile.email || "").slice(0, 160),
+    role,
+    tenantId: tournamentTenantId || profileTenantId,
+    organizationId: tournamentOrganizationId || profileOrganizationId,
+    platformAdmin: profile.platformAdmin === true,
+    device: {
+      id: String(data.device?.id || "").slice(0, 180),
+      name: String(data.device?.name || "").slice(0, 180)
+    }
+  };
+}
+
 function toBackupHttpsError(error) {
   if (error instanceof HttpsError) return error;
   const reason = String(error?.code || error?.message || "backup-error").slice(0, 160);
@@ -320,6 +418,19 @@ function toBackupHttpsError(error) {
   return new HttpsError(code, "No se pudo procesar la operacion de respaldo.", {
     reason,
     details: error instanceof BackupFoundationError ? error.details : undefined
+  });
+}
+
+function toRestoreHttpsError(error) {
+  if (error instanceof HttpsError) return error;
+  const reason = String(error?.code || error?.message || "restore-error").slice(0, 180);
+  const denied = reason.includes("denied") || reason.includes("authority") || reason.includes("mismatch") || reason.includes("inactive");
+  const conflict = reason.includes("conflict") || reason.includes("busy") || reason.includes("changed") || reason.includes("aborted");
+  const invalid = reason.includes("invalid") || reason.includes("required") || reason.includes("not-found") || reason.includes("expired") || reason.includes("incompatible");
+  const code = denied ? "permission-denied" : conflict ? "aborted" : invalid ? "invalid-argument" : "internal";
+  return new HttpsError(code, "No se pudo procesar la restauracion.", {
+    reason,
+    details: error instanceof RestoreEngineError ? error.details : undefined
   });
 }
 
