@@ -663,6 +663,32 @@ function cloneStoredTournament(value) {
   return sanitizeValue(value, { maxDepth: 32, maxArray: 20000, maxKeys: 100000 }) || {};
 }
 
+// RTDB transactions require normal JavaScript objects at the SDK boundary.
+// Internal sanitization intentionally uses null-prototype records, so convert
+// only after the transaction result is complete without changing its content.
+function toFirebaseDatabaseValue(value, seen = new WeakSet(), depth = 0) {
+  if (value === null || typeof value === "boolean" || typeof value === "string") return value;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "object" || depth >= 32 || seen.has(value)) return null;
+
+  seen.add(value);
+  if (Array.isArray(value)) {
+    const output = value.map((item) => toFirebaseDatabaseValue(item, seen, depth + 1));
+    seen.delete(value);
+    return output;
+  }
+
+  const output = {};
+  for (const key of Object.keys(value)) {
+    if (DANGEROUS_KEYS.has(key)) continue;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || descriptor.get || descriptor.set) continue;
+    output[key] = toFirebaseDatabaseValue(descriptor.value, seen, depth + 1);
+  }
+  seen.delete(value);
+  return output;
+}
+
 function stableStringify(value) {
   if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value);
   if (typeof value === "number") return Number.isFinite(value) ? String(value) : "null";
@@ -727,5 +753,6 @@ module.exports = {
   buildOfficialScoreFanoutUpdates,
   markOfficialScoreFanoutDelivered,
   markOfficialScoreFanoutFailed,
+  toFirebaseDatabaseValue,
   stableStringify
 };

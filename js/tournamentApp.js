@@ -1,8 +1,6 @@
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
-
 window.CHARROPRO_APP_MODE = "tournament";
 
 const appModuleUrl = new URL("./app.js", import.meta.url);
-appModuleUrl.searchParams.set("v", CHARROPRO_APP_VERSION);
+appModuleUrl.searchParams.set("v", "20260801-web-client-emulator-runtime-integration-001-v2");
 
 await import(appModuleUrl.href);

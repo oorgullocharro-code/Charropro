@@ -1,12 +1,13 @@
 import { escapeHTML, html, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
 import { loadState, state } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
 import {
+  getFirebaseRuntimeDiagnostics,
   signInFirebaseUser,
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState
-} from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+} from "../core/firebaseSync.js?v=20260801-web-client-emulator-runtime-integration-001-v2";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 import { getTournamentIdFromUrl } from "../core/tournamentContext.js?v=20260708-recovery-001b-panel-status1";
 
@@ -63,6 +64,7 @@ function render() {
       <header class="judge-header">
         <div>
           <p>CharroPro</p>
+          ${renderFirebaseRuntimeBadge()}
           <h1>Jueces</h1>
         </div>
         <a class="button" href="./index.html">Volver</a>
@@ -71,6 +73,12 @@ function render() {
       ${renderGatewayBody()}
     </main>
   `;
+}
+
+function renderFirebaseRuntimeBadge() {
+  const runtime = getFirebaseRuntimeDiagnostics();
+  if (!runtime.local) return "";
+  return html`<span class="runtime-environment-badge">${escapeHTML(runtime.label)}</span>`;
 }
 
 function renderAccessState() {

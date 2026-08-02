@@ -46,6 +46,7 @@ import {
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
+  getFirebaseRuntimeDiagnostics,
   isFirebaseLiveConfigured,
   publishFirebaseGlobalRuleOverrides,
   publishFirebaseOfficialScoreAtomic,
@@ -76,7 +77,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260801-official-score-concurrency-001-v1";
+} from "./core/firebaseSync.js?v=20260801-web-client-emulator-runtime-integration-001-v2";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -723,6 +724,7 @@ function render({ preserveScoringScroll = false } = {}) {
             ${tournamentScoped ? renderTopbarTournamentContext() : ""}
           </div>
           <div class="topbar-actions">
+            ${renderFirebaseRuntimeBadge()}
             ${renderAccessWidget()}
             ${tournamentScoped
               ? html`${IS_TOURNAMENT_APP ? "" : renderTournamentPicker()}${renderTournamentExitActions()}`
@@ -777,6 +779,7 @@ function renderAccessGate() {
       <section class="access-panel">
         <div class="access-brand">
           <span>CharroPro</span>
+          ${renderFirebaseRuntimeBadge()}
           <h1>Acceso privado</h1>
           <p>Inicia sesion para ver solo las areas permitidas para tu rol.</p>
         </div>
@@ -1514,6 +1517,12 @@ function renderAccessWidget() {
     </span>
     <button class="button small" data-action="sign-out-access">Salir</button>
   `;
+}
+
+function renderFirebaseRuntimeBadge() {
+  const runtime = getFirebaseRuntimeDiagnostics();
+  if (!runtime.local) return "";
+  return html`<span class="runtime-environment-badge" title="Proyecto ${escapeHTML(runtime.projectId)}">${escapeHTML(runtime.label)}</span>`;
 }
 
 function getAccessStatusText() {
@@ -8616,6 +8625,7 @@ function renderScoringHeader(charreada, context, charroName) {
         <div class="scoring-live-top">
           <div class="scoring-title">
             <p>Calificando en vivo</p>
+            ${renderFirebaseRuntimeBadge()}
             <h1>${escapeHTML(charreada.name)} / ${escapeHTML(context.suerte.fullName)}</h1>
             ${renderSupervisorReviewNotice()}
           </div>

@@ -3,6 +3,11 @@ import {
   loadConfigurationBootstrap
 } from "./configurationBootstrap.js?v=20260801-configuration-management-001-v1";
 import {
+  buildFirebaseEmulatorConnectionPlan,
+  getFirebaseRuntimePublicDiagnostics,
+  resolveFirebaseRuntime
+} from "./firebaseRuntime.js?v=20260801-web-client-emulator-runtime-integration-001-v2";
+import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
@@ -46,7 +51,15 @@ import {
 } from "./publicProjectionOutbox.js?v=20260729-public-projection-recovery-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
-const FIREBASE_SDK_VERSION = requireConfigurationValue("firebase.sdkVersion");
+const FIREBASE_RUNTIME = resolveFirebaseRuntime({
+  location: globalThis.location,
+  bootstrap: {
+    sdkVersion: requireConfigurationValue("firebase.sdkVersion"),
+    functionsRegion: requireConfigurationValue("firebase.functionsRegion"),
+    client: requireConfigurationValue("firebase.client")
+  }
+});
+const FIREBASE_SDK_VERSION = FIREBASE_RUNTIME.sdkVersion;
 const FIREBASE_SDK_ROOT = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
 const [firebaseAppApi, firebaseAuthApi, firebaseDatabaseApi, firebaseFunctionsApi] = await Promise.all([
   import(`${FIREBASE_SDK_ROOT}/firebase-app.js`),
@@ -55,11 +68,11 @@ const [firebaseAppApi, firebaseAuthApi, firebaseDatabaseApi, firebaseFunctionsAp
   import(`${FIREBASE_SDK_ROOT}/firebase-functions.js`)
 ]);
 const { getApps, initializeApp } = firebaseAppApi;
-const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } = firebaseAuthApi;
-const { get, getDatabase, onValue, push, ref, runTransaction, set, update } = firebaseDatabaseApi;
-const { getFunctions, httpsCallable } = firebaseFunctionsApi;
-const FIREBASE_CONFIG = Object.freeze({ ...requireConfigurationValue("firebase.client") });
-const FIREBASE_FUNCTIONS_REGION = requireConfigurationValue("firebase.functionsRegion");
+const { connectAuthEmulator, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } = firebaseAuthApi;
+const { connectDatabaseEmulator, get, getDatabase, onValue, push, ref, runTransaction, set, update } = firebaseDatabaseApi;
+const { connectFunctionsEmulator, getFunctions, httpsCallable } = firebaseFunctionsApi;
+const FIREBASE_CONFIG = Object.freeze({ ...FIREBASE_RUNTIME.firebaseConfig });
+const FIREBASE_FUNCTIONS_REGION = FIREBASE_RUNTIME.functionsRegion;
 const LIVE_ROOT_PATH = requireConfigurationValue("firebase.paths.live");
 const PUBLIC_TOURNAMENTS_PATH = requireConfigurationValue("firebase.paths.publicTournaments");
 const TOURNAMENT_INDEX_PATH = requireConfigurationValue("firebase.paths.tournamentIndex");
@@ -104,6 +117,7 @@ let appInstance = null;
 let databaseInstance = null;
 let authInstance = null;
 let functionsInstance = null;
+let localEmulatorConnections = null;
 let publicSnapshotBuildCount = 0;
 let publicSnapshotPublishCount = 0;
 let publicSnapshotSetCount = 0;
@@ -4141,14 +4155,16 @@ async function readFirebaseUserProfile(user) {
 }
 
 function getFirebaseDatabase() {
-  if (!appInstance) appInstance = getApps()[0] || initializeApp(FIREBASE_CONFIG);
-  if (!databaseInstance) databaseInstance = getDatabase(appInstance);
+  const app = getFirebaseAppInstance();
+  ensureLocalFirebaseEmulatorConnections(app);
+  if (!databaseInstance) databaseInstance = getDatabase(app);
   return databaseInstance;
 }
 
 function getFirebaseAuth() {
-  if (!appInstance) appInstance = getApps()[0] || initializeApp(FIREBASE_CONFIG);
-  if (!authInstance) authInstance = getAuth(appInstance);
+  const app = getFirebaseAppInstance();
+  ensureLocalFirebaseEmulatorConnections(app);
+  if (!authInstance) authInstance = getAuth(app);
   return authInstance;
 }
 
@@ -4170,9 +4186,50 @@ async function getFirebaseBroadcastAuthenticatedUser() {
 }
 
 function getFirebaseFunctions() {
-  if (!appInstance) appInstance = getApps()[0] || initializeApp(FIREBASE_CONFIG);
-  if (!functionsInstance) functionsInstance = getFunctions(appInstance, FIREBASE_FUNCTIONS_REGION);
+  const app = getFirebaseAppInstance();
+  ensureLocalFirebaseEmulatorConnections(app);
+  if (!functionsInstance) functionsInstance = getFunctions(app, FIREBASE_FUNCTIONS_REGION);
   return functionsInstance;
+}
+
+function getFirebaseAppInstance() {
+  if (appInstance) return appInstance;
+
+  if (FIREBASE_RUNTIME.environment === "local") {
+    const existing = getApps().find((candidate) => candidate.name === FIREBASE_RUNTIME.appName) || null;
+    if (existing && existing.options?.projectId !== FIREBASE_RUNTIME.projectId) {
+      throw new Error("CharroPro Local fue bloqueado porque detecto configuracion de Produccion.");
+    }
+    appInstance = existing || initializeApp(FIREBASE_CONFIG, FIREBASE_RUNTIME.appName);
+    return appInstance;
+  }
+
+  appInstance = getApps()[0] || initializeApp(FIREBASE_CONFIG);
+  return appInstance;
+}
+
+function ensureLocalFirebaseEmulatorConnections(app) {
+  if (FIREBASE_RUNTIME.environment !== "local" || localEmulatorConnections) return;
+
+  const plan = buildFirebaseEmulatorConnectionPlan(FIREBASE_RUNTIME);
+  try {
+    authInstance = authInstance || getAuth(app);
+    databaseInstance = databaseInstance || getDatabase(app);
+    functionsInstance = functionsInstance || getFunctions(app, FIREBASE_FUNCTIONS_REGION);
+    connectAuthEmulator(authInstance, plan.auth.url, { disableWarnings: true });
+    connectDatabaseEmulator(databaseInstance, plan.database.host, plan.database.port);
+    connectFunctionsEmulator(functionsInstance, plan.functions.host, plan.functions.port);
+    localEmulatorConnections = Object.freeze({ ...plan });
+    console.info("[firebase-local-runtime] emulators connected", getFirebaseRuntimeDiagnostics());
+  } catch (error) {
+    throw new Error(`CharroPro Local fue bloqueado porque no pudo conectar Emulator: ${error?.message || "unknown"}`);
+  }
+}
+
+export function getFirebaseRuntimeDiagnostics() {
+  return getFirebaseRuntimePublicDiagnostics(FIREBASE_RUNTIME, {
+    connected: Boolean(localEmulatorConnections)
+  });
 }
 
 async function resolveFirebaseBroadcastAccess(context, operation = "read") {

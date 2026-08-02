@@ -30,6 +30,9 @@ function usage() {
     "  emulators:stop                   Stop a suite previously started with --background.",
     "  emulators:clear --confirm         Clear only ignored local emulator export data.",
     "  emulators:smoke [--env-file <p>] Start a fresh suite and verify all four emulator endpoints.",
+    "  local:seed                        Seed only synthetic users and DEMO / LOCAL / NO OFICIAL data.",
+    "  local:reset --confirm             Remove and recreate only synthetic Emulator data.",
+    "  web:start [--port <port>]         Serve this repository on loopback with no-store responses.",
     "",
     `Local project is fixed to ${DEFAULT_LOCAL_PROJECT_ID}; production is never a default.`
   ].join("\n");
@@ -176,6 +179,51 @@ function emulatorSmokeCommand(argv) {
   return 0;
 }
 
+function localSeedCommand(argv, options = {}) {
+  if (options.reset && !hasOption(argv, "--confirm")) {
+    process.stderr.write("Refusing to reset local runtime data without --confirm.\n");
+    return 1;
+  }
+  const environment = loadEnvironment(argv);
+  if (environment.parseErrors.length || !environment.validation.valid || environment.descriptor.projectId !== DEFAULT_LOCAL_PROJECT_ID) {
+    process.stderr.write("Local runtime seed requires the isolated demo-charropro-local profile.\n");
+    return 1;
+  }
+  const seedScript = resolve(ROOT_DIRECTORY, "tools/development/localRuntimeSeed.mjs");
+  const args = [seedScript];
+  if (options.reset) args.push("--reset");
+  const child = spawn(process.execPath, args, {
+    cwd: ROOT_DIRECTORY,
+    env: {
+      ...process.env,
+      FIREBASE_PROJECT_ID: DEFAULT_LOCAL_PROJECT_ID,
+      FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099",
+      FIREBASE_DATABASE_EMULATOR_HOST: "127.0.0.1:9000",
+      FIREBASE_FUNCTIONS_EMULATOR_HOST: "127.0.0.1:5001",
+      FIREBASE_STORAGE_EMULATOR_HOST: "127.0.0.1:9199"
+    },
+    stdio: "inherit"
+  });
+  child.on("exit", (code) => process.exitCode = code || 0);
+  return 0;
+}
+
+function webStartCommand(argv) {
+  const requestedPort = readOption(argv, "--port");
+  if (requestedPort && (!/^\d+$/.test(requestedPort) || Number(requestedPort) < 1024 || Number(requestedPort) > 65535)) {
+    process.stderr.write("Local web port must be an integer between 1024 and 65535.\n");
+    return 1;
+  }
+  const webServer = resolve(ROOT_DIRECTORY, "tools/development/localWebServer.mjs");
+  const child = spawn(process.execPath, [webServer, requestedPort || "8765"], {
+    cwd: ROOT_DIRECTORY,
+    env: { ...process.env, CHARROPRO_ENV: "local", FIREBASE_PROJECT_ID: DEFAULT_LOCAL_PROJECT_ID },
+    stdio: "inherit"
+  });
+  child.on("exit", (code) => process.exitCode = code || 0);
+  return 0;
+}
+
 function main(argv) {
   const [command = "help"] = argv;
   if (command === "help" || command === "--help" || command === "-h") {
@@ -188,6 +236,9 @@ function main(argv) {
   if (command === "emulators:stop") return emulatorStopCommand();
   if (command === "emulators:clear") return emulatorClearCommand(argv.slice(1));
   if (command === "emulators:smoke") return emulatorSmokeCommand(argv.slice(1));
+  if (command === "local:seed") return localSeedCommand(argv.slice(1));
+  if (command === "local:reset") return localSeedCommand(argv.slice(1), { reset: true });
+  if (command === "web:start") return webStartCommand(argv.slice(1));
   process.stderr.write(`${usage()}\n`);
   return 1;
 }

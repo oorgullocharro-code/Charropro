@@ -16,7 +16,7 @@ function request(port, pathname) {
 }
 
 const checks = await Promise.all([
-  request(9000, `/.json?ns=${encodeURIComponent(`${projectId}-default-rtdb`)}`),
+  request(9000, `/.json?ns=${encodeURIComponent(projectId)}`),
   request(9099, `/emulator/v1/projects/${encodeURIComponent(projectId)}/accounts`),
   request(9199, `/v0/b/${encodeURIComponent(`${projectId}.appspot.com`)}/o`),
   request(5001, `/${encodeURIComponent(projectId)}/us-central1/infrastructureHealth`)

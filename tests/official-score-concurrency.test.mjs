@@ -6,7 +6,9 @@ const {
   OFFICIAL_SCORE_LEDGER_VERSION,
   applyOfficialScoreTransaction,
   buildOfficialScoreFanoutUpdates,
-  prepareOfficialScoreRequest
+  markOfficialScoreFanoutDelivered,
+  prepareOfficialScoreRequest,
+  toFirebaseDatabaseValue
 } = officialScoreConcurrency;
 
 const tournamentId = "tournament-concurrency";
@@ -209,6 +211,18 @@ assert.equal("secretGetter" in preparedImmutable.request.scorePayload[0], false)
 const immutableApplied = applyOfficialScoreTransaction(immutableSource, preparedImmutable.request);
 immutableApplied.tournament.publishedScores[immutableApplied.outcome.recordId].total = 999;
 assert.deepEqual(immutableSource.publishedScores, {}, "transaction output does not mutate its source");
+const firebaseCompatibleTournament = toFirebaseDatabaseValue(immutableApplied.tournament);
+assert.equal(Object.getPrototypeOf(firebaseCompatibleTournament), Object.prototype, "RTDB receives a normal root object");
+assert.equal(Object.getPrototypeOf(firebaseCompatibleTournament.publishedScores), Object.prototype, "RTDB receives normal nested records");
+assert.equal(firebaseCompatibleTournament.publishedScores[immutableApplied.outcome.recordId].total, 999);
+assert.equal(Object.prototype.hasOwnProperty.call(firebaseCompatibleTournament, "__proto__"), false);
+const firebaseCompatibleFanout = toFirebaseDatabaseValue(
+  markOfficialScoreFanoutDelivered(
+    { officialScoreFanout: { [immutableApplied.outcome.recordId]: immutableApplied.tournament.officialScoreFanout[immutableApplied.outcome.recordId] } },
+    immutableApplied.outcome.recordId
+  ).officialScoreFanout[immutableApplied.outcome.recordId]
+);
+assert.equal(Object.getPrototypeOf(firebaseCompatibleFanout), Object.prototype, "RTDB receives a normal fanout transaction value");
 
 const fanoutJob = retryStore.read().officialScoreFanout[corrected.outcome.recordId];
 const fanoutUpdates = buildOfficialScoreFanoutUpdates(tournamentId, fanoutJob);

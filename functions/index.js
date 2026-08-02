@@ -8,7 +8,8 @@ const {
   buildOfficialScoreFanoutUpdates,
   markOfficialScoreFanoutDelivered,
   markOfficialScoreFanoutFailed,
-  prepareOfficialScoreRequest
+  prepareOfficialScoreRequest,
+  toFirebaseDatabaseValue
 } = require("./officialScoreConcurrency");
 const {
   createBackupRuntime,
@@ -128,7 +129,7 @@ exports.publishCharroProOfficialScore = onCall({ region: FUNCTIONS_REGION }, asy
   const transaction = await tournamentRef.transaction((current) => {
     const applied = applyOfficialScoreTransaction(current || {}, officialRequest);
     transactionOutcome = applied.outcome;
-    return applied.tournament;
+    return toFirebaseDatabaseValue(applied.tournament);
   }, undefined, false);
 
   if (!transaction.committed || !transactionOutcome) {
@@ -562,7 +563,9 @@ async function deliverOfficialScoreFanout(tournamentId, recordId, job) {
   await jobRef.transaction((current) => {
     if (!current || current.status === "DELIVERED") return current;
     const container = { officialScoreFanout: { [recordId]: current } };
-    return markOfficialScoreFanoutDelivered(container, recordId).officialScoreFanout[recordId];
+    return toFirebaseDatabaseValue(
+      markOfficialScoreFanoutDelivered(container, recordId).officialScoreFanout[recordId]
+    );
   }, undefined, false);
 }
 
@@ -571,11 +574,13 @@ async function markFanoutFailure(tournamentId, recordId, error) {
   await jobRef.transaction((current) => {
     if (!current || current.status === "DELIVERED") return current;
     const container = { officialScoreFanout: { [recordId]: current } };
-    return markOfficialScoreFanoutFailed(
-      container,
-      recordId,
-      normalizeFunctionError(error)
-    ).officialScoreFanout[recordId];
+    return toFirebaseDatabaseValue(
+      markOfficialScoreFanoutFailed(
+        container,
+        recordId,
+        normalizeFunctionError(error)
+      ).officialScoreFanout[recordId]
+    );
   }, undefined, false);
 }
 
