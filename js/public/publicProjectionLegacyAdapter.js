@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260807-public-snapshot-critical-recovery-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

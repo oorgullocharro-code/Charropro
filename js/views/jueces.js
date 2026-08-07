@@ -7,7 +7,7 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState
-} from "../core/firebaseSync.js?v=20260801-web-client-emulator-runtime-integration-001-v2";
+} from "../core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 import { getTournamentIdFromUrl } from "../core/tournamentContext.js?v=20260708-recovery-001b-panel-status1";
 

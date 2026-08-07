@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { registerHooks } from "node:module";
 import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js";
 import officialScoreConcurrency from "../functions/officialScoreConcurrency.js";
@@ -38,9 +38,16 @@ registerHooks({
 
 const firebaseSync = await import(`../js/core/firebaseSync.js?public-feed-integration=${Date.now()}`);
 const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
+const firebaseSyncImportVersions = await collectFirebaseSyncImportVersions(new URL("../js/", import.meta.url));
 const tournamentId = "tournament-feed-integration";
 const charreadaId = "charreada-feed-integration";
 const teamId = "team-feed-integration";
+
+assert.deepEqual(
+  [...firebaseSyncImportVersions],
+  ["20260807-public-snapshot-critical-recovery-001-v1"],
+  "all browser entrypoints share one firebaseSync module identity"
+);
 
 assert.equal(
   firebaseSync.getFirebasePublicProjectionOutboxJobPath(tournamentId, "../projection"),
@@ -84,6 +91,7 @@ firebase.seed({
     audit: { publishedScores: {} }
   }
 });
+firebase.requireFreshOutboxTransition = true;
 
 const first = await publishOfficial({
   publishedId: "published-integration-1",
@@ -98,15 +106,40 @@ assert.equal(first.complete, true);
 assert.equal(first.partialFailure, false);
 assert.equal(first.privateWrite.ok, true);
 assert.equal(first.publicSnapshot.ok, true);
+assert.equal(first.publicSnapshot.publicSnapshotValidation, true);
 assert.equal(firebase.privateWriteCount, 1, "private score is written once");
 assert.equal(
   firebase.read(`${first.projectionOutboxPath}/intent/createdBy/uid`),
   "test-user",
   "the authenticated Firebase user overrides a forged actor uid"
 );
+const firstOutboxState = firebase.read(`${first.projectionOutboxPath}/state`);
+assert.equal(firstOutboxState.status, "CLIENT_CONFIRMED");
+assert.equal(firstOutboxState.attempts, 1);
+assert.ok(firstOutboxState.projectedAt);
+assert.ok(firstOutboxState.clientConfirmedAt);
+assert.ok(firstOutboxState.targetRevision >= 1);
+assert.ok(firstOutboxState.targetFingerprint);
+assert.ok(
+  firebase.freshOutboxStateReads >= 2,
+  "PROJECTED and CLIENT_CONFIRMED refresh the durable state before each CAS"
+);
+const stableConfirmed = await firebaseSync.reconcileFirebasePublicProjectionOutbox(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor" },
+  { nowMs: Date.parse("2026-07-28T10:01:30.000Z") }
+);
+assert.equal(stableConfirmed.ok, true);
+assert.equal(firebase.read(`${first.projectionOutboxPath}/state`).attempts, 1);
+assert.equal(
+  stableConfirmed.jobs.find((job) => job.projectionId === first.projectionId)?.status,
+  "CLIENT_CONFIRMED",
+  "a confirmed job is never claimed again"
+);
 
 const publicPath = `charropro/publicTournaments/${tournamentId}`;
 const firstProjection = firebase.read(publicPath);
+assertFirebaseSdkSerializable(firstProjection);
 assert.equal(firstProjection.schemaVersion, 2);
 assert.equal(firstProjection.projectionRevision, 1);
 assert.equal(firstProjection.liveFeed.revision, 1);
@@ -381,6 +414,40 @@ const recoveredClaimFailure = await restartedFirebaseSync.reconcileFirebasePubli
 assert.equal(recoveredClaimFailure.ok, true);
 assert.equal(firebase.read(`${claimFailure.projectionOutboxPath}/state`).status, "CLIENT_CONFIRMED");
 
+firebase.failProjectedTransitionOnce = true;
+const projectedTransitionFailure = await publishOfficial({
+  publishedId: "published-projected-transition-failure",
+  scoreId: "score-projected-transition-failure",
+  suerteId: "paso",
+  total: 22,
+  publishedAt: "2026-07-28T10:13:00.000Z"
+});
+assert.equal(projectedTransitionFailure.ok, true, "the official score remains durable when PROJECTED is rejected");
+assert.equal(projectedTransitionFailure.privateWrite.ok, true);
+assert.equal(projectedTransitionFailure.partialFailure, true);
+const projectedFailureState = firebase.read(`${projectedTransitionFailure.projectionOutboxPath}/state`);
+assert.equal(projectedFailureState.status, "RETRY_WAIT");
+assert.equal(projectedFailureState.attempts, 1);
+assert.equal(projectedFailureState.lastErrorCode, "permission-denied");
+assert.equal(projectedFailureState.projectedAt, "");
+assert.equal(projectedFailureState.clientConfirmedAt, "");
+const projectedTransitionRecovered = await restartedFirebaseSync.reconcileFirebasePublicProjectionOutbox(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    projectionIds: [projectedTransitionFailure.projectionId],
+    manual: true,
+    nowMs: Date.parse("2026-07-28T10:13:05.000Z"),
+    jitter: false
+  }
+);
+assert.equal(projectedTransitionRecovered.ok, true);
+const projectedRecoveredState = firebase.read(`${projectedTransitionFailure.projectionOutboxPath}/state`);
+assert.equal(projectedRecoveredState.status, "CLIENT_CONFIRMED");
+assert.equal(projectedRecoveredState.attempts, 2);
+assert.ok(projectedRecoveredState.projectedAt);
+assert.ok(projectedRecoveredState.clientConfirmedAt);
+
 const backlog = await restartedFirebaseSync.readFirebasePublicProjectionOutbox(tournamentId);
 assert.equal(backlog.ok, true);
 assert.equal(backlog.pending, 0);
@@ -521,15 +588,21 @@ function createFirebaseTestAdapter() {
   const database = { name: "test-database" };
   return {
     privateWriteCount: 0,
+    freshOutboxStateReads: 0,
+    requireFreshOutboxTransition: false,
     failPublicTransactions: false,
     failAfterPublicCommitOnce: false,
     failOutboxTransactionsOnce: false,
+    failProjectedTransitionOnce: false,
     seed(value) {
       data = structuredClone(value);
       this.privateWriteCount = 0;
+      this.freshOutboxStateReads = 0;
+      this.requireFreshOutboxTransition = false;
       this.failPublicTransactions = false;
       this.failAfterPublicCommitOnce = false;
       this.failOutboxTransactionsOnce = false;
+      this.failProjectedTransitionOnce = false;
       authUser = { uid: "test-user" };
     },
     read(path) {
@@ -552,6 +625,10 @@ function createFirebaseTestAdapter() {
     },
     async get(target) {
       const value = readPath(data, target.path);
+      if (target.path.includes("/projectionOutbox/") && target.path.endsWith("/state")) {
+        this.freshOutboxStateReads += 1;
+        this.lastFreshOutboxStatePath = target.path;
+      }
       return snapshot(value);
     },
     async set(target, value) {
@@ -575,11 +652,31 @@ function createFirebaseTestAdapter() {
         error.code = "PERMISSION_DENIED";
         throw error;
       }
-      const current = structuredClone(readPath(data, target.path));
+      const serverCurrent = structuredClone(readPath(data, target.path));
+      const staleOutboxTransition = this.requireFreshOutboxTransition
+        && target.path.includes("/projectionOutbox/")
+        && target.path.endsWith("/state")
+        && serverCurrent?.status === "PROCESSING"
+        && this.lastFreshOutboxStatePath !== target.path;
+      const current = staleOutboxTransition
+        ? {
+          ...serverCurrent,
+          status: "PENDING",
+          updatedAtMs: Math.max(0, Number(serverCurrent.updatedAtMs || 0) - 1)
+        }
+        : serverCurrent;
+      this.lastFreshOutboxStatePath = "";
       const next = handler(current);
       if (next === undefined) {
         return { committed: false, snapshot: snapshot(current) };
       }
+      if (this.failProjectedTransitionOnce && next?.status === "PROJECTED") {
+        this.failProjectedTransitionOnce = false;
+        const error = new Error("permission denied while marking projection projected");
+        error.code = "PERMISSION_DENIED";
+        throw error;
+      }
+      assertFirebaseSdkSerializable(next, target.path || "snapshot");
       writePath(data, target.path, structuredClone(next));
       if (this.failAfterPublicCommitOnce && target.path.includes("/publicTournaments/")) {
         this.failAfterPublicCommitOnce = false;
@@ -702,4 +799,39 @@ function writePath(root, path, value) {
 
 function joinPath(left, right) {
   return [left, right].filter(Boolean).join("/").replace(/\/+/g, "/");
+}
+
+function assertFirebaseSdkSerializable(value, path = "snapshot", seen = new WeakSet()) {
+  if (value === null || ["string", "boolean", "number"].includes(typeof value)) return;
+  assert.notEqual(value, undefined, `${path} cannot be undefined`);
+  assert.equal(typeof value, "object", `${path} must be Firebase serializable`);
+  if (seen.has(value)) assert.fail(`${path} cannot contain a cycle`);
+  seen.add(value);
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => assertFirebaseSdkSerializable(item, `${path}[${index}]`, seen));
+    seen.delete(value);
+    return;
+  }
+  assert.equal(Object.getPrototypeOf(value), Object.prototype, `${path} must use Object.prototype`);
+  assert.equal(typeof value.hasOwnProperty, "function", `${path}.hasOwnProperty must be callable`);
+  for (const key of Object.keys(value)) {
+    assert.equal(value.hasOwnProperty(key), true, `${path}.${key} must be an own property`);
+    assertFirebaseSdkSerializable(value[key], `${path}.${key}`, seen);
+  }
+  seen.delete(value);
+}
+
+async function collectFirebaseSyncImportVersions(directoryUrl) {
+  const versions = new Set();
+  for (const entry of await readdir(directoryUrl, { withFileTypes: true })) {
+    const entryUrl = new URL(`${entry.name}${entry.isDirectory() ? "/" : ""}`, directoryUrl);
+    if (entry.isDirectory()) {
+      for (const version of await collectFirebaseSyncImportVersions(entryUrl)) versions.add(version);
+      continue;
+    }
+    if (!entry.name.endsWith(".js")) continue;
+    const source = await readFile(entryUrl, "utf8");
+    for (const match of source.matchAll(/firebaseSync\.js\?v=([^"']+)/g)) versions.add(match[1]);
+  }
+  return versions;
 }

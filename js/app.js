@@ -77,7 +77,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260801-web-client-emulator-runtime-integration-001-v2";
+} from "./core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,

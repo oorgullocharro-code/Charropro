@@ -191,6 +191,13 @@ const canWriteProjectionJob = (profile, current, next, intent) => Boolean(
     next.leaseExpiresAtMs > next.updatedAtMs
   ) &&
   (
+    next.status !== "PROJECTED" ||
+    current.status === "PROCESSING" &&
+    current.claimedBy?.uid === profile.uid &&
+    current.leaseExpiresAtMs >= next.updatedAtMs &&
+    Boolean(next.projectedAt)
+  ) &&
+  (
     next.status !== "CLIENT_CONFIRMED" ||
     current.status === "PROJECTED" &&
     Boolean(next.clientConfirmedAt) &&
@@ -369,6 +376,14 @@ assert.equal(
   canWriteProjectionJob(userA, processingJob, projectedJob, outboxIntent),
   true,
   "PROCESSING to PROJECTED is allowed for the current actor"
+);
+assert.equal(
+  canWriteProjectionJob(userA, processingJob, {
+    ...projectedJob,
+    updatedAtMs: processingJob.leaseExpiresAtMs + 1
+  }, outboxIntent),
+  false,
+  "PROCESSING to PROJECTED is rejected after the claim lease expires"
 );
 assert.equal(
   canWriteProjectionJob(userA, projectedJob, {

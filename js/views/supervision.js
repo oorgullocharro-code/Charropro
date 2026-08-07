@@ -5,7 +5,7 @@ import {
   signOutAuditUser,
   subscribeAuditAuth,
   subscribeFirebaseAuditScores
-} from "../core/firebaseSync.js?v=20260708-recovery-001b-panel-status1";
+} from "../core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1";
 import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("supervision-root");

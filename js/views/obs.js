@@ -3,7 +3,7 @@ import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig }
 import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260712-production-competitions-001-broadcast-context1";
 import { calculateAttemptTotal } from "../core/scoring.js?v=20260709-competitions-003-scoring-by-competition1";
 import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260709-competitions-003-scoring-by-competition1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260712-production-competitions-001-broadcast-context1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1";
 import { getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("obs-root");

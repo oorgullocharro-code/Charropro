@@ -15,6 +15,14 @@ export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([
 ]);
 
 const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+const FIREBASE_RESERVED_KEYS = new Set([...DANGEROUS_KEYS, "hasOwnProperty"]);
+const FIREBASE_REPAIRABLE_ISSUES = new Set([
+  "null-prototype",
+  "has-own-property-unavailable",
+  "has-own-property-overridden",
+  "has-own-property-key",
+  "undefined-value"
+]);
 const MAX_DEPTH = 12;
 const MAX_ARRAY_ITEMS = 2000;
 const MAX_OBJECT_KEYS = 300;
@@ -216,6 +224,34 @@ export function sanitizePublicProjectionValue(value, options = {}) {
   });
 }
 
+export function diagnosePublicProjectionFirebaseCompatibility(value, options = {}) {
+  const issues = [];
+  inspectFirebaseValue(value, {
+    path: options.rootPath || "snapshot",
+    depth: 0,
+    seen: new WeakSet(),
+    issues,
+    maxDepth: finiteLimit(options.maxDepth, MAX_DEPTH),
+    maxArrayItems: finiteLimit(options.maxArrayItems, MAX_ARRAY_ITEMS),
+    maxObjectKeys: finiteLimit(options.maxObjectKeys, MAX_OBJECT_KEYS),
+    maxIssues: finiteLimit(options.maxIssues, 100)
+  });
+  return { valid: issues.length === 0, issues };
+}
+
+export function normalizePublicProjectionForFirebase(value, options = {}) {
+  const sourceDiagnostics = diagnosePublicProjectionFirebaseCompatibility(value, options);
+  const normalized = sanitizePublicProjectionValue(value, options);
+  const validation = diagnosePublicProjectionFirebaseCompatibility(normalized, options);
+  const blockingIssues = sourceDiagnostics.issues.filter((issue) => !FIREBASE_REPAIRABLE_ISSUES.has(issue.reason));
+  return {
+    valid: validation.valid && blockingIssues.length === 0,
+    value: normalized,
+    issues: [...blockingIssues, ...validation.issues],
+    normalizedIssues: sourceDiagnostics.issues
+  };
+}
+
 export function sanitizePublicId(value, fallback = null) {
   if (value === null || value === undefined || value === "") return fallback;
   const normalized = sanitizeString(value, 180);
@@ -385,16 +421,16 @@ function sanitizeValue(value, context) {
     const output = [];
     for (const item of value.slice(0, context.maxArrayItems)) {
       const clean = sanitizeValue(item, { ...context, depth: context.depth + 1 });
-      if (clean !== undefined) output.push(clean);
+      output.push(clean === undefined ? null : clean);
     }
     context.seen.delete(value);
     return output;
   }
 
-  const output = Object.create(null);
+  const output = {};
   let count = 0;
   for (const key of Object.keys(value)) {
-    if (count >= context.maxObjectKeys || DANGEROUS_KEYS.has(key)) continue;
+    if (count >= context.maxObjectKeys || FIREBASE_RESERVED_KEYS.has(key)) continue;
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (!descriptor || descriptor.get || descriptor.set) continue;
     const clean = sanitizeValue(descriptor.value, { ...context, depth: context.depth + 1 });
@@ -405,6 +441,113 @@ function sanitizeValue(value, context) {
   }
   context.seen.delete(value);
   return output;
+}
+
+function inspectFirebaseValue(value, context) {
+  if (context.issues.length >= context.maxIssues) return;
+  if (value === undefined) {
+    addFirebaseIssue(context, "undefined-value", value);
+    return;
+  }
+  if (value === null || typeof value === "boolean" || typeof value === "string") return;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) addFirebaseIssue(context, "non-finite-number", value);
+    return;
+  }
+  if (["bigint", "function", "symbol"].includes(typeof value)) {
+    addFirebaseIssue(context, "unsupported-type", value);
+    return;
+  }
+  if (typeof value !== "object") return;
+  if (context.depth >= context.maxDepth) {
+    addFirebaseIssue(context, "depth-limit", value);
+    return;
+  }
+  if (context.seen.has(value)) {
+    addFirebaseIssue(context, "cyclic-reference", value);
+    return;
+  }
+  context.seen.add(value);
+  try {
+    if (Array.isArray(value)) {
+      if (value.length > context.maxArrayItems) addFirebaseIssue(context, "array-limit", value);
+      value.slice(0, context.maxArrayItems).forEach((item, index) => {
+        inspectFirebaseValue(item, {
+          ...context,
+          path: `${context.path}[${index}]`,
+          depth: context.depth + 1
+        });
+      });
+      return;
+    }
+
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype === null) addFirebaseIssue(context, "null-prototype", value);
+    else if (prototype !== Object.prototype) addFirebaseIssue(context, "unsupported-prototype", value);
+
+    const hasOwnDescriptor = Object.getOwnPropertyDescriptor(value, "hasOwnProperty");
+    if (hasOwnDescriptor && typeof hasOwnDescriptor.value !== "function") {
+      addFirebaseIssue(context, "has-own-property-overridden", value);
+    } else if (typeof value.hasOwnProperty !== "function") {
+      addFirebaseIssue(context, "has-own-property-unavailable", value);
+    }
+
+    const keys = Reflect.ownKeys(value);
+    if (keys.length > context.maxObjectKeys) addFirebaseIssue(context, "object-key-limit", value);
+    for (const key of keys.slice(0, context.maxObjectKeys)) {
+      if (typeof key === "symbol") {
+        addFirebaseIssue({ ...context, path: `${context.path}.[symbol]` }, "symbol-key", value);
+        continue;
+      }
+      const childPath = firebaseChildPath(context.path, key);
+      if (FIREBASE_RESERVED_KEYS.has(key)) {
+        addFirebaseIssue(
+          { ...context, path: childPath },
+          key === "hasOwnProperty" ? "has-own-property-key" : "dangerous-key",
+          value
+        );
+        continue;
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (!descriptor || descriptor.get || descriptor.set) {
+        addFirebaseIssue({ ...context, path: childPath }, "accessor-property", value);
+        continue;
+      }
+      inspectFirebaseValue(descriptor.value, {
+        ...context,
+        path: childPath,
+        depth: context.depth + 1
+      });
+    }
+  } finally {
+    context.seen.delete(value);
+  }
+}
+
+function addFirebaseIssue(context, reason, value) {
+  if (context.issues.length >= context.maxIssues) return;
+  const prototype = value && typeof value === "object" ? Object.getPrototypeOf(value) : null;
+  context.issues.push({
+    path: context.path,
+    reason,
+    valueType: Array.isArray(value) ? "array" : value === null ? "null" : typeof value,
+    constructor: prototype?.constructor?.name || null,
+    prototype: prototype === null
+      ? "null"
+      : prototype === Object.prototype
+        ? "Object.prototype"
+        : prototype === Array.prototype
+          ? "Array.prototype"
+          : prototype?.constructor?.name
+            ? `${prototype.constructor.name}.prototype`
+            : "unknown"
+  });
+}
+
+function firebaseChildPath(parent, key) {
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key)
+    ? `${parent}.${key}`
+    : `${parent}[${JSON.stringify(key)}]`;
 }
 
 function sanitizeString(value, maxLength) {

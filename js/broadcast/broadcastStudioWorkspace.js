@@ -543,7 +543,7 @@ export function createBroadcastStudioEngine(options = {}) {
       if (disposed) throw workspaceError("broadcast-studio-destroyed");
       emit({ connectionState: "preparing", context: null, operationStatus: "Esperando autenticación", error: null });
       try {
-        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e");
+        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1");
         if (typeof runtime.firebaseBroadcastApi.subscribeFirebaseBroadcastContext !== "function") {
           throw workspaceError("broadcast-studio-context-subscriber-unavailable");
         }

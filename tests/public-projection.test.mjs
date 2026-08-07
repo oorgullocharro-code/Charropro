@@ -5,7 +5,10 @@ import {
   reconcilePublicProjection
 } from "../js/public/publicProjection.js";
 import {
+  diagnosePublicProjectionFirebaseCompatibility,
+  normalizePublicProjectionForFirebase,
   sanitizePublicProjectionValue,
+  stablePublicStringify,
   validatePublicProjection
 } from "../js/public/publicProjectionSchema.js";
 import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js";
@@ -176,6 +179,80 @@ assert.equal("big" in sanitized, false);
 assert.equal("self" in sanitized, true);
 assert.equal(sanitized.self, null);
 assert.equal(Object.prototype.polluted, undefined);
+
+const ordinaryFirebaseValue = normalizePublicProjectionForFirebase({ foo: "bar" });
+assert.equal(ordinaryFirebaseValue.valid, true);
+assert.deepEqual(ordinaryFirebaseValue.value, { foo: "bar" });
+assert.equal(Object.getPrototypeOf(ordinaryFirebaseValue.value), Object.prototype);
+
+const nullPrototypeValue = Object.create(null);
+nullPrototypeValue.foo = "bar";
+const nullPrototypeDiagnostics = diagnosePublicProjectionFirebaseCompatibility(nullPrototypeValue);
+assert.equal(nullPrototypeDiagnostics.valid, false);
+assert.ok(nullPrototypeDiagnostics.issues.some((issue) => issue.path === "snapshot" && issue.reason === "null-prototype"));
+const normalizedNullPrototype = normalizePublicProjectionForFirebase(nullPrototypeValue);
+assert.equal(normalizedNullPrototype.valid, true);
+assert.deepEqual(normalizedNullPrototype.value, { foo: "bar" });
+assert.equal(Object.getPrototypeOf(normalizedNullPrototype.value), Object.prototype);
+
+const overriddenHasOwnProperty = { hasOwnProperty: "invalid", foo: "bar" };
+const normalizedHasOwnProperty = normalizePublicProjectionForFirebase(overriddenHasOwnProperty);
+assert.equal(normalizedHasOwnProperty.valid, true);
+assert.equal(normalizedHasOwnProperty.value.foo, "bar");
+assert.equal(Object.prototype.hasOwnProperty.call(normalizedHasOwnProperty.value, "hasOwnProperty"), false);
+assert.equal(typeof normalizedHasOwnProperty.value.hasOwnProperty, "function");
+assert.ok(normalizedHasOwnProperty.normalizedIssues.some((issue) => issue.reason === "has-own-property-overridden"));
+
+const nestedNullPrototype = Object.create(null);
+nestedNullPrototype.score = 33;
+const nestedFirebaseValue = {
+  results: {
+    foo: {
+      bar: nestedNullPrototype
+    }
+  }
+};
+const nestedDiagnostics = diagnosePublicProjectionFirebaseCompatibility(nestedFirebaseValue);
+assert.ok(nestedDiagnostics.issues.some((issue) => (
+  issue.path === "snapshot.results.foo.bar" && issue.reason === "null-prototype"
+)));
+const normalizedNested = normalizePublicProjectionForFirebase(nestedFirebaseValue);
+assert.equal(normalizedNested.valid, true);
+assert.deepEqual(normalizedNested.value.results.foo.bar, { score: 33 });
+
+const undefinedFirebaseValue = normalizePublicProjectionForFirebase({
+  omitted: undefined,
+  items: ["first", undefined, { value: 0, enabled: false, label: "" }]
+});
+assert.equal(undefinedFirebaseValue.valid, true);
+assert.equal(Object.prototype.hasOwnProperty.call(undefinedFirebaseValue.value, "omitted"), false);
+assert.deepEqual(undefinedFirebaseValue.value.items, ["first", null, { value: 0, enabled: false, label: "" }]);
+
+const arrayWithNullPrototype = Object.create(null);
+arrayWithNullPrototype.id = "row-1";
+const normalizedArray = normalizePublicProjectionForFirebase([arrayWithNullPrototype]);
+assert.equal(normalizedArray.valid, true);
+assert.deepEqual(normalizedArray.value, [{ id: "row-1" }]);
+assert.equal(Object.getPrototypeOf(normalizedArray.value[0]), Object.prototype);
+
+const cyclicFirebaseValue = { id: "cycle" };
+cyclicFirebaseValue.self = cyclicFirebaseValue;
+const rejectedCycle = normalizePublicProjectionForFirebase(cyclicFirebaseValue);
+assert.equal(rejectedCycle.valid, false);
+assert.ok(rejectedCycle.issues.some((issue) => issue.path === "snapshot.self" && issue.reason === "cyclic-reference"));
+
+const rejectedPrototype = normalizePublicProjectionForFirebase(new Date("2026-08-07T00:00:00.000Z"));
+assert.equal(rejectedPrototype.valid, false);
+assert.ok(rejectedPrototype.issues.some((issue) => issue.path === "snapshot" && issue.reason === "unsupported-prototype"));
+
+const validProjectionNormalization = normalizePublicProjectionForFirebase(initial.projection);
+assert.equal(validProjectionNormalization.valid, true);
+assert.equal(validProjectionNormalization.normalizedIssues.length, 0);
+assert.equal(
+  stablePublicStringify(validProjectionNormalization.value),
+  stablePublicStringify(initial.projection),
+  "Firebase normalization leaves a valid projection functionally unchanged"
+);
 
 const unsupported = structuredClone(initial.projection);
 unsupported.schemaVersion = 3;

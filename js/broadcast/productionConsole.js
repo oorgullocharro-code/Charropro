@@ -1990,7 +1990,7 @@ export async function connectProductionConsoleRealtime(model, runtime, options =
   }
   runtime.realtimeContractUnsubscribe?.();
   runtime.realtimeContractUnsubscribe = null;
-  const firebaseApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
+  const firebaseApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1");
   if (options.authorizedContext && !options.adapter) throw consoleError("console-realtime-authorized-context-injection-forbidden");
   const context = options.authorizedContext || await firebaseApi.resolveCurrentBroadcastContext(contextSeed, {
     operation: "publish",

@@ -8,7 +8,7 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
+} from "./publicProjectionSchema.js?v=20260807-public-snapshot-critical-recovery-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
