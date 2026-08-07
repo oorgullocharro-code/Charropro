@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "1.0.0",
+  "audit": "CHARROPRO-FMCH-CURRENT-SCORER-FUNCTIONAL-AUDIT-001",
+  "liveUiValidated": false,
+  "evidenceConstraint": "Browser scoring UI requires authenticated access; browser runtime does not consume Emulator profile hosts.",
+  "controls": [
+    {
+      "label": "Base",
+      "suertes": [
+        "all"
+      ],
+      "component": "renderScoringActionAccordions",
+      "event": "toggleRule('base', ruleId)",
+      "state": [
+        "attempt.base",
+        "attempt.applied",
+        "attempt.initializedBase"
+      ],
+      "calculation": "calculateAttemptTotal",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown",
+      "fieldKinds": [
+        "BASE",
+        "GOOD_POINTS"
+      ]
+    },
+    {
+      "label": "Adicional",
+      "suertes": [
+        "all"
+      ],
+      "component": "renderScoringActionAccordions",
+      "event": "toggleRule('adic', ruleId)",
+      "state": [
+        "attempt.adic",
+        "attempt.applied"
+      ],
+      "calculation": "calculateAttemptTotal",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown.adicItems",
+      "fieldKinds": [
+        "ADDITIONAL_POINTS"
+      ]
+    },
+    {
+      "label": "Infraccion",
+      "suertes": [
+        "all"
+      ],
+      "component": "renderScoringActionAccordions",
+      "event": "toggleRule('infr', ruleId)",
+      "state": [
+        "attempt.infr",
+        "attempt.applied"
+      ],
+      "calculation": "calculateAttemptTotal",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown.infrItems",
+      "fieldKinds": [
+        "BAD_POINTS"
+      ]
+    },
+    {
+      "label": "Cero no logrado",
+      "suertes": [
+        "piales",
+        "colas",
+        "manganas_pie",
+        "manganas_caballo"
+      ],
+      "component": "renderScoringBottomBar",
+      "event": "toggleAttemptZero()",
+      "state": [
+        "attempt.attempted",
+        "attempt.notAchieved"
+      ],
+      "calculation": "zero attempt",
+      "persistence": "published.attempt",
+      "officialScore": "published.total",
+      "fieldKinds": [
+        "ATTEMPT_TOTAL"
+      ]
+    },
+    {
+      "label": "Metros de punta",
+      "suertes": [
+        "cala"
+      ],
+      "component": "renderCalaPuntaSection",
+      "event": "writePuntaField",
+      "state": [
+        "attempt.puntaMetros"
+      ],
+      "calculation": "applyPuntaCalculation",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown.puntaMetros",
+      "fieldIds": [
+        "FMCH.TEAM_SHEET.CALA.METERS"
+      ]
+    },
+    {
+      "label": "Marcas o piquetes",
+      "suertes": [
+        "cala"
+      ],
+      "component": "renderCalaPuntaSection",
+      "event": "writePuntaField",
+      "state": [
+        "attempt.puntaPiquetes"
+      ],
+      "calculation": "applyPuntaCalculation",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown.puntaPiquetes",
+      "fieldIds": [
+        "FMCH.TEAM_SHEET.CALA.TIMES",
+        "FMCH.TEAM_SHEET.CALA.P",
+        "FMCH.TEAM_SHEET.CALA.T"
+      ]
+    },
+    {
+      "label": "Grupos Cala",
+      "suertes": [
+        "cala"
+      ],
+      "component": "renderCalaAdicGroup",
+      "event": "toggleRule('adic', ruleId)",
+      "state": [
+        "attempt.applied",
+        "attempt.adic"
+      ],
+      "calculation": "calculateAttemptTotal",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown.adicGroups",
+      "fieldIds": [
+        "FMCH.TEAM_SHEET.CALA.LD",
+        "FMCH.TEAM_SHEET.CALA.LI",
+        "FMCH.TEAM_SHEET.CALA.MD",
+        "FMCH.TEAM_SHEET.CALA.MI",
+        "FMCH.TEAM_SHEET.CALA.PC"
+      ]
+    },
+    {
+      "label": "Tiempo y evidencia",
+      "suertes": [
+        "all"
+      ],
+      "component": "time evidence section",
+      "event": "time input handlers",
+      "state": [
+        "attempt.tiempo",
+        "attempt.timeEvidence",
+        "attempt.note"
+      ],
+      "calculation": "rule-dependent",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown",
+      "fieldKinds": [
+        "COMPLETION_TIME",
+        "TIME"
+      ]
+    },
+    {
+      "label": "Infraccion al equipo",
+      "suertes": [
+        "all"
+      ],
+      "component": "renderTeamPenaltySection",
+      "event": "toggleTeamPenalty(ruleId)",
+      "state": [
+        "attempt.teamPenalties"
+      ],
+      "calculation": "calculateAttemptFinalTotal",
+      "persistence": "published.attempt",
+      "officialScore": "published.breakdown.teamPenalties",
+      "fieldKinds": [
+        "TEAM_INFRACTION"
+      ]
+    },
+    {
+      "label": "Guardar y siguiente",
+      "suertes": [
+        "all"
+      ],
+      "component": "renderScoringBottomBar",
+      "event": "nextScore()",
+      "state": [
+        "state.publishedScores",
+        "state.lastPublishedScore"
+      ],
+      "calculation": "buildPublishedScoreSnapshot",
+      "persistence": "publishFirebaseOfficialScoreAtomic",
+      "officialScore": "published score and audit history",
+      "fieldKinds": [
+        "OFFICIAL_SCORE"
+      ]
+    }
+  ]
+}
