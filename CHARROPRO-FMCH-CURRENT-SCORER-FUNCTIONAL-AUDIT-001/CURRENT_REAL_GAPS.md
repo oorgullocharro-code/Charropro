@@ -56,12 +56,25 @@ y pueden superponerse:
 | P1 formato | Firmas, logo FMCH y footer no tienen captura o composicion oficial completa. | `officialFormat.js` y los 7 FieldID faltantes. | La hoja no alcanza equivalencia documental completa. |
 | P1 operacion | Confirmacion o refutacion multi-juez no es estado explicito del flujo revisado. | `OFFICIAL_SCORE_FLOW.md`. | Requiere validacion operativa autorizada. |
 | P2 operacion | El control de footer etiquetado `Deshacer` ejecuta `previousScore()`: reinicia el cronometro y mueve el puntero al intento anterior. | `renderScoringBottomBar()`, `previousScore()` y `previousScoringPointer()`. | No existe undo transversal de la ultima accion; la etiqueta puede inducir una expectativa distinta al comportamiento real. |
-| P2 definicion | No se localizo entidad, helper, configuracion o persistencia autonoma para fusiones, fusionales, sustituciones o combinaciones. | Busqueda completa en `js/` y `tests/`; solo existen reglas denominadas `Floreo` en Lazo, Pial en el Ruedo y Manganas. | Requiere definicion deportiva antes de declarar equivalencia con Floreo o crear un modelo nuevo. |
+| P2 contrato historico | El usuario refiere un control previo `Pendiente a revision`, pero no aparece en HEAD ni en commits, ramas, etiquetas, reflog o documentos disponibles. | El historial local inicia en `fe309687` y ya contiene el footer actual. | No se conocen estado, persistencia, permisos ni efecto oficial; requiere evidencia historica antes de recuperar. |
 
 El bloqueo anterior de autenticacion y navegador queda cerrado; ya no es una
 brecha del diagnostico. Tampoco se incluyen como faltantes los valores que ya
 existen como regla aplicada, estado, calculo o desglose y solo necesitan
 transformacion de exportacion.
+
+## Rectificacion terminologica del footer
+
+La referencia previa a `fusiones/fusionales` fue una confusion terminologica y no
+constituye una brecha ni un requisito funcional del scorer 2026. La intencion era
+preservar controles historicos del pie del calificador. Se elimina aquella interpretacion
+sin afirmar equivalencia con Floreo ni crear trabajo deportivo nuevo.
+
+El footer actual esta confirmado desde `CORE-1.0-STABLE`: Deshacer, Marcar 0 y Guardar y
+siguiente, ademas de estado y Ajustar botonera. Evidencia y Nota de juez siguen siendo
+funcionales dentro del cuerpo del scorer. No existe boton separado Guardar: los cambios
+persisten como borrador y `Guardar y siguiente` publica y avanza. Los mocks 2026 son solo
+referencias visuales y no autorizan eliminar estas capacidades.
 
 ## Hoja llenada al estado actual
 

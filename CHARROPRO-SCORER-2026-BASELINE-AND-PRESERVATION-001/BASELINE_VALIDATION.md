@@ -15,7 +15,8 @@
 3. Reconciliacion de `FIELD_DICTIONARY.json` contra la matriz de capas.
 4. Inventario de funciones transversales, footer, DQ, timers, persistencia, publicacion,
    exportacion y responsive.
-5. Busqueda explicita de fusiones/fusionales y conceptos relacionados.
+5. Revision historica del footer mediante HEAD, commits, ramas, etiquetas, reflog y
+   documentacion local.
 6. Suite completa y validaciones estaticas al cierre.
 
 ## Evidencia reutilizada
@@ -51,10 +52,13 @@ vigente utilizada aqui.
 | Manual infringement | Localizado: `customInfr` y `addCustomScore("infr")`. |
 | Team infractions | Localizadas: `teamPenalties`, catalogo general/Cala y entrada manual. |
 | DQ | Documentado en `applyDescReason()`. Preserva infracciones numericas/manuales, equipo, evidencia y nota. |
-| Footer | Documentado. `Deshacer` navega al puntero anterior; no es undo por accion. |
+| Footer actual | Confirmado desde `fe309687`: Deshacer, Marcar 0 y Guardar y siguiente; estado y Ajustar botonera tambien visibles. |
+| Deshacer | Navega al puntero anterior y reinicia timer; no es undo por accion. |
+| Guardar | No existe boton separado; cada cambio guarda borrador mediante `persistScoreChange()`. |
+| Evidencia y nota | Funcionales dentro del scorer, fuera del footer; deben preservarse en cualquier reorganizacion. |
+| Pendiente a revision | No localizado en la historia disponible; contrato historico pendiente de evidencia. |
 | Timers | Documentados, incluida cuenta regresiva de Coleadero. |
 | Punta Cala | Preservada como calculador especializado. |
-| Fusiones/fusionales | No localizadas como funcionalidad independiente; Floreo no se declara equivalente. |
 | Publicacion oficial | Transaccion, CAS, idempotencia, ledger, historial, audit y fanout documentados. |
 | Public snapshot | Outbox, Recovery y guards documentados. |
 | FMCH export | Mapeado; brecha de charreada activa permanece P1. |
@@ -75,6 +79,16 @@ Resultados reproducibles obtenidos antes del commit local:
 | Escrituras en Produccion | 0 |
 | Deploy | No |
 | Push | No |
+
+## Rectificacion terminologica
+
+La expresion anterior `fusiones/fusionales` fue una confusion terminologica y se elimina
+como supuesto requisito del scorer 2026. La aclaracion se refiere a funciones historicas
+del footer. Los mocks visuales no constituyen autorizacion para eliminar controles.
+
+Limite de evidencia: el historial Git local comienza en `fe309687`; no permite atribuir
+commit o semantica a una version anterior de `Pendiente a revision` que no haya sido
+importada a este repositorio.
 
 ## Criterio
 

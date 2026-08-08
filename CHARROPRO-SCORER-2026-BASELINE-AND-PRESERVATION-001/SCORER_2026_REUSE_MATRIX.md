@@ -37,7 +37,8 @@ No se identifico ningun componente E en este baseline.
 | Participante/roster resolver | Nombres reales con fallback | Todas | B/C | Completar 4o coleador y Master Data | Placeholder visible | Participants/Master Data |
 | Evidence + notes | Tiempo, etiqueta, fecha y nota | Todas | A/B | Extender tipos sin perder historico | Datos no exportados | Evidence contract futuro |
 | Timer engine | Elapsed general, countdown Colas | Todas | A/B | Extender reglas por suerte solo con validacion | Revisiones stale | Timer rules 2026 |
-| Footer | Acciones y estado | Todas | B/C | Corregir etiqueta/undo sin perder navegacion | “Deshacer” no deshace accion | Scorer footer UX |
+| Footer actual | Estado, Deshacer, Cero y Guardar y siguiente | Todas | A/B/C | Preservar acciones; reorganizar para iPad; definir undo sin perder navegacion | Mock incompleto o cambio semantico | Scorer footer UX |
+| Pendiente a revision (antecedente referido) | No localizado en historia disponible | No determinada | C | Investigar artefacto historico antes de recuperar | Inventar estado, permisos o publicacion | Scorer footer contract |
 | Save local | Draft por torneo | Todas | A | Preservar | Reemplazo cruzado | Core preservation |
 | Next flow | Publica y luego avanza | Todas | A | Preservar | Doble clic/falla parcial | Official score tests |
 | Official publisher | Callable + transaccion + ledger | Todas | A | No tocar por reglas deportivas | Duplicidad/conflicto | Core stabilization |
@@ -47,7 +48,6 @@ No se identifico ningun componente E en este baseline.
 | Official format/exporter | Paquete y hoja actual | Todas | B/C | Completar mapping y resolver charreada activa | Hoja parcial | FMCH exporter 2026 |
 | FieldID matrix | 239 IDs reconciliados | Todas | A/B | Mantener identidad y actualizar capas | Romper trazabilidad | FMCH 2026 spec |
 | Broadcast consumers | Contrato sanitizado | Todas | A | No escribir score | Convertirse en autoridad | Broadcast regression |
-| Fusiones/fusionales | No existe componente autonomo | No determinada | C | Validar termino deportivo antes de modelar | Equipararlo a floreo sin evidencia | Sports validation |
 
 ## Reutilizacion por familia
 
@@ -82,7 +82,8 @@ especificacion que pruebe equivalencia.
 5. Footer: distinguir navegar anterior de undo real.
 6. DQ: definir reversibilidad y cubrir colisiones sin borrar infracciones.
 7. Responsive: eliminar overflow estructural sin ocultar footer ni controles.
-8. Fusiones/fusionales: obtener definicion deportiva antes de crear modelo.
+8. Footer historico: localizar evidencia verificable de `Pendiente a revision` antes de
+   definir recuperacion, estado o permisos.
 
 ## Componentes nuevos necesarios
 

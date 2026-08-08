@@ -122,6 +122,21 @@ Debe conservarse:
 - Datos reales de equipo, charro, caballo y participante tienen prioridad sobre
   placeholders.
 
+### Contrato del footer y de los mocks
+
+- Los mocks 2026 describen jerarquia y presentacion; no autorizan eliminar funciones.
+- Deben preservarse el estado de guardado, Deshacer, Marcar 0 y Guardar y siguiente.
+- Evidencia y Nota de juez deben conservarse aunque actualmente vivan fuera del footer.
+- `persistScoreChange()` conserva el borrador automaticamente; no se inventara un boton
+  separado `Guardar` sin definir primero su contrato frente a publicacion y avance.
+- La semantica actual de Deshacer es navegacion al puntero anterior, no undo por evento.
+  El control no puede desaparecer mientras se define una correccion compatible.
+- `Pendiente a revision` no esta localizado en la historia Git disponible. Solo podra
+  recuperarse cuando exista evidencia verificable de estado, persistencia, permisos,
+  impacto en score oficial y comportamiento en Resultados.
+- La UI futura puede reorganizar controles para iPad portrait/landscape, pero no ocultar
+  ni retirar capacidades confirmadas.
+
 ## Contrato de integraciones
 
 | Integracion | Regla de preservacion |

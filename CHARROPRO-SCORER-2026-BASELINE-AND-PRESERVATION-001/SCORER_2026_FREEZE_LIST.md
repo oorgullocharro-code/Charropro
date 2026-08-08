@@ -63,19 +63,59 @@ compone como Terna sin perder sus intentos independientes.
 | Publicar y siguiente | score oficial + puntero | `nextScore()` | Publica atomicamente y avanza solo con exito. |
 | Historial | `publishedScores`, ledger y auditoria | `recordPublishedScore()` y autoridad server-side | Revision anterior queda historica/superseded. |
 
-## Footer congelado
+## Footer funcional congelado
+
+El historial disponible comienza en `fe30968719431cd449ee786fc92170104902c7fc`
+(`CORE 1.0 STABLE - 2026-07-06`, etiqueta `CORE-1.0-STABLE`). Desde ese primer commit
+el footer conserva el mismo grupo principal. No existe historia Git anterior dentro de
+este repositorio.
+
+### A. Controles actuales confirmados
 
 | Etiqueta actual | Handler | Estado requerido | Efecto real |
 | --- | --- | --- | --- |
-| Teclado | ninguno | siempre deshabilitado | Reserva visual; no existe operacion activa. |
+| Teclado | ninguno | siempre deshabilitado | Reserva visual; no es una accion funcional. |
 | Ajustar botonera | `show-scoring-button-settings` | Supervisor u Operador | Edita layout/etiquetas mediante overrides, no reglas deportivas. |
 | Estado de conexion | lectura | contexto actual | Muestra estado y detalle del ultimo guardado/publicacion. |
-| Deshacer | `previousScore()` | capacidad `score` | Reinicia cronometro y navega al puntero anterior. No revierte la ultima accion. |
-| Marcar 0 | `toggleAttemptZero()` | intento sin valor deportivo | Alterna `attempted/notAchieved`. |
-| Guardar y siguiente | `nextScore()` | jornada abierta y publicacion libre | Publica score oficial; bloqueo de doble accion; luego avanza. |
+| Deshacer | `previousScore()` | contexto de calificacion | Reinicia cronometro, navega al puntero anterior y guarda la navegacion. No revierte la ultima accion. |
+| Marcar 0 | `toggleAttemptZero()` | intento sin valor deportivo | Alterna `attempted/notAchieved` y persiste el borrador. |
+| Guardar y siguiente | `nextScore()` | jornada abierta y publicacion libre | Guarda borrador, publica score oficial con guards y avanza solo tras exito. |
 
-La etiqueta `Deshacer` no debe tomarse como contrato de undo por accion. La diferencia
-entre etiqueta y comportamiento esta registrada como brecha P2.
+Evidencia y Nota de juez son controles funcionales actuales dentro de
+`renderTimeNoteSection()`, no botones del footer. Deben preservarse aunque la presentacion
+iPad-first los reorganice. No existe un boton actual independiente `Guardar`: cada cambio
+deportivo llama `persistScoreChange()` y guarda el borrador; `Guardar y siguiente` realiza
+la publicacion oficial y el avance.
+
+### B. Controles historicos confirmados que deben preservarse o recuperarse
+
+No se encontro un control ausente hoy que pueda confirmarse en el historial disponible.
+Los controles actuales anteriores ya estaban presentes en el commit inicial; la captura
+manual de evidencia se agrego en `09f9eb5e234a4e5db12493c9ec7c62ed2ca8f9f2`
+(`CALIFICADOR-001 COLAS-001`) y permanece vigente fuera del footer.
+
+### C. Controles con semantica pendiente de definicion
+
+- `Pendiente a revision`: referido por el usuario como control de una version anterior,
+  pero no localizado en HEAD, commits, ramas, etiquetas, reflog ni documentos disponibles.
+  No se conocen handler, estado, persistencia, efecto oficial, Resultados ni permisos. Debe
+  investigarse con un artefacto historico verificable antes de recuperar o implementar.
+- `Deshacer`: el control actual debe preservarse, pero su contrato observado es navegar al
+  puntero anterior. Un undo de botones, adicionales, infracciones, DQ o manuales no esta
+  implementado ni probado en el historial disponible.
+- `Guardar` independiente: no localizado como boton del scorer. El contrato probado es
+  guardado automatico de borrador mas `Guardar y siguiente` para publicar y avanzar.
+
+### D. Controles propuestos sin evidencia
+
+Cualquier otro control que no pertenezca a A, no tenga evidencia historica para B y no
+este expresamente bajo investigacion en C queda fuera del producto. No debe inventarse a
+partir de mocks.
+
+Los mocks 2026 son referencias de jerarquia visual, no especificaciones de eliminacion.
+Una ausencia grafica nunca autoriza retirar Deshacer, Cero, Guardar y siguiente,
+Evidencia, Notas ni otra funcion confirmada. La futura UI puede reorganizarlos, pero debe
+mantenerlos accesibles, tactiles y sin scroll horizontal en iPad portrait/landscape.
 
 ## Regla DQ observada
 
@@ -146,6 +186,6 @@ controlada, no una sustitucion del scorer.
 
 Permanecen sin corregir: cuarta fila de Coleadero, `ttm` duplicado, equivalencias Cala,
 firmas, elementos institucionales, encabezados, resolucion de charreada en el formato
-Federacion, semantica de `Deshacer` y ausencia de un modelo autonomo de
-fusiones/fusionales. La fuente oficial es
+Federacion, semantica de `Deshacer` y contrato historico no localizado de `Pendiente a
+revision`. La fuente oficial es
 `../CHARROPRO-FMCH-CURRENT-SCORER-FUNCTIONAL-AUDIT-001/CURRENT_REAL_GAPS.md`.

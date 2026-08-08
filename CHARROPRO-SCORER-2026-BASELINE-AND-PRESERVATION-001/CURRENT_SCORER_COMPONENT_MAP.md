@@ -56,6 +56,8 @@ catalogo actual, no una certificacion del Reglamento FMCH 2026.
 | Metros/marcas | `punta-field` | campos punta | punta automatica | intento | breakdown punta | FieldID Cala |
 | Tiempo/nota | `attempt-field` | `tiempo/note` | no cambia por si solo | intento | clon oficial | `TIME/COMPLETION_TIME` |
 | Evidencia | capture/save/remove | `timeEvidence[]` | no cambia por si sola | intento | clon oficial/auditabilidad | soporte operativo |
+| Guardado automatico | cualquier cambio deportivo | `state.scores` + draft activo | recalculo vigente | `saveState({ silent: true })` | no publica | no aplica |
+| Deshacer | `previous-score` | puntero de navegacion | no revierte calculo | guarda navegacion | no modifica score oficial | no aplica |
 | Guardar y siguiente | `next-score` | published + puntero | snapshot total | transaccion oficial | ledger/audit/fanout | `OFFICIAL_SCORE` |
 
 La matriz exhaustiva permanece en
@@ -132,10 +134,20 @@ El shell actual usa scroll vertical en el contenido, footer separado y breakpoin
 botonera es de una columna. Existen tiras horizontales de turnos/suertes y columnas
 clasicas de 160 px que deben considerarse riesgo, no eliminarse sin prueba visual.
 
-## Fusiones/fusionales
+## Mapa historico del footer
 
-La busqueda de codigo y pruebas no encontro entidad, helper, configuracion ni persistencia
-con los conceptos `fusion`, `fusional`, `sustitucion` o `combinacion`. Si existen como
-termino deportivo externo, no estan modelados de forma autonoma. Los catalogos si tienen
-`Floreo` en Lazo, Pial en el Ruedo y Manganas, pero no hay evidencia para declarar que
-sean equivalentes. Estado: **NO LOCALIZADAS como funcionalidad independiente**.
+| Control | Estado actual | Primera evidencia Git disponible | Semantica confirmada |
+| --- | --- | --- | --- |
+| Deshacer | Visible | `fe309687` / `CORE-1.0-STABLE` | `previousScore()`: reinicia timer y navega al puntero anterior. |
+| Marcar 0 | Visible | `fe309687` / `CORE-1.0-STABLE` | Alterna `attempted/notAchieved` solo sin valor deportivo. |
+| Guardar y siguiente | Visible | `fe309687` / `CORE-1.0-STABLE` | Guarda borrador, publica oficialmente y avanza tras exito. |
+| Guardar separado | No visible | No localizado | El borrador se guarda automaticamente mediante `persistScoreChange()`. |
+| Evidencia | Visible fuera del footer | `09f9eb5e` para captura manual | Captura, etiqueta, guarda o elimina `timeEvidence`; no cambia puntos. |
+| Nota de juez | Visible fuera del footer | `fe309687` / `CORE-1.0-STABLE` | Edita `attempt.note` y persiste borrador. |
+| Pendiente a revision | No visible | No localizado | Sin handler, estado, persistencia ni impacto verificables. |
+
+La busqueda cubrio HEAD, todos los commits alcanzables, ramas, etiquetas, reflog y
+documentacion local. El repositorio no contiene historia anterior a `fe309687`; por ello
+`Pendiente a revision` queda como antecedente referido por el usuario, no como contrato
+tecnico reconstruible todavia. Los mocks visuales no sustituyen este mapa ni autorizan
+eliminar controles confirmados.
