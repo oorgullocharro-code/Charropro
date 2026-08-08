@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-scoring-attempt-model-v2-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-scorer-responsive-component-system-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -16,12 +16,12 @@ import {
 } from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-scoring-attempt-model-v2-001-v1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-scoring-attempt-model-v2-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-scoring-attempt-model-v2-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-scorer-responsive-component-system-001-v1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-scoring-attempt-model-v2-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-scoring-attempt-model-v2-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-scorer-responsive-component-system-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -33,11 +33,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260808-scoring-attempt-model-v2-001-v1";
+} from "./core/scoring.js?v=20260808-scorer-responsive-component-system-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260808-scoring-attempt-model-v2-001-v1";
+} from "./core/scoringAttempt.js?v=20260808-scorer-responsive-component-system-001-v1";
+import {
+  buildScorerAttemptViewModel,
+  buildScorerClassificationModel,
+  buildScorerRuleButtonModel
+} from "./core/scorerComponents.js?v=20260808-scorer-responsive-component-system-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -47,7 +52,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-scoring-attempt-model-v2-001-v1";
+} from "./core/sync.js?v=20260808-scorer-responsive-component-system-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -82,7 +87,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-scoring-attempt-model-v2-001-v1";
+} from "./core/firebaseSync.js?v=20260808-scorer-responsive-component-system-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -131,7 +136,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260808-scoring-attempt-model-v2-001-v1";
+} from "./core/state.js?v=20260808-scorer-responsive-component-system-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -317,7 +322,9 @@ const ACTION_CAPABILITIES = {
   "continue-best-coleador-modal": "score",
   "toggle-desc": "score",
   "add-custom": "score",
+  "clear-custom-form": "score",
   "remove-custom": "score",
+  "select-scoring-classification": "score",
   "reset-attempt": "score",
   "previous-score": "score",
   "next-score": "score",
@@ -7777,10 +7784,11 @@ function renderScoring({ preserveScroll = false } = {}) {
   const leaderboard = buildCharreadaLeaderboard(charreada.id);
   const labels = getScoringEntityLabels(context);
   const showColeadorSelector = context.suerte.type === "coleadero" && !context.competitionContext?.isIndividualCompetition && !isIndividualTournament(context.tournament);
+  const attemptView = buildScoringAttemptUiModel(context);
 
   app.innerHTML = html`
     <div class="scoring-shell cp-scoring-shell scoring-shell-classic ${turnPanelCollapsed ? "turn-panel-collapsed" : ""}">
-      ${renderScoringHeader(charreada, context, charroName)}
+      ${renderScoringHeader(charreada, context, charroName, attemptView)}
       <nav class="suertes-strip cp-suertes-strip">
         ${suertes.map(
           (suerte, index) => html`
@@ -7790,16 +7798,23 @@ function renderScoring({ preserveScroll = false } = {}) {
           `
         ).join("")}
       </nav>
-      ${renderScoringOpportunityBar(context, charroName, showColeadorSelector)}
+      ${renderScoringOpportunityBar(context, charroName, showColeadorSelector, attemptView)}
 
       <main class="scoring-main">
         <section class="score-workspace cp-scoring-main">
-          ${context.attempt.desc ? renderDescState(context.attempt) : ""}
+          ${attemptView.status.isDq
+            ? renderDescState(context.attempt)
+            : attemptView.status.isZero
+              ? renderZeroStateNotice()
+              : ""}
           ${renderScoringMainPanel(charreada, context, charroName)}
+          ${renderScoringClassificationSlot(context, attemptView)}
+          ${renderScoringRemateHistory(attemptView)}
           ${renderTimeNoteSection(context)}
           <section class="cp-botonera-panel">
             ${renderScoringActionAccordions(charreada, context, charroName, leaderboard)}
           </section>
+          ${renderScoringAttemptSummary(attemptView)}
         </section>
       </main>
 
@@ -7808,6 +7823,67 @@ function renderScoring({ preserveScroll = false } = {}) {
   `;
   updateTimerDisplay();
   restoreScoringScroll(scrollSnapshot);
+}
+
+function buildScoringAttemptUiModel(context) {
+  const attemptV2 = adaptLegacyAttemptToV2(
+    context.attempt,
+    buildScoringAttemptV2Context(context),
+    { pointSummary: calculateAttemptPointSummary(context.attempt) }
+  );
+  return buildScorerAttemptViewModel(attemptV2, {
+    opportunityTotal: context.suerte.attempts,
+    timers: [{
+      timerId: `scorer_${context.suerte.id}`,
+      label: getTimerLabel(),
+      display: formatTimer(),
+      status: timerRunning ? "corriendo" : "control externo",
+      primary: true
+    }],
+    sharedTimer: context.attempt.sharedTimerId
+      ? {
+          sharedTimerId: context.attempt.sharedTimerId,
+          label: "Cronometro compartido",
+          display: formatTimer(),
+          status: timerRunning ? "corriendo" : "referencia"
+        }
+      : null,
+    remateHistory: context.attempt.remateHistory,
+    specializedCalculator: context.suerte.id === "cala"
+      ? { id: "cala_punta", label: "Calculador de punta", active: true }
+      : null
+  });
+}
+
+function buildScoringAttemptV2Context(context, attempt = context.attempt) {
+  const isIndividualCompetition = Boolean(context.competitionContext?.isIndividualCompetition);
+  const participantName = getPublishedCharroName(context);
+  const resolution = context.suerte?.ruleResolution || {};
+  return {
+    tournamentId: context.tournament?.id,
+    competitionId: context.charreada?.competitionId
+      || context.competitionContext?.competitionId
+      || "equipos_completo",
+    competitionScope: isIndividualCompetition ? "individual" : "team",
+    charreadaId: context.charreada?.id,
+    participantId: isIndividualCompetition ? context.participant?.id || context.team?.id : null,
+    teamId: isIndividualCompetition ? null : context.team?.id,
+    participantName: isIndividualCompetition ? participantName : null,
+    teamName: isIndividualCompetition ? null : context.team?.name,
+    horseName: isIndividualCompetition ? context.participant?.horseName || context.team?.horseName : null,
+    suerteId: context.suerte?.id,
+    suerte: context.suerte,
+    catalog: context.suerte?.catalog,
+    category: context.team?.category || context.charreada?.category || null,
+    phase: getCharreadaPhase(context.charreada),
+    opportunityNumber: Number(context.attemptIndex || 0) + 1,
+    participantSlot: Number(context.coleadorIndex || 0),
+    opportunityType: context.suerte?.id,
+    sharedOpportunityId: attempt.sharedOpportunityId,
+    sharedSequenceNumber: attempt.sharedSequenceNumber,
+    ruleResolution: resolution,
+    timing: attempt.timing || null
+  };
 }
 
 function renderScoringMainPanel(charreada, context, charroName) {
@@ -7889,13 +7965,17 @@ function renderClassicTurnPanel(charreada, context, labels, showColeadorSelector
   `;
 }
 
-function renderScoringOpportunityBar(context, charroName, showColeadorSelector) {
+function renderScoringOpportunityBar(context, charroName, showColeadorSelector, attemptView) {
+  const opportunity = attemptView.opportunity;
   return html`
     <section class="scoring-opportunity-bar">
       <div class="opportunity-summary">
         <span>Oportunidad</span>
-        <strong>${context.attemptIndex + 1}/${context.suerte.attempts}</strong>
-        <em>${escapeHTML(charroName || "Sin registrar")}</em>
+        <strong>${opportunity.number}/${opportunity.total}</strong>
+        <em>${escapeHTML(opportunity.status || attemptView.status.label)}</em>
+        ${opportunity.sharedOpportunityId
+          ? html`<small>Compartida ${opportunity.sharedSequenceNumber || opportunity.number} de ${opportunity.total}</small>`
+          : ""}
       </div>
       <div class="opportunity-controls" aria-label="Oportunidades">
         ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
@@ -7924,7 +8004,7 @@ function renderScoringOpportunityBar(context, charroName, showColeadorSelector) 
 
 function renderCalaMainPanel(context) {
   return html`
-    <section class="cp-scoring-card cp-main-suerte-panel">
+    <section class="cp-scoring-card cp-main-suerte-panel cp-specialized-calculator" data-calculator="cala_punta">
       <header>
         <div>
           <span>${renderCpIcon("target")}</span>
@@ -8146,15 +8226,43 @@ function renderScoringActionGroupBody(groupId, buttons, charreada, context, char
 }
 
 function renderConfigurableScoringButton(button) {
+  const model = buildScorerRuleButtonModel({
+    id: button.ruleId,
+    label: button.shortLabel || button.label,
+    source: button.source,
+    category: button.ruleType,
+    resolvedValue: Math.abs(Number(button.points || 0)),
+    disabled: button.disabled,
+    disabledReason: button.disabledReason,
+    valueByClassification: button.valueByClassification
+  }, {
+    category: button.ruleType,
+    selected: button.active,
+    disabled: button.disabled,
+    disabledReason: button.disabledReason,
+    classificationId: button.classificationId
+  });
   const dataset = Object.entries(button.dataset || {})
     .map(([key, value]) => `data-${key}="${escapeHTML(value)}"`)
     .join(" ");
   const confirm = button.requiresConfirmation ? `data-confirm-message="${escapeHTML(`Aplicar ${button.shortLabel || button.label}?`)}"` : "";
   return html`
-    <button class="cp-scoring-action-button cp-scoring-action-button--${escapeHTML(button.type)} ${button.active ? "active" : ""}" ${dataset} ${confirm}>
+    <button
+      class="cp-scoring-action-button cp-scoring-action-button--${escapeHTML(button.type)} ${model.selected ? "active" : ""} ${model.disabled ? "cp-scoring-action-button--disabled" : ""}"
+      type="button"
+      aria-pressed="${model.pressed ? "true" : "false"}"
+      aria-label="${escapeHTML(`${model.label} ${button.valueLabel || ""}`.trim())}"
+      data-rule-source="${escapeHTML(model.source)}"
+      data-rule-category="${escapeHTML(model.category)}"
+      ${model.dynamic ? "data-rule-dynamic=\"true\"" : ""}
+      ${model.disabledReason ? `title="${escapeHTML(model.disabledReason)}"` : ""}
+      ${model.disabled ? "disabled" : ""}
+      ${dataset}
+      ${confirm}
+    >
       <span aria-hidden="true">${renderCpIcon(button.icon || "target")}</span>
       <b>${escapeHTML(button.valueLabel || "")}</b>
-      <strong>${escapeHTML(button.shortLabel || button.label)}</strong>
+      <strong>${escapeHTML(model.label)}</strong>
       ${button.description ? html`<em>${escapeHTML(button.description)}</em>` : ""}
     </button>
   `;
@@ -8208,6 +8316,12 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
     shortLabel: rule.label,
     valueLabel: `${isInfr ? "-" : ruleType === "base" ? "" : "+"}${moneylessNumber(rule.pts)}`,
     points: isInfr ? -Number(rule.pts || 0) : Number(rule.pts || 0),
+    source: rule.source || "PRODUCT_BASE",
+    category: rule.category || ruleType,
+    valueByClassification: rule.valueByClassification || null,
+    classificationId: context.attempt.classification?.classificationId || context.attempt.classificationId || null,
+    disabled: rule.disabled === true,
+    disabledReason: rule.disabledReason || "",
     type: visualType,
     icon: isInfr ? "warning" : ruleType === "base" ? "target" : "plus",
     ruleType,
@@ -8244,31 +8358,24 @@ function getScoringButtonLayoutForSuerte(suerteId) {
   return tournamentLayouts[suerteId] || globalLayouts[suerteId] || { buttons: {} };
 }
 
-function renderScoringContextBar(charreada, context, charroName) {
-  const teamTotal = getTeamCharreadaTotal(charreada.id, context.team.id);
+function renderScoringContextBar(charreada, context, charroName, attemptView) {
   const horseName = context.team?.horseName || getParticipantHorseParts(context.team).horseName || "";
-  const association = context.team?.association || context.tournament?.venue || "";
+  const labels = getScoringEntityLabels(context);
 
   return html`
-    <section class="cp-context-bar">
-      ${renderContextCard("user", "Participante", charroName || getEntryDisplayName(context.team), getEntryDisplayName(context.team))}
-      ${renderContextCard("horse", "Caballo", horseName || "Sin caballo registrado", association || "Sin asociacion")}
-      ${renderContextCard("event", "Charreada", charreada.name || "Sin charreada", context.tournament?.venue || context.tournament?.name || "")}
-      ${renderContextCard("score", "Puntaje total", moneylessNumber(teamTotal), "puntos", true)}
-    </section>
-  `;
-}
-
-function renderContextCard(icon, label, value, subvalue = "", highlight = false) {
-  return html`
-    <article class="cp-context-card ${highlight ? "highlight" : ""}">
-      <span class="cp-context-icon" aria-hidden="true">${renderCpIcon(icon)}</span>
-      <div>
-        <span>${escapeHTML(label)}</span>
-        <strong>${escapeHTML(String(value || "-"))}</strong>
-        <em>${escapeHTML(String(subvalue || ""))}</em>
+    <section class="cp-context-bar" aria-label="Contexto de calificacion">
+      <div class="cp-context-primary">
+        <span>Torneo</span>
+        <strong>${escapeHTML(context.tournament?.name || "Sin torneo")}</strong>
+        <em>${escapeHTML(charreada.name || "Sin jornada")} / ${escapeHTML(context.suerte.fullName || context.suerte.name)}</em>
       </div>
-    </article>
+      <dl class="cp-context-metadata">
+        <div><dt>${escapeHTML(labels.scoreEntityLabel)}</dt><dd>${escapeHTML(getEntryDisplayName(context.team) || "Sin registrar")}</dd></div>
+        <div><dt>Participante</dt><dd>${escapeHTML(charroName || "Sin registrar")}</dd></div>
+        <div><dt>Caballo</dt><dd>${escapeHTML(horseName || "Sin caballo registrado")}</dd></div>
+        <div><dt>Estado</dt><dd class="status-${escapeHTML(attemptView.status.tone)}">${escapeHTML(attemptView.status.label)}</dd></div>
+      </dl>
+    </section>
   `;
 }
 
@@ -8348,6 +8455,129 @@ function renderScoringTimerCard() {
         <button class="button" data-action="timer-reset">Reiniciar</button>
       </div>
     </article>
+  `;
+}
+
+function renderScoringTimerGroup(attemptView) {
+  return html`
+    <div class="cp-header-timer-group" data-timer-count="${attemptView.timers.length}">
+      ${attemptView.timers.map((timer) => html`
+        <section class="header-timer read-only cp-timer-tile ${timer.primary ? "primary" : ""}">
+          <span>${escapeHTML(timer.label)}</span>
+          <strong class="timer-display">${escapeHTML(timer.display)}</strong>
+          <em>${escapeHTML(timer.warning || timer.status)}</em>
+        </section>
+      `).join("")}
+      ${attemptView.sharedTimer
+        ? html`
+            <section class="cp-shared-timer-reference">
+              <span>Referencia compartida</span>
+              <strong>${escapeHTML(attemptView.sharedTimer.label)}</strong>
+              <em>${escapeHTML(attemptView.sharedTimer.display)}</em>
+            </section>
+          `
+        : ""}
+    </div>
+  `;
+}
+
+function renderScoringAttemptSummary(attemptView) {
+  const summary = attemptView.summary;
+  const metrics = [
+    ["Base", summary.basePoints, "neutral"],
+    ["Adicionales", summary.additionalPoints, "positive"],
+    ["Infracciones", summary.individualBadPoints, "negative"],
+    ["Equipo", summary.teamBadPoints, "team"],
+    ["Puntos buenos", summary.goodPoints, "positive"],
+    ["Puntos malos", summary.badPoints, "negative"],
+    ["Total", summary.totalPoints, "total"]
+  ];
+  return html`
+    <section class="cp-attempt-summary" aria-labelledby="scoring-attempt-summary-title">
+      <header>
+        <div>
+          <span>Resumen del intento</span>
+          <h2 id="scoring-attempt-summary-title">Puntuacion actual</h2>
+        </div>
+        <strong class="cp-attempt-status status-${escapeHTML(attemptView.status.tone)}">${escapeHTML(attemptView.status.label)}</strong>
+      </header>
+      <div class="cp-attempt-summary-grid">
+        ${metrics.map(([label, value, tone]) => html`
+          <div class="cp-attempt-summary-metric ${tone}">
+            <span>${escapeHTML(label)}</span>
+            <strong>${moneylessNumber(value)}</strong>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderScoringClassificationSlot(context, attemptView) {
+  const classification = buildScorerClassificationModel(
+    getScoringClassificationOptions(context),
+    attemptView.classification.id
+  );
+  if (!classification.options.length) return "";
+  return html`
+    <section class="cp-classification-selector" aria-labelledby="scoring-classification-title">
+      <header>
+        <span>Clasificacion</span>
+        <h2 id="scoring-classification-title">Selecciona la ejecucion</h2>
+      </header>
+      <div class="cp-classification-grid">
+        ${classification.options.map((option) => html`
+          <button
+            type="button"
+            class="cp-classification-option ${option.selected ? "active" : ""}"
+            data-action="select-scoring-classification"
+            data-id="${escapeHTML(option.id)}"
+            data-label="${escapeHTML(option.label)}"
+            aria-pressed="${option.selected ? "true" : "false"}"
+          >
+            <strong>${escapeHTML(option.label)}</strong>
+            ${option.value === null ? "" : html`<span>${moneylessNumber(option.value)}</span>`}
+          </button>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function getScoringClassificationOptions(context) {
+  const options = context.suerte?.presentation?.classificationOptions || context.suerte?.classificationOptions;
+  return Array.isArray(options) ? options : [];
+}
+
+function renderScoringRemateHistory(attemptView) {
+  if (!attemptView.remateHistory.length) return "";
+  return html`
+    <section class="cp-remate-history" aria-labelledby="scoring-remate-history-title">
+      <header>
+        <span>Historial</span>
+        <h2 id="scoring-remate-history-title">Remates de la oportunidad</h2>
+      </header>
+      <div>
+        ${attemptView.remateHistory.map((item) => html`
+          <span class="cp-remate-history-item">
+            <strong>${escapeHTML(item.label)}</strong>
+            ${item.value === null ? "" : html`<em>${moneylessNumber(item.value)}</em>`}
+          </span>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderZeroStateNotice() {
+  return html`
+    <div class="cp-attempt-state-notice zero">
+      <div>
+        <strong>Suerte realizada en cero</strong>
+        <p>La oportunidad queda marcada como no lograda, sin convertirse en descalificacion.</p>
+      </div>
+      <button class="button amber" data-action="toggle-attempt-zero" type="button">Quitar marca de cero</button>
+    </div>
   `;
 }
 
@@ -8555,8 +8785,7 @@ function renderScoringBottomBar(context) {
       : `Turno ${context.teamIndex + 1} / oportunidad ${context.attemptIndex + 1}`);
   return html`
     <footer class="cp-bottom-bar">
-      <div class="cp-bottom-actions muted">
-        <button class="button" type="button" disabled>${renderCpIcon("keyboard")} Teclado</button>
+      <div class="cp-bottom-actions cp-bottom-actions--settings muted">
         <button class="button" data-action="show-scoring-button-settings" type="button" ${canEditLayout ? "" : "disabled"}>${renderCpIcon("settings")} Ajustar botonera</button>
       </div>
       <div class="cp-bottom-sync ${escapeHTML(lastScoreSaveStatus.state || "connected")}">
@@ -8564,12 +8793,12 @@ function renderScoringBottomBar(context) {
         <strong>${escapeHTML(syncLabel)}</strong>
         <em>${escapeHTML(syncDetail)}</em>
       </div>
-      <div class="cp-bottom-actions">
-        <button class="button" data-action="previous-score">${renderCpIcon("undo")} Deshacer</button>
-        <button class="button cp-zero-footer-button ${zeroActive ? "amber" : ""}" data-action="toggle-attempt-zero" ${zeroDisabled ? "disabled" : ""}>
+      <div class="cp-bottom-actions cp-bottom-actions--primary">
+        <button class="button" data-action="previous-score" type="button">${renderCpIcon("undo")} Deshacer</button>
+        <button class="button cp-zero-footer-button ${zeroActive ? "amber" : ""}" data-action="toggle-attempt-zero" type="button" ${zeroDisabled ? "disabled" : ""}>
           ${renderCpIcon("ban")} ${zeroActive ? "0 no logrado" : "Marcar 0"}
         </button>
-        <button class="button primary cp-save-score-button" data-action="next-score" ${officialPublishInProgress ? "disabled" : ""}>
+        <button class="button primary cp-save-score-button" data-action="next-score" type="button" ${officialPublishInProgress ? "disabled" : ""}>
           ${renderCpIcon("check")} ${officialPublishInProgress ? "Publicando..." : "Guardar y siguiente"}
         </button>
       </div>
@@ -8638,7 +8867,7 @@ function renderCpIcon(name) {
   `;
 }
 
-function renderScoringHeader(charreada, context, charroName) {
+function renderScoringHeader(charreada, context, charroName, attemptView) {
   const attemptTotal = calculateAttemptTotal(context.attempt);
   const teamTotal = getTeamCharreadaTotal(charreada.id, context.team.id);
   const labels = getScoringEntityLabels(context);
@@ -8652,7 +8881,8 @@ function renderScoringHeader(charreada, context, charroName) {
           <div class="scoring-title">
             <p>Calificando en vivo</p>
             ${renderFirebaseRuntimeBadge()}
-            <h1>${escapeHTML(charreada.name)} / ${escapeHTML(context.suerte.fullName)}</h1>
+            <h1>${escapeHTML(context.tournament?.name || "CharroPro")}</h1>
+            <small>${escapeHTML(charreada.name)} / ${escapeHTML(context.suerte.fullName)}</small>
             ${renderSupervisorReviewNotice()}
           </div>
           <div class="live-metrics">
@@ -8671,13 +8901,10 @@ function renderScoringHeader(charreada, context, charroName) {
 	              <strong>${moneylessNumber(attemptTotal)}</strong>
 	              <em>${moneylessNumber(teamTotal)} ${escapeHTML(labels.pointsSuffix)}</em>
             </div>
-            <div class="header-timer read-only">
-              <span>${escapeHTML(getTimerLabel())}</span>
-              <strong class="timer-display">${formatTimer()}</strong>
-              <em>Control externo</em>
-            </div>
+            ${renderScoringTimerGroup(attemptView)}
           </div>
         </div>
+        ${renderScoringContextBar(charreada, context, charroName, attemptView)}
         <div class="header-turn-strip" aria-label="Turnos y puntuaciones">
           ${scoringEntries
             .map((entry, index) => {
@@ -8749,12 +8976,12 @@ function restoreScoringScroll(snapshot) {
 
 function renderDescState(attempt) {
   return html`
-    <div class="danger-state">
+    <div class="danger-state cp-attempt-state-notice danger">
       <div>
-        <strong>Descalificado</strong>
+        <strong>Descalificacion</strong>
         <p>${escapeHTML(attempt.desc)}</p>
       </div>
-      <button class="button red" data-action="toggle-desc" data-label="${escapeHTML(attempt.desc)}">Deshacer</button>
+      <button class="button red" data-action="toggle-desc" data-label="${escapeHTML(attempt.desc)}" type="button">Quitar descalificacion</button>
     </div>
   `;
 }
@@ -8794,8 +9021,8 @@ function renderCustomScoreSection(type, context) {
   const title = type === "adic" ? "Adicional manual" : "Infraccion manual";
   const items = context.attempt[type === "adic" ? "customAdic" : "customInfr"] || [];
   return html`
-    <article class="card">
-      <div class="card-body">
+    <section class="cp-manual-score-section" data-manual-score-type="${escapeHTML(type)}">
+      <div>
         ${
           items.length
             ? html`
@@ -8803,7 +9030,7 @@ function renderCustomScoreSection(type, context) {
                   ${items
                     .map(
                       (item) => html`
-                        <button class="button ${type === "adic" ? "green" : "red"}" data-action="remove-custom" data-type="${type}" data-id="${item.id}">
+                        <button class="button ${type === "adic" ? "green" : "red"}" data-action="remove-custom" data-type="${type}" data-id="${item.id}" type="button">
                           ${type === "adic" ? "+" : "-"}${moneylessNumber(item.pts)} ${escapeHTML(item.label)}
                         </button>
                       `
@@ -8823,11 +9050,12 @@ function renderCustomScoreSection(type, context) {
             <input id="custom-${type}-pts" type="number" min="1" value="1">
           </div>
         </div>
-        <div class="topbar-actions" style="margin-top: 10px;">
-          <button class="button ${type === "adic" ? "green" : "red"}" data-action="add-custom" data-type="${type}">Agregar</button>
+        <div class="cp-manual-score-actions">
+          <button class="button" data-action="clear-custom-form" data-type="${type}" type="button">Cancelar</button>
+          <button class="button ${type === "adic" ? "green" : "red"}" data-action="add-custom" data-type="${type}" type="button">Agregar</button>
         </div>
       </div>
-    </article>
+    </section>
   `;
 }
 
@@ -8836,21 +9064,21 @@ function renderTeamPenaltySection(context) {
   const activeIds = new Set(penalties.map((item) => item.id));
   const catalog = getTeamPenaltyRulesForSuerte(context.suerte);
   return html`
-    <article class="card">
-      <div class="card-header">
+    <section class="cp-team-infractions">
+      <header>
         <div>
           <h2 class="card-title">Infracciones al equipo</h2>
           <p class="card-subtitle">Se descuentan del total del equipo y quedan separadas de la calificacion del charro.</p>
         </div>
         <span class="pill red">-${moneylessNumber(sumTeamPenalties(context.attempt))}</span>
-      </div>
-      <div class="card-body">
+      </header>
+      <div>
         ${
           penalties.length
             ? html`
                 <div class="grid" style="margin-bottom: 10px;">
                   ${penalties.map((item) => html`
-                    <button class="button red" data-action="remove-team-penalty" data-id="${escapeHTML(item.id)}">
+                    <button class="button red" data-action="remove-team-penalty" data-id="${escapeHTML(item.id)}" type="button">
                       -${moneylessNumber(item.total || item.pts)} ${escapeHTML(item.label)}
                     </button>
                   `).join("")}
@@ -8860,7 +9088,7 @@ function renderTeamPenaltySection(context) {
         }
         <div class="button-grid compact">
           ${catalog.map((rule) => html`
-            <button class="score-button red ${activeIds.has(rule.id) ? "active" : ""}" data-action="toggle-team-penalty" data-id="${rule.id}">
+            <button class="score-button red ${activeIds.has(rule.id) ? "active" : ""}" data-action="toggle-team-penalty" data-id="${rule.id}" type="button" aria-pressed="${activeIds.has(rule.id) ? "true" : "false"}">
               <b>-${moneylessNumber(rule.pts)}</b>
               <span>${escapeHTML(rule.label)}</span>
             </button>
@@ -8877,10 +9105,10 @@ function renderTeamPenaltySection(context) {
           </div>
         </div>
         <div class="topbar-actions" style="margin-top: 10px;">
-          <button class="button red" data-action="add-team-penalty">Agregar al equipo</button>
+          <button class="button red" data-action="add-team-penalty" type="button">Agregar al equipo</button>
         </div>
       </div>
-    </article>
+    </section>
   `;
 }
 
@@ -8965,15 +9193,15 @@ function renderCalaPuntaSection(context) {
   const metros = Number(context.attempt.puntaMetros || 0);
   const marcas = Number(context.attempt.puntaPiquetes || 1);
   return html`
-    <article class="card cala-punta-card">
-      <div class="card-header">
+    <section class="cala-punta-card cp-specialized-calculator-panel">
+      <header>
         <div>
           <h2 class="card-title">Calculador de punta</h2>
           <p class="card-subtitle">Metros de punta y tiempos de Cala.</p>
         </div>
         <span class="punta-total">+${moneylessNumber(context.attempt.puntaPts)} pts</span>
-      </div>
-      <div class="card-body cala-punta-grid">
+      </header>
+      <div class="cala-punta-grid">
         ${renderPuntaCounter("Metros de punta", "puntaMetros", metros, [
           { label: "+3 Mts", delta: 3 },
           { label: "+5 Mts", delta: 5 }
@@ -8984,7 +9212,7 @@ function renderCalaPuntaSection(context) {
           { label: "3 marcas", set: 3 }
         ], "Desde 7 m: +1 por metro / 1 tiempo +3 / 2 +2 / 3 +1 / 4 +0")}
       </div>
-    </article>
+    </section>
   `;
 }
 
@@ -9075,14 +9303,14 @@ function renderDescSection(context) {
   const otherValue = selectValue === "__other" && selectedDesc !== "Otro" ? selectedDesc : "";
 
   return html`
-    <article class="card">
-      <div class="card-header">
+    <section class="cp-desc-section">
+      <header>
         <div>
           <h2 class="card-title">Descalificaciones</h2>
           <p class="card-subtitle">Selecciona el motivo correspondiente.</p>
         </div>
-      </div>
-      <div class="card-body desc-grid">
+      </header>
+      <div class="desc-grid">
         <div>
           <label>Motivo</label>
           <select data-action="desc-select">
@@ -9110,7 +9338,7 @@ function renderDescSection(context) {
             : ""
         }
       </div>
-    </article>
+    </section>
   `;
 }
 
@@ -9810,7 +10038,9 @@ function handleAction(action, target) {
     "continue-best-coleador-modal": continueAfterBestColeadorModal,
     "toggle-desc": () => toggleDesc(target.dataset.label),
     "add-custom": () => addCustomScore(target.dataset.type),
+    "clear-custom-form": () => clearCustomScoreForm(target.dataset.type),
     "remove-custom": () => removeCustomScore(target.dataset.type, target.dataset.id),
+    "select-scoring-classification": () => setScoringClassification(target.dataset.id, target.dataset.label),
     "reset-attempt": resetAttempt,
     "previous-score": previousScore,
     "next-score": nextScore,
@@ -11338,34 +11568,8 @@ function buildPublishedBreakdown(context, attempt, publication = {}) {
   const resolution = context.suerte?.ruleResolution || {};
   const profile = resolution.profile || {};
   const pointSummary = calculateAttemptPointSummary(attempt);
-  const isIndividualCompetition = Boolean(context.competitionContext?.isIndividualCompetition);
-  const participantName = getPublishedCharroName(context);
   const attemptV2 = buildOfficialScoringAttemptSnapshot(
-    adaptLegacyAttemptToV2(attempt, {
-      tournamentId: context.tournament?.id,
-      competitionId: context.charreada?.competitionId
-        || context.competitionContext?.competitionId
-        || "equipos_completo",
-      competitionScope: isIndividualCompetition ? "individual" : "team",
-      charreadaId: context.charreada?.id,
-      participantId: isIndividualCompetition ? context.participant?.id || context.team?.id : null,
-      teamId: isIndividualCompetition ? null : context.team?.id,
-      participantName: isIndividualCompetition ? participantName : null,
-      teamName: isIndividualCompetition ? null : context.team?.name,
-      horseName: isIndividualCompetition ? context.participant?.horseName || context.team?.horseName : null,
-      suerteId: context.suerte?.id,
-      suerte: context.suerte,
-      catalog: context.suerte?.catalog,
-      category: context.team?.category || context.charreada?.category || null,
-      phase: getCharreadaPhase(context.charreada),
-      opportunityNumber: Number(context.attemptIndex || 0) + 1,
-      participantSlot: Number(context.coleadorIndex || 0),
-      opportunityType: context.suerte?.id,
-      sharedOpportunityId: attempt.sharedOpportunityId,
-      sharedSequenceNumber: attempt.sharedSequenceNumber,
-      ruleResolution: resolution,
-      timing: attempt.timing || null
-    }, {
+    adaptLegacyAttemptToV2(attempt, buildScoringAttemptV2Context(context, attempt), {
       pointSummary,
       actor: publication.publishedBy,
       adaptedAt: publication.publishedAt
@@ -11534,6 +11738,30 @@ function addCustomScore(type) {
   context.attempt[key] = context.attempt[key] || [];
   context.attempt[key].push({ id: uid("manual"), label, pts });
   context.attempt[type] = Number(context.attempt[type] || 0) + pts;
+  persistScoreChange();
+}
+
+function clearCustomScoreForm(type) {
+  const labelInput = document.getElementById(`custom-${type}-label`);
+  const ptsInput = document.getElementById(`custom-${type}-pts`);
+  if (labelInput) labelInput.value = "";
+  if (ptsInput) ptsInput.value = "1";
+  labelInput?.focus();
+}
+
+function setScoringClassification(classificationId, classificationLabel) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt) return;
+  const option = getScoringClassificationOptions(context).find((item) => {
+    return String(item?.id || item?.classificationId || "") === String(classificationId || "");
+  });
+  if (!option) return;
+  context.attempt.classification = {
+    classificationId: String(classificationId || ""),
+    classificationLabel: String(classificationLabel || option.label || option.classificationLabel || ""),
+    classificationValue: option.value ?? null
+  };
   persistScoreChange();
 }
 

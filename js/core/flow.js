@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260808-scoring-attempt-model-v2-001-v1";
+} from "./state.js?v=20260808-scorer-responsive-component-system-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;
