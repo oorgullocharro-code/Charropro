@@ -45,7 +45,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260807-public-snapshot-critical-recovery-001-v1"],
+  ["20260808-public-snapshot-critical-recovery-001-v2"],
   "all browser entrypoints share one firebaseSync module identity"
 );
 

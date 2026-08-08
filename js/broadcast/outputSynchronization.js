@@ -10,14 +10,14 @@ import {
   clearProgramMainOutput,
   getProgramMainOutputStatus,
   validateProgramMainProjection
-} from "./programMainOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./programMainOutput.js?v=20260808-public-snapshot-critical-recovery-001-v2";
 import {
   clearAnnouncerMonitor,
   getAnnouncerSnapshot,
   getAnnouncerStatus,
   updateAnnouncerMonitor,
   validateAnnouncerProjection
-} from "./announcerMonitor.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./announcerMonitor.js?v=20260808-public-snapshot-critical-recovery-001-v2";
 
 export const OUTPUT_SYNCHRONIZATION_VERSION = "1.0.0";
 

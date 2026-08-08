@@ -1,6 +1,6 @@
 import { escapeHTML, html } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
 import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v2";
 import { getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("timer-display-root");

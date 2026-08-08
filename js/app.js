@@ -42,7 +42,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+} from "./core/sync.js?v=20260808-public-snapshot-critical-recovery-001-v2";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -77,7 +77,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1";
+} from "./core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v2";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,

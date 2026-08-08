@@ -736,3 +736,10 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 - Los fixtures públicos cubren más de diez equipos, PM `24`, PEN `-4`, cero, ausencia, corrección, penalización, torneo programado/finalizado, stale, offline y contenido largo.
 - No se modificaron Core deportivo, Firebase Rules, cálculos, resultados oficiales, página privada, Broadcast Studio, calificador, juez, supervisor, operador ni favicon.
 - No se ejecutaron commit, push, deploy, staging ni cambios de reglas.
+
+# CHARROPRO-PUBLIC-SNAPSHOT-CRITICAL-RECOVERY-001 - Cache transitiva V2
+
+- Identidad coherente del subgrafo de sincronización: `20260808-public-snapshot-critical-recovery-001-v2`.
+- Los entrypoints y módulos padre que pueden alcanzar `js/core/firebaseSync.js` invalidan a su dependencia hija con la misma identidad de release.
+- La cobertura reconstruye el grafo HTML/ES modules y simula navegador limpio, `app.js` anterior, `sync.js` anterior, `firebaseSync.js` anterior, recarga normal y hard refresh.
+- No se creó un loader adicional ni se modificó lógica deportiva, Firebase Rules, scores, Portal o Broadcast.
