@@ -5515,6 +5515,7 @@ function compactPublishedBreakdown(breakdown) {
   if (!breakdown) return null;
   return {
     rulebook: breakdown.rulebook || null,
+    attemptV2: breakdown.attemptV2 || null,
     base: Number(breakdown.base || 0),
     adic: Number(breakdown.adic || 0),
     infr: Number(breakdown.infr || 0),

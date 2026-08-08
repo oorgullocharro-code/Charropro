@@ -1,4 +1,4 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260808-rule-profile-engine-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260808-scoring-attempt-model-v2-001-v1";
 import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import {
   getCharreadaScoringEntries,
@@ -6,17 +6,10 @@ import {
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260808-rule-profile-engine-001-v1";
+} from "./state.js?v=20260808-scoring-attempt-model-v2-001-v1";
 
 export function calculateAttemptTotal(attempt) {
-  if (!attempt) return 0;
-  if (attempt.desc) return 0;
-  return (
-    (Number(attempt.base) || 0) +
-    (Number(attempt.adic) || 0) +
-    (Number(attempt.puntaPts) || 0) -
-    (Number(attempt.infr) || 0)
-  );
+  return calculateAttemptPointSummary(attempt).netAttemptPoints;
 }
 
 export function getAttemptTeamPenaltyTotal(attempt = {}) {
@@ -24,7 +17,34 @@ export function getAttemptTeamPenaltyTotal(attempt = {}) {
 }
 
 export function calculateAttemptFinalTotal(attempt) {
-  return calculateAttemptTotal(attempt) - getAttemptTeamPenaltyTotal(attempt);
+  return calculateAttemptPointSummary(attempt).teamAdjustedPoints;
+}
+
+export function calculateAttemptPointSummary(attempt) {
+  if (!attempt) {
+    return {
+      goodPoints: 0,
+      individualBadPoints: 0,
+      teamBadPoints: 0,
+      netAttemptPoints: 0,
+      teamAdjustedPoints: 0
+    };
+  }
+  const goodPoints = (
+    (Number(attempt.base) || 0) +
+    (Number(attempt.adic) || 0) +
+    (Number(attempt.puntaPts) || 0)
+  );
+  const individualBadPoints = Number(attempt.infr) || 0;
+  const teamBadPoints = getAttemptTeamPenaltyTotal(attempt);
+  const netAttemptPoints = attempt.desc ? 0 : goodPoints - individualBadPoints;
+  return {
+    goodPoints,
+    individualBadPoints,
+    teamBadPoints,
+    netAttemptPoints,
+    teamAdjustedPoints: netAttemptPoints - teamBadPoints
+  };
 }
 
 export function calculateCollectionTotal(collection, suerte) {

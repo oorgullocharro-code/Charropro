@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-rule-profile-engine-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-scoring-attempt-model-v2-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -16,23 +16,28 @@ import {
 } from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-rule-profile-engine-001-v1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-rule-profile-engine-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-rule-profile-engine-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-scoring-attempt-model-v2-001-v1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-scoring-attempt-model-v2-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-scoring-attempt-model-v2-001-v1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-rule-profile-engine-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-rule-profile-engine-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-scoring-attempt-model-v2-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-scoring-attempt-model-v2-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
   buildLeaderboard,
+  calculateAttemptPointSummary,
   calculateAttemptTotal,
   getTeamCharreadaResta,
   getTeamCharreadaTotal,
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260808-rule-profile-engine-001-v1";
+} from "./core/scoring.js?v=20260808-scoring-attempt-model-v2-001-v1";
+import {
+  adaptLegacyAttemptToV2,
+  buildOfficialScoringAttemptSnapshot
+} from "./core/scoringAttempt.js?v=20260808-scoring-attempt-model-v2-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -42,7 +47,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-rule-profile-engine-001-v1";
+} from "./core/sync.js?v=20260808-scoring-attempt-model-v2-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -77,7 +82,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-rule-profile-engine-001-v1";
+} from "./core/firebaseSync.js?v=20260808-scoring-attempt-model-v2-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -126,7 +131,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260808-rule-profile-engine-001-v1";
+} from "./core/state.js?v=20260808-scoring-attempt-model-v2-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -11218,6 +11223,8 @@ function markAttemptZeroIfBlank(attempt = {}) {
 
 function buildPublishedScoreSnapshot(context) {
   const attempt = cloneAttempt(context.attempt || emptyAttempt());
+  const publishedAt = new Date().toISOString();
+  const publishedBy = getPublishedBy();
   if (Array.isArray(attempt.timeEvidence) && attempt.timeEvidence.length) {
     console.info("[calificador-001] time evidence saved", {
       count: attempt.timeEvidence.length,
@@ -11228,8 +11235,8 @@ function buildPublishedScoreSnapshot(context) {
   }
   return {
     id: uid("publicado"),
-    publishedAt: new Date().toISOString(),
-    publishedBy: getPublishedBy(),
+    publishedAt,
+    publishedBy,
     tournament: compactPublishedTournament(context.tournament),
     charreada: compactPublishedCharreada(context.charreada),
     team: compactPublishedTeam(context.team),
@@ -11240,7 +11247,7 @@ function buildPublishedScoreSnapshot(context) {
     charro: getPublishedCharroName(context),
     attempt,
     total: calculateAttemptTotal(attempt),
-    breakdown: buildPublishedBreakdown(context, attempt)
+    breakdown: buildPublishedBreakdown(context, attempt, { publishedAt, publishedBy })
   };
 }
 
@@ -11325,11 +11332,50 @@ function getPublishedCharroName(context) {
   return getRosterNameForSuerte(context.team, context.suerte) || context.team?.name || "";
 }
 
-function buildPublishedBreakdown(context, attempt) {
+function buildPublishedBreakdown(context, attempt, publication = {}) {
   const punta = context.suerte?.id === "cala" ? calculatePuntaBreakdown(attempt) : null;
   const teamPenalties = (attempt.teamPenalties || []).map(normalizeTeamPenalty);
   const resolution = context.suerte?.ruleResolution || {};
   const profile = resolution.profile || {};
+  const pointSummary = calculateAttemptPointSummary(attempt);
+  const isIndividualCompetition = Boolean(context.competitionContext?.isIndividualCompetition);
+  const participantName = getPublishedCharroName(context);
+  const attemptV2 = buildOfficialScoringAttemptSnapshot(
+    adaptLegacyAttemptToV2(attempt, {
+      tournamentId: context.tournament?.id,
+      competitionId: context.charreada?.competitionId
+        || context.competitionContext?.competitionId
+        || "equipos_completo",
+      competitionScope: isIndividualCompetition ? "individual" : "team",
+      charreadaId: context.charreada?.id,
+      participantId: isIndividualCompetition ? context.participant?.id || context.team?.id : null,
+      teamId: isIndividualCompetition ? null : context.team?.id,
+      participantName: isIndividualCompetition ? participantName : null,
+      teamName: isIndividualCompetition ? null : context.team?.name,
+      horseName: isIndividualCompetition ? context.participant?.horseName || context.team?.horseName : null,
+      suerteId: context.suerte?.id,
+      suerte: context.suerte,
+      catalog: context.suerte?.catalog,
+      category: context.team?.category || context.charreada?.category || null,
+      phase: getCharreadaPhase(context.charreada),
+      opportunityNumber: Number(context.attemptIndex || 0) + 1,
+      participantSlot: Number(context.coleadorIndex || 0),
+      opportunityType: context.suerte?.id,
+      sharedOpportunityId: attempt.sharedOpportunityId,
+      sharedSequenceNumber: attempt.sharedSequenceNumber,
+      ruleResolution: resolution,
+      timing: attempt.timing || null
+    }, {
+      pointSummary,
+      actor: publication.publishedBy,
+      adaptedAt: publication.publishedAt
+    }),
+    {
+      publishedAt: publication.publishedAt,
+      actor: publication.publishedBy,
+      source: "official-score-publication"
+    }
+  );
   return {
     rulebook: {
       discipline: context.suerte?.id || "",
@@ -11349,13 +11395,14 @@ function buildPublishedBreakdown(context, attempt) {
     puntaMetros: Number(attempt.puntaMetros || 0),
     puntaPiquetes: Number(attempt.puntaPiquetes || 1),
     punta,
-    individualTotal: calculateAttemptTotal(attempt),
-    teamPenaltyTotal: teamPenalties.reduce((sum, item) => sum + Number(item.total || 0), 0),
-    total: calculateAttemptTotal(attempt),
-    teamAdjustedTotal: calculateAttemptTotal(attempt) - teamPenalties.reduce((sum, item) => sum + Number(item.total || 0), 0),
+    individualTotal: pointSummary.netAttemptPoints,
+    teamPenaltyTotal: pointSummary.teamBadPoints,
+    total: pointSummary.netAttemptPoints,
+    teamAdjustedTotal: pointSummary.teamAdjustedPoints,
     attempted: Boolean(attempt.attempted),
     notAchieved: Boolean(attempt.notAchieved),
     desc: attempt.desc || null,
+    attemptV2,
     adicGroups: context.suerte?.id === "cala" ? buildPublishedCalaAdicGroups(context.suerte, attempt) : [],
     extraAdicItems: context.suerte?.id === "cala" ? buildPublishedCalaExtraAdicItems(context.suerte, attempt) : [],
     infrItems: buildPublishedRuleItems(context.suerte?.catalog?.infr || [], attempt, "infr"),
@@ -11461,21 +11508,11 @@ function setDescReason(label) {
 }
 
 function applyDescReason(context, label) {
-  const infrIds = context.suerte.catalog.infr.map((item) => item.id);
   context.attempt.desc = label;
-  context.attempt.base = 0;
-  context.attempt.adic = 0;
-  context.attempt.puntaPts = 0;
-  context.attempt.puntaMetros = 0;
-  context.attempt.puntaPiquetes = 1;
-  context.attempt.customAdic = [];
-  context.attempt.applied = (context.attempt.applied || []).filter((id) => infrIds.includes(id));
-  context.attempt.initializedBase = false;
 }
 
 function clearDesc(attempt) {
   attempt.desc = null;
-  attempt.initializedBase = false;
 }
 
 function addCustomScore(type) {
