@@ -6,7 +6,7 @@ import {
   readLocalGraphicsConfig,
   writeLocalGraphicsConfig
 } from "../core/graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
-import { loadState, saveState, state } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
+import { loadState, saveState, state } from "../core/state.js?v=20260808-rule-profile-engine-001-v1";
 import {
   getLiveChannelFromUrl,
   publishFirebaseGraphicsConfig,
@@ -14,7 +14,7 @@ import {
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLiveCurrent
-} from "../core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3";
+} from "../core/firebaseSync.js?v=20260808-rule-profile-engine-001-v1";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260712-production-competitions-001-broadcast-context1";
 

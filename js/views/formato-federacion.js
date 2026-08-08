@@ -1,6 +1,6 @@
 import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260708-recovery-001b-panel-status1";
-import { getActiveCharreada, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260708-recovery-001b-panel-status1";
+import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260808-rule-profile-engine-001-v1";
+import { getActiveCharreada, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260808-rule-profile-engine-001-v1";
 
 const root = document.getElementById("official-format-root");
 let selectedTeamId = new URLSearchParams(window.location.search).get("team") || "";

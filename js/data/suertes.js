@@ -5,6 +5,11 @@ import {
   CALA_INFR_RULES,
   normalizeCalaRuleOverrideCatalog
 } from "./calaRules.js?v=20260708-recovery-001b-panel-status1";
+import {
+  RULE_PROFILE_CONTRACT_VERSION,
+  resolveEffectiveRules,
+  resolveRuleProfileSelection
+} from "./ruleProfiles.js?v=20260808-rule-profile-engine-001-v1";
 
 export const SUERTES = [
   {
@@ -342,50 +347,56 @@ export function getTournamentTypeConfig(type) {
   return TOURNAMENT_TYPES.find((item) => item.id === normalized) || TOURNAMENT_TYPES[0];
 }
 
-export function getTournamentSuertes(tournament = {}, globalRuleOverrides = null) {
+export function getTournamentSuertes(tournament = {}, globalRuleOverrides = null, options = {}) {
+  return resolveTournamentRules(tournament, globalRuleOverrides, options).suertes;
+}
+
+export function resolveTournamentRules(tournament = {}, globalRuleOverrides = null, options = {}) {
   const config = getTournamentTypeConfig(tournament?.type);
   const generalOverrides = globalRuleOverrides || tournament?.globalRuleOverrides || {};
   const tournamentOverrides = tournament?.ruleOverrides || {};
-  return config.suerteIds
-    .map((suerteId) => {
-      const globalSuerte = applyTournamentRuleOverride(getSuerteById(suerteId), generalOverrides[suerteId]);
-      return applyTournamentRuleOverride(globalSuerte, tournamentOverrides[suerteId]);
-    })
-    .filter(Boolean);
+  const profileSelection = resolveRuleProfileSelection(tournament, options);
+  const diagnostics = [...profileSelection.diagnostics];
+  if (profileSelection.blocked) {
+    return {
+      valid: false,
+      blocked: true,
+      contractVersion: RULE_PROFILE_CONTRACT_VERSION,
+      profile: profileSelection.reference,
+      suertes: [],
+      diagnostics
+    };
+  }
+
+  const resolved = config.suerteIds.map((suerteId) => resolveEffectiveRules({
+    suerte: getSuerteById(suerteId),
+    productOverride: normalizeSuerteOverride(suerteId, generalOverrides[suerteId]),
+    profile: profileSelection.profile,
+    tournamentOverride: normalizeSuerteOverride(suerteId, tournamentOverrides[suerteId]),
+    context: {
+      tournamentId: tournament?.id,
+      competitionId: tournament?.competitionId,
+      category: tournament?.category,
+      phase: tournament?.phase
+    }
+  }));
+  diagnostics.push(...resolved.flatMap((result) => result.diagnostics));
+  const blocked = resolved.some((result) => result.blocked);
+  return {
+    valid: !blocked,
+    blocked,
+    contractVersion: RULE_PROFILE_CONTRACT_VERSION,
+    profile: profileSelection.reference,
+    suertes: blocked ? [] : resolved.map((result) => result.suerte).filter(Boolean),
+    diagnostics
+  };
 }
 
-function applyTournamentRuleOverride(suerte, override) {
-  if (!suerte) return null;
-  const nextSuerte = cloneSuerte(suerte);
-  if (!override?.catalog) return nextSuerte;
-  const overrideCatalog = nextSuerte.id === "cala"
-    ? normalizeCalaRuleOverrideCatalog(override.catalog)
-    : override.catalog;
-
-  ["base", "adic", "infr", "desc"].forEach((group) => {
-    const rules = Array.isArray(overrideCatalog[group])
-      ? overrideCatalog[group]
-      : nextSuerte.catalog[group] || [];
-    nextSuerte.catalog[group] = normalizeRulesForUse(rules, group);
-  });
-
-  return nextSuerte;
-}
-
-function cloneSuerte(suerte) {
-  return JSON.parse(JSON.stringify(suerte));
-}
-
-function normalizeRulesForUse(rules, group) {
-  return (rules || [])
-    .filter((rule) => rule && rule.enabled !== false)
-    .map((rule) => {
-      const nextRule = {
-        id: rule.id || `rule_${Math.random().toString(36).slice(2, 8)}`,
-        label: String(rule.label || "").trim() || "Sin nombre"
-      };
-
-      if (group !== "desc") nextRule.pts = Number(rule.pts || 0);
-      return nextRule;
-    });
+function normalizeSuerteOverride(suerteId, override) {
+  if (!override || typeof override !== "object") return null;
+  if (suerteId !== "cala" || !override.catalog) return override;
+  return {
+    ...override,
+    catalog: normalizeCalaRuleOverrideCatalog(override.catalog)
+  };
 }

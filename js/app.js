@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260708-tournament-types-001-pialadero1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-rule-profile-engine-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -16,12 +16,12 @@ import {
 } from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260709-competitions-003-scoring-by-competition1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260709-competitions-003-scoring-by-competition1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260709-competitions-003-scoring-by-competition1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-rule-profile-engine-001-v1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-rule-profile-engine-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-rule-profile-engine-001-v1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260709-competitions-003-scoring-by-competition1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260709-competitions-003-scoring-by-competition1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-rule-profile-engine-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-rule-profile-engine-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -32,7 +32,7 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260709-competitions-003-scoring-by-competition1";
+} from "./core/scoring.js?v=20260808-rule-profile-engine-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -42,7 +42,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-public-snapshot-critical-recovery-001-v3";
+} from "./core/sync.js?v=20260808-rule-profile-engine-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -77,7 +77,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3";
+} from "./core/firebaseSync.js?v=20260808-rule-profile-engine-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -126,7 +126,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260709-competitions-003-scoring-by-competition1";
+} from "./core/state.js?v=20260808-rule-profile-engine-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -6161,10 +6161,17 @@ function renderRuleEditorGroup(group, rules, locked = false, scope = "tournament
 
 function renderRuleEditorRow(group, rule, locked = false, scope = "tournament") {
   const isGlobalScope = scope === "global";
-  const pillLabel = isGlobalScope ? "Base general" : (rule.custom ? "Convocatoria" : "Base general");
+  const inheritedFromProfile = !isGlobalScope && rule.source === "RULE_PROFILE";
+  const pillLabel = isGlobalScope
+    ? "Base general"
+    : rule.custom
+      ? "Convocatoria"
+      : inheritedFromProfile
+        ? "Perfil reglamentario"
+        : "Base general";
   const buttonLabel = isGlobalScope ? (rule.custom ? "Quitar" : "Ocultar") : (rule.custom ? "Quitar" : "Ocultar");
   return html`
-    <div class="rule-editor-row ${rule.enabled === false ? "disabled" : ""}" data-rule-row data-group="${group.id}" data-id="${escapeHTML(rule.id)}" data-custom="${rule.custom ? "1" : "0"}">
+    <div class="rule-editor-row ${rule.enabled === false ? "disabled" : ""}" data-rule-row data-group="${group.id}" data-id="${escapeHTML(rule.id)}" data-custom="${rule.custom ? "1" : "0"}" data-source="${escapeHTML(rule.source || "PRODUCT_BASE")}">
       <label class="rule-toggle">
         <input type="checkbox" data-field="enabled" ${rule.enabled === false ? "" : "checked"} ${locked ? "disabled" : ""}>
         <span>Activo</span>
@@ -10357,8 +10364,9 @@ function getEditableRuleCatalog(suerteId, scope = "tournament") {
 
 function getRuleEditorBaseSuerte(suerteId, scope = "tournament") {
   if (scope === "global") return SUERTES.find((suerte) => suerte.id === suerteId);
+  const tournament = getActiveTournament() || {};
   return getTournamentSuertes(
-    { type: "completo", ruleOverrides: {} },
+    { ...tournament, type: "completo", ruleOverrides: {} },
     state.settings.globalRuleOverrides
   ).find((suerte) => suerte.id === suerteId) || SUERTES.find((suerte) => suerte.id === suerteId);
 }
@@ -10377,7 +10385,11 @@ function normalizeEditableRule(rule, groupId) {
     label: String(rule.label || "").trim() || "Sin nombre",
     pts: groupId === "desc" ? 0 : Number(rule.pts || 0),
     enabled: rule.enabled !== false,
-    custom: Boolean(rule.custom)
+    custom: Boolean(rule.custom),
+    source: rule.source || "PRODUCT_BASE",
+    ruleKey: rule.ruleKey || "",
+    profileId: rule.profileId || "",
+    profileVersion: rule.profileVersion || ""
   };
 }
 
@@ -11316,10 +11328,20 @@ function getPublishedCharroName(context) {
 function buildPublishedBreakdown(context, attempt) {
   const punta = context.suerte?.id === "cala" ? calculatePuntaBreakdown(attempt) : null;
   const teamPenalties = (attempt.teamPenalties || []).map(normalizeTeamPenalty);
+  const resolution = context.suerte?.ruleResolution || {};
+  const profile = resolution.profile || {};
   return {
-    rulebook: context.suerte?.id === "cala"
-      ? { discipline: "cala", version: CALA_RULEBOOK_VERSION }
-      : null,
+    rulebook: {
+      discipline: context.suerte?.id || "",
+      version: context.suerte?.id === "cala" ? CALA_RULEBOOK_VERSION : null,
+      resolutionContractVersion: resolution.contractVersion || null,
+      ruleProfileId: profile.profileId || null,
+      ruleProfileVersion: profile.profileVersion || null,
+      ruleProfileStatus: profile.status || "product_base",
+      fallbackUsed: Boolean(profile.fallbackUsed),
+      layers: Array.isArray(resolution.layers) ? [...resolution.layers] : ["PRODUCT_BASE"],
+      tournamentOverrideUpdatedAt: context.tournament?.ruleOverrides?.[context.suerte?.id]?.updatedAt || null
+    },
     base: Number(attempt.base || 0),
     adic: Number(attempt.adic || 0),
     infr: Number(attempt.infr || 0),

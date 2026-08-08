@@ -1610,7 +1610,7 @@ export async function connectProgramMainRealtime(instance, options = {}) {
   assertNoProgramMainExternalIdentity(requestContext);
   const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
   const accessId = params.get("access") || options.accessId || null;
-  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3") : null);
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260808-rule-profile-engine-001-v1") : null);
   if (options.authorizedContext && !options.adapter) throw outputError("program-main-output-authorized-context-injection-forbidden");
   if (options.temporaryAccess && !options.adapter) throw outputError("program-main-output-temporary-access-injection-forbidden");
   const temporaryAccess = accessId

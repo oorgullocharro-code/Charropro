@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const RELEASE_ID = "20260808-public-snapshot-critical-recovery-001-v3";
+const RELEASE_ID = "20260808-rule-profile-engine-001-v1";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const TARGET = path.join(ROOT, "js/core/firebaseSync.js");
 
@@ -69,13 +69,17 @@ assert.deepEqual([...firebaseIdentities], [RELEASE_ID], "firebaseSync has one ef
 const currentRequests = new Set(protectedEdges.map(buildRequestKey));
 const priorCacheScenarios = {
   clean: [],
+  previousRelease: [
+    "/js/app.js?v=20260808-public-snapshot-critical-recovery-001-v3",
+    "/js/core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3"
+  ],
   previousApp: ["/js/app.js?v=20260807-public-snapshot-critical-recovery-001-v1"],
   previousSync: ["/js/core/sync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1"],
   previousFirebase: [
     "/js/core/firebaseSync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1",
     "/js/core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1"
   ],
-  previousRelease: [
+  olderRelease: [
     "/js/app.js?v=20260807-public-snapshot-critical-recovery-001-v1",
     "/js/core/sync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1",
     "/js/core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1"
