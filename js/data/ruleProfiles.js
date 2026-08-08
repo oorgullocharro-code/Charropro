@@ -1,3 +1,13 @@
+import {
+  FMCH_2026_CALA_ADIC_RULES,
+  FMCH_2026_CALA_BASE_RULES,
+  FMCH_2026_CALA_DESC_RULES,
+  FMCH_2026_CALA_DISABLED_LEGACY_RULES,
+  FMCH_2026_CALA_INFR_RULES,
+  FMCH_2026_CALA_SOURCE,
+  FMCH_2026_CALA_TEAM_PENALTY_RULES
+} from "./calaRules.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
 export const RULE_PROFILE_STATUSES = Object.freeze([
@@ -56,29 +66,74 @@ const MAX_DEPTH = 10;
 const MAX_ARRAY = 300;
 const MAX_KEYS = 300;
 
+function buildFmchCalaProfileRule(rule, category, order) {
+  return {
+    suerteId: "cala",
+    category,
+    ruleId: rule.id,
+    label: rule.label,
+    ...(category === RULE_CATEGORIES.DISQUALIFICATION ? {} : { value: Number(rule.pts || 0) }),
+    enabled: true,
+    order,
+    metadata: {
+      ...(rule.metadata || {}),
+      implementationTicket: "CHARROPRO-FMCH-2026-CALA-SCORER-001"
+    }
+  };
+}
+
+const FMCH_2026_CALA_PROFILE_RULES = [
+  ...FMCH_2026_CALA_BASE_RULES.map((rule, index) => buildFmchCalaProfileRule(rule, RULE_CATEGORIES.BASE, index)),
+  ...FMCH_2026_CALA_ADIC_RULES.map((rule, index) => buildFmchCalaProfileRule(rule, RULE_CATEGORIES.ADDITIONAL, index)),
+  ...FMCH_2026_CALA_INFR_RULES.map((rule, index) => buildFmchCalaProfileRule(rule, RULE_CATEGORIES.INDIVIDUAL_INFRACTION, index)),
+  ...FMCH_2026_CALA_TEAM_PENALTY_RULES.map((rule, index) => buildFmchCalaProfileRule(rule, RULE_CATEGORIES.TEAM_INFRACTION, index)),
+  ...FMCH_2026_CALA_DESC_RULES.map((rule, index) => buildFmchCalaProfileRule(rule, RULE_CATEGORIES.DISQUALIFICATION, index)),
+  ...FMCH_2026_CALA_DISABLED_LEGACY_RULES.map((rule) => ({
+    suerteId: "cala",
+    category: rule.category,
+    ruleId: rule.id,
+    enabled: false,
+    metadata: {
+      sourceStatus: "LEGACY_PRESERVED_DISABLED",
+      source: FMCH_2026_CALA_SOURCE,
+      reason: rule.reason
+    }
+  }))
+];
+
 export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   contractVersion: RULE_PROFILE_CONTRACT_VERSION,
   profileId: "FMCH_2026_LIBRE",
-  version: "0.1.0",
+  version: "0.2.0",
   name: "FMCH 2026 Libre",
   scope: "competition",
-  status: "skeleton",
+  status: "draft",
   source: "CHARROPRO-FMCH-2026-SCORING-SPECIFICATION-001",
-  rules: [],
+  rules: FMCH_2026_CALA_PROFILE_RULES,
   suerteMetadata: {
     cala: {
+      implementationStatus: "COMPLETE_WITH_BLOCKED_FIELDS",
+      fieldIdMappingStatus: "FIELDID_MAPPING_BLOCKED",
+      blockedFieldIds: [
+        "FMCH.TEAM_SHEET.CALA.SIDE_BAD_POINTS_SUM_CONTROL",
+        "FMCH.TEAM_SHEET.CALA.PC"
+      ],
       specializedCalculators: [{
         calculatorId: "cala_punta",
         renderMode: "specialized_calculator",
-        implementation: "existing"
+        implementation: "existing_preserved",
+        formulaSource: FMCH_2026_CALA_SOURCE
       }]
     }
   },
   metadata: {
     jurisdiction: "FMCH",
     category: "Libre",
-    implementationStatus: "identity_only",
-    sportsRulesLoaded: false
+    implementationStatus: "cala_technical_complete_activation_blocked",
+    sportsRulesLoaded: true,
+    loadedSuerteIds: ["cala"],
+    activationReady: false,
+    activationBlockReason: "Cala ML/CR frente a MD/MI/PC requiere confirmacion deportiva"
   }
 });
 

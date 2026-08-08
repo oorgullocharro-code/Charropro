@@ -4214,6 +4214,21 @@ th.num {
   font-variant-numeric: tabular-nums;
 }
 
+.punta-counter-input {
+  width: 100%;
+  min-width: 0;
+  height: 58px;
+  padding: 8px;
+  border: 1px solid rgba(76, 141, 255, .56);
+  border-radius: 8px;
+  background: #080d15;
+  color: var(--text);
+  font-size: 32px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
 .counter-button {
   width: 58px;
   height: 58px;
@@ -4811,6 +4826,32 @@ th.num {
 
 .cp-scoring-action-button--disabled {
   opacity: .55;
+}
+
+.cp-rule-quantity-control {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cp-rule-quantity-control .cp-scoring-action-button {
+  width: 100%;
+}
+
+.cp-rule-quantity-remove {
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid rgba(239, 91, 100, .5);
+  border-radius: 8px;
+  background: rgba(111, 24, 33, .58);
+  color: #ffb0b6;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.cp-rule-quantity-remove:disabled {
+  cursor: not-allowed;
+  opacity: .42;
 }
 
 .cp-view-all-actions {

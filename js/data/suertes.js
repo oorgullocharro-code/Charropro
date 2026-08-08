@@ -3,13 +3,14 @@ import {
   CALA_BASE_RULES,
   CALA_DESC_RULES,
   CALA_INFR_RULES,
+  CALA_TEAM_PENALTY_RULES,
   normalizeCalaRuleOverrideCatalog
-} from "./calaRules.js?v=20260708-recovery-001b-panel-status1";
+} from "./calaRules.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import {
   RULE_PROFILE_CONTRACT_VERSION,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "./ruleProfiles.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./ruleProfiles.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 
 export const SUERTES = [
   {
@@ -21,6 +22,7 @@ export const SUERTES = [
       base: CALA_BASE_RULES,
       adic: CALA_ADIC_RULES,
       infr: CALA_INFR_RULES,
+      team_infr: CALA_TEAM_PENALTY_RULES,
       desc: CALA_DESC_RULES
     }
   },

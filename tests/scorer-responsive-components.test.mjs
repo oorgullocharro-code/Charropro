@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260808-scorer-responsive-component-system-001-v1";
+const RELEASE_ID = "20260808-fmch-2026-cala-scorer-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({
@@ -190,7 +190,7 @@ const dqView = buildScorerAttemptViewModel(dqAttempt);
 assert.equal(dqView.status.label, "Descalificacion");
 assert.equal(dqView.status.isDq, true);
 assert.equal(dqView.status.isZero, false);
-assert.equal(dqView.summary.totalPoints, 0);
+assert.equal(dqView.summary.totalPoints, -4);
 assert.equal(dqView.summary.goodPoints, 27, "DQ keeps reconstructable good points visible");
 assert.equal(dqView.summary.individualBadPoints, 4);
 assert.equal(dqView.evidenceCount, 1);

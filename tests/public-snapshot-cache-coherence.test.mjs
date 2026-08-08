@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const RELEASE_ID = "20260808-scorer-responsive-component-system-001-v1";
+const RELEASE_ID = "20260808-fmch-2026-cala-scorer-001-v1";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const TARGET = path.join(ROOT, "js/core/firebaseSync.js");
 

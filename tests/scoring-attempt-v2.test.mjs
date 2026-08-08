@@ -129,7 +129,7 @@ const dq = setScoringAttemptDq(simple, {
 assert.equal(dq.sportState.status, "DQ");
 assert.equal(dq.dq.active, true);
 assert.equal(dq.scoring.goodPoints, 23, "DQ preserves reconstructable good points");
-assert.equal(dq.scoring.netAttemptPoints, 0, "DQ nullifies the attempt result");
+assert.equal(dq.scoring.netAttemptPoints, -2, "DQ nullifies good points and preserves bad points");
 assert.equal(dq.scoring.individualBadPoints, 2);
 assert.deepEqual(dq.scoring.baseSelection, simple.scoring.baseSelection);
 assert.deepEqual(dq.scoring.additionalSelections, simple.scoring.additionalSelections);
@@ -202,6 +202,8 @@ assert.equal(manual.scoring.teamAdjustedPoints, 18);
 const manualDq = setScoringAttemptDq(manual, { reason: "DQ de prueba" });
 assert.equal(manualDq.scoring.individualBadPoints, 3);
 assert.equal(manualDq.scoring.teamBadPoints, 4);
+assert.equal(manualDq.scoring.netAttemptPoints, -3);
+assert.equal(manualDq.scoring.teamAdjustedPoints, -7);
 
 const zero = adaptLegacyAttemptToV2(legacyAttempt({
   base: 0,

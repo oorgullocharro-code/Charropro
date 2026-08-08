@@ -6,7 +6,7 @@ import {
   getTeamSuerteTotal,
   hasAttemptActivity
 } from "../js/core/scoring.js";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

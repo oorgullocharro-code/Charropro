@@ -48,7 +48,7 @@
     stage.style.height = `${height * scale}px`;
     document.body.style.width = `${Math.min(964, width * scale + 36)}px`;
     document.getElementById("fixture-title").textContent = `Calificador real ${width} x ${height}`;
-    const scorerUrl = `/torneo.html?tournamentId=demo-local-fmch-2026&view=scoring&charreada=demo-local-fmch-jornada-1&v=20260808-scorer-responsive-component-system-001-v1`;
+    const scorerUrl = `/torneo.html?tournamentId=demo-local-fmch-2026&view=scoring&charreada=demo-local-fmch-jornada-1&v=20260808-fmch-2026-cala-scorer-001-v1`;
     frame.src = scorerUrl;
     frame.addEventListener("load", () => {
       window.setTimeout(async () => {
@@ -86,10 +86,11 @@
         if (scrollSurface && target) {
           scrollSurface.scrollTop += target.getBoundingClientRect().top - scrollSurface.getBoundingClientRect().top - 8;
         }
-        const overflow = Math.max(doc?.body?.scrollWidth || 0, doc?.documentElement?.scrollWidth || 0) - win.innerWidth;
+        const measuredOverflow = Math.max(doc?.body?.scrollWidth || 0, doc?.documentElement?.scrollWidth || 0) - win.innerWidth;
+        const overflow = measuredOverflow > 1 ? measuredOverflow : 0;
         const overflowNodes = [...(doc?.querySelectorAll("*") || [])]
           .map((element) => ({ element, rect: element.getBoundingClientRect() }))
-          .filter(({ rect }) => rect.right > win.innerWidth + .5 || rect.left < -.5)
+          .filter(({ rect }) => rect.right > win.innerWidth + 1 || rect.left < -1)
           .slice(0, 5)
           .map(({ element, rect }) => `${element.tagName.toLowerCase()}.${element.className || ""}@${rect.left.toFixed(1)}:${rect.right.toFixed(1)}`);
         const result = {

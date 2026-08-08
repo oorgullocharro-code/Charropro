@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -10,18 +10,19 @@ import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
   CALA_TEAM_PENALTY_RULES,
+  FMCH_2026_CALA_RULEBOOK_VERSION,
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260708-recovery-001b-panel-status1";
+} from "./data/calaRules.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-scorer-responsive-component-system-001-v1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-scorer-responsive-component-system-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-scorer-responsive-component-system-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -33,16 +34,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./core/scoring.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./core/scoringAttempt.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./core/scorerComponents.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -52,7 +53,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./core/sync.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -87,7 +88,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./core/firebaseSync.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -136,7 +137,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./core/state.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -314,6 +315,7 @@ const ACTION_CAPABILITIES = {
   "desc-select": "score",
   "desc-other": "score",
   "toggle-rule": "score",
+  "adjust-rule-quantity": "score",
   "toggle-team-penalty": "score",
   "toggle-attempt-zero": "score",
   "capture-time-evidence": "score",
@@ -373,6 +375,7 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "desc-select",
   "desc-other",
   "toggle-rule",
+  "adjust-rule-quantity",
   "toggle-team-penalty",
   "toggle-attempt-zero",
   "capture-time-evidence",
@@ -8010,7 +8013,7 @@ function renderCalaMainPanel(context) {
           <span>${renderCpIcon("target")}</span>
           <h2>Calculador de punta</h2>
         </div>
-        <p>Ingrese metros enteros y numero de marcas segun su evaluacion.</p>
+        <p>Ingrese metros y centimetros, junto con el numero de marcas segun su evaluacion.</p>
       </header>
       ${renderCalaPuntaSection(context)}
     </section>
@@ -8246,7 +8249,10 @@ function renderConfigurableScoringButton(button) {
     .map(([key, value]) => `data-${key}="${escapeHTML(value)}"`)
     .join(" ");
   const confirm = button.requiresConfirmation ? `data-confirm-message="${escapeHTML(`Aplicar ${button.shortLabel || button.label}?`)}"` : "";
-  return html`
+  const atQuantityLimit = button.repeatable
+    && button.maxQuantity !== null
+    && button.quantity >= button.maxQuantity;
+  const mainButton = html`
     <button
       class="cp-scoring-action-button cp-scoring-action-button--${escapeHTML(button.type)} ${model.selected ? "active" : ""} ${model.disabled ? "cp-scoring-action-button--disabled" : ""}"
       type="button"
@@ -8256,15 +8262,32 @@ function renderConfigurableScoringButton(button) {
       data-rule-category="${escapeHTML(model.category)}"
       ${model.dynamic ? "data-rule-dynamic=\"true\"" : ""}
       ${model.disabledReason ? `title="${escapeHTML(model.disabledReason)}"` : ""}
-      ${model.disabled ? "disabled" : ""}
+      ${model.disabled || atQuantityLimit ? "disabled" : ""}
       ${dataset}
       ${confirm}
     >
       <span aria-hidden="true">${renderCpIcon(button.icon || "target")}</span>
       <b>${escapeHTML(button.valueLabel || "")}</b>
       <strong>${escapeHTML(model.label)}</strong>
-      ${button.description ? html`<em>${escapeHTML(button.description)}</em>` : ""}
+      ${button.repeatable && button.quantity > 0
+        ? html`<em>Aplicaciones: ${button.quantity}${button.maxQuantity ? `/${button.maxQuantity}` : ""}</em>`
+        : button.description ? html`<em>${escapeHTML(button.description)}</em>` : ""}
     </button>
+  `;
+  if (!button.repeatable) return mainButton;
+  return html`
+    <div class="cp-rule-quantity-control" data-rule-id="${escapeHTML(button.ruleId)}">
+      ${mainButton}
+      <button
+        class="cp-rule-quantity-remove"
+        type="button"
+        data-action="adjust-rule-quantity"
+        data-type="${escapeHTML(button.ruleType)}"
+        data-id="${escapeHTML(button.ruleId)}"
+        data-delta="-1"
+        ${button.quantity > 0 && !model.disabled ? "" : "disabled"}
+      >Quitar una</button>
+    </div>
   `;
 }
 
@@ -8309,6 +8332,11 @@ function buildScoringActionButtons(context) {
 
 function makeRuleScoringButton(rule, ruleType, visualType, group, order, context) {
   const isInfr = ruleType === "infr";
+  const repeatable = rule.metadata?.repeatable === true;
+  const quantity = getAttemptRuleQuantity(context.attempt, rule.id);
+  const maxQuantity = Number.isFinite(Number(rule.metadata?.maxQuantity))
+    ? Math.max(1, Number(rule.metadata.maxQuantity))
+    : null;
   return {
     id: `rule__${ruleType}__${rule.id}`,
     ruleId: rule.id,
@@ -8326,11 +8354,19 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
     icon: isInfr ? "warning" : ruleType === "base" ? "target" : "plus",
     ruleType,
     group,
-    action: "toggle-rule",
+    action: repeatable ? "adjust-rule-quantity" : "toggle-rule",
     enabled: rule.enabled !== false,
     order,
-    active: context.attempt.applied?.includes(rule.id),
-    dataset: { action: "toggle-rule", type: ruleType, id: rule.id }
+    active: quantity > 0,
+    repeatable,
+    quantity,
+    maxQuantity,
+    dataset: {
+      action: repeatable ? "adjust-rule-quantity" : "toggle-rule",
+      type: ruleType,
+      id: rule.id,
+      ...(repeatable ? { delta: "1" } : {})
+    }
   };
 }
 
@@ -8672,11 +8708,15 @@ function buildRecentActions(context) {
       .map((type) => ({ type, rule: (catalog[type] || []).find((item) => item.id === ruleId) }))
       .find((item) => item.rule);
     if (!match) return;
+    const quantity = getAttemptRuleQuantity(attempt, match.rule.id);
+    const repeatable = match.rule.metadata?.repeatable === true;
     actions.push({
       label: match.rule.label,
-      points: `${match.type === "infr" ? "-" : "+"}${moneylessNumber(match.rule.pts)}`,
+      points: `${match.type === "infr" ? "-" : "+"}${moneylessNumber(Number(match.rule.pts || 0) * quantity)}`,
       kind: match.type === "infr" ? "negative" : "positive",
-      dataset: `data-action="toggle-rule" data-type="${match.type}" data-id="${escapeHTML(match.rule.id)}"`
+      dataset: repeatable
+        ? `data-action="adjust-rule-quantity" data-type="${match.type}" data-id="${escapeHTML(match.rule.id)}" data-delta="-1"`
+        : `data-action="toggle-rule" data-type="${match.type}" data-id="${escapeHTML(match.rule.id)}"`
     });
   });
 
@@ -8745,7 +8785,9 @@ function buildScoringActionItems(context) {
         points,
         kind,
         searchText: `${rule.label} ${points} ${type} ${context.suerte.name}`.toLowerCase(),
-        dataset: `data-action="toggle-rule" data-type="${type}" data-id="${escapeHTML(rule.id)}"`
+        dataset: rule.metadata?.repeatable === true
+          ? `data-action="adjust-rule-quantity" data-type="${type}" data-id="${escapeHTML(rule.id)}" data-delta="1"`
+          : `data-action="toggle-rule" data-type="${type}" data-id="${escapeHTML(rule.id)}"`
       });
     });
   });
@@ -9113,9 +9155,13 @@ function renderTeamPenaltySection(context) {
 }
 
 function getTeamPenaltyRulesForSuerte(suerte = {}) {
-  return suerte?.id === "cala"
-    ? CALA_TEAM_PENALTY_RULES.concat(GENERAL_TEAM_PENALTY_RULES)
-    : GENERAL_TEAM_PENALTY_RULES;
+  if (suerte?.id !== "cala") return GENERAL_TEAM_PENALTY_RULES;
+  const effectiveRules = Array.isArray(suerte?.catalog?.team_infr) && suerte.catalog.team_infr.length
+    ? suerte.catalog.team_infr
+    : CALA_TEAM_PENALTY_RULES;
+  const unique = new Map();
+  [...effectiveRules, ...GENERAL_TEAM_PENALTY_RULES].forEach((rule) => unique.set(rule.id, rule));
+  return [...unique.values()];
 }
 
 function renderZeroAttemptSection(context) {
@@ -9197,7 +9243,7 @@ function renderCalaPuntaSection(context) {
       <header>
         <div>
           <h2 class="card-title">Calculador de punta</h2>
-          <p class="card-subtitle">Metros de punta y tiempos de Cala.</p>
+          <p class="card-subtitle">Metros y centimetros de punta, con tiempos de Cala.</p>
         </div>
         <span class="punta-total">+${moneylessNumber(context.attempt.puntaPts)} pts</span>
       </header>
@@ -9217,12 +9263,15 @@ function renderCalaPuntaSection(context) {
 }
 
 function renderPuntaCounter(title, field, value, quickActions, helper = "") {
+  const valueControl = field === "puntaMetros"
+    ? html`<input class="punta-counter-input" type="number" min="0" step="0.01" inputmode="decimal" value="${escapeHTML(value)}" data-action="punta-input" data-field="puntaMetros" aria-label="Metros y centimetros de punta">`
+    : html`<strong>${moneylessNumber(value)}</strong>`;
   return html`
     <div class="punta-counter">
       <label>${escapeHTML(title)}</label>
       <div class="counter-row">
         <button class="counter-button" data-action="punta-step" data-field="${field}" data-delta="-1">-</button>
-        <strong>${moneylessNumber(value)}</strong>
+        ${valueControl}
         <button class="counter-button primary" data-action="punta-step" data-field="${field}" data-delta="1">+</button>
       </div>
       ${helper ? html`<p>${escapeHTML(helper)}</p>` : ""}
@@ -9284,7 +9333,7 @@ function renderPuntaSection(context) {
       <div class="card-body grid cols-2">
         <div>
           <label>Metros de punta</label>
-          <input type="number" min="0" value="${context.attempt.puntaMetros || 0}" data-action="punta-input" data-field="puntaMetros">
+          <input type="number" min="0" step="0.01" inputmode="decimal" value="${context.attempt.puntaMetros || 0}" data-action="punta-input" data-field="puntaMetros">
         </div>
         <div>
           <label>Marcas</label>
@@ -9298,8 +9347,10 @@ function renderPuntaSection(context) {
 function renderDescSection(context) {
   const descOptions = context.suerte.catalog.desc || [];
   const selectedDesc = context.attempt.desc || "";
-  const catalogLabels = descOptions.map((rule) => rule.label);
-  const selectValue = selectedDesc && !catalogLabels.includes(selectedDesc) ? "__other" : selectedDesc;
+  const selectedRule = descOptions.find((rule) =>
+    rule.id === context.attempt.descRuleId || rule.label === selectedDesc
+  );
+  const selectValue = selectedRule?.id || (selectedDesc ? "__other" : "");
   const otherValue = selectValue === "__other" && selectedDesc !== "Otro" ? selectedDesc : "";
 
   return html`
@@ -9318,7 +9369,7 @@ function renderDescSection(context) {
             ${descOptions
               .map(
                 (rule) => html`
-                  <option value="${escapeHTML(rule.label)}" ${selectValue === rule.label ? "selected" : ""}>
+                  <option value="${escapeHTML(rule.id)}" ${selectValue === rule.id ? "selected" : ""}>
                     ${escapeHTML(rule.label)}
                   </option>
                 `
@@ -10028,6 +10079,7 @@ function handleAction(action, target) {
     "punta-step": () => adjustPunta(target.dataset.field, Number(target.dataset.delta || 0)),
     "punta-set": () => setPuntaValue(target.dataset.field, Number(target.dataset.value || 0)),
     "toggle-rule": () => toggleRule(target.dataset.type, target.dataset.id),
+    "adjust-rule-quantity": () => adjustRuleQuantity(target.dataset.type, target.dataset.id, Number(target.dataset.delta || 0)),
     "toggle-team-penalty": () => toggleTeamPenalty(target.dataset.id),
     "add-team-penalty": addTeamPenalty,
     "remove-team-penalty": () => removeTeamPenalty(target.dataset.id),
@@ -11343,9 +11395,55 @@ function writePuntaField(attempt, field, value) {
   if (field === "puntaPiquetes") {
     attempt.puntaPiquetes = Math.max(1, Math.min(4, Number(value) || 1));
   } else {
-    attempt[field] = Math.max(0, Number(value) || 0);
+    attempt[field] = Math.round(Math.max(0, Number(value) || 0) * 100) / 100;
   }
   applyPuntaCalculation(attempt);
+}
+
+function getAttemptRuleQuantity(attempt = {}, ruleId = "") {
+  if (!(attempt.applied || []).includes(ruleId)) return 0;
+  return Math.max(1, Math.floor(Number(attempt.ruleQuantities?.[ruleId] || 1)));
+}
+
+function setAttemptRuleQuantity(attempt, ruleId, quantity) {
+  const nextQuantity = Math.max(0, Math.floor(Number(quantity) || 0));
+  attempt.applied = Array.isArray(attempt.applied) ? attempt.applied : [];
+  attempt.ruleQuantities = attempt.ruleQuantities && typeof attempt.ruleQuantities === "object"
+    ? { ...attempt.ruleQuantities }
+    : {};
+  if (nextQuantity === 0) {
+    attempt.applied = attempt.applied.filter((id) => id !== ruleId);
+    delete attempt.ruleQuantities[ruleId];
+    return;
+  }
+  if (!attempt.applied.includes(ruleId)) attempt.applied.push(ruleId);
+  if (nextQuantity === 1) delete attempt.ruleQuantities[ruleId];
+  else attempt.ruleQuantities[ruleId] = nextQuantity;
+}
+
+function recalculateAttemptRuleTotal(context, type) {
+  const customKey = type === "infr" ? "customInfr" : "customAdic";
+  const catalogTotal = (context.suerte.catalog[type] || []).reduce((sum, rule) =>
+    sum + Number(rule.pts || 0) * getAttemptRuleQuantity(context.attempt, rule.id), 0);
+  const manualTotal = (context.attempt[customKey] || []).reduce((sum, item) => sum + Number(item.pts || 0), 0);
+  context.attempt[type] = catalogTotal + manualTotal;
+}
+
+function adjustRuleQuantity(type, ruleId, delta) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || context.attempt.desc) return;
+  const rule = context.suerte.catalog[type]?.find((item) => item.id === ruleId);
+  if (!rule || rule.metadata?.repeatable !== true) return;
+  const current = getAttemptRuleQuantity(context.attempt, ruleId);
+  const maxQuantity = Number.isFinite(Number(rule.metadata?.maxQuantity))
+    ? Math.max(1, Number(rule.metadata.maxQuantity))
+    : Number.POSITIVE_INFINITY;
+  const next = Math.min(maxQuantity, Math.max(0, current + Number(delta || 0)));
+  if (next === current) return;
+  setAttemptRuleQuantity(context.attempt, ruleId, next);
+  recalculateAttemptRuleTotal(context, type);
+  persistScoreChange();
 }
 
 function toggleRule(type, ruleId) {
@@ -11362,23 +11460,21 @@ function toggleRule(type, ruleId) {
     const baseIds = context.suerte.catalog.base.map((item) => item.id);
     const wasActive = context.attempt.applied.includes(ruleId);
     context.attempt.applied = context.attempt.applied.filter((id) => !baseIds.includes(id));
+    if (context.attempt.ruleQuantities) {
+      baseIds.forEach((id) => delete context.attempt.ruleQuantities[id]);
+    }
     context.attempt.base = 0;
     context.attempt.initializedBase = false;
 
     if (!wasActive) {
-      context.attempt.applied.push(ruleId);
+      setAttemptRuleQuantity(context.attempt, ruleId, 1);
       context.attempt.base = rule.pts;
       context.attempt.initializedBase = true;
     }
   } else {
     const active = context.attempt.applied.includes(ruleId);
-    if (active) {
-      context.attempt.applied = context.attempt.applied.filter((id) => id !== ruleId);
-      context.attempt[type] = Math.max(0, Number(context.attempt[type] || 0) - rule.pts);
-    } else {
-      context.attempt.applied.push(ruleId);
-      context.attempt[type] = Number(context.attempt[type] || 0) + rule.pts;
-    }
+    setAttemptRuleQuantity(context.attempt, ruleId, active ? 0 : 1);
+    recalculateAttemptRuleTotal(context, type);
   }
 
   persistScoreChange();
@@ -11583,7 +11679,9 @@ function buildPublishedBreakdown(context, attempt, publication = {}) {
   return {
     rulebook: {
       discipline: context.suerte?.id || "",
-      version: context.suerte?.id === "cala" ? CALA_RULEBOOK_VERSION : null,
+      version: context.suerte?.id === "cala"
+        ? profile.profileId === "FMCH_2026_LIBRE" ? FMCH_2026_CALA_RULEBOOK_VERSION : CALA_RULEBOOK_VERSION
+        : null,
       resolutionContractVersion: resolution.contractVersion || null,
       ruleProfileId: profile.profileId || null,
       ruleProfileVersion: profile.profileVersion || null,
@@ -11606,6 +11704,7 @@ function buildPublishedBreakdown(context, attempt, publication = {}) {
     attempted: Boolean(attempt.attempted),
     notAchieved: Boolean(attempt.notAchieved),
     desc: attempt.desc || null,
+    descRuleId: attempt.descRuleId || null,
     attemptV2,
     adicGroups: context.suerte?.id === "cala" ? buildPublishedCalaAdicGroups(context.suerte, attempt) : [],
     extraAdicItems: context.suerte?.id === "cala" ? buildPublishedCalaExtraAdicItems(context.suerte, attempt) : [],
@@ -11657,12 +11756,19 @@ function buildPublishedRuleItems(rules, attempt, type, options = {}) {
   const applied = new Set(attempt.applied || []);
   const catalogItems = (rules || [])
     .filter((rule) => applied.has(rule.id))
-    .map((rule) => ({
-      id: rule.id,
-      label: rule.label,
-      abbr: abbreviateScoreLabel(rule.label),
-      pts: Number(rule.pts || 0)
-    }));
+    .map((rule) => {
+      const quantity = getAttemptRuleQuantity(attempt, rule.id);
+      const unitPts = Number(rule.pts || 0);
+      return {
+        id: rule.id,
+        label: rule.label,
+        abbr: abbreviateScoreLabel(rule.label),
+        unitPts,
+        quantity,
+        pts: unitPts * quantity,
+        total: unitPts * quantity
+      };
+    });
 
   if (options.includeCustom === false) return catalogItems;
 
@@ -11694,7 +11800,8 @@ function toggleDesc(label) {
   if (context.attempt.desc === label) {
     clearDesc(context.attempt);
   } else {
-    applyDescReason(context, label);
+    const rule = (context.suerte.catalog.desc || []).find((item) => item.id === label || item.label === label);
+    applyDescReason(context, rule?.label || label, rule?.id || null);
   }
 
   persistScoreChange();
@@ -11706,17 +11813,22 @@ function setDescReason(label) {
   if (!context?.attempt) return;
 
   if (!label) clearDesc(context.attempt);
-  else applyDescReason(context, label);
+  else {
+    const rule = (context.suerte.catalog.desc || []).find((item) => item.id === label || item.label === label);
+    applyDescReason(context, rule?.label || label, rule?.id || null);
+  }
 
   persistScoreChange();
 }
 
-function applyDescReason(context, label) {
+function applyDescReason(context, label, ruleId = null) {
   context.attempt.desc = label;
+  context.attempt.descRuleId = ruleId;
 }
 
 function clearDesc(attempt) {
   attempt.desc = null;
+  attempt.descRuleId = null;
 }
 
 function addCustomScore(type) {

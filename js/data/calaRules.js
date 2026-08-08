@@ -1,4 +1,6 @@
 export const CALA_RULEBOOK_VERSION = "cala_base_reglamento_2026_06";
+export const FMCH_2026_CALA_RULEBOOK_VERSION = "fmch_2026_cala_0.2.0";
+export const FMCH_2026_CALA_SOURCE = "CHARROPRO-FMCH-2026-SCORING-SPECIFICATION-001";
 
 export const CALA_BASE_RULES = [
   { id: "cala_base_completa", pts: 20, label: "Base Cala" }
@@ -58,6 +60,125 @@ export const CALA_DESC_RULES = [
 export const CALA_TEAM_PENALTY_RULES = [
   { id: "cala_equipo_revisor_no_compite", pts: 5, label: "Revisor de punta no participa en faena" },
   { id: "cala_equipo_revisor_entra_rectangulo", pts: 2, label: "Revisor de punta ingresa al rectangulo" }
+];
+
+const confirmedRule = (rule, metadata = {}) => ({
+  ...rule,
+  metadata: {
+    sourceStatus: "CONFIRMED",
+    source: FMCH_2026_CALA_SOURCE,
+    ...metadata
+  }
+});
+
+export const FMCH_2026_CALA_BASE_RULES = [
+  confirmedRule({ id: "cala_base_completa", pts: 20, label: "Cala completa" })
+];
+
+export const FMCH_2026_CALA_ADIC_RULES = [
+  confirmedRule({ id: "cala_lado_derecho_velocidad", pts: 2, label: "Lado derecho: seis o mas vueltas con velocidad" }),
+  confirmedRule({ id: "cala_lado_derecho_pivote", pts: 1, label: "Lado derecho: pata de apoyo en una marca" }),
+  confirmedRule({ id: "cala_lado_izquierdo_velocidad", pts: 2, label: "Lado izquierdo: seis o mas vueltas con velocidad" }),
+  confirmedRule({ id: "cala_lado_izquierdo_pivote", pts: 1, label: "Lado izquierdo: pata de apoyo en una marca" }),
+  confirmedRule({ id: "cala_medio_derecho", pts: 1, label: "Medio lado derecho de 180 grados" }),
+  confirmedRule({ id: "cala_medio_izquierdo", pts: 1, label: "Medio lado izquierdo de 180 grados" }),
+  confirmedRule({ id: "cala_cambio_rectangulo_costado", pts: 1, label: "Cambio de rectangulo de costado o dando pierna" })
+];
+
+export const FMCH_2026_CALA_INFR_RULES = [
+  confirmedRule({ id: "cala_inf_revision_freno_mas_un_minuto", pts: 1, label: "Revision de freno mayor a un minuto" }),
+  confirmedRule({ id: "cala_inf_revision_freno_mas_dos_minutos", pts: 1, label: "Revision de freno mayor a dos minutos: punto adicional" }),
+  confirmedRule({ id: "cala_inf_resistirse_enfrenar", pts: 1, label: "Resistirse a enfrenar" }),
+  confirmedRule({ id: "cala_inf_resistirse_estribo", pts: 1, label: "Resistirse a dar estribo" }),
+  confirmedRule({ id: "cala_inf_ingreso_lateral_rectangulo", pts: 5, label: "Ingreso lateral inicial al rectangulo" }),
+  confirmedRule({ id: "cala_inf_dar_espalda_movimiento", pts: 1, label: "Dar espalda o voltear para iniciar movimiento" }),
+  confirmedRule({ id: "cala_inf_patada_una_extremidad", pts: 4, label: "Patada con una extremidad" }),
+  confirmedRule({ id: "cala_inf_no_saludar_inicio", pts: 1, label: "No saludar al inicio" }),
+  confirmedRule({ id: "cala_inf_no_saludar_final", pts: 1, label: "No saludar al final" }),
+  confirmedRule({ id: "cala_inf_no_correr_recto_ida", pts: 1, label: "No correr en linea recta de ida" }),
+  confirmedRule({ id: "cala_inf_no_correr_recto_regreso", pts: 1, label: "No correr en linea recta de regreso" }),
+  confirmedRule({ id: "cala_inf_estrellarse_partidero", pts: 4, label: "Estrellarse en el partidero" }),
+  confirmedRule({ id: "cala_inf_alborotarse", pts: 1, label: "Alborotarse" }),
+  confirmedRule({ id: "cala_inf_no_poner_en_mano", pts: 1, label: "No poner totalmente en mano" }),
+  confirmedRule({ id: "cala_inf_arrancar_despues_un_minuto", pts: 1, label: "Arrancar despues de un minuto" }),
+  confirmedRule({ id: "cala_inf_no_desarrollar_velocidad", pts: 4, label: "No desarrollar velocidad" }),
+  confirmedRule({ id: "cala_inf_cuartear_medio_cuerpo", pts: 3, label: "Cuartear de medio cuerpo hacia delante" }),
+  confirmedRule({ id: "cala_inf_parar_sobre_manos", pts: 2, label: "Parar sobre las manos o cargarse en la rienda" }),
+  confirmedRule({ id: "cala_inf_rebasar_90_sin_punta", pts: 1, label: "Rebasar 90 metros sin punta adicional valida" }),
+  confirmedRule({ id: "cala_inf_cuestionar_jueces_una_vez", pts: 1, label: "Cuestionar a los jueces una vez" }),
+  confirmedRule({ id: "cala_inf_cejar_borrar_sin_orden", pts: 1, label: "Cejar o borrar huellas sin orden" }),
+  confirmedRule({ id: "cala_inf_abrir_hocico", pts: 1, label: "Abrir hocico, excepto en punta" }),
+  confirmedRule({ id: "cala_inf_rabear_espiguear", pts: 1, label: "Rabear o espiguear" }),
+  confirmedRule({ id: "cala_inf_enjetarse", pts: 1, label: "Enjetarse" }),
+  confirmedRule({ id: "cala_inf_cachetear", pts: 1, label: "Cachetear" }),
+  confirmedRule({ id: "cala_inf_estrellar_despapar_gorbetear", pts: 1, label: "Estrellar, despapar o gorbetear" }),
+  confirmedRule({ id: "cala_inf_freno_fuera_lugar", pts: 2, label: "Freno fuera de lugar" }),
+  confirmedRule({ id: "cala_inf_lados_caminando", pts: 2, label: "Lado caminando o sin apoyo en cuartos traseros" }, { repeatable: true, maxQuantity: 2, unit: "lado" }),
+  confirmedRule({ id: "cala_inf_espalda_fin_lado", pts: 5, label: "Dar espalda al terminar el lado" }, { repeatable: true, maxQuantity: 2, unit: "lado" }),
+  confirmedRule({ id: "cala_inf_medio_incompleto", pts: 1, label: "Medio lado menor a 180 grados" }, { repeatable: true, maxQuantity: 2, unit: "lado" }),
+  confirmedRule({ id: "cala_inf_anticiparse", pts: 5, label: "Anticiparse mas de 90 grados al mando" }, { repeatable: true, unit: "ocasion" }),
+  confirmedRule({ id: "cala_inf_cambiar_mano", pts: 1, label: "Cambiar de mano durante los ejercicios" }),
+  confirmedRule({ id: "cala_inf_cejar_antes_cambio_rectangulo", pts: 2, label: "Cejar antes del cambio de rectangulo" }),
+  confirmedRule({ id: "cala_inf_ceja_fuera_linea", pts: 1, label: "Ceja fuera de linea o sin tomar el centro" }),
+  confirmedRule({ id: "cala_inf_soltar_estribo", pts: 2, label: "Soltar el estribo" }),
+  confirmedRule({ id: "cala_inf_mondingo_trote", pts: 1, label: "Andadura de mondingo o trote" }),
+  confirmedRule({ id: "cala_inf_arreo_protector_roto", pts: 2, label: "Arreo o protector roto o desplazado" }),
+  confirmedRule({ id: "cala_inf_perder_cuarta", pts: 1, label: "Perder la cuarta" }),
+  confirmedRule({ id: "cala_inf_sangrado", pts: 2, label: "Sangrado de hocico, ijares o barbada" }),
+  confirmedRule({ id: "cala_inf_disminuir_velocidad_lado", pts: 4, label: "Titubear o disminuir velocidad en el lado" }, { repeatable: true, maxQuantity: 2, unit: "lado" }),
+  confirmedRule({ id: "cala_inf_disminuir_velocidad_ceja", pts: 4, label: "Disminuir velocidad en la ceja" }),
+  confirmedRule({ id: "cala_inf_sujetarse_descanso", pts: 2, label: "Sujetarse durante el descanso" }),
+  confirmedRule({ id: "cala_inf_descansar_mano_paso", pts: 2, label: "Descansar la mano durante el paso natural" })
+];
+
+export const FMCH_2026_CALA_TEAM_PENALTY_RULES = [
+  confirmedRule({ id: "cala_equipo_revisor_no_compite", pts: 5, label: "Revisor de punta que no participa en otra faena" }, { scope: "team" }),
+  confirmedRule({ id: "cala_equipo_revisor_entra_rectangulo", pts: 2, label: "Revisor que ingresa al rectangulo" }, { scope: "team" })
+];
+
+export const FMCH_2026_CALA_DESC_RULES = [
+  confirmedRule({ id: "cala_desc_freno_arreo_prohibido_cambio", label: "Freno o arreo prohibido o cambio" }),
+  confirmedRule({ id: "cala_desc_entrada_salida_incorrecta", label: "Entrada o salida incorrecta del rectangulo" }),
+  confirmedRule({ id: "cala_desc_alteracion_cola_crin", label: "Alteraciones de cola o crin" }),
+  confirmedRule({ id: "cala_desc_competidor_distinto", label: "Competidor distinto" }),
+  confirmedRule({ id: "cala_desc_no_ir_galope", label: "No ir a galope" }),
+  confirmedRule({ id: "cala_desc_vuelta_fuera_lados", label: "Dar vuelta fuera de los lados" }),
+  confirmedRule({ id: "cala_desc_reparo", label: "Caballo repara o se levanta de manos" }),
+  confirmedRule({ id: "cala_desc_punta_antes_60_parar_antes_70", label: "Punta antes de 60 metros o parar antes de 70 metros" }),
+  confirmedRule({ id: "cala_desc_negativa_enfrenar_estribar", label: "Negativa a enfrenar o estribar" }),
+  confirmedRule({ id: "cala_desc_salirse_rectangulo", label: "Salirse del rectangulo" }),
+  confirmedRule({ id: "cala_desc_no_parar_llamado", label: "No parar al llamado" }),
+  confirmedRule({ id: "cala_desc_no_cambio_rectangulo", label: "No cambiar de rectangulo" }),
+  confirmedRule({ id: "cala_desc_caida_caballo", label: "Caida del caballo" }),
+  confirmedRule({ id: "cala_desc_caida_jinete", label: "Caida del jinete" }),
+  confirmedRule({ id: "cala_desc_apearse", label: "Apearse el jinete" }),
+  confirmedRule({ id: "cala_desc_segunda_discusion", label: "Segunda discusion" }),
+  confirmedRule({ id: "cala_desc_cuarta_ausente_mal_ubicada", label: "Cuarta ausente o mal ubicada" }),
+  confirmedRule({ id: "cala_desc_cadenilla_incorrecta", label: "Cadenilla incorrecta" }),
+  confirmedRule({ id: "cala_desc_abrir_manquear_rienda", label: "Abrir o manquear la rienda" }),
+  confirmedRule({ id: "cala_desc_apoyo_evitar_caida", label: "Apoyarse para evitar la caida" }),
+  confirmedRule({ id: "cala_desc_faena_incompleta_negativa", label: "Faena incompleta o negativa a ejecutarla" }),
+  confirmedRule({ id: "cala_desc_romper_secuencia", label: "Romper la secuencia o repetir un movimiento" }),
+  confirmedRule({ id: "cala_desc_dos_manos", label: "Usar dos manos" }),
+  confirmedRule({ id: "cala_desc_caballo_otro_equipo_fase", label: "Caballo presentado por otro equipo en la misma fase" }),
+  confirmedRule({ id: "cala_desc_dos_minutos", label: "Rebasar dos minutos sin arrancar" }),
+  confirmedRule({ id: "cala_desc_no_cejar_60m", label: "No cejar hasta la linea de 60 metros" }),
+  confirmedRule({ id: "cala_desc_remendar_arreo", label: "Remendar el arreo" }),
+  confirmedRule({ id: "cala_desc_no_galope_despues_20m", label: "No ir a galope despues de 20 metros" }),
+  confirmedRule({ id: "cala_desc_adelanto_ceja_mas_90", label: "Adelantarse mas de 90 grados en la ceja" }),
+  confirmedRule({ id: "cala_desc_persona_rectangulos", label: "Personas cerca de los rectangulos" }),
+  confirmedRule({ id: "cala_desc_no_volver_frente", label: "No volver de frente" }),
+  confirmedRule({ id: "cala_desc_presentador_diferente", label: "Presentador diferente" }),
+  confirmedRule({ id: "cala_desc_salida_incorrecta_revision", label: "Salida incorrecta despues de la revision del freno" }),
+  confirmedRule({ id: "cala_desc_cambio_freno_caballo", label: "Cambio de freno o cabalgadura" }),
+  confirmedRule({ id: "cala_desc_patada_doble", label: "Patada con ambas extremidades" }),
+  confirmedRule({ id: "cala_desc_retirarse_ruedo_revision", label: "Retirarse del ruedo despues de la revision" })
+];
+
+export const FMCH_2026_CALA_DISABLED_LEGACY_RULES = [
+  { id: "cala_inf_no_correr_recto", category: "infr", reason: "Sustituida por identidades separadas para ida y regreso" },
+  { id: "cala_desc_faena_incompleta", category: "desc", reason: "Sustituida por la causa oficial combinada" },
+  { id: "cala_desc_negarse_movimiento", category: "desc", reason: "Sustituida por la causa oficial combinada" }
 ];
 
 export const CALA_ADIC_SECTIONS = [
@@ -130,13 +251,17 @@ const LEGACY_ADIC_KEEP_AS_LEGACY = {
 };
 
 export function calculatePuntaBreakdown(attempt = {}) {
-  const metros = Math.max(0, Math.floor(Number(attempt.puntaMetros) || 0));
+  const rawMetros = Number(attempt.puntaMetros);
+  const metros = Math.max(0, Number.isFinite(rawMetros) ? rawMetros : 0);
+  const metrosEnteros = Math.floor(metros);
+  const centimetros = Math.round((metros - metrosEnteros) * 100);
+  const metrosCalificados = centimetros > 51 ? metrosEnteros + 1 : metrosEnteros;
   const tiempos = Math.max(1, Math.floor(Number(attempt.puntaPiquetes) || 1));
   let puntosDistancia = 0;
   let puntosTiempos = 0;
 
-  if (metros >= 6 && tiempos <= 4) {
-    puntosDistancia = Math.max(0, metros - 6);
+  if (metrosCalificados >= 6 && tiempos <= 4) {
+    puntosDistancia = Math.max(0, metrosCalificados - 6);
     if (tiempos === 1) puntosTiempos = 3;
     else if (tiempos === 2) puntosTiempos = 2;
     else if (tiempos === 3) puntosTiempos = 1;
@@ -144,6 +269,8 @@ export function calculatePuntaBreakdown(attempt = {}) {
 
   return {
     metros,
+    metrosCalificados,
+    centimetros,
     tiempos,
     puntosDistancia,
     puntosTiempos,
@@ -271,8 +398,9 @@ function addLegacyCustom(attempt, key, legacyId, item) {
 
 function recalculateMigratedCalaAttempt(attempt) {
   const applied = new Set(attempt.applied || []);
-  const adic = CALA_ADIC_RULES.reduce((sum, rule) => sum + (applied.has(rule.id) ? Number(rule.pts || 0) : 0), 0);
-  const infr = CALA_INFR_RULES.reduce((sum, rule) => sum + (applied.has(rule.id) ? Number(rule.pts || 0) : 0), 0);
+  const quantityFor = (ruleId) => Math.max(1, Number(attempt.ruleQuantities?.[ruleId] || 1));
+  const adic = CALA_ADIC_RULES.reduce((sum, rule) => sum + (applied.has(rule.id) ? Number(rule.pts || 0) * quantityFor(rule.id) : 0), 0);
+  const infr = CALA_INFR_RULES.reduce((sum, rule) => sum + (applied.has(rule.id) ? Number(rule.pts || 0) * quantityFor(rule.id) : 0), 0);
   const customAdic = (attempt.customAdic || []).reduce((sum, item) => sum + Number(item.pts || 0), 0);
   const customInfr = (attempt.customInfr || []).reduce((sum, item) => sum + Number(item.pts || 0), 0);
   const punta = calculatePuntaBreakdown(attempt);
@@ -281,6 +409,8 @@ function recalculateMigratedCalaAttempt(attempt) {
   attempt.adic = adic + customAdic;
   attempt.infr = infr + customInfr;
   attempt.puntaMetros = punta.metros;
+  attempt.puntaMetrosCalificados = punta.metrosCalificados;
+  attempt.puntaCentimetros = punta.centimetros;
   attempt.puntaPiquetes = punta.tiempos;
   attempt.puntaPts = punta.total;
 }

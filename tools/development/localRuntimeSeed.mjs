@@ -2,6 +2,7 @@
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { DEFAULT_LOCAL_PROJECT_ID } from "./environmentFoundation.mjs";
+import { FMCH_2026_LIBRE_PROFILE } from "../../js/data/ruleProfiles.js";
 
 const require = createRequire(import.meta.url);
 const requireFromFunctions = createRequire(new URL("../../functions/package.json", import.meta.url));
@@ -64,6 +65,18 @@ export function createLocalRuntimeSeedFixture(now = "2026-08-01T00:00:00.000Z") 
     demo: true,
     environment: "local",
     official: false
+  };
+  tournament.ruleProfileId = FMCH_2026_LIBRE_PROFILE.profileId;
+  tournament.ruleProfileVersion = FMCH_2026_LIBRE_PROFILE.version;
+  tournament.ruleProfile = {
+    ...FMCH_2026_LIBRE_PROFILE,
+    status: "active",
+    metadata: {
+      ...FMCH_2026_LIBRE_PROFILE.metadata,
+      fixtureOnly: true,
+      activationReady: false,
+      environment: "local-emulator"
+    }
   };
   const teams = [
     { id: "demo-local-equipo-a", name: "Charros Demo del Norte", association: "Asociacion Local A", category: "Libre", roster: { integrantes: [{ name: "Charro Uno", horseName: "Relampago Local" }] } },

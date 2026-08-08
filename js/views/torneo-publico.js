@@ -1,3 +1,3 @@
-import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260808-scorer-responsive-component-system-001-v1";
+import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 
 bootstrapPublicPortal();

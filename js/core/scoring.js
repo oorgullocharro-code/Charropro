@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260808-scorer-responsive-component-system-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260708-recovery-001b-panel-status1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260808-scorer-responsive-component-system-001-v1";
+} from "./state.js?v=20260808-fmch-2026-cala-scorer-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;
@@ -37,7 +37,7 @@ export function calculateAttemptPointSummary(attempt) {
   );
   const individualBadPoints = Number(attempt.infr) || 0;
   const teamBadPoints = getAttemptTeamPenaltyTotal(attempt);
-  const netAttemptPoints = attempt.desc ? 0 : goodPoints - individualBadPoints;
+  const netAttemptPoints = attempt.desc ? 0 - individualBadPoints : goodPoints - individualBadPoints;
   return {
     goodPoints,
     individualBadPoints,
@@ -306,6 +306,8 @@ export function hasAttemptActivity(attempt) {
 export function applyPuntaCalculation(attempt) {
   const punta = calculatePuntaBreakdown(attempt);
   attempt.puntaMetros = punta.metros;
+  attempt.puntaMetrosCalificados = punta.metrosCalificados;
+  attempt.puntaCentimetros = punta.centimetros;
   attempt.puntaPiquetes = punta.tiempos;
   attempt.puntaPts = punta.total;
 }

@@ -252,16 +252,33 @@ assert.equal(explicitFallback.valid, true);
 assert.equal(explicitFallback.suertes.length, SUERTES.length);
 assert.equal(explicitFallback.profile.fallbackUsed, true);
 
-const skeletonSelection = resolveRuleProfileSelection({
+const fmchDraftSelection = resolveRuleProfileSelection({
   ruleProfileId: FMCH_2026_LIBRE_PROFILE.profileId,
   ruleProfileVersion: FMCH_2026_LIBRE_PROFILE.version
 });
-assert.equal(skeletonSelection.blocked, true);
-assert.ok(skeletonSelection.diagnostics.some((item) => item.code === "profile-not-available-for-scoring"));
+assert.equal(fmchDraftSelection.blocked, true, "the FMCH profile is not selectable in production while source fields remain blocked");
+assert.ok(fmchDraftSelection.diagnostics.some((item) => item.code === "profile-not-available-for-scoring"));
+assert.equal(FMCH_2026_LIBRE_PROFILE.status, "draft");
+assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.2.0");
 assert.equal(
   FMCH_2026_LIBRE_PROFILE.suerteMetadata.cala.specializedCalculators[0].renderMode,
   "specialized_calculator"
 );
+
+const fmchCala = resolveEffectiveRules({
+  suerte: SUERTES.find((item) => item.id === "cala"),
+  profile: FMCH_2026_LIBRE_PROFILE
+});
+assert.equal(fmchCala.valid, true);
+assert.equal(fmchCala.suerte.catalog.base.length, 1);
+assert.equal(fmchCala.suerte.catalog.base[0].pts, 20);
+assert.equal(fmchCala.suerte.catalog.adic.length, 7);
+assert.equal(fmchCala.suerte.catalog.infr.length, 43);
+assert.equal(fmchCala.suerte.catalog.team_infr.length, 2);
+assert.equal(fmchCala.suerte.catalog.desc.length, 36);
+assert.equal(fmchCala.suerte.ruleMetadata.fieldIdMappingStatus, "FIELDID_MAPPING_BLOCKED");
+assert.ok(fmchCala.allRules.infr.some((rule) => rule.id === "cala_inf_no_correr_recto" && rule.enabled === false));
+assert.ok(fmchCala.allRules.desc.some((rule) => rule.id === "cala_desc_faena_incompleta" && rule.enabled === false));
 
 const profileMetadata = resolve({
   profile: profile([], {
@@ -343,7 +360,7 @@ resolveEffectiveRules({ suerte: frozenSuerte, profile: frozenProfile });
 assert.deepEqual(frozenSuerte, sourceSuerteSnapshot);
 assert.deepEqual(frozenProfile, sourceProfileSnapshot);
 assert.equal(calculateAttemptTotal({ base: 10, adic: 5, infr: 3, puntaPts: 0, desc: null }), 12);
-assert.equal(calculateAttemptTotal({ base: 10, adic: 5, infr: 3, puntaPts: 0, desc: "DQ" }), 0);
+assert.equal(calculateAttemptTotal({ base: 10, adic: 5, infr: 3, puntaPts: 0, desc: "DQ" }), -3);
 
 const historicalScore = {
   id: "official-before-profile",

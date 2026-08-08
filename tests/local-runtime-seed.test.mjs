@@ -21,6 +21,11 @@ assert.equal(JSON.stringify(fixture).includes("charropro-e8a68"), false);
 
 const tournament = fixture.database["charropro/tournaments"][LOCAL_RUNTIME_TOURNAMENT_ID];
 assert.equal(tournament.info.demo, true);
+assert.equal(tournament.info.ruleProfileId, "FMCH_2026_LIBRE");
+assert.equal(tournament.info.ruleProfileVersion, "0.2.0");
+assert.equal(tournament.info.ruleProfile.status, "active");
+assert.equal(tournament.info.ruleProfile.metadata.fixtureOnly, true);
+assert.equal(tournament.info.ruleProfile.metadata.activationReady, false);
 assert.equal(tournament.teams.length, 3);
 assert.deepEqual(tournament.charreadas[0].suerteIds, ["cala", "piales", "colas", "toro", "terna", "yegua", "manganas_pie", "manganas_caballo", "paso"]);
 assert.equal(tournament.meta.activeCharreadaId, LOCAL_RUNTIME_CHARREADA_ID);

@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import {
+  FMCH_2026_CALA_DESC_RULES,
+  FMCH_2026_CALA_INFR_RULES,
   calculatePuntaBreakdown,
   migrateCalaAttempt,
   normalizeTeamPenalty,
@@ -25,6 +27,20 @@ puntaCases.forEach(([metros, tiempos, expected]) => {
     `${metros}m / ${tiempos} tiempos`
   );
 });
+
+assert.equal(FMCH_2026_CALA_INFR_RULES.length, 43);
+assert.equal(FMCH_2026_CALA_DESC_RULES.length, 36);
+assert.deepEqual(calculatePuntaBreakdown({ puntaMetros: 8.51, puntaPiquetes: 1 }), {
+  metros: 8.51,
+  metrosCalificados: 8,
+  centimetros: 51,
+  tiempos: 1,
+  puntosDistancia: 2,
+  puntosTiempos: 3,
+  total: 5
+});
+assert.equal(calculatePuntaBreakdown({ puntaMetros: 8.52, puntaPiquetes: 1 }).total, 6);
+assert.equal(calculatePuntaBreakdown({ puntaMetros: 90, puntaPiquetes: 1 }).total, 87);
 
 const ladoCompleto = { applied: ["ca2"], customAdic: [], customInfr: [] };
 migrateCalaAttempt(ladoCompleto);

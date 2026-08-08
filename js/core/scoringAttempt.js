@@ -228,7 +228,7 @@ export function calculateScoringAttemptV2Points(attempt = {}) {
   const goodPoints = basePoints + additionalPoints + calculatorPoints;
   const individualBadPoints = sumSelections(attempt.infractions);
   const teamBadPoints = sumSelections(attempt.teamInfractions);
-  const netAttemptPoints = attempt.dq?.active ? 0 : goodPoints - individualBadPoints;
+  const netAttemptPoints = attempt.dq?.active ? 0 - individualBadPoints : goodPoints - individualBadPoints;
   return {
     goodPoints,
     individualBadPoints,
@@ -426,7 +426,16 @@ function buildLegacySelections(attempt, catalogRules, manualItems, category, agg
   const applied = new Set(Array.isArray(attempt.applied) ? attempt.applied.map(String) : []);
   const catalogSelections = catalogRules
     .filter((rule) => applied.has(String(rule.id || rule.ruleId)))
-    .map((rule) => normalizeSelection(rule, { category, manualDefault: false }));
+    .map((rule) => {
+      const ruleId = String(rule.id || rule.ruleId || "");
+      const quantity = Math.max(1, Math.floor(finiteNumber(attempt.ruleQuantities?.[ruleId], 1)));
+      const resolvedValue = finiteNumber(rule.resolvedValue ?? rule.value ?? rule.pts, 0);
+      return normalizeSelection({
+        ...rule,
+        quantity,
+        total: resolvedValue * quantity
+      }, { category, manualDefault: false });
+    });
   const manualSelections = normalizeSelections(manualItems, { category, source: "MANUAL", manualDefault: true });
   const selections = [...catalogSelections, ...manualSelections];
   const resolved = sumSelections(selections);
@@ -447,12 +456,12 @@ function buildLegacySelections(attempt, catalogRules, manualItems, category, agg
 function buildLegacyDq(attempt, rules) {
   const reason = normalizeText(attempt.desc || attempt.dq?.reason, 1000);
   const matched = rules.find((rule) =>
-    normalizeText(rule.id || rule.ruleId, 240) === normalizeText(attempt.dq?.ruleId, 240)
+    normalizeText(rule.id || rule.ruleId, 240) === normalizeText(attempt.descRuleId || attempt.dq?.ruleId, 240)
     || normalizeText(rule.label, 1000) === reason
   );
   return normalizeDq({
     active: Boolean(reason || attempt.dq?.active),
-    ruleId: matched?.ruleId || matched?.id || attempt.dq?.ruleId || null,
+    ruleId: matched?.ruleId || matched?.id || attempt.descRuleId || attempt.dq?.ruleId || null,
     reason,
     source: matched?.source || attempt.dq?.source || "LEGACY",
     previousStatus: attempt.dq?.previousStatus || null
@@ -469,6 +478,8 @@ function buildLegacyCalculationDetail(attempt, context) {
     selections: [],
     details: {
       metros: finiteNumber(attempt.puntaMetros, 0),
+      metrosCalificados: finiteNumber(attempt.puntaMetrosCalificados, finiteNumber(attempt.puntaMetros, 0)),
+      centimetros: nonNegativeInteger(attempt.puntaCentimetros, 0),
       piquetes: positiveInteger(attempt.puntaPiquetes, 1)
     }
   });
