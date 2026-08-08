@@ -739,7 +739,20 @@ Las pruebas automatizadas usan adapter falso y no escriben en Firebase de produc
 
 # CHARROPRO-PUBLIC-SNAPSHOT-CRITICAL-RECOVERY-001 - Cache transitiva V2
 
-- Identidad coherente del subgrafo de sincronización: `20260808-public-snapshot-critical-recovery-001-v2`.
+- Identidad coherente del subgrafo de sincronización: `20260808-public-snapshot-critical-recovery-001-v3`.
 - Los entrypoints y módulos padre que pueden alcanzar `js/core/firebaseSync.js` invalidan a su dependencia hija con la misma identidad de release.
 - La cobertura reconstruye el grafo HTML/ES modules y simula navegador limpio, `app.js` anterior, `sync.js` anterior, `firebaseSync.js` anterior, recarga normal y hard refresh.
 - No se creó un loader adicional ni se modificó lógica deportiva, Firebase Rules, scores, Portal o Broadcast.
+
+# CHARROPRO-PUBLIC-SNAPSHOT-CRITICAL-RECOVERY-001 - Protección de scores compartidos
+
+- Se recuperaron quirúrgicamente tres scores oficiales de Cala de Charro Completo desde dos exportaciones RTDB oficiales coincidentes. El universo productivo regresó de 450 a 453 sin modificar los 450 registros existentes.
+- La causa fue `Enviar prueba -> publishSharedAppState() -> publishFirebaseTournamentState()`: el estado local incompleto reemplazaba la colección remota `scores` mediante una actualización de nivel torneo.
+- `Enviar prueba` queda desacoplado de la publicación del estado privado compartido y conserva únicamente sus pipelines derivados de Live y Google Sheets.
+- `publishFirebaseTournamentState()` compara IDs remotos contra IDs propuestos, aborta si falta cualquier ID remoto y nunca incluye `scores` en su actualización compartida, incluso cuando ambos conjuntos coinciden.
+- Los scores individuales continúan escribiéndose exclusivamente mediante `publishFirebaseScore()` sobre `scores/{scoreId}`; los borrados explícitos existentes no se convierten en ausencias implícitas.
+- La atribución local y los respaldos por torneo usan `charreadaId`, por lo que conservan participantes individuales de Charro Completo, Caladero, Coleadero y Pialadero.
+- La regresión cubre remoto 453/local 450, A/B/C, mismo conjunto con payload local diferente, escritura individual, `publishedScores`, auditoría y snapshot público.
+- La prueba real en RTDB Emulator `demo-charropro-local` confirmó 453 antes y después del intento destructivo, snapshot válido y cero cambios colaterales en `publishedScores` y auditoría.
+- Cache-buster protector: `20260808-public-snapshot-critical-recovery-001-v3`.
+- No se modificaron reglas deportivas, Firebase Rules, cálculos, Portal Público visual ni Broadcast Studio.

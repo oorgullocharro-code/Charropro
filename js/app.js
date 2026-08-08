@@ -42,7 +42,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-public-snapshot-critical-recovery-001-v2";
+} from "./core/sync.js?v=20260808-public-snapshot-critical-recovery-001-v3";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -77,7 +77,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v2";
+} from "./core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -2442,13 +2442,20 @@ function getLocalTournamentDiagnostics(tournamentId) {
   const charreadas = getTournamentCharreadas(tournamentId);
   const teams = getTournamentTeams(tournamentId);
   const charreadaIds = new Set(charreadas.map((charreada) => charreada.id));
-  const teamIds = new Set(teams.map((team) => team.id));
+  const scoreIds = Object.keys(state.scores || {}).filter((key) => scoreKeyBelongsToTournament(key, charreadaIds));
   return {
     teams: teams.length,
     charreadas: charreadas.length,
-    scores: Object.keys(state.scores || {}).filter((key) => scoreKeyBelongsToTournament(key, charreadaIds, teamIds)).length,
+    scores: scoreIds.length,
     publishedScores: (state.publishedScores || []).filter((score) => (score.tournament?.id || score.tournamentId || "") === tournamentId).length
   };
+}
+
+function getLocalTournamentScoreIds(tournamentId) {
+  const charreadaIds = new Set(getTournamentCharreadas(tournamentId).map((charreada) => charreada.id));
+  return Object.keys(state.scores || {})
+    .filter((key) => scoreKeyBelongsToTournament(key, charreadaIds))
+    .sort();
 }
 
 function getLocalTournamentVersion(tournamentId) {
@@ -2477,6 +2484,8 @@ async function guardTournamentRemoteSafety(tournamentId) {
 
   const localCounts = getLocalTournamentDiagnostics(tournamentId);
   const remoteCounts = remote.counts || {};
+  const localScoreIds = new Set(getLocalTournamentScoreIds(tournamentId));
+  const missingRemoteIds = (remote.ids?.scores || []).filter((scoreId) => !localScoreIds.has(scoreId));
   firebaseDiagnostics.remoteCounts = firebaseDiagnostics.remoteCounts || {};
   firebaseDiagnostics.remoteVersions = firebaseDiagnostics.remoteVersions || {};
   firebaseDiagnostics.remoteCounts[tournamentId] = remoteCounts;
@@ -2490,6 +2499,15 @@ async function guardTournamentRemoteSafety(tournamentId) {
     (localCounts.publishedScores === 0 && Number(remoteCounts.publishedScores || 0) > 0);
 
   if (incomplete) return { ok: false, reason: "incomplete-local-data", localCounts, remoteCounts };
+  if (missingRemoteIds.length) {
+    return {
+      ok: false,
+      reason: "remote-score-ids-missing",
+      localCounts,
+      remoteCounts,
+      missingRemoteIds
+    };
+  }
 
   const localVersion = getLocalTournamentVersion(tournamentId);
   if (Number(remote.version || 0) > localVersion) {
@@ -2502,6 +2520,7 @@ async function guardTournamentRemoteSafety(tournamentId) {
 function formatSafetyGuardMessage(reason = "") {
   if (reason === "not-prepared") return "Primero prepara CharroPro para trabajar con la informacion mas reciente.";
   if (reason === "incomplete-local-data") return "Este dispositivo no tiene datos completos. Sincroniza con CharroPro antes de guardar.";
+  if (reason === "remote-score-ids-missing") return "CharroPro detectó scores remotos que faltan en este dispositivo. Sincroniza antes de guardar.";
   if (reason === "stale-version") return "Hay una version mas reciente en CharroPro. Sincroniza antes de continuar.";
   return "No se pudo validar la informacion remota. Sincroniza con CharroPro antes de continuar.";
 }
@@ -2908,11 +2927,10 @@ function cloneJson(value) {
 
 function replaceTournamentScores(tournamentId, nextScores, options = {}) {
   const charreadaIds = new Set(getTournamentCharreadas(tournamentId).map((charreada) => charreada.id));
-  const teamIds = new Set(getTournamentTeams(tournamentId).map((team) => team.id));
   const protectedDraft = getProtectedScoringDraft(tournamentId);
   Object.keys(state.scores || {}).forEach((key) => {
     if (protectedDraft?.id === key) return;
-    if (scoreKeyBelongsToTournament(key, charreadaIds, teamIds)) delete state.scores[key];
+    if (scoreKeyBelongsToTournament(key, charreadaIds)) delete state.scores[key];
   });
   state.scores = {
     ...(state.scores || {}),
@@ -2955,9 +2973,9 @@ function mergeTournamentSettings(settings = {}, tournamentId = "") {
   }
 }
 
-function scoreKeyBelongsToTournament(key, charreadaIds, teamIds) {
-  const [charreadaId, teamId] = String(key || "").split("__");
-  return charreadaIds.has(charreadaId) && teamIds.has(teamId);
+function scoreKeyBelongsToTournament(key, charreadaIds) {
+  const [charreadaId] = String(key || "").split("__");
+  return charreadaIds.has(charreadaId);
 }
 
 function clearPortalTournamentDetailCache(remoteIds = new Set()) {
@@ -2966,22 +2984,20 @@ function clearPortalTournamentDetailCache(remoteIds = new Set()) {
   state.publishedScores = (state.publishedScores || []).filter((score) => remoteIds.has(score.tournament?.id || score.tournamentId || ""));
 
   const charreadaIds = new Set(state.charreadas.map((charreada) => charreada.id));
-  const teamIds = new Set(state.teams.map((team) => team.id));
   Object.keys(state.scores || {}).forEach((key) => {
-    const [charreadaId, teamId] = String(key || "").split("__");
-    if (!charreadaIds.has(charreadaId) || !teamIds.has(teamId)) delete state.scores[key];
+    const [charreadaId] = String(key || "").split("__");
+    if (!charreadaIds.has(charreadaId)) delete state.scores[key];
   });
 }
 
 function removeLocalTournamentData(tournamentId) {
   if (!tournamentId) return;
   const charreadaIds = new Set(state.charreadas.filter((charreada) => charreada.tournamentId === tournamentId).map((charreada) => charreada.id));
-  const teamIds = new Set(state.teams.filter((team) => team.tournamentId === tournamentId).map((team) => team.id));
   state.tournaments = state.tournaments.filter((tournament) => tournament.id !== tournamentId);
   state.teams = state.teams.filter((team) => team.tournamentId !== tournamentId);
   state.charreadas = state.charreadas.filter((charreada) => charreada.tournamentId !== tournamentId);
   Object.keys(state.scores || {}).forEach((key) => {
-    if (scoreKeyBelongsToTournament(key, charreadaIds, teamIds)) delete state.scores[key];
+    if (scoreKeyBelongsToTournament(key, charreadaIds)) delete state.scores[key];
   });
   state.publishedScores = (state.publishedScores || []).filter((score) => (score.tournament?.id || score.tournamentId || "") !== tournamentId);
   state.statHistorySnapshots = (state.statHistorySnapshots || []).filter((snapshot) => (snapshot.tournament?.id || snapshot.tournamentId || "") !== tournamentId);
@@ -6523,9 +6539,8 @@ function buildRecoveryCenterSummary(tournament = {}) {
   const teams = tournamentId ? getTournamentTeams(tournamentId) : [];
   const charreadas = tournamentId ? getTournamentCharreadas(tournamentId) : [];
   const charreadaIds = new Set(charreadas.map((charreada) => charreada.id));
-  const teamIds = new Set(teams.map((team) => team.id));
   const scoresCount = Object.keys(state.scores || {})
-    .filter((key) => scoreKeyBelongsToTournament(key, charreadaIds, teamIds))
+    .filter((key) => scoreKeyBelongsToTournament(key, charreadaIds))
     .length;
 
   return {
@@ -6735,10 +6750,9 @@ function buildRecoveryFullBackup(tournament) {
   const teams = getTournamentTeams(tournamentId).map(cloneJson);
   const charreadas = getTournamentCharreadas(tournamentId).map(cloneJson);
   const charreadaIds = new Set(charreadas.map((charreada) => charreada.id));
-  const teamIds = new Set(teams.map((team) => team.id));
   const scores = Object.fromEntries(
     Object.entries(state.scores || {})
-      .filter(([key]) => scoreKeyBelongsToTournament(key, charreadaIds, teamIds))
+      .filter(([key]) => scoreKeyBelongsToTournament(key, charreadaIds))
       .map(([key, value]) => [key, cloneJson(value)])
   );
   const publishedScores = (state.publishedScores || [])
@@ -12134,12 +12148,11 @@ function saveSettings() {
 
 async function testSync() {
   claimGoogleSyncControl();
-  saveState();
+  saveState({ silent: true });
   const firebaseResult = await sendToFirebaseLive();
-  const appStateResult = canPublishSharedState() ? await publishSharedAppState() : { ok: false };
   const sheetsResult = await sendToGoogleSheets({ force: true });
-  showToast(firebaseResult.ok || appStateResult.ok || sheetsResult.ok ? "Sincronizacion enviada." : "No se pudo sincronizar.");
-  saveState();
+  showToast(firebaseResult.ok || sheetsResult.ok ? "Sincronizacion enviada." : "No se pudo sincronizar.");
+  saveState({ silent: true });
   render({ preserveScoringScroll: state.view === "scoring" });
 }
 

@@ -26,7 +26,7 @@ import {
   takeProductionConsoleOfficialProgram,
   updateProductionConsoleOfficialPreviewLiveData,
   updateProductionConsoleOfficialProgramLiveData
-} from "./productionConsole.js?v=20260808-public-snapshot-critical-recovery-001-v2";
+} from "./productionConsole.js?v=20260808-public-snapshot-critical-recovery-001-v3";
 import {
   applyProgramMainProjection,
   clearProgramMainOutput,
@@ -34,7 +34,7 @@ import {
   createProgramMainOutput,
   destroyProgramMainOutput,
   mountProgramMainOutput
-} from "./programMainOutput.js?v=20260808-public-snapshot-critical-recovery-001-v2";
+} from "./programMainOutput.js?v=20260808-public-snapshot-critical-recovery-001-v3";
 import { destroyTemplateRendererIntegration } from "./templateRendererIntegration.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
 import { destroyThemeTemplateIntegration } from "./themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
 import { destroyPreviewEngine } from "./previewEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
@@ -543,7 +543,7 @@ export function createBroadcastStudioEngine(options = {}) {
       if (disposed) throw workspaceError("broadcast-studio-destroyed");
       emit({ connectionState: "preparing", context: null, operationStatus: "Esperando autenticación", error: null });
       try {
-        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v2");
+        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3");
         if (typeof runtime.firebaseBroadcastApi.subscribeFirebaseBroadcastContext !== "function") {
           throw workspaceError("broadcast-studio-context-subscriber-unavailable");
         }

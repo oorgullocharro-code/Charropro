@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { registerHooks } from "node:module";
+import { createRequire, registerHooks } from "node:module";
 import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js";
 import officialScoreConcurrency from "../functions/officialScoreConcurrency.js";
+
+const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
 const {
   applyOfficialScoreTransaction,
@@ -45,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260808-public-snapshot-critical-recovery-001-v2"],
+  ["20260808-public-snapshot-critical-recovery-001-v3"],
   "all browser entrypoints share one firebaseSync module identity"
 );
 
@@ -492,8 +494,210 @@ assert.equal(
   true
 );
 
+const sharedTournamentId = "tournament-shared-score-guard";
+const sharedCharreadaId = "charreada-shared-score-guard";
+const sharedTeamId = "team-shared-score-guard";
+const remote453 = Object.fromEntries(
+  Array.from({ length: 453 }, (_, index) => [
+    `${sharedCharreadaId}__${sharedTeamId}__suerte_${String(index).padStart(3, "0")}`,
+    [{ total: index }]
+  ])
+);
+const local450 = Object.fromEntries(Object.entries(remote453).slice(0, 450));
+const sharedAppState = buildSharedTournamentAppState(local450);
+
+firebase.seed({
+  charropro: {
+    tournaments: {
+      [sharedTournamentId]: buildSharedTournamentRecord(remote453)
+    },
+    tournamentIndex: {},
+    publicTournaments: {},
+    audit: {
+      publishedScores: {
+        [sharedTournamentId]: {
+          audit_a: { result: "SUCCESS" }
+        }
+      }
+    }
+  }
+});
+
+const blockedSharedWrite = await firebaseSync.publishFirebaseTournamentState(
+  sharedTournamentId,
+  sharedAppState,
+  { uid: "shared-guard-user", role: "supervisor" }
+);
+assert.equal(blockedSharedWrite.ok, false, "453 remote / 450 local aborts the shared write");
+assert.equal(blockedSharedWrite.reason, "remote-score-ids-missing");
+assert.equal(blockedSharedWrite.scoreWriteGuard.countRemote, 453);
+assert.equal(blockedSharedWrite.scoreWriteGuard.countProposed, 450);
+assert.equal(blockedSharedWrite.scoreWriteGuard.missingRemoteIds.length, 3);
+assert.equal(
+  Object.keys(firebase.read(`charropro/tournaments/${sharedTournamentId}/scores`)).length,
+  453,
+  "the remote score universe remains complete"
+);
+
+const idsABC = ["a", "b", "c"].map((suffix) => `${sharedCharreadaId}__${sharedTeamId}__${suffix}`);
+const remoteABC = Object.fromEntries(idsABC.map((scoreId, index) => [scoreId, [{ total: index + 1 }]]));
+firebase.seed({
+  charropro: {
+    tournaments: {
+      [sharedTournamentId]: buildSharedTournamentRecord(remoteABC)
+    },
+    tournamentIndex: {},
+    publicTournaments: {},
+    audit: {
+      publishedScores: {
+        [sharedTournamentId]: {
+          audit_a: { result: "SUCCESS" }
+        }
+      }
+    }
+  }
+});
+
+const missingCState = buildSharedTournamentAppState({
+  [idsABC[0]]: [{ total: 100 }],
+  [idsABC[1]]: [{ total: 200 }]
+});
+const beforeBlockedTournament = firebase.read(`charropro/tournaments/${sharedTournamentId}`);
+const blockedC = await firebaseSync.publishFirebaseTournamentState(
+  sharedTournamentId,
+  missingCState,
+  { uid: "shared-guard-user", role: "supervisor" }
+);
+assert.equal(blockedC.ok, false);
+assert.deepEqual(blockedC.scoreWriteGuard.missingRemoteIds, [idsABC[2]]);
+assert.deepEqual(
+  firebase.read(`charropro/tournaments/${sharedTournamentId}`),
+  beforeBlockedTournament,
+  "a blocked replacement is atomic"
+);
+
+const sameIdsState = buildSharedTournamentAppState({
+  [idsABC[0]]: [{ total: 100 }],
+  [idsABC[1]]: [{ total: 200 }],
+  [idsABC[2]]: [{ total: 300 }]
+});
+const publishedBeforeSharedWrite = firebase.read(`charropro/tournaments/${sharedTournamentId}/publishedScores`);
+const auditBeforeSharedWrite = firebase.read(`charropro/audit/publishedScores/${sharedTournamentId}`);
+const allowedSharedWrite = await firebaseSync.publishFirebaseTournamentState(
+  sharedTournamentId,
+  sameIdsState,
+  { uid: "shared-guard-user", role: "supervisor" }
+);
+assert.equal(allowedSharedWrite.ok, true);
+assert.equal(allowedSharedWrite.scoreWriteGuard.missingRemoteIds.length, 0);
+assert.deepEqual(
+  firebase.read(`charropro/tournaments/${sharedTournamentId}/scores`),
+  remoteABC,
+  "shared state never rewrites score payloads even when all IDs match"
+);
+assert.deepEqual(
+  firebase.read(`charropro/tournaments/${sharedTournamentId}/publishedScores`),
+  publishedBeforeSharedWrite,
+  "shared state preserves publishedScores"
+);
+assert.deepEqual(
+  firebase.read(`charropro/audit/publishedScores/${sharedTournamentId}`),
+  auditBeforeSharedWrite,
+  "shared state preserves the official audit"
+);
+
+const individualScoreWrite = await firebaseSync.publishFirebaseScore(
+  sharedTournamentId,
+  idsABC[0],
+  [{ total: 999 }],
+  { uid: "judge-test", role: "juez" }
+);
+assert.equal(individualScoreWrite.ok, true);
+assert.deepEqual(firebase.read(`charropro/tournaments/${sharedTournamentId}/scores/${idsABC[0]}`), [{ total: 999 }]);
+assert.deepEqual(firebase.read(`charropro/tournaments/${sharedTournamentId}/scores/${idsABC[1]}`), remoteABC[idsABC[1]]);
+assert.deepEqual(firebase.read(`charropro/tournaments/${sharedTournamentId}/scores/${idsABC[2]}`), remoteABC[idsABC[2]]);
+
+const testSyncSource = appSource.slice(
+  appSource.indexOf("async function testSync()"),
+  appSource.indexOf("async function publishLiveState()")
+);
+assert.doesNotMatch(testSyncSource, /publishSharedAppState\s*\(/, "Enviar prueba does not publish private shared state");
+assert.match(testSyncSource, /saveState\(\{ silent: true \}\)/, "Enviar prueba does not queue a shared-state write indirectly");
+
+if (process.env.CHARROPRO_RUN_FIREBASE_EMULATOR === "1") {
+  await runFirebaseEmulatorSharedScoreGuard();
+}
+
 delete globalThis[TEST_STATE_KEY];
 console.log("public-live-feed-integration.test.mjs: ok");
+
+async function runFirebaseEmulatorSharedScoreGuard() {
+  const projectId = String(process.env.FIREBASE_PROJECT_ID || "").trim();
+  const databaseHost = String(process.env.FIREBASE_DATABASE_EMULATOR_HOST || "").trim();
+  assert.equal(projectId, "demo-charropro-local", "the score guard fixture only runs against the isolated local project");
+  assert.match(databaseHost, /^127\.0\.0\.1:\d+$/, "the fixture requires an explicit loopback RTDB Emulator");
+  assert.equal(JSON.stringify(process.env).includes("charropro-e8a68"), false, "the fixture cannot target Production");
+
+  await firebase.connectDatabaseEmulator(projectId, databaseHost);
+  const tournamentPath = `charropro/tournaments/${sharedTournamentId}`;
+  const publishedPath = `${tournamentPath}/publishedScores`;
+  const auditPath = `charropro/audit/publishedScores/${sharedTournamentId}`;
+  try {
+    await firebase.writeRemote(tournamentPath, buildSharedTournamentRecord(remote453));
+    await firebase.writeRemote(`charropro/tournamentIndex/${sharedTournamentId}`, null);
+    await firebase.writeRemote(`charropro/publicTournaments/${sharedTournamentId}`, null);
+    await firebase.writeRemote(auditPath, { audit_a: { result: "SUCCESS" } });
+
+    const beforeScores = await firebase.readRemote(`${tournamentPath}/scores`);
+    const beforePublished = await firebase.readRemote(publishedPath);
+    const beforeAudit = await firebase.readRemote(auditPath);
+    assert.equal(Object.keys(beforeScores).length, 453);
+
+    const blocked = await firebaseSync.publishFirebaseTournamentState(
+      sharedTournamentId,
+      buildSharedTournamentAppState(local450),
+      { uid: "emulator-shared-guard-user", role: "supervisor" }
+    );
+    assert.equal(blocked.ok, false);
+    assert.equal(blocked.reason, "remote-score-ids-missing");
+    assert.equal(blocked.scoreWriteGuard.countRemote, 453);
+    assert.equal(blocked.scoreWriteGuard.countProposed, 450);
+    assert.equal(blocked.scoreWriteGuard.missingRemoteIds.length, 3);
+    assert.deepEqual(await firebase.readRemote(`${tournamentPath}/scores`), beforeScores);
+    assert.deepEqual(await firebase.readRemote(publishedPath), beforePublished);
+    assert.deepEqual(await firebase.readRemote(auditPath), beforeAudit);
+
+    const safeShared = await firebaseSync.publishFirebaseTournamentState(
+      sharedTournamentId,
+      buildSharedTournamentAppState(remote453),
+      { uid: "emulator-shared-guard-user", role: "supervisor" }
+    );
+    assert.equal(safeShared.ok, true);
+    assert.equal(safeShared.publicSnapshot?.ok, true, "public snapshot remains operational in Emulator");
+    assert.deepEqual(await firebase.readRemote(`${tournamentPath}/scores`), beforeScores);
+    assert.deepEqual(await firebase.readRemote(publishedPath), beforePublished);
+    assert.deepEqual(await firebase.readRemote(auditPath), beforeAudit);
+
+    const targetScoreId = Object.keys(remote453)[0];
+    const individual = await firebaseSync.publishFirebaseScore(
+      sharedTournamentId,
+      targetScoreId,
+      [{ total: 999 }],
+      { uid: "emulator-judge", role: "juez" }
+    );
+    assert.equal(individual.ok, true);
+    const afterIndividual = await firebase.readRemote(`${tournamentPath}/scores`);
+    assert.equal(Object.keys(afterIndividual).length, 453);
+    assert.deepEqual(afterIndividual[targetScoreId], [{ total: 999 }]);
+    assert.deepEqual(afterIndividual[Object.keys(remote453)[1]], beforeScores[Object.keys(remote453)[1]]);
+  } finally {
+    await firebase.writeRemote(tournamentPath, null);
+    await firebase.writeRemote(`charropro/tournamentIndex/${sharedTournamentId}`, null);
+    await firebase.writeRemote(`charropro/publicTournaments/${sharedTournamentId}`, null);
+    await firebase.writeRemote(auditPath, null);
+    await firebase.disconnectDatabaseEmulator();
+  }
+}
 
 async function publishOfficial({
   publishedId,
@@ -549,6 +753,76 @@ async function publishOfficial({
   );
 }
 
+function buildSharedTournamentRecord(scores) {
+  return {
+    info: {
+      id: sharedTournamentId,
+      name: "Shared Score Guard",
+      type: "completo"
+    },
+    meta: {
+      version: 7,
+      activeCharreadaId: sharedCharreadaId,
+      updatedAt: "2026-08-08T12:00:00.000Z",
+      updatedAtMs: Date.parse("2026-08-08T12:00:00.000Z")
+    },
+    teams: {
+      [sharedTeamId]: {
+        id: sharedTeamId,
+        tournamentId: sharedTournamentId,
+        name: "Equipo Guard"
+      }
+    },
+    charreadas: {
+      [sharedCharreadaId]: {
+        id: sharedCharreadaId,
+        tournamentId: sharedTournamentId,
+        name: "Charreada Guard",
+        status: "en_vivo",
+        competitionId: "equipos_completo",
+        competitionType: "equipos_completo",
+        teamIds: [sharedTeamId]
+      }
+    },
+    scores: structuredClone(scores),
+    publishedScores: {
+      published_a: {
+        id: "published_a",
+        tournament: { id: sharedTournamentId },
+        charreada: { id: sharedCharreadaId },
+        team: { id: sharedTeamId, name: "Equipo Guard" },
+        suerte: { id: "cala", name: "Cala" },
+        total: 1,
+        revision: 1,
+        superseded: false
+      }
+    }
+  };
+}
+
+function buildSharedTournamentAppState(scores) {
+  return {
+    schemaVersion: 2,
+    activeTournamentId: sharedTournamentId,
+    activeCharreadaId: sharedCharreadaId,
+    tournaments: [{ id: sharedTournamentId, name: "Shared Score Guard", type: "completo" }],
+    teams: [{ id: sharedTeamId, tournamentId: sharedTournamentId, name: "Equipo Guard" }],
+    charreadas: [{
+      id: sharedCharreadaId,
+      tournamentId: sharedTournamentId,
+      name: "Charreada Guard",
+      status: "en_vivo",
+      competitionId: "equipos_completo",
+      competitionType: "equipos_completo",
+      teamIds: [sharedTeamId]
+    }],
+    scores: structuredClone(scores),
+    publishedScores: [],
+    statHistorySnapshots: [],
+    settings: {}
+  };
+}
+
 function firebaseModuleSource(moduleName) {
   const state = `globalThis.${TEST_STATE_KEY}`;
   const modules = {
@@ -584,6 +858,9 @@ function firebaseModuleSource(moduleName) {
 function createFirebaseTestAdapter() {
   let data = {};
   let authUser = { uid: "test-user" };
+  let emulatorApp = null;
+  let emulatorDatabase = null;
+  let deleteEmulatorApp = null;
   const app = { name: "test-app" };
   const database = { name: "test-database" };
   return {
@@ -608,6 +885,31 @@ function createFirebaseTestAdapter() {
     read(path) {
       return structuredClone(readPath(data, path));
     },
+    async connectDatabaseEmulator(projectId, databaseHost) {
+      const { deleteApp, initializeApp } = requireFromFunctions("firebase-admin/app");
+      const { getDatabase } = requireFromFunctions("firebase-admin/database");
+      emulatorApp = initializeApp({
+        projectId,
+        databaseURL: `http://${databaseHost}?ns=${projectId}`
+      }, `public-shared-score-guard-${Date.now()}`);
+      emulatorDatabase = getDatabase(emulatorApp);
+      deleteEmulatorApp = deleteApp;
+    },
+    async disconnectDatabaseEmulator() {
+      if (emulatorApp && deleteEmulatorApp) await deleteEmulatorApp(emulatorApp);
+      emulatorApp = null;
+      emulatorDatabase = null;
+      deleteEmulatorApp = null;
+    },
+    async readRemote(path) {
+      assert.ok(emulatorDatabase, "Firebase Emulator adapter is connected");
+      const result = await emulatorDatabase.ref(path).once("value");
+      return structuredClone(result.val());
+    },
+    async writeRemote(path, value) {
+      assert.ok(emulatorDatabase, "Firebase Emulator adapter is connected");
+      await emulatorDatabase.ref(path).set(structuredClone(value));
+    },
     write(path, value) {
       writePath(data, path, structuredClone(value));
     },
@@ -624,6 +926,10 @@ function createFirebaseTestAdapter() {
       return { path: String(path || "") };
     },
     async get(target) {
+      if (emulatorDatabase) {
+        const result = await emulatorDatabase.ref(target.path).once("value");
+        return snapshot(result.val());
+      }
       const value = readPath(data, target.path);
       if (target.path.includes("/projectionOutbox/") && target.path.endsWith("/state")) {
         this.freshOutboxStateReads += 1;
@@ -632,15 +938,26 @@ function createFirebaseTestAdapter() {
       return snapshot(value);
     },
     async set(target, value) {
+      if (emulatorDatabase) {
+        await emulatorDatabase.ref(target.path).set(structuredClone(value));
+        return;
+      }
       writePath(data, target.path, structuredClone(value));
     },
     async update(target, value) {
+      if (emulatorDatabase) {
+        await emulatorDatabase.ref(target.path).update(structuredClone(value));
+        return;
+      }
       if (!target.path) this.privateWriteCount += 1;
       for (const [path, entry] of Object.entries(value || {})) {
         writePath(data, joinPath(target.path, path), structuredClone(entry));
       }
     },
     async runTransaction(target, handler) {
+      if (emulatorDatabase) {
+        return emulatorDatabase.ref(target.path).transaction(handler, undefined, false);
+      }
       if (this.failOutboxTransactionsOnce && target.path.includes("/projectionOutbox/")) {
         this.failOutboxTransactionsOnce = false;
         const error = new Error("permission denied while claiming projection");

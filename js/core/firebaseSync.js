@@ -2103,6 +2103,40 @@ function buildTournamentRecordCounts(record = {}) {
   };
 }
 
+function buildTournamentRecordIds(record = {}) {
+  return {
+    teams: listStoredRecordIds(record.teams),
+    charreadas: listStoredRecordIds(record.charreadas),
+    scores: listStoredRecordIds(record.scores),
+    publishedScores: listStoredRecordIds(record.publishedScores)
+  };
+}
+
+function buildCollectionIdGuard(remoteCollection, proposedCollection, operation = "collection-write") {
+  const remoteIds = listStoredRecordIds(remoteCollection);
+  const proposedIds = listStoredRecordIds(proposedCollection);
+  const proposedSet = new Set(proposedIds);
+  const missingRemoteIds = remoteIds.filter((id) => !proposedSet.has(id));
+  return {
+    ok: missingRemoteIds.length === 0,
+    operation,
+    countRemote: remoteIds.length,
+    countProposed: proposedIds.length,
+    missingRemoteIds
+  };
+}
+
+function listStoredRecordIds(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item, index) => String(item?.id || index))
+      .filter(Boolean)
+      .sort();
+  }
+  if (!value || typeof value !== "object") return [];
+  return Object.keys(value).filter(Boolean).sort();
+}
+
 function countStoredRecords(value) {
   if (Array.isArray(value)) return value.filter(Boolean).length;
   if (!value || typeof value !== "object") return 0;
@@ -4045,7 +4079,8 @@ export async function readFirebaseTournamentSafetySnapshot(tournamentId) {
         missing: true,
         tournamentId: cleanTournamentId,
         version: 0,
-        counts: buildTournamentRecordCounts({})
+        counts: buildTournamentRecordCounts({}),
+        ids: buildTournamentRecordIds({})
       };
     }
 
@@ -4057,6 +4092,7 @@ export async function readFirebaseTournamentSafetySnapshot(tournamentId) {
       version: Number(record.meta?.version || 0),
       meta: record.meta || {},
       counts: buildTournamentRecordCounts(record),
+      ids: buildTournamentRecordIds(record),
       updatedAt: record.meta?.updatedAt || "",
       updatedAtMs: Number(record.meta?.updatedAtMs || 0)
     };
@@ -4154,6 +4190,26 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
     const version = Number(remote.version || 0) + 1;
     const now = Date.now();
     const record = compactTournamentRecord(cleanTournamentId, appState);
+    const scoreWriteGuard = buildCollectionIdGuard(
+      remoteRecord.scores,
+      record.scores,
+      "publishFirebaseTournamentState:scores"
+    );
+    if (!scoreWriteGuard.ok) {
+      console.warn("[firebase-sync] reemplazo destructivo de scores bloqueado", {
+        tournamentId: cleanTournamentId,
+        operation: scoreWriteGuard.operation,
+        countRemote: scoreWriteGuard.countRemote,
+        countProposed: scoreWriteGuard.countProposed,
+        missingRemoteIds: scoreWriteGuard.missingRemoteIds,
+        actor: compactActor(actor)
+      });
+      return {
+        ok: false,
+        reason: "remote-score-ids-missing",
+        scoreWriteGuard
+      };
+    }
     const meta = {
       ...record.meta,
       version,
@@ -4163,8 +4219,9 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
       updatedByName: actor.name || actor.email || "",
       clientId: actor.clientId || ""
     };
+    const { scores: _proposedScores, ...nonScoreRecord } = record;
     const payload = cleanUndefined({
-      ...record,
+      ...nonScoreRecord,
       meta
     });
     const authoritativeRecord = cleanUndefined({
@@ -4173,6 +4230,7 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
         ...meta,
         lastPublishedScore: remote.lastPublishedScore || null
       },
+      scores: remoteRecord.scores || {},
       publishedScores: remoteRecord.publishedScores || {}
     });
     const { meta: payloadMeta, ...statePayload } = payload;
@@ -4183,7 +4241,7 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
     await update(ref(getFirebaseDatabase(), path), statePayload);
     await update(ref(getFirebaseDatabase(), `${TOURNAMENT_INDEX_PATH}/${cleanTournamentId}`), compactTournamentIndex(authoritativeRecord));
     const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, authoritativeRecord, { source: "tournamentState" });
-    return { ok: true, version, publicSnapshot };
+    return { ok: true, version, publicSnapshot, scoreWriteGuard };
   } catch (error) {
     console.error("[CharroPro] publishFirebaseTournamentState failed", {
       tournamentId,
@@ -5006,10 +5064,9 @@ function compactTournamentRecord(tournamentId, appState = {}) {
   const tournament = (appState.tournaments || []).find((item) => item.id === cleanTournamentId) || { id: cleanTournamentId };
   const teams = (appState.teams || []).filter((team) => team.tournamentId === cleanTournamentId);
   const charreadas = (appState.charreadas || []).filter((charreada) => charreada.tournamentId === cleanTournamentId);
-  const teamIds = new Set(teams.map((team) => team.id).filter(Boolean));
   const charreadaIds = new Set(charreadas.map((charreada) => charreada.id).filter(Boolean));
   const scores = Object.fromEntries(
-    Object.entries(appState.scores || {}).filter(([key]) => scoreKeyBelongsToTournament(key, charreadaIds, teamIds))
+    Object.entries(appState.scores || {}).filter(([key]) => scoreKeyBelongsToTournament(key, charreadaIds))
   );
   const history = (appState.statHistorySnapshots || []).filter((snapshot) =>
     (snapshot.tournament?.id || snapshot.tournamentId || "") === cleanTournamentId
@@ -5098,9 +5155,9 @@ function arrayFromRecord(value) {
   return Object.values(value).filter(Boolean);
 }
 
-function scoreKeyBelongsToTournament(key, charreadaIds, teamIds) {
-  const [charreadaId, teamId] = String(key || "").split("__");
-  return charreadaIds.has(charreadaId) && teamIds.has(teamId);
+function scoreKeyBelongsToTournament(key, charreadaIds) {
+  const [charreadaId] = String(key || "").split("__");
+  return charreadaIds.has(charreadaId);
 }
 
 function publishedScoreBelongsToTournament(score, tournamentId, charreadaIds, teamIds) {

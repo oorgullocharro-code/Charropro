@@ -6,7 +6,7 @@ import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConf
 import { buildOfficialPackage } from "./officialFormat.js?v=20260709-competitions-003-scoring-by-competition1";
 import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260709-competitions-003-scoring-by-competition1";
 import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260709-competitions-003-scoring-by-competition1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v2";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3";
 import { getTimerScopeKey, getTimerView } from "./timerRules.js?v=20260708-recovery-001b-panel-status1";
 import { CHARROPRO_APP_VERSION } from "./version.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 

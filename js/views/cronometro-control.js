@@ -7,7 +7,7 @@ import {
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive
-} from "../core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v2";
+} from "../core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3";
 import { getTimerScopeKey, getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 
