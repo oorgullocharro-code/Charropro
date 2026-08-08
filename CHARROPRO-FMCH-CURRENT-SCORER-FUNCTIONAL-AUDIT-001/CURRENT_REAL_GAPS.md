@@ -55,6 +55,8 @@ y pueden superponerse:
 | P1 integracion documental | La pagina independiente `formato-federacion.html` no recupero la charreada activa al abrirse desde Resultados. | Con Cala=20 persistida, la pagina mostro `No hay una charreada activa con equipos para mostrar`. | Hoy existe dato suficiente para una hoja parcial, pero el visor independiente no la presenta de forma confiable. |
 | P1 formato | Firmas, logo FMCH y footer no tienen captura o composicion oficial completa. | `officialFormat.js` y los 7 FieldID faltantes. | La hoja no alcanza equivalencia documental completa. |
 | P1 operacion | Confirmacion o refutacion multi-juez no es estado explicito del flujo revisado. | `OFFICIAL_SCORE_FLOW.md`. | Requiere validacion operativa autorizada. |
+| P2 operacion | El control de footer etiquetado `Deshacer` ejecuta `previousScore()`: reinicia el cronometro y mueve el puntero al intento anterior. | `renderScoringBottomBar()`, `previousScore()` y `previousScoringPointer()`. | No existe undo transversal de la ultima accion; la etiqueta puede inducir una expectativa distinta al comportamiento real. |
+| P2 definicion | No se localizo entidad, helper, configuracion o persistencia autonoma para fusiones, fusionales, sustituciones o combinaciones. | Busqueda completa en `js/` y `tests/`; solo existen reglas denominadas `Floreo` en Lazo, Pial en el Ruedo y Manganas. | Requiere definicion deportiva antes de declarar equivalencia con Floreo o crear un modelo nuevo. |
 
 El bloqueo anterior de autenticacion y navegador queda cerrado; ya no es una
 brecha del diagnostico. Tampoco se incluyen como faltantes los valores que ya
