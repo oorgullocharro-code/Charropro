@@ -1,6 +1,6 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import {
@@ -38,6 +38,12 @@ export const emptyAttempt = () => ({
   remateId: null,
   remateLabel: null,
   remateMetadata: null,
+  classification: null,
+  noRepara: false,
+  resolvedRuleValues: {},
+  dynamicScoring: null,
+  timing: null,
+  timeEvidence: [],
   autoDescRuleId: null,
   tiempo: "",
   desc: null,

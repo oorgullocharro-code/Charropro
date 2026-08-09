@@ -47,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260808-fmch-2026-piales-coleadero-001-v1"],
+  ["20260808-fmch-2026-jineteos-dynamic-001-v1"],
   "all browser entrypoints share one firebaseSync module identity"
 );
 

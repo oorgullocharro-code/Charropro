@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fixture FMCH Piales y Coleadero</title>
+  <title>Fixture FMCH Jineteos</title>
 </head>
 <body>
   <main>
     <h1>Fixture local FMCH 2026</h1>
     <p>Instala datos sinteticos exclusivamente en Firebase Emulator.</p>
     <button data-seed-emulator type="button">Preparar emulador local</button>
-    <button data-install-suerte="1" type="button" disabled>Abrir Piales sintetico</button>
-    <button data-install-suerte="2" type="button" disabled>Abrir Coleadero sintetico</button>
+    <button data-install-suerte="3" type="button" disabled>Abrir Jineteo de Toro</button>
+    <button data-install-suerte="6" type="button" disabled>Abrir Jineteo de Yegua</button>
     <p data-status>Emulador pendiente.</p>
   </main>
   <script type="module">
@@ -25,7 +25,7 @@
     const profile = { ...FMCH_2026_LIBRE_PROFILE, status: "active" };
     const tournament = {
       id: tournamentId,
-      name: "Fixture local FMCH Piales y Coleadero",
+      name: "Fixture local FMCH Jineteos",
       season: 2026,
       type: "completo",
       category: "Libre",
@@ -77,7 +77,7 @@
       view: "scoring",
       activeTournamentId: tournamentId,
       activeCharreadaId: charreadaId,
-      scoringSuerteIdx: 1,
+      scoringSuerteIdx: 3,
       scoringTeamIdx: 0,
       scoringAttemptIdx: 0,
       scoringColeadorIdx: 0,
@@ -92,7 +92,7 @@
     };
 
     async function writeEmulator(path, value, method = "PUT") {
-      if (!(["127.0.0.1", "localhost"].includes(window.location.hostname))) {
+      if (!(window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")) {
         throw new Error("fixture-loopback-required");
       }
       const response = await fetch(`${emulatorBaseUrl}/${path}.json?ns=${emulatorProjectId}`, {
@@ -119,7 +119,7 @@
           writeEmulator(`charropro/tournaments/${tournamentId}/meta`, {
             activeTournamentId: tournamentId,
             activeCharreadaId: charreadaId,
-            scoringSuerteIdx: 1,
+            scoringSuerteIdx: 3,
             scoringTeamIdx: 0,
             scoringAttemptIdx: 0,
             scoringColeadorIdx: 0,
@@ -146,10 +146,10 @@
     });
 
     document.querySelectorAll("[data-install-suerte]").forEach((button) => button.addEventListener("click", () => {
-      state.scoringSuerteIdx = Number(button.dataset.installSuerte || 1);
+      state.scoringSuerteIdx = Number(button.dataset.installSuerte || 3);
       localStorage.setItem("charropro_tournament_active_v1", tournamentId);
       localStorage.setItem(`charropro_tournament_${tournamentId}`, JSON.stringify(state));
-      window.location.assign(`../../torneo.html?tournamentId=${tournamentId}&view=scoring&charreada=${charreadaId}&v=fixture-fmch-piales-colas-2026`);
+      window.location.assign(`../../torneo.html?tournamentId=${tournamentId}&view=scoring&charreada=${charreadaId}&v=fixture-fmch-jineteos-2026`);
     }));
   </script>
 </body>

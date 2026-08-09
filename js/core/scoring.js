@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./state.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;

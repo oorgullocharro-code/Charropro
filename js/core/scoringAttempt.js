@@ -377,6 +377,7 @@ export function buildEffectiveRulesFingerprint(suerte = {}) {
       category,
       ruleId: normalizeId(rule.ruleId || rule.id),
       value: finiteNumber(rule.value ?? rule.pts, 0),
+      valueByClassification: normalizeValueTable(rule.valueByClassification),
       source: normalizeText(rule.source || rule.origin, 80),
       enabled: rule.enabled !== false,
       order: finiteNumber(rule.order, 0)
@@ -410,7 +411,13 @@ function buildStableAttemptId(identity, scope) {
 function buildLegacyBaseSelection(attempt, baseRules) {
   const applied = new Set(Array.isArray(attempt.applied) ? attempt.applied.map(String) : []);
   const selected = baseRules.find((rule) => applied.has(String(rule.id || rule.ruleId)));
-  if (selected) return normalizeSelection(selected, { category: "base", resolvedValue: finiteNumber(attempt.base, selected.pts) });
+  if (selected) {
+    const ruleId = String(selected.id || selected.ruleId || "");
+    return normalizeSelection(selected, {
+      category: "base",
+      resolvedValue: finiteNumber(attempt.resolvedRuleValues?.[ruleId], finiteNumber(attempt.base, selected.pts))
+    });
+  }
   if (finiteNumber(attempt.base, 0) === 0) return null;
   return normalizeSelection({
     id: "legacy_base_aggregate",
@@ -429,9 +436,13 @@ function buildLegacySelections(attempt, catalogRules, manualItems, category, agg
     .map((rule) => {
       const ruleId = String(rule.id || rule.ruleId || "");
       const quantity = Math.max(1, Math.floor(finiteNumber(attempt.ruleQuantities?.[ruleId], 1)));
-      const resolvedValue = finiteNumber(rule.resolvedValue ?? rule.value ?? rule.pts, 0);
+      const resolvedValue = finiteNumber(
+        attempt.resolvedRuleValues?.[ruleId],
+        finiteNumber(rule.resolvedValue ?? rule.value ?? rule.pts, 0)
+      );
       return normalizeSelection({
         ...rule,
+        resolvedValue,
         quantity,
         total: resolvedValue * quantity
       }, { category, manualDefault: false });

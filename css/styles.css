@@ -9165,6 +9165,54 @@ html.graphic-page #graphic-root {
   font-weight: 800;
 }
 
+.cp-jineteo-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, .8fr) minmax(210px, 1.2fr) minmax(150px, .7fr);
+  align-items: stretch;
+  gap: 10px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.cp-jineteo-controls > .button {
+  min-height: var(--scorer-touch-target);
+}
+
+.cp-jineteo-timing-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 3px 10px;
+  min-width: 0;
+  padding: 9px 12px;
+  border-left: 3px solid #4c8dff;
+  background: rgba(76, 141, 255, .08);
+}
+
+.cp-jineteo-timing-summary span,
+.cp-jineteo-timing-summary em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.cp-jineteo-timing-summary strong {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-jineteo-timing-record {
+  margin: 0;
+  padding: 0 14px 12px;
+  color: #9fc2ff;
+  font-weight: 800;
+  text-align: left;
+}
+
 .cp-official-fall-diagram {
   grid-row: 1 / span 2;
   width: 44px;
@@ -9347,6 +9395,10 @@ html.graphic-page #graphic-root {
   .cp-piales-distance > div,
   .cp-piales-distance .cp-field-note {
     grid-column: 1 / -1;
+  }
+
+  .cp-jineteo-controls {
+    grid-template-columns: 1fr;
   }
 }
 

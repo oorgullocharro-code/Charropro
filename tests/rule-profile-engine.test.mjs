@@ -259,7 +259,7 @@ const fmchDraftSelection = resolveRuleProfileSelection({
 assert.equal(fmchDraftSelection.blocked, true, "the FMCH profile is not selectable in production while source fields remain blocked");
 assert.ok(fmchDraftSelection.diagnostics.some((item) => item.code === "profile-not-available-for-scoring"));
 assert.equal(FMCH_2026_LIBRE_PROFILE.status, "draft");
-assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.3.0");
+assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.4.0");
 assert.equal(
   FMCH_2026_LIBRE_PROFILE.suerteMetadata.cala.specializedCalculators[0].renderMode,
   "specialized_calculator"

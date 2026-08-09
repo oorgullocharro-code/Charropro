@@ -6,7 +6,7 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_SOURCE,
   FMCH_2026_CALA_TEAM_PENALTY_RULES
-} from "./calaRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./calaRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   FMCH_2026_COLEADERO_ADIC_RULES,
   FMCH_2026_COLEADERO_BASE_RULES,
@@ -23,7 +23,25 @@ import {
   FMCH_2026_PIALES_INFR_RULES,
   FMCH_2026_PIALES_RULEBOOK_VERSION,
   FMCH_2026_PIALES_TEAM_PENALTY_RULES
-} from "./fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import {
+  FMCH_2026_JINETEO_CLASSIFICATIONS,
+  FMCH_2026_JINETEOS_SOURCE,
+  FMCH_2026_TORO_ADIC_RULES,
+  FMCH_2026_TORO_BASE_RULES,
+  FMCH_2026_TORO_DESC_RULES,
+  FMCH_2026_TORO_DISABLED_LEGACY_RULES,
+  FMCH_2026_TORO_INFR_RULES,
+  FMCH_2026_TORO_RULEBOOK_VERSION,
+  FMCH_2026_TORO_TEAM_PENALTY_RULES,
+  FMCH_2026_YEGUA_ADIC_RULES,
+  FMCH_2026_YEGUA_BASE_RULES,
+  FMCH_2026_YEGUA_DESC_RULES,
+  FMCH_2026_YEGUA_DISABLED_LEGACY_RULES,
+  FMCH_2026_YEGUA_INFR_RULES,
+  FMCH_2026_YEGUA_RULEBOOK_VERSION,
+  FMCH_2026_YEGUA_TEAM_PENALTY_RULES
+} from "./fmch2026JineteosRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
@@ -80,7 +98,7 @@ const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$/;
 const MAX_DEPTH = 10;
-const MAX_ARRAY = 300;
+const MAX_ARRAY = 500;
 const MAX_KEYS = 300;
 
 function buildFmchCalaProfileRule(rule, category, order) {
@@ -172,10 +190,65 @@ const FMCH_2026_COLEADERO_PROFILE_RULES = buildFmchSuerteProfileRules("colas", {
   desc: FMCH_2026_COLEADERO_DESC_RULES
 }, FMCH_2026_COLEADERO_DISABLED_LEGACY_RULES);
 
+function buildFmchJineteoProfileRule(suerteId, rule, category, order) {
+  return {
+    suerteId,
+    category,
+    ruleId: rule.id,
+    label: rule.label,
+    ...(category === RULE_CATEGORIES.DISQUALIFICATION ? {} : { value: Number(rule.pts || 0) }),
+    ...(rule.valueByClassification ? { valueByClassification: rule.valueByClassification } : {}),
+    enabled: true,
+    order,
+    metadata: {
+      ...(rule.metadata || {}),
+      source: FMCH_2026_JINETEOS_SOURCE,
+      implementationTicket: "CHARROPRO-FMCH-2026-JINETEOS-DYNAMIC-IMPLEMENTATION-001"
+    }
+  };
+}
+
+function buildFmchJineteoProfileRules(suerteId, catalogs, disabledLegacyRules) {
+  return [
+    ...catalogs.base.map((rule, index) => buildFmchJineteoProfileRule(suerteId, rule, RULE_CATEGORIES.BASE, index)),
+    ...catalogs.adic.map((rule, index) => buildFmchJineteoProfileRule(suerteId, rule, RULE_CATEGORIES.ADDITIONAL, index)),
+    ...catalogs.infr.map((rule, index) => buildFmchJineteoProfileRule(suerteId, rule, RULE_CATEGORIES.INDIVIDUAL_INFRACTION, index)),
+    ...catalogs.team_infr.map((rule, index) => buildFmchJineteoProfileRule(suerteId, rule, RULE_CATEGORIES.TEAM_INFRACTION, index)),
+    ...catalogs.desc.map((rule, index) => buildFmchJineteoProfileRule(suerteId, rule, RULE_CATEGORIES.DISQUALIFICATION, index)),
+    ...disabledLegacyRules.map((rule) => ({
+      suerteId,
+      category: rule.category,
+      ruleId: rule.id,
+      enabled: false,
+      metadata: {
+        sourceStatus: "LEGACY_PRESERVED_DISABLED",
+        source: FMCH_2026_JINETEOS_SOURCE,
+        reason: "Reconciliado contra FMCH 2026; se conserva físicamente para históricos"
+      }
+    }))
+  ];
+}
+
+const FMCH_2026_TORO_PROFILE_RULES = buildFmchJineteoProfileRules("toro", {
+  base: FMCH_2026_TORO_BASE_RULES,
+  adic: FMCH_2026_TORO_ADIC_RULES,
+  infr: FMCH_2026_TORO_INFR_RULES,
+  team_infr: FMCH_2026_TORO_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_TORO_DESC_RULES
+}, FMCH_2026_TORO_DISABLED_LEGACY_RULES);
+
+const FMCH_2026_YEGUA_PROFILE_RULES = buildFmchJineteoProfileRules("yegua", {
+  base: FMCH_2026_YEGUA_BASE_RULES,
+  adic: FMCH_2026_YEGUA_ADIC_RULES,
+  infr: FMCH_2026_YEGUA_INFR_RULES,
+  team_infr: FMCH_2026_YEGUA_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_YEGUA_DESC_RULES
+}, FMCH_2026_YEGUA_DISABLED_LEGACY_RULES);
+
 export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   contractVersion: RULE_PROFILE_CONTRACT_VERSION,
   profileId: "FMCH_2026_LIBRE",
-  version: "0.3.0",
+  version: "0.4.0",
   name: "FMCH 2026 Libre",
   scope: "competition",
   status: "draft",
@@ -183,7 +256,9 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   rules: [
     ...FMCH_2026_CALA_PROFILE_RULES,
     ...FMCH_2026_PIALES_PROFILE_RULES,
-    ...FMCH_2026_COLEADERO_PROFILE_RULES
+    ...FMCH_2026_COLEADERO_PROFILE_RULES,
+    ...FMCH_2026_TORO_PROFILE_RULES,
+    ...FMCH_2026_YEGUA_PROFILE_RULES
   ],
   suerteMetadata: {
     cala: {
@@ -231,14 +306,43 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
       opportunitiesPerParticipant: 3,
       rulebookVersion: FMCH_2026_COLEADERO_RULEBOOK_VERSION,
       officialFallDiagramSupport: "optional_asset_not_available"
+    },
+    toro: {
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
+      rulebookVersion: FMCH_2026_TORO_RULEBOOK_VERSION,
+      classificationControlsBase: true,
+      classificationOptions: FMCH_2026_JINETEO_CLASSIFICATIONS,
+      timerContract: {
+        timerId: "toro_apretalamiento",
+        limitMs: 300000,
+        warningThresholdsMs: [180000, 240000],
+        derivedAdjustments: true
+      }
+    },
+    yegua: {
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
+      rulebookVersion: FMCH_2026_YEGUA_RULEBOOK_VERSION,
+      classificationControlsBase: true,
+      classificationOptions: FMCH_2026_JINETEO_CLASSIFICATIONS,
+      noReparaClassificationId: "MINIMA",
+      timerContract: {
+        timerId: "yegua_apretalamiento",
+        limitMs: 300000,
+        warningThresholdsMs: [180000, 240000],
+        derivedAdjustments: true
+      }
     }
   },
   metadata: {
     jurisdiction: "FMCH",
     category: "Libre",
-    implementationStatus: "cala_piales_coleadero_technical_complete_activation_blocked",
+    implementationStatus: "cala_piales_coleadero_jineteos_technical_complete_activation_blocked",
     sportsRulesLoaded: true,
-    loadedSuerteIds: ["cala", "piales", "colas"],
+    loadedSuerteIds: ["cala", "piales", "colas", "toro", "yegua"],
     activationReady: false,
     activationBlockReason: "Cala ML/CR frente a MD/MI/PC y cuarta fila de Coleadero requieren confirmacion de fuente"
   }

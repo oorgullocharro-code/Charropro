@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./state.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

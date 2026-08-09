@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./data/calaRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,15 +25,25 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import {
+  FMCH_2026_TORO_RULEBOOK_VERSION,
+  FMCH_2026_YEGUA_RULEBOOK_VERSION,
+  applyFmch2026JineteoTiming,
+  isFmch2026JineteoSuerte,
+  reconcileFmch2026JineteoAttempt,
+  resolveFmch2026JineteoTiming,
+  resolveJineteoRuleValue,
+  setFmch2026JineteoClassification
+} from "./data/fmch2026JineteosRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -45,16 +55,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./core/scoring.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./core/scoringAttempt.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./core/scorerComponents.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -64,7 +74,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./core/sync.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -99,7 +109,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./core/firebaseSync.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -148,7 +158,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+} from "./core/state.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -8194,15 +8204,49 @@ function formatAttemptBreakdown(attempt = {}) {
 }
 
 function renderJineteoMainPanel(context) {
+  const timerView = getTimerView(
+    {
+      running: timerRunning,
+      startedAt: timerRunning ? timerStartedAt : null,
+      elapsedMs: timerElapsedMs
+    },
+    getTimerSource()
+  );
+  const classificationId = context.attempt.classification?.classificationId || "";
+  const timing = resolveFmch2026JineteoTiming(timerView.elapsedMs, classificationId, {
+    noRepara: context.attempt.noRepara
+  });
+  const noRepara = Boolean(context.attempt.noRepara);
   return html`
-    <section class="cp-scoring-card cp-main-suerte-panel">
+    <section class="cp-scoring-card cp-main-suerte-panel cp-jineteo-panel">
       <header>
         <div>
           <span>${renderCpIcon("shield")}</span>
           <h2>${escapeHTML(context.suerte.id === "toro" ? "Calificador de jineteo de toro" : "Calificador de jineteo de yegua")}</h2>
         </div>
-        <p>Suma base y adicionales; aplica deducciones desde la botonera.</p>
+        <p>Selecciona la clasificación; las acciones conservan su identidad y actualizan su valor reglamentario.</p>
       </header>
+      <div class="cp-jineteo-controls">
+        ${context.suerte.id === "yegua"
+          ? html`<button
+              class="button ${noRepara ? "amber" : ""}"
+              data-action="toggle-jineteo-no-repara"
+              type="button"
+              aria-pressed="${noRepara ? "true" : "false"}"
+            >${noRepara ? "No repara: Mínima" : "Marcar No repara"}</button>`
+          : ""}
+        <div class="cp-jineteo-timing-summary">
+          <span>Apretalamiento</span>
+          <strong class="timer-display">${escapeHTML(timerView.formatted)}</strong>
+          <em>${timing.disqualified
+            ? "Pierde la jineteada"
+            : timing.minute5Penalty ? "Dos infracciones" : timing.minute4Penalty ? "Una infracción" : timing.timeSavedQuantity ? `+${timing.timeSavedQuantity} por tiempo` : "Sin ajuste"}</em>
+        </div>
+        <button class="button primary" data-action="apply-jineteo-timing" type="button">Aplicar tiempo</button>
+      </div>
+      ${context.attempt.timing?.timerId
+        ? html`<p class="cp-jineteo-timing-record">Tiempo aplicado: ${escapeHTML(context.attempt.timing.legacyText || "")} / ${Number(context.attempt.timing.adjustments?.length || 0)} ajuste(s)</p>`
+        : ""}
     </section>
   `;
 }
@@ -8256,7 +8300,9 @@ function renderScoringActionAccordions(charreada, context, charroName, leaderboa
   const infrButtons = buttons.filter((button) => button.ruleType === "infr");
 
   return [
-    renderScoringAccordionGroup("base", "Calificaciones base", "target", renderScoringActionGroupBody("base", baseButtons, charreada, context, charroName, leaderboard)),
+    context.suerte.ruleMetadata?.classificationControlsBase
+      ? ""
+      : renderScoringAccordionGroup("base", "Calificaciones base", "target", renderScoringActionGroupBody("base", baseButtons, charreada, context, charroName, leaderboard)),
     renderScoringAccordionGroup("adic", "Adicionales", "plus", renderScoringActionGroupBody("adic", adicButtons, charreada, context, charroName, leaderboard)),
     renderScoringAccordionGroup("infr", "Infracciones", "warning", renderScoringActionGroupBody("infr", infrButtons, charreada, context, charroName, leaderboard)),
     renderScoringAccordionGroup("teamPenalties", "Infracciones al equipo", "shield", renderTeamPenaltySection(context)),
@@ -8378,19 +8424,19 @@ function buildScoringActionButtons(context) {
   const buttons = [];
   const usedQuick = new Set();
 
-  (catalog.base || []).forEach((rule, index) => {
+  (catalog.base || []).filter((rule) => rule.metadata?.automaticOnly !== true).forEach((rule, index) => {
     buttons.push(makeRuleScoringButton(rule, "base", "neutral", "quickActions", index + 1, context));
     usedQuick.add(rule.id);
   });
 
   (catalog.adic || []).forEach((rule, index) => {
-    if (rule.metadata?.specializedInput) return;
+    if (rule.metadata?.specializedInput || rule.metadata?.automaticOnly) return;
     const group = index < 8 ? "quickActions" : "more";
     buttons.push(makeRuleScoringButton(rule, "adic", "positive", group, 20 + index, context));
     if (group === "quickActions") usedQuick.add(rule.id);
   });
 
-  (catalog.infr || []).forEach((rule, index) => {
+  (catalog.infr || []).filter((rule) => rule.metadata?.automaticOnly !== true).forEach((rule, index) => {
     buttons.push(makeRuleScoringButton(rule, "infr", "negative", "infractions", 100 + index, context));
   });
 
@@ -8404,20 +8450,27 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
   const maxQuantity = Number.isFinite(Number(rule.metadata?.maxQuantity))
     ? Math.max(1, Number(rule.metadata.maxQuantity))
     : null;
+  const classificationId = context.attempt.classification?.classificationId || context.attempt.classificationId || null;
+  const resolvedPoints = rule.valueByClassification
+    ? resolveJineteoRuleValue(rule, classificationId)
+    : Number(rule.pts || 0);
+  const classificationRequired = rule.metadata?.requiresClassification === true && !classificationId;
   const additionalBlocked = ruleType === "adic" && isAttemptAdditionalBlocked(context);
   return {
     id: `rule__${ruleType}__${rule.id}`,
     ruleId: rule.id,
     label: rule.label,
     shortLabel: rule.label,
-    valueLabel: `${isInfr ? "-" : ruleType === "base" ? "" : "+"}${moneylessNumber(rule.pts)}`,
-    points: isInfr ? -Number(rule.pts || 0) : Number(rule.pts || 0),
+    valueLabel: `${isInfr ? "-" : ruleType === "base" ? "" : "+"}${moneylessNumber(resolvedPoints)}`,
+    points: isInfr ? -resolvedPoints : resolvedPoints,
     source: rule.source || "PRODUCT_BASE",
     category: rule.category || ruleType,
     valueByClassification: rule.valueByClassification || null,
-    classificationId: context.attempt.classification?.classificationId || context.attempt.classificationId || null,
-    disabled: rule.disabled === true || additionalBlocked,
-    disabledReason: additionalBlocked ? "La base seleccionada no recibe adicionales" : rule.disabledReason || "",
+    classificationId,
+    disabled: rule.disabled === true || additionalBlocked || classificationRequired,
+    disabledReason: additionalBlocked
+      ? "La base seleccionada no recibe adicionales"
+      : classificationRequired ? "Selecciona una clasificación" : rule.disabledReason || "",
     type: visualType,
     icon: isInfr ? "warning" : ruleType === "base" ? "target" : "plus",
     suppressGenericIcon: rule.metadata?.suppressGenericIcon === true,
@@ -8651,7 +8704,9 @@ function renderScoringClassificationSlot(context, attemptView) {
 }
 
 function getScoringClassificationOptions(context) {
-  const options = context.suerte?.presentation?.classificationOptions || context.suerte?.classificationOptions;
+  const options = context.suerte?.ruleMetadata?.classificationOptions
+    || context.suerte?.presentation?.classificationOptions
+    || context.suerte?.classificationOptions;
   return Array.isArray(options) ? options : [];
 }
 
@@ -10167,6 +10222,8 @@ function handleAction(action, target) {
     "clear-custom-form": () => clearCustomScoreForm(target.dataset.type),
     "remove-custom": () => removeCustomScore(target.dataset.type, target.dataset.id),
     "select-scoring-classification": () => setScoringClassification(target.dataset.id, target.dataset.label),
+    "toggle-jineteo-no-repara": toggleJineteoNoRepara,
+    "apply-jineteo-timing": applyJineteoTiming,
     "reset-attempt": resetAttempt,
     "previous-score": previousScore,
     "next-score": nextScore,
@@ -11511,14 +11568,20 @@ function setAttemptRuleQuantity(attempt, ruleId, quantity) {
 
 function recalculateAttemptRuleTotal(context, type) {
   const customKey = type === "infr" ? "customInfr" : "customAdic";
-  const catalogTotal = (context.suerte.catalog[type] || []).reduce((sum, rule) =>
-    sum + Number(rule.pts || 0) * getAttemptRuleQuantity(context.attempt, rule.id), 0);
+  const classificationId = context.attempt.classification?.classificationId || "";
+  const catalogTotal = (context.suerte.catalog[type] || []).reduce((sum, rule) => {
+    const resolvedValue = rule.valueByClassification
+      ? resolveJineteoRuleValue(rule, classificationId)
+      : Number(rule.pts || 0);
+    return sum + resolvedValue * getAttemptRuleQuantity(context.attempt, rule.id);
+  }, 0);
   const manualTotal = (context.attempt[customKey] || []).reduce((sum, item) => sum + Number(item.pts || 0), 0);
   context.attempt[type] = catalogTotal + manualTotal;
 }
 
 function isAttemptAdditionalBlocked(context) {
-  return getSelectedBaseRule(context?.attempt, context?.suerte?.catalog || {})?.metadata?.blocksAdditionals === true;
+  return context?.attempt?.noRepara === true
+    || getSelectedBaseRule(context?.attempt, context?.suerte?.catalog || {})?.metadata?.blocksAdditionals === true;
 }
 
 function clearBlockedAttemptAdditionals(context) {
@@ -11540,6 +11603,12 @@ function reconcileAttemptConditionalRules(context) {
   }
   clearBlockedAttemptAdditionals(context);
   if (!isAttemptAdditionalBlocked(context)) recalculateAttemptRuleTotal(context, "adic");
+  reconcileJineteoContext(context);
+}
+
+function reconcileJineteoContext(context) {
+  if (!context?.attempt || !isFmch2026JineteoSuerte(context.suerte?.id)) return;
+  Object.assign(context.attempt, reconcileFmch2026JineteoAttempt(context.attempt, context.suerte));
 }
 
 function reconcileExclusiveAdditionalSelection(context, rule, selecting) {
@@ -11888,6 +11957,8 @@ function getEffectiveRulebookVersion(suerteId, profileId) {
   if (profileId !== "FMCH_2026_LIBRE") return null;
   if (suerteId === "piales") return FMCH_2026_PIALES_RULEBOOK_VERSION;
   if (suerteId === "colas") return FMCH_2026_COLEADERO_RULEBOOK_VERSION;
+  if (suerteId === "toro") return FMCH_2026_TORO_RULEBOOK_VERSION;
+  if (suerteId === "yegua") return FMCH_2026_YEGUA_RULEBOOK_VERSION;
   return null;
 }
 
@@ -11924,7 +11995,7 @@ function buildPublishedRuleItems(rules, attempt, type, options = {}) {
     .filter((rule) => applied.has(rule.id))
     .map((rule) => {
       const quantity = getAttemptRuleQuantity(attempt, rule.id);
-      const unitPts = Number(rule.pts || 0);
+      const unitPts = Number(attempt.resolvedRuleValues?.[rule.id] ?? rule.pts ?? 0);
       return {
         id: rule.id,
         label: rule.label,
@@ -12042,11 +12113,57 @@ function setScoringClassification(classificationId, classificationLabel) {
     return String(item?.id || item?.classificationId || "") === String(classificationId || "");
   });
   if (!option) return;
-  context.attempt.classification = {
-    classificationId: String(classificationId || ""),
-    classificationLabel: String(classificationLabel || option.label || option.classificationLabel || ""),
-    classificationValue: option.value ?? null
-  };
+  if (isFmch2026JineteoSuerte(context.suerte?.id)) {
+    Object.assign(
+      context.attempt,
+      setFmch2026JineteoClassification(context.attempt, context.suerte, String(classificationId || ""))
+    );
+  } else {
+    context.attempt.classification = {
+      classificationId: String(classificationId || ""),
+      classificationLabel: String(classificationLabel || option.label || option.classificationLabel || ""),
+      classificationValue: option.value ?? null
+    };
+  }
+  persistScoreChange();
+}
+
+function toggleJineteoNoRepara() {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026JineteoSuerte(context.suerte?.id)) return;
+  if (context.attempt.noRepara) {
+    context.attempt.noRepara = false;
+    reconcileJineteoContext(context);
+  } else {
+    Object.assign(
+      context.attempt,
+      setFmch2026JineteoClassification(context.attempt, context.suerte, "MINIMA", { noRepara: true })
+    );
+  }
+  persistScoreChange();
+}
+
+function applyJineteoTiming() {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026JineteoSuerte(context.suerte?.id)) return;
+  if (!context.attempt.classification?.classificationId) {
+    showToast("Selecciona una clasificación antes de aplicar el tiempo.");
+    return;
+  }
+  const timerView = getTimerView(
+    {
+      running: timerRunning,
+      startedAt: timerRunning ? timerStartedAt : null,
+      elapsedMs: timerElapsedMs
+    },
+    getTimerSource()
+  );
+  Object.assign(
+    context.attempt,
+    applyFmch2026JineteoTiming(context.attempt, context.suerte, timerView.elapsedMs)
+  );
   persistScoreChange();
 }
 

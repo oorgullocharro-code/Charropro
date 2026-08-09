@@ -22,7 +22,7 @@ import {
 } from "../js/core/scoringAttempt.js";
 import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js";
 
-const RELEASE_ID = "20260808-fmch-2026-piales-coleadero-001-v1";
+const RELEASE_ID = "20260808-fmch-2026-jineteos-dynamic-001-v1";
 const publishedAt = "2026-08-08T18:00:00.000Z";
 
 assert.equal(FMCH_2026_CALA_RULEBOOK_VERSION, "fmch_2026_cala_0.2.0");
@@ -45,7 +45,7 @@ assert.equal(effectiveCala.suerte.catalog.infr.length, 43);
 assert.equal(effectiveCala.suerte.catalog.team_infr.length, 2);
 assert.equal(effectiveCala.suerte.catalog.desc.length, 36);
 assert.equal(effectiveCala.suerte.ruleResolution.profile.profileId, "FMCH_2026_LIBRE");
-assert.equal(effectiveCala.suerte.ruleResolution.profile.profileVersion, "0.3.0");
+assert.equal(effectiveCala.suerte.ruleResolution.profile.profileVersion, "0.4.0");
 assert.equal(effectiveCala.suerte.ruleMetadata.fieldIdMappingStatus, "FIELDID_MAPPING_BLOCKED");
 assert.deepEqual(productCala, productCalaBefore, "profile resolution does not mutate Product Base");
 
@@ -79,9 +79,9 @@ const profileSelection = resolveRuleProfileSelection({
 });
 assert.equal(profileSelection.blocked, true, "the draft profile cannot be activated in production");
 assert.equal(FMCH_2026_LIBRE_PROFILE.metadata.activationReady, false);
-assert.deepEqual(FMCH_2026_LIBRE_PROFILE.metadata.loadedSuerteIds, ["cala", "piales", "colas"]);
+assert.deepEqual(FMCH_2026_LIBRE_PROFILE.metadata.loadedSuerteIds, ["cala", "piales", "colas", "toro", "yegua"]);
 
-for (const otherSuerte of SUERTES.filter((suerte) => !["cala", "piales", "colas"].includes(suerte.id))) {
+for (const otherSuerte of SUERTES.filter((suerte) => !["cala", "piales", "colas", "toro", "yegua"].includes(suerte.id))) {
   const before = structuredClone(otherSuerte);
   const effective = resolveEffectiveRules({ suerte: otherSuerte, profile: FMCH_2026_LIBRE_PROFILE });
   assert.equal(effective.valid, true, `${otherSuerte.id} remains resolvable`);
@@ -167,7 +167,7 @@ assert.equal(repeatedSelection.total, 4);
 assert.equal(attemptV2.scoring.calculationDetail.details.metros, 8);
 assert.equal(attemptV2.scoring.calculationDetail.details.metrosCalificados, 8);
 assert.equal(attemptV2.context.ruleProfileId, "FMCH_2026_LIBRE");
-assert.equal(attemptV2.context.ruleProfileVersion, "0.3.0");
+assert.equal(attemptV2.context.ruleProfileVersion, "0.4.0");
 
 const dq = setScoringAttemptDq(attemptV2, {
   active: true,
@@ -199,7 +199,7 @@ const official = buildOfficialScoringAttemptSnapshot(dq, {
   source: "official-score-publication"
 });
 assert.equal(official.publication.frozen, true);
-assert.equal(official.context.ruleProfileVersion, "0.3.0");
+assert.equal(official.context.ruleProfileVersion, "0.4.0");
 assert.equal(official.dq.ruleId, "cala_desc_caida_jinete");
 assert.equal(official.scoring.netAttemptPoints, -4);
 assert.throws(() => { official.scoring.netAttemptPoints = 999; }, TypeError);

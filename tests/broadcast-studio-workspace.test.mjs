@@ -166,7 +166,7 @@ assert.match(html, /id="broadcast-announcer-link"[^>]*>Abrir Locutores/);
 for (const action of ["prepare", "take", "cut", "auto", "clear"]) {
   assert.match(html, new RegExp(`data-workspace-action="${action}"`));
 }
-assert.match(html, /broadcastStudioWorkspace\.js\?v=20260808-fmch-2026-piales-coleadero-001-v1/);
+assert.match(html, /broadcastStudioWorkspace\.js\?v=20260808-fmch-2026-jineteos-dynamic-001-v1/);
 assert.doesNotMatch(html, /Snapshot|Contract|Variables|Bindings|Themes|Templates|Firebase|Output Routing|Revisiones|IDs/);
 assert.doesNotMatch(html, /contexto oficial|Program Main activo/i);
 
