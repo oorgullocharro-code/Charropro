@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fixture FMCH Piales y Coleadero</title>
+</head>
+<body>
+  <main>
+    <h1>Fixture local FMCH 2026</h1>
+    <p>Instala datos sinteticos exclusivamente en Firebase Emulator.</p>
+    <button data-seed-emulator type="button">Preparar emulador local</button>
+    <button data-install-suerte="1" type="button" disabled>Abrir Piales sintetico</button>
+    <button data-install-suerte="2" type="button" disabled>Abrir Coleadero sintetico</button>
+    <p data-status>Emulador pendiente.</p>
+  </main>
+  <script type="module">
+    import { FMCH_2026_LIBRE_PROFILE } from "../../js/data/ruleProfiles.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+
+    const tournamentId = "demo-local-fmch-2026";
+    const charreadaId = "demo-local-fmch-jornada-1";
+    const teamId = "demo-local-equipo-a";
+    const emulatorBaseUrl = "http://127.0.0.1:9000";
+    const emulatorProjectId = "demo-charropro-local";
+    const profile = { ...FMCH_2026_LIBRE_PROFILE, status: "active" };
+    const tournament = {
+      id: tournamentId,
+      name: "Fixture local FMCH Piales y Coleadero",
+      season: 2026,
+      type: "completo",
+      category: "Libre",
+      status: "en_vivo",
+      venue: "Lienzo sintetico",
+      demo: true,
+      environment: "local",
+      official: false,
+      ruleProfileId: profile.profileId,
+      ruleProfileVersion: profile.version,
+      ruleProfile: profile
+    };
+    const team = {
+      id: teamId,
+      tournamentId,
+      name: "Charros Sinteticos del Centro",
+      category: "Libre",
+      association: "Asociacion de Prueba",
+      roster: {
+        cala: "Calador Sintetico",
+        piales: "Pialador Sintetico",
+        colas: ["Alejandro Prueba", "Bernardo Prueba", "Carlos Prueba"],
+        toro: "Jinete Toro Sintetico",
+        lazo: "Lazador Sintetico",
+        pial_ruedo: "Pialador Ruedo Sintetico",
+        terna: ["Lazador Sintetico", "Pialador Ruedo Sintetico", "Tercer Terna Sintetico"],
+        yegua: "Jinete Yegua Sintetico",
+        manganas_pie: "Manganero Pie Sintetico",
+        manganas_caballo: "Manganero Caballo Sintetico",
+        paso: "Pasador Sintetico"
+      }
+    };
+    const charreada = {
+      id: charreadaId,
+      tournamentId,
+      name: "Jornada sintetica FMCH",
+      date: "2026-08-08",
+      startTime: "10:00",
+      phase: "Validacion local",
+      status: "en_vivo",
+      competitionType: "equipos_completo",
+      competitionScope: "team",
+      competitionId: "equipos_completo",
+      suerteIds: ["cala", "piales", "colas", "toro", "terna", "yegua", "manganas_pie", "manganas_caballo", "paso"],
+      teamIds: [teamId]
+    };
+    const state = {
+      schemaVersion: 2,
+      view: "scoring",
+      activeTournamentId: tournamentId,
+      activeCharreadaId: charreadaId,
+      scoringSuerteIdx: 1,
+      scoringTeamIdx: 0,
+      scoringAttemptIdx: 0,
+      scoringColeadorIdx: 0,
+      tournaments: [tournament],
+      teams: [team],
+      charreadas: [charreada],
+      scores: {},
+      publishedScores: [],
+      statHistorySnapshots: [],
+      migrationLog: [],
+      settings: { globalRuleOverrides: {}, scoringButtonLayouts: {} }
+    };
+
+    async function writeEmulator(path, value, method = "PUT") {
+      if (!(["127.0.0.1", "localhost"].includes(window.location.hostname))) {
+        throw new Error("fixture-loopback-required");
+      }
+      const response = await fetch(`${emulatorBaseUrl}/${path}.json?ns=${emulatorProjectId}`, {
+        method,
+        headers: {
+          "Authorization": "Bearer owner",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(value)
+      });
+      if (!response.ok) throw new Error(`fixture-emulator-write-failed:${response.status}`);
+    }
+
+    document.querySelector("[data-seed-emulator]").addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      const status = document.querySelector("[data-status]");
+      button.disabled = true;
+      status.textContent = "Preparando datos sinteticos...";
+      try {
+        await Promise.all([
+          writeEmulator(`charropro/tournaments/${tournamentId}/info`, tournament),
+          writeEmulator(`charropro/tournaments/${tournamentId}/teams`, [team]),
+          writeEmulator(`charropro/tournaments/${tournamentId}/charreadas`, [charreada]),
+          writeEmulator(`charropro/tournaments/${tournamentId}/meta`, {
+            activeTournamentId: tournamentId,
+            activeCharreadaId: charreadaId,
+            scoringSuerteIdx: 1,
+            scoringTeamIdx: 0,
+            scoringAttemptIdx: 0,
+            scoringColeadorIdx: 0,
+            schemaVersion: 1,
+            version: 1,
+            updatedAt: new Date().toISOString(),
+            updatedAtMs: Date.now()
+          }),
+          writeEmulator(`charropro/tournamentIndex/${tournamentId}`, {
+            ...tournament,
+            teamCount: 1,
+            charreadaCount: 1,
+            scoreCount: 0,
+            updatedAt: new Date().toISOString(),
+            updatedAtMs: Date.now()
+          })
+        ]);
+        document.querySelectorAll("[data-install-suerte]").forEach((item) => { item.disabled = false; });
+        status.textContent = "Emulador local preparado.";
+      } catch (error) {
+        button.disabled = false;
+        status.textContent = `Error: ${error.message || error}`;
+      }
+    });
+
+    document.querySelectorAll("[data-install-suerte]").forEach((button) => button.addEventListener("click", () => {
+      state.scoringSuerteIdx = Number(button.dataset.installSuerte || 1);
+      localStorage.setItem("charropro_tournament_active_v1", tournamentId);
+      localStorage.setItem(`charropro_tournament_${tournamentId}`, JSON.stringify(state));
+      window.location.assign(`../../torneo.html?tournamentId=${tournamentId}&view=scoring&charreada=${charreadaId}&v=fixture-fmch-piales-colas-2026`);
+    }));
+  </script>
+</body>
+</html>

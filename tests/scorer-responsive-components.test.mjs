@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260808-fmch-2026-cala-scorer-001-v1";
+const RELEASE_ID = "20260808-fmch-2026-piales-coleadero-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({

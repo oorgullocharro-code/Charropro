@@ -471,6 +471,19 @@ function buildLegacyDq(attempt, rules) {
 function buildLegacyCalculationDetail(attempt, context) {
   if (attempt.calculationDetail) return normalizeCalculationDetail(attempt.calculationDetail);
   const suerteId = context.suerteId || context.suerte?.id;
+  if (suerteId === "piales") {
+    return normalizeCalculationDetail({
+      type: "piales_distancia",
+      value: 0,
+      selections: [],
+      details: {
+        distanceMeters: finiteNumber(attempt.distanceMeters, 0),
+        distanceAdditionalPoints: finiteNumber(attempt.distanceAdditionalPoints, 0),
+        remateId: normalizeText(attempt.remateId, 240) || null,
+        remateLabel: normalizeText(attempt.remateLabel, 500) || null
+      }
+    });
+  }
   if (suerteId !== "cala" && !attempt.puntaPts && !attempt.puntaMetros) return null;
   return normalizeCalculationDetail({
     type: "cala_punta",

@@ -9108,6 +9108,70 @@ html.graphic-page #graphic-root {
   font-style: normal;
 }
 
+.cp-piales-distance {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 180px) minmax(100px, 130px);
+  align-items: end;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d1118;
+}
+
+.cp-piales-distance > div,
+.cp-piales-distance label,
+.cp-piales-distance output {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.cp-piales-distance span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.cp-piales-distance p {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: left;
+}
+
+.cp-piales-distance input {
+  width: 100%;
+  min-height: var(--scorer-touch-target);
+}
+
+.cp-piales-distance output {
+  min-height: var(--scorer-touch-target);
+  align-content: center;
+  padding: 8px 12px;
+  border-left: 3px solid #39c98a;
+  color: #8ce0b6;
+  background: rgba(57, 201, 138, .08);
+}
+
+.cp-piales-distance output strong {
+  font-size: 24px;
+}
+
+.cp-piales-distance .cp-field-note {
+  grid-column: 1 / -1;
+  color: #ffd780;
+  font-weight: 800;
+}
+
+.cp-official-fall-diagram {
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
 .cp-attempt-state-notice {
   display: flex;
   align-items: center;
@@ -9275,6 +9339,15 @@ html.graphic-page #graphic-root {
   .scoring-shell-classic .cp-main-suerte-panel p {
     text-align: left;
   }
+
+  .cp-piales-distance {
+    grid-template-columns: minmax(0, 1fr) minmax(105px, 145px);
+  }
+
+  .cp-piales-distance > div,
+  .cp-piales-distance .cp-field-note {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 640px) {
@@ -9292,6 +9365,15 @@ html.graphic-page #graphic-root {
 
   .cp-attempt-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cp-piales-distance {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-piales-distance > div,
+  .cp-piales-distance .cp-field-note {
+    grid-column: auto;
   }
 
   .scoring-shell-classic .cp-bottom-bar {

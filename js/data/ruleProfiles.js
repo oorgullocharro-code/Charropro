@@ -6,7 +6,24 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_SOURCE,
   FMCH_2026_CALA_TEAM_PENALTY_RULES
-} from "./calaRules.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./calaRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import {
+  FMCH_2026_COLEADERO_ADIC_RULES,
+  FMCH_2026_COLEADERO_BASE_RULES,
+  FMCH_2026_COLEADERO_DESC_RULES,
+  FMCH_2026_COLEADERO_DISABLED_LEGACY_RULES,
+  FMCH_2026_COLEADERO_INFR_RULES,
+  FMCH_2026_COLEADERO_RULEBOOK_VERSION,
+  FMCH_2026_COLEADERO_TEAM_PENALTY_RULES,
+  FMCH_2026_PIALES_ADIC_RULES,
+  FMCH_2026_PIALES_BASE_RULES,
+  FMCH_2026_PIALES_COLEADERO_SOURCE,
+  FMCH_2026_PIALES_DESC_RULES,
+  FMCH_2026_PIALES_DISABLED_LEGACY_RULES,
+  FMCH_2026_PIALES_INFR_RULES,
+  FMCH_2026_PIALES_RULEBOOK_VERSION,
+  FMCH_2026_PIALES_TEAM_PENALTY_RULES
+} from "./fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
@@ -101,15 +118,73 @@ const FMCH_2026_CALA_PROFILE_RULES = [
   }))
 ];
 
+function buildFmchProfileRule(suerteId, rule, category, order) {
+  return {
+    suerteId,
+    category,
+    ruleId: rule.id,
+    label: rule.label,
+    ...(category === RULE_CATEGORIES.DISQUALIFICATION ? {} : { value: Number(rule.pts || 0) }),
+    enabled: true,
+    order,
+    metadata: {
+      ...(rule.metadata || {}),
+      source: FMCH_2026_PIALES_COLEADERO_SOURCE,
+      implementationTicket: "CHARROPRO-FMCH-2026-PIALES-COLEADERO-IMPLEMENTATION-001"
+    }
+  };
+}
+
+function buildFmchSuerteProfileRules(suerteId, catalogs, disabledLegacyRules) {
+  return [
+    ...catalogs.base.map((rule, index) => buildFmchProfileRule(suerteId, rule, RULE_CATEGORIES.BASE, index)),
+    ...catalogs.adic.map((rule, index) => buildFmchProfileRule(suerteId, rule, RULE_CATEGORIES.ADDITIONAL, index)),
+    ...catalogs.infr.map((rule, index) => buildFmchProfileRule(suerteId, rule, RULE_CATEGORIES.INDIVIDUAL_INFRACTION, index)),
+    ...catalogs.team_infr.map((rule, index) => buildFmchProfileRule(suerteId, rule, RULE_CATEGORIES.TEAM_INFRACTION, index)),
+    ...catalogs.desc.map((rule, index) => buildFmchProfileRule(suerteId, rule, RULE_CATEGORIES.DISQUALIFICATION, index)),
+    ...disabledLegacyRules.map((rule) => ({
+      suerteId,
+      category: rule.category,
+      ruleId: rule.id,
+      enabled: false,
+      metadata: {
+        sourceStatus: "LEGACY_PRESERVED_DISABLED",
+        source: FMCH_2026_PIALES_COLEADERO_SOURCE,
+        reason: "Reconciliado contra FMCH 2026; se conserva fisicamente para historicos"
+      }
+    }))
+  ];
+}
+
+const FMCH_2026_PIALES_PROFILE_RULES = buildFmchSuerteProfileRules("piales", {
+  base: FMCH_2026_PIALES_BASE_RULES,
+  adic: FMCH_2026_PIALES_ADIC_RULES,
+  infr: FMCH_2026_PIALES_INFR_RULES,
+  team_infr: FMCH_2026_PIALES_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_PIALES_DESC_RULES
+}, FMCH_2026_PIALES_DISABLED_LEGACY_RULES);
+
+const FMCH_2026_COLEADERO_PROFILE_RULES = buildFmchSuerteProfileRules("colas", {
+  base: FMCH_2026_COLEADERO_BASE_RULES,
+  adic: FMCH_2026_COLEADERO_ADIC_RULES,
+  infr: FMCH_2026_COLEADERO_INFR_RULES,
+  team_infr: FMCH_2026_COLEADERO_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_COLEADERO_DESC_RULES
+}, FMCH_2026_COLEADERO_DISABLED_LEGACY_RULES);
+
 export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   contractVersion: RULE_PROFILE_CONTRACT_VERSION,
   profileId: "FMCH_2026_LIBRE",
-  version: "0.2.0",
+  version: "0.3.0",
   name: "FMCH 2026 Libre",
   scope: "competition",
   status: "draft",
   source: "CHARROPRO-FMCH-2026-SCORING-SPECIFICATION-001",
-  rules: FMCH_2026_CALA_PROFILE_RULES,
+  rules: [
+    ...FMCH_2026_CALA_PROFILE_RULES,
+    ...FMCH_2026_PIALES_PROFILE_RULES,
+    ...FMCH_2026_COLEADERO_PROFILE_RULES
+  ],
   suerteMetadata: {
     cala: {
       implementationStatus: "COMPLETE_WITH_BLOCKED_FIELDS",
@@ -124,16 +199,48 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
         implementation: "existing_preserved",
         formulaSource: FMCH_2026_CALA_SOURCE
       }]
+    },
+    piales: {
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "EXPORT_CONTROLS_BLOCKED",
+      blockedFieldIds: [
+        "FMCH.TEAM_SHEET.PIALES.SIDE_CONTROL",
+        "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_01",
+        "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_02",
+        "FMCH.TEAM_SHEET.PIALES.POST_INFRACTION_CONTROL_03"
+      ],
+      rulebookVersion: FMCH_2026_PIALES_RULEBOOK_VERSION,
+      specializedCalculators: [{
+        calculatorId: "piales_distancia",
+        renderMode: "specialized_calculator",
+        implementation: "numeric_complete_meters",
+        formulaSource: FMCH_2026_PIALES_COLEADERO_SOURCE
+      }]
+    },
+    colas: {
+      implementationStatus: "COMPLETE_WITH_BLOCKED_FIELDS",
+      sportingCertification: "BLOCKED",
+      fieldIdMappingStatus: "FIELDID_MAPPING_BLOCKED",
+      blockedFieldIds: [
+        "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_04.NAME",
+        "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_04"
+      ],
+      fourthRowStatus: "SOURCE_CONFIRMATION_REQUIRED",
+      activeParticipantCount: 3,
+      opportunitiesPerParticipant: 3,
+      rulebookVersion: FMCH_2026_COLEADERO_RULEBOOK_VERSION,
+      officialFallDiagramSupport: "optional_asset_not_available"
     }
   },
   metadata: {
     jurisdiction: "FMCH",
     category: "Libre",
-    implementationStatus: "cala_technical_complete_activation_blocked",
+    implementationStatus: "cala_piales_coleadero_technical_complete_activation_blocked",
     sportsRulesLoaded: true,
-    loadedSuerteIds: ["cala"],
+    loadedSuerteIds: ["cala", "piales", "colas"],
     activationReady: false,
-    activationBlockReason: "Cala ML/CR frente a MD/MI/PC requiere confirmacion deportiva"
+    activationBlockReason: "Cala ML/CR frente a MD/MI/PC y cuarta fila de Coleadero requieren confirmacion de fuente"
   }
 });
 

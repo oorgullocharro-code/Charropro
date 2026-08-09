@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -14,15 +14,26 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./data/calaRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import {
+  FMCH_2026_COLEADERO_RULEBOOK_VERSION,
+  FMCH_2026_PIALES_DISTANCE_RULE_ID,
+  FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID,
+  FMCH_2026_PIALES_RULEBOOK_VERSION,
+  buildPialesRemateHistory,
+  calculatePialesDistanceAdditional,
+  getSelectedBaseRule,
+  resolveConditionalBasePoints,
+  shouldDisqualifyRepeatedThirdPialesRemate
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-fmch-2026-cala-scorer-001-v1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-fmch-2026-cala-scorer-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-fmch-2026-cala-scorer-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -34,16 +45,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./core/scoring.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./core/scoringAttempt.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./core/scorerComponents.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -53,7 +64,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./core/sync.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -88,7 +99,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./core/firebaseSync.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -137,7 +148,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260808-fmch-2026-cala-scorer-001-v1";
+} from "./core/state.js?v=20260808-fmch-2026-piales-coleadero-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -311,6 +322,7 @@ const ACTION_CAPABILITIES = {
   "punta-step": "score",
   "punta-set": "score",
   "punta-input": "score",
+  "piales-distance-input": "score",
   "attempt-field": "score",
   "desc-select": "score",
   "desc-other": "score",
@@ -371,6 +383,7 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "punta-step",
   "punta-set",
   "punta-input",
+  "piales-distance-input",
   "attempt-field",
   "desc-select",
   "desc-other",
@@ -7851,10 +7864,14 @@ function buildScoringAttemptUiModel(context) {
           status: timerRunning ? "corriendo" : "referencia"
         }
       : null,
-    remateHistory: context.attempt.remateHistory,
+    remateHistory: context.suerte.id === "piales"
+      ? buildPialesRemateHistory(getAttemptsForContext(context))
+      : context.attempt.remateHistory,
     specializedCalculator: context.suerte.id === "cala"
       ? { id: "cala_punta", label: "Calculador de punta", active: true }
-      : null
+      : context.suerte.id === "piales"
+        ? { id: "piales_distancia", label: "Distancia adicional", active: true }
+        : null
   });
 }
 
@@ -7942,7 +7959,7 @@ function renderClassicTurnPanel(charreada, context, labels, showColeadorSelector
             showColeadorSelector
               ? [0, 1, 2].map((index) => html`
                   <button class="turn-button ${index === state.scoringColeadorIdx ? "active" : ""}" data-action="select-coleador" data-index="${index}">
-                    <strong>Coleador ${index + 1}</strong>
+                    <strong>${escapeHTML(getColeadorDisplayName(context, index))}</strong>
                     <span>${index === state.scoringColeadorIdx ? "Activo" : "Tocar para editar"}</span>
                   </button>
                 `).join("")
@@ -7990,7 +8007,7 @@ function renderScoringOpportunityBar(context, charroName, showColeadorSelector, 
           showColeadorSelector
             ? [0, 1, 2].map((index) => html`
                 <button data-action="select-coleador" data-index="${index}" class="${index === state.scoringColeadorIdx ? "active" : ""}">
-                  Coleador ${index + 1}
+                  ${escapeHTML(getColeadorDisplayName(context, index))}
                 </button>
               `).join("")
             : ""
@@ -8047,6 +8064,41 @@ function renderAttemptMainPanel(context) {
           <em>${formatAttemptBreakdown(activeAttempt)}</em>
         </article>
       </div>
+      ${context.suerte.id === "piales" ? renderPialesDistanceCalculator(context) : ""}
+    </section>
+  `;
+}
+
+function renderPialesDistanceCalculator(context) {
+  const baseRule = getSelectedBaseRule(context.attempt, context.suerte.catalog);
+  const blocked = baseRule?.metadata?.blocksAdditionals === true;
+  const distanceMeters = Number(context.attempt.distanceMeters || 0);
+  const points = calculatePialesDistanceAdditional(distanceMeters, baseRule?.id);
+  return html`
+    <section class="cp-piales-distance" data-calculator="piales_distancia">
+      <div>
+        <span>Distancia adicional</span>
+        <strong>Metros completos excedentes</strong>
+        <p>Se suma un punto por cada metro excedente de la distancia reglamentaria.</p>
+      </div>
+      <label>
+        <span>Metros</span>
+        <input
+          type="number"
+          min="0"
+          max="90"
+          step="0.01"
+          inputmode="decimal"
+          value="${escapeHTML(distanceMeters)}"
+          data-action="piales-distance-input"
+          ${blocked ? "disabled" : ""}
+        >
+      </label>
+      <output>
+        <span>Adicional</span>
+        <strong>+${moneylessNumber(points)}</strong>
+      </output>
+      ${blocked ? html`<p class="cp-field-note">Lazo de verijas no recibe adicionales.</p>` : ""}
     </section>
   `;
 }
@@ -8072,7 +8124,7 @@ function renderColeaderoMainPanel(context) {
         ${Array.from({ length: coleadorCount }, (_, index) => {
           const attempts = getAttemptsForContext(context, index);
           const total = attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
-          const name = context.team?.roster?.colas?.[index] || (context.team?.participantName && index === 0 ? context.team.participantName : `Coleador ${index + 1}`);
+          const name = getColeadorDisplayName(context, index);
           return html`
             <button class="cp-attempt-card ${index === context.coleadorIndex ? "active" : ""}" data-action="select-coleador" data-index="${index}">
               <span>Coleador ${index + 1}</span>
@@ -8099,6 +8151,12 @@ function renderColeaderoMainPanel(context) {
       </div>
     </section>
   `;
+}
+
+function getColeadorDisplayName(context, index) {
+  return context.team?.roster?.colas?.[index]
+    || (context.team?.participantName && index === 0 ? context.team.participantName : "")
+    || `Coleador ${index + 1}`;
 }
 
 function getScoreCollectionForContext(context) {
@@ -8266,7 +8324,9 @@ function renderConfigurableScoringButton(button) {
       ${dataset}
       ${confirm}
     >
-      <span aria-hidden="true">${renderCpIcon(button.icon || "target")}</span>
+      ${button.diagramSrc
+        ? html`<img class="cp-official-fall-diagram" src="${escapeHTML(button.diagramSrc)}" alt="${escapeHTML(button.label)}">`
+        : button.suppressGenericIcon ? "" : html`<span aria-hidden="true">${renderCpIcon(button.icon || "target")}</span>`}
       <b>${escapeHTML(button.valueLabel || "")}</b>
       <strong>${escapeHTML(model.label)}</strong>
       ${button.repeatable && button.quantity > 0
@@ -8289,6 +8349,12 @@ function renderConfigurableScoringButton(button) {
       >Quitar una</button>
     </div>
   `;
+}
+
+function getOfficialFallDiagramSrc(value) {
+  const source = String(value || "").trim();
+  if (!source || source.includes("..") || /^(?:data|javascript|file):/i.test(source)) return "";
+  return /^(?:\.\/|\/|assets\/)/.test(source) ? source : "";
 }
 
 function getConfiguredScoringButtons(context) {
@@ -8318,6 +8384,7 @@ function buildScoringActionButtons(context) {
   });
 
   (catalog.adic || []).forEach((rule, index) => {
+    if (rule.metadata?.specializedInput) return;
     const group = index < 8 ? "quickActions" : "more";
     buttons.push(makeRuleScoringButton(rule, "adic", "positive", group, 20 + index, context));
     if (group === "quickActions") usedQuick.add(rule.id);
@@ -8337,6 +8404,7 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
   const maxQuantity = Number.isFinite(Number(rule.metadata?.maxQuantity))
     ? Math.max(1, Number(rule.metadata.maxQuantity))
     : null;
+  const additionalBlocked = ruleType === "adic" && isAttemptAdditionalBlocked(context);
   return {
     id: `rule__${ruleType}__${rule.id}`,
     ruleId: rule.id,
@@ -8348,10 +8416,12 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
     category: rule.category || ruleType,
     valueByClassification: rule.valueByClassification || null,
     classificationId: context.attempt.classification?.classificationId || context.attempt.classificationId || null,
-    disabled: rule.disabled === true,
-    disabledReason: rule.disabledReason || "",
+    disabled: rule.disabled === true || additionalBlocked,
+    disabledReason: additionalBlocked ? "La base seleccionada no recibe adicionales" : rule.disabledReason || "",
     type: visualType,
     icon: isInfr ? "warning" : ruleType === "base" ? "target" : "plus",
+    suppressGenericIcon: rule.metadata?.suppressGenericIcon === true,
+    diagramSrc: getOfficialFallDiagramSrc(rule.metadata?.officialDiagramSrc),
     ruleType,
     group,
     action: repeatable ? "adjust-rule-quantity" : "toggle-rule",
@@ -8452,7 +8522,7 @@ function renderScoringTurnSelector(charreada, context, labels, showColeadorSelec
           showColeadorSelector
             ? [0, 1, 2].map((index) => html`
                 <button data-action="select-coleador" data-index="${index}" class="${index === state.scoringColeadorIdx ? "active" : ""}">
-                  Coleador ${index + 1}
+                  ${escapeHTML(getColeadorDisplayName(context, index))}
                 </button>
               `).join("")
             : ""
@@ -9155,10 +9225,9 @@ function renderTeamPenaltySection(context) {
 }
 
 function getTeamPenaltyRulesForSuerte(suerte = {}) {
-  if (suerte?.id !== "cala") return GENERAL_TEAM_PENALTY_RULES;
   const effectiveRules = Array.isArray(suerte?.catalog?.team_infr) && suerte.catalog.team_infr.length
     ? suerte.catalog.team_infr
-    : CALA_TEAM_PENALTY_RULES;
+    : suerte?.id === "cala" ? CALA_TEAM_PENALTY_RULES : [];
   const unique = new Map();
   [...effectiveRules, ...GENERAL_TEAM_PENALTY_RULES].forEach((rule) => unique.set(rule.id, rule));
   return [...unique.values()];
@@ -9935,6 +10004,11 @@ function wireGlobalEvents() {
       if (!attempt) return;
       writePuntaField(attempt, target.dataset.field, Number(target.value || 0));
       persistScoreChange();
+    }
+
+    if (target.dataset.action === "piales-distance-input") {
+      if (!canUseAction(target.dataset.action)) return;
+      setPialesDistanceValue(target.value);
     }
 
     if (target.dataset.action === "attempt-field") {
@@ -11400,6 +11474,20 @@ function writePuntaField(attempt, field, value) {
   applyPuntaCalculation(attempt);
 }
 
+function setPialesDistanceValue(value) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || context.suerte?.id !== "piales" || context.attempt.desc) return;
+  const baseRule = getSelectedBaseRule(context.attempt, context.suerte.catalog);
+  const distanceMeters = Math.min(90, Math.max(0, Number(value) || 0));
+  const distanceAdditionalPoints = calculatePialesDistanceAdditional(distanceMeters, baseRule?.id);
+  context.attempt.distanceMeters = Math.round(distanceMeters * 100) / 100;
+  context.attempt.distanceAdditionalPoints = distanceAdditionalPoints;
+  setAttemptRuleQuantity(context.attempt, FMCH_2026_PIALES_DISTANCE_RULE_ID, distanceAdditionalPoints);
+  recalculateAttemptRuleTotal(context, "adic");
+  persistScoreChange();
+}
+
 function getAttemptRuleQuantity(attempt = {}, ruleId = "") {
   if (!(attempt.applied || []).includes(ruleId)) return 0;
   return Math.max(1, Math.floor(Number(attempt.ruleQuantities?.[ruleId] || 1)));
@@ -11429,6 +11517,58 @@ function recalculateAttemptRuleTotal(context, type) {
   context.attempt[type] = catalogTotal + manualTotal;
 }
 
+function isAttemptAdditionalBlocked(context) {
+  return getSelectedBaseRule(context?.attempt, context?.suerte?.catalog || {})?.metadata?.blocksAdditionals === true;
+}
+
+function clearBlockedAttemptAdditionals(context) {
+  if (!isAttemptAdditionalBlocked(context)) return;
+  const additionalIds = new Set((context.suerte.catalog.adic || []).map((rule) => rule.id));
+  context.attempt.applied = (context.attempt.applied || []).filter((ruleId) => !additionalIds.has(ruleId));
+  context.attempt.ruleQuantities = { ...(context.attempt.ruleQuantities || {}) };
+  additionalIds.forEach((ruleId) => delete context.attempt.ruleQuantities[ruleId]);
+  context.attempt.customAdic = [];
+  context.attempt.adic = 0;
+  context.attempt.distanceMeters = 0;
+  context.attempt.distanceAdditionalPoints = 0;
+}
+
+function reconcileAttemptConditionalRules(context) {
+  const hasConditionalBaseRules = (context.suerte.catalog.infr || []).some((rule) => rule.metadata?.annulsBase === true);
+  if (hasConditionalBaseRules) {
+    context.attempt.base = resolveConditionalBasePoints(context.attempt, context.suerte.catalog);
+  }
+  clearBlockedAttemptAdditionals(context);
+  if (!isAttemptAdditionalBlocked(context)) recalculateAttemptRuleTotal(context, "adic");
+}
+
+function reconcileExclusiveAdditionalSelection(context, rule, selecting) {
+  const group = rule.metadata?.exclusiveGroup;
+  if (!group || !selecting) return;
+  (context.suerte.catalog.adic || []).forEach((candidate) => {
+    if (candidate.id !== rule.id && candidate.metadata?.exclusiveGroup === group) {
+      setAttemptRuleQuantity(context.attempt, candidate.id, 0);
+    }
+  });
+}
+
+function reconcilePialesRemateConstraint(context) {
+  if (context.suerte?.id !== "piales") return;
+  const attempts = getAttemptsForContext(context);
+  const third = attempts[2];
+  if (!third) return;
+  const shouldDisqualify = shouldDisqualifyRepeatedThirdPialesRemate(attempts, 2, third.remateId);
+  if (shouldDisqualify) {
+    const rule = (context.suerte.catalog.desc || []).find((item) => item.id === FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID);
+    third.desc = rule?.label || "Tercer remate no diferente, salvo excepcion reglada";
+    third.descRuleId = FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID;
+    third.autoDescRuleId = FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID;
+  } else if (third.autoDescRuleId === FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID) {
+    clearDesc(third);
+    third.autoDescRuleId = null;
+  }
+}
+
 function adjustRuleQuantity(type, ruleId, delta) {
   if (!guardUnlockedCharreada()) return;
   const context = getCurrentContext();
@@ -11443,6 +11583,7 @@ function adjustRuleQuantity(type, ruleId, delta) {
   if (next === current) return;
   setAttemptRuleQuantity(context.attempt, ruleId, next);
   recalculateAttemptRuleTotal(context, type);
+  reconcileAttemptConditionalRules(context);
   persistScoreChange();
 }
 
@@ -11470,12 +11611,25 @@ function toggleRule(type, ruleId) {
       setAttemptRuleQuantity(context.attempt, ruleId, 1);
       context.attempt.base = rule.pts;
       context.attempt.initializedBase = true;
+      if (context.suerte.id === "piales") {
+        context.attempt.remateId = rule.id;
+        context.attempt.remateLabel = rule.label;
+        context.attempt.remateMetadata = { source: rule.source || "RULE_PROFILE" };
+      }
+    } else if (context.suerte.id === "piales") {
+      context.attempt.remateId = null;
+      context.attempt.remateLabel = null;
+      context.attempt.remateMetadata = null;
     }
   } else {
     const active = context.attempt.applied.includes(ruleId);
+    if (type === "adic") reconcileExclusiveAdditionalSelection(context, rule, !active);
     setAttemptRuleQuantity(context.attempt, ruleId, active ? 0 : 1);
     recalculateAttemptRuleTotal(context, type);
   }
+
+  reconcileAttemptConditionalRules(context);
+  reconcilePialesRemateConstraint(context);
 
   persistScoreChange();
 }
@@ -11679,9 +11833,7 @@ function buildPublishedBreakdown(context, attempt, publication = {}) {
   return {
     rulebook: {
       discipline: context.suerte?.id || "",
-      version: context.suerte?.id === "cala"
-        ? profile.profileId === "FMCH_2026_LIBRE" ? FMCH_2026_CALA_RULEBOOK_VERSION : CALA_RULEBOOK_VERSION
-        : null,
+      version: getEffectiveRulebookVersion(context.suerte?.id, profile.profileId),
       resolutionContractVersion: resolution.contractVersion || null,
       ruleProfileId: profile.profileId || null,
       ruleProfileVersion: profile.profileVersion || null,
@@ -11697,6 +11849,10 @@ function buildPublishedBreakdown(context, attempt, publication = {}) {
     puntaMetros: Number(attempt.puntaMetros || 0),
     puntaPiquetes: Number(attempt.puntaPiquetes || 1),
     punta,
+    distanceMeters: Number(attempt.distanceMeters || 0),
+    distanceAdditionalPoints: Number(attempt.distanceAdditionalPoints || 0),
+    remateId: attempt.remateId || null,
+    remateLabel: attempt.remateLabel || null,
     individualTotal: pointSummary.netAttemptPoints,
     teamPenaltyTotal: pointSummary.teamBadPoints,
     total: pointSummary.netAttemptPoints,
@@ -11723,6 +11879,16 @@ function buildPublishedBreakdown(context, attempt, publication = {}) {
       pts: Number(item.pts || 0)
     }))
   };
+}
+
+function getEffectiveRulebookVersion(suerteId, profileId) {
+  if (suerteId === "cala") {
+    return profileId === "FMCH_2026_LIBRE" ? FMCH_2026_CALA_RULEBOOK_VERSION : CALA_RULEBOOK_VERSION;
+  }
+  if (profileId !== "FMCH_2026_LIBRE") return null;
+  if (suerteId === "piales") return FMCH_2026_PIALES_RULEBOOK_VERSION;
+  if (suerteId === "colas") return FMCH_2026_COLEADERO_RULEBOOK_VERSION;
+  return null;
 }
 
 function buildPublishedCalaAdicGroups(suerte, attempt) {
@@ -11824,17 +11990,23 @@ function setDescReason(label) {
 function applyDescReason(context, label, ruleId = null) {
   context.attempt.desc = label;
   context.attempt.descRuleId = ruleId;
+  context.attempt.autoDescRuleId = null;
 }
 
 function clearDesc(attempt) {
   attempt.desc = null;
   attempt.descRuleId = null;
+  attempt.autoDescRuleId = null;
 }
 
 function addCustomScore(type) {
   if (!guardUnlockedCharreada()) return;
   const context = getCurrentContext();
   if (!context?.attempt || context.attempt.desc) return;
+  if (type === "adic" && isAttemptAdditionalBlocked(context)) {
+    showToast("La base seleccionada no recibe adicionales.");
+    return;
+  }
 
   const labelInput = document.getElementById(`custom-${type}-label`);
   const ptsInput = document.getElementById(`custom-${type}-pts`);
@@ -11850,6 +12022,7 @@ function addCustomScore(type) {
   context.attempt[key] = context.attempt[key] || [];
   context.attempt[key].push({ id: uid("manual"), label, pts });
   context.attempt[type] = Number(context.attempt[type] || 0) + pts;
+  reconcileAttemptConditionalRules(context);
   persistScoreChange();
 }
 
@@ -11888,6 +12061,7 @@ function removeCustomScore(type, id) {
 
   context.attempt[key] = context.attempt[key].filter((entry) => entry.id !== id);
   context.attempt[type] = Math.max(0, Number(context.attempt[type] || 0) - Number(item.pts || 0));
+  reconcileAttemptConditionalRules(context);
   persistScoreChange();
 }
 
