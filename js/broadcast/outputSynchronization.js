@@ -10,14 +10,14 @@ import {
   clearProgramMainOutput,
   getProgramMainOutputStatus,
   validateProgramMainProjection
-} from "./programMainOutput.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./programMainOutput.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   clearAnnouncerMonitor,
   getAnnouncerSnapshot,
   getAnnouncerStatus,
   updateAnnouncerMonitor,
   validateAnnouncerProjection
-} from "./announcerMonitor.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./announcerMonitor.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 
 export const OUTPUT_SYNCHRONIZATION_VERSION = "1.0.0";
 

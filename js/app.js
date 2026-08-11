@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./data/calaRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -48,7 +48,7 @@ import {
   reserveFmch2026TernaOpportunity,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -68,21 +68,21 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260810-fmch-2026-manganas-paso-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260810-fmch-2026-manganas-paso-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   applyOfficialTimerCommand,
   formatTimerMs,
   getOfficialTimerContextView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260810-fmch-2026-manganas-paso-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./core/timerRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -94,16 +94,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./core/scoring.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./core/scoringAttempt.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./core/scorerComponents.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -113,7 +113,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./core/sync.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -148,7 +148,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./core/firebaseSync.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -201,7 +201,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+} from "./core/state.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -7899,14 +7899,14 @@ function renderScoring({ preserveScroll = false } = {}) {
             : attemptView.status.isZero
               ? renderZeroStateNotice()
               : ""}
-          ${renderScoringMainPanel(charreada, context, charroName)}
+          ${renderScoringLiveOverview(attemptView)}
           ${renderScoringClassificationSlot(context, attemptView)}
-          ${renderScoringRemateHistory(attemptView)}
-          ${renderTimeNoteSection(context)}
+          ${renderScoringMainPanel(charreada, context, charroName)}
           <section class="cp-botonera-panel">
             ${renderScoringActionAccordions(charreada, context, charroName, leaderboard)}
           </section>
-          ${renderScoringAttemptSummary(attemptView)}
+          ${renderScoringRemateHistory(attemptView)}
+          ${renderTimeNoteSection(context)}
         </section>
       </main>
 
@@ -8140,21 +8140,13 @@ function renderClassicTurnPanel(charreada, context, labels, showColeadorSelector
 function renderScoringOpportunityBar(context, charroName, showColeadorSelector, attemptView) {
   const ternaRuntime = getTernaRuntime(context);
   if (ternaRuntime) return renderTernaOpportunityBar(context, charroName, ternaRuntime);
-  const opportunity = attemptView.opportunity;
   return html`
-    <section class="scoring-opportunity-bar">
-      <div class="opportunity-summary">
-        <span>Oportunidad</span>
-        <strong>${opportunity.number}/${opportunity.total}</strong>
-        <em>${escapeHTML(opportunity.status || attemptView.status.label)}</em>
-        ${opportunity.sharedOpportunityId
-          ? html`<small>Compartida ${opportunity.sharedSequenceNumber || opportunity.number} de ${opportunity.total}</small>`
-          : ""}
-      </div>
+    <section class="scoring-opportunity-bar cp-opportunity-selector" data-scorer-zone="opportunity-selector" aria-label="Seleccionar oportunidad">
+      <strong class="cp-opportunity-selector-label">Oportunidad</strong>
       <div class="opportunity-controls" aria-label="Oportunidades">
         ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
           <button data-action="select-attempt" data-index="${index}" class="${index === state.scoringAttemptIdx ? "active" : ""}">
-            Oportunidad ${index + 1}
+            ${index + 1}/${context.suerte.attempts}
           </button>
         `).join("")}
         ${
@@ -8167,11 +8159,6 @@ function renderScoringOpportunityBar(context, charroName, showColeadorSelector, 
             : ""
         }
       </div>
-      <div class="opportunity-summary">
-        <span>Charro</span>
-        <strong>${escapeHTML(charroName || "Sin registrar")}</strong>
-        <em>${escapeHTML(getEntryDisplayName(context.team))}</em>
-      </div>
     </section>
   `;
 }
@@ -8180,11 +8167,11 @@ function renderTernaOpportunityBar(context, charroName, runtime) {
   const used = runtime.session.history.length;
   const current = runtime.session.currentOpportunity;
   return html`
-    <section class="scoring-opportunity-bar cp-terna-opportunity-bar" data-terna-session="${escapeHTML(runtime.session.ternaSessionId)}">
+    <section class="scoring-opportunity-bar cp-opportunity-selector cp-terna-opportunity-bar" data-scorer-zone="opportunity-selector" data-terna-session="${escapeHTML(runtime.session.ternaSessionId)}">
       <div class="opportunity-summary">
-        <span>Oportunidades compartidas</span>
+        <span>Compartidas</span>
         <strong>${used}/${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</strong>
-        <em>${current ? `Actual ${current}` : "Sin oportunidades disponibles"}</em>
+        <em>${current ? `Actual ${current}` : "Agotadas"}</em>
       </div>
       <div class="opportunity-controls cp-terna-opportunities" aria-label="Cinco oportunidades compartidas de Terna">
         ${runtime.session.opportunities.map((opportunity) => {
@@ -8197,14 +8184,9 @@ function renderTernaOpportunityBar(context, charroName, runtime) {
               class="${isUsed ? "used" : ""} ${isCurrent ? "active" : ""}"
               aria-label="Oportunidad ${opportunity.sharedSequenceNumber}: ${label}"
               ${isUsed ? `data-action="select-terna-history" data-sequence="${opportunity.sharedSequenceNumber}"` : "disabled"}
-            >${opportunity.sharedSequenceNumber} · ${label}</button>
+            >${opportunity.sharedSequenceNumber}</button>
           `;
         }).join("")}
-      </div>
-      <div class="opportunity-summary">
-        <span>Charro</span>
-        <strong>${escapeHTML(charroName || "Sin registrar")}</strong>
-        <em>${escapeHTML(context.suerte.id === "lazo" ? "Lazo Cabecero" : "Pial en el Ruedo")}</em>
       </div>
     </section>
   `;
@@ -8673,9 +8655,9 @@ function renderScoringActionAccordions(charreada, context, charroName, leaderboa
       ? ""
       : renderScoringAccordionGroup("base", "Calificaciones base", "target", renderScoringActionGroupBody("base", baseButtons, charreada, context, charroName, leaderboard)),
     renderScoringAccordionGroup("adic", "Adicionales", "plus", renderScoringActionGroupBody("adic", adicButtons, charreada, context, charroName, leaderboard)),
-    renderScoringAccordionGroup("infr", "Infracciones", "warning", renderScoringActionGroupBody("infr", infrButtons, charreada, context, charroName, leaderboard)),
-    renderScoringAccordionGroup("teamPenalties", "Infracciones al equipo", "shield", renderTeamPenaltySection(context)),
-    renderScoringAccordionGroup("desc", "Descalificaciones", "ban", renderDescSection(context))
+    renderScoringAccordionGroup("infr", "Infracciones", "warning", renderScoringActionGroupBody("infr", infrButtons, charreada, context, charroName, leaderboard), { collapsible: true }),
+    renderScoringAccordionGroup("teamPenalties", "Infracciones al equipo", "shield", renderTeamPenaltySection(context), { collapsible: true }),
+    renderScoringAccordionGroup("desc", "Descalificaciones", "ban", renderDescSection(context), { collapsible: true, tone: "danger" })
   ].join("");
 }
 
@@ -8963,9 +8945,23 @@ function renderScoringTurnSelector(charreada, context, labels, showColeadorSelec
   `;
 }
 
-function renderScoringAccordionGroup(groupId, title, icon, body) {
+function renderScoringAccordionGroup(groupId, title, icon, body, options = {}) {
+  if (options.collapsible) {
+    return html`
+      <details class="cp-accordion-group cp-inline-secondary-control ${escapeHTML(options.tone || "")}" data-accordion="${groupId}" data-scorer-zone="secondary-controls">
+        <summary class="cp-accordion-header cp-block-header">
+          <span class="cp-accordion-icon" aria-hidden="true">${renderCpIcon(icon)}</span>
+          <strong>${escapeHTML(title)}</strong>
+          <span class="cp-inline-disclosure">Abrir</span>
+        </summary>
+        <div class="cp-accordion-body">
+          ${body}
+        </div>
+      </details>
+    `;
+  }
   return html`
-    <section class="cp-accordion-group open cp-fixed-action-block" data-accordion="${groupId}">
+    <section class="cp-accordion-group open cp-fixed-action-block" data-accordion="${groupId}" data-scorer-zone="sport-controls">
       <header class="cp-accordion-header cp-block-header">
         <span class="cp-accordion-icon" aria-hidden="true">${renderCpIcon(icon)}</span>
         <strong>${escapeHTML(title)}</strong>
@@ -8998,13 +8994,24 @@ function renderScoringTimerCard() {
 function renderScoringTimerGroup(attemptView) {
   return html`
     <div class="cp-header-timer-group" data-timer-count="${attemptView.timers.length}">
-      ${attemptView.timers.map((timer) => html`
-        <section class="header-timer read-only cp-timer-tile ${timer.primary ? "primary" : ""}">
-          <span>${escapeHTML(timer.label)}</span>
-          <strong class="${String(timer.timerId || "").startsWith("terna:") ? "terna-timer-display" : "timer-display"}" data-terna-timer-id="${escapeHTML(timer.timerId || "")}">${escapeHTML(timer.display)}</strong>
-          <em>${escapeHTML(timer.warning || timer.status)}</em>
-        </section>
-      `).join("")}
+      ${attemptView.timers.map((timer) => {
+        const timerId = String(timer.timerId || "");
+        const isTernaTimer = timerId.startsWith("terna:");
+        const isOfficialSportTimer = /^timer_(?:manganas|paso)_/.test(timerId);
+        const displayClass = isTernaTimer
+          ? "terna-timer-display"
+          : isOfficialSportTimer ? "official-timer-display" : "timer-display";
+        const timerDataset = isTernaTimer
+          ? `data-terna-timer-id="${escapeHTML(timer.timerId || "")}"`
+          : isOfficialSportTimer ? `data-official-timer-id="${escapeHTML(timer.timerId || "")}"` : "";
+        return html`
+          <section class="header-timer read-only cp-timer-tile ${timer.primary ? "primary" : ""}">
+            <span>${escapeHTML(timer.label)}</span>
+            <strong class="${displayClass}" ${timerDataset}>${escapeHTML(timer.display)}</strong>
+            <em>${escapeHTML(timer.warning || timer.status)}</em>
+          </section>
+        `;
+      }).join("")}
       ${attemptView.sharedTimer
         ? html`
             <section class="cp-shared-timer-reference">
@@ -9046,6 +9053,25 @@ function renderScoringAttemptSummary(attemptView) {
           </div>
         `).join("")}
       </div>
+    </section>
+  `;
+}
+
+function renderScoringLiveOverview(attemptView) {
+  const summary = attemptView.summary;
+  return html`
+    <section class="cp-live-score-overview" data-scorer-zone="score-overview" aria-label="Puntuacion y tiempo actuales">
+      <div class="cp-live-total">
+        <span>Total actual</span>
+        <strong>${moneylessNumber(summary.totalPoints)} <small>pts</small></strong>
+        <em class="status-${escapeHTML(attemptView.status.tone)}">${escapeHTML(attemptView.status.label)}</em>
+      </div>
+      <div class="cp-live-breakdown" aria-label="Desglose actual">
+        <span><small>Base</small><strong>${moneylessNumber(summary.basePoints)}</strong></span>
+        <span><small>Adic.</small><strong>+${moneylessNumber(summary.additionalPoints)}</strong></span>
+        <span><small>Infr.</small><strong>-${moneylessNumber(summary.individualBadPoints)}</strong></span>
+      </div>
+      ${renderScoringTimerGroup(attemptView)}
     </section>
   `;
 }
@@ -9418,56 +9444,43 @@ function renderCpIcon(name) {
 }
 
 function renderScoringHeader(charreada, context, charroName, attemptView) {
-  const attemptTotal = calculateAttemptTotal(context.attempt);
-  const teamTotal = getTeamCharreadaTotal(charreada.id, context.team.id);
   const labels = getScoringEntityLabels(context);
   const scoringEntries = getCharreadaScoringEntries(charreada);
+  const horseName = context.team?.horseName || getParticipantHorseParts(context.team).horseName || "";
+  const opportunity = attemptView.opportunity;
 
   return html`
-    <header class="scoring-header">
+    <header class="scoring-header" data-scorer-zone="context">
       <button class="button" data-action="exit-scoring">Salir</button>
       <div class="scoring-livebar">
-        <div class="scoring-live-top">
+        <div class="cp-judge-context">
           <div class="scoring-title">
-            <p>Calificando en vivo</p>
-            ${renderFirebaseRuntimeBadge()}
-            <h1>${escapeHTML(context.tournament?.name || "CharroPro")}</h1>
-            <small>${escapeHTML(charreada.name)} / ${escapeHTML(context.suerte.fullName)}</small>
-            ${renderSupervisorReviewNotice()}
+            <p>Calificando en vivo ${renderFirebaseRuntimeBadge()}</p>
+            <h1>${escapeHTML(context.suerte.fullName)}</h1>
+            <small>${escapeHTML(context.tournament?.name || "CharroPro")} · ${escapeHTML(charreada.name)}</small>
           </div>
-          <div class="live-metrics">
-	          <div class="live-metric wide">
-	              <span>${escapeHTML(labels.scoreEntityLabel)}</span>
-	              <strong>${escapeHTML(getEntryDisplayName(context.team))}</strong>
-	              <em>Turno ${context.teamIndex + 1}</em>
-	            </div>
-            <div class="live-metric">
-              <span>Oportunidad</span>
-              <strong>${context.attemptIndex + 1}/${context.suerte.attempts}</strong>
-              <em>${escapeHTML(charroName)}</em>
-            </div>
-            <div class="live-metric">
-	              <span>Pasada</span>
-	              <strong>${moneylessNumber(attemptTotal)}</strong>
-	              <em>${moneylessNumber(teamTotal)} ${escapeHTML(labels.pointsSuffix)}</em>
-            </div>
-            ${renderScoringTimerGroup(attemptView)}
-          </div>
+          <dl class="cp-judge-context-grid">
+            <div><dt>${escapeHTML(labels.scoreEntityLabel)}</dt><dd>${escapeHTML(getEntryDisplayName(context.team) || "Sin registrar")}</dd></div>
+            <div><dt>Participante</dt><dd>${escapeHTML(charroName || "Sin registrar")}</dd></div>
+            ${horseName ? html`<div><dt>Caballo</dt><dd>${escapeHTML(horseName)}</dd></div>` : ""}
+            <div><dt>Oportunidad</dt><dd>${opportunity.number}/${opportunity.total} · ${escapeHTML(attemptView.status.label)}</dd></div>
+          </dl>
+          ${renderSupervisorReviewNotice()}
         </div>
-        ${renderScoringContextBar(charreada, context, charroName, attemptView)}
-        <div class="header-turn-strip" aria-label="Turnos y puntuaciones">
-          ${scoringEntries
-            .map((entry, index) => {
-              return html`
+        <details class="cp-turn-switcher">
+          <summary>Cambiar ${escapeHTML(labels.scoreEntityLabel.toLowerCase())} · turno ${context.teamIndex + 1}/${scoringEntries.length}</summary>
+          <div class="header-turn-strip" aria-label="Turnos y puntuaciones">
+            ${scoringEntries
+              .map((entry, index) => html`
                 <button class="header-turn-chip ${index === state.scoringTeamIdx ? "active" : ""}" data-action="select-team" data-index="${index}">
                   <span>${index + 1}</span>
-	                  <strong>${escapeHTML(entry ? getEntryDisplayName(entry) : labels.nameHeader)}</strong>
+                  <strong>${escapeHTML(entry ? getEntryDisplayName(entry) : labels.nameHeader)}</strong>
                   <em>${moneylessNumber(getTeamCharreadaTotal(charreada.id, entry.id))} pts</em>
                 </button>
-              `;
-            })
-            .join("")}
-        </div>
+              `)
+              .join("")}
+          </div>
+        </details>
       </div>
     </header>
   `;
@@ -9903,15 +9916,15 @@ function renderDescSection(context) {
 function renderTimeNoteSection(context) {
   const evidence = normalizeTimeEvidenceList(context.attempt.timeEvidence);
   return html`
-    <article class="card time-evidence-card">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">Evidencia de tiempo</h2>
-          <p class="card-subtitle">Captura manualmente el cronometro cuando el juez lo decida.</p>
-        </div>
-        <button class="button primary" data-action="capture-time-evidence" type="button">Tomar tiempo</button>
-      </div>
+    <details class="card time-evidence-card cp-inline-secondary-control" data-scorer-zone="secondary-controls">
+      <summary class="card-header">
+        <strong>Evidencia y nota</strong>
+        <span>${evidence.length ? `${evidence.length} registro(s)` : "Opcional"}</span>
+      </summary>
       <div class="card-body form-grid">
+        <div class="wide cp-time-evidence-actions">
+          <button class="button primary" data-action="capture-time-evidence" type="button">Tomar tiempo</button>
+        </div>
         <div>
           <label>Tiempo observado</label>
           <input value="${escapeHTML(context.attempt.tiempo || "")}" data-action="attempt-field" data-field="tiempo" placeholder="00:00.0">
@@ -9939,7 +9952,7 @@ function renderTimeNoteSection(context) {
             : html`<div class="time-evidence-empty">Sin tiempos capturados.</div>`}
         </div>
       </div>
-    </article>
+    </details>
   `;
 }
 

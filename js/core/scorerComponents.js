@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

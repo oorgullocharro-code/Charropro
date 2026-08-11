@@ -9909,3 +9909,447 @@ html.graphic-page #graphic-root {
     font-size: 10px;
   }
 }
+
+/* Scorer information hierarchy compaction */
+.scoring-shell-classic {
+  --scorer-section-gap: 8px;
+  --scorer-footer-clearance: 16px;
+}
+
+.scoring-shell-classic .scoring-header {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 7px 10px;
+  background: #111720;
+}
+
+.scoring-shell-classic .scoring-header > .button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+.scoring-shell-classic .scoring-livebar {
+  gap: 5px;
+}
+
+.cp-judge-context {
+  display: grid;
+  grid-template-columns: minmax(190px, .72fr) minmax(0, 1.8fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cp-judge-context .scoring-title {
+  min-width: 0;
+}
+
+.cp-judge-context .scoring-title p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 10px;
+}
+
+.cp-judge-context .scoring-title h1 {
+  margin: 1px 0 0;
+  font-size: 22px;
+  line-height: 1.05;
+}
+
+.cp-judge-context .scoring-title small {
+  font-size: 10px;
+}
+
+.cp-judge-context-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+}
+
+.cp-judge-context-grid > div {
+  min-width: 0;
+  padding: 5px 8px;
+  border-left: 2px solid var(--line);
+}
+
+.cp-judge-context-grid dt {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.cp-judge-context-grid dd {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.cp-turn-switcher {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+}
+
+.cp-turn-switcher > summary {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  list-style: none;
+}
+
+.cp-turn-switcher > summary::-webkit-details-marker,
+.cp-inline-secondary-control > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cp-turn-switcher > summary::after {
+  content: "+";
+  margin-left: auto;
+  color: #9fc2ff;
+  font-size: 17px;
+}
+
+.cp-turn-switcher[open] > summary::after {
+  content: "−";
+}
+
+.cp-turn-switcher .header-turn-strip {
+  padding: 3px 0 6px;
+}
+
+.scoring-shell-classic .cp-suertes-strip {
+  padding: 4px 8px;
+}
+
+.scoring-shell-classic .suerte-tab {
+  min-height: 38px;
+  padding: 6px;
+  font-size: 11px;
+}
+
+.scoring-shell-classic .cp-opportunity-selector {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+}
+
+.cp-opportunity-selector-label {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.scoring-shell-classic .cp-opportunity-selector .opportunity-controls {
+  grid-template-columns: repeat(auto-fit, minmax(58px, 92px));
+  justify-content: start;
+  gap: 5px;
+}
+
+.scoring-shell-classic .cp-opportunity-selector .opportunity-controls button {
+  min-height: 44px;
+  padding: 6px 8px;
+}
+
+.scoring-shell-classic .cp-terna-opportunity-bar {
+  grid-template-columns: minmax(92px, auto) minmax(0, 1fr);
+}
+
+.scoring-shell-classic .cp-terna-opportunity-bar .opportunity-summary {
+  min-width: 0;
+  padding: 0;
+}
+
+.scoring-shell-classic .score-workspace {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  gap: var(--scorer-section-gap);
+  padding: 8px 10px var(--scorer-footer-clearance);
+}
+
+.cp-live-score-overview {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  display: grid;
+  grid-template-columns: minmax(150px, .55fr) minmax(210px, .8fr) minmax(220px, 1.65fr);
+  align-items: stretch;
+  gap: 7px;
+  padding: 7px;
+  border: 1px solid rgba(76, 141, 255, .42);
+  border-radius: 8px;
+  background: rgba(13, 17, 24, .98);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .22);
+}
+
+.cp-live-total,
+.cp-live-breakdown,
+.cp-live-score-overview .cp-header-timer-group {
+  min-width: 0;
+}
+
+.cp-live-total {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1px 8px;
+  padding: 5px 9px;
+  border-left: 4px solid var(--blue-2);
+  background: rgba(76, 141, 255, .1);
+}
+
+.cp-live-total > span,
+.cp-live-breakdown small {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.cp-live-total > strong {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  color: #fff;
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.cp-live-total > strong small {
+  font-size: 11px;
+}
+
+.cp-live-total > em {
+  color: #9fc2ff;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.cp-live-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.cp-live-breakdown > span {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 5px 7px;
+  border-left: 2px solid var(--line);
+}
+
+.cp-live-breakdown strong {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-live-score-overview .cp-header-timer-group {
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 5px;
+}
+
+.cp-live-score-overview .header-timer {
+  min-height: 54px;
+  padding: 5px 8px;
+}
+
+.cp-live-score-overview .header-timer span,
+.cp-live-score-overview .header-timer em {
+  font-size: 9px;
+}
+
+.cp-live-score-overview .header-timer strong {
+  font-size: 23px;
+}
+
+.scoring-shell-classic .cp-main-suerte-panel > header {
+  display: none;
+}
+
+.scoring-shell-classic .cp-main-suerte-panel,
+.scoring-shell-classic .cp-accordion-group,
+.scoring-shell-classic .time-evidence-card {
+  margin: 0;
+}
+
+.scoring-shell-classic .cp-attempt-panel,
+.scoring-shell-classic .cp-metric-grid {
+  gap: 7px;
+  padding: 9px;
+}
+
+.scoring-shell-classic .cp-attempt-card,
+.scoring-shell-classic .cp-main-total-card,
+.scoring-shell-classic .cp-metric-grid article {
+  min-height: 78px;
+  padding: 9px;
+}
+
+.scoring-shell-classic .cp-attempt-card strong,
+.scoring-shell-classic .cp-main-total-card strong,
+.scoring-shell-classic .cp-metric-grid strong {
+  font-size: 25px;
+}
+
+.scoring-shell-classic .quick-button,
+.scoring-shell-classic .cp-main-suerte-panel .button {
+  min-height: 44px;
+}
+
+.scoring-shell-classic .cp-mangana-total {
+  display: none;
+}
+
+.scoring-shell-classic .cp-botonera-panel {
+  gap: 7px;
+}
+
+.scoring-shell-classic .cp-accordion-header {
+  min-height: 44px;
+  padding: 5px 9px;
+}
+
+.scoring-shell-classic .cp-accordion-body {
+  padding: 8px;
+}
+
+.cp-inline-secondary-control > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.cp-inline-secondary-control > summary .cp-inline-disclosure {
+  margin-left: auto;
+  color: #9fc2ff;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.cp-inline-secondary-control[open] > summary .cp-inline-disclosure {
+  font-size: 0;
+}
+
+.cp-inline-secondary-control[open] > summary .cp-inline-disclosure::after {
+  content: "Cerrar";
+  font-size: 11px;
+}
+
+.cp-inline-secondary-control.danger > summary {
+  border-left: 3px solid var(--red);
+}
+
+.time-evidence-card > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.time-evidence-card > summary span {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.cp-time-evidence-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.scoring-shell-classic .cp-bottom-bar {
+  gap: 8px;
+  padding: 7px 10px max(7px, env(safe-area-inset-bottom));
+}
+
+.scoring-shell-classic .cp-bottom-actions--settings .button {
+  min-height: 44px;
+  padding: 7px 9px;
+  font-size: 11px;
+}
+
+.scoring-shell-classic .cp-save-score-button {
+  min-width: 220px;
+  font-weight: 950;
+}
+
+@media (max-width: 980px) {
+  .cp-judge-context {
+    grid-template-columns: minmax(170px, .68fr) minmax(0, 1.7fr);
+  }
+
+  .cp-judge-context .supervisor-review-notice {
+    grid-column: 1 / -1;
+  }
+
+  .cp-judge-context-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cp-live-score-overview {
+    grid-template-columns: minmax(145px, .65fr) minmax(190px, .85fr) minmax(190px, 1.5fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .cp-judge-context {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-live-score-overview {
+    position: relative;
+    grid-template-columns: minmax(135px, .7fr) minmax(0, 1.3fr);
+  }
+
+  .cp-live-score-overview .cp-header-timer-group {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .scoring-shell-classic .scoring-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .scoring-shell-classic .scoring-header > .button {
+    padding-inline: 9px;
+  }
+
+  .cp-judge-context-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cp-live-score-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-live-score-overview .cp-header-timer-group {
+    grid-column: auto;
+  }
+
+  .scoring-shell-classic .cp-opportunity-selector,
+  .scoring-shell-classic .cp-terna-opportunity-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .scoring-shell-classic .cp-bottom-sync em,
+  .scoring-shell-classic .cp-bottom-actions--settings {
+    display: none;
+  }
+}

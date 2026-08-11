@@ -22,7 +22,7 @@ import {
 } from "../js/core/scoringAttempt.js";
 import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js";
 
-const RELEASE_ID = "20260810-fmch-2026-manganas-paso-001-v1";
+const RELEASE_ID = "20260811-scorer-information-hierarchy-compaction-001-v1";
 const publishedAt = "2026-08-08T18:00:00.000Z";
 
 assert.equal(FMCH_2026_CALA_RULEBOOK_VERSION, "fmch_2026_cala_0.2.0");
