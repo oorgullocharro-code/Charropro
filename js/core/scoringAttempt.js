@@ -64,7 +64,8 @@ export function adaptLegacyAttemptToV2(legacyAttempt = {}, context = {}, options
     catalog.adic,
     legacy.customAdic,
     "additional",
-    finiteNumber(legacy.adic, 0)
+    finiteNumber(legacy.adic, 0),
+    { specialSelections: buildLegacySportAdditionalSelections(legacy, identity.suerteId) }
   );
   const infractions = buildLegacySelections(
     legacy,
@@ -128,7 +129,21 @@ export function adaptLegacyAttemptToV2(legacyAttempt = {}, context = {}, options
         remateId: legacy.remateId,
         remateLabel: legacy.remateLabel,
         remateMetadata: legacy.remateMetadata
-      })
+      }),
+      result: normalizeExecutionResult(legacy.manganaResult || legacy.pasoResult, sportStatus),
+      floreo: normalizeFloreo({
+        total: legacy.floreoTotal,
+        scoredTotal: legacy.floreoScoredTotal,
+        detail: legacy.floreoDetail,
+        source: legacy.floreoSource
+      }),
+      pullCount: nonNegativeInteger(legacy.pullCount, 0),
+      vuelta: nullablePositiveInteger(legacy.pasoVuelta),
+      distance: {
+        meters: finiteNumber(legacy.distanceMeters, 0),
+        resolvedValue: finiteNumber(legacy.distanceAdditionalPoints, 0)
+      },
+      dynamicContext: normalizeDynamicContext(legacy.dynamicScoring)
     },
     scoring: {
       baseSelection,
@@ -188,7 +203,16 @@ export function normalizeScoringAttemptV2(attempt = {}) {
       legacyStatusMapping: Boolean(sportState.legacyStatusMapping),
       classification: normalizeClassification(sportState.classification),
       opportunity: normalizeOpportunity(sportState.opportunity, identity.opportunityNumber),
-      remate: normalizeRemate(sportState.remate)
+      remate: normalizeRemate(sportState.remate),
+      result: normalizeExecutionResult(sportState.result, sportState.status),
+      floreo: normalizeFloreo(sportState.floreo),
+      pullCount: nonNegativeInteger(sportState.pullCount, 0),
+      vuelta: nullablePositiveInteger(sportState.vuelta),
+      distance: {
+        meters: finiteNumber(sportState.distance?.meters, 0),
+        resolvedValue: finiteNumber(sportState.distance?.resolvedValue, 0)
+      },
+      dynamicContext: normalizeDynamicContext(sportState.dynamicContext)
     },
     scoring: {
       baseSelection: scoring.baseSelection ? normalizeSelection(scoring.baseSelection, { category: "base" }) : null,
@@ -342,6 +366,8 @@ export function validateScoringAttemptV2(attempt, options = {}) {
   if (source.dq?.active && !normalizeText(source.dq.reason, 1000)) errors.push("attempt-dq-reason-required");
   if (source.dq?.active && source.sportState?.status !== "DQ") errors.push("attempt-dq-status-conflict");
   validateClassification(source.sportState?.classification, errors);
+  if (source.sportState?.floreo && !Array.isArray(source.sportState.floreo.detail)) errors.push("attempt-floreo-detail-invalid");
+  if (!Number.isInteger(source.sportState?.pullCount) || source.sportState.pullCount < 0) errors.push("attempt-pull-count-invalid");
   validateTiming(source.timing, errors);
   if (!Array.isArray(source.evidence)) errors.push("attempt-evidence-invalid");
   if (!ATTEMPT_PUBLICATION_STATES.includes(source.publication?.state)) errors.push("attempt-publication-state-invalid");
@@ -429,7 +455,7 @@ function buildLegacyBaseSelection(attempt, baseRules) {
   }, { category: "base" });
 }
 
-function buildLegacySelections(attempt, catalogRules, manualItems, category, aggregateTotal) {
+function buildLegacySelections(attempt, catalogRules, manualItems, category, aggregateTotal, options = {}) {
   const applied = new Set(Array.isArray(attempt.applied) ? attempt.applied.map(String) : []);
   const catalogSelections = catalogRules
     .filter((rule) => applied.has(String(rule.id || rule.ruleId)))
@@ -448,7 +474,8 @@ function buildLegacySelections(attempt, catalogRules, manualItems, category, agg
       }, { category, manualDefault: false });
     });
   const manualSelections = normalizeSelections(manualItems, { category, source: "MANUAL", manualDefault: true });
-  const selections = [...catalogSelections, ...manualSelections];
+  const specialSelections = normalizeSelections(options.specialSelections, { category, source: "FMCH_2026", manualDefault: false });
+  const selections = [...catalogSelections, ...manualSelections, ...specialSelections];
   const resolved = sumSelections(selections);
   const remainder = finiteNumber(aggregateTotal, 0) - resolved;
   if (Math.abs(remainder) > 0.000001) {
@@ -462,6 +489,26 @@ function buildLegacySelections(attempt, catalogRules, manualItems, category, agg
     }, { category }));
   }
   return selections;
+}
+
+function buildLegacySportAdditionalSelections(attempt = {}, suerteId = "") {
+  if (!["manganas_pie", "manganas_caballo"].includes(suerteId)) return [];
+  const resolvedValue = Math.max(0, finiteNumber(attempt.floreoScoredTotal ?? attempt.floreoTotal, 0));
+  if (!resolvedValue && !attempt.floreoSource && !(attempt.floreoDetail || []).length) return [];
+  return [{
+    id: `${suerteId}_floreo_total`,
+    selectedRuleId: `${suerteId}_floreo_total`,
+    label: "Floreo total",
+    resolvedValue,
+    value: resolvedValue,
+    quantity: 1,
+    source: attempt.floreoSource || "FMCH_2026",
+    metadata: {
+      source: attempt.floreoSource || "FMCH_2026",
+      identity: "floreoTotal",
+      detailOptional: true
+    }
+  }];
 }
 
 function buildLegacyDq(attempt, rules) {
@@ -634,6 +681,45 @@ function normalizeRemate(value = {}) {
   };
 }
 
+function normalizeExecutionResult(value, sportStatus) {
+  const clean = normalizeText(value, 80).toUpperCase();
+  if (["NOT_STARTED", "ACHIEVED", "NOT_ACHIEVED"].includes(clean)) return clean;
+  if (sportStatus === "NOT_ACHIEVED" || sportStatus === "ZERO") return "NOT_ACHIEVED";
+  if (["ATTEMPTED", "VALID", "DQ"].includes(sportStatus)) return "ACHIEVED";
+  return "NOT_STARTED";
+}
+
+function normalizeFloreo(value = {}) {
+  const total = finiteNumber(value?.total, 0);
+  const scoredTotal = value?.scoredTotal === null || value?.scoredTotal === undefined
+    ? total
+    : finiteNumber(value.scoredTotal, 0);
+  return {
+    total: Math.max(0, total),
+    scoredTotal: Math.max(0, scoredTotal),
+    source: normalizeText(value?.source, 240) || null,
+    detail: (Array.isArray(value?.detail) ? value.detail : []).slice(0, 100).map((item) => ({
+      selectedRuleId: nullableId(item?.selectedRuleId || item?.ruleId || item?.id),
+      label: normalizeText(item?.label, 240),
+      resolvedValue: finiteNumber(item?.resolvedValue ?? item?.value, 0),
+      source: normalizeText(item?.source, 240) || null
+    })).filter((item) => item.selectedRuleId)
+  };
+}
+
+function normalizeDynamicContext(value = {}) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return {
+    contractVersion: normalizeText(value.contractVersion, 80) || null,
+    classificationId: nullableId(value.classificationId),
+    vuelta: nullablePositiveInteger(value.vuelta),
+    selectedRuleIds: (Array.isArray(value.selectedRuleIds) ? value.selectedRuleIds : [])
+      .slice(0, 100).map(normalizeId).filter(Boolean),
+    resolvedRuleValues: normalizePlainObject(value.resolvedRuleValues),
+    source: normalizeText(value.source, 240) || null
+  };
+}
+
 function normalizeCalculationDetail(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   return {
@@ -648,12 +734,20 @@ function normalizeTiming(value = {}, legacyText = "") {
   return {
     timerId: nullableId(value?.timerId || value?.id),
     sharedTimerId: nullableId(value?.sharedTimerId),
+    officialElapsedMs: nullableNonNegativeNumber(value?.officialElapsedMs ?? value?.elapsedMs),
+    wallElapsedMs: nullableNonNegativeNumber(value?.wallElapsedMs),
     elapsedMs: nullableNonNegativeNumber(value?.elapsedMs),
     remainingMs: nullableNonNegativeNumber(value?.remainingMs),
     startedAt: normalizeIso(value?.startedAt) || null,
     endedAt: normalizeIso(value?.endedAt) || null,
     status: normalizeText(value?.status || value?.timingStatus, 80) || null,
     legacyText: normalizeText(value?.legacyText ?? legacyText, 240),
+    secondaryTimers: (Array.isArray(value?.secondaryTimers) ? value.secondaryTimers : []).slice(0, 20).map((timer) => ({
+      timerId: nullableId(timer?.timerId || timer?.id),
+      officialElapsedMs: nullableNonNegativeNumber(timer?.officialElapsedMs ?? timer?.elapsedMs),
+      wallElapsedMs: nullableNonNegativeNumber(timer?.wallElapsedMs),
+      status: normalizeText(timer?.status, 80) || null
+    })).filter((timer) => timer.timerId),
     adjustments: (Array.isArray(value?.adjustments || value?.timeAdjustments)
       ? value.adjustments || value.timeAdjustments
       : []).slice(0, 100).map((item) => normalizePlainObject(item))

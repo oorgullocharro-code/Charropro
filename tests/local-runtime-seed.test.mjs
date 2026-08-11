@@ -22,7 +22,7 @@ assert.equal(JSON.stringify(fixture).includes("charropro-e8a68"), false);
 const tournament = fixture.database["charropro/tournaments"][LOCAL_RUNTIME_TOURNAMENT_ID];
 assert.equal(tournament.info.demo, true);
 assert.equal(tournament.info.ruleProfileId, "FMCH_2026_LIBRE");
-assert.equal(tournament.info.ruleProfileVersion, "0.5.0");
+assert.equal(tournament.info.ruleProfileVersion, "0.6.0");
 assert.equal(tournament.info.ruleProfile.status, "active");
 assert.equal(tournament.info.ruleProfile.metadata.fixtureOnly, true);
 assert.equal(tournament.info.ruleProfile.metadata.activationReady, false);

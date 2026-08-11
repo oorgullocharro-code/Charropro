@@ -6,7 +6,7 @@ import {
   getTeamSuerteTotal,
   hasAttemptActivity
 } from "../js/core/scoring.js";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

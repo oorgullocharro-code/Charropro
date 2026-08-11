@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260810-fmch-2026-terna-complete-001-v1";
+const RELEASE_ID = "20260810-fmch-2026-manganas-paso-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({

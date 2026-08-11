@@ -9213,6 +9213,183 @@ html.graphic-page #graphic-root {
   text-align: left;
 }
 
+.cp-manganas-panel,
+.cp-paso-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.cp-manganas-dashboard,
+.cp-paso-dashboard {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.5fr) repeat(3, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.cp-paso-dashboard {
+  grid-template-columns: repeat(2, minmax(240px, 1fr)) minmax(180px, 0.8fr);
+}
+
+.cp-sport-timer,
+.cp-mangana-total,
+.cp-mangana-floreo,
+.cp-mangana-pulls,
+.cp-paso-summary {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  padding: 12px;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.cp-sport-timer.paused {
+  border-color: var(--amber);
+}
+
+.cp-sport-timer > span,
+.cp-mangana-total > span,
+.cp-mangana-floreo > span,
+.cp-mangana-pulls > span,
+.cp-paso-summary > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cp-sport-timer > strong,
+.cp-mangana-total > strong,
+.cp-paso-summary > strong {
+  font-size: clamp(22px, 3cqi, 32px);
+  line-height: 1.05;
+}
+
+.cp-sport-timer > em,
+.cp-sport-timer > small,
+.cp-mangana-total > em,
+.cp-mangana-floreo > em,
+.cp-mangana-pulls > em,
+.cp-paso-summary > em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
+.cp-sport-timer-actions,
+.cp-mangana-result,
+.cp-mangana-remates > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cp-sport-timer-actions .button,
+.cp-mangana-result .button,
+.cp-mangana-remates .button {
+  min-height: 42px;
+}
+
+.cp-sport-stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(48px, 1fr) 44px;
+  align-items: center;
+  gap: 6px;
+}
+
+.cp-sport-stepper button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.cp-sport-stepper strong {
+  text-align: center;
+  font-size: 24px;
+}
+
+.cp-mangana-remates,
+.cp-mangana-floreo-detail,
+.cp-mangana-history {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+  background: var(--panel);
+}
+
+.cp-mangana-remates > span,
+.cp-mangana-floreo-detail > summary {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.cp-mangana-floreo-detail > summary {
+  cursor: pointer;
+}
+
+.cp-mangana-floreo-detail > p {
+  margin: 0 0 10px;
+}
+
+.cp-mangana-history {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cp-mangana-history > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  border-left: 3px solid var(--line);
+  padding: 6px 8px;
+}
+
+.cp-mangana-history > span.active {
+  border-left-color: var(--blue);
+}
+
+.cp-mangana-history em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .cp-manganas-dashboard,
+  .cp-paso-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .cp-manganas-dashboard,
+  .cp-paso-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-mangana-history {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-sport-timer-actions .button,
+  .cp-mangana-result .button,
+  .cp-mangana-remates .button {
+    flex: 1 1 130px;
+  }
+}
+
 .cp-official-fall-diagram {
   grid-row: 1 / span 2;
   width: 44px;

@@ -1,17 +1,17 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./timerRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
@@ -48,6 +48,14 @@ export const emptyAttempt = () => ({
   remateId: null,
   remateLabel: null,
   remateMetadata: null,
+  floreoTotal: 0,
+  floreoScoredTotal: 0,
+  floreoSource: null,
+  floreoDetail: [],
+  pullCount: 0,
+  manganaResult: "NOT_STARTED",
+  pasoVuelta: 1,
+  pasoResult: "NOT_STARTED",
   classification: null,
   noRepara: false,
   resolvedRuleValues: {},

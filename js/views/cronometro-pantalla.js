@@ -1,6 +1,6 @@
 import { escapeHTML, html } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260810-fmch-2026-terna-complete-001-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import { getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("timer-display-root");

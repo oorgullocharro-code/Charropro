@@ -6,7 +6,7 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_SOURCE,
   FMCH_2026_CALA_TEAM_PENALTY_RULES
-} from "./calaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./calaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   FMCH_2026_COLEADERO_ADIC_RULES,
   FMCH_2026_COLEADERO_BASE_RULES,
@@ -23,7 +23,7 @@ import {
   FMCH_2026_PIALES_INFR_RULES,
   FMCH_2026_PIALES_RULEBOOK_VERSION,
   FMCH_2026_PIALES_TEAM_PENALTY_RULES
-} from "./fmch2026PialesColeaderoRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./fmch2026PialesColeaderoRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   FMCH_2026_JINETEO_CLASSIFICATIONS,
   FMCH_2026_JINETEOS_SOURCE,
@@ -41,7 +41,7 @@ import {
   FMCH_2026_YEGUA_INFR_RULES,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_TEAM_PENALTY_RULES
-} from "./fmch2026JineteosRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./fmch2026JineteosRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   FMCH_2026_LAZO_ADIC_RULES,
   FMCH_2026_LAZO_BASE_RULES,
@@ -59,7 +59,34 @@ import {
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
   FMCH_2026_TERNA_RULEBOOK_VERSION,
   FMCH_2026_TERNA_SOURCE
-} from "./fmch2026TernaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./fmch2026TernaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import {
+  FMCH_2026_MANGANAS_CABALLO_ADIC_RULES,
+  FMCH_2026_MANGANAS_CABALLO_BASE_RULES,
+  FMCH_2026_MANGANAS_CABALLO_DESC_RULES,
+  FMCH_2026_MANGANAS_CABALLO_DISABLED_LEGACY_RULES,
+  FMCH_2026_MANGANAS_CABALLO_INFR_RULES,
+  FMCH_2026_MANGANAS_CABALLO_TEAM_PENALTY_RULES,
+  FMCH_2026_MANGANAS_DURATION_MS,
+  FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
+  FMCH_2026_MANGANAS_PASO_RULEBOOK_VERSION,
+  FMCH_2026_MANGANAS_PASO_SOURCE,
+  FMCH_2026_MANGANAS_PIE_ADIC_RULES,
+  FMCH_2026_MANGANAS_PIE_BASE_RULES,
+  FMCH_2026_MANGANAS_PIE_DESC_RULES,
+  FMCH_2026_MANGANAS_PIE_DISABLED_LEGACY_RULES,
+  FMCH_2026_MANGANAS_PIE_INFR_RULES,
+  FMCH_2026_MANGANAS_PIE_TEAM_PENALTY_RULES,
+  FMCH_2026_PASO_ADIC_RULES,
+  FMCH_2026_PASO_BASE_RULES,
+  FMCH_2026_PASO_CLASSIFICATIONS,
+  FMCH_2026_PASO_DESC_RULES,
+  FMCH_2026_PASO_DISABLED_LEGACY_RULES,
+  FMCH_2026_PASO_DISMOUNT_DURATION_MS,
+  FMCH_2026_PASO_EXIT_DURATION_MS,
+  FMCH_2026_PASO_INFR_RULES,
+  FMCH_2026_PASO_TEAM_PENALTY_RULES
+} from "./fmch2026ManganasPasoRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
@@ -317,6 +344,69 @@ const FMCH_2026_PIAL_RUEDO_PROFILE_RULES = buildFmchTernaProfileRules("pial_rued
   desc: FMCH_2026_PIAL_RUEDO_DESC_RULES
 }, FMCH_2026_PIAL_RUEDO_DISABLED_LEGACY_RULES);
 
+function buildFmchManganasPasoProfileRule(suerteId, rule, category, order) {
+  return {
+    suerteId,
+    category,
+    ruleId: rule.id,
+    label: rule.label,
+    ...(category === RULE_CATEGORIES.DISQUALIFICATION ? {} : { value: Number(rule.pts || 0) }),
+    ...(rule.valueByClassification ? { valueByClassification: rule.valueByClassification } : {}),
+    enabled: true,
+    order,
+    metadata: {
+      ...(rule.metadata || {}),
+      source: FMCH_2026_MANGANAS_PASO_SOURCE,
+      implementationTicket: "CHARROPRO-FMCH-2026-MANGANAS-PASO-IMPLEMENTATION-001"
+    }
+  };
+}
+
+function buildFmchManganasPasoProfileRules(suerteId, catalogs, disabledLegacyRules) {
+  return [
+    ...catalogs.base.map((rule, index) => buildFmchManganasPasoProfileRule(suerteId, rule, RULE_CATEGORIES.BASE, index)),
+    ...catalogs.adic.map((rule, index) => buildFmchManganasPasoProfileRule(suerteId, rule, RULE_CATEGORIES.ADDITIONAL, index)),
+    ...catalogs.infr.map((rule, index) => buildFmchManganasPasoProfileRule(suerteId, rule, RULE_CATEGORIES.INDIVIDUAL_INFRACTION, index)),
+    ...catalogs.team_infr.map((rule, index) => buildFmchManganasPasoProfileRule(suerteId, rule, RULE_CATEGORIES.TEAM_INFRACTION, index)),
+    ...catalogs.desc.map((rule, index) => buildFmchManganasPasoProfileRule(suerteId, rule, RULE_CATEGORIES.DISQUALIFICATION, index)),
+    ...disabledLegacyRules.map((rule) => ({
+      suerteId,
+      category: rule.category,
+      ruleId: rule.id,
+      enabled: false,
+      metadata: {
+        sourceStatus: "LEGACY_PRESERVED_DISABLED",
+        source: FMCH_2026_MANGANAS_PASO_SOURCE,
+        reason: "Reconciliado contra FMCH 2026; se conserva físicamente para históricos"
+      }
+    }))
+  ];
+}
+
+const FMCH_2026_MANGANAS_PIE_PROFILE_RULES = buildFmchManganasPasoProfileRules("manganas_pie", {
+  base: FMCH_2026_MANGANAS_PIE_BASE_RULES,
+  adic: FMCH_2026_MANGANAS_PIE_ADIC_RULES,
+  infr: FMCH_2026_MANGANAS_PIE_INFR_RULES,
+  team_infr: FMCH_2026_MANGANAS_PIE_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_MANGANAS_PIE_DESC_RULES
+}, FMCH_2026_MANGANAS_PIE_DISABLED_LEGACY_RULES);
+
+const FMCH_2026_MANGANAS_CABALLO_PROFILE_RULES = buildFmchManganasPasoProfileRules("manganas_caballo", {
+  base: FMCH_2026_MANGANAS_CABALLO_BASE_RULES,
+  adic: FMCH_2026_MANGANAS_CABALLO_ADIC_RULES,
+  infr: FMCH_2026_MANGANAS_CABALLO_INFR_RULES,
+  team_infr: FMCH_2026_MANGANAS_CABALLO_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_MANGANAS_CABALLO_DESC_RULES
+}, FMCH_2026_MANGANAS_CABALLO_DISABLED_LEGACY_RULES);
+
+const FMCH_2026_PASO_PROFILE_RULES = buildFmchManganasPasoProfileRules("paso", {
+  base: FMCH_2026_PASO_BASE_RULES,
+  adic: FMCH_2026_PASO_ADIC_RULES,
+  infr: FMCH_2026_PASO_INFR_RULES,
+  team_infr: FMCH_2026_PASO_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_PASO_DESC_RULES
+}, FMCH_2026_PASO_DISABLED_LEGACY_RULES);
+
 export const FMCH_2026_LIBRE_PROFILE_0_4_0 = deepFreeze({
   contractVersion: RULE_PROFILE_CONTRACT_VERSION,
   profileId: "FMCH_2026_LIBRE",
@@ -420,7 +510,7 @@ export const FMCH_2026_LIBRE_PROFILE_0_4_0 = deepFreeze({
   }
 });
 
-export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
+export const FMCH_2026_LIBRE_PROFILE_0_5_0 = deepFreeze({
   ...FMCH_2026_LIBRE_PROFILE_0_4_0,
   version: "0.5.0",
   rules: [
@@ -470,8 +560,74 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   }
 });
 
+export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
+  ...FMCH_2026_LIBRE_PROFILE_0_5_0,
+  version: "0.6.0",
+  rules: [
+    ...FMCH_2026_LIBRE_PROFILE_0_5_0.rules,
+    ...FMCH_2026_MANGANAS_PIE_PROFILE_RULES,
+    ...FMCH_2026_MANGANAS_CABALLO_PROFILE_RULES,
+    ...FMCH_2026_PASO_PROFILE_RULES
+  ],
+  suerteMetadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_5_0.suerteMetadata,
+    manganas_pie: {
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
+      scoringAttempts: FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
+      rulebookVersion: FMCH_2026_MANGANAS_PASO_RULEBOOK_VERSION,
+      quickFloreoTotal: true,
+      optionalFloreoDetail: true,
+      timerContract: {
+        timerId: "timer_manganas_pie",
+        limitMs: FMCH_2026_MANGANAS_DURATION_MS,
+        mode: "independent_countdown",
+        officialPausesExcluded: true
+      }
+    },
+    manganas_caballo: {
+      implementationStatus: "COMPLETE_WITH_BLOCKED_FIELDS",
+      sportingCertification: "PASS_WITH_SOURCE_BLOCKER",
+      fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
+      scoringAttempts: FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
+      rulebookVersion: FMCH_2026_MANGANAS_PASO_RULEBOOK_VERSION,
+      quickFloreoTotal: true,
+      optionalFloreoDetail: true,
+      blockedSourceItems: ["USI-003"],
+      contraMascaraIdentityStatus: "SOURCE_CONFIRMATION_REQUIRED",
+      timerContract: {
+        timerId: "timer_manganas_caballo",
+        limitMs: FMCH_2026_MANGANAS_DURATION_MS,
+        mode: "independent_countdown",
+        officialPausesExcluded: true
+      }
+    },
+    paso: {
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
+      rulebookVersion: FMCH_2026_MANGANAS_PASO_RULEBOOK_VERSION,
+      classificationControlsBase: false,
+      classificationOptions: FMCH_2026_PASO_CLASSIFICATIONS,
+      timerContracts: [
+        { timerId: "timer_paso_3min", limitMs: FMCH_2026_PASO_EXIT_DURATION_MS, mode: "independent_countdown" },
+        { timerId: "timer_paso_1min", limitMs: FMCH_2026_PASO_DISMOUNT_DURATION_MS, mode: "independent_countdown" }
+      ]
+    }
+  },
+  metadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_5_0.metadata,
+    implementationStatus: "all_ten_suertes_technical_complete_activation_blocked",
+    loadedSuerteIds: ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua", "manganas_pie", "manganas_caballo", "paso"],
+    activationReady: false,
+    activationBlockReason: "Cala ML/CR frente a MD/MI/PC, cuarta fila de Coleadero y doble identidad Contra máscara requieren confirmación de fuente"
+  }
+});
+
 export const RULE_PROFILES = deepFreeze([
   FMCH_2026_LIBRE_PROFILE_0_4_0,
+  FMCH_2026_LIBRE_PROFILE_0_5_0,
   FMCH_2026_LIBRE_PROFILE
 ]);
 

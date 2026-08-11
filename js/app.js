@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./data/calaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -48,21 +48,41 @@ import {
   reserveFmch2026TernaOpportunity,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import {
+  FMCH_2026_MANGANAS_DURATION_MS,
+  FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
+  FMCH_2026_PASO_DISMOUNT_DURATION_MS,
+  FMCH_2026_PASO_EXIT_DURATION_MS,
+  applyFmch2026ManganaTiming,
+  applyFmch2026PasoTiming,
+  buildFmch2026ManganaRemateHistory,
+  getFmch2026ManganaFloreoRules,
+  isFmch2026ManganaSuerte,
+  isFmch2026PasoSuerte,
+  reconcileFmch2026ManganaAttempt,
+  reconcileFmch2026PasoAttempt,
+  setFmch2026ManganaFloreoTotal,
+  setFmch2026ManganaPullCount,
+  setFmch2026ManganaRemate,
+  setFmch2026ManganaResult,
+  shouldDisqualifyRepeatedManganaRemate,
+  toggleFmch2026ManganaFloreoDetail
+} from "./data/fmch2026ManganasPasoRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260810-fmch-2026-terna-complete-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260810-fmch-2026-terna-complete-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   applyOfficialTimerCommand,
   formatTimerMs,
   getOfficialTimerContextView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260810-fmch-2026-terna-complete-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./core/timerRules.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260810-fmch-2026-manganas-paso-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -74,16 +94,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./core/scoring.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./core/scoringAttempt.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./core/scorerComponents.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -93,7 +113,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./core/sync.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -128,7 +148,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./core/firebaseSync.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -181,7 +201,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260810-fmch-2026-terna-complete-001-v1";
+} from "./core/state.js?v=20260810-fmch-2026-manganas-paso-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -374,6 +394,14 @@ const ACTION_CAPABILITIES = {
   "clear-custom-form": "score",
   "remove-custom": "score",
   "select-scoring-classification": "score",
+  "adjust-mangana-floreo": "score",
+  "toggle-mangana-floreo-detail": "score",
+  "adjust-mangana-pulls": "score",
+  "set-mangana-result": "score",
+  "set-paso-result": "score",
+  "set-mangana-remate": "score",
+  "apply-sport-timing": "score",
+  "sport-timer-command": "timer",
   "reset-attempt": "score",
   "previous-score": "score",
   "next-score": "score",
@@ -437,6 +465,14 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "toggle-desc",
   "add-custom",
   "remove-custom",
+  "adjust-mangana-floreo",
+  "toggle-mangana-floreo-detail",
+  "adjust-mangana-pulls",
+  "set-mangana-result",
+  "set-paso-result",
+  "set-mangana-remate",
+  "apply-sport-timing",
+  "sport-timer-command",
   "reset-attempt",
   "previous-score",
   "next-score",
@@ -7884,6 +7920,7 @@ function renderScoring({ preserveScroll = false } = {}) {
 
 function buildScoringAttemptUiModel(context) {
   const ternaRuntime = getTernaRuntime(context);
+  const fmchSportTimers = getFmch2026SportTimerRuntimes(context);
   const attemptV2 = adaptLegacyAttemptToV2(
     context.attempt,
     buildScoringAttemptV2Context(context),
@@ -7900,7 +7937,16 @@ function buildScoringAttemptUiModel(context) {
           primary: true,
           kind: "terna"
         }]
-      : [{
+      : fmchSportTimers.length
+        ? fmchSportTimers.map((runtime, index) => ({
+            timerId: runtime.timer.timerId,
+            label: runtime.label,
+            display: runtime.view.formattedRemaining,
+            status: runtime.view.status,
+            primary: index === 0,
+            kind: runtime.kind
+          }))
+        : [{
           timerId: `scorer_${context.suerte.id}`,
           label: getTimerLabel(),
           display: formatTimer(),
@@ -7917,7 +7963,14 @@ function buildScoringAttemptUiModel(context) {
         }))
       : context.suerte.id === "piales"
         ? buildPialesRemateHistory(getAttemptsForContext(context))
-        : context.attempt.remateHistory,
+        : isFmch2026ManganaSuerte(context.suerte.id)
+          ? buildFmch2026ManganaRemateHistory(getAttemptsForContext(context)).filter((item) => item.remateId).map((item) => ({
+              id: item.remateId,
+              label: item.remateLabel,
+              value: item.opportunityNumber,
+              status: `Oportunidad ${item.opportunityNumber}`
+            }))
+          : context.attempt.remateHistory,
     specializedCalculator: context.suerte.id === "cala"
       ? { id: "cala_punta", label: "Calculador de punta", active: true }
       : context.suerte.id === "piales"
@@ -7940,6 +7993,37 @@ function getTernaRuntime(context = getCurrentContext()) {
     teamId: session.teamId
   });
   return { session, timer, view: getOfficialTimerContextView(timer) };
+}
+
+function getFmch2026SportTimerRuntimes(context = getCurrentContext()) {
+  if (!context || (!isFmch2026ManganaSuerte(context.suerte?.id) && !isFmch2026PasoSuerte(context.suerte?.id))) return [];
+  const scope = [context.charreada?.id || "charreada", context.team?.id || context.participant?.id || "participante"].join(":");
+  const shared = {
+    source: "scorer",
+    tournamentId: context.tournament?.id || "",
+    competitionId: context.charreada?.competitionId || context.competitionContext?.competitionId || "equipos_completo",
+    charreadaId: context.charreada?.id || "",
+    teamId: context.team?.id || ""
+  };
+  const manganaTimerPrefix = context.suerte.id === "manganas_pie"
+    ? "timer_manganas_pie"
+    : "timer_manganas_caballo";
+  const definitions = isFmch2026ManganaSuerte(context.suerte.id)
+    ? [{
+        timerId: `${manganaTimerPrefix}:${scope}`,
+        contextType: manganaTimerPrefix,
+        durationMs: FMCH_2026_MANGANAS_DURATION_MS,
+        label: context.suerte.id === "manganas_pie" ? "Manganas a Pie · 7 min" : "Manganas a Caballo · 7 min",
+        kind: context.suerte.id
+      }]
+    : [
+        { timerId: `timer_paso_3min:${scope}`, contextType: "timer_paso_3min", durationMs: FMCH_2026_PASO_EXIT_DURATION_MS, label: "Salida · 3 min", kind: "paso_exit" },
+        { timerId: `timer_paso_1min:${scope}`, contextType: "timer_paso_1min", durationMs: FMCH_2026_PASO_DISMOUNT_DURATION_MS, label: "Desmonte · 1 min", kind: "paso_dismount" }
+      ];
+  return definitions.map((definition) => {
+    const timer = getOrCreateOfficialTimer(definition.timerId, { ...shared, ...definition });
+    return { ...definition, timer, view: getOfficialTimerContextView(timer) };
+  });
 }
 
 function buildScoringAttemptV2Context(context, attempt = context.attempt) {
@@ -7976,7 +8060,8 @@ function buildScoringAttemptV2Context(context, attempt = context.attempt) {
 function renderScoringMainPanel(charreada, context, charroName) {
   if (context.suerte.id === "cala") return renderCalaMainPanel(context);
   if (context.suerte.type === "coleadero" || context.suerte.id === "colas") return renderColeaderoMainPanel(context);
-  if (["piales", "manganas_pie", "manganas_caballo"].includes(context.suerte.id)) return renderAttemptMainPanel(context);
+  if (context.suerte.id === "piales") return renderAttemptMainPanel(context);
+  if (isFmch2026ManganaSuerte(context.suerte.id)) return renderManganasMainPanel(context);
   if (["toro", "yegua"].includes(context.suerte.id)) return renderJineteoMainPanel(context);
   if (isFmch2026TernaSuerte(context.suerte.id) || context.suerte.id === "terna") return renderTernaMainPanel(context);
   if (context.suerte.id === "paso") return renderPasoMainPanel(context);
@@ -8141,11 +8226,7 @@ function renderCalaMainPanel(context) {
 }
 
 function renderAttemptMainPanel(context) {
-  const title = context.suerte.id === "piales"
-    ? "Calificador de piales"
-    : context.suerte.id === "manganas_pie"
-      ? "Calificador de manganas a pie"
-      : "Calificador de manganas a caballo";
+  const title = "Calificador de piales";
   const attempts = getAttemptsForContext(context);
   const activeAttempt = attempts[context.attemptIndex] || context.attempt;
   return html`
@@ -8169,6 +8250,106 @@ function renderAttemptMainPanel(context) {
       </div>
       ${context.suerte.id === "piales" ? renderPialesDistanceCalculator(context) : ""}
     </section>
+  `;
+}
+
+function renderManganasMainPanel(context) {
+  const attempts = getAttemptsForContext(context);
+  const attempt = reconcileFmch2026ManganaAttempt(context.attempt, context.suerte);
+  const timerRuntime = getFmch2026SportTimerRuntimes(context)[0];
+  const detailRules = getFmch2026ManganaFloreoRules(context.suerte.id);
+  const selectedDetail = new Set((attempt.floreoDetail || []).map((item) => item.selectedRuleId));
+  const isPie = context.suerte.id === "manganas_pie";
+  const remates = isPie
+    ? (context.suerte.catalog.adic || []).filter((item) => item.metadata?.remate)
+    : context.suerte.catalog.base || [];
+  return html`
+    <section class="cp-scoring-card cp-main-suerte-panel cp-manganas-panel" data-suerte="${escapeHTML(context.suerte.id)}">
+      <header>
+        <div>
+          <span>${renderCpIcon("rope")}</span>
+          <h2>${isPie ? "Manganas a Pie" : "Manganas a Caballo"}</h2>
+        </div>
+        <p>Tres oportunidades, remate identificado y captura rápida de floreo.</p>
+      </header>
+      <div class="cp-manganas-dashboard">
+        ${renderOfficialSportTimer(timerRuntime)}
+        <article class="cp-mangana-total">
+          <span>Total de oportunidad</span>
+          <strong>${moneylessNumber(calculateAttemptTotal(attempt))}</strong>
+          <em>${attempt.desc ? "Descalificada" : attempt.manganaResult === "ACHIEVED" ? "Lograda" : attempt.manganaResult === "NOT_ACHIEVED" ? "No lograda" : "Sin registrar"}</em>
+        </article>
+        <article class="cp-mangana-floreo" data-source="FMCH_2026">
+          <span>Floreo total</span>
+          <div class="cp-sport-stepper">
+            <button type="button" data-action="adjust-mangana-floreo" data-delta="-1" aria-label="Restar un punto de floreo">−</button>
+            <strong>${moneylessNumber(attempt.floreoTotal)}</strong>
+            <button type="button" data-action="adjust-mangana-floreo" data-delta="1" aria-label="Sumar un punto de floreo">+</button>
+          </div>
+          <em>${attempt.floreoScoredTotal === attempt.floreoTotal ? "FMCH 2026" : "Centenario: floreo no puntuable"}</em>
+        </article>
+        <article class="cp-mangana-pulls">
+          <span>Tirones</span>
+          <div class="cp-sport-stepper">
+            <button type="button" data-action="adjust-mangana-pulls" data-delta="-1" aria-label="Restar tirón">−</button>
+            <strong>${Number(attempt.pullCount || 0)}</strong>
+            <button type="button" data-action="adjust-mangana-pulls" data-delta="1" aria-label="Sumar tirón">+</button>
+          </div>
+          <em>${attempt.pullCount >= 3 ? "Malos acumulados: -4" : attempt.pullCount === 2 ? "Malos acumulados: -2" : "Sin ajuste por tirón"}</em>
+        </article>
+      </div>
+      <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo de la oportunidad">
+        <button type="button" class="button ${attempt.manganaResult === "ACHIEVED" ? "primary" : ""}" data-action="set-mangana-result" data-result="ACHIEVED">Lograda</button>
+        <button type="button" class="button ${attempt.manganaResult === "NOT_ACHIEVED" ? "amber" : ""}" data-action="set-mangana-result" data-result="NOT_ACHIEVED">No lograda</button>
+      </div>
+      ${isPie ? html`
+        <section class="cp-mangana-remates">
+          <span>Remate</span>
+          <div>
+            ${remates.map((remate) => html`<button type="button" class="button ${attempt.remateId === remate.id ? "primary" : ""}" data-action="set-mangana-remate" data-id="${escapeHTML(remate.id)}">${escapeHTML(remate.label)} +${moneylessNumber(remate.pts)}</button>`).join("")}
+          </div>
+        </section>
+      ` : ""}
+      <details class="cp-mangana-floreo-detail" ${selectedDetail.size ? "open" : ""}>
+        <summary>Detalle de floreo opcional</summary>
+        <p>Este desglose documenta la ejecución; el total rápido sigue siendo el valor oficial capturado.</p>
+        <div class="cp-scoring-button-grid">
+          ${detailRules.map((rule) => html`
+            <button type="button" class="cp-scoring-action-button positive ${selectedDetail.has(rule.id) ? "active" : ""}" data-action="toggle-mangana-floreo-detail" data-id="${escapeHTML(rule.id)}" aria-pressed="${selectedDetail.has(rule.id) ? "true" : "false"}">
+              <b>+${moneylessNumber(rule.pts)}</b><strong>${escapeHTML(rule.label)}</strong>
+            </button>
+          `).join("")}
+        </div>
+      </details>
+      <section class="cp-mangana-history" aria-label="Historial de remates">
+        ${buildFmch2026ManganaRemateHistory(attempts).map((item) => html`
+          <span class="${item.opportunityNumber === context.attemptIndex + 1 ? "active" : ""}">
+            <strong>${item.opportunityNumber}/3</strong>
+            <em>${escapeHTML(item.remateLabel || "Sin remate")}</em>
+          </span>
+        `).join("")}
+      </section>
+    </section>
+  `;
+}
+
+function renderOfficialSportTimer(runtime) {
+  if (!runtime) return "";
+  const view = runtime.view;
+  return html`
+    <article class="cp-sport-timer ${view.paused ? "paused" : ""}" data-timer-kind="${escapeHTML(runtime.kind)}">
+      <span>${escapeHTML(runtime.label)}</span>
+      <strong class="official-timer-display" data-official-timer-id="${escapeHTML(runtime.timer.timerId)}">${escapeHTML(view.formattedRemaining)}</strong>
+      <em>${escapeHTML(view.status)}${view.pauseReason ? ` · ${view.pauseReason}` : ""}</em>
+      <small>Real ${escapeHTML(formatTimerMs(view.wallElapsedMs))} · oficial ${escapeHTML(formatTimerMs(view.officialElapsedMs))}</small>
+      <div class="cp-sport-timer-actions">
+        ${view.status === "READY" ? html`<button class="button primary" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="START">Iniciar</button>` : ""}
+        ${view.status === "RUNNING" ? html`<button class="button amber" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="PAUSE">Pausar</button>` : ""}
+        ${view.status === "PAUSED" ? html`<button class="button primary" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="RESUME">Reanudar</button>` : ""}
+        ${view.status !== "FINISHED" ? html`<button class="button" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="FINISH">Finalizar</button>` : ""}
+        <button class="button" data-action="apply-sport-timing" type="button">Aplicar tiempo</button>
+      </div>
+    </article>
   `;
 }
 
@@ -8292,8 +8473,18 @@ function hasAttemptVisibleResult(attempt = {}) {
 
 function formatAttemptBreakdown(attempt = {}) {
   if (attempt.desc) return "Descalificado";
-  if (attempt.notAchieved || attempt.attempted) return "0 no logrado";
+  if (isAttemptZeroMarked(attempt)) return "0 no logrado";
   return `Base ${moneylessNumber(attempt.base)} / Adic. ${moneylessNumber(Number(attempt.adic || 0) + Number(attempt.puntaPts || 0))} / Infr. ${moneylessNumber(attempt.infr)}`;
+}
+
+function isAttemptZeroMarked(attempt = {}) {
+  if (attempt.manganaResult && attempt.manganaResult !== "NOT_STARTED") {
+    return attempt.manganaResult === "NOT_ACHIEVED";
+  }
+  if (attempt.pasoResult && attempt.pasoResult !== "NOT_STARTED") {
+    return attempt.pasoResult === "NOT_ACHIEVED";
+  }
+  return Boolean(attempt.notAchieved || attempt.attempted);
 }
 
 function renderJineteoMainPanel(context) {
@@ -8430,15 +8621,29 @@ function renderTernaMainPanel(context) {
 }
 
 function renderPasoMainPanel(context) {
+  const timers = getFmch2026SportTimerRuntimes(context);
+  const attempt = reconcileFmch2026PasoAttempt(context.attempt, context.suerte);
   return html`
-    <section class="cp-scoring-card cp-main-suerte-panel">
+    <section class="cp-scoring-card cp-main-suerte-panel cp-paso-panel">
       <header>
         <div>
           <span>${renderCpIcon("flag")}</span>
           <h2>Calificador de paso de la muerte</h2>
         </div>
-        <p>Registra monta, ejecucion, estilo, tiempo y deducciones desde la botonera.</p>
+        <p>Selecciona vuelta y clasificación; las acciones dinámicas toman su valor del perfil vigente.</p>
       </header>
+      <div class="cp-paso-dashboard">
+        ${timers.map(renderOfficialSportTimer).join("")}
+        <article class="cp-paso-summary">
+          <span>Faena</span>
+          <strong>${attempt.pasoVuelta === 2 ? "Segunda vuelta" : "Primera vuelta"}</strong>
+          <em>${attempt.classification?.classificationLabel || "Clasificación pendiente"} · ${moneylessNumber(calculateAttemptTotal(attempt))} pts</em>
+        </article>
+      </div>
+      <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo del Paso">
+        <button type="button" class="button ${attempt.pasoResult === "ACHIEVED" ? "primary" : ""}" data-action="set-paso-result" data-result="ACHIEVED">Logrado</button>
+        <button type="button" class="button ${attempt.pasoResult === "NOT_ACHIEVED" ? "amber" : ""}" data-action="set-paso-result" data-result="NOT_ACHIEVED">No logrado</button>
+      </div>
     </section>
   `;
 }
@@ -8620,6 +8825,9 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
     : Number(rule.pts || 0);
   const classificationRequired = rule.metadata?.requiresClassification === true && !classificationId;
   const additionalBlocked = ruleType === "adic" && isAttemptAdditionalBlocked(context);
+  const selectedBaseRuleId = getSelectedBaseRule(context.attempt, context.suerte.catalog)?.id || "";
+  const conditionalBaseBlocked = Array.isArray(rule.metadata?.allowedBaseRuleIds)
+    && !rule.metadata.allowedBaseRuleIds.includes(selectedBaseRuleId);
   const firstOpportunityBlocked = rule.metadata?.firstOpportunityOnly === true
     && Number(getTernaRuntime(context)?.session?.currentOpportunity || context.attemptIndex + 1) !== 1;
   return {
@@ -8633,9 +8841,11 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
     category: rule.category || ruleType,
     valueByClassification: rule.valueByClassification || null,
     classificationId,
-    disabled: rule.disabled === true || additionalBlocked || classificationRequired || firstOpportunityBlocked,
+    disabled: rule.disabled === true || additionalBlocked || conditionalBaseBlocked || classificationRequired || firstOpportunityBlocked,
     disabledReason: additionalBlocked
       ? "La base seleccionada no recibe adicionales"
+      : conditionalBaseBlocked
+        ? "No corresponde a la vuelta seleccionada"
       : classificationRequired
         ? "Selecciona una clasificación"
         : firstOpportunityBlocked ? "Solo corresponde a la primera oportunidad compartida" : rule.disabledReason || "",
@@ -9110,7 +9320,7 @@ function buildScoringActionItems(context) {
 
 function renderScoringBottomBar(context) {
   const canEditLayout = canEditScoringButtonLayout();
-  const zeroActive = Boolean(context.attempt.attempted || context.attempt.notAchieved);
+  const zeroActive = isAttemptZeroMarked(context.attempt);
   const zeroDisabled = !zeroActive && hasAttemptScoringActivity(context.attempt);
   const syncLabel = lastScoreSaveStatus.label || "Conectado";
   const syncDetail =
@@ -9147,6 +9357,11 @@ function hasAttemptScoringActivity(attempt = {}) {
     Number(attempt.adic || 0) ||
     Number(attempt.infr || 0) ||
     Number(attempt.puntaPts || 0) ||
+    Number(attempt.floreoTotal || 0) ||
+    Number(attempt.pullCount || 0) ||
+    attempt.manganaResult === "ACHIEVED" ||
+    attempt.pasoResult === "ACHIEVED" ||
+    attempt.classification?.classificationId ||
     attempt.desc ||
     attempt.applied?.length ||
     attempt.customAdic?.length ||
@@ -9457,7 +9672,7 @@ function getTeamPenaltyRulesForSuerte(suerte = {}) {
 }
 
 function renderZeroAttemptSection(context) {
-  const active = Boolean(context.attempt.attempted || context.attempt.notAchieved);
+  const active = isAttemptZeroMarked(context.attempt);
   const hasScore = hasAttemptScoreValue(context.attempt);
   return html`
     <article class="card">
@@ -10387,6 +10602,14 @@ function handleAction(action, target) {
     "select-scoring-classification": () => setScoringClassification(target.dataset.id, target.dataset.label),
     "toggle-jineteo-no-repara": toggleJineteoNoRepara,
     "apply-jineteo-timing": applyJineteoTiming,
+    "adjust-mangana-floreo": () => adjustManganaFloreo(Number(target.dataset.delta || 0)),
+    "toggle-mangana-floreo-detail": () => toggleManganaFloreoDetail(target.dataset.id),
+    "adjust-mangana-pulls": () => adjustManganaPulls(Number(target.dataset.delta || 0)),
+    "set-mangana-result": () => applyManganaResult(target.dataset.result),
+    "set-paso-result": () => applyPasoResult(target.dataset.result),
+    "set-mangana-remate": () => applyManganaRemate(target.dataset.id),
+    "sport-timer-command": () => applyFmchSportTimerCommand(target.dataset.timerKind, target.dataset.command),
+    "apply-sport-timing": applyCurrentFmchSportTiming,
     "reset-attempt": resetAttempt,
     "previous-score": previousScore,
     "next-score": nextScore,
@@ -11799,7 +12022,11 @@ function recalculateAttemptRuleTotal(context, type) {
     return sum + resolvedValue * getAttemptRuleQuantity(context.attempt, rule.id);
   }, 0);
   const manualTotal = (context.attempt[customKey] || []).reduce((sum, item) => sum + Number(item.pts || 0), 0);
-  context.attempt[type] = catalogTotal + manualTotal;
+  context.attempt[type] = catalogTotal + manualTotal + (
+    type === "adic" && isFmch2026ManganaSuerte(context.suerte?.id)
+      ? Number(context.attempt.floreoScoredTotal ?? context.attempt.floreoTotal ?? 0)
+      : 0
+  );
 }
 
 function isAttemptAdditionalBlocked(context) {
@@ -11827,6 +12054,28 @@ function reconcileAttemptConditionalRules(context) {
   clearBlockedAttemptAdditionals(context);
   if (!isAttemptAdditionalBlocked(context)) recalculateAttemptRuleTotal(context, "adic");
   reconcileJineteoContext(context);
+  if (isFmch2026ManganaSuerte(context.suerte?.id)) {
+    Object.assign(context.attempt, reconcileFmch2026ManganaAttempt(context.attempt, context.suerte));
+    reconcileManganaRemateConstraint(context);
+  }
+  if (isFmch2026PasoSuerte(context.suerte?.id)) {
+    Object.assign(context.attempt, reconcileFmch2026PasoAttempt(context.attempt, context.suerte));
+  }
+}
+
+function reconcileManganaRemateConstraint(context) {
+  if (!isFmch2026ManganaSuerte(context.suerte?.id) || !context.attempt?.remateId) return;
+  const attempts = getAttemptsForContext(context);
+  const ruleId = `${context.suerte.id}_desc_repetir_remate`;
+  const repeated = shouldDisqualifyRepeatedManganaRemate(attempts, context.attemptIndex, context.attempt.remateId);
+  if (repeated) {
+    context.attempt.desc = (context.suerte.catalog.desc || []).find((item) => item.id === ruleId)?.label || "Repetir remate";
+    context.attempt.descRuleId = ruleId;
+    context.attempt.autoDescRuleId = ruleId;
+  } else if (context.attempt.autoDescRuleId === ruleId) {
+    clearDesc(context.attempt);
+    context.attempt.autoDescRuleId = null;
+  }
 }
 
 function reconcileJineteoContext(context) {
@@ -11930,8 +12179,12 @@ function toggleRule(type, ruleId) {
         context.attempt.remateId = rule.id;
         context.attempt.remateLabel = rule.label;
         context.attempt.remateMetadata = { source: rule.source || "RULE_PROFILE" };
+      } else if (context.suerte.id === "manganas_caballo") {
+        Object.assign(context.attempt, setFmch2026ManganaRemate(context.attempt, context.suerte, rule.id));
+      } else if (context.suerte.id === "paso") {
+        context.attempt.pasoVuelta = Number(rule.metadata?.vuelta || 1);
       }
-    } else if (context.suerte.id === "piales" || isFmch2026TernaSuerte(context.suerte.id)) {
+    } else if (context.suerte.id === "piales" || isFmch2026TernaSuerte(context.suerte.id) || context.suerte.id === "manganas_caballo") {
       context.attempt.remateId = null;
       context.attempt.remateLabel = null;
       context.attempt.remateMetadata = null;
@@ -12008,6 +12261,12 @@ function toggleAttemptZero() {
   if (!context?.attempt || hasAttemptScoreValue(context.attempt)) return;
   context.attempt.attempted = !context.attempt.attempted;
   context.attempt.notAchieved = Boolean(context.attempt.attempted);
+  if (isFmch2026ManganaSuerte(context.suerte?.id)) {
+    context.attempt.manganaResult = context.attempt.notAchieved ? "NOT_ACHIEVED" : "NOT_STARTED";
+  }
+  if (isFmch2026PasoSuerte(context.suerte?.id)) {
+    context.attempt.pasoResult = context.attempt.notAchieved ? "NOT_ACHIEVED" : "NOT_STARTED";
+  }
   persistScoreChange();
 }
 
@@ -12015,6 +12274,59 @@ function markAttemptZeroIfBlank(attempt = {}) {
   if (hasAttemptScoreValue(attempt)) return;
   attempt.attempted = true;
   attempt.notAchieved = true;
+}
+
+function freezeCurrentFmchSportAttempt(context) {
+  if (!context?.attempt) return;
+  const runtimes = getFmch2026SportTimerRuntimes(context);
+  if (isFmch2026ManganaSuerte(context.suerte?.id)) {
+    reconcileManganaRemateConstraint(context);
+    if (context.attempt.notAchieved && context.attempt.manganaResult === "NOT_STARTED") {
+      context.attempt.manganaResult = "NOT_ACHIEVED";
+    }
+    const runtime = runtimes[0];
+    if (runtime) {
+      context.attempt.timing = {
+        ...(context.attempt.timing || {}),
+        timerId: runtime.timer.timerId,
+        officialElapsedMs: runtime.view.officialElapsedMs,
+        elapsedMs: runtime.view.officialElapsedMs,
+        remainingMs: runtime.view.remainingMs,
+        wallElapsedMs: runtime.view.wallElapsedMs,
+        startedAt: runtime.timer.wallStartedAt,
+        endedAt: runtime.timer.wallFinishedAt,
+        status: runtime.view.status,
+        legacyText: runtime.view.formattedRemaining,
+        adjustments: Array.isArray(context.attempt.timing?.adjustments) ? context.attempt.timing.adjustments : []
+      };
+    }
+    Object.assign(context.attempt, reconcileFmch2026ManganaAttempt(context.attempt, context.suerte));
+  }
+  if (isFmch2026PasoSuerte(context.suerte?.id)) {
+    const exit = runtimes.find((item) => item.kind === "paso_exit");
+    const dismount = runtimes.find((item) => item.kind === "paso_dismount");
+    if (exit && dismount) {
+      context.attempt.timing = {
+        ...(context.attempt.timing || {}),
+        timerId: exit.timer.timerId,
+        officialElapsedMs: exit.view.officialElapsedMs,
+        elapsedMs: exit.view.officialElapsedMs,
+        remainingMs: exit.view.remainingMs,
+        wallElapsedMs: exit.view.wallElapsedMs,
+        startedAt: exit.timer.wallStartedAt,
+        endedAt: exit.timer.wallFinishedAt,
+        status: exit.view.status,
+        secondaryTimers: [{
+          timerId: dismount.timer.timerId,
+          officialElapsedMs: dismount.view.officialElapsedMs,
+          wallElapsedMs: dismount.view.wallElapsedMs,
+          status: dismount.view.status
+        }],
+        adjustments: Array.isArray(context.attempt.timing?.adjustments) ? context.attempt.timing.adjustments : []
+      };
+    }
+    Object.assign(context.attempt, reconcileFmch2026PasoAttempt(context.attempt, context.suerte));
+  }
 }
 
 function buildPublishedScoreSnapshot(context) {
@@ -12372,6 +12684,9 @@ function setScoringClassification(classificationId, classificationLabel) {
       classificationLabel: String(classificationLabel || option.label || option.classificationLabel || ""),
       classificationValue: option.value ?? null
     };
+    if (isFmch2026PasoSuerte(context.suerte?.id)) {
+      Object.assign(context.attempt, reconcileFmch2026PasoAttempt(context.attempt, context.suerte));
+    }
   }
   persistScoreChange();
 }
@@ -12412,6 +12727,119 @@ function applyJineteoTiming() {
     context.attempt,
     applyFmch2026JineteoTiming(context.attempt, context.suerte, timerView.elapsedMs)
   );
+  persistScoreChange();
+}
+
+function adjustManganaFloreo(delta) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
+  Object.assign(
+    context.attempt,
+    setFmch2026ManganaFloreoTotal(context.attempt, context.suerte, Number(context.attempt.floreoTotal || 0) + Number(delta || 0))
+  );
+  persistScoreChange();
+}
+
+function toggleManganaFloreoDetail(ruleId) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
+  Object.assign(context.attempt, toggleFmch2026ManganaFloreoDetail(context.attempt, context.suerte, ruleId));
+  persistScoreChange();
+}
+
+function adjustManganaPulls(delta) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
+  Object.assign(
+    context.attempt,
+    setFmch2026ManganaPullCount(context.attempt, context.suerte, Number(context.attempt.pullCount || 0) + Number(delta || 0))
+  );
+  persistScoreChange();
+}
+
+function applyManganaResult(result) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
+  Object.assign(context.attempt, setFmch2026ManganaResult(context.attempt, context.suerte, result));
+  persistScoreChange();
+}
+
+function applyPasoResult(result) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026PasoSuerte(context.suerte?.id)) return;
+  context.attempt.pasoResult = result === "ACHIEVED" ? "ACHIEVED" : "NOT_ACHIEVED";
+  context.attempt.attempted = true;
+  context.attempt.notAchieved = context.attempt.pasoResult === "NOT_ACHIEVED";
+  Object.assign(context.attempt, reconcileFmch2026PasoAttempt(context.attempt, context.suerte));
+  persistScoreChange();
+}
+
+function applyManganaRemate(remateId) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
+  Object.assign(context.attempt, setFmch2026ManganaRemate(context.attempt, context.suerte, remateId));
+  reconcileManganaRemateConstraint(context);
+  persistScoreChange();
+}
+
+function applyFmchSportTimerCommand(timerKind, command) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  const runtime = getFmch2026SportTimerRuntimes(context).find((item) => item.kind === timerKind);
+  if (!runtime) return;
+  const result = applyOfficialTimerCommand(runtime.timer, {
+    type: command,
+    reason: command === "PAUSE" ? "Pausa oficial autorizada" : "",
+    source: "scorer",
+    actor: getAccessActor()
+  }, { expectedRevision: runtime.timer.revision });
+  if (!result.ok) {
+    showToast("El cronómetro oficial no aceptó el cambio de estado.");
+    return;
+  }
+  setOfficialTimer({ ...runtime.timer, ...result.timer });
+  saveState({ silent: true });
+  render({ preserveScoringScroll: true });
+}
+
+function applyCurrentFmchSportTiming() {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt) return;
+  const runtimes = getFmch2026SportTimerRuntimes(context);
+  if (isFmch2026ManganaSuerte(context.suerte?.id)) {
+    const runtime = runtimes[0];
+    if (!runtime) return;
+    const attempts = getAttemptsForContext(context);
+    const hasConsumed = attempts.some((attempt) => attempt?.manganaResult === "ACHIEVED") || context.attempt.manganaResult === "ACHIEVED";
+    Object.assign(context.attempt, applyFmch2026ManganaTiming(context.attempt, context.suerte, {
+      timerId: runtime.timer.timerId,
+      officialElapsedMs: runtime.view.officialElapsedMs,
+      wallElapsedMs: runtime.view.wallElapsedMs,
+      status: runtime.view.status,
+      legacyText: runtime.view.formattedRemaining,
+      hasConsumed
+    }));
+  } else if (isFmch2026PasoSuerte(context.suerte?.id)) {
+    const exit = runtimes.find((item) => item.kind === "paso_exit");
+    const dismount = runtimes.find((item) => item.kind === "paso_dismount");
+    if (!exit || !dismount) return;
+    Object.assign(context.attempt, applyFmch2026PasoTiming(context.attempt, context.suerte, {
+      timerId: exit.timer.timerId,
+      dismountTimerId: dismount.timer.timerId,
+      exitOfficialElapsedMs: exit.view.officialElapsedMs,
+      dismountOfficialElapsedMs: dismount.view.officialElapsedMs,
+      exitExpired: exit.view.expired
+    }));
+  } else {
+    return;
+  }
   persistScoreChange();
 }
 
@@ -13138,6 +13566,14 @@ async function nextScore() {
     render({ preserveScoringScroll: true });
     return;
   }
+  if (isFmch2026ManganaSuerte(context.suerte?.id) && (context.attempt.manganaResult || "NOT_STARTED") === "NOT_STARTED") {
+    showToast("Indica si la mangana fue lograda o no lograda antes de publicar.");
+    return;
+  }
+  if (isFmch2026PasoSuerte(context.suerte?.id) && (context.attempt.pasoResult || "NOT_STARTED") === "NOT_STARTED") {
+    showToast("Indica si el Paso fue logrado o no logrado antes de publicar.");
+    return;
+  }
   officialPublishInProgress = true;
   setScoreSaveStatus({
     state: "saving",
@@ -13150,6 +13586,7 @@ async function nextScore() {
   try {
     if (context) {
       markAttemptZeroIfBlank(context.attempt);
+      freezeCurrentFmchSportAttempt(context);
       preparedTerna = prepareTernaAttemptForPublication(context);
       if (!preparedTerna.ok) {
         officialPublishInProgress = false;
@@ -13355,7 +13792,9 @@ function hydrateTimerFromState() {
 }
 
 function ensureTernaTimerTicker(context = getCurrentContext()) {
-  const active = isFmch2026TernaSuerte(context?.suerte?.id);
+  const active = isFmch2026TernaSuerte(context?.suerte?.id)
+    || isFmch2026ManganaSuerte(context?.suerte?.id)
+    || isFmch2026PasoSuerte(context?.suerte?.id);
   if (!active) {
     window.clearInterval(ternaTimerInterval);
     ternaTimerInterval = null;
@@ -13367,8 +13806,8 @@ function ensureTernaTimerTicker(context = getCurrentContext()) {
 }
 
 function updateTernaTimerDisplays() {
-  document.querySelectorAll(".terna-timer-display[data-terna-timer-id]").forEach((display) => {
-    const timerId = display.dataset.ternaTimerId;
+  document.querySelectorAll(".terna-timer-display[data-terna-timer-id], .official-timer-display[data-official-timer-id]").forEach((display) => {
+    const timerId = display.dataset.ternaTimerId || display.dataset.officialTimerId;
     const timer = state.officialTimers?.[timerId];
     if (!timer) return;
     display.textContent = getOfficialTimerContextView(timer).formattedRemaining;

@@ -27,6 +27,7 @@ import {
 import {
   FMCH_2026_LIBRE_PROFILE,
   FMCH_2026_LIBRE_PROFILE_0_4_0,
+  FMCH_2026_LIBRE_PROFILE_0_5_0,
   getRuleProfile,
   resolveEffectiveRules,
   validateRuleProfile
@@ -59,13 +60,13 @@ const legacyPial = structuredClone(productPial);
 const effectiveLazo = resolveEffectiveRules({ suerte: productLazo, profile: FMCH_2026_LIBRE_PROFILE });
 const effectivePial = resolveEffectiveRules({ suerte: productPial, profile: FMCH_2026_LIBRE_PROFILE });
 
-assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.5.0");
+assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.6.0");
 assert.equal(FMCH_2026_LIBRE_PROFILE.status, "draft");
 assert.equal(FMCH_2026_LIBRE_PROFILE.metadata.activationReady, false);
 assert.equal(validateRuleProfile(FMCH_2026_LIBRE_PROFILE).valid, true);
-assert.equal(FMCH_2026_LIBRE_PROFILE.rules.length, 518);
+assert.equal(FMCH_2026_LIBRE_PROFILE.rules.length, 731);
 assert.equal(getRuleProfile("FMCH_2026_LIBRE", "0.4.0"), FMCH_2026_LIBRE_PROFILE_0_4_0);
-assert.equal(getRuleProfile("FMCH_2026_LIBRE", "0.5.0"), FMCH_2026_LIBRE_PROFILE);
+assert.equal(getRuleProfile("FMCH_2026_LIBRE", "0.5.0"), FMCH_2026_LIBRE_PROFILE_0_5_0);
 assert.equal(FMCH_2026_TERNA_RULEBOOK_VERSION, "fmch_2026_terna_0.5.0");
 assert.equal(FMCH_2026_TERNA_OPPORTUNITY_LIMIT, 5);
 assert.equal(FMCH_2026_TERNA_DURATION_MS, 420000);
@@ -268,7 +269,7 @@ assert.equal(attemptV2.sportState.opportunity.sharedOpportunityId, sharedAttempt
 assert.equal(attemptV2.sportState.opportunity.sharedSequenceNumber, 1);
 assert.equal(attemptV2.timing.sharedTimerId, corrected.session.sharedTimerId);
 assert.equal(attemptV2.sportState.remate.remateId, "lazo_base_floreado");
-assert.equal(attemptV2.context.ruleProfileVersion, "0.5.0");
+assert.equal(attemptV2.context.ruleProfileVersion, "0.6.0");
 assert.equal(attemptV2.note, "Nota sintetica");
 assert.equal(attemptV2.evidence.length, 1);
 
@@ -288,7 +289,7 @@ const official = buildOfficialScoringAttemptSnapshot(dqAttempt, {
   source: "official-score-publication"
 });
 assert.equal(official.publication.frozen, true);
-assert.equal(official.context.ruleProfileVersion, "0.5.0");
+assert.equal(official.context.ruleProfileVersion, "0.6.0");
 assert.equal(official.sportState.opportunity.sharedOpportunityId, sharedAttempt.sharedOpportunityId);
 assert.equal(official.timing.sharedTimerId, corrected.session.sharedTimerId);
 assert.throws(() => { official.sportState.opportunity.sharedSequenceNumber = 99; }, TypeError);
