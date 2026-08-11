@@ -51,6 +51,10 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
 } from "./publicProjectionOutbox.js?v=20260729-public-projection-recovery-001-v1";
+import {
+  normalizePendingScoreReview,
+  validatePendingScoreReview
+} from "./pendingScoreReview.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -4178,6 +4182,79 @@ export async function publishFirebaseScore(tournamentId, scoreId, scorePayload, 
   }
 }
 
+export async function writeFirebasePendingScoreReview(tournamentId, pendingReview, actor = {}, options = {}) {
+  const cleanTournamentId = normalizeLiveChannel(tournamentId || pendingReview?.tournamentId);
+  const validation = validatePendingScoreReview(pendingReview);
+  if (!cleanTournamentId) return { ok: false, reason: "missing-tournament" };
+  if (!validation.valid) return { ok: false, reason: "invalid-pending-review", errors: validation.errors };
+  if (validation.record.tournamentId !== cleanTournamentId) {
+    return { ok: false, reason: "pending-review-tournament-conflict" };
+  }
+  if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase" };
+
+  const expectedRevision = Math.max(0, Number(options.expectedRevision ?? validation.record.revision - 1));
+  const path = `${TOURNAMENTS_PATH}/${cleanTournamentId}/pendingScoreReviews/${validation.record.pendingId}`;
+  const actorRecord = compactActor(actor);
+  let conflictReason = "pending-review-revision-conflict";
+  let idempotent = false;
+
+  try {
+    const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (currentValue) => {
+      if (!currentValue) {
+        if (expectedRevision !== 0 || validation.record.revision !== 1) return;
+        return validation.record;
+      }
+
+      const current = normalizePendingScoreReview(currentValue);
+      if (
+        current.pendingId !== validation.record.pendingId ||
+        current.attemptKey !== validation.record.attemptKey ||
+        current.tournamentId !== validation.record.tournamentId ||
+        current.charreadaId !== validation.record.charreadaId
+      ) {
+        conflictReason = "pending-review-identity-conflict";
+        return;
+      }
+      if (
+        current.revision === validation.record.revision &&
+        current.idempotencyKey === validation.record.idempotencyKey &&
+        current.status === validation.record.status
+      ) {
+        idempotent = true;
+        return currentValue;
+      }
+      if (current.revision !== expectedRevision || validation.record.revision !== expectedRevision + 1) return;
+      return validation.record;
+    }, { applyLocally: false });
+
+    if (!transaction.committed) {
+      return {
+        ok: false,
+        conflict: true,
+        reason: conflictReason,
+        expectedRevision,
+        actor: actorRecord,
+        record: transaction.snapshot?.exists()
+          ? normalizePendingScoreReview(transaction.snapshot.val())
+          : null
+      };
+    }
+    return {
+      ok: true,
+      path,
+      idempotent,
+      expectedRevision,
+      record: normalizePendingScoreReview(transaction.snapshot.val() || validation.record)
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      detail: normalizeErrorDetail({ error })
+    };
+  }
+}
+
 export async function publishFirebaseTournamentState(tournamentId, appState = {}, actor = {}) {
   if (!tournamentId || !isFirebaseLiveConfigured()) return { ok: false, reason: "missing-tournament" };
 
@@ -4219,7 +4296,11 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
       updatedByName: actor.name || actor.email || "",
       clientId: actor.clientId || ""
     };
-    const { scores: _proposedScores, ...nonScoreRecord } = record;
+    const {
+      scores: _proposedScores,
+      pendingScoreReviews: _transactionalPendingScoreReviews,
+      ...nonScoreRecord
+    } = record;
     const payload = cleanUndefined({
       ...nonScoreRecord,
       meta
@@ -4320,6 +4401,35 @@ export function subscribeFirebaseScores(tournamentId, callback) {
       reason: normalizeFirebaseFailureReason(error),
       receivedAtMs: Date.now()
     });
+    return () => {};
+  }
+}
+
+export function subscribeFirebasePendingScoreReviews(tournamentId, callback) {
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  if (!cleanTournamentId || !isFirebaseLiveConfigured()) return () => {};
+  const path = `${TOURNAMENTS_PATH}/${cleanTournamentId}/pendingScoreReviews`;
+  try {
+    return onValue(ref(getFirebaseDatabase(), path), (snapshot) => {
+      callback({
+        tournamentId: cleanTournamentId,
+        path,
+        records: snapshot.val() || {},
+        exists: snapshot.exists(),
+        receivedAtMs: Date.now()
+      });
+    }, (error) => {
+      callback({
+        tournamentId: cleanTournamentId,
+        path,
+        records: {},
+        exists: false,
+        error,
+        reason: normalizeFirebaseFailureReason(error),
+        receivedAtMs: Date.now()
+      });
+    });
+  } catch {
     return () => {};
   }
 }
@@ -5068,6 +5178,11 @@ function compactTournamentRecord(tournamentId, appState = {}) {
   const scores = Object.fromEntries(
     Object.entries(appState.scores || {}).filter(([key]) => scoreKeyBelongsToTournament(key, charreadaIds))
   );
+  const pendingScoreReviews = Object.fromEntries(
+    Object.entries(appState.pendingScoreReviews || {})
+      .map(([pendingId, record]) => [pendingId, normalizePendingScoreReview(record)])
+      .filter(([, record]) => record.tournamentId === cleanTournamentId)
+  );
   const history = (appState.statHistorySnapshots || []).filter((snapshot) =>
     (snapshot.tournament?.id || snapshot.tournamentId || "") === cleanTournamentId
   );
@@ -5077,6 +5192,7 @@ function compactTournamentRecord(tournamentId, appState = {}) {
     teams: teams.map(compactStoredTeam),
     charreadas: charreadas.map(compactStoredCharreada),
     scores,
+    pendingScoreReviews,
     history: history.map(compactStatHistorySnapshot),
     settings: {
       googleSheetsUrl: settings.googleSheetsUrl || "",
@@ -5131,6 +5247,7 @@ function inflateTournamentStatePayload(tournamentId, record = {}) {
     teams: arrayFromRecord(record.teams).map(compactStoredTeam),
     charreadas: arrayFromRecord(record.charreadas).map(compactStoredCharreada),
     scores: record.scores || {},
+    pendingScoreReviews: record.pendingScoreReviews || {},
     publishedScores: arrayFromRecord(record.publishedScores).map(compactPublishedScore),
     history: arrayFromRecord(record.history).map(compactStatHistorySnapshot),
     statHistorySnapshots: arrayFromRecord(record.history).map(compactStatHistorySnapshot),

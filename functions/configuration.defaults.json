@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260801-official-score-concurrency-001-v1",
+      "appVersion": "20260811-pending-review-full-scorer-integration-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -116,6 +116,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "0308a08555a073de14c89f9898886d8d8030c5baedbdfa797aa83f57f7109615",
-  "fingerprint": "0308a08555a073de14c89f9898886d8d8030c5baedbdfa797aa83f57f7109615"
+  "checksum": "612e1f0dfd312f2f2ca460e8a4fc7dc86b534556221456f35c145acf293de3dd",
+  "fingerprint": "612e1f0dfd312f2f2ca460e8a4fc7dc86b534556221456f35c145acf293de3dd"
 }

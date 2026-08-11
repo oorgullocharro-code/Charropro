@@ -1,6 +1,6 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./data/calaRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -48,7 +48,7 @@ import {
   reserveFmch2026TernaOpportunity,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -68,21 +68,21 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   applyOfficialTimerCommand,
   formatTimerMs,
   getOfficialTimerContextView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./core/timerRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -94,16 +94,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./core/scoring.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./core/scoringAttempt.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./core/scorerComponents.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -113,7 +113,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./core/sync.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -141,14 +141,28 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseGlobalRuleOverrides,
   subscribeFirebaseLive,
+  subscribeFirebasePendingScoreReviews,
   subscribeFirebaseScores,
   subscribeFirebaseScoringButtonLayouts,
   subscribeFirebaseStatHistory,
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
-  verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+  verifyFirebasePublicProjectionJob,
+  writeFirebasePendingScoreReview
+} from "./core/firebaseSync.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import {
+  PENDING_SCORE_REVIEW_STATUSES,
+  buildScorerReturnContext,
+  closePendingScoreReview,
+  createPendingScoreReview,
+  listPendingScoreReviews,
+  normalizePendingScoreReviewRegistry,
+  openPendingScoreReview,
+  putPendingScoreReview,
+  resolvePendingScoreReview,
+  updatePendingScoreReviewDraft
+} from "./core/pendingScoreReview.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -201,7 +215,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./core/state.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -235,6 +249,7 @@ const OFFICIAL_PROGRAM_COLLAPSE_STORAGE_KEY = "official_program_collapsed_days";
 const RECOVERY_LAST_BACKUP_STORAGE_KEY = "recovery_last_backup_v1";
 const RECOVERY_BACKUP_HISTORY_STORAGE_KEY = "recovery_backup_history_v1";
 const FIREBASE_CLIENT_ID_KEY = "firebase_client_id";
+const PENDING_REVIEW_TAB_SESSION_KEY = "pending_review_tab_session_id";
 const APP_CACHE_VERSION_STORAGE_KEY = "cache_version";
 const PREPARE_STORAGE_KEY = "prepare_status_v1";
 const TEAM_CATEGORIES = [
@@ -405,6 +420,12 @@ const ACTION_CAPABILITIES = {
   "reset-attempt": "score",
   "previous-score": "score",
   "next-score": "score",
+  "show-pending-review-create": "score",
+  "show-pending-review-list": "score",
+  "close-pending-review-panel": "score",
+  "confirm-pending-review": "score",
+  "open-pending-review": "score",
+  "cancel-pending-resolution": "score",
   "take-live-control": "supervise",
   "timer-toggle": "timer",
   "timer-reset": "timer",
@@ -476,6 +497,12 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "reset-attempt",
   "previous-score",
   "next-score",
+  "show-pending-review-create",
+  "show-pending-review-list",
+  "close-pending-review-panel",
+  "confirm-pending-review",
+  "open-pending-review",
+  "cancel-pending-resolution",
   "timer-toggle",
   "timer-reset",
   "confirm-freeze-tournament",
@@ -699,6 +726,8 @@ let firebaseTournamentStateUnsubscribe = null;
 let firebaseTournamentStateId = "";
 let firebaseScoresUnsubscribe = null;
 let firebaseScoresTournamentId = "";
+let firebasePendingReviewsUnsubscribe = null;
+let firebasePendingReviewsTournamentId = "";
 let firebaseAccessUnsubscribe = null;
 let firebaseAppStateTimer = null;
 let firebaseUsersUnsubscribe = null;
@@ -725,6 +754,11 @@ let activeScoringDraft = null;
 let officialPublishInProgress = false;
 let pendingTimeEvidenceCapture = null;
 let pendingBestColeadorModal = null;
+let pendingReviewPanelMode = "";
+let activePendingResolutionId = "";
+let pendingReviewDraftSyncTimer = null;
+let pendingReviewDraftSyncPromise = null;
+let pendingReviewOperationInProgress = false;
 let lastScoreSaveStatus = {
   state: "connected",
   label: "Conectado",
@@ -751,6 +785,7 @@ let lastSyncError = "";
 let prepareState = readPrepareState();
 let firebaseDiagnostics = readFirebaseDiagnostics();
 const firebaseClientId = readFirebaseClientId();
+const pendingReviewTabSessionId = readPendingReviewTabSessionId();
 let launchRequestedScoring = false;
 let launchRequestedAdmin = false;
 let sidebarCollapsed = readSidebarPreference();
@@ -762,6 +797,7 @@ let supervisorLiveControlEnabled = false;
 let lastPermissionsMenuLogKey = "";
 
 loadState();
+recoverPendingResolutionSession();
 if (portalUrlAfterCacheLoad) window.history.replaceState({}, "", portalUrlAfterCacheLoad);
 clearStaleLocalTournamentCache();
 applyLaunchParams();
@@ -1533,6 +1569,19 @@ function readFirebaseClientId() {
   }
 }
 
+function readPendingReviewTabSessionId() {
+  try {
+    const key = scopedStorageKey(PENDING_REVIEW_TAB_SESSION_KEY);
+    const saved = sessionStorage.getItem(key);
+    if (saved) return saved;
+    const created = uid("pestana-pendiente");
+    sessionStorage.setItem(key, created);
+    return created;
+  } catch {
+    return uid("pestana-pendiente");
+  }
+}
+
 function clearStaleLocalTournamentCache() {
   try {
     const versionKey = scopedStorageKey(APP_CACHE_VERSION_STORAGE_KEY);
@@ -1704,6 +1753,8 @@ async function signOutAccess() {
   };
   if (firebaseAppStateUnsubscribe) firebaseAppStateUnsubscribe();
   if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
+  stopFirebaseScoresSubscription();
+  stopFirebasePendingReviewsSubscription();
   if (firebaseUsersUnsubscribe) firebaseUsersUnsubscribe();
   if (firebaseStatHistoryUnsubscribe) firebaseStatHistoryUnsubscribe();
   if (globalScoringLayoutsUnsubscribe) globalScoringLayoutsUnsubscribe();
@@ -1734,6 +1785,13 @@ function getAccessActor() {
     name: firebaseAccess.name,
     role: firebaseAccess.role,
     clientId: firebaseClientId
+  };
+}
+
+function getPendingReviewActor() {
+  return {
+    ...getAccessActor(),
+    tabSessionId: pendingReviewTabSessionId
   };
 }
 
@@ -2150,6 +2208,7 @@ function stopPreparationSubscriptions() {
   if (firebaseAppStateUnsubscribe) firebaseAppStateUnsubscribe();
   if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
   stopFirebaseScoresSubscription();
+  stopFirebasePendingReviewsSubscription();
   firebaseAppStateUnsubscribe = null;
   firebaseAppStateSubscriptionKey = "";
   firebaseTournamentStateUnsubscribe = null;
@@ -2740,6 +2799,7 @@ function startFirebaseAppStateSubscription() {
     if (firebaseAppStateUnsubscribe) firebaseAppStateUnsubscribe();
     if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
     stopFirebaseScoresSubscription();
+    stopFirebasePendingReviewsSubscription();
     firebaseAppStateUnsubscribe = null;
     firebaseAppStateSubscriptionKey = "";
     firebaseTournamentStateUnsubscribe = null;
@@ -2757,12 +2817,14 @@ function startFirebaseAppStateSubscription() {
     if (!tournamentId) return;
     if (firebaseTournamentStateId === tournamentId && firebaseTournamentStateUnsubscribe) {
       startFirebaseScoresSubscription(tournamentId);
+      startFirebasePendingReviewsSubscription(tournamentId);
       return;
     }
     if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
     firebaseTournamentStateId = tournamentId;
     firebaseTournamentStateUnsubscribe = subscribeFirebaseTournamentState(tournamentId, (payload) => applyRemoteTournamentState(payload));
     startFirebaseScoresSubscription(tournamentId);
+    startFirebasePendingReviewsSubscription(tournamentId);
     return;
   }
 
@@ -2772,6 +2834,7 @@ function startFirebaseAppStateSubscription() {
     firebaseTournamentStateId = "";
   }
   stopFirebaseScoresSubscription();
+  stopFirebasePendingReviewsSubscription();
   const subscriptionKey = [
     firebaseAccess.uid || "",
     firebaseAccess.role || "",
@@ -2815,6 +2878,34 @@ function stopFirebaseScoresSubscription() {
   }
   firebaseScoresUnsubscribe = null;
   firebaseScoresTournamentId = "";
+}
+
+function startFirebasePendingReviewsSubscription(tournamentId) {
+  if (!tournamentId || firebasePendingReviewsTournamentId === tournamentId && firebasePendingReviewsUnsubscribe) return;
+  stopFirebasePendingReviewsSubscription();
+  firebasePendingReviewsTournamentId = tournamentId;
+  firebasePendingReviewsUnsubscribe = subscribeFirebasePendingScoreReviews(tournamentId, applyRemotePendingScoreReviews);
+}
+
+function stopFirebasePendingReviewsSubscription() {
+  firebasePendingReviewsUnsubscribe?.();
+  firebasePendingReviewsUnsubscribe = null;
+  firebasePendingReviewsTournamentId = "";
+}
+
+function applyRemotePendingScoreReviews(payload = {}) {
+  if (payload.error) {
+    setLastFirebaseError(payload.reason || "pending-review-listener-error", payload.error?.message || "");
+    return;
+  }
+  const tournamentId = payload.tournamentId || state.activeTournamentId || "";
+  const remote = normalizePendingScoreReviewRegistry(payload.records);
+  const retained = Object.fromEntries(Object.entries(state.pendingScoreReviews || {})
+    .filter(([, record]) => record.tournamentId !== tournamentId));
+  state.pendingScoreReviews = { ...retained, ...remote };
+  saveState({ silent: true });
+  if (!activePendingResolutionId) recoverPendingResolutionSession();
+  if (state.view === "scoring") render({ preserveScoringScroll: true });
 }
 
 function applyRemoteScores(payload = {}) {
@@ -2944,6 +3035,7 @@ function applyRemoteTournamentState(payload = {}) {
   replaceTournamentItems("teams", tournamentId, remoteState.teams || []);
   replaceTournamentItems("charreadas", tournamentId, remoteState.charreadas || []);
   replaceTournamentScores(tournamentId, remoteState.scores || {});
+  state.pendingScoreReviews = normalizePendingScoreReviewRegistry(remoteState.pendingScoreReviews || state.pendingScoreReviews);
   replaceTournamentPublishedScores(tournamentId, remoteState.publishedScores || []);
   replaceTournamentHistory(tournamentId, remoteState.history || remoteState.statHistorySnapshots || []);
   mergeTournamentSettings(remoteState.settings || {}, tournamentId);
@@ -7910,6 +8002,7 @@ function renderScoring({ preserveScroll = false } = {}) {
         </section>
       </main>
 
+      ${renderPendingReviewPanel(context)}
       ${renderScoringBottomBar(context)}
     </div>
   `;
@@ -9354,6 +9447,8 @@ function renderScoringBottomBar(context) {
     (lastScoreSaveStatus.state === "saved" && lastScoreSaveStatus.savedAtMs
       ? `Ultimo guardado ${formatScoreSaveTime(lastScoreSaveStatus.savedAtMs)}`
       : `Turno ${context.teamIndex + 1} / oportunidad ${context.attemptIndex + 1}`);
+  const pendingCount = getActivePendingScoreReviews().length;
+  const resolvingPending = Boolean(activePendingResolutionId);
   return html`
     <footer class="cp-bottom-bar">
       <div class="cp-bottom-actions cp-bottom-actions--settings muted">
@@ -9363,17 +9458,98 @@ function renderScoringBottomBar(context) {
         <span class="cp-sync-dot"></span>
         <strong>${escapeHTML(syncLabel)}</strong>
         <em>${escapeHTML(syncDetail)}</em>
+        <button class="cp-pending-count" data-action="show-pending-review-list" type="button">Pendientes ${pendingCount}</button>
       </div>
       <div class="cp-bottom-actions cp-bottom-actions--primary">
         <button class="button" data-action="previous-score" type="button">${renderCpIcon("undo")} Deshacer</button>
         <button class="button cp-zero-footer-button ${zeroActive ? "amber" : ""}" data-action="toggle-attempt-zero" type="button" ${zeroDisabled ? "disabled" : ""}>
           ${renderCpIcon("ban")} ${zeroActive ? "0 no logrado" : "Marcar 0"}
         </button>
+        <button class="button cp-pending-review-button" data-action="show-pending-review-create" type="button" ${resolvingPending || pendingReviewOperationInProgress ? "disabled" : ""}>
+          ${renderCpIcon("flag")} Pendiente
+        </button>
         <button class="button primary cp-save-score-button" data-action="next-score" type="button" ${officialPublishInProgress ? "disabled" : ""}>
-          ${renderCpIcon("check")} ${officialPublishInProgress ? "Publicando..." : "Guardar y siguiente"}
+          ${renderCpIcon("check")} ${officialPublishInProgress ? "Publicando..." : resolvingPending ? "Resolver y publicar" : "Guardar y siguiente"}
         </button>
       </div>
     </footer>
+  `;
+}
+
+function getActivePendingScoreReviews() {
+  return listPendingScoreReviews(state.pendingScoreReviews, {
+    tournamentId: state.activeTournamentId,
+    status: PENDING_SCORE_REVIEW_STATUSES.PENDING
+  });
+}
+
+function renderPendingReviewPanel(context) {
+  const activeRecord = activePendingResolutionId
+    ? state.pendingScoreReviews?.[activePendingResolutionId]
+    : null;
+  if (!pendingReviewPanelMode && !activeRecord) return "";
+  const pendingRecords = getActivePendingScoreReviews();
+  const reasons = [
+    ["video_review", "Revisión de video"],
+    ["judges_instruction", "Indicación de jueces"],
+    ["technical_review", "Revisión técnica"],
+    ["rules_question", "Duda reglamentaria"],
+    ["pending_evidence", "Evidencia pendiente"],
+    ["other", "Otro"]
+  ];
+  return html`
+    <aside class="cp-pending-review-panel" aria-label="Revisión de calificaciones pendientes">
+      ${activeRecord ? html`
+        <div class="cp-pending-resolution-bar">
+          <div>
+            <span>Resolviendo pendiente</span>
+            <strong>${escapeHTML(activeRecord.metadata?.suerteName || context?.suerte?.name || "Suerte")} · ${escapeHTML(activeRecord.metadata?.entryName || "Participante")}</strong>
+          </div>
+          <button class="button" data-action="cancel-pending-resolution" type="button" ${pendingReviewOperationInProgress ? "disabled" : ""}>Volver sin publicar</button>
+        </div>
+      ` : ""}
+      ${pendingReviewPanelMode === "create" ? html`
+        <div class="cp-pending-create">
+          <div>
+            <span>Dejar esta faena pendiente</span>
+            <strong>${escapeHTML(context.suerte.name)} · ${escapeHTML(getEntryDisplayName(context.team) || "Participante")}</strong>
+          </div>
+          <label>
+            Motivo opcional
+            <select id="pending-review-reason">
+              <option value="">Sin motivo</option>
+              ${reasons.map(([value, label]) => html`<option value="${value}">${escapeHTML(label)}</option>`).join("")}
+            </select>
+          </label>
+          <label>
+            Nota opcional
+            <input id="pending-review-note" type="text" maxlength="500" placeholder="Detalle breve">
+          </label>
+          <div class="cp-pending-panel-actions">
+            <button class="button" data-action="close-pending-review-panel" type="button">Cancelar</button>
+            <button class="button amber" data-action="confirm-pending-review" type="button" ${pendingReviewOperationInProgress ? "disabled" : ""}>Dejar pendiente y avanzar</button>
+          </div>
+        </div>
+      ` : ""}
+      ${pendingReviewPanelMode === "list" ? html`
+        <div class="cp-pending-list">
+          <div class="cp-pending-list-head">
+            <div><span>Calificaciones pendientes</span><strong>${pendingRecords.length}</strong></div>
+            <button class="button small" data-action="close-pending-review-panel" type="button">Cerrar</button>
+          </div>
+          ${pendingRecords.length ? pendingRecords.map((record) => html`
+            <article class="cp-pending-list-item">
+              <div>
+                <strong>${escapeHTML(record.metadata?.suerteName || record.suerteId)}</strong>
+                <span>${escapeHTML(record.metadata?.entryName || record.teamId || record.participantId)}</span>
+                <em>Oportunidad ${Number(record.attemptIndex || 0) + 1}${record.reason?.label ? ` · ${escapeHTML(record.reason.label)}` : ""}</em>
+              </div>
+              <button class="button small" data-action="open-pending-review" data-id="${escapeHTML(record.pendingId)}" type="button" ${activeRecord || pendingReviewOperationInProgress ? "disabled" : ""}>Abrir</button>
+            </article>
+          `).join("") : html`<p class="cp-pending-empty">No hay calificaciones pendientes.</p>`}
+        </div>
+      ` : ""}
+    </aside>
   `;
 }
 
@@ -10626,6 +10802,12 @@ function handleAction(action, target) {
     "reset-attempt": resetAttempt,
     "previous-score": previousScore,
     "next-score": nextScore,
+    "show-pending-review-create": showPendingReviewCreate,
+    "show-pending-review-list": showPendingReviewList,
+    "close-pending-review-panel": closePendingReviewPanel,
+    "confirm-pending-review": confirmCurrentPendingReview,
+    "open-pending-review": () => openPendingReviewById(target.dataset.id),
+    "cancel-pending-resolution": cancelPendingResolution,
     "timer-toggle": toggleTimer,
     "timer-reset": () => stopTimer(true),
     "terna-timer-start": () => applyTernaTimerCommand("START"),
@@ -13406,6 +13588,20 @@ async function commitTernaAttemptAfterPublication(context, prepared, publishResu
 
 function continueOfficialScoreFlowAfterPublish(context = getCurrentContext()) {
   suppressNextSharedAppStatePublish = true;
+  if (activePendingResolutionId) {
+    const resolved = state.pendingScoreReviews?.[activePendingResolutionId];
+    if (resolved?.status === PENDING_SCORE_REVIEW_STATUSES.RESOLVED && resolved.returnContext) {
+      const returnContext = resolved.returnContext;
+      activePendingResolutionId = "";
+      pendingReviewPanelMode = "";
+      restoreScorerReturnContext(returnContext);
+      syncCurrentLiveState({ repeat: true });
+      officialPublishInProgress = false;
+      showToast("Pendiente resuelta. Regresaste al punto donde estabas calificando.");
+      render();
+      return;
+    }
+  }
   if (isFmch2026TernaSuerte(context?.suerte?.id)) {
     const session = getOrCreateTernaSession(context);
     if (session?.history?.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT) {
@@ -13541,6 +13737,351 @@ function maybeShowBestColeadorModal(context = {}) {
   return true;
 }
 
+function showPendingReviewCreate() {
+  if (activePendingResolutionId) {
+    showToast("Vuelve primero al punto original antes de abrir otra pendiente.");
+    return;
+  }
+  pendingReviewPanelMode = pendingReviewPanelMode === "create" ? "" : "create";
+  render({ preserveScoringScroll: true });
+}
+
+function showPendingReviewList() {
+  pendingReviewPanelMode = pendingReviewPanelMode === "list" ? "" : "list";
+  render({ preserveScoringScroll: true });
+}
+
+function closePendingReviewPanel() {
+  pendingReviewPanelMode = "";
+  render({ preserveScoringScroll: true });
+}
+
+function getPendingReasonDefinition() {
+  const code = String(document.getElementById("pending-review-reason")?.value || "other");
+  const labels = {
+    video_review: "Revisión de video",
+    judges_instruction: "Indicación de jueces",
+    technical_review: "Revisión técnica",
+    rules_question: "Duda reglamentaria",
+    pending_evidence: "Evidencia pendiente",
+    other: "Otro"
+  };
+  return {
+    code,
+    label: code === "other" && !document.getElementById("pending-review-reason")?.value ? "" : labels[code] || "Otro",
+    note: String(document.getElementById("pending-review-note")?.value || "").trim()
+  };
+}
+
+function buildCurrentScorerReturnContext(context = getCurrentContext()) {
+  const scoreNode = context ? getScoreNodeForContext(context) : null;
+  return buildScorerReturnContext({
+    tournamentId: context?.tournament?.id || state.activeTournamentId || "",
+    competitionId: context?.charreada?.competitionId || context?.competitionContext?.competitionId || "",
+    charreadaId: context?.charreada?.id || state.activeCharreadaId || "",
+    teamId: context?.competitionContext?.isIndividualCompetition ? "" : context?.team?.id || "",
+    participantId: context?.competitionContext?.isIndividualCompetition ? context?.team?.id || "" : "",
+    suerteId: context?.suerte?.id || "",
+    scoringTeamIdx: state.scoringTeamIdx,
+    scoringSuerteIdx: state.scoringSuerteIdx,
+    scoringAttemptIdx: state.scoringAttemptIdx,
+    scoringColeadorIdx: state.scoringColeadorIdx,
+    sharedOpportunityId: context?.attempt?.sharedOpportunityId || "",
+    sharedSequenceNumber: context?.attempt?.sharedSequenceNumber || 0,
+    returnDraft: scoreNode?.ok
+      ? { scoreId: scoreNode.id, scorePayload: cloneScorePayload(scoreNode.payload) }
+      : null,
+    view: "scoring"
+  });
+}
+
+function buildPendingReviewDraftSnapshot(context = getCurrentContext()) {
+  if (!context) return null;
+  const scoreNode = getScoreNodeForContext(context);
+  if (!scoreNode.ok) return null;
+  return {
+    scoreId: scoreNode.id,
+    scorePayload: cloneScorePayload(scoreNode.payload),
+    attempt: cloneAttempt(context.attempt),
+    attemptV2: adaptLegacyAttemptToV2(
+      context.attempt,
+      buildScoringAttemptV2Context(context),
+      { pointSummary: calculateAttemptPointSummary(context.attempt) }
+    ),
+    capturedAt: new Date().toISOString()
+  };
+}
+
+function buildPendingReviewDefinition(context, reason) {
+  const individual = context.competitionContext?.isIndividualCompetition;
+  const draftSnapshot = buildPendingReviewDraftSnapshot(context);
+  return {
+    tournamentId: context.tournament?.id || state.activeTournamentId || "",
+    competitionId: context.charreada?.competitionId || context.competitionContext?.competitionId || "equipos_completo",
+    charreadaId: context.charreada?.id || "",
+    teamId: individual ? "" : context.team?.id || "",
+    participantId: individual ? context.team?.id || "" : "",
+    participantScope: individual ? "individual" : "team",
+    suerteId: context.suerte?.id || "",
+    attemptIndex: context.attemptIndex,
+    coleadorIndex: context.coleadorIndex,
+    sharedOpportunityId: context.attempt?.sharedOpportunityId || "",
+    sharedSequenceNumber: context.attempt?.sharedSequenceNumber || 0,
+    scoreId: draftSnapshot?.scoreId || scoreKey(context.charreada.id, context.team.id, context.suerte.id),
+    reason,
+    draftSnapshot,
+    metadata: {
+      suerteName: context.suerte?.fullName || context.suerte?.name || context.suerte?.id || "",
+      entryName: getEntryDisplayName(context.team) || "",
+      participantName: getCharroName(context) || "",
+      opportunityNumber: Number(context.attemptIndex || 0) + 1,
+      timerAuthority: "independent"
+    }
+  };
+}
+
+function storePendingReviewRecord(record) {
+  const stored = putPendingScoreReview(state.pendingScoreReviews, record);
+  if (!stored.ok) return stored;
+  state.pendingScoreReviews = stored.registry;
+  saveState({ silent: true });
+  return stored;
+}
+
+async function persistPendingReviewRecord(record, expectedRevision) {
+  const result = await writeFirebasePendingScoreReview(
+    record.tournamentId,
+    record,
+    getPendingReviewActor(),
+    { expectedRevision }
+  );
+  if (result.ok && result.record) storePendingReviewRecord(result.record);
+  return result;
+}
+
+async function confirmCurrentPendingReview() {
+  if (!guardUnlockedCharreada() || pendingReviewOperationInProgress || officialPublishInProgress) return;
+  if (!isActiveAccessSession(firebaseAccess) || ![ROLES.JUEZ, ROLES.SUPERVISOR].includes(firebaseAccess.role)) {
+    showToast("Tu rol no puede dejar calificaciones pendientes.");
+    return;
+  }
+  const context = getCurrentContext();
+  if (!context) return;
+  const pending = createPendingScoreReview(buildPendingReviewDefinition(context, getPendingReasonDefinition()), {
+    actor: getPendingReviewActor()
+  });
+  pendingReviewOperationInProgress = true;
+  render({ preserveScoringScroll: true });
+  const result = await persistPendingReviewRecord(pending, 0);
+  pendingReviewOperationInProgress = false;
+  if (!result.ok) {
+    const detail = result.conflict ? "La pendiente cambió en otro dispositivo." : "No se pudo conservar la pendiente en CharroPro.";
+    showToast(detail);
+    render({ preserveScoringScroll: true });
+    return;
+  }
+
+  releaseActiveScoringDraft(pending.scoreId);
+  pendingReviewPanelMode = "";
+  advanceScoringPointer();
+  saveScoringNavigationDraft();
+  showToast("Calificación pendiente guardada. La charreada puede continuar.");
+  render();
+}
+
+function applyPendingReviewDraft(record) {
+  const scorePayload = record?.draftSnapshot?.scorePayload;
+  if (!record?.scoreId || !Array.isArray(scorePayload)) return false;
+  state.scores[record.scoreId] = cloneScorePayload(scorePayload);
+  return true;
+}
+
+function restoreScorerReturnContext(returnContext = {}) {
+  const tournamentId = String(returnContext.tournamentId || "");
+  const charreada = state.charreadas.find((item) => item.id === returnContext.charreadaId && item.tournamentId === tournamentId);
+  if (!charreada) return false;
+  state.activeTournamentId = tournamentId;
+  state.activeCharreadaId = charreada.id;
+  const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;
+  if (returnContext.returnDraft?.scoreId && Array.isArray(returnContext.returnDraft.scorePayload)) {
+    state.scores[returnContext.returnDraft.scoreId] = cloneScorePayload(returnContext.returnDraft.scorePayload);
+  }
+  const suertes = getCharreadaScoringSuertes(charreada, tournament, state.settings.globalRuleOverrides);
+  const entries = getCharreadaScoringEntries(charreada);
+  const suerteIndex = suertes.findIndex((suerte) => suerte.id === returnContext.suerteId);
+  const entryId = returnContext.participantId || returnContext.teamId;
+  const teamIndex = entries.findIndex((entry) => entry.id === entryId);
+  state.scoringSuerteIdx = suerteIndex >= 0 ? suerteIndex : Number(returnContext.scoringSuerteIdx || 0);
+  state.scoringTeamIdx = teamIndex >= 0 ? teamIndex : Number(returnContext.scoringTeamIdx || 0);
+  state.scoringAttemptIdx = Number(returnContext.scoringAttemptIdx || 0);
+  state.scoringColeadorIdx = Number(returnContext.scoringColeadorIdx || 0);
+  state.view = "scoring";
+  saveState({ silent: true });
+  return true;
+}
+
+async function openPendingReviewById(pendingId) {
+  if (activePendingResolutionId || pendingReviewOperationInProgress) {
+    showToast("Vuelve primero al punto original antes de abrir otra pendiente.");
+    return;
+  }
+  const current = state.pendingScoreReviews?.[pendingId];
+  const context = getCurrentContext();
+  if (!current || current.status !== PENDING_SCORE_REVIEW_STATUSES.PENDING || !context) return;
+  if (!isActiveAccessSession(firebaseAccess) || ![ROLES.JUEZ, ROLES.SUPERVISOR].includes(firebaseAccess.role)) return;
+  const transition = openPendingScoreReview(current, {
+    actor: getPendingReviewActor(),
+    expectedRevision: current.revision,
+    returnContext: buildCurrentScorerReturnContext(context)
+  });
+  if (!transition.ok) return;
+  pendingReviewOperationInProgress = true;
+  render({ preserveScoringScroll: true });
+  const result = await persistPendingReviewRecord(transition.record, current.revision);
+  pendingReviewOperationInProgress = false;
+  if (!result.ok) {
+    showToast("La pendiente cambió en otro dispositivo. Sincroniza antes de abrirla.");
+    render({ preserveScoringScroll: true });
+    return;
+  }
+  activePendingResolutionId = pendingId;
+  pendingReviewPanelMode = "";
+  applyPendingReviewDraft(result.record);
+  restoreScorerReturnContext({
+    tournamentId: result.record.tournamentId,
+    competitionId: result.record.competitionId,
+    charreadaId: result.record.charreadaId,
+    teamId: result.record.teamId,
+    participantId: result.record.participantId,
+    suerteId: result.record.suerteId,
+    scoringAttemptIdx: result.record.attemptIndex,
+    scoringColeadorIdx: result.record.coleadorIndex,
+    sharedOpportunityId: result.record.sharedOpportunityId,
+    sharedSequenceNumber: result.record.sharedSequenceNumber,
+    view: "scoring"
+  });
+  markActiveScoringDraft(getCurrentContext());
+  showToast("Pendiente abierta. Al publicar volverás al punto anterior.");
+  render();
+}
+
+function scheduleActivePendingDraftSync() {
+  if (!activePendingResolutionId) return;
+  window.clearTimeout(pendingReviewDraftSyncTimer);
+  pendingReviewDraftSyncTimer = window.setTimeout(() => {
+    void flushActivePendingDraftSync();
+  }, 400);
+}
+
+async function flushActivePendingDraftSync() {
+  window.clearTimeout(pendingReviewDraftSyncTimer);
+  pendingReviewDraftSyncTimer = null;
+  if (!activePendingResolutionId) return { ok: true, skipped: true };
+  if (pendingReviewDraftSyncPromise) return pendingReviewDraftSyncPromise;
+  const current = state.pendingScoreReviews?.[activePendingResolutionId];
+  const context = getCurrentContext();
+  if (!current || !context) return { ok: false, reason: "pending-review-context-missing" };
+  const transition = updatePendingScoreReviewDraft(current, {
+    actor: getPendingReviewActor(),
+    expectedRevision: current.revision,
+    draftSnapshot: buildPendingReviewDraftSnapshot(context)
+  });
+  if (!transition.ok) return transition;
+  pendingReviewDraftSyncPromise = persistPendingReviewRecord(transition.record, current.revision);
+  try {
+    return await pendingReviewDraftSyncPromise;
+  } finally {
+    pendingReviewDraftSyncPromise = null;
+  }
+}
+
+async function cancelPendingResolution() {
+  if (!activePendingResolutionId || pendingReviewOperationInProgress) return;
+  pendingReviewOperationInProgress = true;
+  const draftResult = await flushActivePendingDraftSync();
+  const current = state.pendingScoreReviews?.[activePendingResolutionId];
+  if (!draftResult.ok || !current) {
+    pendingReviewOperationInProgress = false;
+    showToast("No se pudo guardar el borrador pendiente. Intenta sincronizar.");
+    render({ preserveScoringScroll: true });
+    return;
+  }
+  const returnContext = current.returnContext;
+  const transition = closePendingScoreReview(current, {
+    actor: getPendingReviewActor(),
+    expectedRevision: current.revision,
+    draftSnapshot: buildPendingReviewDraftSnapshot(getCurrentContext())
+  });
+  const result = transition.ok
+    ? await persistPendingReviewRecord(transition.record, current.revision)
+    : transition;
+  pendingReviewOperationInProgress = false;
+  if (!result.ok) {
+    showToast("La pendiente cambió en otro dispositivo. No se abandonó la resolución.");
+    render({ preserveScoringScroll: true });
+    return;
+  }
+  activePendingResolutionId = "";
+  pendingReviewPanelMode = "list";
+  releaseActiveScoringDraft(current.scoreId);
+  restoreScorerReturnContext(returnContext);
+  saveScoringNavigationDraft();
+  showToast("Volviste al punto anterior. La calificación sigue pendiente.");
+  render();
+}
+
+async function completePendingResolutionAfterPublish(publishResult) {
+  if (!activePendingResolutionId) return { ok: true, skipped: true };
+  const current = state.pendingScoreReviews?.[activePendingResolutionId];
+  if (!current) return { ok: false, reason: "pending-review-missing" };
+  const published = publishResult.published || {};
+  const officialScore = {
+    id: published.id || publishResult.id || "",
+    scoreId: publishResult.scoreId || current.scoreId,
+    attemptKey: published.attemptKey || "",
+    revision: Number(published.revision || publishResult.revision || 1),
+    publishedAt: published.publishedAt || new Date().toISOString()
+  };
+  const transition = resolvePendingScoreReview(current, {
+    actor: getPendingReviewActor(),
+    expectedRevision: current.revision,
+    officialScore
+  });
+  if (!transition.ok) return transition;
+  const result = await persistPendingReviewRecord(transition.record, current.revision);
+  if (!result.ok && result.record?.status === PENDING_SCORE_REVIEW_STATUSES.RESOLVED && result.record.officialScore?.id === officialScore.id) {
+    storePendingReviewRecord(result.record);
+    return { ok: true, idempotent: true, record: result.record };
+  }
+  return result;
+}
+
+function recoverPendingResolutionSession() {
+  const registry = normalizePendingScoreReviewRegistry(state.pendingScoreReviews);
+  state.pendingScoreReviews = registry;
+  const record = Object.values(registry).find((item) => (
+    item.status === PENDING_SCORE_REVIEW_STATUSES.PENDING &&
+    item.resolutionSession?.status === "open" &&
+    item.returnContext &&
+    item.resolutionSession?.openedBy?.tabSessionId === pendingReviewTabSessionId
+  ));
+  if (!record) return;
+  activePendingResolutionId = record.pendingId;
+  applyPendingReviewDraft(record);
+  restoreScorerReturnContext({
+    tournamentId: record.tournamentId,
+    competitionId: record.competitionId,
+    charreadaId: record.charreadaId,
+    teamId: record.teamId,
+    participantId: record.participantId,
+    suerteId: record.suerteId,
+    scoringAttemptIdx: record.attemptIndex,
+    scoringColeadorIdx: record.coleadorIndex,
+    view: "scoring"
+  });
+  markActiveScoringDraft(getCurrentContext());
+}
+
 function continueAfterBestColeadorModal() {
   if (!pendingBestColeadorModal) {
     closeModal();
@@ -13586,6 +14127,14 @@ async function nextScore() {
   if (isFmch2026PasoSuerte(context.suerte?.id) && (context.attempt.pasoResult || "NOT_STARTED") === "NOT_STARTED") {
     showToast("Indica si el Paso fue logrado o no logrado antes de publicar.");
     return;
+  }
+  if (activePendingResolutionId) {
+    const pendingDraftResult = await flushActivePendingDraftSync();
+    if (!pendingDraftResult.ok) {
+      showToast("No se pudo sincronizar el borrador pendiente. No se publicó.");
+      render({ preserveScoringScroll: true });
+      return;
+    }
   }
   officialPublishInProgress = true;
   setScoreSaveStatus({
@@ -13636,6 +14185,19 @@ async function nextScore() {
           scoreId: publishResult.scoreId || ""
         });
         showToast("El score se publicó, pero la secuencia compartida de Terna requiere revisión.");
+        render({ preserveScoringScroll: true });
+        return;
+      }
+      const pendingResolution = await completePendingResolutionAfterPublish(publishResult);
+      if (!pendingResolution.ok) {
+        officialPublishInProgress = false;
+        setScoreSaveStatus({
+          state: "warning",
+          label: "Score publicado; pendiente por conciliar",
+          detail: "El score oficial existe, pero la pendiente cambió en otro dispositivo.",
+          scoreId: publishResult.scoreId || ""
+        });
+        showToast("El score se publicó, pero la pendiente requiere conciliación por concurrencia.");
         render({ preserveScoringScroll: true });
         return;
       }
@@ -13694,6 +14256,7 @@ function persistScoreChange() {
   markActiveScoringDraft();
   resetScoreSaveStatusForDraft();
   saveState({ silent: true });
+  scheduleActivePendingDraftSync();
   // La calificacion queda como borrador local hasta que el juez toque "Publicar y siguiente".
   render({ preserveScoringScroll: true });
 }

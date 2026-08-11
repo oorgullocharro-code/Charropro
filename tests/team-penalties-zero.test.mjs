@@ -6,7 +6,7 @@ import {
   getTeamSuerteTotal,
   hasAttemptActivity
 } from "../js/core/scoring.js";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

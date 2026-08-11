@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260811-scorer-information-hierarchy-compaction-001-v1";
+const RELEASE_ID = "20260811-pending-review-full-scorer-integration-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({

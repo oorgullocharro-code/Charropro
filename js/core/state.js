@@ -1,17 +1,18 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260811-scorer-information-hierarchy-compaction-001-v1";
+} from "./timerRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260811-pending-review-full-scorer-integration-001-v1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
@@ -104,6 +105,7 @@ const createInitialState = () => ({
   teams: [],
   charreadas: [],
   scores: {},
+  pendingScoreReviews: {},
   publishedScores: [],
   statHistorySnapshots: [],
   migrationLog: [],
@@ -164,6 +166,7 @@ export function loadState(tournamentId = "") {
       tournaments: (parsed.tournaments || []).map(normalizeTournament),
       teams: (parsed.teams || []).map(normalizeTeam),
       charreadas: (parsed.charreadas || []).map(normalizeCharreada),
+      pendingScoreReviews: normalizePendingScoreReviewRegistry(parsed.pendingScoreReviews),
       publishedScores: normalizePublishedScores(parsed.publishedScores, parsed.lastPublishedScore),
       statHistorySnapshots: normalizeStatHistorySnapshots(parsed.statHistorySnapshots),
       migrationLog: Array.isArray(parsed.migrationLog) ? parsed.migrationLog : [],
@@ -320,6 +323,10 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
     const ids = getPublishedScoreIds(record);
     return ids.tournamentId === cleanTournamentId;
   });
+  const pendingScoreReviews = Object.fromEntries(
+    Object.entries(normalizePendingScoreReviewRegistry(source.pendingScoreReviews))
+      .filter(([, record]) => record.tournamentId === cleanTournamentId)
+  );
   const statHistorySnapshots = (source.statHistorySnapshots || []).filter((record) => {
     return (record?.tournament?.id || record?.tournamentId || "") === cleanTournamentId;
   });
@@ -340,6 +347,7 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
     teams,
     charreadas,
     scores,
+    pendingScoreReviews,
     publishedScores,
     statHistorySnapshots,
     ternaSessions,
@@ -731,6 +739,7 @@ export function setActiveTournament(tournamentId) {
         tournaments: mergeTournamentLists(previousTournaments, (parsed.tournaments || []).map(normalizeTournament)),
         teams: (parsed.teams || []).map(normalizeTeam),
         charreadas: (parsed.charreadas || []).map(normalizeCharreada),
+        pendingScoreReviews: normalizePendingScoreReviewRegistry(parsed.pendingScoreReviews),
         publishedScores: normalizePublishedScores(parsed.publishedScores, parsed.lastPublishedScore),
         statHistorySnapshots: normalizeStatHistorySnapshots(parsed.statHistorySnapshots),
         migrationLog: Array.isArray(parsed.migrationLog) ? parsed.migrationLog : [],
