@@ -38,10 +38,10 @@ const legacyColas = structuredClone(productColas);
 const effectivePiales = resolveEffectiveRules({ suerte: productPiales, profile: FMCH_2026_LIBRE_PROFILE });
 const effectiveColas = resolveEffectiveRules({ suerte: productColas, profile: FMCH_2026_LIBRE_PROFILE });
 
-assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.4.0");
+assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.5.0");
 assert.equal(FMCH_2026_LIBRE_PROFILE.status, "draft");
 assert.equal(FMCH_2026_LIBRE_PROFILE.metadata.activationReady, false);
-assert.deepEqual(FMCH_2026_LIBRE_PROFILE.metadata.loadedSuerteIds, ["cala", "piales", "colas", "toro", "yegua"]);
+assert.deepEqual(FMCH_2026_LIBRE_PROFILE.metadata.loadedSuerteIds, ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua"]);
 assert.equal(FMCH_2026_PIALES_RULEBOOK_VERSION, "fmch_2026_piales_0.3.0");
 assert.equal(FMCH_2026_COLEADERO_RULEBOOK_VERSION, "fmch_2026_coleadero_0.3.0");
 
@@ -190,7 +190,7 @@ const officialColas = buildOfficialScoringAttemptSnapshot(colasDq, {
   source: "official-score-publication"
 });
 assert.equal(officialColas.publication.frozen, true);
-assert.equal(officialColas.context.ruleProfileVersion, "0.4.0");
+assert.equal(officialColas.context.ruleProfileVersion, "0.5.0");
 assert.throws(() => { officialColas.scoring.netAttemptPoints = 999; }, TypeError);
 
 assert.deepEqual(productPiales, legacyPiales, "Product Base Piales remains physically intact for legacy reads");
@@ -216,7 +216,7 @@ assert.match(appSource, /buildPialesRemateHistory\(getAttemptsForContext\(contex
 assert.match(appSource, /getColeadorDisplayName\(context, index\)/);
 assert.match(appSource, /suppressGenericIcon/);
 assert.match(appSource, /hasConditionalBaseRules/);
-assert.match(appSource, /publishOfficialScoreForContext\(context\)/);
+assert.match(appSource, /publishOfficialScoreForContext\(publicationContext,\s*\{/);
 assert.match(cssSource, /\.cp-piales-distance/);
 assert.match(cssSource, /\.cp-official-fall-diagram/);
 assert.match(fixtureSource, /http:\/\/127\.0\.0\.1:9000/);

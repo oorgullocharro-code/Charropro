@@ -123,13 +123,13 @@ import {
   createOutputSynchronization,
   startOutputSynchronization,
   synchronizeProgramMain
-} from "../js/broadcast/outputSynchronization.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "../js/broadcast/outputSynchronization.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";

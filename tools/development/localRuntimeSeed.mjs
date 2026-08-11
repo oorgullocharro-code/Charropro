@@ -79,9 +79,9 @@ export function createLocalRuntimeSeedFixture(now = "2026-08-01T00:00:00.000Z") 
     }
   };
   const teams = [
-    { id: "demo-local-equipo-a", name: "Charros Demo del Norte", association: "Asociacion Local A", category: "Libre", roster: { piales: "Pialador Demo Norte", colas: ["Alberto Demo", "Bernardo Demo", "Carlos Demo"], integrantes: [{ name: "Charro Uno", horseName: "Relampago Local" }] } },
-    { id: "demo-local-equipo-b", name: "Rancheros de Ensayo", association: "Asociacion Local B", category: "Libre", roster: { piales: "Pialador de Ensayo", colas: ["Diego Ensayo", "Esteban Ensayo", "Felipe Ensayo"], integrantes: [{ name: "Charro Dos", horseName: "Centella Local" }] } },
-    { id: "demo-local-equipo-c", name: "Tradicion Ficticia", association: "Asociacion Local C", category: "Libre", roster: { piales: "Pialador Tradicion", colas: ["Gustavo Local", "Hector Local", "Ignacio Local"], integrantes: [{ name: "Charro Tres", horseName: "Lucero Local" }] } }
+    { id: "demo-local-equipo-a", name: "Charros Demo del Norte", association: "Asociacion Local A", category: "Libre", roster: { piales: "Pialador Demo Norte", colas: ["Alberto Demo", "Bernardo Demo", "Carlos Demo"], lazo: "Cabecero Demo Norte", pial_ruedo: "Pialador Ruedo Norte", terna: ["Cabecero Demo Norte", "Pialador Ruedo Norte", "Auxiliar Demo Norte"], integrantes: [{ name: "Charro Uno", horseName: "Relampago Local" }] } },
+    { id: "demo-local-equipo-b", name: "Rancheros de Ensayo", association: "Asociacion Local B", category: "Libre", roster: { piales: "Pialador de Ensayo", colas: ["Diego Ensayo", "Esteban Ensayo", "Felipe Ensayo"], lazo: "Cabecero de Ensayo", pial_ruedo: "Pialador Ruedo Ensayo", terna: ["Cabecero de Ensayo", "Pialador Ruedo Ensayo", "Auxiliar de Ensayo"], integrantes: [{ name: "Charro Dos", horseName: "Centella Local" }] } },
+    { id: "demo-local-equipo-c", name: "Tradicion Ficticia", association: "Asociacion Local C", category: "Libre", roster: { piales: "Pialador Tradicion", colas: ["Gustavo Local", "Hector Local", "Ignacio Local"], lazo: "Cabecero Tradicion", pial_ruedo: "Pialador Ruedo Tradicion", terna: ["Cabecero Tradicion", "Pialador Ruedo Tradicion", "Auxiliar Tradicion"], integrantes: [{ name: "Charro Tres", horseName: "Lucero Local" }] } }
   ].map((team) => ({ ...team, tournamentId: tournament.id, demo: true }));
   const charreada = {
     id: LOCAL_RUNTIME_CHARREADA_ID,

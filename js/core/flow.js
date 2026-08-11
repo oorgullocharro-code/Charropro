@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./state.js?v=20260810-fmch-2026-terna-complete-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;
@@ -29,6 +29,37 @@ export function advanceScoringPointer() {
 
   saveState({ silent: true });
   return { finished: state.view !== "scoring" };
+}
+
+export function advanceAfterCompletedTernaSession() {
+  const suertes = getActiveTournamentSuertes();
+  const teamCount = getActiveScoringEntryCount();
+  const currentTeamIndex = Number(state.scoringTeamIdx || 0);
+  const toroIndex = suertes.findIndex((suerte) => suerte.id === "toro");
+  const lazoIndex = suertes.findIndex((suerte) => suerte.id === "lazo");
+  const pialIndex = suertes.findIndex((suerte) => suerte.id === "pial_ruedo");
+
+  if (currentTeamIndex < teamCount - 1) {
+    state.scoringTeamIdx = currentTeamIndex + 1;
+    state.scoringSuerteIdx = toroIndex >= 0 ? toroIndex : lazoIndex >= 0 ? lazoIndex : pialIndex;
+    state.scoringAttemptIdx = 0;
+    state.scoringColeadorIdx = 0;
+    saveState({ silent: true });
+    return { finished: false, nextTeam: true };
+  }
+
+  const groupEnd = Math.max(toroIndex, lazoIndex, pialIndex);
+  const nextSuerteIndex = suertes.findIndex((suerte, index) => index > groupEnd && suerte);
+  state.scoringTeamIdx = 0;
+  state.scoringAttemptIdx = 0;
+  state.scoringColeadorIdx = 0;
+  if (nextSuerteIndex >= 0) {
+    state.scoringSuerteIdx = nextSuerteIndex;
+  } else {
+    state.view = "results";
+  }
+  saveState({ silent: true });
+  return { finished: state.view !== "scoring", nextTeam: false };
 }
 
 export function previousScoringPointer() {

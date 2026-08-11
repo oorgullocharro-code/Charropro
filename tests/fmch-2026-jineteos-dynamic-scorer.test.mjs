@@ -35,10 +35,10 @@ const legacyYegua = structuredClone(productYegua);
 const effectiveToro = resolveEffectiveRules({ suerte: productToro, profile: FMCH_2026_LIBRE_PROFILE });
 const effectiveYegua = resolveEffectiveRules({ suerte: productYegua, profile: FMCH_2026_LIBRE_PROFILE });
 
-assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.4.0");
+assert.equal(FMCH_2026_LIBRE_PROFILE.version, "0.5.0");
 assert.equal(FMCH_2026_LIBRE_PROFILE.status, "draft");
 assert.equal(FMCH_2026_LIBRE_PROFILE.metadata.activationReady, false);
-assert.deepEqual(FMCH_2026_LIBRE_PROFILE.metadata.loadedSuerteIds, ["cala", "piales", "colas", "toro", "yegua"]);
+assert.deepEqual(FMCH_2026_LIBRE_PROFILE.metadata.loadedSuerteIds, ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua"]);
 assert.equal(validateRuleProfile(FMCH_2026_LIBRE_PROFILE).valid, true);
 const completeTournamentRules = resolveTournamentRules({
   id: "tournament_fmch_2026",
@@ -235,7 +235,7 @@ const official = buildOfficialScoringAttemptSnapshot(toroDq, {
   source: "official-score-publication"
 });
 assert.equal(official.publication.frozen, true);
-assert.equal(official.context.ruleProfileVersion, "0.4.0");
+assert.equal(official.context.ruleProfileVersion, "0.5.0");
 assert.equal(official.scoring.additionalSelections[0].selectedRuleId, "toro_adic_tentemozo");
 assert.equal(official.scoring.additionalSelections[0].resolvedValue, 1);
 assert.throws(() => { official.scoring.netAttemptPoints = 999; }, TypeError);
@@ -247,7 +247,7 @@ const officialYegua = buildOfficialScoringAttemptSnapshot(yeguaDq, {
   source: "official-score-publication"
 });
 assert.equal(officialYegua.publication.frozen, true);
-assert.equal(officialYegua.context.ruleProfileVersion, "0.4.0");
+assert.equal(officialYegua.context.ruleProfileVersion, "0.5.0");
 assert.equal(officialYegua.scoring.additionalSelections[0].selectedRuleId, "yegua_adic_cara_atras");
 assert.equal(officialYegua.scoring.additionalSelections[0].resolvedValue, 0);
 assert.throws(() => { officialYegua.teamInfractions[0].resolvedValue = 999; }, TypeError);

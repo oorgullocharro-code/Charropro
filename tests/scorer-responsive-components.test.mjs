@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260808-fmch-2026-jineteos-dynamic-001-v1";
+const RELEASE_ID = "20260810-fmch-2026-terna-complete-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({
@@ -253,7 +253,7 @@ assert.match(appSource, /data-action="next-score"[\s\S]{0,260}Guardar y siguient
 assert.match(appSource, /data-action="show-scoring-button-settings"[\s\S]{0,220}Ajustar botonera/);
 assert.doesNotMatch(appSource, /Pendiente a revisi[oó]n/i);
 assert.match(appSource, /function previousScore\(\)[\s\S]*?stopTimer\(true\)[\s\S]*?previousScoringPointer/);
-assert.match(appSource, /async function nextScore\(\)[\s\S]*?publishOfficialScoreForContext\(context\)[\s\S]*?continueOfficialScoreFlowAfterPublish/);
+assert.match(appSource, /async function nextScore\(\)[\s\S]*?publishOfficialScoreForContext\(publicationContext,\s*\{[\s\S]*?continueOfficialScoreFlowAfterPublish/);
 assert.match(cssSource, /--scorer-touch-target:\s*56px/);
 assert.match(cssSource, /position:\s*sticky;[\s\S]{0,80}bottom:\s*0/);
 assert.match(cssSource, /repeat\(auto-fit,\s*minmax\(min\(100%,\s*var\(--scorer-rule-min\)\),\s*1fr\)\)/);

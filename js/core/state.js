@@ -1,7 +1,17 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
+import {
+  buildFmch2026TernaSessionId,
+  createFmch2026TernaSession,
+  isFmch2026TernaSuerte,
+  normalizeFmch2026TernaSession
+} from "../data/fmch2026TernaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import {
+  createOfficialTimerContext,
+  normalizeOfficialTimerContext
+} from "./timerRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
@@ -43,6 +53,10 @@ export const emptyAttempt = () => ({
   resolvedRuleValues: {},
   dynamicScoring: null,
   timing: null,
+  sharedOpportunityId: null,
+  sharedSequenceNumber: null,
+  sharedTimerId: null,
+  opportunityType: null,
   timeEvidence: [],
   autoDescRuleId: null,
   tiempo: "",
@@ -75,6 +89,8 @@ const createInitialState = () => ({
     elapsedMs: 0,
     updatedAt: null
   },
+  officialTimers: {},
+  ternaSessions: {},
   lastPublishedScore: null,
   tournaments: [],
   teams: [],
@@ -299,6 +315,12 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
   const statHistorySnapshots = (source.statHistorySnapshots || []).filter((record) => {
     return (record?.tournament?.id || record?.tournamentId || "") === cleanTournamentId;
   });
+  const ternaSessions = Object.fromEntries(
+    Object.entries(source.ternaSessions || {}).filter(([, session]) => session?.tournamentId === cleanTournamentId)
+  );
+  const officialTimers = Object.fromEntries(
+    Object.entries(source.officialTimers || {}).filter(([, timer]) => timer?.tournamentId === cleanTournamentId)
+  );
   const activeCharreadaId = charreadaIds.has(source.activeCharreadaId) ? source.activeCharreadaId : charreadas[0]?.id || null;
 
   return {
@@ -312,6 +334,8 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
     scores,
     publishedScores,
     statHistorySnapshots,
+    ternaSessions,
+    officialTimers,
     lastPublishedScore: publishedScores.find((record) => record.id === source.lastPublishedScore?.id) || null,
     settings: {
       ...createInitialState().settings,
@@ -884,8 +908,7 @@ export function ensureScoresForCharreada(charreadaId) {
   scoringEntries.forEach((entry) => {
     suertes.forEach((suerte) => {
       const key = scoreKey(charreadaId, entry.id, suerte.id);
-      if (state.scores[key]) return;
-      state.scores[key] = createScoreCollection(suerte);
+      state.scores[key] = normalizeScoreCollectionForSuerte(state.scores[key], suerte);
     });
   });
 
@@ -900,6 +923,77 @@ export function createScoreCollection(suerte) {
   }
 
   return Array.from({ length: suerte.attempts }, () => emptyAttempt());
+}
+
+export function normalizeScoreCollectionForSuerte(collection, suerte = {}) {
+  const attempts = Math.max(1, Number(suerte.attempts || 1));
+  if (suerte.type === "coleadero") {
+    const rows = Array.isArray(collection) ? collection.slice() : [];
+    while (rows.length < 3) rows.push([]);
+    return rows.map((row) => {
+      const normalized = Array.isArray(row) ? row.slice() : [];
+      while (normalized.length < attempts) normalized.push(emptyAttempt());
+      return normalized;
+    });
+  }
+  const normalized = Array.isArray(collection) ? collection.slice() : [];
+  while (normalized.length < attempts) normalized.push(emptyAttempt());
+  return normalized;
+}
+
+export function getTernaSessionIdentity(context = getCurrentContext()) {
+  if (!context?.charreada?.id || !context?.team?.id) return null;
+  return {
+    tournamentId: context.tournament?.id || context.charreada.tournamentId || state.activeTournamentId || "",
+    competitionId: context.charreada.competitionId || context.competitionContext?.competitionId || "equipos_completo",
+    charreadaId: context.charreada.id,
+    teamId: context.team.id
+  };
+}
+
+export function getOrCreateTernaSession(context = getCurrentContext()) {
+  if (!isFmch2026TernaSuerte(context?.suerte?.id)) return null;
+  const identity = getTernaSessionIdentity(context);
+  const ternaSessionId = buildFmch2026TernaSessionId(identity || {});
+  if (!ternaSessionId) return null;
+  if (!state.ternaSessions || typeof state.ternaSessions !== "object") state.ternaSessions = {};
+  const existing = state.ternaSessions[ternaSessionId];
+  const session = existing
+    ? normalizeFmch2026TernaSession(existing, identity)
+    : createFmch2026TernaSession(identity);
+  state.ternaSessions[ternaSessionId] = session;
+  return session;
+}
+
+export function setTernaSession(session = {}) {
+  const normalized = normalizeFmch2026TernaSession(session, session);
+  if (!state.ternaSessions || typeof state.ternaSessions !== "object") state.ternaSessions = {};
+  state.ternaSessions[normalized.ternaSessionId] = normalized;
+  return normalized;
+}
+
+export function getOrCreateOfficialTimer(timerId, definition = {}) {
+  if (!timerId) return null;
+  if (!state.officialTimers || typeof state.officialTimers !== "object") state.officialTimers = {};
+  const existing = state.officialTimers[timerId];
+  const timer = existing
+    ? normalizeOfficialTimerContext(existing, { ...definition, timerId })
+    : createOfficialTimerContext({ ...definition, timerId });
+  state.officialTimers[timerId] = {
+    ...timer,
+    tournamentId: definition.tournamentId || timer.tournamentId || state.activeTournamentId || "",
+    competitionId: definition.competitionId || timer.competitionId || "",
+    charreadaId: definition.charreadaId || timer.charreadaId || "",
+    teamId: definition.teamId || timer.teamId || ""
+  };
+  return state.officialTimers[timerId];
+}
+
+export function setOfficialTimer(timer = {}) {
+  const normalized = normalizeOfficialTimerContext(timer);
+  if (!state.officialTimers || typeof state.officialTimers !== "object") state.officialTimers = {};
+  state.officialTimers[normalized.timerId] = { ...timer, ...normalized };
+  return state.officialTimers[normalized.timerId];
 }
 
 export function scoreKey(charreadaId, teamId, suerteId) {
@@ -919,7 +1013,7 @@ export function getCurrentAttempt() {
   const suerte = suertes[state.scoringSuerteIdx];
   if (!suerte || !entry) return null;
   const key = scoreKey(charreada.id, entry.id, suerte.id);
-  const collection = state.scores[key] || createScoreCollection(suerte);
+  const collection = normalizeScoreCollectionForSuerte(state.scores[key], suerte);
   state.scores[key] = collection;
 
   if (suerte.type === "coleadero") {

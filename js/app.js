@@ -1,4 +1,4 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260801-official-score-concurrency-001-v1";
 import {
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./data/calaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,15 +35,34 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import {
+  FMCH_2026_TERNA_DURATION_MS,
+  FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
+  FMCH_2026_TERNA_RULEBOOK_VERSION,
+  applyFmch2026TernaTimeAdditional,
+  buildFmch2026TernaOfficialAttempt,
+  buildFmch2026TernaOpportunityDraft,
+  commitFmch2026TernaOpportunity,
+  isFmch2026TernaSuerte,
+  reserveFmch2026TernaOpportunity,
+  shouldDisqualifyRepeatedFmch2026TernaRemate,
+  resolveFmch2026TernaTimeAdditional
+} from "./data/fmch2026TernaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
-import { advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
-import { formatTimerMs, getTimerScopeKey, getTimerView } from "./core/timerRules.js?v=20260708-recovery-001b-panel-status1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import {
+  applyOfficialTimerCommand,
+  formatTimerMs,
+  getOfficialTimerContextView,
+  getTimerScopeKey,
+  getTimerView
+} from "./core/timerRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -55,16 +74,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./core/scoring.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./core/scoringAttempt.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./core/scorerComponents.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -74,7 +93,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./core/sync.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
@@ -109,7 +128,7 @@ import {
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob
-} from "./core/firebaseSync.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./core/firebaseSync.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -140,6 +159,8 @@ import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getCurrentContext,
+  getOrCreateOfficialTimer,
+  getOrCreateTernaSession,
   getLatestStatHistorySnapshot,
   getTeam,
   getTournamentCharreadas,
@@ -153,12 +174,14 @@ import {
   scoreKey,
   setActiveTournament,
   setGlobalRuleOverrides,
+  setOfficialTimer,
+  setTernaSession,
   setView,
   LIVE_TIMER_KEY,
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./core/state.js?v=20260810-fmch-2026-terna-complete-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -329,6 +352,8 @@ const ACTION_CAPABILITIES = {
   "select-team": "score",
   "select-attempt": "score",
   "select-coleador": "score",
+  "select-terna-suerte": "score",
+  "select-terna-history": "score",
   "punta-step": "score",
   "punta-set": "score",
   "punta-input": "score",
@@ -355,6 +380,10 @@ const ACTION_CAPABILITIES = {
   "take-live-control": "supervise",
   "timer-toggle": "timer",
   "timer-reset": "timer",
+  "terna-timer-start": "timer",
+  "terna-timer-pause": "timer",
+  "terna-timer-resume": "timer",
+  "terna-timer-finish": "timer",
   "show-scoring-button-settings": "settings",
   "save-scoring-button-layout": "settings",
   "reset-scoring-button-layout": "settings",
@@ -621,6 +650,7 @@ let timerRunning = false;
 let timerStartedAt = 0;
 let timerElapsedMs = 0;
 let timerInterval = null;
+let ternaTimerInterval = null;
 let lastTimerSyncAt = 0;
 let lastExternalTimerAt = 0;
 let firebaseTimerUnsubscribe = null;
@@ -7848,41 +7878,68 @@ function renderScoring({ preserveScroll = false } = {}) {
     </div>
   `;
   updateTimerDisplay();
+  ensureTernaTimerTicker(context);
   restoreScoringScroll(scrollSnapshot);
 }
 
 function buildScoringAttemptUiModel(context) {
+  const ternaRuntime = getTernaRuntime(context);
   const attemptV2 = adaptLegacyAttemptToV2(
     context.attempt,
     buildScoringAttemptV2Context(context),
     { pointSummary: calculateAttemptPointSummary(context.attempt) }
   );
   return buildScorerAttemptViewModel(attemptV2, {
-    opportunityTotal: context.suerte.attempts,
-    timers: [{
-      timerId: `scorer_${context.suerte.id}`,
-      label: getTimerLabel(),
-      display: formatTimer(),
-      status: timerRunning ? "corriendo" : "control externo",
-      primary: true
-    }],
-    sharedTimer: context.attempt.sharedTimerId
-      ? {
-          sharedTimerId: context.attempt.sharedTimerId,
-          label: "Cronometro compartido",
+    opportunityTotal: ternaRuntime ? FMCH_2026_TERNA_OPPORTUNITY_LIMIT : context.suerte.attempts,
+    timers: ternaRuntime
+      ? [{
+          timerId: ternaRuntime.timer.timerId,
+          label: "Terna",
+          display: ternaRuntime.view.formattedRemaining,
+          status: ternaRuntime.view.status,
+          primary: true,
+          kind: "terna"
+        }]
+      : [{
+          timerId: `scorer_${context.suerte.id}`,
+          label: getTimerLabel(),
           display: formatTimer(),
-          status: timerRunning ? "corriendo" : "referencia"
-        }
-      : null,
-    remateHistory: context.suerte.id === "piales"
-      ? buildPialesRemateHistory(getAttemptsForContext(context))
-      : context.attempt.remateHistory,
+          status: timerRunning ? "corriendo" : "control externo",
+          primary: true
+        }],
+    sharedTimer: null,
+    remateHistory: ternaRuntime
+      ? (ternaRuntime.session.remateHistory?.[context.suerte.id === "lazo" ? "HEAD" : "PIAL"] || []).map((item) => ({
+          id: item.remateId,
+          label: item.remateLabel,
+          value: item.sharedSequenceNumber,
+          status: `Oportunidad ${item.sharedSequenceNumber}`
+        }))
+      : context.suerte.id === "piales"
+        ? buildPialesRemateHistory(getAttemptsForContext(context))
+        : context.attempt.remateHistory,
     specializedCalculator: context.suerte.id === "cala"
       ? { id: "cala_punta", label: "Calculador de punta", active: true }
       : context.suerte.id === "piales"
         ? { id: "piales_distancia", label: "Distancia adicional", active: true }
         : null
   });
+}
+
+function getTernaRuntime(context = getCurrentContext()) {
+  if (!isFmch2026TernaSuerte(context?.suerte?.id)) return null;
+  const session = getOrCreateTernaSession(context);
+  if (!session) return null;
+  const timer = getOrCreateOfficialTimer(session.sharedTimerId, {
+    contextType: "terna",
+    durationMs: FMCH_2026_TERNA_DURATION_MS,
+    source: "scorer",
+    tournamentId: session.tournamentId,
+    competitionId: session.competitionId,
+    charreadaId: session.charreadaId,
+    teamId: session.teamId
+  });
+  return { session, timer, view: getOfficialTimerContextView(timer) };
 }
 
 function buildScoringAttemptV2Context(context, attempt = context.attempt) {
@@ -7921,7 +7978,7 @@ function renderScoringMainPanel(charreada, context, charroName) {
   if (context.suerte.type === "coleadero" || context.suerte.id === "colas") return renderColeaderoMainPanel(context);
   if (["piales", "manganas_pie", "manganas_caballo"].includes(context.suerte.id)) return renderAttemptMainPanel(context);
   if (["toro", "yegua"].includes(context.suerte.id)) return renderJineteoMainPanel(context);
-  if (context.suerte.id === "terna") return renderTernaMainPanel(context);
+  if (isFmch2026TernaSuerte(context.suerte.id) || context.suerte.id === "terna") return renderTernaMainPanel(context);
   if (context.suerte.id === "paso") return renderPasoMainPanel(context);
   return renderGenericMainPanel(charreada, context, charroName);
 }
@@ -7996,6 +8053,8 @@ function renderClassicTurnPanel(charreada, context, labels, showColeadorSelector
 }
 
 function renderScoringOpportunityBar(context, charroName, showColeadorSelector, attemptView) {
+  const ternaRuntime = getTernaRuntime(context);
+  if (ternaRuntime) return renderTernaOpportunityBar(context, charroName, ternaRuntime);
   const opportunity = attemptView.opportunity;
   return html`
     <section class="scoring-opportunity-bar">
@@ -8027,6 +8086,40 @@ function renderScoringOpportunityBar(context, charroName, showColeadorSelector, 
         <span>Charro</span>
         <strong>${escapeHTML(charroName || "Sin registrar")}</strong>
         <em>${escapeHTML(getEntryDisplayName(context.team))}</em>
+      </div>
+    </section>
+  `;
+}
+
+function renderTernaOpportunityBar(context, charroName, runtime) {
+  const used = runtime.session.history.length;
+  const current = runtime.session.currentOpportunity;
+  return html`
+    <section class="scoring-opportunity-bar cp-terna-opportunity-bar" data-terna-session="${escapeHTML(runtime.session.ternaSessionId)}">
+      <div class="opportunity-summary">
+        <span>Oportunidades compartidas</span>
+        <strong>${used}/${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</strong>
+        <em>${current ? `Actual ${current}` : "Sin oportunidades disponibles"}</em>
+      </div>
+      <div class="opportunity-controls cp-terna-opportunities" aria-label="Cinco oportunidades compartidas de Terna">
+        ${runtime.session.opportunities.map((opportunity) => {
+          const isUsed = opportunity.status === "CONSUMED";
+          const isCurrent = opportunity.sharedSequenceNumber === current;
+          const label = isUsed ? "Usada" : isCurrent ? "Actual" : "Disponible";
+          return html`
+            <button
+              type="button"
+              class="${isUsed ? "used" : ""} ${isCurrent ? "active" : ""}"
+              aria-label="Oportunidad ${opportunity.sharedSequenceNumber}: ${label}"
+              ${isUsed ? `data-action="select-terna-history" data-sequence="${opportunity.sharedSequenceNumber}"` : "disabled"}
+            >${opportunity.sharedSequenceNumber} · ${label}</button>
+          `;
+        }).join("")}
+      </div>
+      <div class="opportunity-summary">
+        <span>Charro</span>
+        <strong>${escapeHTML(charroName || "Sin registrar")}</strong>
+        <em>${escapeHTML(context.suerte.id === "lazo" ? "Lazo Cabecero" : "Pial en el Ruedo")}</em>
       </div>
     </section>
   `;
@@ -8252,15 +8345,86 @@ function renderJineteoMainPanel(context) {
 }
 
 function renderTernaMainPanel(context) {
+  const runtime = getTernaRuntime(context);
+  if (!runtime) return "";
+  const timer = runtime.view;
+  const session = runtime.session;
+  const currentType = context.suerte.id === "lazo" ? "HEAD" : "PIAL";
+  const history = session.history;
   return html`
-    <section class="cp-scoring-card cp-main-suerte-panel">
+    <section class="cp-scoring-card cp-main-suerte-panel cp-terna-panel" data-terna-status="${escapeHTML(session.status)}">
       <header>
         <div>
           <span>${renderCpIcon("rope")}</span>
-          <h2>Calificador de terna en el ruedo</h2>
+          <h2>Terna en el Ruedo</h2>
         </div>
-        <p>Evalua lazo de cabeza, pial de ruedo y tiempo. Las acciones oficiales estan abajo.</p>
+        <p>${escapeHTML(currentType === "HEAD" ? "Pantalla independiente de Lazo Cabecero" : "Pantalla independiente de Pial en el Ruedo")}</p>
       </header>
+      <div class="cp-terna-switch" role="group" aria-label="Cambiar score de Terna">
+        <button class="button ${currentType === "HEAD" ? "primary" : ""}" data-action="select-terna-suerte" data-id="lazo" type="button">Lazo Cabecero</button>
+        <button class="button ${currentType === "PIAL" ? "primary" : ""}" data-action="select-terna-suerte" data-id="pial_ruedo" type="button">Pial en el Ruedo</button>
+      </div>
+      <div class="cp-terna-dashboard">
+        <article class="cp-terna-timer ${timer.paused ? "paused" : ""}">
+          <span>Tiempo oficial de Terna</span>
+          <strong class="terna-timer-display" data-terna-timer-id="${escapeHTML(timer.timerId)}">${escapeHTML(timer.formattedRemaining)}</strong>
+          <em>${escapeHTML(timer.status)}${timer.pauseReason ? ` · ${timer.pauseReason}` : ""}</em>
+          <small>Tiempo real ${escapeHTML(formatTimerMs(timer.wallElapsedMs))} · oficial ${escapeHTML(formatTimerMs(timer.officialElapsedMs))}</small>
+        </article>
+        <article class="cp-terna-counter">
+          <span>Oportunidades compartidas</span>
+          <strong>${history.length}/${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</strong>
+          <em>${session.currentOpportunity ? `Actual ${session.currentOpportunity}` : "Cupo agotado"}</em>
+        </article>
+        <article class="cp-terna-counted">
+          <span>Lazos de cuenta</span>
+          <strong>${session.headCounted ? "Cabecero listo" : "Cabecero pendiente"}</strong>
+          <em>${session.pialCounted ? "Pial listo" : "Pial pendiente"}</em>
+        </article>
+      </div>
+      <div class="cp-terna-timer-controls">
+        ${timer.status === "READY" ? html`<button class="button primary" data-action="terna-timer-start" type="button">Iniciar Terna</button>` : ""}
+        ${timer.status === "RUNNING" ? html`<button class="button amber" data-action="terna-timer-pause" type="button">Pausar</button>` : ""}
+        ${timer.status === "PAUSED" ? html`<button class="button primary" data-action="terna-timer-resume" type="button">Reanudar</button>` : ""}
+        ${timer.status !== "FINISHED" ? html`<button class="button" data-action="terna-timer-finish" type="button">Finalizar</button>` : ""}
+        <label>
+          <span>Motivo de pausa</span>
+          <select id="terna-pause-reason">
+            <option value="Limpieza de ruedo">Limpieza de ruedo</option>
+            <option value="Recoger sombreros o equipo">Recoger sombreros o equipo</option>
+            <option value="Indicación de jueces">Indicación de jueces</option>
+            <option value="Ganado">Ganado</option>
+            <option value="Reposición">Reposición</option>
+            <option value="Otro motivo autorizado">Otro motivo autorizado</option>
+          </select>
+        </label>
+      </div>
+      ${session.timeAdditional.applied
+        ? html`<p class="cp-terna-time-additional" data-publication-status="${escapeHTML(session.timeAdditional.publicationStatus || "NOT_REQUIRED")}">Tiempo no utilizado: +${session.timeAdditional.pointsPerLazador} a cada lazador (${session.timeAdditional.completeUnusedMinutes} minuto(s) completo(s)). Publicación: ${escapeHTML(getTernaTimeAdditionalPublicationLabel(session.timeAdditional.publicationStatus))}.</p>`
+        : ""}
+      <section class="cp-terna-history" aria-labelledby="terna-history-title">
+        <header>
+          <div>
+            <span>Historial compartido</span>
+            <h3 id="terna-history-title">Secuencia oficial</h3>
+          </div>
+        </header>
+        ${history.length
+          ? html`<ol>${history.map((entry) => html`
+              <li>
+                <span>${entry.sharedSequenceNumber}</span>
+                <div>
+                  <strong>${escapeHTML(entry.type === "HEAD" ? "Cabecero" : "Pial")}</strong>
+                  <em>${escapeHTML(entry.participantName || "Sin nombre")}</em>
+                </div>
+                <div>
+                  <strong>${escapeHTML(entry.result || "ATTEMPTED")}</strong>
+                  <em>${escapeHTML(entry.remateLabel || "Sin remate registrado")}</em>
+                </div>
+              </li>
+            `).join("")}</ol>`
+          : html`<p class="cp-terna-empty">Todavía no hay oportunidades consumidas.</p>`}
+      </section>
     </section>
   `;
 }
@@ -8456,6 +8620,8 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
     : Number(rule.pts || 0);
   const classificationRequired = rule.metadata?.requiresClassification === true && !classificationId;
   const additionalBlocked = ruleType === "adic" && isAttemptAdditionalBlocked(context);
+  const firstOpportunityBlocked = rule.metadata?.firstOpportunityOnly === true
+    && Number(getTernaRuntime(context)?.session?.currentOpportunity || context.attemptIndex + 1) !== 1;
   return {
     id: `rule__${ruleType}__${rule.id}`,
     ruleId: rule.id,
@@ -8467,10 +8633,12 @@ function makeRuleScoringButton(rule, ruleType, visualType, group, order, context
     category: rule.category || ruleType,
     valueByClassification: rule.valueByClassification || null,
     classificationId,
-    disabled: rule.disabled === true || additionalBlocked || classificationRequired,
+    disabled: rule.disabled === true || additionalBlocked || classificationRequired || firstOpportunityBlocked,
     disabledReason: additionalBlocked
       ? "La base seleccionada no recibe adicionales"
-      : classificationRequired ? "Selecciona una clasificación" : rule.disabledReason || "",
+      : classificationRequired
+        ? "Selecciona una clasificación"
+        : firstOpportunityBlocked ? "Solo corresponde a la primera oportunidad compartida" : rule.disabledReason || "",
     type: visualType,
     icon: isInfr ? "warning" : ruleType === "base" ? "target" : "plus",
     suppressGenericIcon: rule.metadata?.suppressGenericIcon === true,
@@ -8623,7 +8791,7 @@ function renderScoringTimerGroup(attemptView) {
       ${attemptView.timers.map((timer) => html`
         <section class="header-timer read-only cp-timer-tile ${timer.primary ? "primary" : ""}">
           <span>${escapeHTML(timer.label)}</span>
-          <strong class="timer-display">${escapeHTML(timer.display)}</strong>
+          <strong class="${String(timer.timerId || "").startsWith("terna:") ? "terna-timer-display" : "timer-display"}" data-terna-timer-id="${escapeHTML(timer.timerId || "")}">${escapeHTML(timer.display)}</strong>
           <em>${escapeHTML(timer.warning || timer.status)}</em>
         </section>
       `).join("")}
@@ -9568,21 +9736,28 @@ function captureTimeEvidence() {
   if (!guardUnlockedCharreada()) return;
   const context = getCurrentContext();
   if (!context?.attempt) return;
-  const timerView = getTimerView(
-    {
-      running: timerRunning,
-      startedAt: timerRunning ? timerStartedAt : null,
-      elapsedMs: timerElapsedMs
-    },
-    getTimerSource()
-  );
+  const ternaRuntime = getTernaRuntime(context);
+  const timerView = ternaRuntime
+    ? {
+        displayMs: ternaRuntime.view.remainingMs,
+        formatted: ternaRuntime.view.formattedRemaining,
+        running: ternaRuntime.view.running
+      }
+    : getTimerView(
+        {
+          running: timerRunning,
+          startedAt: timerRunning ? timerStartedAt : null,
+          elapsedMs: timerElapsedMs
+        },
+        getTimerSource()
+      );
   pendingTimeEvidenceCapture = {
     id: uid("tiempo"),
     timeMs: Number(timerView.displayMs || 0),
     timeText: timerView.formatted || formatTimerMs(timerView.displayMs || 0),
     capturedAt: new Date().toISOString(),
-    timerRunning: Boolean(timerRunning),
-    source: "calificador-manual"
+    timerRunning: ternaRuntime ? Boolean(ternaRuntime.view.running) : Boolean(timerRunning),
+    source: ternaRuntime ? "terna-official-timer" : "calificador-manual"
   };
 
   showModal({
@@ -10177,22 +10352,10 @@ function handleAction(action, target) {
         render();
       }
     },
-    "select-suerte": () => {
-      stopTimer(true);
-      state.scoringSuerteIdx = Number(target.dataset.index);
-      state.scoringAttemptIdx = 0;
-      state.scoringColeadorIdx = 0;
-      saveScoringNavigationDraft();
-      render();
-    },
-    "select-team": () => {
-      stopTimer(true);
-      state.scoringTeamIdx = Number(target.dataset.index);
-      state.scoringAttemptIdx = 0;
-      state.scoringColeadorIdx = 0;
-      saveScoringNavigationDraft();
-      render();
-    },
+    "select-suerte": () => selectScoringSuerte(Number(target.dataset.index)),
+    "select-terna-suerte": () => selectTernaSuerte(target.dataset.id),
+    "select-terna-history": () => selectTernaHistory(target),
+    "select-team": () => selectScoringTeam(Number(target.dataset.index)),
     "select-attempt": () => {
       stopTimer(true);
       state.scoringAttemptIdx = Number(target.dataset.index);
@@ -10229,6 +10392,10 @@ function handleAction(action, target) {
     "next-score": nextScore,
     "timer-toggle": toggleTimer,
     "timer-reset": () => stopTimer(true),
+    "terna-timer-start": () => applyTernaTimerCommand("START"),
+    "terna-timer-pause": () => applyTernaTimerCommand("PAUSE", document.getElementById("terna-pause-reason")?.value || "Pausa autorizada"),
+    "terna-timer-resume": () => applyTernaTimerCommand("RESUME"),
+    "terna-timer-finish": () => applyTernaTimerCommand("FINISH"),
     "show-scoring-button-settings": showScoringButtonSettingsModal,
     "save-scoring-button-layout": () => saveScoringButtonLayout(target.dataset.scope),
     "reset-scoring-button-layout": () => resetScoringButtonLayout(target.dataset.scope),
@@ -10265,6 +10432,62 @@ function handleAction(action, target) {
   };
 
   handlers[action]?.();
+}
+
+function selectScoringSuerte(index) {
+  const current = getCurrentContext();
+  const suertes = getCharreadaScoringSuertes(getActiveCharreada(), getActiveTournament(), state.settings.globalRuleOverrides);
+  const targetSuerte = suertes[index];
+  if (!targetSuerte) return;
+  const preservesParallelTimer = isFmch2026TernaSuerte(current?.suerte?.id) || isFmch2026TernaSuerte(targetSuerte.id);
+  if (!preservesParallelTimer) stopTimer(true);
+  state.scoringSuerteIdx = index;
+  state.scoringAttemptIdx = 0;
+  state.scoringColeadorIdx = 0;
+  if (isFmch2026TernaSuerte(targetSuerte.id) && current) {
+    const session = getOrCreateTernaSession({ ...current, suerte: targetSuerte });
+    state.scoringAttemptIdx = Math.max(0, Number(session?.currentOpportunity || 1) - 1);
+  }
+  saveScoringNavigationDraft();
+  render();
+}
+
+function selectTernaSuerte(suerteId) {
+  const suertes = getCharreadaScoringSuertes(getActiveCharreada(), getActiveTournament(), state.settings.globalRuleOverrides);
+  const index = suertes.findIndex((suerte) => suerte.id === suerteId);
+  if (index >= 0) selectScoringSuerte(index);
+}
+
+function selectTernaHistory(target) {
+  const context = getCurrentContext();
+  const runtime = getTernaRuntime(context);
+  const sequence = Number(target?.dataset?.sequence || 0);
+  const entry = runtime?.session?.history?.find((item) => item.sharedSequenceNumber === sequence);
+  if (!entry) return;
+  const suertes = getCharreadaScoringSuertes(context.charreada, context.tournament, state.settings.globalRuleOverrides);
+  const suerteId = entry.type === "HEAD" ? "lazo" : "pial_ruedo";
+  const index = suertes.findIndex((suerte) => suerte.id === suerteId);
+  if (index < 0) return;
+  state.scoringSuerteIdx = index;
+  state.scoringAttemptIdx = Math.max(0, Number(entry.attemptIndex || entry.sharedSequenceNumber - 1));
+  state.scoringColeadorIdx = 0;
+  saveScoringNavigationDraft();
+  render();
+}
+
+function selectScoringTeam(index) {
+  const current = getCurrentContext();
+  if (!isFmch2026TernaSuerte(current?.suerte?.id)) stopTimer(true);
+  state.scoringTeamIdx = index;
+  state.scoringAttemptIdx = 0;
+  state.scoringColeadorIdx = 0;
+  const nextContext = getCurrentContext();
+  if (isFmch2026TernaSuerte(nextContext?.suerte?.id)) {
+    const session = getOrCreateTernaSession(nextContext);
+    state.scoringAttemptIdx = Math.max(0, Number(session?.currentOpportunity || 1) - 1);
+  }
+  saveScoringNavigationDraft();
+  render();
 }
 
 function toggleScoringAccordion(groupId) {
@@ -11638,6 +11861,29 @@ function reconcilePialesRemateConstraint(context) {
   }
 }
 
+function reconcileTernaRemateConstraint(context) {
+  if (context.suerte?.id !== "pial_ruedo" || !context.attempt?.remateId) return;
+  const runtime = getTernaRuntime(context);
+  if (!runtime) return;
+  const ruleId = "pial_ruedo_desc_repetir_remate";
+  const shouldDisqualify = shouldDisqualifyRepeatedFmch2026TernaRemate(runtime.session, {
+    type: "PIAL",
+    participantId: context.participant?.id || "",
+    participantName: getPublishedCharroName(context),
+    remateId: context.attempt.remateId,
+    sharedOpportunityId: context.attempt.sharedOpportunityId
+  });
+  if (shouldDisqualify) {
+    const rule = (context.suerte.catalog.desc || []).find((item) => item.id === ruleId);
+    context.attempt.desc = rule?.label || "Repetir remate";
+    context.attempt.descRuleId = ruleId;
+    context.attempt.autoDescRuleId = ruleId;
+  } else if (context.attempt.autoDescRuleId === ruleId) {
+    clearDesc(context.attempt);
+    context.attempt.autoDescRuleId = null;
+  }
+}
+
 function adjustRuleQuantity(type, ruleId, delta) {
   if (!guardUnlockedCharreada()) return;
   const context = getCurrentContext();
@@ -11680,12 +11926,12 @@ function toggleRule(type, ruleId) {
       setAttemptRuleQuantity(context.attempt, ruleId, 1);
       context.attempt.base = rule.pts;
       context.attempt.initializedBase = true;
-      if (context.suerte.id === "piales") {
+      if (context.suerte.id === "piales" || isFmch2026TernaSuerte(context.suerte.id)) {
         context.attempt.remateId = rule.id;
         context.attempt.remateLabel = rule.label;
         context.attempt.remateMetadata = { source: rule.source || "RULE_PROFILE" };
       }
-    } else if (context.suerte.id === "piales") {
+    } else if (context.suerte.id === "piales" || isFmch2026TernaSuerte(context.suerte.id)) {
       context.attempt.remateId = null;
       context.attempt.remateLabel = null;
       context.attempt.remateMetadata = null;
@@ -11699,6 +11945,7 @@ function toggleRule(type, ruleId) {
 
   reconcileAttemptConditionalRules(context);
   reconcilePialesRemateConstraint(context);
+  reconcileTernaRemateConstraint(context);
 
   persistScoreChange();
 }
@@ -11959,6 +12206,7 @@ function getEffectiveRulebookVersion(suerteId, profileId) {
   if (suerteId === "colas") return FMCH_2026_COLEADERO_RULEBOOK_VERSION;
   if (suerteId === "toro") return FMCH_2026_TORO_RULEBOOK_VERSION;
   if (suerteId === "yegua") return FMCH_2026_YEGUA_RULEBOOK_VERSION;
+  if (isFmch2026TernaSuerte(suerteId)) return FMCH_2026_TERNA_RULEBOOK_VERSION;
   return null;
 }
 
@@ -12186,7 +12434,17 @@ function resetAttempt() {
   if (!guardUnlockedCharreada()) return;
   const context = getCurrentContext();
   if (!context?.attempt) return;
+  const sharedIdentity = isFmch2026TernaSuerte(context.suerte?.id)
+    ? {
+        sharedOpportunityId: context.attempt.sharedOpportunityId,
+        sharedSequenceNumber: context.attempt.sharedSequenceNumber,
+        sharedTimerId: context.attempt.sharedTimerId,
+        opportunityType: context.attempt.opportunityType,
+        opportunityStatus: context.attempt.opportunityStatus
+      }
+    : null;
   Object.assign(context.attempt, emptyAttempt());
+  if (sharedIdentity?.sharedOpportunityId) Object.assign(context.attempt, sharedIdentity);
   context.attempt.timeEvidence = [];
   persistScoreChange();
 }
@@ -12200,11 +12458,24 @@ function getScoreNodeMissingFields(context) {
   return missing;
 }
 
-function getScoreNodeForContext(context) {
+function getScoreNodeForContext(context, options = {}) {
   const missing = getScoreNodeMissingFields(context);
   if (missing.length) return { ok: false, missing };
   const id = scoreKey(context.charreada.id, context.team.id, context.suerte.id);
   if (!id) return { ok: false, missing: ["scoreId"] };
+  const payload = cloneScorePayload(state.scores[id] || []);
+  if (isFmch2026TernaSuerte(context.suerte.id) && Array.isArray(options.opportunityHistory) && Array.isArray(payload)) {
+    options.opportunityHistory
+      .filter((entry) => entry?.suerteId === context.suerte.id)
+      .forEach((entry) => {
+        const attemptIndex = Math.max(0, Number(entry.attemptIndex || 0));
+        if (!payload[attemptIndex]) return;
+        payload[attemptIndex] = buildFmch2026TernaOfficialAttempt(payload[attemptIndex], entry);
+      });
+  }
+  if (isFmch2026TernaSuerte(context.suerte.id) && options.attemptOverride && Array.isArray(payload)) {
+    payload[Math.max(0, Number(context.attemptIndex || 0))] = cloneAttempt(options.attemptOverride);
+  }
   return {
     ok: true,
     id,
@@ -12212,7 +12483,7 @@ function getScoreNodeForContext(context) {
     charreadaId: context.charreada.id,
     teamId: context.team.id,
     suerteId: context.suerte.id,
-    payload: cloneScorePayload(state.scores[id] || [])
+    payload
   };
 }
 
@@ -12399,8 +12670,8 @@ function getPublishGuardMessage(result = {}) {
   return "No se pudo validar la charreada activa. Intenta sincronizar antes de publicar.";
 }
 
-async function publishOfficialScoreForContext(context) {
-  const scoreNode = getScoreNodeForContext(context);
+async function publishOfficialScoreForContext(context, options = {}) {
+  const scoreNode = getScoreNodeForContext(context, options);
   if (!scoreNode?.ok) {
     const missing = scoreNode?.missing || ["score"];
     setLastFirebaseError("missing-score-data", missing.join(", "));
@@ -12568,10 +12839,144 @@ function reconcileCommittedOfficialScore(previousRecords = [], committed = {}) {
   return record;
 }
 
-function continueOfficialScoreFlowAfterPublish() {
+function prepareTernaAttemptForPublication(context) {
+  if (!isFmch2026TernaSuerte(context?.suerte?.id)) return { ok: true, terna: false };
+  reconcileTernaRemateConstraint(context);
+  const runtime = getTernaRuntime(context);
+  if (!runtime) return { ok: false, reason: "terna-session-missing" };
+  const existing = context.attempt.sharedOpportunityId
+    ? runtime.session.history.find((entry) => entry.sharedOpportunityId === context.attempt.sharedOpportunityId)
+    : null;
+  if (context.attempt.sharedOpportunityId && !existing) {
+    const expectedId = runtime.session.currentOpportunity
+      ? `${runtime.session.ternaSessionId}:op:${runtime.session.currentOpportunity}`
+      : "";
+    if (context.attempt.sharedOpportunityId !== expectedId) {
+      return { ok: false, reason: "terna-shared-sequence-mismatch", session: runtime.session };
+    }
+  }
+  const timerView = runtime.view;
+  const hasCountableBase = Number(context.attempt.base || 0) > 0 && !context.attempt.desc && !context.attempt.notAchieved;
+  const result = context.attempt.desc
+    ? "DQ"
+    : context.attempt.notAchieved ? "ZERO" : hasCountableBase ? "VALID" : "ATTEMPTED";
+  const draft = existing
+    ? { ok: true, opportunity: {
+        ...existing,
+        participantId: context.participant?.id || existing.participantId || "",
+        participantName: getPublishedCharroName(context),
+        attemptIndex: context.attemptIndex,
+        result,
+        qualifiesForTerna: hasCountableBase,
+        countsForTerna: hasCountableBase,
+        remateId: context.attempt.remateId,
+        remateLabel: context.attempt.remateLabel,
+        officialElapsedMs: timerView.officialElapsedMs,
+        remainingMs: timerView.remainingMs
+      }, correction: true }
+    : buildFmch2026TernaOpportunityDraft(runtime.session, {
+        type: context.suerte.id,
+        participantId: context.participant?.id || "",
+        participantName: getPublishedCharroName(context),
+        attemptIndex: context.attemptIndex,
+        result,
+        countsForTerna: hasCountableBase,
+        remateId: context.attempt.remateId,
+        remateLabel: context.attempt.remateLabel,
+        officialElapsedMs: timerView.officialElapsedMs,
+        remainingMs: timerView.remainingMs
+      });
+  if (!draft.ok) return draft;
+  const opportunity = draft.opportunity;
+  const reservation = draft.correction
+    ? { ok: true, idempotent: true, session: runtime.session }
+    : reserveFmch2026TernaOpportunity(runtime.session, opportunity);
+  if (!reservation.ok) return reservation;
+  if (!draft.correction) setTernaSession(reservation.session);
+  context.attempt.sharedOpportunityId = opportunity.sharedOpportunityId;
+  context.attempt.sharedSequenceNumber = opportunity.sharedSequenceNumber;
+  context.attempt.sharedTimerId = runtime.session.sharedTimerId;
+  context.attempt.opportunityType = opportunity.type;
+  context.attempt.opportunityStatus = opportunity.status;
+  context.attempt.timing = {
+    ...(context.attempt.timing || {}),
+    timerId: runtime.session.sharedTimerId,
+    sharedTimerId: runtime.session.sharedTimerId,
+    elapsedMs: timerView.officialElapsedMs,
+    remainingMs: timerView.remainingMs,
+    startedAt: runtime.timer.wallStartedAt,
+    endedAt: runtime.timer.wallFinishedAt,
+    status: timerView.status,
+    legacyText: timerView.formattedRemaining,
+    adjustments: Array.isArray(context.attempt.timing?.adjustments) ? context.attempt.timing.adjustments : []
+  };
+  return {
+    ok: true,
+    terna: true,
+    correction: Boolean(draft.correction),
+    opportunity,
+    originalSession: runtime.session,
+    session: reservation.session
+  };
+}
+
+function rollbackTernaPublicationReservation(prepared) {
+  if (!prepared?.terna || prepared.correction || !prepared.originalSession) return;
+  setTernaSession(prepared.originalSession);
+  saveState({ silent: true });
+}
+
+async function commitTernaAttemptAfterPublication(context, prepared, publishResult) {
+  if (!prepared?.terna) return { ok: true, terna: false };
+  const commit = commitFmch2026TernaOpportunity(
+    prepared.session,
+    prepared.opportunity,
+    {
+      scoreId: publishResult.scoreId || scoreKey(context.charreada.id, context.team.id, context.suerte.id),
+      publishedScoreId: publishResult.published?.id || publishResult.id || ""
+    }
+  );
+  if (!commit.ok) return commit;
+  context.attempt.opportunityStatus = "CONSUMED";
+  let session = setTernaSession(commit.session);
+  let runtime = getTernaRuntime(context);
+  let timer = runtime?.timer;
+  if (session.history.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT && timer?.status !== "FINISHED") {
+    const finish = applyOfficialTimerCommand(timer, {
+      type: "FINISH",
+      source: "scorer-opportunity-limit",
+      actor: getAccessActor()
+    }, { expectedRevision: timer.revision });
+    if (finish.ok) {
+      timer = setOfficialTimer({ ...timer, ...finish.timer });
+      session = setTernaSession({
+        ...session,
+        status: "COMPLETED",
+        finishedAt: finish.timer.updatedAt,
+        updatedAt: finish.timer.updatedAt,
+        revision: session.revision + (finish.idempotent ? 0 : 1)
+      });
+    }
+  }
+  const timeAdditional = await applyTernaTimeAdditionalIfEligible(context, session, timer);
+  saveState({ silent: true });
+  return { ...commit, timeAdditional, session: getOrCreateTernaSession(context) };
+}
+
+function continueOfficialScoreFlowAfterPublish(context = getCurrentContext()) {
   suppressNextSharedAppStatePublish = true;
-  stopTimer(true);
-  advanceScoringPointer();
+  if (isFmch2026TernaSuerte(context?.suerte?.id)) {
+    const session = getOrCreateTernaSession(context);
+    if (session?.history?.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT) {
+      advanceAfterCompletedTernaSession();
+    } else {
+      state.scoringAttemptIdx = Math.max(0, Number(session?.currentOpportunity || 1) - 1);
+      saveState({ silent: true });
+    }
+  } else {
+    stopTimer(true);
+    advanceScoringPointer();
+  }
   syncCurrentLiveState({ repeat: true });
   officialPublishInProgress = false;
   render();
@@ -12741,14 +13146,46 @@ async function nextScore() {
     scoreId: scoreKey(context.charreada.id, context.team.id, context.suerte.id)
   });
   render({ preserveScoringScroll: true });
+  let preparedTerna = null;
   try {
     if (context) {
       markAttemptZeroIfBlank(context.attempt);
+      preparedTerna = prepareTernaAttemptForPublication(context);
+      if (!preparedTerna.ok) {
+        officialPublishInProgress = false;
+        showToast(preparedTerna.reason === "terna-opportunity-limit-reached"
+          ? "La Terna ya consumió sus cinco oportunidades."
+          : "La oportunidad compartida cambió. Revisa la secuencia antes de publicar.");
+        render({ preserveScoringScroll: true });
+        return;
+      }
       markActiveScoringDraft(context);
       saveState({ silent: true });
-      const publishResult = await publishOfficialScoreForContext(context);
+      const publicationContext = preparedTerna.terna
+        ? {
+            ...context,
+            attempt: buildFmch2026TernaOfficialAttempt(context.attempt, preparedTerna.opportunity)
+          }
+        : context;
+      const publishResult = await publishOfficialScoreForContext(publicationContext, {
+        attemptOverride: preparedTerna.terna ? publicationContext.attempt : null
+      });
       if (!publishResult.ok) {
+        rollbackTernaPublicationReservation(preparedTerna);
         officialPublishInProgress = false;
+        render({ preserveScoringScroll: true });
+        return;
+      }
+      const ternaCommit = await commitTernaAttemptAfterPublication(context, preparedTerna, publishResult);
+      if (!ternaCommit.ok) {
+        officialPublishInProgress = false;
+        setScoreSaveStatus({
+          state: "warning",
+          label: "Score publicado; secuencia pendiente",
+          detail: "El score oficial existe, pero el estado compartido requiere revisión.",
+          scoreId: publishResult.scoreId || ""
+        });
+        showToast("El score se publicó, pero la secuencia compartida de Terna requiere revisión.");
         render({ preserveScoringScroll: true });
         return;
       }
@@ -12768,8 +13205,9 @@ async function nextScore() {
       releaseActiveScoringDraft(scoreKey(context.charreada.id, context.team.id, context.suerte.id));
     }
     if (maybeShowBestColeadorModal(context)) return;
-    continueOfficialScoreFlowAfterPublish();
+    continueOfficialScoreFlowAfterPublish(context);
   } catch (error) {
+    rollbackTernaPublicationReservation(preparedTerna);
     officialPublishInProgress = false;
     setLastFirebaseError("official-publish-exception", error?.message || "");
     setScoreSaveStatus({
@@ -12914,6 +13352,309 @@ function hydrateTimerFromState() {
   if (timerRunning) {
     timerInterval = window.setInterval(updateTimerDisplay, 100);
   }
+}
+
+function ensureTernaTimerTicker(context = getCurrentContext()) {
+  const active = isFmch2026TernaSuerte(context?.suerte?.id);
+  if (!active) {
+    window.clearInterval(ternaTimerInterval);
+    ternaTimerInterval = null;
+    return;
+  }
+  updateTernaTimerDisplays();
+  if (ternaTimerInterval) return;
+  ternaTimerInterval = window.setInterval(updateTernaTimerDisplays, 100);
+}
+
+function updateTernaTimerDisplays() {
+  document.querySelectorAll(".terna-timer-display[data-terna-timer-id]").forEach((display) => {
+    const timerId = display.dataset.ternaTimerId;
+    const timer = state.officialTimers?.[timerId];
+    if (!timer) return;
+    display.textContent = getOfficialTimerContextView(timer).formattedRemaining;
+  });
+}
+
+async function applyTernaTimerCommand(type, pauseReason = "") {
+  if (!guardUnlockedCharreada()) return;
+  if (type === "FINISH" && officialPublishInProgress) {
+    showToast("Espera a que termine la publicación oficial en curso.");
+    return;
+  }
+  const context = getCurrentContext();
+  const runtime = getTernaRuntime(context);
+  if (!runtime) return;
+  const result = applyOfficialTimerCommand(runtime.timer, {
+    type,
+    reason: pauseReason,
+    source: "scorer",
+    actor: getAccessActor()
+  }, {
+    expectedRevision: runtime.timer.revision
+  });
+  if (!result.ok) {
+    showToast("El cronómetro de Terna no aceptó el cambio de estado.");
+    return;
+  }
+  const timer = setOfficialTimer({
+    ...runtime.timer,
+    ...result.timer,
+    tournamentId: runtime.session.tournamentId,
+    competitionId: runtime.session.competitionId,
+    charreadaId: runtime.session.charreadaId,
+    teamId: runtime.session.teamId
+  });
+  const now = timer.updatedAt || new Date().toISOString();
+  const session = setTernaSession({
+    ...runtime.session,
+    status: type === "FINISH"
+      ? "FINISHED"
+      : ["START", "PAUSE", "RESUME"].includes(type) || runtime.session.history.length
+        ? "IN_PROGRESS"
+        : runtime.session.status,
+    startedAt: type === "START" ? runtime.session.startedAt || now : runtime.session.startedAt,
+    finishedAt: type === "FINISH" ? now : runtime.session.finishedAt,
+    updatedAt: now,
+    revision: runtime.session.revision + (result.idempotent ? 0 : 1)
+  });
+  const ownsPublicationLock = type === "FINISH";
+  if (ownsPublicationLock) officialPublishInProgress = true;
+  try {
+    const timeAdditional = await applyTernaTimeAdditionalIfEligible(context, session, timer);
+    saveState({ silent: true });
+    if (timeAdditional.publicationFailed) {
+      showToast("El adicional quedó guardado localmente, pero una corrección oficial requiere reintento.");
+    }
+  } catch (error) {
+    console.error("[terna-001] no se pudo cerrar el adicional de tiempo", error);
+    showToast("No se pudo cerrar el adicional de tiempo de Terna.");
+  } finally {
+    if (ownsPublicationLock) officialPublishInProgress = false;
+    render({ preserveScoringScroll: true });
+  }
+}
+
+async function applyTernaTimeAdditionalIfEligible(context, sourceSession = null, sourceTimer = null) {
+  if (!isFmch2026TernaSuerte(context?.suerte?.id)) return { applied: false, reason: "not-terna" };
+  const runtime = getTernaRuntime(context);
+  const session = sourceSession || runtime?.session;
+  const timer = sourceTimer || runtime?.timer;
+  if (!session || !timer) return { applied: false, reason: "missing-context" };
+  const timerView = getOfficialTimerContextView(timer);
+  const resolved = resolveFmch2026TernaTimeAdditional(timerView, session);
+  const previousTimeAdditional = session.timeAdditional || {};
+  if (timerView.status !== "FINISHED") {
+    setTernaSession({
+      ...session,
+      timeAdditional: {
+        ...resolved,
+        applied: false,
+        appliedAt: null,
+        publicationStatus: "NOT_REQUIRED",
+        publishedAt: null,
+        publications: [],
+        failures: []
+      }
+    });
+    return { applied: false, reason: "timer-not-finished", resolved };
+  }
+  const requiresRemovalPublication = !resolved.eligible && (
+    previousTimeAdditional.applied || (previousTimeAdditional.publications || []).length
+  );
+  if (!resolved.eligible && !requiresRemovalPublication) {
+    setTernaSession({
+      ...session,
+      timeAdditional: {
+        ...resolved,
+        applied: false,
+        appliedAt: null,
+        publicationStatus: "NOT_REQUIRED",
+        publishedAt: null,
+        publications: [],
+        failures: []
+      }
+    });
+    return { applied: false, reason: "both-lazos-required", resolved };
+  }
+
+  const suertes = getCharreadaScoringSuertes(context.charreada, context.tournament, state.settings.globalRuleOverrides);
+  const targetOpportunityIds = new Set([
+    ...session.history.filter((entry) => entry.countsForTerna).map((entry) => entry.sharedOpportunityId),
+    ...(previousTimeAdditional.publications || []).map((entry) => entry.sharedOpportunityId)
+  ]);
+  const targets = session.history.filter((entry) => targetOpportunityIds.has(entry.sharedOpportunityId)).map((entry) => {
+    const suerte = suertes.find((item) => item.id === entry.suerteId);
+    const collection = state.scores[scoreKey(session.charreadaId, session.teamId, entry.suerteId)];
+    const attempt = Array.isArray(collection) ? collection[entry.attemptIndex] : null;
+    if (!suerte || !attempt) return null;
+    const quantity = entry.countsForTerna ? resolved.pointsPerLazador : 0;
+    const ruleId = entry.suerteId === "lazo"
+      ? "lazo_adic_tiempo_no_usado"
+      : "pial_ruedo_adic_tiempo_no_usado";
+    const beforeQuantity = Number(attempt.ruleQuantities?.[ruleId] || 0);
+    const beforeTiming = JSON.stringify(attempt.timing || null);
+    const adjustedAttempt = applyFmch2026TernaTimeAdditional(attempt, suerte, quantity);
+    adjustedAttempt.timing = {
+      ...(adjustedAttempt.timing || {}),
+      timerId: session.sharedTimerId,
+      sharedTimerId: session.sharedTimerId,
+      elapsedMs: timerView.officialElapsedMs,
+      remainingMs: timerView.remainingMs,
+      startedAt: timer.wallStartedAt,
+      endedAt: timer.wallFinishedAt,
+      status: timerView.status,
+      legacyText: timerView.formattedRemaining,
+      adjustments: Array.isArray(adjustedAttempt.timing?.adjustments) ? adjustedAttempt.timing.adjustments : []
+    };
+    adjustedAttempt.timeEvidence = (Array.isArray(adjustedAttempt.timeEvidence) ? adjustedAttempt.timeEvidence : [])
+      .filter((evidence) => evidence?.id !== `${session.sharedTimerId}:time-additional`);
+    adjustedAttempt.timeEvidence.push({
+      id: `${session.sharedTimerId}:time-additional`,
+      label: `Cierre oficial de Terna: ${timerView.formattedRemaining} restantes`,
+      timeMs: timerView.remainingMs,
+      source: "terna-official-timer"
+    });
+    const scoreRef = `${entry.suerteId}:${entry.attemptIndex}`;
+    const existingPublication = (previousTimeAdditional.publications || []).find((publication) => (
+      publication.scoreRef === scoreRef && Number(publication.quantity || 0) === quantity
+    ));
+    return {
+      entry,
+      suerte,
+      attempt,
+      adjustedAttempt: buildFmch2026TernaOfficialAttempt(adjustedAttempt, entry),
+      quantity,
+      scoreRef,
+      changed: beforeQuantity !== quantity || beforeTiming !== JSON.stringify(adjustedAttempt.timing),
+      existingPublication
+    };
+  }).filter(Boolean);
+  const appliedAt = new Date().toISOString();
+  let nextSession = setTernaSession({
+    ...session,
+    timeAdditional: {
+      ...resolved,
+      applied: resolved.eligible,
+      appliedAt: resolved.eligible ? appliedAt : null,
+      publicationStatus: targets.some((target) => target.quantity > 0) ? "PENDING" : "NOT_REQUIRED",
+      publishedAt: null,
+      publications: targets.map((target) => target.existingPublication).filter(Boolean),
+      failures: []
+    },
+    updatedAt: appliedAt,
+    revision: session.revision + 1
+  });
+  saveState({ silent: true });
+
+  const pendingTargets = targets.filter((target) => target.changed || !target.existingPublication);
+  if (!pendingTargets.length) {
+    const published = targets.every((target) => target.existingPublication);
+    nextSession = setTernaSession({
+      ...nextSession,
+      timeAdditional: {
+        ...nextSession.timeAdditional,
+        publicationStatus: published ? "PUBLISHED" : "NOT_REQUIRED",
+        publishedAt: published ? previousTimeAdditional.publishedAt || appliedAt : null
+      }
+    });
+    return { applied: true, resolved, publicationStatus: nextSession.timeAdditional.publicationStatus };
+  }
+
+  const publications = targets
+    .filter((target) => !pendingTargets.includes(target))
+    .map((target) => target.existingPublication)
+    .filter(Boolean);
+  const failures = [];
+  for (const target of pendingTargets) {
+    const scoreId = scoreKey(session.charreadaId, session.teamId, target.entry.suerteId);
+    const currentCollection = state.scores[scoreId];
+    const currentAttempt = Array.isArray(currentCollection)
+      ? currentCollection[target.entry.attemptIndex]
+      : null;
+    if (!currentAttempt) {
+      failures.push({
+        scoreRef: target.scoreRef,
+        sharedOpportunityId: target.entry.sharedOpportunityId,
+        reason: "terna-time-additional-attempt-missing"
+      });
+      continue;
+    }
+    Object.assign(currentAttempt, cloneAttempt(target.adjustedAttempt));
+    const correctionContext = {
+      ...context,
+      suerte: target.suerte,
+      attempt: currentAttempt,
+      attemptIndex: target.entry.attemptIndex,
+      coleadorIndex: 0
+    };
+    const result = await publishOfficialScoreForContext(correctionContext, {
+      attemptOverride: currentAttempt,
+      opportunityHistory: nextSession.history
+    });
+    if (!result.ok) {
+      failures.push({
+        scoreRef: target.scoreRef,
+        sharedOpportunityId: target.entry.sharedOpportunityId,
+        reason: result.reason || "official-publication-failed"
+      });
+      continue;
+    }
+    publications.push({
+      scoreRef: target.scoreRef,
+      sharedOpportunityId: target.entry.sharedOpportunityId,
+      quantity: target.quantity,
+      scoreId: result.scoreId || scoreKey(session.charreadaId, session.teamId, target.entry.suerteId),
+      publishedScoreId: result.published?.id || result.id || "",
+      publishedAt: result.published?.publishedAt || new Date().toISOString()
+    });
+  }
+
+  targets.forEach((target) => {
+    const scoreId = scoreKey(session.charreadaId, session.teamId, target.entry.suerteId);
+    const currentCollection = state.scores[scoreId];
+    const currentAttempt = Array.isArray(currentCollection)
+      ? currentCollection[target.entry.attemptIndex]
+      : null;
+    if (currentAttempt) Object.assign(currentAttempt, cloneAttempt(target.adjustedAttempt));
+  });
+
+  const publicationStatus = failures.length
+    ? publications.length ? "PARTIAL" : "FAILED"
+    : "PUBLISHED";
+  const publishedAt = publicationStatus === "PUBLISHED" ? new Date().toISOString() : null;
+  const updatedHistory = nextSession.history.map((entry) => {
+    const publication = publications.find((item) => item.sharedOpportunityId === entry.sharedOpportunityId);
+    return publication ? { ...entry, timeAdditionalPublishedScoreId: publication.publishedScoreId } : entry;
+  });
+  nextSession = setTernaSession({
+    ...nextSession,
+    history: updatedHistory,
+    timeAdditional: {
+      ...nextSession.timeAdditional,
+      publicationStatus,
+      publishedAt,
+      publications,
+      failures
+    },
+    updatedAt: publishedAt || new Date().toISOString(),
+    revision: nextSession.revision + 1
+  });
+  saveState({ silent: true });
+  return {
+    applied: true,
+    resolved,
+    publicationStatus,
+    publicationFailed: failures.length > 0,
+    failures
+  };
+}
+
+function getTernaTimeAdditionalPublicationLabel(status = "NOT_REQUIRED") {
+  if (status === "PUBLISHED") return "correcciones oficiales confirmadas";
+  if (status === "PENDING") return "correcciones oficiales en curso";
+  if (status === "PARTIAL") return "corrección parcial; reintento requerido";
+  if (status === "FAILED") return "corrección pendiente";
+  return "sin corrección necesaria";
 }
 
 function subscribeExternalTimerControl() {

@@ -6,7 +6,7 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_SOURCE,
   FMCH_2026_CALA_TEAM_PENALTY_RULES
-} from "./calaRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./calaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   FMCH_2026_COLEADERO_ADIC_RULES,
   FMCH_2026_COLEADERO_BASE_RULES,
@@ -23,7 +23,7 @@ import {
   FMCH_2026_PIALES_INFR_RULES,
   FMCH_2026_PIALES_RULEBOOK_VERSION,
   FMCH_2026_PIALES_TEAM_PENALTY_RULES
-} from "./fmch2026PialesColeaderoRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./fmch2026PialesColeaderoRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   FMCH_2026_JINETEO_CLASSIFICATIONS,
   FMCH_2026_JINETEOS_SOURCE,
@@ -41,7 +41,25 @@ import {
   FMCH_2026_YEGUA_INFR_RULES,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_TEAM_PENALTY_RULES
-} from "./fmch2026JineteosRules.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "./fmch2026JineteosRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
+import {
+  FMCH_2026_LAZO_ADIC_RULES,
+  FMCH_2026_LAZO_BASE_RULES,
+  FMCH_2026_LAZO_DESC_RULES,
+  FMCH_2026_LAZO_DISABLED_LEGACY_RULES,
+  FMCH_2026_LAZO_INFR_RULES,
+  FMCH_2026_LAZO_TEAM_PENALTY_RULES,
+  FMCH_2026_PIAL_RUEDO_ADIC_RULES,
+  FMCH_2026_PIAL_RUEDO_BASE_RULES,
+  FMCH_2026_PIAL_RUEDO_DESC_RULES,
+  FMCH_2026_PIAL_RUEDO_DISABLED_LEGACY_RULES,
+  FMCH_2026_PIAL_RUEDO_INFR_RULES,
+  FMCH_2026_PIAL_RUEDO_TEAM_PENALTY_RULES,
+  FMCH_2026_TERNA_DURATION_MS,
+  FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
+  FMCH_2026_TERNA_RULEBOOK_VERSION,
+  FMCH_2026_TERNA_SOURCE
+} from "./fmch2026TernaRules.js?v=20260810-fmch-2026-terna-complete-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
@@ -98,7 +116,7 @@ const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$/;
 const MAX_DEPTH = 10;
-const MAX_ARRAY = 500;
+const MAX_ARRAY = 1000;
 const MAX_KEYS = 300;
 
 function buildFmchCalaProfileRule(rule, category, order) {
@@ -245,7 +263,61 @@ const FMCH_2026_YEGUA_PROFILE_RULES = buildFmchJineteoProfileRules("yegua", {
   desc: FMCH_2026_YEGUA_DESC_RULES
 }, FMCH_2026_YEGUA_DISABLED_LEGACY_RULES);
 
-export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
+function buildFmchTernaProfileRule(suerteId, rule, category, order) {
+  return {
+    suerteId,
+    category,
+    ruleId: rule.id,
+    label: rule.label,
+    ...(category === RULE_CATEGORIES.DISQUALIFICATION ? {} : { value: Number(rule.pts || 0) }),
+    enabled: true,
+    order,
+    metadata: {
+      ...(rule.metadata || {}),
+      source: FMCH_2026_TERNA_SOURCE,
+      implementationTicket: "CHARROPRO-FMCH-2026-TERNA-COMPLETE-IMPLEMENTATION-001"
+    }
+  };
+}
+
+function buildFmchTernaProfileRules(suerteId, catalogs, disabledLegacyRules) {
+  return [
+    ...catalogs.base.map((rule, index) => buildFmchTernaProfileRule(suerteId, rule, RULE_CATEGORIES.BASE, index)),
+    ...catalogs.adic.map((rule, index) => buildFmchTernaProfileRule(suerteId, rule, RULE_CATEGORIES.ADDITIONAL, index)),
+    ...catalogs.infr.map((rule, index) => buildFmchTernaProfileRule(suerteId, rule, RULE_CATEGORIES.INDIVIDUAL_INFRACTION, index)),
+    ...catalogs.team_infr.map((rule, index) => buildFmchTernaProfileRule(suerteId, rule, RULE_CATEGORIES.TEAM_INFRACTION, index)),
+    ...catalogs.desc.map((rule, index) => buildFmchTernaProfileRule(suerteId, rule, RULE_CATEGORIES.DISQUALIFICATION, index)),
+    ...disabledLegacyRules.map((rule) => ({
+      suerteId,
+      category: rule.category,
+      ruleId: rule.id,
+      enabled: false,
+      metadata: {
+        sourceStatus: "LEGACY_PRESERVED_DISABLED",
+        source: FMCH_2026_TERNA_SOURCE,
+        reason: "Reconciliado contra FMCH 2026; se conserva físicamente para históricos"
+      }
+    }))
+  ];
+}
+
+const FMCH_2026_LAZO_PROFILE_RULES = buildFmchTernaProfileRules("lazo", {
+  base: FMCH_2026_LAZO_BASE_RULES,
+  adic: FMCH_2026_LAZO_ADIC_RULES,
+  infr: FMCH_2026_LAZO_INFR_RULES,
+  team_infr: FMCH_2026_LAZO_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_LAZO_DESC_RULES
+}, FMCH_2026_LAZO_DISABLED_LEGACY_RULES);
+
+const FMCH_2026_PIAL_RUEDO_PROFILE_RULES = buildFmchTernaProfileRules("pial_ruedo", {
+  base: FMCH_2026_PIAL_RUEDO_BASE_RULES,
+  adic: FMCH_2026_PIAL_RUEDO_ADIC_RULES,
+  infr: FMCH_2026_PIAL_RUEDO_INFR_RULES,
+  team_infr: FMCH_2026_PIAL_RUEDO_TEAM_PENALTY_RULES,
+  desc: FMCH_2026_PIAL_RUEDO_DESC_RULES
+}, FMCH_2026_PIAL_RUEDO_DISABLED_LEGACY_RULES);
+
+export const FMCH_2026_LIBRE_PROFILE_0_4_0 = deepFreeze({
   contractVersion: RULE_PROFILE_CONTRACT_VERSION,
   profileId: "FMCH_2026_LIBRE",
   version: "0.4.0",
@@ -348,7 +420,60 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   }
 });
 
-export const RULE_PROFILES = deepFreeze([FMCH_2026_LIBRE_PROFILE]);
+export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
+  ...FMCH_2026_LIBRE_PROFILE_0_4_0,
+  version: "0.5.0",
+  rules: [
+    ...FMCH_2026_LIBRE_PROFILE_0_4_0.rules,
+    ...FMCH_2026_LAZO_PROFILE_RULES,
+    ...FMCH_2026_PIAL_RUEDO_PROFILE_RULES
+  ],
+  suerteMetadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_4_0.suerteMetadata,
+    lazo: {
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
+      rulebookVersion: FMCH_2026_TERNA_RULEBOOK_VERSION,
+      sharedDomain: "terna",
+      scoringAttempts: FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
+      sharedOpportunityLimit: FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
+      timerContract: {
+        timerId: "terna",
+        limitMs: FMCH_2026_TERNA_DURATION_MS,
+        mode: "shared_countdown",
+        officialPausesExcluded: true
+      }
+    },
+    pial_ruedo: {
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
+      rulebookVersion: FMCH_2026_TERNA_RULEBOOK_VERSION,
+      sharedDomain: "terna",
+      scoringAttempts: FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
+      sharedOpportunityLimit: FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
+      timerContract: {
+        timerId: "terna",
+        limitMs: FMCH_2026_TERNA_DURATION_MS,
+        mode: "shared_countdown",
+        officialPausesExcluded: true
+      }
+    }
+  },
+  metadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_4_0.metadata,
+    implementationStatus: "cala_piales_coleadero_jineteos_terna_technical_complete_activation_blocked",
+    loadedSuerteIds: ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua"],
+    activationReady: false,
+    activationBlockReason: "Cala ML/CR frente a MD/MI/PC y cuarta fila de Coleadero requieren confirmación de fuente"
+  }
+});
+
+export const RULE_PROFILES = deepFreeze([
+  FMCH_2026_LIBRE_PROFILE_0_4_0,
+  FMCH_2026_LIBRE_PROFILE
+]);
 
 export function buildRuleIdentity(suerteId, category, ruleId) {
   const cleanSuerteId = normalizeId(suerteId);
@@ -548,6 +673,9 @@ export function resolveEffectiveRules({
     blocked,
     suerte: {
       ...sourceSuerte,
+      ...(Number.isInteger(Number(ruleMetadata?.scoringAttempts)) && Number(ruleMetadata.scoringAttempts) > 0
+        ? { attempts: Number(ruleMetadata.scoringAttempts) }
+        : {}),
       catalog: activeCatalog,
       ruleMetadata,
       ruleResolution: {

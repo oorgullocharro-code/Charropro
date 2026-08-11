@@ -9274,6 +9274,236 @@ html.graphic-page #graphic-root {
   overflow-wrap: anywhere;
 }
 
+/* CHARROPRO-FMCH-2026-TERNA-COMPLETE-IMPLEMENTATION-001 */
+.cp-terna-opportunity-bar .opportunity-summary strong,
+.cp-terna-opportunity-bar .opportunity-summary em {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.scoring-shell-classic .cp-terna-opportunities {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: visible;
+}
+
+.scoring-shell-classic .cp-terna-opportunities button {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 7px 5px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.scoring-shell-classic .cp-terna-opportunities button.used {
+  border-color: #31c48d;
+  color: #b8f7d8;
+  background: rgba(49, 196, 141, .12);
+}
+
+.scoring-shell-classic .cp-terna-opportunities button.active {
+  border-color: #f4b740;
+  color: #ffe5aa;
+  background: rgba(244, 183, 64, .12);
+}
+
+.cp-terna-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.cp-terna-panel > header {
+  margin-bottom: 0;
+}
+
+.cp-terna-switch,
+.cp-terna-timer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+}
+
+.cp-terna-switch .button {
+  flex: 1 1 220px;
+  min-height: var(--scorer-touch-target);
+}
+
+.cp-terna-dashboard {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.2fr) repeat(2, minmax(180px, .9fr));
+  gap: 10px;
+}
+
+.cp-terna-timer,
+.cp-terna-counter,
+.cp-terna-counted {
+  min-width: 0;
+  min-height: 132px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d1118;
+}
+
+.cp-terna-timer {
+  border-color: rgba(49, 196, 141, .45);
+}
+
+.cp-terna-timer.paused {
+  border-color: #f4b740;
+  background: rgba(244, 183, 64, .08);
+}
+
+.cp-terna-timer span,
+.cp-terna-counter span,
+.cp-terna-counted span,
+.cp-terna-timer em,
+.cp-terna-counter em,
+.cp-terna-counted em,
+.cp-terna-timer small {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.cp-terna-timer span,
+.cp-terna-counter span,
+.cp-terna-counted span {
+  text-transform: uppercase;
+}
+
+.cp-terna-timer strong,
+.cp-terna-counter strong,
+.cp-terna-counted strong {
+  font-size: 22px;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.cp-terna-timer strong {
+  color: #b8f7d8;
+  font-size: 34px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-terna-timer.paused strong {
+  color: #ffe5aa;
+}
+
+.cp-terna-timer-controls .button {
+  min-height: var(--scorer-touch-target);
+}
+
+.cp-terna-timer-controls label {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.cp-terna-timer-controls label span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.cp-terna-timer-controls select {
+  width: 100%;
+  min-height: var(--scorer-touch-target);
+}
+
+.cp-terna-time-additional {
+  padding: 10px 12px;
+  border: 1px solid rgba(49, 196, 141, .45);
+  border-radius: 8px;
+  color: #b8f7d8 !important;
+  background: rgba(49, 196, 141, .08);
+  text-align: left !important;
+}
+
+.cp-terna-history {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0d1118;
+}
+
+.cp-terna-history > header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cp-terna-history > header span,
+.cp-terna-history li em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.cp-terna-history h3 {
+  margin: 2px 0 0;
+  font-size: 16px;
+}
+
+.cp-terna-history ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cp-terna-history li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 36px repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cp-terna-history li:last-child {
+  border-bottom: 0;
+}
+
+.cp-terna-history li > span {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #31c48d;
+  border-radius: 50%;
+  color: #b8f7d8;
+  font-weight: 950;
+}
+
+.cp-terna-history li div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cp-terna-history li strong,
+.cp-terna-history li em {
+  overflow-wrap: anywhere;
+}
+
+.cp-terna-empty {
+  padding: 14px;
+  text-align: left !important;
+}
+
 @media (max-width: 1220px) {
   .scoring-shell-classic .scoring-live-top {
     grid-template-columns: minmax(170px, .48fr) minmax(0, 1.52fr);
@@ -9289,6 +9519,22 @@ html.graphic-page #graphic-root {
 
   .cp-attempt-summary-grid {
     grid-template-columns: repeat(4, minmax(86px, 1fr));
+  }
+
+  .cp-terna-dashboard {
+    grid-template-columns: minmax(220px, 1.15fr) repeat(2, minmax(150px, .85fr));
+  }
+
+  .scoring-shell-classic .cp-bottom-sync {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .scoring-shell-classic .cp-bottom-sync em {
+    grid-column: 1 / -1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-wrap: normal;
   }
 }
 
@@ -9355,6 +9601,10 @@ html.graphic-page #graphic-root {
     width: 100%;
     min-width: 0;
   }
+
+  .cp-terna-dashboard {
+    grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -9399,6 +9649,14 @@ html.graphic-page #graphic-root {
 
   .cp-jineteo-controls {
     grid-template-columns: 1fr;
+  }
+
+  .cp-terna-dashboard {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cp-terna-timer {
+    grid-column: 1 / -1;
   }
 }
 
@@ -9448,5 +9706,29 @@ html.graphic-page #graphic-root {
   .cp-manual-score-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .cp-terna-dashboard,
+  .cp-terna-history li {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-terna-timer {
+    grid-column: auto;
+  }
+
+  .cp-terna-history li > span {
+    width: 28px;
+    height: 28px;
+  }
+
+  .scoring-shell-classic .cp-terna-opportunities {
+    gap: 4px;
+  }
+
+  .scoring-shell-classic .cp-terna-opportunities button {
+    min-height: 54px;
+    padding-inline: 2px;
+    font-size: 10px;
   }
 }

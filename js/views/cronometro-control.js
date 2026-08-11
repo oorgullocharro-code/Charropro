@@ -1,5 +1,5 @@
 import { escapeHTML, html, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { LIVE_TIMER_KEY, getScopedLocalStorageKey, loadState, saveState, state } from "../core/state.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+import { LIVE_TIMER_KEY, getScopedLocalStorageKey, loadState, saveState, state } from "../core/state.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import {
   getLiveChannelFromUrl,
   publishFirebaseTimer,
@@ -7,7 +7,7 @@ import {
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive
-} from "../core/firebaseSync.js?v=20260808-fmch-2026-jineteos-dynamic-001-v1";
+} from "../core/firebaseSync.js?v=20260810-fmch-2026-terna-complete-001-v1";
 import { getTimerScopeKey, getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 
