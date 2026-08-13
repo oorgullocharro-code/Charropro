@@ -6344,6 +6344,286 @@ th.num {
   }
 }
 
+/* CHARROPRO-SCORER-WORKSPACE-VIEWPORT-COMPACTION-001 */
+.scoring-shell-classic {
+  --scorer-workspace-gap: 6px;
+}
+
+.cp-manual-score-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(92px, 120px) auto;
+  align-items: end;
+  gap: 8px;
+}
+
+.cp-manual-score-form > div {
+  min-width: 0;
+}
+
+.cp-manual-score-form input {
+  width: 100%;
+  min-height: 44px;
+}
+
+.cp-manual-score-form .cp-manual-score-actions {
+  display: flex;
+  align-items: end;
+  gap: 6px;
+  margin: 0;
+}
+
+.cp-manual-score-form .cp-manual-score-actions .button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+@media (min-width: 761px) {
+  .scoring-shell-classic .scoring-header {
+    gap: 5px;
+    padding: 5px 8px;
+  }
+
+  .scoring-shell-classic .scoring-header > .button {
+    min-height: 44px;
+    padding: 6px 10px;
+  }
+
+  .scoring-shell-classic .scoring-livebar {
+    gap: 4px;
+  }
+
+  .cp-judge-context {
+    gap: 7px;
+  }
+
+  .cp-judge-context .scoring-title p {
+    line-height: 1;
+  }
+
+  .cp-judge-context .scoring-title h1 {
+    margin-top: 0;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .cp-judge-context .scoring-title small {
+    line-height: 1.1;
+  }
+
+  .cp-judge-context-grid {
+    gap: 3px;
+  }
+
+  .cp-judge-context-grid > div {
+    padding: 3px 6px;
+  }
+
+  .cp-judge-context-grid dd {
+    margin-top: 1px;
+    line-height: 1.05;
+  }
+
+  .cp-team-card-strip {
+    gap: 4px;
+  }
+
+  .cp-team-card {
+    min-height: 44px;
+    padding-block: 4px;
+  }
+
+  .scoring-shell-classic .cp-live-score-overview {
+    gap: 5px;
+    padding: 4px;
+  }
+
+  .scoring-shell-classic .cp-live-total,
+  .scoring-shell-classic .cp-live-breakdown > span {
+    padding-block: 2px;
+  }
+
+  .scoring-shell-classic .cp-live-total > strong {
+    font-size: 26px;
+  }
+
+  .scoring-shell-classic .cp-live-score-overview .header-timer {
+    min-height: 48px;
+    padding: 4px 7px;
+  }
+
+  .scoring-shell-classic .cp-live-score-overview .header-timer strong {
+    font-size: 21px;
+  }
+
+  .scoring-shell-classic .cp-scoring-navigation {
+    gap: 5px;
+    padding-block: 3px;
+  }
+
+  .scoring-shell-classic .suerte-tab {
+    min-height: 44px;
+    padding-block: 5px;
+  }
+
+  .scoring-shell-classic .score-workspace {
+    gap: var(--scorer-workspace-gap);
+    padding-top: 6px;
+  }
+
+  .scoring-shell-classic .cp-manganas-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, .32fr);
+    grid-template-areas:
+      "dashboard history"
+      "result history"
+      "remates history"
+      "detail history";
+    align-content: start;
+    column-gap: 10px;
+    row-gap: 8px;
+  }
+
+  .scoring-shell-classic .cp-manganas-panel > header {
+    display: none;
+  }
+
+  .scoring-shell-classic .cp-manganas-dashboard {
+    grid-area: dashboard;
+    grid-template-columns: minmax(180px, .95fr) repeat(2, minmax(145px, .75fr));
+    gap: 8px;
+  }
+
+  .scoring-shell-classic .cp-mangana-result {
+    grid-area: result;
+  }
+
+  .scoring-shell-classic .cp-mangana-remates {
+    grid-area: remates;
+  }
+
+  .scoring-shell-classic .cp-mangana-floreo-detail {
+    grid-area: detail;
+  }
+
+  .scoring-shell-classic .cp-mangana-history {
+    grid-area: history;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 7px;
+    padding: 9px;
+  }
+
+  .cp-mangana-history > header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .cp-mangana-history > header small {
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: none;
+  }
+
+  .cp-mangana-history > button {
+    min-height: 58px;
+    gap: 5px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel-2);
+  }
+
+  .cp-mangana-history > button strong {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+  }
+
+  .cp-mangana-history > button strong > span {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .cp-mangana-history > button.active {
+    border-color: var(--blue-2);
+    background: rgba(76, 141, 255, .14);
+  }
+
+  .cp-mangana-history > button.active strong > span {
+    background: var(--blue-2);
+    color: #fff;
+  }
+
+  .cp-mangana-history > button.completed {
+    border-left-color: var(--green);
+  }
+
+  .cp-mangana-history > button.pending {
+    border-left-color: var(--amber);
+    background: rgba(245, 168, 61, .08);
+  }
+
+  .cp-mangana-result .button.green.active {
+    border-color: var(--green);
+    box-shadow: inset 0 0 0 1px var(--green);
+  }
+
+  .cp-mangana-result .button.red.active {
+    border-color: var(--red);
+    box-shadow: inset 0 0 0 1px var(--red);
+  }
+}
+
+@media (max-width: 900px) {
+  .scoring-shell-classic .cp-manganas-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .scoring-shell-classic .cp-mangana-history {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cp-mangana-history > header {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .cp-manual-score-form {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-manual-score-form .cp-manual-score-actions {
+    justify-content: stretch;
+  }
+
+  .cp-manual-score-form .cp-manual-score-actions .button {
+    flex: 1 1 0;
+  }
+
+  .scoring-shell-classic .cp-mangana-history {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .danger-state {
   border: 1px solid rgba(239, 91, 91, .45);
   background: rgba(239, 91, 91, .14);

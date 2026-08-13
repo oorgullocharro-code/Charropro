@@ -52,9 +52,11 @@ assert.match(terna, /cp-inline-secondary-control/);
 assert.match(appSource, /resolveFmch2026TernaNextSuerteId/);
 assert.match(ternaRulesSource, /CLOSED_UNUSED/);
 
-assert.match(appSource, /function formatManganaHistoryState/);
+assert.match(appSource, /function formatManganaHistoryStatus/);
+assert.match(appSource, /function formatManganaHistoryDetail/);
 assert.match(appSource, /cp-mangana-history[\s\S]*?data-action="select-attempt"/);
-assert.match(appSource, /"ACTIVA"/);
+assert.match(appSource, /"ACTIVO"/);
+assert.match(appSource, /"COMPLETADO"/);
 assert.match(appSource, /"PENDIENTE"/);
 assert.match(appSource, /Básicas/);
 assert.match(appSource, /Rodadas \/ variantes/);

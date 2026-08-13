@@ -1,11 +1,11 @@
 import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { loadState, state } from "../core/state.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { loadState, state } from "../core/state.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   signInAuditUser,
   signOutAuditUser,
   subscribeAuditAuth,
   subscribeFirebaseAuditScores
-} from "../core/firebaseSync.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "../core/firebaseSync.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("supervision-root");

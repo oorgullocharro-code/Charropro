@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260813-scorer-screen-by-screen-ux-refinement-001-v1",
+      "appVersion": "20260813-scorer-workspace-viewport-compaction-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -116,6 +116,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "88e5d7b3f44839ddb5ac4f2507f2f1b9bc226523f5c8c4e843e8bae099fca8b1",
-  "fingerprint": "88e5d7b3f44839ddb5ac4f2507f2f1b9bc226523f5c8c4e843e8bae099fca8b1"
+  "checksum": "3d0ee107936df12cd7a2ca5815eec9ca695377c075f06c85e7939648f0c5e614",
+  "fingerprint": "3d0ee107936df12cd7a2ca5815eec9ca695377c075f06c85e7939648f0c5e614"
 }

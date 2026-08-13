@@ -1,6 +1,6 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./data/calaRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -51,7 +51,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -71,12 +71,12 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -84,9 +84,9 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/timerRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -98,16 +98,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/scoring.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/scoringAttempt.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/scorerComponents.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -117,7 +117,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/sync.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   createFirebaseTournamentBackup,
@@ -156,7 +156,7 @@ import {
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/firebaseSync.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -168,7 +168,7 @@ import {
   putPendingScoreReview,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/pendingScoreReview.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -221,7 +221,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+} from "./core/state.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -8445,8 +8445,8 @@ function renderManganasMainPanel(context) {
         </article>
       </div>
       <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo de la oportunidad">
-        <button type="button" class="button ${attempt.manganaResult === "ACHIEVED" ? "primary" : ""}" data-action="set-mangana-result" data-result="ACHIEVED">Lograda</button>
-        <button type="button" class="button ${attempt.manganaResult === "NOT_ACHIEVED" ? "amber" : ""}" data-action="set-mangana-result" data-result="NOT_ACHIEVED">No lograda</button>
+        <button type="button" class="button green ${attempt.manganaResult === "ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="ACHIEVED">Lograda</button>
+        <button type="button" class="button red ${attempt.manganaResult === "NOT_ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="NOT_ACHIEVED">No lograda</button>
       </div>
       ${isPie ? html`
         <section class="cp-mangana-remates">
@@ -8467,22 +8467,32 @@ function renderManganasMainPanel(context) {
           `).join("")}
         </div>
       </details>
-      <section class="cp-mangana-history" aria-label="Historial de remates">
-        ${attempts.map((historyAttempt, index) => html`
-          <button type="button" data-action="select-attempt" data-index="${index}" class="${index === context.attemptIndex ? "active" : ""}" aria-pressed="${index === context.attemptIndex ? "true" : "false"}">
-            <strong>${index + 1}</strong>
-            <em>${escapeHTML(formatManganaHistoryState(historyAttempt, index === context.attemptIndex))}</em>
-          </button>
-        `).join("")}
+      <section class="cp-mangana-history" aria-label="Historial de intentos">
+        <header><span>Historial de intentos</span><small>Attempt V2</small></header>
+        ${attempts.map((historyAttempt, index) => {
+          const active = index === context.attemptIndex;
+          return html`
+            <button type="button" data-action="select-attempt" data-index="${index}" class="${active ? "active" : hasAttemptVisibleResult(historyAttempt) ? "completed" : "pending"}" aria-pressed="${active ? "true" : "false"}">
+              <strong><span>${index + 1}</span>${escapeHTML(formatManganaHistoryStatus(historyAttempt, active))}</strong>
+              <em>${escapeHTML(formatManganaHistoryDetail(historyAttempt, context.suerte))}</em>
+            </button>
+          `;
+        }).join("")}
       </section>
     </section>
   `;
 }
 
-function formatManganaHistoryState(attempt = {}, active = false) {
-  if (active) return "ACTIVA";
-  if (hasAttemptVisibleResult(attempt)) return `${attempt.desc ? "DQ" : "✓"} ${moneylessNumber(calculateAttemptTotal(attempt))} pts`;
-  return "PENDIENTE";
+function formatManganaHistoryStatus(attempt = {}, active = false) {
+  if (active) return "ACTIVO";
+  return hasAttemptVisibleResult(attempt) ? "COMPLETADO" : "PENDIENTE";
+}
+
+function formatManganaHistoryDetail(attempt = {}, suerte = {}) {
+  if (!hasAttemptVisibleResult(attempt)) return "Sin remate";
+  if (attempt.desc) return "Descalificada";
+  const remate = (suerte.catalog?.adic || []).find((item) => item.id === attempt.remateId);
+  return remate?.label || `✓ ${moneylessNumber(calculateAttemptTotal(attempt))} pts`;
 }
 
 function renderOfficialSportTimer(runtime) {
@@ -9949,7 +9959,7 @@ function renderCustomScoreSection(type, context) {
               `
             : ""
         }
-        <div class="form-grid">
+        <div class="cp-manual-score-form">
           <div>
             <label>${title}</label>
             <input id="custom-${type}-label" placeholder="Concepto">
@@ -9958,10 +9968,10 @@ function renderCustomScoreSection(type, context) {
             <label>Puntos</label>
             <input id="custom-${type}-pts" type="number" min="1" value="1">
           </div>
-        </div>
-        <div class="cp-manual-score-actions">
-          <button class="button" data-action="clear-custom-form" data-type="${type}" type="button">Cancelar</button>
-          <button class="button ${type === "adic" ? "green" : "red"}" data-action="add-custom" data-type="${type}" type="button">Agregar</button>
+          <div class="cp-manual-score-actions">
+            <button class="button" data-action="clear-custom-form" data-type="${type}" type="button">Cancelar</button>
+            <button class="button ${type === "adic" ? "green" : "red"}" data-action="add-custom" data-type="${type}" type="button">Agregar</button>
+          </div>
         </div>
       </div>
     </section>
@@ -10003,7 +10013,7 @@ function renderTeamPenaltySection(context) {
             </button>
           `).join("")}
         </div>
-        <div class="form-grid" style="margin-top: 12px;">
+        <div class="cp-manual-score-form" style="margin-top: 12px;">
           <div>
             <label>Infraccion al equipo manual</label>
             <input id="team-penalty-label" placeholder="Concepto">
@@ -10012,9 +10022,9 @@ function renderTeamPenaltySection(context) {
             <label>Puntos</label>
             <input id="team-penalty-pts" type="number" min="1" value="1">
           </div>
-        </div>
-        <div class="topbar-actions" style="margin-top: 10px;">
-          <button class="button red" data-action="add-team-penalty" type="button">Agregar al equipo</button>
+          <div class="cp-manual-score-actions">
+            <button class="button red" data-action="add-team-penalty" type="button">Agregar al equipo</button>
+          </div>
         </div>
       </div>
     </section>
