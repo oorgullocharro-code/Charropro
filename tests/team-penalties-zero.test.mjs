@@ -6,7 +6,7 @@ import {
   getTeamSuerteTotal,
   hasAttemptActivity
 } from "../js/core/scoring.js";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

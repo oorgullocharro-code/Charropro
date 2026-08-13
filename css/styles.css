@@ -5909,6 +5909,441 @@ th.num {
   }
 }
 
+/* CHARROPRO-SCORER-SCREEN-BY-SCREEN-UX-REFINEMENT-001 */
+.scoring-shell-classic.cp-scoring-shell {
+  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-auto-rows: auto;
+}
+
+.scoring-shell-classic .scoring-livebar {
+  display: grid;
+  gap: 6px;
+}
+
+.cp-team-card-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 5px;
+  min-width: 0;
+}
+
+.cp-team-card {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0d1118;
+  color: var(--text);
+  text-align: left;
+}
+
+.cp-team-card > span {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.cp-team-card strong {
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.cp-team-card em {
+  color: #9fc2ff;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.cp-team-card.active {
+  border-color: #4c8dff;
+  background: rgba(76, 141, 255, .14);
+  box-shadow: inset 3px 0 #4c8dff;
+}
+
+.cp-team-card.active > span {
+  background: #4c8dff;
+  color: #fff;
+}
+
+.scoring-shell-classic .cp-live-score-overview {
+  position: relative;
+  top: auto;
+  z-index: auto;
+  grid-template-columns: minmax(145px, .55fr) minmax(190px, .8fr) minmax(220px, 1.65fr);
+  padding: 5px;
+  border-color: var(--line);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.scoring-shell-classic .cp-live-total,
+.scoring-shell-classic .cp-live-breakdown > span {
+  padding-block: 3px;
+}
+
+.scoring-shell-classic .cp-live-total > strong {
+  font-size: 28px;
+}
+
+.scoring-shell-classic .cp-scoring-navigation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+  background: #111720;
+}
+
+.scoring-shell-classic .cp-scoring-navigation .cp-suertes-strip {
+  align-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cp-context-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+}
+
+.cp-context-selector > span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.scoring-shell-classic .cp-compact-opportunities {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.scoring-shell-classic .cp-compact-opportunities button {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 5px 7px;
+}
+
+.cp-coleadero-selector {
+  display: grid;
+  grid-template-columns: minmax(360px, auto) auto;
+}
+
+.cp-coleador-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(112px, 1fr));
+  gap: 4px;
+}
+
+.cp-coleador-controls button {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0d1118;
+  color: var(--text);
+  text-align: left;
+}
+
+.cp-coleador-controls button strong,
+.cp-coleador-controls button span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cp-coleador-controls button strong {
+  font-size: 10px;
+}
+
+.cp-coleador-controls button span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.cp-coleador-controls button.active {
+  border-color: #4c8dff;
+  background: rgba(76, 141, 255, .14);
+}
+
+.cp-coleadero-attempt-select {
+  display: grid;
+  gap: 2px;
+  min-width: 92px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.cp-coleadero-attempt-select select {
+  min-height: 44px;
+  padding: 5px 28px 5px 8px;
+  border-color: var(--line);
+  background-color: #0d1118;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.cp-piales-panel {
+  padding: 0;
+}
+
+.cp-piales-panel .cp-piales-distance {
+  margin: 0;
+  border: 0;
+}
+
+.cp-piales-distance-stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(90px, 1fr) 44px;
+  align-items: end;
+  gap: 5px;
+}
+
+.cp-piales-distance-stepper button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.cp-piales-distance-stepper input {
+  min-height: 44px;
+}
+
+.cp-operational-control-bar,
+.cp-paso-operational-zone {
+  display: grid;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.cp-operational-control-bar {
+  grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.2fr) repeat(2, minmax(130px, auto));
+}
+
+.cp-inline-timer-actions {
+  align-content: center;
+  padding: 6px;
+  border-left: 2px solid var(--line);
+}
+
+.cp-terna-dashboard {
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+
+.cp-terna-dashboard .cp-terna-counter,
+.cp-terna-dashboard .cp-terna-counted {
+  min-height: 88px;
+  padding: 10px;
+}
+
+.cp-terna-history > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 7px 10px;
+  list-style: none;
+}
+
+.cp-terna-history > summary h3,
+.cp-terna-history > summary span {
+  margin: 0;
+}
+
+.cp-terna-history > ol,
+.cp-terna-history > p {
+  margin: 0;
+  padding: 8px 12px 12px 34px;
+}
+
+.cp-paso-operational-zone {
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, .7fr) minmax(180px, .6fr);
+}
+
+.cp-paso-operational-zone .cp-classification-selector {
+  margin: 0;
+}
+
+.cp-paso-operational-zone .cp-mangana-result,
+.cp-paso-operational-zone .cp-paso-summary {
+  align-content: center;
+}
+
+.cp-paso-timer-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr)) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.cp-paso-timer-controls > section {
+  display: grid;
+  grid-template-columns: minmax(90px, .55fr) minmax(0, 1.45fr);
+  align-items: center;
+  gap: 6px;
+}
+
+.cp-paso-timer-controls > section > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.cp-paso-timer-controls span,
+.cp-paso-timer-controls strong {
+  font-size: 10px;
+}
+
+.cp-scoring-family-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.cp-scoring-family-group {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+}
+
+.cp-scoring-family-group:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.cp-scoring-family-group > h3 {
+  margin: 0;
+  color: #9fc2ff;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.cp-disabled-reason {
+  grid-column: 1 / -1;
+  color: #ffd780;
+  font-size: 10px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1180px) {
+  .scoring-shell-classic .cp-scoring-navigation,
+  .cp-coleadero-selector {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-context-selector {
+    padding: 5px 0 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .cp-operational-control-bar,
+  .cp-paso-operational-zone,
+  .cp-paso-timer-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cp-terna-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .cp-team-card-strip,
+  .cp-coleador-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scoring-shell-classic .cp-live-score-overview,
+  .cp-operational-control-bar,
+  .cp-paso-operational-zone,
+  .cp-paso-timer-controls,
+  .cp-paso-timer-controls > section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scoring-shell-classic .cp-live-score-overview .cp-header-timer-group {
+    grid-column: auto;
+  }
+
+  .cp-context-selector,
+  .cp-coleadero-selector {
+    align-items: stretch;
+  }
+
+  .scoring-shell-classic .cp-compact-opportunities {
+    flex-wrap: wrap;
+  }
+
+  .cp-piales-distance {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-piales-distance-stepper,
+  .cp-piales-distance output,
+  .cp-piales-distance .cp-field-note {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .scoring-shell-classic .scoring-header {
+    align-items: start;
+  }
+
+  .cp-team-card-strip,
+  .cp-coleador-controls,
+  .cp-terna-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-team-card {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+  }
+
+  .cp-scoring-navigation .suerte-tab,
+  .cp-context-selector button,
+  .cp-scoring-action-button,
+  .cp-bottom-actions .button {
+    min-height: 48px;
+  }
+}
+
 .danger-state {
   border: 1px solid rgba(239, 91, 91, .45);
   background: rgba(239, 91, 91, .14);
@@ -9575,16 +10010,22 @@ html.graphic-page #graphic-root {
   gap: 8px;
 }
 
-.cp-mangana-history > span {
+.cp-mangana-history > button {
   min-width: 0;
   display: grid;
   gap: 3px;
+  border: 0;
   border-left: 3px solid var(--line);
   padding: 6px 8px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.cp-mangana-history > span.active {
+.cp-mangana-history > button.active {
   border-left-color: var(--blue);
+  background: var(--panel-2);
 }
 
 .cp-mangana-history em {
@@ -10743,5 +11184,138 @@ html.graphic-page #graphic-root {
   .cp-pending-list-item {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+/* Final scorer UX precedence over historical scorer layers. */
+.scoring-shell-classic.cp-scoring-shell {
+  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-auto-rows: auto;
+}
+
+.scoring-shell-classic .cp-live-score-overview {
+  position: relative;
+  top: auto;
+  z-index: auto;
+  box-shadow: none;
+}
+
+.scoring-shell-classic .cp-piales-panel .cp-piales-distance {
+  margin: 0;
+  border: 0;
+}
+
+.scoring-shell-classic .cp-terna-dashboard {
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+
+.scoring-shell-classic .cp-classification-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 138px), 1fr));
+}
+
+.scoring-shell-classic .cp-compact-opportunities {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+@media (max-width: 1180px) {
+  .scoring-shell-classic .cp-terna-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scoring-shell-classic .cp-bottom-bar {
+    grid-template-areas: "sync actions";
+    grid-template-columns: minmax(180px, .45fr) minmax(0, 1.55fr);
+  }
+
+  .scoring-shell-classic .cp-bottom-actions--settings {
+    display: none;
+  }
+
+  .scoring-shell-classic .cp-bottom-actions--primary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .scoring-shell-classic .cp-bottom-actions--primary .button,
+  .scoring-shell-classic .cp-save-score-button {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .scoring-shell-classic .cp-terna-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scoring-shell-classic .cp-live-score-overview {
+    grid-template-columns: minmax(120px, .7fr) minmax(0, 1.3fr);
+  }
+
+  .scoring-shell-classic .cp-live-score-overview .cp-header-timer-group {
+    grid-column: 1 / -1;
+  }
+
+  .scoring-shell-classic .cp-suertes-strip {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .scoring-shell-classic .scoring-header {
+    position: relative;
+    display: block;
+  }
+
+  .scoring-shell-classic .scoring-header > .button {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    z-index: 2;
+    width: auto;
+    min-width: 64px;
+    max-width: 72px;
+    margin: 0;
+  }
+
+  .scoring-shell-classic .cp-judge-context .scoring-title {
+    padding-right: 62px;
+  }
+
+  .scoring-shell-classic .cp-team-card-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .scoring-shell-classic .cp-team-card {
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-content: center;
+    min-height: 58px;
+    padding: 5px;
+  }
+
+  .scoring-shell-classic .cp-team-card > span {
+    width: 20px;
+    height: 20px;
+  }
+
+  .scoring-shell-classic .cp-team-card em {
+    grid-column: 2;
+    white-space: normal;
+  }
+
+  .scoring-shell-classic .cp-suertes-strip {
+    gap: 3px;
+  }
+
+  .scoring-shell-classic .suerte-tab {
+    min-height: 48px;
+    padding: 4px 2px;
+    font-size: 9px;
+  }
+
+  .scoring-shell-classic .cp-bottom-bar {
+    grid-template-areas: "sync" "actions";
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: 0;
   }
 }

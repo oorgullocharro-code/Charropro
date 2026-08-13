@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

@@ -4,7 +4,7 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale
 } from "../public/publicPortalClient.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260813-operational-flow-public-portal-corrections-001-v1",
+      "appVersion": "20260813-scorer-screen-by-screen-ux-refinement-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -116,6 +116,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "3e4a271e31dce13f36df9662b40d25f512cf2dfe35b65b1482c05857b0c7a6b6",
-  "fingerprint": "3e4a271e31dce13f36df9662b40d25f512cf2dfe35b65b1482c05857b0c7a6b6"
+  "checksum": "88e5d7b3f44839ddb5ac4f2507f2f1b9bc226523f5c8c4e843e8bae099fca8b1",
+  "fingerprint": "88e5d7b3f44839ddb5ac4f2507f2f1b9bc226523f5c8c4e843e8bae099fca8b1"
 }

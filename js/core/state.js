@@ -1,18 +1,18 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./timerRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,

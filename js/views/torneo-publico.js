@@ -1,3 +1,3 @@
-import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 
 bootstrapPublicPortal();

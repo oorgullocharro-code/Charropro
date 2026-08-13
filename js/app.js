@@ -1,6 +1,6 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./data/calaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -51,7 +51,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -71,12 +71,12 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -84,9 +84,9 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/timerRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -98,16 +98,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/scoring.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/scoringAttempt.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/scorerComponents.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -117,7 +117,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/sync.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   createFirebaseTournamentBackup,
@@ -156,7 +156,7 @@ import {
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/firebaseSync.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -168,7 +168,7 @@ import {
   putPendingScoreReview,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/pendingScoreReview.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -221,7 +221,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./core/state.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -392,6 +392,7 @@ const ACTION_CAPABILITIES = {
   "select-suerte": "score",
   "select-team": "score",
   "select-attempt": "score",
+  "select-coleadero-attempt": "score",
   "select-coleador": "score",
   "select-terna-suerte": "score",
   "select-terna-history": "score",
@@ -399,6 +400,7 @@ const ACTION_CAPABILITIES = {
   "punta-set": "score",
   "punta-input": "score",
   "piales-distance-input": "score",
+  "adjust-piales-distance": "score",
   "attempt-field": "score",
   "desc-select": "score",
   "desc-other": "score",
@@ -476,11 +478,13 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "select-suerte",
   "select-team",
   "select-attempt",
+  "select-coleadero-attempt",
   "select-coleador",
   "punta-step",
   "punta-set",
   "punta-input",
   "piales-distance-input",
+  "adjust-piales-distance",
   "attempt-field",
   "desc-select",
   "desc-other",
@@ -8014,16 +8018,7 @@ function renderScoring({ preserveScroll = false } = {}) {
   app.innerHTML = html`
     <div class="scoring-shell cp-scoring-shell scoring-shell-classic ${turnPanelCollapsed ? "turn-panel-collapsed" : ""}">
       ${renderScoringHeader(charreada, context, charroName, attemptView)}
-      <nav class="suertes-strip cp-suertes-strip">
-        ${suertes.map(
-          (suerte, index) => html`
-            <button class="suerte-tab ${index === state.scoringSuerteIdx ? "active" : ""}" data-action="select-suerte" data-index="${index}">
-              ${escapeHTML(suerte.name)}
-            </button>
-          `
-        ).join("")}
-      </nav>
-      ${renderScoringOpportunityBar(context, charroName, showColeadorSelector, attemptView)}
+      ${renderScoringNavigation(suertes, context, charroName, showColeadorSelector)}
 
       <main class="scoring-main">
         <section class="score-workspace cp-scoring-main">
@@ -8032,9 +8027,8 @@ function renderScoring({ preserveScroll = false } = {}) {
             : attemptView.status.isZero
               ? renderZeroStateNotice()
               : ""}
-          ${renderScoringLiveOverview(attemptView)}
-          ${renderScoringClassificationSlot(context, attemptView)}
-          ${renderScoringMainPanel(charreada, context, charroName)}
+          ${context.suerte.id === "paso" ? "" : renderScoringClassificationSlot(context, attemptView)}
+          ${renderScoringMainPanel(charreada, context, charroName, attemptView)}
           <section class="cp-botonera-panel">
             ${renderScoringActionAccordions(charreada, context, charroName, leaderboard)}
           </section>
@@ -8213,14 +8207,14 @@ function buildScoringAttemptV2Context(context, attempt = context.attempt) {
   };
 }
 
-function renderScoringMainPanel(charreada, context, charroName) {
+function renderScoringMainPanel(charreada, context, charroName, attemptView) {
   if (context.suerte.id === "cala") return renderCalaMainPanel(context);
   if (context.suerte.type === "coleadero" || context.suerte.id === "colas") return renderColeaderoMainPanel(context);
   if (context.suerte.id === "piales") return renderAttemptMainPanel(context);
   if (isFmch2026ManganaSuerte(context.suerte.id)) return renderManganasMainPanel(context);
   if (["toro", "yegua"].includes(context.suerte.id)) return renderJineteoMainPanel(context);
   if (isFmch2026TernaSuerte(context.suerte.id) || context.suerte.id === "terna") return renderTernaMainPanel(context);
-  if (context.suerte.id === "paso") return renderPasoMainPanel(context);
+  if (context.suerte.id === "paso") return renderPasoMainPanel(context, attemptView);
   return renderGenericMainPanel(charreada, context, charroName);
 }
 
@@ -8293,29 +8287,60 @@ function renderClassicTurnPanel(charreada, context, labels, showColeadorSelector
   `;
 }
 
-function renderScoringOpportunityBar(context, charroName, showColeadorSelector, attemptView) {
+function renderScoringNavigation(suertes, context, charroName, showColeadorSelector) {
   const ternaRuntime = getTernaRuntime(context);
-  if (ternaRuntime) return renderTernaOpportunityBar(context, charroName, ternaRuntime);
   return html`
-    <section class="scoring-opportunity-bar cp-opportunity-selector" data-scorer-zone="opportunity-selector" aria-label="Seleccionar oportunidad">
-      <strong class="cp-opportunity-selector-label">Oportunidad</strong>
-      <div class="opportunity-controls" aria-label="Oportunidades">
-        ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
-          <button data-action="select-attempt" data-index="${index}" class="${index === state.scoringAttemptIdx ? "active" : ""}">
-            ${index + 1}/${context.suerte.attempts}
-          </button>
-        `).join("")}
-        ${
-          showColeadorSelector
-            ? [0, 1, 2].map((index) => html`
-                <button data-action="select-coleador" data-index="${index}" class="${index === state.scoringColeadorIdx ? "active" : ""}">
-                  ${escapeHTML(getColeadorDisplayName(context, index))}
-                </button>
-              `).join("")
-            : ""
-        }
-      </div>
+    <section class="cp-scoring-navigation" data-scorer-zone="scoring-navigation" aria-label="Navegacion del calificador">
+      <nav class="suertes-strip cp-suertes-strip" aria-label="Suertes">
+        ${suertes.map(
+          (suerte, index) => html`
+            <button class="suerte-tab ${index === state.scoringSuerteIdx ? "active" : ""}" data-action="select-suerte" data-index="${index}">
+              ${escapeHTML(suerte.name)}
+            </button>
+          `
+        ).join("")}
+      </nav>
+      ${ternaRuntime
+        ? renderTernaOpportunityBar(context, charroName, ternaRuntime)
+        : renderStandardScoringContextSelector(context, showColeadorSelector)}
     </section>
+  `;
+}
+
+function renderStandardScoringContextSelector(context, showColeadorSelector) {
+  if (context.suerte.attempts <= 1 && !showColeadorSelector) return "";
+  if (isFmch2026ManganaSuerte(context.suerte.id)) return "";
+  if (showColeadorSelector) {
+    return html`
+      <div class="cp-context-selector cp-coleadero-selector" data-scorer-zone="opportunity-selector" aria-label="Coleador y oportunidad">
+        <div class="cp-coleador-controls" aria-label="Coleadores">
+          ${[0, 1, 2].map((index) => html`
+            <button data-action="select-coleador" data-index="${index}" class="${index === state.scoringColeadorIdx ? "active" : ""}">
+              <strong>${escapeHTML(getColeadorDisplayName(context, index))}</strong>
+              <span>${index === state.scoringColeadorIdx ? `Activa ${state.scoringAttemptIdx + 1}/${context.suerte.attempts}` : "Seleccionar"}</span>
+            </button>
+          `).join("")}
+        </div>
+        <label class="cp-coleadero-attempt-select">
+          <span>Oportunidad</span>
+          <select data-action="select-coleadero-attempt" aria-label="Oportunidad del coleador activo">
+            ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
+              <option value="${index}" ${index === state.scoringAttemptIdx ? "selected" : ""}>${index + 1}/${context.suerte.attempts}</option>
+            `).join("")}
+          </select>
+        </label>
+      </div>
+    `;
+  }
+  return html`
+    <div class="cp-context-selector" data-scorer-zone="opportunity-selector" aria-label="Oportunidades">
+      <span>Intento</span>
+      <div class="opportunity-controls cp-compact-opportunities">
+        ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
+          <button data-action="select-attempt" data-index="${index}" class="${index === state.scoringAttemptIdx ? "active" : ""}">${index + 1}/${context.suerte.attempts}</button>
+        `).join("")}
+      </div>
+    </div>
   `;
 }
 
@@ -8323,7 +8348,7 @@ function renderTernaOpportunityBar(context, charroName, runtime) {
   const used = runtime.session.history.length;
   const current = runtime.session.currentOpportunity;
   return html`
-    <section class="scoring-opportunity-bar cp-opportunity-selector cp-terna-opportunity-bar" data-scorer-zone="opportunity-selector" data-terna-session="${escapeHTML(runtime.session.ternaSessionId)}">
+    <div class="cp-context-selector cp-terna-opportunity-bar" data-scorer-zone="opportunity-selector" data-terna-session="${escapeHTML(runtime.session.ternaSessionId)}">
       <div class="opportunity-summary">
         <span>Compartidas</span>
         <strong>${used}/${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</strong>
@@ -8344,7 +8369,7 @@ function renderTernaOpportunityBar(context, charroName, runtime) {
           `;
         }).join("")}
       </div>
-    </section>
+    </div>
   `;
 }
 
@@ -8364,31 +8389,9 @@ function renderCalaMainPanel(context) {
 }
 
 function renderAttemptMainPanel(context) {
-  const title = "Calificador de piales";
-  const attempts = getAttemptsForContext(context);
-  const activeAttempt = attempts[context.attemptIndex] || context.attempt;
-  const timerRuntime = getFmch2026SportTimerRuntimes(context)[0];
   return html`
-    <section class="cp-scoring-card cp-main-suerte-panel">
-      <header>
-        <div>
-          <span>${renderCpIcon("target")}</span>
-          <h2>${title}</h2>
-        </div>
-        <p>Registra cada intento y usa la botonera para aplicar valores oficiales.</p>
-      </header>
-      ${renderOfficialSportTimer(timerRuntime)}
-      <div class="cp-attempt-panel">
-        ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
-          ${renderAttemptSummaryButton(index, attempts[index], index === context.attemptIndex)}
-        `).join("")}
-        <article class="cp-main-total-card">
-          <span>Total de oportunidad activa</span>
-          <strong>${moneylessNumber(calculateAttemptTotal(activeAttempt))}</strong>
-          <em>${formatAttemptBreakdown(activeAttempt)}</em>
-        </article>
-      </div>
-      ${context.suerte.id === "piales" ? renderPialesDistanceCalculator(context) : ""}
+    <section class="cp-scoring-card cp-main-suerte-panel cp-piales-panel">
+      ${renderPialesDistanceCalculator(context)}
     </section>
   `;
 }
@@ -8396,7 +8399,6 @@ function renderAttemptMainPanel(context) {
 function renderManganasMainPanel(context) {
   const attempts = getAttemptsForContext(context);
   const attempt = reconcileFmch2026ManganaAttempt(context.attempt, context.suerte);
-  const timerRuntime = getFmch2026SportTimerRuntimes(context)[0];
   const detailRules = getFmch2026ManganaFloreoRules(context.suerte.id);
   const selectedDetail = new Set((attempt.floreoDetail || []).map((item) => item.selectedRuleId));
   const isPie = context.suerte.id === "manganas_pie";
@@ -8413,7 +8415,11 @@ function renderManganasMainPanel(context) {
         <p>Tres oportunidades, remate identificado y captura rápida de floreo.</p>
       </header>
       <div class="cp-manganas-dashboard">
-        ${renderOfficialSportTimer(timerRuntime)}
+        <article class="cp-mangana-attempt">
+          <span>Intento actual</span>
+          <strong>${context.attemptIndex + 1} de ${context.suerte.attempts}</strong>
+          <em>${attempt.manganaResult === "ACHIEVED" ? "Lograda" : attempt.manganaResult === "NOT_ACHIEVED" ? "No lograda" : "En captura"}</em>
+        </article>
         <article class="cp-mangana-total">
           <span>Total de oportunidad</span>
           <strong>${moneylessNumber(calculateAttemptTotal(attempt))}</strong>
@@ -8462,15 +8468,21 @@ function renderManganasMainPanel(context) {
         </div>
       </details>
       <section class="cp-mangana-history" aria-label="Historial de remates">
-        ${buildFmch2026ManganaRemateHistory(attempts).map((item) => html`
-          <span class="${item.opportunityNumber === context.attemptIndex + 1 ? "active" : ""}">
-            <strong>${item.opportunityNumber}/3</strong>
-            <em>${escapeHTML(item.remateLabel || "Sin remate")}</em>
-          </span>
+        ${attempts.map((historyAttempt, index) => html`
+          <button type="button" data-action="select-attempt" data-index="${index}" class="${index === context.attemptIndex ? "active" : ""}" aria-pressed="${index === context.attemptIndex ? "true" : "false"}">
+            <strong>${index + 1}</strong>
+            <em>${escapeHTML(formatManganaHistoryState(historyAttempt, index === context.attemptIndex))}</em>
+          </button>
         `).join("")}
       </section>
     </section>
   `;
+}
+
+function formatManganaHistoryState(attempt = {}, active = false) {
+  if (active) return "ACTIVA";
+  if (hasAttemptVisibleResult(attempt)) return `${attempt.desc ? "DQ" : "✓"} ${moneylessNumber(calculateAttemptTotal(attempt))} pts`;
+  return "PENDIENTE";
 }
 
 function renderOfficialSportTimer(runtime) {
@@ -8519,19 +8531,23 @@ function renderPialesDistanceCalculator(context) {
         <strong>Metros completos excedentes</strong>
         <p>Se suma un punto por cada metro excedente de la distancia reglamentaria.</p>
       </div>
-      <label>
-        <span>Metros</span>
-        <input
-          type="number"
-          min="0"
-          max="90"
-          step="0.01"
-          inputmode="decimal"
-          value="${escapeHTML(distanceMeters)}"
-          data-action="piales-distance-input"
-          ${blocked ? "disabled" : ""}
-        >
-      </label>
+      <div class="cp-piales-distance-stepper" role="group" aria-label="Metros adicionales">
+        <button type="button" data-action="adjust-piales-distance" data-delta="-1" aria-label="Restar un metro" ${blocked ? "disabled" : ""}>−</button>
+        <label>
+          <span>Metros</span>
+          <input
+            type="number"
+            min="0"
+            max="90"
+            step="0.01"
+            inputmode="decimal"
+            value="${escapeHTML(distanceMeters)}"
+            data-action="piales-distance-input"
+            ${blocked ? "disabled" : ""}
+          >
+        </label>
+        <button type="button" data-action="adjust-piales-distance" data-delta="1" aria-label="Sumar un metro" ${blocked ? "disabled" : ""}>+</button>
+      </div>
       <output>
         <span>Adicional</span>
         <strong>+${moneylessNumber(points)}</strong>
@@ -8542,55 +8558,7 @@ function renderPialesDistanceCalculator(context) {
 }
 
 function renderColeaderoMainPanel(context) {
-  const coleadorName = getCharroName(context);
-  const collection = getScoreCollectionForContext(context);
-  const coleadorCount = context.tournament?.type === "coleadero" || context.competitionContext?.isIndividualCompetition
-    ? 1
-    : Math.max(3, Array.isArray(collection) ? collection.length : 0);
-  const activeAttempts = getAttemptsForContext(context);
-  const coleadorTotal = activeAttempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
-  const timerRuntime = getFmch2026SportTimerRuntimes(context)[0];
-  return html`
-    <section class="cp-scoring-card cp-main-suerte-panel">
-      <header>
-        <div>
-          <span>${renderCpIcon("rope")}</span>
-          <h2>Calculador de colas en el lienzo</h2>
-        </div>
-        <p>Controla coleador, oportunidad y total del intento actual.</p>
-      </header>
-      ${renderOfficialSportTimer(timerRuntime)}
-      <div class="cp-attempt-panel">
-        ${Array.from({ length: coleadorCount }, (_, index) => {
-          const attempts = getAttemptsForContext(context, index);
-          const total = attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
-          const name = getColeadorDisplayName(context, index);
-          return html`
-            <button class="cp-attempt-card ${index === context.coleadorIndex ? "active" : ""}" data-action="select-coleador" data-index="${index}">
-              <span>Coleador ${index + 1}</span>
-              <strong>${escapeHTML(name || `Coleador ${index + 1}`)}</strong>
-              <em>${moneylessNumber(total)} pts</em>
-            </button>
-          `;
-        }).join("")}
-        <article class="cp-main-total-card">
-          <span>Total del coleador activo</span>
-          <strong>${moneylessNumber(coleadorTotal)}</strong>
-          <em>${escapeHTML(coleadorName)}</em>
-        </article>
-      </div>
-      <div class="cp-attempt-panel cp-opportunity-panel">
-        ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
-          ${renderAttemptSummaryButton(index, activeAttempts[index], index === context.attemptIndex, `Oportunidad ${index + 1}`)}
-        `).join("")}
-        <article class="cp-main-total-card">
-          <span>Oportunidad activa</span>
-          <strong>${moneylessNumber(calculateAttemptTotal(context.attempt))}</strong>
-          <em>${formatAttemptBreakdown(context.attempt)}</em>
-        </article>
-      </div>
-    </section>
-  `;
+  return "";
 }
 
 function getColeadorDisplayName(context, index) {
@@ -8660,8 +8628,17 @@ function renderJineteoMainPanel(context) {
         </div>
         <p>Selecciona la clasificación; las acciones conservan su identidad y actualizan su valor reglamentario.</p>
       </header>
-      <div class="cp-jineteo-controls">
-        ${renderOfficialSportTimer(timerRuntime)}
+      <div class="cp-jineteo-controls cp-operational-control-bar">
+        <div class="cp-jineteo-timing-summary">
+          <span>Apretalamiento</span>
+          <strong>${escapeHTML(timerView.status || "READY")}</strong>
+          <em>${timing.disqualified
+            ? "Pierde la jineteada"
+            : timing.minute5Penalty ? "Dos infracciones" : timing.minute4Penalty ? "Una infracción" : timing.timeSavedQuantity ? `+${timing.timeSavedQuantity} por tiempo` : "Sin ajuste"}</em>
+        </div>
+        <div class="cp-sport-timer-actions cp-inline-timer-actions">
+          ${timerRuntime ? renderScorerTimerControlButtons(timerRuntime) : ""}
+        </div>
         ${context.suerte.id === "yegua"
           ? html`<button
               class="button ${noRepara ? "amber" : ""}"
@@ -8670,13 +8647,6 @@ function renderJineteoMainPanel(context) {
               aria-pressed="${noRepara ? "true" : "false"}"
             >${noRepara ? "No repara: Mínima" : "Marcar No repara"}</button>`
           : ""}
-        <div class="cp-jineteo-timing-summary">
-          <span>Apretalamiento</span>
-          <strong class="official-timer-display" data-official-timer-id="${escapeHTML(timerRuntime?.timer?.timerId || "")}">${escapeHTML(timerView.formattedRemaining)}</strong>
-          <em>${timing.disqualified
-            ? "Pierde la jineteada"
-            : timing.minute5Penalty ? "Dos infracciones" : timing.minute4Penalty ? "Una infracción" : timing.timeSavedQuantity ? `+${timing.timeSavedQuantity} por tiempo` : "Sin ajuste"}</em>
-        </div>
         <button class="button primary" data-action="apply-jineteo-timing" type="button">Aplicar tiempo</button>
       </div>
       ${context.attempt.timing?.timerId
@@ -8694,6 +8664,7 @@ function renderTernaMainPanel(context) {
   const session = runtime.session;
   const currentType = context.suerte.id === "lazo" ? "HEAD" : "PIAL";
   const history = session.history;
+  const nextContextLabel = getTernaNextContextLabel(context, session, currentType);
   const canFinishSession = canFinishFmch2026TernaSession(session);
   const pendingSessionReview = hasPendingTernaSessionReview(context);
   return html`
@@ -8710,21 +8681,25 @@ function renderTernaMainPanel(context) {
         <button class="button ${currentType === "PIAL" ? "primary" : ""}" data-action="select-terna-suerte" data-id="pial_ruedo" type="button">Pial en el Ruedo</button>
       </div>
       <div class="cp-terna-dashboard">
-        <article class="cp-terna-timer ${timer.paused ? "paused" : ""}">
-          <span>Tiempo oficial de Terna</span>
-          <strong class="terna-timer-display" data-terna-timer-id="${escapeHTML(timer.timerId)}">${escapeHTML(timer.formattedRemaining)}</strong>
-          <em>${escapeHTML(timer.status)}${timer.pauseReason ? ` · ${timer.pauseReason}` : ""} · Control: ${escapeHTML(control.controllerLabel)}</em>
-          <small>Tiempo real ${escapeHTML(formatTimerMs(timer.wallElapsedMs))} · oficial ${escapeHTML(formatTimerMs(timer.officialElapsedMs))}</small>
+        <article class="cp-terna-counter">
+          <span>Lazador actual</span>
+          <strong>${escapeHTML(currentType === "HEAD" ? "Lazo Cabecero" : "Pial en el Ruedo")}</strong>
+          <em>${escapeHTML(charroNameForTerna(context))}</em>
         </article>
         <article class="cp-terna-counter">
-          <span>Oportunidades compartidas</span>
-          <strong>${history.length}/${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</strong>
-          <em>${session.currentOpportunity ? `Actual ${session.currentOpportunity}` : session.closure?.type === "EARLY_FINISH" ? "Terna finalizada" : "Cupo agotado"}</em>
+          <span>Intento actual</span>
+          <strong>${session.currentOpportunity || history.length} de ${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</strong>
+          <em>${session.closure?.type === "EARLY_FINISH" ? "Terna finalizada" : `${history.length} consumido(s)`}</em>
         </article>
         <article class="cp-terna-counted">
-          <span>Lazos de cuenta</span>
-          <strong>${session.headCounted ? "Cabecero listo" : "Cabecero pendiente"}</strong>
-          <em>${session.pialCounted ? "Pial listo" : "Pial pendiente"}</em>
+          <span>Siguiente lazador</span>
+          <strong>${escapeHTML(nextContextLabel)}</strong>
+          <em>Derivado de la secuencia oficial</em>
+        </article>
+        <article class="cp-terna-counted cp-terna-time-reference">
+          <span>Tiempo Terna</span>
+          <strong>${escapeHTML(timer.status)}</strong>
+          <em>Cuenta oficial visible en cabecera</em>
         </article>
       </div>
       <div class="cp-terna-timer-controls">
@@ -8759,13 +8734,14 @@ function renderTernaMainPanel(context) {
       ${session.timeAdditional.applied
         ? html`<p class="cp-terna-time-additional" data-publication-status="${escapeHTML(session.timeAdditional.publicationStatus || "NOT_REQUIRED")}">Tiempo no utilizado: +${session.timeAdditional.pointsPerLazador} a cada lazador (${session.timeAdditional.completeUnusedMinutes} minuto(s) completo(s)). Publicación: ${escapeHTML(getTernaTimeAdditionalPublicationLabel(session.timeAdditional.publicationStatus))}.</p>`
         : ""}
-      <section class="cp-terna-history" aria-labelledby="terna-history-title">
-        <header>
+      <details class="cp-terna-history cp-inline-secondary-control" aria-labelledby="terna-history-title">
+        <summary>
           <div>
             <span>Historial compartido</span>
-            <h3 id="terna-history-title">Secuencia oficial</h3>
+            <h3 id="terna-history-title">Secuencia oficial · ${history.length}/${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</h3>
           </div>
-        </header>
+          <span class="cp-inline-disclosure">Abrir</span>
+        </summary>
         ${history.length
           ? html`<ol>${history.map((entry) => html`
               <li>
@@ -8781,12 +8757,32 @@ function renderTernaMainPanel(context) {
               </li>
             `).join("")}</ol>`
           : html`<p class="cp-terna-empty">Todavía no hay oportunidades consumidas.</p>`}
-      </section>
+      </details>
     </section>
   `;
 }
 
-function renderPasoMainPanel(context) {
+function charroNameForTerna(context) {
+  return getCharroName(context) || (context.suerte.id === "lazo" ? "Cabecero" : "Pialador");
+}
+
+function getTernaNextContextLabel(context, session, currentType) {
+  const draft = buildFmch2026TernaOpportunityDraft(session, {
+    type: currentType,
+    participantId: context.team?.id,
+    participantName: charroNameForTerna(context),
+    attemptIndex: context.attemptIndex,
+    result: "ATTEMPTED"
+  });
+  if (!draft.ok) return "Siguiente contexto";
+  const preview = commitFmch2026TernaOpportunity(session, draft.opportunity, { scoreId: "preview" });
+  if (!preview.ok) return "Siguiente contexto";
+  const nextSuerteId = resolveFmch2026TernaNextSuerteId(preview.session);
+  if (!nextSuerteId) return "Siguiente contexto";
+  return nextSuerteId === "lazo" ? "Lazo Cabecero" : "Pial en el Ruedo";
+}
+
+function renderPasoMainPanel(context, attemptView) {
   const timers = getFmch2026SportTimerRuntimes(context);
   const attempt = reconcileFmch2026PasoAttempt(context.attempt, context.suerte);
   return html`
@@ -8798,17 +8794,26 @@ function renderPasoMainPanel(context) {
         </div>
         <p>Selecciona vuelta y clasificación; las acciones dinámicas toman su valor del perfil vigente.</p>
       </header>
-      <div class="cp-paso-dashboard">
-        ${timers.map(renderOfficialSportTimer).join("")}
+      <div class="cp-paso-operational-zone">
+        ${renderScoringClassificationSlot(context, attemptView)}
+        <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo del Paso">
+          <button type="button" class="button ${attempt.pasoResult === "ACHIEVED" ? "primary" : ""}" data-action="set-paso-result" data-result="ACHIEVED">Logrado</button>
+          <button type="button" class="button ${attempt.pasoResult === "NOT_ACHIEVED" ? "amber" : ""}" data-action="set-paso-result" data-result="NOT_ACHIEVED">No logrado</button>
+        </div>
         <article class="cp-paso-summary">
           <span>Faena</span>
           <strong>${attempt.pasoVuelta === 2 ? "Segunda vuelta" : "Primera vuelta"}</strong>
           <em>${attempt.classification?.classificationLabel || "Clasificación pendiente"} · ${moneylessNumber(calculateAttemptTotal(attempt))} pts</em>
         </article>
       </div>
-      <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo del Paso">
-        <button type="button" class="button ${attempt.pasoResult === "ACHIEVED" ? "primary" : ""}" data-action="set-paso-result" data-result="ACHIEVED">Logrado</button>
-        <button type="button" class="button ${attempt.pasoResult === "NOT_ACHIEVED" ? "amber" : ""}" data-action="set-paso-result" data-result="NOT_ACHIEVED">No logrado</button>
+      <div class="cp-paso-timer-controls" aria-label="Controles temporales del Paso">
+        ${timers.map((runtime) => html`
+          <section>
+            <div><span>${escapeHTML(runtime.kind === "paso_exit" ? "Salida" : "Desmonte")}</span><strong>${escapeHTML(runtime.view.status)}</strong></div>
+            <div class="cp-sport-timer-actions">${renderScorerTimerControlButtons(runtime)}</div>
+          </section>
+        `).join("")}
+        <button class="button" data-action="apply-sport-timing" type="button">Aplicar tiempos</button>
       </div>
     </section>
   `;
@@ -8833,13 +8838,14 @@ function renderScoringActionAccordions(charreada, context, charroName, leaderboa
   const baseButtons = buttons.filter((button) => button.ruleType === "base");
   const adicButtons = buttons.filter((button) => button.ruleType === "adic");
   const infrButtons = buttons.filter((button) => button.ruleType === "infr");
+  const openIndividualInfractions = ["colas", "toro", "lazo", "pial_ruedo", "yegua"].includes(context.suerte.id);
 
   return [
     context.suerte.ruleMetadata?.classificationControlsBase
       ? ""
       : renderScoringAccordionGroup("base", "Calificaciones base", "target", renderScoringActionGroupBody("base", baseButtons, charreada, context, charroName, leaderboard)),
     renderScoringAccordionGroup("adic", "Adicionales", "plus", renderScoringActionGroupBody("adic", adicButtons, charreada, context, charroName, leaderboard)),
-    renderScoringAccordionGroup("infr", "Infracciones", "warning", renderScoringActionGroupBody("infr", infrButtons, charreada, context, charroName, leaderboard), { collapsible: true }),
+    renderScoringAccordionGroup("infr", "Infracciones", "warning", renderScoringActionGroupBody("infr", infrButtons, charreada, context, charroName, leaderboard), { collapsible: true, defaultOpen: openIndividualInfractions }),
     renderScoringAccordionGroup("teamPenalties", "Infracciones al equipo", "shield", renderTeamPenaltySection(context), { collapsible: true }),
     renderScoringAccordionGroup("desc", "Descalificaciones", "ban", renderDescSection(context), { collapsible: true, tone: "danger" })
   ].join("");
@@ -8847,7 +8853,7 @@ function renderScoringActionAccordions(charreada, context, charroName, leaderboa
 
 function renderScoringActionGroupBody(groupId, buttons, charreada, context, charroName, leaderboard) {
   const buttonGrid = buttons.length
-    ? html`<div class="cp-scoring-button-grid">${buttons.map((button) => renderConfigurableScoringButton(button)).join("")}</div>`
+    ? renderScoringButtonLayout(groupId, buttons, context)
     : html`<div class="cp-empty-actions">Sin botones activos en este grupo.</div>`;
 
   if (groupId === "adic") {
@@ -8865,6 +8871,52 @@ function renderScoringActionGroupBody(groupId, buttons, charreada, context, char
   }
 
   return buttonGrid;
+}
+
+function renderScoringButtonLayout(groupId, buttons, context) {
+  if (groupId === "adic" && context.suerte.id === "cala") {
+    return renderNamedScoringGroups(CALA_ADIC_SECTIONS.map((section) => ({
+      label: section.label,
+      buttons: buttons.filter((button) => section.ids.includes(button.ruleId))
+    })), buttons);
+  }
+  if (groupId === "base" && context.suerte.id === "manganas_caballo") {
+    const groups = [
+      { label: "Básicas", match: (label) => !/(rodad|morena|bigotona|contra|desden|desdén|espalda|ancas|centenario)/i.test(label) },
+      { label: "Rodadas / variantes", match: (label) => /(rodad|morena|bigotona)/i.test(label) && !/contra|desden|desdén/i.test(label) },
+      { label: "Contras", match: (label) => /contra/i.test(label) && !/desden|desdén/i.test(label) },
+      { label: "Desdenes / especiales", match: (label) => /(desden|desdén|espalda|ancas|centenario)/i.test(label) }
+    ].map((group) => ({ ...group, buttons: buttons.filter((button) => group.match(button.label)) }));
+    return renderNamedScoringGroups(groups, buttons);
+  }
+  if (groupId === "adic" && context.suerte.id === "paso") {
+    const groups = [
+      { label: "Arreo", match: (label) => /arreo/i.test(label) && !/cuarte/i.test(label) },
+      { label: "Cuartear", match: (label) => /cuarte/i.test(label) },
+      { label: "Ejecución", match: (label) => /(oreja|pierna|ape|levant)/i.test(label) },
+      { label: "Distancia", match: (label) => /(distancia|cuarto)/i.test(label) }
+    ].map((group) => ({ ...group, buttons: buttons.filter((button) => group.match(button.label)) }));
+    return renderNamedScoringGroups(groups, buttons);
+  }
+  return html`<div class="cp-scoring-button-grid">${buttons.map((button) => renderConfigurableScoringButton(button)).join("")}</div>`;
+}
+
+function renderNamedScoringGroups(groups, allButtons) {
+  const assigned = new Set(groups.flatMap((group) => group.buttons.map((button) => button.ruleId)));
+  const normalized = [
+    ...groups.filter((group) => group.buttons.length),
+    { label: "Otras", buttons: allButtons.filter((button) => !assigned.has(button.ruleId)) }
+  ].filter((group) => group.buttons.length);
+  return html`
+    <div class="cp-scoring-family-groups">
+      ${normalized.map((group) => html`
+        <section class="cp-scoring-family-group">
+          <h3>${escapeHTML(group.label)}</h3>
+          <div class="cp-scoring-button-grid">${group.buttons.map((button) => renderConfigurableScoringButton(button)).join("")}</div>
+        </section>
+      `).join("")}
+    </div>
+  `;
 }
 
 function renderConfigurableScoringButton(button) {
@@ -8913,6 +8965,7 @@ function renderConfigurableScoringButton(button) {
       ${button.repeatable && button.quantity > 0
         ? html`<em>Aplicaciones: ${button.quantity}${button.maxQuantity ? `/${button.maxQuantity}` : ""}</em>`
         : button.description ? html`<em>${escapeHTML(button.description)}</em>` : ""}
+      ${model.disabledReason ? html`<small class="cp-disabled-reason">${escapeHTML(model.disabledReason)}</small>` : ""}
     </button>
   `;
   if (!button.repeatable) return mainButton;
@@ -9132,7 +9185,7 @@ function renderScoringTurnSelector(charreada, context, labels, showColeadorSelec
 function renderScoringAccordionGroup(groupId, title, icon, body, options = {}) {
   if (options.collapsible) {
     return html`
-      <details class="cp-accordion-group cp-inline-secondary-control ${escapeHTML(options.tone || "")}" data-accordion="${groupId}" data-scorer-zone="secondary-controls">
+      <details class="cp-accordion-group cp-inline-secondary-control ${escapeHTML(options.tone || "")}" data-accordion="${groupId}" data-scorer-zone="secondary-controls" ${options.defaultOpen ? "open" : ""}>
         <summary class="cp-accordion-header cp-block-header">
           <span class="cp-accordion-icon" aria-hidden="true">${renderCpIcon(icon)}</span>
           <strong>${escapeHTML(title)}</strong>
@@ -9181,7 +9234,7 @@ function renderScoringTimerGroup(attemptView) {
       ${attemptView.timers.map((timer) => {
         const timerId = String(timer.timerId || "");
         const isTernaTimer = timerId.startsWith("terna:");
-        const isOfficialSportTimer = /^timer_(?:manganas|paso|toro|yegua)_/.test(timerId);
+        const isOfficialSportTimer = /^timer_/.test(timerId);
         const displayClass = isTernaTimer
           ? "terna-timer-display"
           : isOfficialSportTimer ? "official-timer-display" : "timer-display";
@@ -9540,6 +9593,7 @@ function renderScoringBottomBar(context) {
       : `Turno ${context.teamIndex + 1} / oportunidad ${context.attemptIndex + 1}`);
   const pendingCount = getActivePendingScoreReviews().length;
   const resolvingPending = Boolean(activePendingResolutionId);
+  const saveLabel = getScoringSaveButtonLabel(context);
   return html`
     <footer class="cp-bottom-bar">
       <div class="cp-bottom-actions cp-bottom-actions--settings muted">
@@ -9559,12 +9613,35 @@ function renderScoringBottomBar(context) {
         <button class="button cp-pending-review-button" data-action="show-pending-review-create" type="button" ${resolvingPending || pendingReviewOperationInProgress ? "disabled" : ""}>
           ${renderCpIcon("flag")} Pendiente
         </button>
-        <button class="button primary cp-save-score-button" data-action="next-score" type="button" ${officialPublishInProgress ? "disabled" : ""}>
-          ${renderCpIcon("check")} ${officialPublishInProgress ? "Publicando..." : resolvingPending ? "Resolver y publicar" : "Guardar y siguiente"}
+        <button class="button primary cp-save-score-button" data-action="next-score" type="button" aria-label="Guardar y siguiente: ${escapeHTML(saveLabel)}" ${officialPublishInProgress ? "disabled" : ""}>
+          ${renderCpIcon("check")} ${officialPublishInProgress ? "Publicando..." : resolvingPending ? "Resolver y publicar" : `Guardar → ${escapeHTML(saveLabel)}`}
         </button>
       </div>
     </footer>
   `;
+}
+
+function getScoringSaveButtonLabel(context) {
+  const attempts = Math.max(1, Number(context.suerte?.attempts || 1));
+  if (isFmch2026TernaSuerte(context.suerte?.id)) {
+    const runtime = getTernaRuntime(context);
+    const currentType = context.suerte.id === "lazo" ? "HEAD" : "PIAL";
+    return runtime ? getTernaNextContextLabel(context, runtime.session, currentType) : "siguiente lazador";
+  }
+  if (context.suerte?.id === "colas") {
+    const participantSlots = context.competitionContext?.isIndividualCompetition || isIndividualTournament(context.tournament) ? 1 : 3;
+    if (context.coleadorIndex < participantSlots - 1) return `coleador ${context.coleadorIndex + 2}`;
+    const entries = getCharreadaScoringEntries(context.charreada);
+    if (context.teamIndex < entries.length - 1) return "siguiente participante";
+    if (context.attemptIndex < attempts - 1) return `oportunidad ${context.attemptIndex + 2}`;
+  } else if (context.attemptIndex < attempts - 1) {
+    return `oportunidad ${context.attemptIndex + 2}`;
+  }
+  const entries = getCharreadaScoringEntries(context.charreada);
+  if (context.teamIndex < entries.length - 1) return "siguiente participante";
+  const suertes = getCharreadaScoringSuertes(context.charreada, context.tournament);
+  if (state.scoringSuerteIdx < suertes.length - 1) return suertes[state.scoringSuerteIdx + 1]?.name || "siguiente suerte";
+  return "cerrar recorrido";
 }
 
 function getActivePendingScoreReviews() {
@@ -9734,22 +9811,24 @@ function renderScoringHeader(charreada, context, charroName, attemptView) {
           </dl>
           ${renderSupervisorReviewNotice()}
         </div>
-        <details class="cp-turn-switcher">
-          <summary>Cambiar ${escapeHTML(labels.scoreEntityLabel.toLowerCase())} · turno ${context.teamIndex + 1}/${scoringEntries.length}</summary>
-          <div class="header-turn-strip" aria-label="Turnos y puntuaciones">
-            ${scoringEntries
-              .map((entry, index) => html`
-                <button class="header-turn-chip ${index === state.scoringTeamIdx ? "active" : ""}" data-action="select-team" data-index="${index}">
-                  <span>${index + 1}</span>
-                  <strong>${escapeHTML(entry ? getEntryDisplayName(entry) : labels.nameHeader)}</strong>
-                  <em>${moneylessNumber(getTeamCharreadaTotal(charreada.id, entry.id))} pts</em>
-                </button>
-              `)
-              .join("")}
-          </div>
-        </details>
+        ${renderScoringTeamCards(charreada, scoringEntries, labels)}
+        ${renderScoringLiveOverview(attemptView)}
       </div>
     </header>
+  `;
+}
+
+function renderScoringTeamCards(charreada, scoringEntries, labels) {
+  return html`
+    <div class="cp-team-card-strip" aria-label="${escapeHTML(labels.scoreEntityLabel)} y puntuaciones">
+      ${scoringEntries.map((entry, index) => html`
+        <button class="cp-team-card ${index === state.scoringTeamIdx ? "active" : ""}" data-action="select-team" data-index="${index}" type="button">
+          <span>${index + 1}</span>
+          <strong>${escapeHTML(entry ? getEntryDisplayName(entry) : labels.nameHeader)}</strong>
+          <em>${moneylessNumber(getTeamCharreadaTotal(charreada.id, entry.id))} pts</em>
+        </button>
+      `).join("")}
+    </div>
   `;
 }
 
@@ -10737,6 +10816,14 @@ function wireGlobalEvents() {
       setPialesDistanceValue(target.value);
     }
 
+    if (target.dataset.action === "select-coleadero-attempt") {
+      if (!canUseAction(target.dataset.action)) return;
+      stopTimer(true);
+      state.scoringAttemptIdx = Number(target.value || 0);
+      saveScoringNavigationDraft();
+      render();
+    }
+
     if (target.dataset.action === "attempt-field") {
       if (!canUseAction(target.dataset.action)) return;
       if (!guardUnlockedCharreada()) return;
@@ -10866,6 +10953,7 @@ function handleAction(action, target) {
     },
     "punta-step": () => adjustPunta(target.dataset.field, Number(target.dataset.delta || 0)),
     "punta-set": () => setPuntaValue(target.dataset.field, Number(target.dataset.value || 0)),
+    "adjust-piales-distance": () => adjustPialesDistance(Number(target.dataset.delta || 0)),
     "toggle-rule": () => toggleRule(target.dataset.type, target.dataset.id),
     "adjust-rule-quantity": () => adjustRuleQuantity(target.dataset.type, target.dataset.id, Number(target.dataset.delta || 0)),
     "toggle-team-penalty": () => toggleTeamPenalty(target.dataset.id),
@@ -12289,6 +12377,12 @@ function setPialesDistanceValue(value) {
   setAttemptRuleQuantity(context.attempt, FMCH_2026_PIALES_DISTANCE_RULE_ID, distanceAdditionalPoints);
   recalculateAttemptRuleTotal(context, "adic");
   persistScoreChange();
+}
+
+function adjustPialesDistance(delta) {
+  const context = getCurrentContext();
+  if (!context?.attempt || context.suerte?.id !== "piales") return;
+  setPialesDistanceValue(Number(context.attempt.distanceMeters || 0) + Number(delta || 0));
 }
 
 function getAttemptRuleQuantity(attempt = {}, ruleId = "") {

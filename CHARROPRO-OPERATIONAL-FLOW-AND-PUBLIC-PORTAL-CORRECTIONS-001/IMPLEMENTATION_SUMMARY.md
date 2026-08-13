@@ -24,6 +24,6 @@ Se corrigieron los dos bloques autorizados sin modificar reglas deportivas, Rule
 
 ## Version
 
-`20260813-operational-flow-public-portal-corrections-001-v1`
+`20260813-scorer-screen-by-screen-ux-refinement-001-v1`
 
 FMCH_2026_LIBRE permanece en `0.6.0`.

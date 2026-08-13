@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./state.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

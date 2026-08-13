@@ -10,14 +10,18 @@ function occurrenceCount(source, pattern) {
   return source.match(pattern)?.length || 0;
 }
 
-const overviewPosition = appSource.indexOf("${renderScoringLiveOverview(attemptView)}");
-const classificationPosition = appSource.indexOf("${renderScoringClassificationSlot(context, attemptView)}");
-const mainPanelPosition = appSource.indexOf("${renderScoringMainPanel(charreada, context, charroName)}");
-const controlsPosition = appSource.indexOf("${renderScoringActionAccordions(charreada, context, charroName, leaderboard)}");
-const evidencePosition = appSource.indexOf("${renderTimeNoteSection(context)}");
+const renderScoringStart = appSource.indexOf("function renderScoring(");
+const renderScoringEnd = appSource.indexOf("function buildScoringAttemptUiModel", renderScoringStart);
+const renderScoringSource = appSource.slice(renderScoringStart, renderScoringEnd);
+const headerPosition = renderScoringSource.indexOf("renderScoringHeader(charreada, context, charroName, attemptView)");
+const classificationPosition = renderScoringSource.indexOf("renderScoringClassificationSlot(context, attemptView)");
+const mainPanelPosition = renderScoringSource.indexOf("renderScoringMainPanel(charreada, context, charroName, attemptView)");
+const controlsPosition = renderScoringSource.indexOf("renderScoringActionAccordions(charreada, context, charroName, leaderboard)");
+const evidencePosition = renderScoringSource.indexOf("renderTimeNoteSection(context)");
 
-assert.ok(overviewPosition > 0, "the common score overview exists");
-assert.ok(overviewPosition < classificationPosition, "total and timer precede dynamic classification");
+assert.ok(headerPosition > 0, "the common scorer header exists");
+assert.ok(headerPosition < classificationPosition, "the fixed header precedes dynamic classification");
+assert.match(appSource, /function renderScoringHeader[\s\S]*?renderScoringLiveOverview\(attemptView\)/, "total and timer live in the fixed header");
 assert.ok(classificationPosition < mainPanelPosition, "classification precedes the specialized panel when it changes scoring");
 assert.ok(mainPanelPosition < controlsPosition, "specialized controls precede the common rule controls");
 assert.ok(controlsPosition < evidencePosition, "optional evidence follows sporting controls");
@@ -51,7 +55,7 @@ assert.doesNotMatch(footerSource, /data-action="toggle-desc"/, "zero and DQ stay
 assert.match(cssSource, /--scorer-touch-target:\s*56px/);
 assert.match(cssSource, /\.scoring-shell-classic \.quick-button,[\s\S]*?min-height:\s*44px/);
 assert.match(cssSource, /\.scoring-shell-classic \.cp-scoring-action-button[\s\S]*?min-height:\s*78px/);
-assert.match(cssSource, /\.cp-live-score-overview\s*\{[\s\S]*?position:\s*sticky/);
+assert.match(cssSource, /CHARROPRO-SCORER-SCREEN-BY-SCREEN-UX-REFINEMENT-001[\s\S]*?\.scoring-shell-classic \.cp-live-score-overview\s*\{[\s\S]*?position:\s*relative/);
 assert.match(cssSource, /\.scoring-shell-classic\s*\{[\s\S]*?overflow-x:\s*hidden/);
 assert.match(cssSource, /@media \(max-width:\s*980px\)/);
 assert.match(cssSource, /@media \(max-width:\s*760px\)/);

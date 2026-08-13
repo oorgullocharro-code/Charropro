@@ -29,4 +29,4 @@
 - Pruebas de identidad: `tests/announcer-monitor.test.mjs`, `tests/broadcast-studio-workspace.test.mjs`, `tests/fmch-2026-cala-scorer.test.mjs`, `tests/full-scorer-integration.test.mjs`, `tests/output-synchronization.test.mjs`, `tests/pending-score-review-workflow.test.mjs`, `tests/production-console.test.mjs`, `tests/production-nav.test.mjs`, `tests/public-live-feed-integration.test.mjs`, `tests/public-portal-core.test.mjs`, `tests/public-snapshot-cache-coherence.test.mjs`, `tests/scorer-responsive-components.test.mjs`, `tests/team-penalties-zero.test.mjs`.
 - Fixtures de identidad: `tests/fixtures/fmch-jineteos-runtime.html`, `tests/fixtures/fmch-piales-coleadero-runtime.html`, `tests/fixtures/scorer-responsive-viewport.html`.
 
-Los archivos de esta seccion solo sustituyen el cache-buster anterior por `20260813-operational-flow-public-portal-corrections-001-v1`, excepto los archivos ya descritos como funcionales o fixtures visuales.
+Los archivos de esta seccion solo sustituyen el cache-buster anterior por `20260813-scorer-screen-by-screen-ux-refinement-001-v1`, excepto los archivos ya descritos como funcionales o fixtures visuales.

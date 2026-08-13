@@ -6,7 +6,7 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_SOURCE,
   FMCH_2026_CALA_TEAM_PENALTY_RULES
-} from "./calaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./calaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_COLEADERO_ADIC_RULES,
   FMCH_2026_COLEADERO_BASE_RULES,
@@ -23,7 +23,7 @@ import {
   FMCH_2026_PIALES_INFR_RULES,
   FMCH_2026_PIALES_RULEBOOK_VERSION,
   FMCH_2026_PIALES_TEAM_PENALTY_RULES
-} from "./fmch2026PialesColeaderoRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./fmch2026PialesColeaderoRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_JINETEO_CLASSIFICATIONS,
   FMCH_2026_JINETEOS_SOURCE,
@@ -41,7 +41,7 @@ import {
   FMCH_2026_YEGUA_INFR_RULES,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_TEAM_PENALTY_RULES
-} from "./fmch2026JineteosRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./fmch2026JineteosRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_LAZO_ADIC_RULES,
   FMCH_2026_LAZO_BASE_RULES,
@@ -59,7 +59,7 @@ import {
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
   FMCH_2026_TERNA_RULEBOOK_VERSION,
   FMCH_2026_TERNA_SOURCE
-} from "./fmch2026TernaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./fmch2026TernaRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 import {
   FMCH_2026_MANGANAS_CABALLO_ADIC_RULES,
   FMCH_2026_MANGANAS_CABALLO_BASE_RULES,
@@ -86,7 +86,7 @@ import {
   FMCH_2026_PASO_EXIT_DURATION_MS,
   FMCH_2026_PASO_INFR_RULES,
   FMCH_2026_PASO_TEAM_PENALTY_RULES
-} from "./fmch2026ManganasPasoRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+} from "./fmch2026ManganasPasoRules.js?v=20260813-scorer-screen-by-screen-ux-refinement-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
