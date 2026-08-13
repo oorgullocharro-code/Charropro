@@ -4,6 +4,7 @@ export const FMCH_2026_TERNA_SESSION_VERSION = "1.0.0";
 export const FMCH_2026_TERNA_OPPORTUNITY_LIMIT = 5;
 export const FMCH_2026_TERNA_DURATION_MS = 7 * 60 * 1000;
 export const FMCH_2026_TERNA_SUERTE_IDS = Object.freeze(["lazo", "pial_ruedo"]);
+export const FMCH_2026_TERNA_CLOSED_UNUSED_STATUS = "CLOSED_UNUSED";
 
 export const FMCH_2026_LAZO_BASE_RULES = freezeRules([
   rule("lazo_base_sencillo", "Sencillo", 5, remateMetadata("sencillo")),
@@ -233,12 +234,18 @@ export function normalizeFmch2026TernaSession(value = {}, identity = {}) {
       : []
   );
   const usedIds = new Set(history.map((item) => item.sharedOpportunityId));
+  const closure = normalizeTernaClosure(base.closure);
+  const closedEarly = closure?.type === "EARLY_FINISH";
   const opportunities = Array.from({ length: FMCH_2026_TERNA_OPPORTUNITY_LIMIT }, (_, index) => {
     const sharedOpportunityId = `${expectedId}:op:${index + 1}`;
     const historyEntry = history.find((item) => item.sharedOpportunityId === sharedOpportunityId);
     return historyEntry
       ? { ...historyEntry, status: "CONSUMED" }
-      : { sharedOpportunityId, sharedSequenceNumber: index + 1, status: "AVAILABLE" };
+      : {
+        sharedOpportunityId,
+        sharedSequenceNumber: index + 1,
+        status: closedEarly ? FMCH_2026_TERNA_CLOSED_UNUSED_STATUS : "AVAILABLE"
+      };
   });
   const used = Math.min(FMCH_2026_TERNA_OPPORTUNITY_LIMIT, usedIds.size);
   const complete = used >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT;
@@ -250,7 +257,7 @@ export function normalizeFmch2026TernaSession(value = {}, identity = {}) {
     sharedTimerId: normalizeId(base.sharedTimerId) || `${expectedId}:timer`,
     opportunityLimit: FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
     opportunities,
-    currentOpportunity: complete ? null : used + 1,
+    currentOpportunity: complete || closedEarly ? null : used + 1,
     history,
     remateHistory: buildFmch2026TernaRemateHistory(history),
     headCounted: history.some((item) => item.type === "HEAD" && item.countsForTerna),
@@ -262,12 +269,61 @@ export function normalizeFmch2026TernaSession(value = {}, identity = {}) {
         : used || base.status === "IN_PROGRESS"
           ? "IN_PROGRESS"
           : "READY",
-    activeOpportunity: base.activeOpportunity ? normalizeOpportunity(base.activeOpportunity) : null,
+    activeOpportunity: closedEarly ? null : base.activeOpportunity ? normalizeOpportunity(base.activeOpportunity) : null,
+    closure,
     revision: nonNegativeInteger(base.revision),
     timeAdditional: normalizeTimeAdditional(base.timeAdditional),
     createdAt: normalizeIso(base.createdAt),
     updatedAt: normalizeIso(base.updatedAt)
   };
+}
+
+export function resolveFmch2026TernaNextSuerteId(session = {}) {
+  const current = normalizeFmch2026TernaSession(session, session);
+  if (!current.currentOpportunity || current.status === "COMPLETED" || current.closure?.type === "EARLY_FINISH") {
+    return null;
+  }
+  const previous = current.history[current.history.length - 1] || null;
+  if (!previous) return "lazo";
+  return previous.type === "HEAD" ? "pial_ruedo" : "lazo";
+}
+
+export function canFinishFmch2026TernaSession(session = {}) {
+  const current = normalizeFmch2026TernaSession(session, session);
+  return current.history.length > 0 &&
+    current.history.length < FMCH_2026_TERNA_OPPORTUNITY_LIMIT &&
+    Boolean(current.currentOpportunity) &&
+    !current.activeOpportunity &&
+    current.closure?.type !== "EARLY_FINISH";
+}
+
+export function finishFmch2026TernaSession(session = {}, options = {}) {
+  const current = normalizeFmch2026TernaSession(session, session);
+  if (!canFinishFmch2026TernaSession(current)) {
+    return { ok: false, reason: "terna-early-finish-not-available", session: current };
+  }
+  const now = toIso(options.now ?? Date.now());
+  const closedOpportunityIds = current.opportunities
+    .filter((opportunity) => opportunity.status !== "CONSUMED")
+    .map((opportunity) => opportunity.sharedOpportunityId);
+  const next = normalizeFmch2026TernaSession({
+    ...current,
+    status: "FINISHED",
+    activeOpportunity: null,
+    currentOpportunity: null,
+    finishedAt: now,
+    updatedAt: now,
+    revision: current.revision + 1,
+    closure: {
+      type: "EARLY_FINISH",
+      reason: String(options.reason || "operator-finished-terna").slice(0, 160),
+      closedAt: now,
+      closedBy: normalizeId(options.closedBy),
+      source: String(options.source || "scorer").slice(0, 80),
+      closedOpportunityIds
+    }
+  }, current);
+  return { ok: true, idempotent: false, session: next, closedOpportunityIds };
 }
 
 export function validateFmch2026TernaSession(session = {}) {
@@ -600,6 +656,21 @@ function normalizeTimeAdditional(value = {}) {
       sharedOpportunityId: normalizeId(entry?.sharedOpportunityId),
       reason: String(entry?.reason || "official-publication-failed").slice(0, 240)
     }))
+  };
+}
+
+function normalizeTernaClosure(value) {
+  if (!value || value.type !== "EARLY_FINISH") return null;
+  return {
+    type: "EARLY_FINISH",
+    reason: String(value.reason || "operator-finished-terna").slice(0, 160),
+    closedAt: normalizeIso(value.closedAt),
+    closedBy: normalizeId(value.closedBy),
+    source: String(value.source || "scorer").slice(0, 80),
+    closedOpportunityIds: (Array.isArray(value.closedOpportunityIds) ? value.closedOpportunityIds : [])
+      .slice(0, FMCH_2026_TERNA_OPPORTUNITY_LIMIT)
+      .map(normalizeId)
+      .filter(Boolean)
   };
 }
 

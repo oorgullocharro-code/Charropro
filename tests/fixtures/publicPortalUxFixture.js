@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260728-public-portal-design-system-v2-001-sports-ui-v2";
+} from "../../js/publicPortal/portalRender.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260728-public-live-feed-integration-001-fix-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,
@@ -238,6 +238,10 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
       fixtureResult("resultado-11", "charros-valle", "Charros del Valle", 11, 229),
       fixtureResult("resultado-12", "rancho-sierra", "Rancho de la Sierra", 12, null, {
         subtotal: 224,
+        accumulatedTotal: 224,
+        totalStatus: "partial",
+        provisionalPosition: 12,
+        positionStatus: "provisional",
         scores: { CC: 31, P: 25, C: 68, JT: 16, LC: 22, PR: 17, JY: 18, MP: 27, MC: 0 }
       })
     ]
@@ -302,6 +306,32 @@ function buildFixtureScenario(scenario = "live") {
     snapshot.live.currentResult = null;
     snapshot.live.timer = { status: "unavailable", running: false };
     snapshot.liveFeed.status = "finished";
+  }
+  if (scenario === "partial") {
+    snapshot.results.items = [
+      fixtureResult("partial-a", "equipo-a", "Charros Demo del Norte", null, null, {
+        scores: { CC: 38 },
+        subtotal: 38,
+        accumulatedTotal: 38,
+        totalStatus: "partial",
+        provisionalPosition: 1,
+        positionStatus: "provisional",
+        displayOrder: 1
+      }),
+      fixtureResult("partial-b", "equipo-b", "Rancheros de Ensayo", null, null, {
+        scores: { CC: 26 },
+        subtotal: 26,
+        accumulatedTotal: 26,
+        totalStatus: "partial",
+        provisionalPosition: 2,
+        positionStatus: "provisional",
+        displayOrder: 2
+      })
+    ];
+    snapshot.live.standings = [
+      { resultId: "partial-a", teamId: "equipo-a", teamName: "Charros Demo del Norte", total: 38, provisionalPosition: 1, positionStatus: "provisional" },
+      { resultId: "partial-b", teamId: "equipo-b", teamName: "Rancheros de Ensayo", total: 26, provisionalPosition: 2, positionStatus: "provisional" }
+    ];
   }
   if (scenario === "long-content") {
     snapshot.metadata.name = "Gran Campeonato Nacional de Charrería y Tradición Deportiva de México";

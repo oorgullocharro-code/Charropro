@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260811-official-timer-authority-sync-001-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260811-official-timer-authority-sync-001-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,14 +8,14 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "../core/firebaseSync.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   getOfficialTimerContextView,
   getOfficialTimerControlView,
   normalizeOfficialTimerContext
-} from "../core/timerRules.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "../core/timerRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("timer-control-root");

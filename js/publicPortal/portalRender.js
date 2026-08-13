@@ -748,12 +748,12 @@ function renderCompetitionsView(model) {
     fragment.append(emptyState("Sin rankings", "Los rankings aparecerán cuando existan competencias publicadas.", "trophy"));
     return fragment;
   }
-  const selectedResults = model.results || [];
+  const selectedResults = model.rankedResults || model.results || [];
   if (selectedResults.length) {
     const ranking = element("section", "public-portal-ranking-feature");
     ranking.append(
       sectionHeading(
-        "Ranking oficial",
+        selectedResults.some((row) => row.totalStatus === "partial") ? "Ranking provisional" : "Ranking oficial",
         model.selectedCompetition?.displayName || "Competencia seleccionada",
         "trophy"
       ),
@@ -764,7 +764,7 @@ function renderCompetitionsView(model) {
   } else {
     fragment.append(emptyState(
       "Ranking pendiente",
-      "La competencia seleccionada todavía no tiene posiciones oficiales publicadas.",
+      "La competencia seleccionada todavía no tiene puntuaciones oficiales publicadas.",
       "trophy"
     ));
   }
@@ -815,15 +815,15 @@ function renderResultsView(model, uiState, options) {
     section.append(cards);
     const tableHeading = element("h3", "public-portal-secondary-table-title", "Tabla accesible");
     section.append(tableHeading);
-    const table = createTable(["Posición oficial", resultEntityLabel(model), "Categoría", "Total oficial", "Estado"]);
+    const table = createTable(["Posición", resultEntityLabel(model), "Categoría", "Acumulado / total", "Estado"]);
     for (const row of model.results) {
       const tr = element("tr");
       if (options.updatedResultIds?.has(row.resultId)) tr.classList.add("is-updated");
       tr.dataset.resultId = row.resultId;
-      appendCell(tr, formatOfficialPosition(row.officialPosition), { header: true });
+      appendCell(tr, formatOfficialPosition(row.displayPosition), { header: true });
       appendCell(tr, row.displayName);
       appendCell(tr, row.categoryName || "—");
-      appendScoreCell(tr, row.officialTotal, row.subtotal);
+      appendScoreCell(tr, row.displayTotal, row.totalStatus);
       appendCell(tr, resultStatusLabel(row));
       table.tbody.append(tr);
     }
@@ -880,7 +880,7 @@ function renderSheetView(model, uiState, options) {
     th.append(abbreviation("PEN", "Penalizaciones"));
     headerRow.append(th);
   }
-  for (const [shortLabel, label] of [["TOTAL", "Total oficial"], ["POS", "Posición oficial"]]) {
+  for (const [shortLabel, label] of [["TOTAL", "Acumulado o total oficial"], ["POS", "Posición oficial o provisional"]]) {
     const th = element("th");
     th.scope = "col";
     th.append(abbreviation(shortLabel, label));
@@ -894,8 +894,8 @@ function renderSheetView(model, uiState, options) {
     appendCell(tr, row.name, { header: true, sticky: true });
     for (const column of model.sheet.columns) appendCell(tr, formatScore(row.scores[column.id]), { numeric: true });
     if (model.sheet.showPenalty) appendCell(tr, formatScore(row.teamPenaltyTotal), { numeric: true });
-    appendCell(tr, formatScore(row.officialTotal), { numeric: true, strong: true });
-    appendCell(tr, formatOfficialPosition(row.officialPosition), { numeric: true });
+    appendCell(tr, formatScore(row.displayTotal), { numeric: true, strong: true });
+    appendCell(tr, formatOfficialPosition(row.displayPosition), { numeric: true });
     tbody.append(tr);
   }
   table.append(thead, tbody);
@@ -941,11 +941,18 @@ function renderResultFilters(model, uiState) {
 
 function renderStandingsTable(rows = []) {
   if (!rows.length) return emptyMessage("No hay marcador publicado para esta charreada.");
-  const table = createTable(["Posición oficial", "Participante", "Total publicado"]);
+  const hasProvisionalPositions = rows.some((row) => (
+    row.displayPosition && row.positionStatus !== "official"
+  ));
+  const table = createTable([
+    hasProvisionalPositions ? "Posición provisional" : "Posición oficial",
+    "Participante",
+    "Acumulado / total"
+  ]);
   for (const row of rows) {
     const tr = element("tr");
     tr.classList.toggle("is-active", row.active);
-    appendCell(tr, formatOfficialPosition(row.officialPosition), { header: true });
+    appendCell(tr, formatOfficialPosition(row.displayPosition), { header: true });
     appendCell(tr, row.name || "No registrado");
     appendCell(tr, formatScore(row.total), { numeric: true, strong: true });
     table.tbody.append(tr);
@@ -991,8 +998,12 @@ function renderNowCard(model, options = {}) {
 }
 
 function renderHomeLeaders(model) {
-  const rows = model.results || model.allResults || [];
-  const section = sectionPanel("Líderes publicados", rows.length ? "Top oficial" : "Pendiente", "medal");
+  const rows = model.rankedResults || model.results || model.allResults || [];
+  const section = sectionPanel(
+    "Líderes publicados",
+    rows.length ? rows.some((row) => row.totalStatus === "partial") ? "Acumulado oficial" : "Top oficial" : "Pendiente",
+    "medal"
+  );
   section.classList.add("public-portal-home-leaders");
   if (!rows.length) {
     section.append(emptyMessage("Los líderes aparecerán con los primeros resultados oficiales.", "medal"));
@@ -1007,21 +1018,21 @@ function renderHomeLeaders(model) {
 
 function renderPodium(rows = []) {
   const podiumRows = rows.filter((row) => {
-    const position = Number(row.officialPosition);
+    const position = Number(row.displayPosition);
     return Number.isSafeInteger(position) && position >= 1 && position <= 3;
   });
   if (!podiumRows.length) return element("div", "public-portal-podium is-empty");
   const podium = element("div", "public-portal-podium");
   podium.setAttribute("aria-label", "Podio oficial");
   for (const row of podiumRows) {
-    const position = Number(row.officialPosition);
+    const position = Number(row.displayPosition);
     const card = element("article", "public-portal-podium-card");
     card.dataset.position = String(position);
     card.append(
       element("span", "public-portal-podium-position", positionLabel(position)),
       publicIcon("medal", "public-portal-podium-icon"),
       element("h3", "", row.displayName || "No registrado"),
-      element("strong", "public-portal-podium-score", scoreWithUnit(row.officialTotal)),
+      element("strong", "public-portal-podium-score", scoreWithUnit(row.displayTotal)),
       element("span", "public-portal-podium-context", [row.categoryName, row.phaseName].filter(Boolean).join(" · ") || "Resultado oficial")
     );
     podium.append(card);
@@ -1035,13 +1046,13 @@ function renderRankingList(rows, model, options = {}) {
     : "public-portal-ranking-list");
   for (const row of rows) {
     const item = element("li", "public-portal-ranking-row");
-    const position = element("span", "public-portal-ranking-position", formatOfficialPosition(row.officialPosition));
+    const position = element("span", "public-portal-ranking-position", formatOfficialPosition(row.displayPosition));
     const identity = element("span", "public-portal-ranking-identity");
     identity.append(
       element("strong", "", row.displayName || "No registrado"),
       element("small", "", [row.categoryName, row.phaseName].filter(Boolean).join(" · ") || resultEntityLabel(model))
     );
-    item.append(position, identity, element("strong", "public-portal-ranking-score", scoreWithUnit(row.officialTotal)));
+    item.append(position, identity, element("strong", "public-portal-ranking-score", scoreWithUnit(row.displayTotal)));
     list.append(item);
   }
   return list;
@@ -1051,7 +1062,7 @@ function renderScoreCard(row, model, options = {}) {
   const card = element("article", "public-portal-score-card");
   if (options.updatedResultIds?.has(row.resultId)) card.classList.add("is-updated");
   card.dataset.resultId = row.resultId;
-  const position = element("span", "public-portal-score-position", positionLabel(row.officialPosition));
+  const position = element("span", "public-portal-score-position", positionLabel(row.displayPosition));
   const copy = element("div", "public-portal-score-identity");
   copy.append(
     element("h3", "", row.displayName),
@@ -1059,8 +1070,10 @@ function renderScoreCard(row, model, options = {}) {
   );
   const score = element("div", "public-portal-score-value");
   score.append(
-    element("strong", "", formatScore(row.officialTotal)),
-    element("span", "", row.officialTotal === null || row.officialTotal === undefined ? "Sin total oficial" : "puntos")
+    element("strong", "", formatScore(row.displayTotal)),
+    element("span", "", row.displayTotal === null || row.displayTotal === undefined
+      ? "Sin puntuación publicada"
+      : row.totalStatus === "final" ? "puntos · total oficial" : "puntos · acumulado parcial")
   );
   card.append(position, copy, score);
   return card;
@@ -1099,15 +1112,15 @@ function appendCell(row, value, options = {}) {
   return cell;
 }
 
-function appendScoreCell(row, officialTotal, subtotal) {
+function appendScoreCell(row, displayTotal, totalStatus) {
   const cell = element("td", "is-numeric");
-  if (officialTotal !== null && officialTotal !== undefined) {
-    cell.append(element("strong", "", formatScore(officialTotal)));
+  if (displayTotal !== null && displayTotal !== undefined) {
+    cell.append(
+      element("strong", "", formatScore(displayTotal)),
+      element("small", "", totalStatus === "final" ? "Total oficial" : "Acumulado parcial")
+    );
   } else {
     cell.append(element("span", "", "—"));
-    if (subtotal !== null && subtotal !== undefined) {
-      cell.append(element("small", "", `Subtotal publicado: ${formatScore(subtotal)}`));
-    }
   }
   row.append(cell);
 }
@@ -1125,10 +1138,10 @@ function renderNowResult(model) {
   );
   const standing = model.live.standings.find((row) => row.active) || null;
   if (standing?.total !== null && standing?.total !== undefined) {
-    container.append(element("small", "", `Total oficial: ${formatScore(standing.total)} puntos`));
+    container.append(element("small", "", `${standing.totalStatus === "final" ? "Total oficial" : "Acumulado parcial"}: ${formatScore(standing.total)} puntos`));
   }
-  if (standing?.officialPosition) {
-    container.append(element("small", "", `Posición oficial: ${standing.officialPosition}.º`));
+  if (standing?.displayPosition) {
+    container.append(element("small", "", `${standing.positionStatus === "official" ? "Posición oficial" : "Posición provisional"}: ${standing.displayPosition}.º`));
   }
   return container;
 }
@@ -1459,8 +1472,8 @@ function resultEntityLabel(model) {
 
 function resultStatusLabel(row) {
   if (row.officialPosition !== null) return "Oficial";
-  if (row.officialTotal !== null) return "Total publicado";
-  return "Subtotal publicado";
+  if (row.totalStatus === "final") return "Total oficial";
+  return "Parcial";
 }
 
 function homeHeadline(model) {

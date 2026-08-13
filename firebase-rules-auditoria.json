@@ -345,7 +345,7 @@
             "standings": {
               "$itemId": {
                 "$other": {
-                  ".validate": "$other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'total' || $other === 'officialPosition' || $other === 'positionStatus' || $other === 'active'"
+                  ".validate": "$other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'total' || $other === 'officialPosition' || $other === 'provisionalPosition' || $other === 'positionStatus' || $other === 'totalStatus' || $other === 'active'"
                 }
               }
             },
@@ -407,7 +407,7 @@
                   }
                 },
                 "$other": {
-                  ".validate": "$other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName' || $other === 'association' || $other === 'categoryId' || $other === 'categoryName' || $other === 'competitionId' || $other === 'competitionType' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'participantScope' || $other === 'scores' || $other === 'subtotal' || $other === 'teamPenaltyTotal' || $other === 'officialTotal' || $other === 'officialPosition' || $other === 'positionStatus' || $other === 'resultStatus' || $other === 'publishedAt' || $other === 'sourceRevision' || $other === 'displayOrder'"
+                  ".validate": "$other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName' || $other === 'association' || $other === 'categoryId' || $other === 'categoryName' || $other === 'competitionId' || $other === 'competitionType' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'participantScope' || $other === 'scores' || $other === 'subtotal' || $other === 'accumulatedTotal' || $other === 'totalStatus' || $other === 'teamPenaltyTotal' || $other === 'officialTotal' || $other === 'officialPosition' || $other === 'provisionalPosition' || $other === 'positionStatus' || $other === 'resultStatus' || $other === 'publishedAt' || $other === 'sourceRevision' || $other === 'displayOrder'"
                 }
               }
             },

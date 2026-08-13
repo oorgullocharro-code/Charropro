@@ -1,6 +1,6 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260811-official-timer-authority-sync-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260811-official-timer-authority-sync-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./data/calaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -43,12 +43,15 @@ import {
   applyFmch2026TernaTimeAdditional,
   buildFmch2026TernaOfficialAttempt,
   buildFmch2026TernaOpportunityDraft,
+  canFinishFmch2026TernaSession,
   commitFmch2026TernaOpportunity,
+  finishFmch2026TernaSession,
   isFmch2026TernaSuerte,
   reserveFmch2026TernaOpportunity,
+  resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -68,12 +71,12 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260811-official-timer-authority-sync-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260811-official-timer-authority-sync-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260811-official-timer-authority-sync-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -81,9 +84,9 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260811-official-timer-authority-sync-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260811-official-timer-authority-sync-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/timerRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -95,16 +98,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/scoring.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/scoringAttempt.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/scorerComponents.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -114,7 +117,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/sync.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   createFirebaseTournamentBackup,
@@ -153,7 +156,7 @@ import {
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/firebaseSync.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -165,7 +168,7 @@ import {
   putPendingScoreReview,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/pendingScoreReview.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -218,7 +221,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./core/state.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -438,6 +441,7 @@ const ACTION_CAPABILITIES = {
   "terna-timer-pause": "timer",
   "terna-timer-resume": "timer",
   "terna-timer-finish": "timer",
+  "finish-terna-session": "score",
   "show-scoring-button-settings": "settings",
   "save-scoring-button-layout": "settings",
   "reset-scoring-button-layout": "settings",
@@ -497,6 +501,7 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "set-mangana-result",
   "set-paso-result",
   "set-mangana-remate",
+  "finish-terna-session",
   "apply-sport-timing",
   "sport-timer-command",
   "take-timer-backup",
@@ -8689,6 +8694,8 @@ function renderTernaMainPanel(context) {
   const session = runtime.session;
   const currentType = context.suerte.id === "lazo" ? "HEAD" : "PIAL";
   const history = session.history;
+  const canFinishSession = canFinishFmch2026TernaSession(session);
+  const pendingSessionReview = hasPendingTernaSessionReview(context);
   return html`
     <section class="cp-scoring-card cp-main-suerte-panel cp-terna-panel" data-terna-status="${escapeHTML(session.status)}">
       <header>
@@ -8712,7 +8719,7 @@ function renderTernaMainPanel(context) {
         <article class="cp-terna-counter">
           <span>Oportunidades compartidas</span>
           <strong>${history.length}/${FMCH_2026_TERNA_OPPORTUNITY_LIMIT}</strong>
-          <em>${session.currentOpportunity ? `Actual ${session.currentOpportunity}` : "Cupo agotado"}</em>
+          <em>${session.currentOpportunity ? `Actual ${session.currentOpportunity}` : session.closure?.type === "EARLY_FINISH" ? "Terna finalizada" : "Cupo agotado"}</em>
         </article>
         <article class="cp-terna-counted">
           <span>Lazos de cuenta</span>
@@ -8729,9 +8736,14 @@ function renderTernaMainPanel(context) {
               ${timer.status === "READY" ? html`<button class="button primary" data-action="terna-timer-start" type="button">Iniciar Terna</button>` : ""}
               ${timer.status === "RUNNING" ? html`<button class="button amber" data-action="terna-timer-pause" type="button">Pausar</button>` : ""}
               ${timer.status === "PAUSED" ? html`<button class="button primary" data-action="terna-timer-resume" type="button">Reanudar</button>` : ""}
-              ${timer.status !== "FINISHED" ? html`<button class="button" data-action="terna-timer-finish" type="button">Finalizar</button>` : ""}
+              ${timer.status !== "FINISHED" ? html`<button class="button" data-action="terna-timer-finish" type="button">Finalizar tiempo</button>` : ""}
               ${control.canHandback ? html`<button class="button" data-action="handoff-timer-control" data-timer-id="${escapeHTML(runtime.timer.timerId)}" type="button">Devolver control al campo</button>` : ""}
             `}
+        ${canFinishSession ? html`
+          <button class="button amber" data-action="finish-terna-session" type="button" ${officialPublishInProgress || pendingSessionReview || (timer.status !== "FINISHED" && !control.isOwner) ? "disabled" : ""}>
+            Finalizar Terna
+          </button>
+        ` : ""}
         ${control.isOwner ? html`<label>
           <span>Motivo de pausa</span>
           <select id="terna-pause-reason">
@@ -10896,6 +10908,7 @@ function handleAction(action, target) {
     "terna-timer-pause": () => applyTernaTimerCommand("PAUSE", document.getElementById("terna-pause-reason")?.value || "Pausa autorizada"),
     "terna-timer-resume": () => applyTernaTimerCommand("RESUME"),
     "terna-timer-finish": () => applyTernaTimerCommand("FINISH"),
+    "finish-terna-session": finishCurrentTernaSession,
     "show-scoring-button-settings": showScoringButtonSettingsModal,
     "save-scoring-button-layout": () => saveScoringButtonLayout(target.dataset.scope),
     "reset-scoring-button-layout": () => resetScoringButtonLayout(target.dataset.scope),
@@ -10953,9 +10966,19 @@ function selectScoringSuerte(index) {
 }
 
 function selectTernaSuerte(suerteId) {
+  if (!setTernaScoringPointer(suerteId)) return;
+  render();
+}
+
+function setTernaScoringPointer(suerteId, session = null) {
   const suertes = getCharreadaScoringSuertes(getActiveCharreada(), getActiveTournament(), state.settings.globalRuleOverrides);
   const index = suertes.findIndex((suerte) => suerte.id === suerteId);
-  if (index >= 0) selectScoringSuerte(index);
+  if (index < 0) return false;
+  state.scoringSuerteIdx = index;
+  state.scoringAttemptIdx = Math.max(0, Number(session?.currentOpportunity || 1) - 1);
+  state.scoringColeadorIdx = 0;
+  saveScoringNavigationDraft();
+  return true;
 }
 
 function selectTernaHistory(target) {
@@ -13755,10 +13778,11 @@ function continueOfficialScoreFlowAfterPublish(context = getCurrentContext()) {
   }
   if (isFmch2026TernaSuerte(context?.suerte?.id)) {
     const session = getOrCreateTernaSession(context);
-    if (session?.history?.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT) {
+    if (session?.history?.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT || session?.closure?.type === "EARLY_FINISH") {
       advanceAfterCompletedTernaSession();
     } else {
-      state.scoringAttemptIdx = Math.max(0, Number(session?.currentOpportunity || 1) - 1);
+      const nextSuerteId = resolveFmch2026TernaNextSuerteId(session);
+      if (nextSuerteId) setTernaScoringPointer(nextSuerteId, session);
       saveState({ silent: true });
     }
   } else {
@@ -14540,6 +14564,70 @@ function updateTernaTimerDisplays() {
     if (!timer) return;
     display.textContent = getOfficialTimerContextView(timer).formattedRemaining;
   });
+}
+
+function hasPendingTernaSessionReview(context = getCurrentContext()) {
+  if (!context || !isFmch2026TernaSuerte(context.suerte?.id)) return false;
+  return listPendingScoreReviews(state.pendingScoreReviews, {
+    tournamentId: state.activeTournamentId,
+    charreadaId: context.charreada?.id,
+    status: PENDING_SCORE_REVIEW_STATUSES.PENDING
+  }).some((record) => (
+    record.teamId === context.team?.id && isFmch2026TernaSuerte(record.suerteId)
+  ));
+}
+
+async function finishCurrentTernaSession() {
+  if (!guardUnlockedCharreada() || officialPublishInProgress) return;
+  const context = getCurrentContext();
+  const runtime = getTernaRuntime(context);
+  if (!runtime || !canFinishFmch2026TernaSession(runtime.session)) return;
+  if (hasPendingTernaSessionReview(context)) {
+    showToast("Resuelve las calificaciones pendientes de esta Terna antes de finalizarla.");
+    return;
+  }
+
+  officialPublishInProgress = true;
+  try {
+    let timer = runtime.timer;
+    if (timer.status !== "FINISHED") {
+      const finishTimer = await executeScorerTimerAuthority(runtime, {
+        type: "FINISH",
+        source: "scorer-terna-early-finish"
+      });
+      if (!finishTimer.ok) {
+        showToast("No se pudo finalizar el tiempo oficial de Terna.");
+        return;
+      }
+      timer = setOfficialTimer(finishTimer.timer);
+    }
+
+    const closed = finishFmch2026TernaSession(runtime.session, {
+      now: timer.updatedAt || Date.now(),
+      closedBy: getScorerTimerController().controllerUid,
+      source: "scorer"
+    });
+    if (!closed.ok) {
+      showToast("La Terna no puede finalizarse en su estado actual.");
+      return;
+    }
+    const session = setTernaSession(closed.session);
+    const timeAdditional = await applyTernaTimeAdditionalIfEligible(context, session, timer);
+    saveState({ silent: true });
+    advanceAfterCompletedTernaSession();
+    syncCurrentLiveState({ repeat: true });
+    if (timeAdditional.publicationFailed) {
+      showToast("La Terna finalizó; el adicional oficial requiere reintento.");
+    } else {
+      showToast("Terna finalizada. Las oportunidades restantes quedaron como no utilizadas.");
+    }
+  } catch (error) {
+    console.error("[terna-flow] no se pudo finalizar la sesión", error);
+    showToast("No se pudo finalizar la Terna.");
+  } finally {
+    officialPublishInProgress = false;
+    render();
+  }
 }
 
 async function applyTernaTimerCommand(type, pauseReason = "") {

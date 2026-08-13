@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260811-official-timer-authority-sync-001-v1";
+const RELEASE_ID = "20260813-operational-flow-public-portal-corrections-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({

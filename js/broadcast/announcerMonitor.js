@@ -1808,7 +1808,7 @@ export async function connectAnnouncerMonitorRealtime(instance, options = {}) {
   assertNoAnnouncerExternalIdentity(requestContext);
   const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
   const accessId = params.get("access") || options.accessId || null;
-  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260811-official-timer-authority-sync-001-v1") : null);
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260813-operational-flow-public-portal-corrections-001-v1") : null);
   if (options.authorizedContext && !options.adapter) throw monitorError("announcer-monitor-authorized-context-injection-forbidden");
   if (options.temporaryAccess && !options.adapter) throw monitorError("announcer-monitor-temporary-access-injection-forbidden");
   const temporaryAccess = accessId

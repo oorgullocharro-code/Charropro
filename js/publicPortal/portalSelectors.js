@@ -70,7 +70,12 @@ export function buildPortalSheet(results = [], competition = null) {
       scores: Object.fromEntries(columns.map((column) => [column.id, scoreOrNull(row.scores?.[column.id])])),
       teamPenaltyTotal: scoreOrNull(row.teamPenaltyTotal),
       officialTotal: scoreOrNull(row.officialTotal),
+      accumulatedTotal: scoreOrNull(row.accumulatedTotal ?? row.subtotal),
+      displayTotal: scoreOrNull(row.officialTotal ?? row.accumulatedTotal ?? row.subtotal),
+      totalStatus: normalizeTotalStatus(row.totalStatus, row.officialTotal),
       officialPosition: officialPosition(row.officialPosition),
+      provisionalPosition: officialPosition(row.provisionalPosition),
+      displayPosition: officialPosition(row.officialPosition ?? row.provisionalPosition),
       positionStatus: row.positionStatus || "unavailable"
     }))
   };
@@ -163,6 +168,7 @@ function buildV2PortalModel(snapshot, options) {
     nowMs: options.nowMs
   });
   const sheet = buildPortalSheet(results, selectedCompetition);
+  const rankedResults = rankPortalResults(results);
   const resultFilters = buildResultFilters(rawResults, selectedCompetitionId);
   return {
     schemaVersion: 2,
@@ -205,6 +211,7 @@ function buildV2PortalModel(snapshot, options) {
     selectedCompetition,
     selectedCompetitionId,
     results,
+    rankedResults,
     allResults: rawResults,
     resultFilters,
     activeFilters: filters,
@@ -340,6 +347,7 @@ function buildLegacyPortalModel(snapshot, options) {
     selectedCompetition,
     selectedCompetitionId,
     results,
+    rankedResults: rankPortalResults(results),
     allResults: rawResults,
     resultFilters: buildResultFilters(rawResults, selectedCompetitionId),
     activeFilters: filters,
@@ -394,6 +402,7 @@ function buildEmptyPortalModel(options) {
     selectedCompetition: null,
     selectedCompetitionId: "",
     results: [],
+    rankedResults: [],
     allResults: [],
     resultFilters: { categories: [], phases: [], charreadas: [] },
     activeFilters: { competitionId: "", categoryId: "", phaseId: "", charreadaId: "" },
@@ -535,6 +544,8 @@ function normalizeProgramParticipant(item = {}, sourceIndex = 0) {
 function normalizeResultItem(item = {}, index = 0) {
   const participantScope = item.participantScope === "individual" ? "individual" : "team";
   const officialTotal = scoreOrNull(item.officialTotal);
+  const accumulatedTotal = scoreOrNull(item.accumulatedTotal ?? item.subtotal);
+  const provisionalPosition = officialPosition(item.provisionalPosition);
   return {
     resultId: text(item.resultId || item.id || `result_${index + 1}`),
     teamId: participantScope === "team" ? text(item.teamId) : "",
@@ -556,9 +567,14 @@ function normalizeResultItem(item = {}, index = 0) {
     participantScope,
     scores: normalizeScores(item.scores),
     subtotal: scoreOrNull(item.subtotal),
+    accumulatedTotal,
     teamPenaltyTotal: scoreOrNull(item.teamPenaltyTotal),
     officialTotal,
+    displayTotal: scoreOrNull(officialTotal ?? accumulatedTotal),
+    totalStatus: normalizeTotalStatus(item.totalStatus, officialTotal),
     officialPosition: officialPosition(item.officialPosition),
+    provisionalPosition,
+    displayPosition: officialPosition(item.officialPosition ?? provisionalPosition),
     positionStatus: text(item.positionStatus) || "unavailable",
     resultStatus: text(item.resultStatus) || "published",
     publishedAt: text(item.publishedAt),
@@ -611,7 +627,10 @@ function normalizeV2Live(live = {}, overview = {}, competitions = [], program = 
       name: text(row.participantName || row.teamName),
       total: scoreOrNull(row.total),
       officialPosition: officialPosition(row.officialPosition),
+      provisionalPosition: officialPosition(row.provisionalPosition),
+      displayPosition: officialPosition(row.officialPosition ?? row.provisionalPosition),
       positionStatus: text(row.positionStatus),
+      totalStatus: normalizeTotalStatus(row.totalStatus, row.positionStatus === "official" ? row.total : null),
       active: Boolean(row.active)
     })),
     updatedAt: text(live?.updatedAt || overview?.updatedAt)
@@ -717,6 +736,20 @@ function buildResultFilters(results, competitionId) {
     phases: uniqueOptions(scoped, "phaseId", "phaseName", "Fase"),
     charreadas: uniqueOptions(scoped, "charreadaId", "charreadaId", "Charreada")
   };
+}
+
+function rankPortalResults(results = []) {
+  return [...asArray(results)].sort((left, right) => (
+    (left.displayPosition ?? Number.MAX_SAFE_INTEGER) - (right.displayPosition ?? Number.MAX_SAFE_INTEGER) ||
+    (right.displayTotal ?? Number.NEGATIVE_INFINITY) - (left.displayTotal ?? Number.NEGATIVE_INFINITY) ||
+    left.displayOrder - right.displayOrder ||
+    left.resultId.localeCompare(right.resultId)
+  ));
+}
+
+function normalizeTotalStatus(value, officialTotal) {
+  if (value === "final" || value === "partial") return value;
+  return scoreOrNull(officialTotal) === null ? "partial" : "final";
 }
 
 function uniqueOptions(rows, valueKey, labelKey, fallback) {

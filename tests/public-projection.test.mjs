@@ -52,7 +52,10 @@ const teamResult = initial.projection.results.items.find((row) => row.teamId ===
 assert.equal(teamResult.subtotal, 35, "attempt/breakdown total wins over anomalous top-level 280");
 assert.equal(teamResult.scores.CC, 35);
 assert.equal(teamResult.officialPosition, null);
-assert.equal(teamResult.positionStatus, "unavailable");
+assert.equal(teamResult.accumulatedTotal, 35);
+assert.equal(teamResult.provisionalPosition, 1);
+assert.equal(teamResult.positionStatus, "provisional");
+assert.equal(teamResult.totalStatus, "partial");
 
 const individualResult = initial.projection.results.items.find((row) => row.participantId === "participant-1");
 assert.ok(individualResult);

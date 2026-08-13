@@ -123,13 +123,13 @@ import {
   createOutputSynchronization,
   startOutputSynchronization,
   synchronizeProgramMain
-} from "../js/broadcast/outputSynchronization.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "../js/broadcast/outputSynchronization.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js";
 import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
 import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";

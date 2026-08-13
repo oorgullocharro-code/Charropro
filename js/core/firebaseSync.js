@@ -54,14 +54,14 @@ import {
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./pendingScoreReview.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "./timerRules.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({

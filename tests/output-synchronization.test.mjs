@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/outputSynchronization.js?v=20260811-official-timer-authority-sync-001-v1";
+import * as api from "../js/broadcast/outputSynchronization.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine
@@ -16,13 +16,13 @@ import {
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 import {
   configureAnnouncerMonitor,
   createAnnouncerMonitor,
   getAnnouncerSnapshot,
   mountAnnouncerMonitor
-} from "../js/broadcast/announcerMonitor.js?v=20260811-official-timer-authority-sync-001-v1";
+} from "../js/broadcast/announcerMonitor.js?v=20260813-operational-flow-public-portal-corrections-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";

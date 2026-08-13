@@ -25,6 +25,8 @@ export const PUBLIC_SCORE_COLUMNS = Object.freeze({
   colas: ["C"],
   toro: ["JT"],
   terna: ["LC", "PR"],
+  lazo: ["LC"],
+  pial_ruedo: ["PR"],
   yegua: ["JY"],
   manganas_pie: ["MP"],
   manganas_caballo: ["MC"],
@@ -486,7 +488,12 @@ function buildResults(published, charreadas) {
     if (score.publishedAt > row.publishedAt) row.publishedAt = score.publishedAt;
     row.sourceRevision = Math.max(row.sourceRevision, score.sourceRevision);
   }
-  const items = [...rows.values()].slice(0, MAX_RESULT_ROWS);
+  const items = [...rows.values()].slice(0, MAX_RESULT_ROWS).map((row) => ({
+    ...row,
+    accumulatedTotal: row.subtotal,
+    totalStatus: row.officialTotal === null ? "partial" : "final",
+    provisionalPosition: null
+  }));
   const scopes = {};
   for (const row of items) {
     const key = [
@@ -509,12 +516,39 @@ function buildResults(published, charreadas) {
     }
     scopes[key].resultIds.push(row.resultId);
   }
+  assignProvisionalPositions(items, scopes);
   return {
     revision: 0,
     status: items.length ? "ready" : "empty",
     scopes,
     items
   };
+}
+
+function assignProvisionalPositions(items, scopes) {
+  for (const scope of Object.values(scopes)) {
+    const scopedRows = scope.resultIds
+      .map((resultId) => items.find((row) => row.resultId === resultId))
+      .filter(Boolean)
+      .sort((left, right) => (
+        resolvePublishedTotal(right) - resolvePublishedTotal(left) ||
+        left.displayOrder - right.displayOrder ||
+        left.resultId.localeCompare(right.resultId)
+      ));
+    let previousTotal = null;
+    let position = 0;
+    scopedRows.forEach((row, index) => {
+      const total = resolvePublishedTotal(row);
+      if (previousTotal === null || total !== previousTotal) position = index + 1;
+      row.provisionalPosition = position;
+      if (!row.officialPosition) row.positionStatus = "provisional";
+      previousTotal = total;
+    });
+  }
+}
+
+function resolvePublishedTotal(row) {
+  return row.officialTotal ?? row.accumulatedTotal ?? row.subtotal ?? 0;
 }
 
 function buildCompetitions(charreadas, resultItems, tournament) {
@@ -660,7 +694,9 @@ function buildLiveStandings(rows, active, turn) {
       participantName: row.participantName,
       total: row.officialTotal ?? row.subtotal,
       officialPosition: row.officialPosition,
+      provisionalPosition: row.provisionalPosition,
       positionStatus: row.positionStatus,
+      totalStatus: row.totalStatus,
       active: Boolean(
         (row.teamId && row.teamId === turn.team.id) ||
         (row.participantId && row.participantId === turn.participant.id)
@@ -786,10 +822,9 @@ function normalizeSuerteId(value) {
     coleadero: "colas",
     jt: "toro",
     jineteo_toro: "toro",
-    lc: "terna",
-    pr: "terna",
-    lazo_cabecero: "terna",
-    pial_ruedo: "terna",
+    lc: "lazo",
+    pr: "pial_ruedo",
+    lazo_cabecero: "lazo",
     jy: "yegua",
     jineteo_yegua: "yegua",
     mp: "manganas_pie",

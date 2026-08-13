@@ -168,9 +168,12 @@ const RESULT_ITEM_FIELDS = new Set([
   "participantScope",
   "scores",
   "subtotal",
+  "accumulatedTotal",
+  "totalStatus",
   "teamPenaltyTotal",
   "officialTotal",
   "officialPosition",
+  "provisionalPosition",
   "positionStatus",
   "resultStatus",
   "publishedAt",
@@ -208,7 +211,9 @@ const STANDING_FIELDS = new Set([
   "participantName",
   "total",
   "officialPosition",
+  "provisionalPosition",
   "positionStatus",
+  "totalStatus",
   "active"
 ]);
 
