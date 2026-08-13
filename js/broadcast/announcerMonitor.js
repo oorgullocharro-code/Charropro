@@ -850,6 +850,7 @@ function normalizeTimer(value) {
     startedAt: normalizeNullableIso(source.startedAt),
     pausedAt: normalizeNullableIso(source.pausedAt),
     stoppedAt: normalizeNullableIso(source.stoppedAt),
+    pauseReason: nullableText(source.pauseReason),
     generatedAt: normalizeNullableIso(source.generatedAt)
   };
 }
@@ -1220,7 +1221,7 @@ function renderTimer(container, timer) {
   time.textContent = displayValue(timer?.formattedTime);
   const state = container.ownerDocument.createElement("span");
   state.className = "announcer-timer-state";
-  state.textContent = timerStatusLabel(timer?.status);
+  state.textContent = [timerStatusLabel(timer?.status), timer?.pauseReason].filter(Boolean).join(" · ");
   wrapper.append(time, state);
   container.appendChild(wrapper);
 }
@@ -1398,7 +1399,8 @@ function summarizeTimer(value) {
     elapsedMs: value.elapsedMs ?? null,
     remainingMs: value.remainingMs ?? null,
     sourceRevision: value.sourceRevision ?? null,
-    alertState: value.alertState ?? null
+    alertState: value.alertState ?? null,
+    pauseReason: value.pauseReason ?? null
   };
 }
 
@@ -1806,7 +1808,7 @@ export async function connectAnnouncerMonitorRealtime(instance, options = {}) {
   assertNoAnnouncerExternalIdentity(requestContext);
   const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
   const accessId = params.get("access") || options.accessId || null;
-  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260811-pending-review-full-scorer-integration-001-v1") : null);
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260811-official-timer-authority-sync-001-v1") : null);
   if (options.authorizedContext && !options.adapter) throw monitorError("announcer-monitor-authorized-context-injection-forbidden");
   if (options.temporaryAccess && !options.adapter) throw monitorError("announcer-monitor-temporary-access-injection-forbidden");
   const temporaryAccess = accessId

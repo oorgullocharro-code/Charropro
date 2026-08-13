@@ -1,6 +1,6 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260811-official-timer-authority-sync-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./data/calaRules.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -48,7 +48,7 @@ import {
   reserveFmch2026TernaOpportunity,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -68,21 +68,22 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260811-official-timer-authority-sync-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260811-pending-review-full-scorer-integration-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260811-pending-review-full-scorer-integration-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260811-official-timer-authority-sync-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260811-official-timer-authority-sync-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
-  applyOfficialTimerCommand,
+  buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
   getOfficialTimerContextView,
+  getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260811-pending-review-full-scorer-integration-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260811-pending-review-full-scorer-integration-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/timerRules.js?v=20260811-official-timer-authority-sync-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260811-official-timer-authority-sync-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   applyPuntaCalculation,
   buildCharreadaLeaderboard,
@@ -94,16 +95,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/scoring.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/scoringAttempt.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/scorerComponents.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -113,8 +114,9 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/sync.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
+  applyFirebaseOfficialTimerAuthority,
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
   getFirebaseRuntimeDiagnostics,
@@ -141,6 +143,7 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseGlobalRuleOverrides,
   subscribeFirebaseLive,
+  subscribeFirebaseOfficialTimers,
   subscribeFirebasePendingScoreReviews,
   subscribeFirebaseScores,
   subscribeFirebaseScoringButtonLayouts,
@@ -150,7 +153,7 @@ import {
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/firebaseSync.js?v=20260811-official-timer-authority-sync-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -162,7 +165,7 @@ import {
   putPendingScoreReview,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/pendingScoreReview.js?v=20260811-official-timer-authority-sync-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -215,7 +218,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./core/state.js?v=20260811-official-timer-authority-sync-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -417,6 +420,8 @@ const ACTION_CAPABILITIES = {
   "set-mangana-remate": "score",
   "apply-sport-timing": "score",
   "sport-timer-command": "timer",
+  "take-timer-backup": "timer",
+  "handoff-timer-control": "timer",
   "reset-attempt": "score",
   "previous-score": "score",
   "next-score": "score",
@@ -494,6 +499,8 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "set-mangana-remate",
   "apply-sport-timing",
   "sport-timer-command",
+  "take-timer-backup",
+  "handoff-timer-control",
   "reset-attempt",
   "previous-score",
   "next-score",
@@ -728,6 +735,9 @@ let firebaseScoresUnsubscribe = null;
 let firebaseScoresTournamentId = "";
 let firebasePendingReviewsUnsubscribe = null;
 let firebasePendingReviewsTournamentId = "";
+let firebaseOfficialTimersUnsubscribe = null;
+let firebaseOfficialTimersTournamentId = "";
+const scorerTimerPendingIds = new Set();
 let firebaseAccessUnsubscribe = null;
 let firebaseAppStateTimer = null;
 let firebaseUsersUnsubscribe = null;
@@ -1755,6 +1765,7 @@ async function signOutAccess() {
   if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
   stopFirebaseScoresSubscription();
   stopFirebasePendingReviewsSubscription();
+  stopFirebaseOfficialTimersSubscription();
   if (firebaseUsersUnsubscribe) firebaseUsersUnsubscribe();
   if (firebaseStatHistoryUnsubscribe) firebaseStatHistoryUnsubscribe();
   if (globalScoringLayoutsUnsubscribe) globalScoringLayoutsUnsubscribe();
@@ -2800,6 +2811,7 @@ function startFirebaseAppStateSubscription() {
     if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
     stopFirebaseScoresSubscription();
     stopFirebasePendingReviewsSubscription();
+    stopFirebaseOfficialTimersSubscription();
     firebaseAppStateUnsubscribe = null;
     firebaseAppStateSubscriptionKey = "";
     firebaseTournamentStateUnsubscribe = null;
@@ -2818,6 +2830,7 @@ function startFirebaseAppStateSubscription() {
     if (firebaseTournamentStateId === tournamentId && firebaseTournamentStateUnsubscribe) {
       startFirebaseScoresSubscription(tournamentId);
       startFirebasePendingReviewsSubscription(tournamentId);
+      startFirebaseOfficialTimersSubscription(tournamentId);
       return;
     }
     if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
@@ -2825,6 +2838,7 @@ function startFirebaseAppStateSubscription() {
     firebaseTournamentStateUnsubscribe = subscribeFirebaseTournamentState(tournamentId, (payload) => applyRemoteTournamentState(payload));
     startFirebaseScoresSubscription(tournamentId);
     startFirebasePendingReviewsSubscription(tournamentId);
+    startFirebaseOfficialTimersSubscription(tournamentId);
     return;
   }
 
@@ -2835,6 +2849,7 @@ function startFirebaseAppStateSubscription() {
   }
   stopFirebaseScoresSubscription();
   stopFirebasePendingReviewsSubscription();
+  stopFirebaseOfficialTimersSubscription();
   const subscriptionKey = [
     firebaseAccess.uid || "",
     firebaseAccess.role || "",
@@ -2891,6 +2906,27 @@ function stopFirebasePendingReviewsSubscription() {
   firebasePendingReviewsUnsubscribe?.();
   firebasePendingReviewsUnsubscribe = null;
   firebasePendingReviewsTournamentId = "";
+}
+
+function startFirebaseOfficialTimersSubscription(tournamentId) {
+  if (!tournamentId || firebaseOfficialTimersTournamentId === tournamentId && firebaseOfficialTimersUnsubscribe) return;
+  stopFirebaseOfficialTimersSubscription();
+  firebaseOfficialTimersTournamentId = tournamentId;
+  firebaseOfficialTimersUnsubscribe = subscribeFirebaseOfficialTimers(tournamentId, applyRemoteOfficialTimers);
+}
+
+function stopFirebaseOfficialTimersSubscription() {
+  firebaseOfficialTimersUnsubscribe?.();
+  firebaseOfficialTimersUnsubscribe = null;
+  firebaseOfficialTimersTournamentId = "";
+}
+
+function applyRemoteOfficialTimers(payload = {}) {
+  if (payload.error || payload.tournamentId !== state.activeTournamentId) return;
+  const retained = Object.fromEntries(Object.entries(state.officialTimers || {})
+    .filter(([, timer]) => timer?.tournamentId !== payload.tournamentId));
+  state.officialTimers = { ...retained, ...(payload.registry || {}) };
+  if (state.view === "scoring") render({ preserveScoringScroll: true });
 }
 
 function applyRemotePendingScoreReviews(payload = {}) {
@@ -8076,46 +8112,68 @@ function getTernaRuntime(context = getCurrentContext()) {
   if (!isFmch2026TernaSuerte(context?.suerte?.id)) return null;
   const session = getOrCreateTernaSession(context);
   if (!session) return null;
-  const timer = getOrCreateOfficialTimer(session.sharedTimerId, {
+  const resolvedDefinition = getOfficialTimerDefinitionsForScoringContext(context)[0] || {};
+  const definition = {
+    ...resolvedDefinition,
+    timerId: session.sharedTimerId,
     contextType: "terna",
     durationMs: FMCH_2026_TERNA_DURATION_MS,
     source: "scorer",
     tournamentId: session.tournamentId,
     competitionId: session.competitionId,
     charreadaId: session.charreadaId,
-    teamId: session.teamId
-  });
-  return { session, timer, view: getOfficialTimerContextView(timer) };
+    teamId: session.teamId,
+    suerteId: "terna",
+    label: "Terna"
+  };
+  const timer = getOrCreateOfficialTimer(session.sharedTimerId, definition);
+  return { session, definition, timer, view: getOfficialTimerContextView(timer) };
 }
 
 function getFmch2026SportTimerRuntimes(context = getCurrentContext()) {
-  if (!context || (!isFmch2026ManganaSuerte(context.suerte?.id) && !isFmch2026PasoSuerte(context.suerte?.id))) return [];
-  const scope = [context.charreada?.id || "charreada", context.team?.id || context.participant?.id || "participante"].join(":");
-  const shared = {
+  const suerteId = context?.suerte?.id || "";
+  const supported = isFmch2026ManganaSuerte(suerteId)
+    || isFmch2026PasoSuerte(suerteId)
+    || ["piales", "colas", "toro", "yegua"].includes(suerteId);
+  if (!context || !supported) return [];
+  const definitions = getOfficialTimerDefinitionsForScoringContext(context).map((definition) => ({
+    ...definition,
     source: "scorer",
-    tournamentId: context.tournament?.id || "",
-    competitionId: context.charreada?.competitionId || context.competitionContext?.competitionId || "equipos_completo",
-    charreadaId: context.charreada?.id || "",
-    teamId: context.team?.id || ""
-  };
-  const manganaTimerPrefix = context.suerte.id === "manganas_pie"
-    ? "timer_manganas_pie"
-    : "timer_manganas_caballo";
-  const definitions = isFmch2026ManganaSuerte(context.suerte.id)
-    ? [{
-        timerId: `${manganaTimerPrefix}:${scope}`,
-        contextType: manganaTimerPrefix,
-        durationMs: FMCH_2026_MANGANAS_DURATION_MS,
-        label: context.suerte.id === "manganas_pie" ? "Manganas a Pie · 7 min" : "Manganas a Caballo · 7 min",
-        kind: context.suerte.id
-      }]
-    : [
-        { timerId: `timer_paso_3min:${scope}`, contextType: "timer_paso_3min", durationMs: FMCH_2026_PASO_EXIT_DURATION_MS, label: "Salida · 3 min", kind: "paso_exit" },
-        { timerId: `timer_paso_1min:${scope}`, contextType: "timer_paso_1min", durationMs: FMCH_2026_PASO_DISMOUNT_DURATION_MS, label: "Desmonte · 1 min", kind: "paso_dismount" }
-      ];
+    label: definition.contextType === "timer_manganas_pie"
+      ? "Manganas a Pie · 7 min"
+      : definition.contextType === "timer_manganas_caballo"
+        ? "Manganas a Caballo · 7 min"
+        : definition.contextType === "timer_paso_3min"
+          ? "Salida · 3 min"
+          : definition.contextType === "timer_paso_1min"
+            ? "Desmonte · 1 min"
+            : definition.label,
+    kind: definition.contextType === "timer_paso_3min"
+      ? "paso_exit"
+      : definition.contextType === "timer_paso_1min"
+        ? "paso_dismount"
+        : suerteId
+  }));
   return definitions.map((definition) => {
-    const timer = getOrCreateOfficialTimer(definition.timerId, { ...shared, ...definition });
-    return { ...definition, timer, view: getOfficialTimerContextView(timer) };
+    const timer = getOrCreateOfficialTimer(definition.timerId, definition);
+    return { ...definition, definition, timer, view: getOfficialTimerContextView(timer) };
+  });
+}
+
+function getOfficialTimerDefinitionsForScoringContext(context = getCurrentContext()) {
+  if (!context) return [];
+  return buildOfficialTimerDefinitionsFromContext({
+    tournament: context.tournament,
+    charreada: context.charreada,
+    turn: {
+      competition: {
+        id: context.charreada?.competitionId || context.competitionContext?.competitionId || "equipos_completo",
+        competitionId: context.charreada?.competitionId || context.competitionContext?.competitionId || "equipos_completo"
+      },
+      team: context.competitionContext?.isIndividualCompetition ? null : context.team,
+      participant: context.competitionContext?.isIndividualCompetition ? context.participant || context.team : null,
+      suerte: context.suerte
+    }
   });
 }
 
@@ -8304,6 +8362,7 @@ function renderAttemptMainPanel(context) {
   const title = "Calificador de piales";
   const attempts = getAttemptsForContext(context);
   const activeAttempt = attempts[context.attemptIndex] || context.attempt;
+  const timerRuntime = getFmch2026SportTimerRuntimes(context)[0];
   return html`
     <section class="cp-scoring-card cp-main-suerte-panel">
       <header>
@@ -8313,6 +8372,7 @@ function renderAttemptMainPanel(context) {
         </div>
         <p>Registra cada intento y usa la botonera para aplicar valores oficiales.</p>
       </header>
+      ${renderOfficialSportTimer(timerRuntime)}
       <div class="cp-attempt-panel">
         ${Array.from({ length: context.suerte.attempts }, (_, index) => html`
           ${renderAttemptSummaryButton(index, attempts[index], index === context.attemptIndex)}
@@ -8411,20 +8471,34 @@ function renderManganasMainPanel(context) {
 function renderOfficialSportTimer(runtime) {
   if (!runtime) return "";
   const view = runtime.view;
+  const control = getOfficialTimerControlView(runtime.timer, getScorerTimerController());
   return html`
     <article class="cp-sport-timer ${view.paused ? "paused" : ""}" data-timer-kind="${escapeHTML(runtime.kind)}">
       <span>${escapeHTML(runtime.label)}</span>
       <strong class="official-timer-display" data-official-timer-id="${escapeHTML(runtime.timer.timerId)}">${escapeHTML(view.formattedRemaining)}</strong>
-      <em>${escapeHTML(view.status)}${view.pauseReason ? ` · ${view.pauseReason}` : ""}</em>
+      <em>${escapeHTML(view.status)}${view.pauseReason ? ` · ${view.pauseReason}` : ""} · Control: ${escapeHTML(control.controllerLabel)}</em>
       <small>Real ${escapeHTML(formatTimerMs(view.wallElapsedMs))} · oficial ${escapeHTML(formatTimerMs(view.officialElapsedMs))}</small>
       <div class="cp-sport-timer-actions">
-        ${view.status === "READY" ? html`<button class="button primary" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="START">Iniciar</button>` : ""}
-        ${view.status === "RUNNING" ? html`<button class="button amber" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="PAUSE">Pausar</button>` : ""}
-        ${view.status === "PAUSED" ? html`<button class="button primary" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="RESUME">Reanudar</button>` : ""}
-        ${view.status !== "FINISHED" ? html`<button class="button" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="FINISH">Finalizar</button>` : ""}
+        ${renderScorerTimerControlButtons(runtime, control)}
         <button class="button" data-action="apply-sport-timing" type="button">Aplicar tiempo</button>
       </div>
     </article>
+  `;
+}
+
+function renderScorerTimerControlButtons(runtime, control = getOfficialTimerControlView(runtime.timer, getScorerTimerController())) {
+  const view = runtime.view || getOfficialTimerContextView(runtime.timer);
+  const pending = scorerTimerPendingIds.has(runtime.timer.timerId);
+  if (pending) return html`<button class="button" type="button" disabled>Confirmando...</button>`;
+  if (!control.isOwner) {
+    return html`<button class="button" data-action="take-timer-backup" data-timer-id="${escapeHTML(runtime.timer.timerId)}" type="button">Tomar control de respaldo</button>`;
+  }
+  return html`
+    ${view.status === "READY" ? html`<button class="button primary" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="START" type="button">Iniciar</button>` : ""}
+    ${view.status === "RUNNING" ? html`<button class="button amber" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="PAUSE" type="button">Pausar</button>` : ""}
+    ${view.status === "PAUSED" ? html`<button class="button primary" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="RESUME" type="button">Reanudar</button>` : ""}
+    ${view.status !== "FINISHED" ? html`<button class="button" data-action="sport-timer-command" data-timer-kind="${escapeHTML(runtime.kind)}" data-command="FINISH" type="button">Finalizar</button>` : ""}
+    ${control.canHandback ? html`<button class="button" data-action="handoff-timer-control" data-timer-id="${escapeHTML(runtime.timer.timerId)}" type="button">Devolver control al campo</button>` : ""}
   `;
 }
 
@@ -8470,6 +8544,7 @@ function renderColeaderoMainPanel(context) {
     : Math.max(3, Array.isArray(collection) ? collection.length : 0);
   const activeAttempts = getAttemptsForContext(context);
   const coleadorTotal = activeAttempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
+  const timerRuntime = getFmch2026SportTimerRuntimes(context)[0];
   return html`
     <section class="cp-scoring-card cp-main-suerte-panel">
       <header>
@@ -8479,6 +8554,7 @@ function renderColeaderoMainPanel(context) {
         </div>
         <p>Controla coleador, oportunidad y total del intento actual.</p>
       </header>
+      ${renderOfficialSportTimer(timerRuntime)}
       <div class="cp-attempt-panel">
         ${Array.from({ length: coleadorCount }, (_, index) => {
           const attempts = getAttemptsForContext(context, index);
@@ -8563,16 +8639,10 @@ function isAttemptZeroMarked(attempt = {}) {
 }
 
 function renderJineteoMainPanel(context) {
-  const timerView = getTimerView(
-    {
-      running: timerRunning,
-      startedAt: timerRunning ? timerStartedAt : null,
-      elapsedMs: timerElapsedMs
-    },
-    getTimerSource()
-  );
+  const timerRuntime = getFmch2026SportTimerRuntimes(context)[0];
+  const timerView = timerRuntime?.view || { officialElapsedMs: 0, formattedRemaining: "00:00.0" };
   const classificationId = context.attempt.classification?.classificationId || "";
-  const timing = resolveFmch2026JineteoTiming(timerView.elapsedMs, classificationId, {
+  const timing = resolveFmch2026JineteoTiming(timerView.officialElapsedMs, classificationId, {
     noRepara: context.attempt.noRepara
   });
   const noRepara = Boolean(context.attempt.noRepara);
@@ -8586,6 +8656,7 @@ function renderJineteoMainPanel(context) {
         <p>Selecciona la clasificación; las acciones conservan su identidad y actualizan su valor reglamentario.</p>
       </header>
       <div class="cp-jineteo-controls">
+        ${renderOfficialSportTimer(timerRuntime)}
         ${context.suerte.id === "yegua"
           ? html`<button
               class="button ${noRepara ? "amber" : ""}"
@@ -8596,7 +8667,7 @@ function renderJineteoMainPanel(context) {
           : ""}
         <div class="cp-jineteo-timing-summary">
           <span>Apretalamiento</span>
-          <strong class="timer-display">${escapeHTML(timerView.formatted)}</strong>
+          <strong class="official-timer-display" data-official-timer-id="${escapeHTML(timerRuntime?.timer?.timerId || "")}">${escapeHTML(timerView.formattedRemaining)}</strong>
           <em>${timing.disqualified
             ? "Pierde la jineteada"
             : timing.minute5Penalty ? "Dos infracciones" : timing.minute4Penalty ? "Una infracción" : timing.timeSavedQuantity ? `+${timing.timeSavedQuantity} por tiempo` : "Sin ajuste"}</em>
@@ -8614,6 +8685,7 @@ function renderTernaMainPanel(context) {
   const runtime = getTernaRuntime(context);
   if (!runtime) return "";
   const timer = runtime.view;
+  const control = getOfficialTimerControlView(runtime.timer, getScorerTimerController());
   const session = runtime.session;
   const currentType = context.suerte.id === "lazo" ? "HEAD" : "PIAL";
   const history = session.history;
@@ -8634,7 +8706,7 @@ function renderTernaMainPanel(context) {
         <article class="cp-terna-timer ${timer.paused ? "paused" : ""}">
           <span>Tiempo oficial de Terna</span>
           <strong class="terna-timer-display" data-terna-timer-id="${escapeHTML(timer.timerId)}">${escapeHTML(timer.formattedRemaining)}</strong>
-          <em>${escapeHTML(timer.status)}${timer.pauseReason ? ` · ${timer.pauseReason}` : ""}</em>
+          <em>${escapeHTML(timer.status)}${timer.pauseReason ? ` · ${timer.pauseReason}` : ""} · Control: ${escapeHTML(control.controllerLabel)}</em>
           <small>Tiempo real ${escapeHTML(formatTimerMs(timer.wallElapsedMs))} · oficial ${escapeHTML(formatTimerMs(timer.officialElapsedMs))}</small>
         </article>
         <article class="cp-terna-counter">
@@ -8649,11 +8721,18 @@ function renderTernaMainPanel(context) {
         </article>
       </div>
       <div class="cp-terna-timer-controls">
-        ${timer.status === "READY" ? html`<button class="button primary" data-action="terna-timer-start" type="button">Iniciar Terna</button>` : ""}
-        ${timer.status === "RUNNING" ? html`<button class="button amber" data-action="terna-timer-pause" type="button">Pausar</button>` : ""}
-        ${timer.status === "PAUSED" ? html`<button class="button primary" data-action="terna-timer-resume" type="button">Reanudar</button>` : ""}
-        ${timer.status !== "FINISHED" ? html`<button class="button" data-action="terna-timer-finish" type="button">Finalizar</button>` : ""}
-        <label>
+        ${scorerTimerPendingIds.has(runtime.timer.timerId)
+          ? html`<button class="button" type="button" disabled>Confirmando...</button>`
+          : !control.isOwner
+            ? html`<button class="button" data-action="take-timer-backup" data-timer-id="${escapeHTML(runtime.timer.timerId)}" type="button">Tomar control de respaldo</button>`
+            : html`
+              ${timer.status === "READY" ? html`<button class="button primary" data-action="terna-timer-start" type="button">Iniciar Terna</button>` : ""}
+              ${timer.status === "RUNNING" ? html`<button class="button amber" data-action="terna-timer-pause" type="button">Pausar</button>` : ""}
+              ${timer.status === "PAUSED" ? html`<button class="button primary" data-action="terna-timer-resume" type="button">Reanudar</button>` : ""}
+              ${timer.status !== "FINISHED" ? html`<button class="button" data-action="terna-timer-finish" type="button">Finalizar</button>` : ""}
+              ${control.canHandback ? html`<button class="button" data-action="handoff-timer-control" data-timer-id="${escapeHTML(runtime.timer.timerId)}" type="button">Devolver control al campo</button>` : ""}
+            `}
+        ${control.isOwner ? html`<label>
           <span>Motivo de pausa</span>
           <select id="terna-pause-reason">
             <option value="Limpieza de ruedo">Limpieza de ruedo</option>
@@ -8663,7 +8742,7 @@ function renderTernaMainPanel(context) {
             <option value="Reposición">Reposición</option>
             <option value="Otro motivo autorizado">Otro motivo autorizado</option>
           </select>
-        </label>
+        </label>` : ""}
       </div>
       ${session.timeAdditional.applied
         ? html`<p class="cp-terna-time-additional" data-publication-status="${escapeHTML(session.timeAdditional.publicationStatus || "NOT_REQUIRED")}">Tiempo no utilizado: +${session.timeAdditional.pointsPerLazador} a cada lazador (${session.timeAdditional.completeUnusedMinutes} minuto(s) completo(s)). Publicación: ${escapeHTML(getTernaTimeAdditionalPublicationLabel(session.timeAdditional.publicationStatus))}.</p>`
@@ -9090,7 +9169,7 @@ function renderScoringTimerGroup(attemptView) {
       ${attemptView.timers.map((timer) => {
         const timerId = String(timer.timerId || "");
         const isTernaTimer = timerId.startsWith("terna:");
-        const isOfficialSportTimer = /^timer_(?:manganas|paso)_/.test(timerId);
+        const isOfficialSportTimer = /^timer_(?:manganas|paso|toro|yegua)_/.test(timerId);
         const displayClass = isTernaTimer
           ? "terna-timer-display"
           : isOfficialSportTimer ? "official-timer-display" : "timer-display";
@@ -10141,11 +10220,12 @@ function captureTimeEvidence() {
   const context = getCurrentContext();
   if (!context?.attempt) return;
   const ternaRuntime = getTernaRuntime(context);
-  const timerView = ternaRuntime
+  const officialRuntime = ternaRuntime || getFmch2026SportTimerRuntimes(context)[0] || null;
+  const timerView = officialRuntime
     ? {
-        displayMs: ternaRuntime.view.remainingMs,
-        formatted: ternaRuntime.view.formattedRemaining,
-        running: ternaRuntime.view.running
+        displayMs: officialRuntime.view.remainingMs ?? officialRuntime.view.officialElapsedMs,
+        formatted: officialRuntime.view.formattedRemaining,
+        running: officialRuntime.view.running
       }
     : getTimerView(
         {
@@ -10160,8 +10240,8 @@ function captureTimeEvidence() {
     timeMs: Number(timerView.displayMs || 0),
     timeText: timerView.formatted || formatTimerMs(timerView.displayMs || 0),
     capturedAt: new Date().toISOString(),
-    timerRunning: ternaRuntime ? Boolean(ternaRuntime.view.running) : Boolean(timerRunning),
-    source: ternaRuntime ? "terna-official-timer" : "calificador-manual"
+    timerRunning: officialRuntime ? Boolean(officialRuntime.view.running) : Boolean(timerRunning),
+    source: officialRuntime ? "official-timer-authority" : "calificador-manual"
   };
 
   showModal({
@@ -10798,6 +10878,8 @@ function handleAction(action, target) {
     "set-paso-result": () => applyPasoResult(target.dataset.result),
     "set-mangana-remate": () => applyManganaRemate(target.dataset.id),
     "sport-timer-command": () => applyFmchSportTimerCommand(target.dataset.timerKind, target.dataset.command),
+    "take-timer-backup": () => takeScorerTimerBackup(target.dataset.timerId),
+    "handoff-timer-control": () => handoffScorerTimerControl(target.dataset.timerId),
     "apply-sport-timing": applyCurrentFmchSportTiming,
     "reset-attempt": resetAttempt,
     "previous-score": previousScore,
@@ -12910,17 +12992,11 @@ function applyJineteoTiming() {
     showToast("Selecciona una clasificación antes de aplicar el tiempo.");
     return;
   }
-  const timerView = getTimerView(
-    {
-      running: timerRunning,
-      startedAt: timerRunning ? timerStartedAt : null,
-      elapsedMs: timerElapsedMs
-    },
-    getTimerSource()
-  );
+  const runtime = getFmch2026SportTimerRuntimes(context)[0];
+  if (!runtime) return;
   Object.assign(
     context.attempt,
-    applyFmch2026JineteoTiming(context.attempt, context.suerte, timerView.elapsedMs)
+    applyFmch2026JineteoTiming(context.attempt, context.suerte, runtime.view.officialElapsedMs)
   );
   persistScoreChange();
 }
@@ -12983,24 +13059,97 @@ function applyManganaRemate(remateId) {
   persistScoreChange();
 }
 
-function applyFmchSportTimerCommand(timerKind, command) {
+async function applyFmchSportTimerCommand(timerKind, command) {
   if (!guardUnlockedCharreada()) return;
   const context = getCurrentContext();
   const runtime = getFmch2026SportTimerRuntimes(context).find((item) => item.kind === timerKind);
   if (!runtime) return;
-  const result = applyOfficialTimerCommand(runtime.timer, {
+  await executeScorerTimerAuthority(runtime, {
     type: command,
     reason: command === "PAUSE" ? "Pausa oficial autorizada" : "",
-    source: "scorer",
-    actor: getAccessActor()
-  }, { expectedRevision: runtime.timer.revision });
-  if (!result.ok) {
-    showToast("El cronómetro oficial no aceptó el cambio de estado.");
-    return;
-  }
-  setOfficialTimer({ ...runtime.timer, ...result.timer });
-  saveState({ silent: true });
+    source: "scorer_backup"
+  });
+}
+
+function getScorerTimerController() {
+  return {
+    controllerId: `scorer:${firebaseAccess.uid || "sin_usuario"}:${firebaseClientId}`,
+    controllerUid: firebaseAccess.uid || "",
+    controllerRole: firebaseAccess.role || "juez",
+    controllerSessionId: pendingReviewTabSessionId,
+    controllerType: firebaseAccess.role === ROLES.SUPERVISOR ? "supervisor_backup" : "scorer_backup"
+  };
+}
+
+function getScorerTimerRuntime(timerId, context = getCurrentContext()) {
+  if (!timerId || !context) return null;
+  const terna = getTernaRuntime(context);
+  if (terna?.timer?.timerId === timerId) return terna;
+  return getFmch2026SportTimerRuntimes(context).find((runtime) => runtime.timer?.timerId === timerId) || null;
+}
+
+function createScorerTimerCommandId(timerId, operation) {
+  return `scorer-timer:${timerId}:${operation}:${firebaseClientId}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function executeScorerTimerAuthority(runtime, request = {}) {
+  if (!runtime?.timer?.timerId || scorerTimerPendingIds.has(runtime.timer.timerId)) return { ok: false, reason: "pending" };
+  const definition = runtime.definition || {
+    ...runtime,
+    timerId: runtime.timer.timerId,
+    tournamentId: runtime.timer.tournamentId,
+    competitionId: runtime.timer.competitionId,
+    charreadaId: runtime.timer.charreadaId,
+    teamId: runtime.timer.teamId,
+    participantId: runtime.timer.participantId,
+    suerteId: runtime.timer.suerteId
+  };
+  const operation = String(request.operation || request.type || "COMMAND").toUpperCase();
+  const commandId = createScorerTimerCommandId(runtime.timer.timerId, operation);
+  scorerTimerPendingIds.add(runtime.timer.timerId);
   render({ preserveScoringScroll: true });
+  const result = await applyFirebaseOfficialTimerAuthority(definition, {
+    ...request,
+    timerId: runtime.timer.timerId,
+    commandId,
+    expectedRevision: Number(runtime.timer.revision || 0),
+    controller: getScorerTimerController(),
+    actor: getAccessActor(),
+    issuedAt: new Date().toISOString()
+  }, { actor: getAccessActor() });
+  scorerTimerPendingIds.delete(runtime.timer.timerId);
+  if (result.timer) setOfficialTimer(result.timer);
+  if (!result.ok) {
+    showToast(result.reason === "official-timer-revision-conflict"
+      ? "El cronometro cambio en otro dispositivo. Se recupero el estado oficial."
+      : "Timer Authority rechazo la operacion de respaldo.");
+  }
+  render({ preserveScoringScroll: true });
+  return result;
+}
+
+async function takeScorerTimerBackup(timerId) {
+  if (!guardUnlockedCharreada()) return;
+  const runtime = getScorerTimerRuntime(timerId);
+  if (!runtime) return;
+  await executeScorerTimerAuthority(runtime, {
+    operation: "TAKEOVER_CONTROL",
+    reason: "Toma explicita de control de respaldo desde el calificador",
+    source: "scorer_backup"
+  });
+}
+
+async function handoffScorerTimerControl(timerId) {
+  if (!guardUnlockedCharreada()) return;
+  const runtime = getScorerTimerRuntime(timerId);
+  const control = runtime ? getOfficialTimerControlView(runtime.timer, getScorerTimerController()) : null;
+  if (!runtime || !control?.isOwner || !control.previousController?.controllerId) return;
+  await executeScorerTimerAuthority(runtime, {
+    operation: "HANDOFF_CONTROL",
+    targetController: control.previousController,
+    reason: "Devolucion explicita al juez de campo",
+    source: "scorer_backup"
+  });
 }
 
 function applyCurrentFmchSportTiming() {
@@ -13565,13 +13714,15 @@ async function commitTernaAttemptAfterPublication(context, prepared, publishResu
   let runtime = getTernaRuntime(context);
   let timer = runtime?.timer;
   if (session.history.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT && timer?.status !== "FINISHED") {
-    const finish = applyOfficialTimerCommand(timer, {
-      type: "FINISH",
-      source: "scorer-opportunity-limit",
-      actor: getAccessActor()
-    }, { expectedRevision: timer.revision });
+    const control = getOfficialTimerControlView(timer, getScorerTimerController());
+    const finish = control.isOwner
+      ? await executeScorerTimerAuthority(runtime, {
+          type: "FINISH",
+          source: "scorer-opportunity-limit"
+        })
+      : { ok: false, reason: "official-timer-controlled-by-field" };
     if (finish.ok) {
-      timer = setOfficialTimer({ ...timer, ...finish.timer });
+      timer = setOfficialTimer(finish.timer);
       session = setTernaSession({
         ...session,
         status: "COMPLETED",
@@ -14370,7 +14521,8 @@ function hydrateTimerFromState() {
 function ensureTernaTimerTicker(context = getCurrentContext()) {
   const active = isFmch2026TernaSuerte(context?.suerte?.id)
     || isFmch2026ManganaSuerte(context?.suerte?.id)
-    || isFmch2026PasoSuerte(context?.suerte?.id);
+    || isFmch2026PasoSuerte(context?.suerte?.id)
+    || ["toro", "yegua"].includes(context?.suerte?.id);
   if (!active) {
     window.clearInterval(ternaTimerInterval);
     ternaTimerInterval = null;
@@ -14399,26 +14551,15 @@ async function applyTernaTimerCommand(type, pauseReason = "") {
   const context = getCurrentContext();
   const runtime = getTernaRuntime(context);
   if (!runtime) return;
-  const result = applyOfficialTimerCommand(runtime.timer, {
+  const result = await executeScorerTimerAuthority(runtime, {
     type,
     reason: pauseReason,
-    source: "scorer",
-    actor: getAccessActor()
-  }, {
-    expectedRevision: runtime.timer.revision
+    source: "scorer_backup"
   });
   if (!result.ok) {
-    showToast("El cronómetro de Terna no aceptó el cambio de estado.");
     return;
   }
-  const timer = setOfficialTimer({
-    ...runtime.timer,
-    ...result.timer,
-    tournamentId: runtime.session.tournamentId,
-    competitionId: runtime.session.competitionId,
-    charreadaId: runtime.session.charreadaId,
-    teamId: runtime.session.teamId
-  });
+  const timer = setOfficialTimer(result.timer);
   const now = timer.updatedAt || new Date().toISOString();
   const session = setTernaSession({
     ...runtime.session,

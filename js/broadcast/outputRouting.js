@@ -709,6 +709,7 @@ function buildTimerProjection(timer, options) {
     startedAt: normalizeNullableIso(timer.startedAt),
     pausedAt: normalizeNullableIso(timer.pausedAt),
     stoppedAt: normalizeNullableIso(timer.stoppedAt),
+    pauseReason: nullableText(timer.pauseReason),
     sourceRevision,
     contextRef: sanitizeTimerContext(timer.contextRef),
     generatedAt,

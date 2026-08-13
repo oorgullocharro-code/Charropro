@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260811-official-timer-authority-sync-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",

@@ -1,7 +1,7 @@
 import { escapeHTML, html } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260811-pending-review-full-scorer-integration-001-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260811-pending-review-full-scorer-integration-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260708-recovery-001b-panel-status1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260811-official-timer-authority-sync-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260811-official-timer-authority-sync-001-v1";
+import { getOfficialTimerContextView, getTimerView } from "../core/timerRules.js?v=20260811-official-timer-authority-sync-001-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -52,8 +52,8 @@ function render() {
   root.innerHTML = html`
     <main class="timer-display-page">
       <section class="timer-display-panel ${timer.running ? "running" : "paused"}" id="timer-display-panel">
-        <span id="timer-display-state">${escapeHTML(getTimerView(timer, getTimerSource()).stateLabel)}</span>
-        <strong id="timer-display-clock">${escapeHTML(getTimerView(timer, getTimerSource()).formatted)}</strong>
+        <span id="timer-display-state">${escapeHTML(getDisplayTimerView().stateLabel)}</span>
+        <strong id="timer-display-clock">${escapeHTML(getDisplayTimerView().formatted)}</strong>
         <p id="timer-display-context">${escapeHTML(getLiveContextText())}</p>
       </section>
     </main>
@@ -68,13 +68,13 @@ function updateScreen() {
   const context = document.getElementById("timer-display-context");
 
   if (panel) {
-    const view = getTimerView(timer, getTimerSource());
+    const view = getDisplayTimerView();
     panel.classList.toggle("running", Boolean(timer.running));
     panel.classList.toggle("paused", !timer.running);
     panel.classList.toggle("expired", Boolean(view.expired));
   }
-  if (stateLabel) stateLabel.textContent = getTimerView(timer, getTimerSource()).stateLabel;
-  if (display) display.textContent = getTimerView(timer, getTimerSource()).formatted;
+  if (stateLabel) stateLabel.textContent = getDisplayTimerView().stateLabel;
+  if (display) display.textContent = getDisplayTimerView().formatted;
   if (context) context.textContent = getLiveContextText();
 }
 
@@ -95,6 +95,31 @@ function getTimerSource() {
     charreada: remotePayload?.charreada || null,
     turn: remotePayload?.turn || null
   };
+}
+
+function getDisplayTimerView() {
+  if (!timer.official) return getTimerView(timer, getTimerSource());
+  const view = getOfficialTimerContextView({
+    ...timer,
+    status: timer.officialStatus || String(timer.status || "READY").toUpperCase(),
+    durationMs: Number(timer.durationMs ?? timer.limitMs ?? 0),
+    officialElapsedMs: Number(timer.officialElapsedMs ?? timer.elapsedMs ?? 0),
+    runningSince: timer.runningSince || null,
+    wallStartedAt: timer.startedAt || null,
+    wallFinishedAt: timer.stoppedAt || null
+  });
+  return {
+    ...view,
+    formatted: view.formattedRemaining,
+    stateLabel: timer.stateLabel || getOfficialStateLabel(view.status)
+  };
+}
+
+function getOfficialStateLabel(status) {
+  if (status === "RUNNING") return "Tiempo en curso";
+  if (status === "PAUSED") return "Tiempo pausado";
+  if (status === "FINISHED") return "Tiempo finalizado";
+  return "Listo para iniciar";
 }
 
 function readStoredLiveTimer() {
@@ -158,6 +183,11 @@ function normalizeTimer(value = {}) {
   return {
     ...value,
     running: Boolean(value.running ?? value.isRunning ?? value.active),
+    official: Boolean(value.official),
+    officialStatus: value.officialStatus || "",
+    runningSince: value.runningSince || null,
+    officialElapsedMs: Number(value.officialElapsedMs ?? elapsedMs ?? 0),
+    durationMs: Number(value.durationMs ?? value.limitMs ?? 0),
     startedAt: startedAt === "" ? null : startedAt,
     elapsedMs: Number(elapsedMs || 0),
     revision: Number(value.revision || 0),

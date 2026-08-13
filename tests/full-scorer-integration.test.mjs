@@ -14,13 +14,13 @@ const {
   getCharreadaScoringSuertes,
   getCurrentContext,
   state
-} = await import("../js/core/state.js?v=20260811-pending-review-full-scorer-integration-001-v1");
-const { advanceScoringPointer } = await import("../js/core/flow.js?v=20260811-pending-review-full-scorer-integration-001-v1");
+} = await import("../js/core/state.js?v=20260811-official-timer-authority-sync-001-v1");
+const { advanceScoringPointer } = await import("../js/core/flow.js?v=20260811-official-timer-authority-sync-001-v1");
 const {
   createPendingScoreReview,
   listPendingScoreReviews,
   putPendingScoreReview
-} = await import("../js/core/pendingScoreReview.js?v=20260811-pending-review-full-scorer-integration-001-v1");
+} = await import("../js/core/pendingScoreReview.js?v=20260811-official-timer-authority-sync-001-v1");
 
 const tournamentId = "demo-local-fmch-2026";
 const charreadaId = "demo-local-fmch-jornada-1";

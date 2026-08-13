@@ -3352,26 +3352,29 @@ th.num {
 
 .timer-control-body {
   overflow: auto;
-  background:
-    radial-gradient(circle at 18% 14%, rgba(76, 141, 255, .18), transparent 28%),
-    radial-gradient(circle at 82% 18%, rgba(49, 196, 141, .16), transparent 24%),
-    #0d1118;
+  background: #0d1118;
 }
 
 .timer-control-page {
   min-height: 100dvh;
-  padding: 20px;
+  padding:
+    max(14px, env(safe-area-inset-top))
+    max(14px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(14px, env(safe-area-inset-left));
   display: grid;
   place-items: center;
 }
 
 .timer-control-shell {
   width: min(760px, 100%);
+  min-width: 0;
   display: grid;
   gap: 14px;
 }
 
 .timer-control-head {
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3393,16 +3396,18 @@ th.num {
 }
 
 .timer-control-panel {
+  min-width: 0;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 8px;
   padding: 18px;
   display: grid;
-  gap: 16px;
-  background: rgba(23, 28, 38, .92);
+  gap: 12px;
+  background: #171c26;
   box-shadow: var(--shadow);
 }
 
 .timer-control-live {
+  min-width: 0;
   display: grid;
   gap: 5px;
 }
@@ -3424,11 +3429,11 @@ th.num {
 }
 
 .timer-control-clock {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 22px;
-  background:
-    linear-gradient(135deg, rgba(10, 18, 14, .98), rgba(14, 24, 36, .95));
+  min-width: 0;
+  border: 1px solid #303846;
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #0f141c;
   text-align: center;
 }
 
@@ -3454,22 +3459,245 @@ th.num {
 .timer-control-clock strong {
   display: block;
   margin-top: 4px;
-  font-size: clamp(64px, 16vw, 150px);
+  font-size: clamp(54px, 14vw, 112px);
   font-weight: 950;
   line-height: .95;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 
-.timer-control-main-actions {
+.timer-control-clock em {
+  display: block;
+  margin-top: 7px;
+  color: #d5dbe6;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.timer-context-selector {
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.timer-context-selector button,
+.timer-pause-reasons button {
+  min-height: 44px;
+  border: 1px solid #3a4454;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #111720;
+  color: #e9edf4;
+  font: inherit;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.timer-context-selector button.active,
+.timer-pause-reasons button.active {
+  border-color: #f4b740;
+  background: #33270e;
+  color: #ffe5a8;
+}
+
+.timer-control-primary-zone {
+  min-width: 0;
+  min-height: clamp(210px, 45dvh, 380px);
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  place-items: center;
+}
+
+.timer-control-primary-button {
+  width: clamp(190px, 60vw, 340px);
+  aspect-ratio: 1;
+  border: 3px solid #6b7484;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  padding: 22px;
+  background: #227a50;
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .42), inset 0 0 0 6px rgba(255, 255, 255, .08);
+  font: inherit;
+  text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.timer-control-primary-button strong {
+  font-size: clamp(28px, 8vw, 48px);
+  line-height: 1;
+}
+
+.timer-control-primary-button small {
+  color: rgba(255, 255, 255, .82);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.timer-control-primary-button.state-running {
+  border-color: #ffce65;
+  background: #a63c2f;
+}
+
+.timer-control-primary-button.state-paused {
+  border-color: #ffe09a;
+  background: #9a6810;
+}
+
+.timer-control-primary-button.state-finished,
+.timer-control-primary-button:disabled {
+  border-color: #596171;
+  background: #333a46;
+  color: #c8ced8;
+  cursor: not-allowed;
+}
+
+.timer-control-state-mark {
+  width: 18px;
+  height: 18px;
+  margin: 0 auto;
+  border: 3px solid currentColor;
+  border-radius: 50%;
+}
+
+.timer-control-primary-button.state-running .timer-control-state-mark {
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.timer-control-primary-button.state-paused .timer-control-state-mark {
+  width: 16px;
+  border-width: 0 5px;
+  border-radius: 0;
+}
+
+.timer-control-observer,
+.timer-control-empty,
+.timer-pause-reasons {
+  min-width: 0;
+  border: 1px solid #343d4b;
+  border-radius: 8px;
+  padding: 12px;
+  background: #111720;
+}
+
+.timer-control-observer p,
+.timer-control-empty p {
+  margin: 4px 0 10px;
+  color: var(--muted);
+}
+
+.timer-pause-reasons > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.timer-pause-reasons > div {
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.timer-control-secondary-actions {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
-.timer-control-main-actions .button {
-  min-height: 58px;
-  font-size: 18px;
+.timer-control-secondary-actions span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.timer-control-secondary-list {
+  display: grid;
+  gap: 6px;
+}
+
+.timer-control-secondary-list button {
+  min-height: 48px;
+  border: 1px solid #343d4b;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #111720;
+  color: #e9edf4;
+  font: inherit;
+  text-align: left;
+}
+
+.timer-control-secondary-list button span {
+  overflow: hidden;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timer-control-secondary-list button strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-control-secondary-list button em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+@media (max-width: 620px) and (orientation: portrait) {
+  .timer-control-page {
+    align-items: start;
+  }
+
+  .timer-control-shell {
+    gap: 8px;
+  }
+
+  .timer-control-head h1 {
+    font-size: 24px;
+  }
+
+  .timer-control-head .topbar-actions .button:not(.small) {
+    display: none;
+  }
+
+  .timer-control-panel {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .timer-control-clock {
+    padding: 8px 12px;
+  }
+
+  .timer-control-clock strong {
+    font-size: clamp(50px, 17vw, 76px);
+  }
+
+  .timer-control-primary-zone {
+    min-height: 0;
+  }
+
+  .timer-control-primary-button {
+    width: min(60vw, 250px);
+  }
 }
 
 .timer-display-body {

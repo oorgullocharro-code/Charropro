@@ -54,7 +54,14 @@ import {
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260811-pending-review-full-scorer-integration-001-v1";
+} from "./pendingScoreReview.js?v=20260811-official-timer-authority-sync-001-v1";
+import {
+  applyOfficialTimerCommand,
+  applyOfficialTimerControlOperation,
+  buildOfficialTimerProjection,
+  createOfficialTimerContext,
+  normalizeOfficialTimerContext
+} from "./timerRules.js?v=20260811-official-timer-authority-sync-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -2182,6 +2189,219 @@ export async function publishFirebaseTimer(timer, options = {}) {
     return { ok: true, publicSnapshot };
   } catch (error) {
     return { ok: false, reason: error.message };
+  }
+}
+
+export function getFirebaseOfficialTimerPath(tournamentId = "", timerId = "") {
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  const timerKey = normalizeFirebaseTimerKey(timerId);
+  return cleanTournamentId && timerKey
+    ? `${TOURNAMENTS_PATH}/${cleanTournamentId}/officialTimers/${timerKey}`
+    : "";
+}
+
+export function subscribeFirebaseOfficialTimers(tournamentId, callback) {
+  if (!isFirebaseLiveConfigured()) return () => {};
+  const cleanTournamentId = normalizeLiveChannel(tournamentId);
+  if (!cleanTournamentId) return () => {};
+  const path = `${TOURNAMENTS_PATH}/${cleanTournamentId}/officialTimers`;
+  try {
+    return onValue(ref(getFirebaseDatabase(), path), (snapshot) => {
+      const registry = snapshot.val() || {};
+      const timers = Object.values(registry)
+        .map((timer) => {
+          try {
+            return normalizeOfficialTimerContext(timer);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
+      callback({
+        tournamentId: cleanTournamentId,
+        timers,
+        registry: Object.fromEntries(timers.map((timer) => [timer.timerId, timer])),
+        observedAt: new Date().toISOString(),
+        observedAtMs: Date.now()
+      });
+    }, (error) => {
+      callback({
+        tournamentId: cleanTournamentId,
+        timers: [],
+        registry: {},
+        observedAt: new Date().toISOString(),
+        observedAtMs: Date.now(),
+        error: normalizeFirebaseFailureReason(error)
+      });
+    });
+  } catch {
+    return () => {};
+  }
+}
+
+export async function applyFirebaseOfficialTimerAuthority(definition = {}, request = {}, options = {}) {
+  if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase" };
+  const tournamentId = normalizeLiveChannel(definition.tournamentId || options.tournamentId);
+  const timerId = String(definition.timerId || request.timerId || "").trim();
+  const path = getFirebaseOfficialTimerPath(tournamentId, timerId);
+  if (!tournamentId || !timerId || !path) return { ok: false, reason: "official-timer-identity-required" };
+
+  const auth = getFirebaseAuth();
+  if (typeof auth.authStateReady === "function") await auth.authStateReady();
+  const authUser = auth.currentUser;
+  if (!authUser?.uid) return { ok: false, reason: "not-authenticated" };
+
+  const actor = compactTimerAuthorityActor({
+    ...(options.actor || request.actor || {}),
+    id: authUser.uid,
+    uid: authUser.uid
+  });
+  const acceptedAtMs = resolveFirebaseTimerNow(options.now ?? request.acceptedAt);
+  const acceptedAt = new Date(acceptedAtMs).toISOString();
+  const normalizedRequest = cleanUndefined({
+    ...request,
+    timerId,
+    actor,
+    acceptedAt,
+    issuedAt: request.issuedAt || acceptedAt
+  });
+  let transition = null;
+  let conflictTimer = null;
+  let failureReason = "official-timer-transaction-conflict";
+
+  try {
+    const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (currentValue) => {
+      let current = null;
+      try {
+        current = currentValue
+          ? normalizeOfficialTimerContext(currentValue, definition)
+          : createOfficialTimerContext(definition, { now: acceptedAtMs, source: request.source || definition.source || "timer-authority" });
+      } catch {
+        failureReason = "official-timer-invalid-current-state";
+        return;
+      }
+      if (
+        current.timerId !== timerId ||
+        current.tournamentId && current.tournamentId !== tournamentId ||
+        current.charreadaId && definition.charreadaId && current.charreadaId !== definition.charreadaId
+      ) {
+        failureReason = "official-timer-identity-conflict";
+        conflictTimer = current;
+        return;
+      }
+
+      const expectedRevision = request.expectedRevision ?? options.expectedRevision;
+      const operation = String(request.operation || "").trim().toUpperCase();
+      transition = operation
+        ? applyOfficialTimerControlOperation(current, normalizedRequest, {
+            definition,
+            expectedRevision,
+            now: acceptedAtMs,
+            actor,
+            controller: request.controller,
+            targetController: request.targetController,
+            leaseMs: options.leaseMs,
+            requireCommandId: true,
+            source: request.source
+          })
+        : applyOfficialTimerCommand(current, normalizedRequest, {
+            definition,
+            expectedRevision,
+            now: acceptedAtMs,
+            actor,
+            controller: request.controller,
+            leaseMs: options.leaseMs,
+            requireCommandId: true,
+            enforceOwnership: true,
+            autoClaim: true,
+            source: request.source
+          });
+      if (!transition.ok) {
+        failureReason = transition.reason;
+        conflictTimer = transition.timer;
+        return;
+      }
+      if (transition.idempotent) {
+        conflictTimer = current;
+        return;
+      }
+      return cleanUndefined({
+        ...transition.timer,
+        timerKey: normalizeFirebaseTimerKey(timerId),
+        tournamentId,
+        competitionId: String(definition.competitionId || transition.timer.competitionId || "equipos_completo"),
+        charreadaId: String(definition.charreadaId || transition.timer.charreadaId || ""),
+        teamId: String(definition.teamId || transition.timer.teamId || ""),
+        participantId: String(definition.participantId || transition.timer.participantId || ""),
+        suerteId: String(definition.suerteId || transition.timer.suerteId || ""),
+        label: String(definition.label || transition.timer.label || transition.timer.contextType || "Cronometro oficial"),
+        authorityAcceptedAt: acceptedAt,
+        actor
+      });
+    }, { applyLocally: false });
+
+    if (!transaction.committed && transition?.ok && transition.idempotent && conflictTimer) {
+      const timer = normalizeOfficialTimerContext(conflictTimer, definition);
+      const authorityAcceptedAt = timer.authorityAcceptedAt || timer.updatedAt;
+      const authorityAcceptedAtMs = resolveFirebaseTimerNow(authorityAcceptedAt);
+      return {
+        ok: true,
+        idempotent: true,
+        path,
+        timer,
+        projection: buildOfficialTimerProjection(timer, { now: authorityAcceptedAtMs }),
+        projectionResult: { ok: true, skipped: true },
+        authorityAcceptedAt,
+        authorityAcceptedAtMs
+      };
+    }
+
+    if (!transaction.committed || !transition?.ok) {
+      return {
+        ok: false,
+        conflict: true,
+        reason: failureReason,
+        expectedRevision: request.expectedRevision ?? options.expectedRevision,
+        timer: transaction.snapshot?.exists()
+          ? normalizeOfficialTimerContext(transaction.snapshot.val(), definition)
+          : conflictTimer
+      };
+    }
+
+    const timer = normalizeOfficialTimerContext(transaction.snapshot.val(), definition);
+    const authorityAcceptedAt = timer.authorityAcceptedAt || acceptedAt;
+    const authorityAcceptedAtMs = resolveFirebaseTimerNow(authorityAcceptedAt);
+    const projection = buildOfficialTimerProjection(timer, { now: authorityAcceptedAtMs });
+    let projectionResult = { ok: true };
+    try {
+      await writeLiveUpdate({
+        timer: projection,
+        "current/action": "official_timer_update",
+        "current/timer": projection,
+        firebaseUpdatedAt: authorityAcceptedAtMs,
+        liveChannel: tournamentId,
+        timestamp: authorityAcceptedAt
+      }, tournamentId);
+    } catch (error) {
+      projectionResult = { ok: false, reason: normalizeFirebaseFailureReason(error) };
+    }
+    return {
+      ok: true,
+      idempotent: Boolean(transition.idempotent),
+      path,
+      timer,
+      projection,
+      projectionResult,
+      authorityAcceptedAt,
+      authorityAcceptedAtMs
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      detail: normalizeErrorDetail({ error }),
+      timer: conflictTimer
+    };
   }
 }
 
@@ -5439,29 +5659,72 @@ function compactTimeEvidence(items = []) {
 function compactTimer(timer) {
   timer = timer || {};
   return {
+    official: Boolean(timer.official),
+    timerId: timer.timerId || timer.id || "",
+    id: timer.id || timer.timerId || "",
+    contextType: timer.contextType || "",
+    label: timer.label || timer.limitLabel || "",
+    status: timer.status || "",
+    officialStatus: timer.officialStatus || "",
     revision: Number(timer.revision || 0),
+    sourceRevision: Number(timer.sourceRevision ?? timer.revision ?? 0),
     tournamentId: timer.tournamentId || "",
     charreadaId: timer.charreadaId || "",
     teamId: timer.teamId || "",
     suerteId: timer.suerteId || "",
     attemptId: timer.attemptId || "",
     running: Boolean(timer.running),
+    runningSince: timer.runningSince || null,
     startedAt: timer.startedAt || null,
     elapsedMs: Number(timer.elapsedMs || 0),
+    officialElapsedMs: Number(timer.officialElapsedMs ?? timer.elapsedMs ?? 0),
     elapsedLiveMs: Number(timer.elapsedLiveMs || 0),
     displayMs: Number(timer.displayMs || 0),
     remainingMs: timer.remainingMs === null || timer.remainingMs === undefined ? null : Number(timer.remainingMs || 0),
     formatted: timer.formatted || "00:00.0",
+    formattedTime: timer.formattedTime || timer.formatted || "00:00.0",
+    display: timer.display || timer.formatted || "00:00.0",
+    timeText: timer.timeText || timer.formattedTime || timer.formatted || "00:00.0",
     mode: timer.mode || "elapsed",
     limitMs: Number(timer.limitMs || 0),
+    durationMs: Number(timer.durationMs ?? timer.limitMs ?? 0),
     limitLabel: timer.limitLabel || "",
     stateLabel: timer.stateLabel || "",
     expired: Boolean(timer.expired),
     scopeKey: timer.scopeKey || "",
+    paused: Boolean(timer.paused),
+    pausedAt: timer.pausedAt || null,
+    stoppedAt: timer.stoppedAt || null,
+    generatedAt: timer.generatedAt || null,
+    contextRef: timer.contextRef || null,
+    controllerType: timer.controllerType || null,
+    pauseReason: timer.pauseReason || null,
     updatedAtMs: Number(timer.updatedAtMs || 0),
     clientId: timer.clientId || "",
     updatedAt: timer.updatedAt || null
   };
+}
+
+function normalizeFirebaseTimerKey(timerId) {
+  return String(timerId || "")
+    .trim()
+    .replace(/[.#$\[\]/]/g, "_")
+    .replace(/[^A-Za-z0-9_:@-]/g, "_")
+    .slice(0, 240);
+}
+
+function compactTimerAuthorityActor(actor = {}) {
+  return {
+    id: String(actor.id || actor.uid || "").trim().slice(0, 160),
+    name: String(actor.name || actor.displayName || "").trim().slice(0, 160),
+    role: normalizeRole(actor.role)
+  };
+}
+
+function resolveFirebaseTimerNow(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const parsed = Date.parse(String(value || ""));
+  return Number.isFinite(parsed) ? parsed : Date.now();
 }
 
 function compactLeaderboardItem(item) {

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260811-pending-review-full-scorer-integration-001-v1",
+      "appVersion": "20260811-official-timer-authority-sync-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -116,6 +116,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "612e1f0dfd312f2f2ca460e8a4fc7dc86b534556221456f35c145acf293de3dd",
-  "fingerprint": "612e1f0dfd312f2f2ca460e8a4fc7dc86b534556221456f35c145acf293de3dd"
+  "checksum": "dda0aef779a7f557b62331ec08e74cfb6d66cea16ce52d3ec6de369611e3ab74",
+  "fingerprint": "dda0aef779a7f557b62331ec08e74cfb6d66cea16ce52d3ec6de369611e3ab74"
 }
