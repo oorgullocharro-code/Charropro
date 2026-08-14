@@ -1,15 +1,82 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./state.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;
+}
+
+export function buildGlobalColeaderoLeader(publishedScores = [], filters = {}) {
+  const activeByAttempt = new Map();
+  (Array.isArray(publishedScores) ? publishedScores : []).forEach((record) => {
+    const tournamentId = record?.tournament?.id || record?.tournamentId || "";
+    const charreadaId = record?.charreada?.id || record?.charreadaId || "";
+    const suerteId = record?.suerte?.id || record?.suerteId || "";
+    const suerteType = record?.suerte?.type || record?.suerteType || "";
+    if (filters.tournamentId && tournamentId !== filters.tournamentId) return;
+    if (filters.charreadaId && charreadaId !== filters.charreadaId) return;
+    if (suerteId !== "colas" && suerteType !== "coleadero") return;
+    if (record?.superseded || record?.officialStatus === "historical") return;
+
+    const attemptKey = String(record?.attemptKey || record?.id || "");
+    if (!attemptKey) return;
+    const current = activeByAttempt.get(attemptKey);
+    if (!current || Number(record?.revision || 0) > Number(current?.revision || 0)) {
+      activeByAttempt.set(attemptKey, record);
+    }
+  });
+
+  const entriesByParticipant = new Map();
+  activeByAttempt.forEach((record) => {
+    const explicitParticipantId = String(
+      record?.participantId ||
+      record?.competitorId ||
+      record?.participant?.id ||
+      record?.attempt?.participantId ||
+      ""
+    ).trim();
+    const teamId = String(record?.team?.id || record?.teamId || "").trim();
+    const rawColeadorIndex = Number(record?.coleadorIndex || 0);
+    const coleadorIndex = Number.isInteger(rawColeadorIndex) && rawColeadorIndex >= 0 ? rawColeadorIndex : 0;
+    const participantKey = explicitParticipantId
+      ? `participant:${explicitParticipantId}`
+      : teamId ? `team:${teamId}:coleador:${coleadorIndex}` : "";
+    if (!participantKey) return;
+
+    const current = entriesByParticipant.get(participantKey) || {
+      participantKey,
+      participantId: explicitParticipantId,
+      teamId,
+      teamName: String(record?.team?.name || record?.teamName || "").trim(),
+      coleadorIndex,
+      name: String(
+        record?.participantName ||
+        record?.charro ||
+        record?.participant?.name ||
+        record?.attempt?.participantName ||
+        "Coleador no registrado"
+      ).trim() || "Coleador no registrado",
+      total: 0,
+      scoreCount: 0
+    };
+    const officialTotal = Number(record?.total || 0);
+    current.total += Number.isFinite(officialTotal) ? officialTotal : 0;
+    current.scoreCount += 1;
+    entriesByParticipant.set(participantKey, current);
+  });
+
+  const entries = [...entriesByParticipant.values()]
+    .sort((left, right) => right.total - left.total || left.participantKey.localeCompare(right.participantKey));
+  if (!entries.length) return { entries: [], winners: [], bestTotal: null, tied: false };
+  const bestTotal = entries[0].total;
+  const winners = entries.filter((entry) => entry.total === bestTotal);
+  return { entries, winners, bestTotal, tied: winners.length > 1 };
 }
 
 export function getAttemptTeamPenaltyTotal(attempt = {}) {

@@ -48,13 +48,23 @@ assert.equal(resolveFmch2026TernaNextSuerteId(session), "pial_ruedo", "official 
 assert.equal(session.sharedTimerId, `${session.ternaSessionId}:timer`);
 assert.equal(session.history[0].sharedOpportunityId, `${session.ternaSessionId}:op:1`);
 
-session = consume(session, "PIAL", 2);
-assert.equal(resolveFmch2026TernaNextSuerteId(session), "lazo", "official Pial returns to the canonical next Cabecero opportunity");
+session = consume(session, "PIAL", 2, false);
+assert.equal(resolveFmch2026TernaNextSuerteId(session), "pial_ruedo", "a failed Pial keeps Pial active");
+session = consume(session, "PIAL", 3, true);
+assert.equal(resolveFmch2026TernaNextSuerteId(session), null, "a successful Pial completes the active role sequence");
+assert.equal(session.status, "COMPLETED", "both counted Terna phases complete the session before 5/5");
+assert.equal(session.currentOpportunity, null, "a completed Terna does not reserve another opportunity");
+assert.equal(session.history.length, 3, "completion preserves only consumed opportunities");
+assert.equal(
+  session.opportunities.filter((item) => item.status === FMCH_2026_TERNA_CLOSED_UNUSED_STATUS).length,
+  2,
+  "remaining shared opportunities close unused"
+);
 
 for (const usedCount of [1, 2, 4]) {
   let source = createFmch2026TernaSession({ ...identity, teamId: `equipo-${usedCount}` });
   for (let index = 0; index < usedCount; index += 1) {
-    source = consume(source, index % 2 === 0 ? "HEAD" : "PIAL", index + 1);
+    source = consume(source, "HEAD", index + 1, false);
   }
   const historyBefore = structuredClone(source.history);
   const closed = finishFmch2026TernaSession(source, {
@@ -83,17 +93,19 @@ assert.match(appSource, /setTernaScoringPointer\(nextSuerteId, session\)/);
 assert.match(appSource, /hasPendingTernaSessionReview\(context\)/);
 assert.match(appSource, /executeScorerTimerAuthority\(runtime, \{[\s\S]*?type: "FINISH"/);
 assert.match(appSource, /advanceAfterCompletedTernaSession\(\)/);
+assert.match(appSource, /session\?\.status === "COMPLETED"/);
+assert.match(appSource, /return "Finalizar Terna"/);
 assert.match(appSource, /"finish-terna-session": "score"/);
 assert.doesNotMatch(appSource, /Attempt V3/);
 
 console.log("terna-operational-flow.test.mjs: ok");
 
-function consume(source, type, sequence) {
+function consume(source, type, sequence, countsForTerna) {
   const draft = buildFmch2026TernaOpportunityDraft(source, {
     type,
     participantId: `${type.toLowerCase()}-${sequence}`,
-    result: "VALID",
-    countsForTerna: true
+    result: countsForTerna ? "VALID" : "ZERO",
+    countsForTerna
   });
   assert.equal(draft.ok, true);
   const reservation = reserveFmch2026TernaOpportunity(source, draft.opportunity, {

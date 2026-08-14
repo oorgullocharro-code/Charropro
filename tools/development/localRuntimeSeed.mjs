@@ -2,7 +2,7 @@
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { DEFAULT_LOCAL_PROJECT_ID } from "./environmentFoundation.mjs";
-import { FMCH_2026_LIBRE_PROFILE } from "../../js/data/ruleProfiles.js";
+import { buildLocalFmch2026RuleProfileAssignment } from "../../js/core/localRuleProfileDefaults.js";
 
 const require = createRequire(import.meta.url);
 const requireFromFunctions = createRequire(new URL("../../functions/package.json", import.meta.url));
@@ -66,18 +66,7 @@ export function createLocalRuntimeSeedFixture(now = "2026-08-01T00:00:00.000Z") 
     environment: "local",
     official: false
   };
-  tournament.ruleProfileId = FMCH_2026_LIBRE_PROFILE.profileId;
-  tournament.ruleProfileVersion = FMCH_2026_LIBRE_PROFILE.version;
-  tournament.ruleProfile = {
-    ...FMCH_2026_LIBRE_PROFILE,
-    status: "active",
-    metadata: {
-      ...FMCH_2026_LIBRE_PROFILE.metadata,
-      fixtureOnly: true,
-      activationReady: false,
-      environment: "local-emulator"
-    }
-  };
+  Object.assign(tournament, buildLocalFmch2026RuleProfileAssignment());
   const teams = [
     { id: "demo-local-equipo-a", name: "Charros Demo del Norte", association: "Asociacion Local A", category: "Libre", roster: { piales: "Pialador Demo Norte", colas: ["Alberto Demo", "Bernardo Demo", "Carlos Demo"], lazo: "Cabecero Demo Norte", pial_ruedo: "Pialador Ruedo Norte", terna: ["Cabecero Demo Norte", "Pialador Ruedo Norte", "Auxiliar Demo Norte"], integrantes: [{ name: "Charro Uno", horseName: "Relampago Local" }] } },
     { id: "demo-local-equipo-b", name: "Rancheros de Ensayo", association: "Asociacion Local B", category: "Libre", roster: { piales: "Pialador de Ensayo", colas: ["Diego Ensayo", "Esteban Ensayo", "Felipe Ensayo"], lazo: "Cabecero de Ensayo", pial_ruedo: "Pialador Ruedo Ensayo", terna: ["Cabecero de Ensayo", "Pialador Ruedo Ensayo", "Auxiliar de Ensayo"], integrantes: [{ name: "Charro Dos", horseName: "Centella Local" }] } },

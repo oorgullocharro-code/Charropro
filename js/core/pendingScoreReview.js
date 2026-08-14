@@ -233,6 +233,21 @@ export function normalizePendingScoreReviewRegistry(registry = {}) {
     .map((record) => [record.pendingId, record]));
 }
 
+export function reconcilePendingScoreReviewRegistries(localRegistry = {}, remoteRegistry = {}, options = {}) {
+  const local = normalizePendingScoreReviewRegistry(localRegistry);
+  const remote = normalizePendingScoreReviewRegistry(remoteRegistry);
+  const reconciled = { ...local };
+
+  Object.values(remote).forEach((remoteRecord) => {
+    const localRecord = local[remoteRecord.pendingId];
+    reconciled[remoteRecord.pendingId] = localRecord && localRecord.revision > remoteRecord.revision
+      ? localRecord
+      : remoteRecord;
+  });
+
+  return reconciled;
+}
+
 export function listPendingScoreReviews(registry = {}, filters = {}) {
   return Object.values(normalizePendingScoreReviewRegistry(registry))
     .filter((record) => !filters.tournamentId || record.tournamentId === filters.tournamentId)

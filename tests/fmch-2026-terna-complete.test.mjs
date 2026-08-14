@@ -129,8 +129,11 @@ session = consume(session, {
   remateLabel: "Corvero derecho"
 });
 assert.equal(session.history.length, 2);
-assert.equal(session.currentOpportunity, 3);
+assert.equal(session.currentOpportunity, null);
 assert.equal(session.pialCounted, true);
+assert.equal(session.status, "COMPLETED");
+assert.equal(session.opportunities.filter((opportunity) => opportunity.status === "CLOSED_UNUSED").length, 3);
+assert.equal(buildFmch2026TernaOpportunityDraft(session, { type: "PIAL" }).reason, "terna-opportunity-limit-reached");
 assert.deepEqual(session.history.map((entry) => entry.type), ["HEAD", "PIAL"]);
 assert.deepEqual(buildFmch2026TernaRemateHistory(session.history).PIAL.map((item) => item.remateId), [
   "pial_ruedo_base_corvero_derecho"
@@ -146,23 +149,24 @@ assert.equal(shouldDisqualifyRepeatedFmch2026TernaRemate(session, {
   remateId: "pial_ruedo_base_corvero_derecho"
 }), false);
 
-session = consume(session, {
-  type: "HEAD",
-  participantName: "Cabecero Demo",
-  result: "ZERO",
-  countsForTerna: false
-});
-assert.equal(session.history[2].result, "ZERO");
-assert.notEqual(session.history[2].result, "DQ");
-session = consume(session, { type: "PIAL", participantName: "Pialador Demo", result: "DQ", countsForTerna: false });
-session = consume(session, { type: "HEAD", participantName: "Cabecero Demo", result: "ATTEMPTED", countsForTerna: false });
-assert.equal(session.history.length, 5);
-assert.equal(session.currentOpportunity, null);
-assert.equal(session.status, "COMPLETED");
-assert.equal(buildFmch2026TernaOpportunityDraft(session, { type: "PIAL" }).reason, "terna-opportunity-limit-reached");
+let exhaustedSession = createFmch2026TernaSession({ ...identity, teamId: "team_exhausted" });
+for (let index = 0; index < FMCH_2026_TERNA_OPPORTUNITY_LIMIT; index += 1) {
+  exhaustedSession = consume(exhaustedSession, {
+    type: "HEAD",
+    participantName: "Cabecero sin cuenta",
+    result: index === 3 ? "DQ" : "ZERO",
+    countsForTerna: false
+  });
+}
+assert.equal(exhaustedSession.history[2].result, "ZERO");
+assert.notEqual(exhaustedSession.history[2].result, "DQ");
+assert.equal(exhaustedSession.history.length, 5);
+assert.equal(exhaustedSession.currentOpportunity, null);
+assert.equal(exhaustedSession.status, "COMPLETED");
+assert.equal(buildFmch2026TernaOpportunityDraft(exhaustedSession, { type: "PIAL" }).reason, "terna-opportunity-limit-reached");
 
-const corrected = commitFmch2026TernaOpportunity(session, {
-  ...session.history[2],
+const corrected = commitFmch2026TernaOpportunity(exhaustedSession, {
+  ...exhaustedSession.history[2],
   result: "VALID",
   qualifiesForTerna: true,
   remateId: "lazo_base_efecto",
@@ -228,7 +232,7 @@ assert.equal(independentlyPaused.status, "PAUSED");
 assert.equal(toroTimer.status, "RUNNING");
 assert.notEqual(independentlyPaused.timerId, toroTimer.timerId);
 
-const bonus = resolveFmch2026TernaTimeAdditional({ remainingMs: 119999 }, corrected.session);
+const bonus = resolveFmch2026TernaTimeAdditional({ remainingMs: 119999 }, session);
 assert.deepEqual(bonus, {
   eligible: true,
   completeUnusedMinutes: 1,

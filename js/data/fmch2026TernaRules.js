@@ -236,6 +236,9 @@ export function normalizeFmch2026TernaSession(value = {}, identity = {}) {
   const usedIds = new Set(history.map((item) => item.sharedOpportunityId));
   const closure = normalizeTernaClosure(base.closure);
   const closedEarly = closure?.type === "EARLY_FINISH";
+  const headCounted = history.some((item) => item.type === "HEAD" && item.countsForTerna);
+  const pialCounted = history.some((item) => item.type === "PIAL" && item.countsForTerna);
+  const sportingComplete = headCounted && pialCounted;
   const opportunities = Array.from({ length: FMCH_2026_TERNA_OPPORTUNITY_LIMIT }, (_, index) => {
     const sharedOpportunityId = `${expectedId}:op:${index + 1}`;
     const historyEntry = history.find((item) => item.sharedOpportunityId === sharedOpportunityId);
@@ -244,11 +247,11 @@ export function normalizeFmch2026TernaSession(value = {}, identity = {}) {
       : {
         sharedOpportunityId,
         sharedSequenceNumber: index + 1,
-        status: closedEarly ? FMCH_2026_TERNA_CLOSED_UNUSED_STATUS : "AVAILABLE"
+        status: closedEarly || sportingComplete ? FMCH_2026_TERNA_CLOSED_UNUSED_STATUS : "AVAILABLE"
       };
   });
   const used = Math.min(FMCH_2026_TERNA_OPPORTUNITY_LIMIT, usedIds.size);
-  const complete = used >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT;
+  const complete = used >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT || sportingComplete;
   return {
     ...createFmch2026TernaSession(base, { now: base.createdAt || Date.now() }),
     ...base,
@@ -260,8 +263,8 @@ export function normalizeFmch2026TernaSession(value = {}, identity = {}) {
     currentOpportunity: complete || closedEarly ? null : used + 1,
     history,
     remateHistory: buildFmch2026TernaRemateHistory(history),
-    headCounted: history.some((item) => item.type === "HEAD" && item.countsForTerna),
-    pialCounted: history.some((item) => item.type === "PIAL" && item.countsForTerna),
+    headCounted,
+    pialCounted,
     status: complete
       ? "COMPLETED"
       : base.status === "FINISHED"
@@ -269,7 +272,7 @@ export function normalizeFmch2026TernaSession(value = {}, identity = {}) {
         : used || base.status === "IN_PROGRESS"
           ? "IN_PROGRESS"
           : "READY",
-    activeOpportunity: closedEarly ? null : base.activeOpportunity ? normalizeOpportunity(base.activeOpportunity) : null,
+    activeOpportunity: complete || closedEarly ? null : base.activeOpportunity ? normalizeOpportunity(base.activeOpportunity) : null,
     closure,
     revision: nonNegativeInteger(base.revision),
     timeAdditional: normalizeTimeAdditional(base.timeAdditional),
@@ -283,9 +286,27 @@ export function resolveFmch2026TernaNextSuerteId(session = {}) {
   if (!current.currentOpportunity || current.status === "COMPLETED" || current.closure?.type === "EARLY_FINISH") {
     return null;
   }
-  const previous = current.history[current.history.length - 1] || null;
-  if (!previous) return "lazo";
-  return previous.type === "HEAD" ? "pial_ruedo" : "lazo";
+  if (!current.headCounted) return "lazo";
+  if (!current.pialCounted) return "pial_ruedo";
+  return null;
+}
+
+export function resolveFmch2026TernaAttemptCompletion(attemptV2 = {}) {
+  const sportState = attemptV2?.sportState || {};
+  const sportStatus = String(sportState.status || "NOT_STARTED").trim().toUpperCase();
+  const executionResult = String(sportState.result || "NOT_STARTED").trim().toUpperCase();
+  const selectedBaseRuleId = normalizeId(attemptV2?.scoring?.baseSelection?.selectedRuleId);
+  const blocked = ["DQ", "NOT_ACHIEVED", "ZERO", "LOST_OPPORTUNITY"].includes(sportStatus)
+    || executionResult === "NOT_ACHIEVED";
+  const completed = Boolean(selectedBaseRuleId) && !blocked;
+  return {
+    completed,
+    qualifiesForTerna: completed,
+    countsForTerna: completed,
+    result: sportStatus === "DQ" ? "DQ" : completed ? "VALID" : blocked ? "ZERO" : "ATTEMPTED",
+    sportStatus,
+    selectedBaseRuleId: selectedBaseRuleId || null
+  };
 }
 
 export function canFinishFmch2026TernaSession(session = {}) {
@@ -390,6 +411,10 @@ export function validateFmch2026TernaSequence(session = {}, opportunity = {}) {
   const current = normalizeFmch2026TernaSession(session, session);
   const candidate = normalizeOpportunity(opportunity);
   if (!current.currentOpportunity) return { valid: false, reason: "terna-opportunity-limit-reached" };
+  const expectedSuerteId = resolveFmch2026TernaNextSuerteId(current);
+  if (!expectedSuerteId || candidate.suerteId !== expectedSuerteId) {
+    return { valid: false, reason: "terna-role-state-mismatch" };
+  }
   if (candidate.sharedSequenceNumber !== current.currentOpportunity) {
     return { valid: false, reason: "terna-shared-sequence-mismatch" };
   }
@@ -442,9 +467,15 @@ export function commitFmch2026TernaOpportunity(session = {}, opportunity = {}, p
     const history = current.history.map((item) =>
       item.sharedOpportunityId === replacement.sharedOpportunityId ? replacement : item
     );
+    const reconciledHistory = reconcileCountedHistory(history);
+    const complete = reconciledHistory.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT || (
+      reconciledHistory.some((item) => item.type === "HEAD" && item.countsForTerna)
+      && reconciledHistory.some((item) => item.type === "PIAL" && item.countsForTerna)
+    );
     const next = normalizeFmch2026TernaSession({
       ...current,
-      history,
+      history: reconciledHistory,
+      finishedAt: complete ? current.finishedAt || now : current.closure?.type === "EARLY_FINISH" ? current.finishedAt : null,
       updatedAt: now,
       revision: current.revision + 1
     }, current);
@@ -465,7 +496,9 @@ export function commitFmch2026TernaOpportunity(session = {}, opportunity = {}, p
     consumedAt: now
   };
   const history = [...current.history, entry];
-  const complete = history.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT;
+  const headCounted = current.headCounted || (entry.type === "HEAD" && entry.countsForTerna);
+  const pialCounted = current.pialCounted || (entry.type === "PIAL" && entry.countsForTerna);
+  const complete = history.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT || (headCounted && pialCounted);
   const next = normalizeFmch2026TernaSession({
     ...current,
     status: complete ? "COMPLETED" : "IN_PROGRESS",

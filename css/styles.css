@@ -6188,16 +6188,59 @@ th.num {
 }
 
 .cp-paso-operational-zone {
-  grid-template-columns: minmax(0, 1.5fr) minmax(220px, .7fr) minmax(180px, .6fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(230px, .55fr);
+}
+
+.cp-paso-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 260px);
+  align-items: stretch;
+  gap: 10px;
+}
+
+.cp-paso-primary {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 8px;
+}
+
+.cp-paso-context {
+  min-height: 100%;
 }
 
 .cp-paso-operational-zone .cp-classification-selector {
   margin: 0;
 }
 
-.cp-paso-operational-zone .cp-mangana-result,
+.cp-paso-operational-zone .cp-paso-result,
 .cp-paso-operational-zone .cp-paso-summary {
   align-content: center;
+}
+
+.cp-paso-result {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.cp-paso-result > span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cp-paso-result .button {
+  min-width: 0;
+  min-height: 42px;
 }
 
 .cp-paso-timer-controls {
@@ -6206,7 +6249,9 @@ th.num {
   align-items: center;
   gap: 8px;
   padding: 8px;
-  border-top: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
 }
 
 .cp-paso-timer-controls > section {
@@ -6273,9 +6318,12 @@ th.num {
   }
 
   .cp-operational-control-bar,
-  .cp-paso-operational-zone,
   .cp-paso-timer-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cp-paso-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 230px);
   }
 
   .cp-terna-dashboard {
@@ -6294,6 +6342,18 @@ th.num {
   .cp-paso-operational-zone,
   .cp-paso-timer-controls,
   .cp-paso-timer-controls > section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-paso-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-paso-context {
+    min-height: auto;
+  }
+
+  .cp-paso-result {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -6475,7 +6535,6 @@ th.num {
     grid-template-columns: minmax(0, 1fr) minmax(220px, .32fr);
     grid-template-areas:
       "dashboard history"
-      "result history"
       "remates history"
       "detail history";
     align-content: start;
@@ -6489,12 +6548,74 @@ th.num {
 
   .scoring-shell-classic .cp-manganas-dashboard {
     grid-area: dashboard;
-    grid-template-columns: minmax(180px, .95fr) repeat(2, minmax(145px, .75fr));
+    grid-template-columns: minmax(156px, .72fr) repeat(2, minmax(180px, 1fr));
+    grid-template-areas:
+      "attempt attempt attempt"
+      "result floreo pulls";
     gap: 8px;
+  }
+
+  .scoring-shell-classic .cp-mangana-attempt {
+    grid-area: attempt;
+    min-height: 22px;
+    padding: 1px 2px;
+    border: 0;
+    background: transparent;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .scoring-shell-classic .cp-mangana-attempt > span {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .scoring-shell-classic .cp-mangana-attempt > strong {
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .scoring-shell-classic .cp-mangana-attempt > em {
+    color: var(--muted);
+    font-size: 11px;
+    font-style: normal;
   }
 
   .scoring-shell-classic .cp-mangana-result {
     grid-area: result;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 6px;
+    padding: 9px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+  }
+
+  .scoring-shell-classic .cp-mangana-result > span {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .scoring-shell-classic .cp-mangana-result .button {
+    width: 100%;
+    min-height: 38px;
+    padding-block: 6px;
+  }
+
+  .scoring-shell-classic .cp-mangana-floreo {
+    grid-area: floreo;
+  }
+
+  .scoring-shell-classic .cp-mangana-pulls {
+    grid-area: pulls;
   }
 
   .scoring-shell-classic .cp-mangana-remates {
@@ -6621,6 +6742,19 @@ th.num {
 
   .scoring-shell-classic .cp-mangana-history {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scoring-shell-classic .cp-manganas-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "attempt"
+      "result"
+      "floreo"
+      "pulls";
+  }
+
+  .scoring-shell-classic .cp-mangana-result .button {
+    width: auto;
   }
 }
 

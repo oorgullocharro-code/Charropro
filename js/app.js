@@ -1,6 +1,6 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./data/calaRules.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -48,10 +48,11 @@ import {
   finishFmch2026TernaSession,
   isFmch2026TernaSuerte,
   reserveFmch2026TernaOpportunity,
+  resolveFmch2026TernaAttemptCompletion,
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -71,12 +72,13 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -84,11 +86,12 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/timerRules.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   applyPuntaCalculation,
+  buildGlobalColeaderoLeader,
   buildCharreadaLeaderboard,
   buildLeaderboard,
   calculateAttemptPointSummary,
@@ -98,16 +101,16 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/scoring.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/scoringAttempt.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/scorerComponents.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -117,7 +120,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/sync.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   createFirebaseTournamentBackup,
@@ -156,7 +159,7 @@ import {
   subscribeFirebaseUsers,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/firebaseSync.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -166,9 +169,10 @@ import {
   normalizePendingScoreReviewRegistry,
   openPendingScoreReview,
   putPendingScoreReview,
+  reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/pendingScoreReview.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -221,7 +225,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260813-scorer-workspace-viewport-compaction-001-v1";
+} from "./core/state.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -2944,10 +2948,11 @@ function applyRemotePendingScoreReviews(payload = {}) {
     return;
   }
   const tournamentId = payload.tournamentId || state.activeTournamentId || "";
-  const remote = normalizePendingScoreReviewRegistry(payload.records);
-  const retained = Object.fromEntries(Object.entries(state.pendingScoreReviews || {})
-    .filter(([, record]) => record.tournamentId !== tournamentId));
-  state.pendingScoreReviews = { ...retained, ...remote };
+  state.pendingScoreReviews = reconcilePendingScoreReviewRegistries(
+    state.pendingScoreReviews,
+    payload.records,
+    { tournamentId }
+  );
   saveState({ silent: true });
   if (!activePendingResolutionId) recoverPendingResolutionSession();
   if (state.view === "scoring") render({ preserveScoringScroll: true });
@@ -8416,15 +8421,15 @@ function renderManganasMainPanel(context) {
       </header>
       <div class="cp-manganas-dashboard">
         <article class="cp-mangana-attempt">
-          <span>Intento actual</span>
+          <span>Intento</span>
           <strong>${context.attemptIndex + 1} de ${context.suerte.attempts}</strong>
-          <em>${attempt.manganaResult === "ACHIEVED" ? "Lograda" : attempt.manganaResult === "NOT_ACHIEVED" ? "No lograda" : "En captura"}</em>
+          <em>${attempt.manganaResult === "ACHIEVED" ? "Lograda" : attempt.manganaResult === "NOT_ACHIEVED" ? "No lograda" : "En captura"} · ${moneylessNumber(calculateAttemptTotal(attempt))} pts</em>
         </article>
-        <article class="cp-mangana-total">
-          <span>Total de oportunidad</span>
-          <strong>${moneylessNumber(calculateAttemptTotal(attempt))}</strong>
-          <em>${attempt.desc ? "Descalificada" : attempt.manganaResult === "ACHIEVED" ? "Lograda" : attempt.manganaResult === "NOT_ACHIEVED" ? "No lograda" : "Sin registrar"}</em>
-        </article>
+        <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo de la oportunidad">
+          <span>Resultado</span>
+          <button type="button" class="button green ${attempt.manganaResult === "ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="ACHIEVED">Lograda</button>
+          <button type="button" class="button red ${attempt.manganaResult === "NOT_ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="NOT_ACHIEVED">No lograda</button>
+        </div>
         <article class="cp-mangana-floreo" data-source="FMCH_2026">
           <span>Floreo total</span>
           <div class="cp-sport-stepper">
@@ -8443,10 +8448,6 @@ function renderManganasMainPanel(context) {
           </div>
           <em>${attempt.pullCount >= 3 ? "Malos acumulados: -4" : attempt.pullCount === 2 ? "Malos acumulados: -2" : "Sin ajuste por tirón"}</em>
         </article>
-      </div>
-      <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo de la oportunidad">
-        <button type="button" class="button green ${attempt.manganaResult === "ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="ACHIEVED">Lograda</button>
-        <button type="button" class="button red ${attempt.manganaResult === "NOT_ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="NOT_ACHIEVED">No lograda</button>
       </div>
       ${isPie ? html`
         <section class="cp-mangana-remates">
@@ -8673,6 +8674,7 @@ function renderTernaMainPanel(context) {
   const control = getOfficialTimerControlView(runtime.timer, getScorerTimerController());
   const session = runtime.session;
   const currentType = context.suerte.id === "lazo" ? "HEAD" : "PIAL";
+  const activeSuerteId = resolveFmch2026TernaNextSuerteId(session);
   const history = session.history;
   const nextContextLabel = getTernaNextContextLabel(context, session, currentType);
   const canFinishSession = canFinishFmch2026TernaSession(session);
@@ -8687,8 +8689,8 @@ function renderTernaMainPanel(context) {
         <p>${escapeHTML(currentType === "HEAD" ? "Pantalla independiente de Lazo Cabecero" : "Pantalla independiente de Pial en el Ruedo")}</p>
       </header>
       <div class="cp-terna-switch" role="group" aria-label="Cambiar score de Terna">
-        <button class="button ${currentType === "HEAD" ? "primary" : ""}" data-action="select-terna-suerte" data-id="lazo" type="button">Lazo Cabecero</button>
-        <button class="button ${currentType === "PIAL" ? "primary" : ""}" data-action="select-terna-suerte" data-id="pial_ruedo" type="button">Pial en el Ruedo</button>
+        <button class="button ${currentType === "HEAD" ? "primary" : ""}" data-action="select-terna-suerte" data-id="lazo" type="button" ${activeSuerteId && activeSuerteId !== "lazo" ? "disabled" : ""}>Lazo Cabecero</button>
+        <button class="button ${currentType === "PIAL" ? "primary" : ""}" data-action="select-terna-suerte" data-id="pial_ruedo" type="button" ${activeSuerteId && activeSuerteId !== "pial_ruedo" ? "disabled" : ""}>Pial en el Ruedo</button>
       </div>
       <div class="cp-terna-dashboard">
         <article class="cp-terna-counter">
@@ -8777,18 +8779,20 @@ function charroNameForTerna(context) {
 }
 
 function getTernaNextContextLabel(context, session, currentType) {
+  const completion = getCurrentTernaAttemptCompletion(context);
   const draft = buildFmch2026TernaOpportunityDraft(session, {
     type: currentType,
     participantId: context.team?.id,
     participantName: charroNameForTerna(context),
     attemptIndex: context.attemptIndex,
-    result: "ATTEMPTED"
+    result: completion.result,
+    countsForTerna: completion.countsForTerna
   });
-  if (!draft.ok) return "Siguiente contexto";
+  if (!draft.ok) return "Finalizar Terna";
   const preview = commitFmch2026TernaOpportunity(session, draft.opportunity, { scoreId: "preview" });
-  if (!preview.ok) return "Siguiente contexto";
+  if (!preview.ok) return "Finalizar Terna";
   const nextSuerteId = resolveFmch2026TernaNextSuerteId(preview.session);
-  if (!nextSuerteId) return "Siguiente contexto";
+  if (!nextSuerteId) return "Finalizar Terna";
   return nextSuerteId === "lazo" ? "Lazo Cabecero" : "Pial en el Ruedo";
 }
 
@@ -8804,26 +8808,31 @@ function renderPasoMainPanel(context, attemptView) {
         </div>
         <p>Selecciona vuelta y clasificación; las acciones dinámicas toman su valor del perfil vigente.</p>
       </header>
-      <div class="cp-paso-operational-zone">
-        ${renderScoringClassificationSlot(context, attemptView)}
-        <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo del Paso">
-          <button type="button" class="button ${attempt.pasoResult === "ACHIEVED" ? "primary" : ""}" data-action="set-paso-result" data-result="ACHIEVED">Logrado</button>
-          <button type="button" class="button ${attempt.pasoResult === "NOT_ACHIEVED" ? "amber" : ""}" data-action="set-paso-result" data-result="NOT_ACHIEVED">No logrado</button>
+      <div class="cp-paso-workspace">
+        <div class="cp-paso-primary">
+          <div class="cp-paso-operational-zone">
+            ${renderScoringClassificationSlot(context, attemptView)}
+            <div class="cp-paso-result" role="group" aria-label="Resultado deportivo del Paso">
+              <span>Resultado</span>
+              <button type="button" class="button green ${attempt.pasoResult === "ACHIEVED" ? "active" : ""}" data-action="set-paso-result" data-result="ACHIEVED">Logrado</button>
+              <button type="button" class="button red ${attempt.pasoResult === "NOT_ACHIEVED" ? "active" : ""}" data-action="set-paso-result" data-result="NOT_ACHIEVED">No logrado</button>
+            </div>
+          </div>
+          <div class="cp-paso-timer-controls" aria-label="Controles temporales del Paso">
+            ${timers.map((runtime) => html`
+              <section>
+                <div><span>${escapeHTML(runtime.kind === "paso_exit" ? "Salida" : "Desmonte")}</span><strong>${escapeHTML(runtime.view.status)}</strong></div>
+                <div class="cp-sport-timer-actions">${renderScorerTimerControlButtons(runtime)}</div>
+              </section>
+            `).join("")}
+            <button class="button" data-action="apply-sport-timing" type="button">Aplicar tiempos</button>
+          </div>
         </div>
-        <article class="cp-paso-summary">
+        <article class="cp-paso-summary cp-paso-context">
           <span>Faena</span>
           <strong>${attempt.pasoVuelta === 2 ? "Segunda vuelta" : "Primera vuelta"}</strong>
           <em>${attempt.classification?.classificationLabel || "Clasificación pendiente"} · ${moneylessNumber(calculateAttemptTotal(attempt))} pts</em>
         </article>
-      </div>
-      <div class="cp-paso-timer-controls" aria-label="Controles temporales del Paso">
-        ${timers.map((runtime) => html`
-          <section>
-            <div><span>${escapeHTML(runtime.kind === "paso_exit" ? "Salida" : "Desmonte")}</span><strong>${escapeHTML(runtime.view.status)}</strong></div>
-            <div class="cp-sport-timer-actions">${renderScorerTimerControlButtons(runtime)}</div>
-          </section>
-        `).join("")}
-        <button class="button" data-action="apply-sport-timing" type="button">Aplicar tiempos</button>
       </div>
     </section>
   `;
@@ -11064,7 +11073,14 @@ function selectScoringSuerte(index) {
 }
 
 function selectTernaSuerte(suerteId) {
-  if (!setTernaScoringPointer(suerteId)) return;
+  const context = getCurrentContext();
+  const session = context && isFmch2026TernaSuerte(context.suerte?.id) ? getOrCreateTernaSession(context) : null;
+  const activeSuerteId = session ? resolveFmch2026TernaNextSuerteId(session) : null;
+  if (activeSuerteId && suerteId !== activeSuerteId) {
+    showToast(activeSuerteId === "lazo" ? "La fase activa continúa con Lazo Cabecero." : "La fase activa continúa con Pial en el Ruedo.");
+    return;
+  }
+  if (!setTernaScoringPointer(suerteId, session)) return;
   render();
 }
 
@@ -11497,17 +11513,17 @@ function saveTournament() {
   const data = Object.fromEntries(new FormData(form));
   const id = uid("torneo");
 
-	  state.tournaments.push({
-	    id,
-	    name: data.name.trim(),
-	    season: getSeasonFromInput(data.season || data.date),
-	    date: data.date,
-	    venue: data.venue.trim(),
-	    type: data.type || "completo",
-	    ruleOverrides: {},
-	    individualAwardPlaces: 5,
-	    status: data.status || "preparacion"
-	  });
+  state.tournaments.push(applyLocalFmch2026RuleProfileDefault({
+    id,
+    name: data.name.trim(),
+    season: getSeasonFromInput(data.season || data.date),
+    date: data.date,
+    venue: data.venue.trim(),
+    type: data.type || "completo",
+    ruleOverrides: {},
+    individualAwardPlaces: 5,
+    status: data.status || "preparacion"
+  }, getFirebaseRuntimeDiagnostics()));
   state.activeTournamentId = id;
   state.activeCharreadaId = null;
   state.view = "dashboard";
@@ -12123,6 +12139,7 @@ function saveCharreada() {
   const existingId = form.dataset.id || "";
   const existing = existingId ? state.charreadas.find((item) => item.id === existingId) : null;
   if (existing && !guardUnlockedCharreada(existing, "Esta charreada esta congelada; no se puede modificar.")) return;
+  if (!existing) ensureLocalRuleProfileForNewCharreada();
   const id = existing?.id || uid("charreada");
   const wasActive = state.activeCharreadaId === id;
   const phase = normalizeCharreadaPhaseInput(data.get("phase"), data.get("phaseOther"));
@@ -12173,6 +12190,18 @@ function saveCharreada() {
   saveState();
   if (state.activeCharreadaId === id) syncCurrentLiveState({ repeat: true });
   render();
+}
+
+function ensureLocalRuleProfileForNewCharreada() {
+  const tournament = getActiveTournament();
+  if (!tournament) return;
+  const resolved = applyLocalFmch2026RuleProfileDefault(tournament, getFirebaseRuntimeDiagnostics());
+  if (resolved === tournament) return;
+  Object.assign(tournament, {
+    ruleProfileId: resolved.ruleProfileId,
+    ruleProfileVersion: resolved.ruleProfileVersion,
+    ruleProfile: resolved.ruleProfile
+  });
 }
 
 function getOrderedCharreadaTeamIds(data) {
@@ -13755,10 +13784,8 @@ function prepareTernaAttemptForPublication(context) {
     }
   }
   const timerView = runtime.view;
-  const hasCountableBase = Number(context.attempt.base || 0) > 0 && !context.attempt.desc && !context.attempt.notAchieved;
-  const result = context.attempt.desc
-    ? "DQ"
-    : context.attempt.notAchieved ? "ZERO" : hasCountableBase ? "VALID" : "ATTEMPTED";
+  const completion = getCurrentTernaAttemptCompletion(context);
+  const result = completion.result;
   const draft = existing
     ? { ok: true, opportunity: {
         ...existing,
@@ -13766,8 +13793,8 @@ function prepareTernaAttemptForPublication(context) {
         participantName: getPublishedCharroName(context),
         attemptIndex: context.attemptIndex,
         result,
-        qualifiesForTerna: hasCountableBase,
-        countsForTerna: hasCountableBase,
+        qualifiesForTerna: completion.qualifiesForTerna,
+        countsForTerna: completion.countsForTerna,
         remateId: context.attempt.remateId,
         remateLabel: context.attempt.remateLabel,
         officialElapsedMs: timerView.officialElapsedMs,
@@ -13779,7 +13806,7 @@ function prepareTernaAttemptForPublication(context) {
         participantName: getPublishedCharroName(context),
         attemptIndex: context.attemptIndex,
         result,
-        countsForTerna: hasCountableBase,
+        countsForTerna: completion.countsForTerna,
         remateId: context.attempt.remateId,
         remateLabel: context.attempt.remateLabel,
         officialElapsedMs: timerView.officialElapsedMs,
@@ -13817,6 +13844,15 @@ function prepareTernaAttemptForPublication(context) {
     originalSession: runtime.session,
     session: reservation.session
   };
+}
+
+function getCurrentTernaAttemptCompletion(context = {}) {
+  const attemptV2 = adaptLegacyAttemptToV2(
+    context.attempt,
+    buildScoringAttemptV2Context(context),
+    { pointSummary: calculateAttemptPointSummary(context.attempt) }
+  );
+  return resolveFmch2026TernaAttemptCompletion(attemptV2);
 }
 
 function rollbackTernaPublicationReservation(prepared) {
@@ -13882,7 +13918,7 @@ function continueOfficialScoreFlowAfterPublish(context = getCurrentContext()) {
   }
   if (isFmch2026TernaSuerte(context?.suerte?.id)) {
     const session = getOrCreateTernaSession(context);
-    if (session?.history?.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT || session?.closure?.type === "EARLY_FINISH") {
+    if (session?.status === "COMPLETED" || session?.history?.length >= FMCH_2026_TERNA_OPPORTUNITY_LIMIT || session?.closure?.type === "EARLY_FINISH") {
       advanceAfterCompletedTernaSession();
     } else {
       const nextSuerteId = resolveFmch2026TernaNextSuerteId(session);
@@ -13907,75 +13943,28 @@ function getColeadorCountForContext(context = {}, collection = null) {
   return Math.max(3, Array.isArray(collection) ? collection.length : 0);
 }
 
-function isCompletingColasForTeam(context = {}) {
+function isCompletingColasForCharreada(context = {}) {
   if (!isColasContext(context)) return false;
   const collection = getScoreCollectionForContext(context);
   const coleadorCount = getColeadorCountForContext(context, collection);
   const attempts = Math.max(1, Number(context.suerte?.attempts || 1));
-  return Number(context.coleadorIndex || 0) >= coleadorCount - 1
+  const entries = getCharreadaScoringEntries(context.charreada);
+  return Number(context.teamIndex || 0) >= Math.max(0, entries.length - 1)
+    && Number(context.coleadorIndex || 0) >= coleadorCount - 1
     && Number(context.attemptIndex || 0) >= attempts - 1;
 }
 
-function readColeadorNameFromAttempt(attempt = {}) {
-  const fields = [
-    "coleadorName",
-    "charroName",
-    "participantName",
-    "athleteName",
-    "charro",
-    "competidor",
-    "ejecutante",
-    "name"
-  ];
-  for (const field of fields) {
-    const value = attempt?.[field];
-    if (typeof value === "string" && value.trim()) return value.trim();
-    if (value && typeof value === "object") {
-      const nested = value.name || value.nombre || value.fullName || value.displayName;
-      if (typeof nested === "string" && nested.trim()) return nested.trim();
-    }
-  }
-  return "";
-}
-
-function resolveColeadorName(context = {}, coleadorIndex = 0, attempts = []) {
-  const attemptName = attempts.map(readColeadorNameFromAttempt).find(Boolean);
-  if (attemptName) return attemptName;
-  const rosterName = context.team?.roster?.colas?.[coleadorIndex] || "";
-  if (rosterName) return rosterName;
-  if (coleadorIndex === 0 && context.team?.participantName) return context.team.participantName;
-  return "Coleador no registrado";
-}
-
 function buildBestColeadorSummary(context = {}) {
-  if (!isCompletingColasForTeam(context)) return null;
-  const collection = getScoreCollectionForContext(context);
-  const coleadorCount = getColeadorCountForContext(context, collection);
-  const entries = Array.from({ length: coleadorCount }, (_, index) => {
-    const attempts = Array.isArray(collection?.[index]) ? collection[index] : [];
-    const total = attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0);
-    return {
-      index,
-      name: resolveColeadorName(context, index, attempts),
-      total,
-      hasScores: attempts.some((attempt) => hasAttemptVisibleResult(attempt))
-    };
-  }).filter((entry) => entry.hasScores);
-
-  if (!entries.length) return null;
-
-  const bestTotal = Math.max(...entries.map((entry) => Number(entry.total || 0)));
-  const winners = entries.filter((entry) => Number(entry.total || 0) === bestTotal);
-  const summary = {
-    teamName: getEntryDisplayName(context.team) || context.team?.name || "—",
-    bestTotal,
-    winners,
-    entries
-  };
+  if (!isCompletingColasForCharreada(context)) return null;
+  const summary = buildGlobalColeaderoLeader(state.publishedScores, {
+    tournamentId: context.tournament?.id || context.charreada?.tournamentId || "",
+    charreadaId: context.charreada?.id || ""
+  });
+  if (!summary.entries.length) return null;
   console.info("[colas-001] best coleador calculated", {
-    team: summary.teamName,
-    bestTotal,
-    winners: winners.map((entry) => entry.name)
+    charreadaId: context.charreada?.id || "",
+    bestTotal: summary.bestTotal,
+    winners: summary.winners.map((entry) => entry.participantKey)
   });
   return summary;
 }
@@ -13993,13 +13982,13 @@ function maybeShowBestColeadorModal(context = {}) {
           <span aria-hidden="true">🏆</span>
           <div>
             <strong>${escapeHTML(title)}</strong>
-            <em>Equipo: ${escapeHTML(summary.teamName || "—")}</em>
+            <em>General de la charreada · ${summary.tied ? "Empate explícito" : "Liderazgo oficial"}</em>
           </div>
         </div>
         <div class="best-coleador-list">
           ${summary.winners.map((entry) => html`
             <article class="best-coleador-row">
-              <strong>${escapeHTML(entry.name || "Coleador no registrado")}</strong>
+              <strong>${escapeHTML(entry.name || "Coleador no registrado")} · ${escapeHTML(entry.teamName || "Equipo no registrado")}</strong>
               <span>${moneylessNumber(entry.total)} pts</span>
             </article>
           `).join("")}
@@ -14009,7 +13998,7 @@ function maybeShowBestColeadorModal(context = {}) {
     actions: html`<button class="button primary" data-action="continue-best-coleador-modal">Aceptar</button>`
   });
   console.info("[colas-001] best coleador modal shown", {
-    team: summary.teamName,
+    scope: "charreada",
     winners: summary.winners.length,
     bestTotal: summary.bestTotal
   });
@@ -14134,7 +14123,7 @@ async function persistPendingReviewRecord(record, expectedRevision) {
     getPendingReviewActor(),
     { expectedRevision }
   );
-  if (result.ok && result.record) storePendingReviewRecord(result.record);
+  if (result.record) storePendingReviewRecord(result.record);
   return result;
 }
 
@@ -14370,8 +14359,8 @@ function continueAfterBestColeadorModal() {
   pendingBestColeadorModal = null;
   closeModal();
   console.info("[colas-001] best coleador modal closed", {
-    team: summary.teamName,
-    winners: summary.winners?.map((entry) => entry.name) || []
+    scope: "charreada",
+    winners: summary.winners?.map((entry) => entry.participantKey) || []
   });
   continueOfficialScoreFlowAfterPublish();
 }
