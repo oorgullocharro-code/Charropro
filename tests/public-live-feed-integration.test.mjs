@@ -118,6 +118,7 @@ assert.equal(
 const firstOutboxState = firebase.read(`${first.projectionOutboxPath}/state`);
 assert.equal(firstOutboxState.status, "CLIENT_CONFIRMED");
 assert.equal(firstOutboxState.attempts, 1);
+assert.equal(firstOutboxState.deadLetterReason, "");
 assert.deepEqual(
   firebase.outboxStateTransitions.slice(0, 3),
   ["PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],

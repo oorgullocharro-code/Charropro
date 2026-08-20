@@ -12,6 +12,8 @@ import {
   getPublicProjectionRetryDelay,
   isPublicProjectionJobEligible,
   normalizePublicProjectionJob,
+  normalizePublicProjectionState,
+  sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
 } from "../js/core/publicProjectionOutbox.js";
@@ -88,6 +90,8 @@ assert.equal(buildPublicProjectionIntent({ ...base, attemptKey: "" }), null);
 const pendingJob = normalizePublicProjectionJob({ intent });
 assert.equal(pendingJob.state.status, PUBLIC_PROJECTION_STATUSES.PENDING);
 assert.equal(pendingJob.state.attempts, 0);
+assert.equal(normalizePublicProjectionState({}).deadLetterReason, "");
+assert.equal(sanitizeProjectionErrorCode(""), "");
 assert.equal(isPublicProjectionJobEligible(pendingJob, { nowMs: T0 }), true);
 
 const processing = claimPublicProjectionState(pendingJob.state, {
@@ -102,6 +106,7 @@ assert.equal(processing.leaseOwner, "worker-1");
 assert.equal(processing.leaseExpiresAtMs, T0 + 30000);
 assert.equal(processing.claimedBy.uid, "judge-1");
 assert.equal(processing.updatedBy.uid, "judge-1");
+assert.equal(processing.deadLetterReason, "");
 assert.equal(
   claimPublicProjectionState(processing, { nowMs: T0 + 1000, leaseOwner: "worker-2" }),
   null,
@@ -132,6 +137,7 @@ const projected = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PROJECTE
   targetRevision: 4,
   targetFingerprint: "abcd"
 }, { nowMs: T0 + 10 });
+assert.equal(projected.deadLetterReason, "");
 assert.equal(
   buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.VERIFIED, projected, {
     verifiedAt: new Date(T0 + 20).toISOString()
@@ -146,6 +152,7 @@ assert.equal(clientConfirmed.status, PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED
 assert.equal(clientConfirmed.targetRevision, 4);
 assert.equal(clientConfirmed.verifiedAt, "");
 assert.equal(clientConfirmed.leaseOwner, "");
+assert.equal(clientConfirmed.deadLetterReason, "");
 assert.equal(
   buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PROCESSING, clientConfirmed, {}, { nowMs: T0 + 30 }),
   null,
@@ -161,6 +168,7 @@ const serverVerified = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.VER
   verifiedAt: new Date(T0 + 20).toISOString()
 }, { nowMs: T0 + 20, authority: "trusted-server" });
 assert.equal(serverVerified.status, PUBLIC_PROJECTION_STATUSES.VERIFIED);
+assert.equal(serverVerified.deadLetterReason, "");
 assert.equal(
   buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.VERIFIED, serverVerified, {}, {
     nowMs: T0 + 30
@@ -198,6 +206,19 @@ const exhausted = buildPublicProjectionFailureState({
 });
 assert.equal(exhausted.status, PUBLIC_PROJECTION_STATUSES.DEAD_LETTER);
 assert.equal(exhausted.deadLetterReason, "network-error");
+
+const unknownFailure = buildPublicProjectionFailureState({
+  ...processing,
+  attempts: PUBLIC_PROJECTION_MAX_ATTEMPTS
+}, {
+  reason: "unclassified-failure",
+  message: "unclassified failure"
+}, {
+  nowMs: T0,
+  jitter: false
+});
+assert.equal(unknownFailure.status, PUBLIC_PROJECTION_STATUSES.DEAD_LETTER);
+assert.equal(unknownFailure.deadLetterReason, "unknown");
 
 const invalidSource = buildPublicProjectionFailureState(processing, {
   reason: "missing-projection-source",

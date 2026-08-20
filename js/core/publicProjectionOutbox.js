@@ -290,6 +290,15 @@ export function buildPublicProjectionState(status, previous = {}, patch = {}, op
     next.leaseOwner = "";
     next.leaseExpiresAtMs = 0;
   }
+  if ([
+    PUBLIC_PROJECTION_STATUSES.PENDING,
+    PUBLIC_PROJECTION_STATUSES.PROCESSING,
+    PUBLIC_PROJECTION_STATUSES.PROJECTED,
+    PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+    PUBLIC_PROJECTION_STATUSES.VERIFIED
+  ].includes(nextStatus)) {
+    next.deadLetterReason = "";
+  }
   if (nextStatus === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED) {
     next.clientConfirmedAt = next.clientConfirmedAt || new Date(nowMs).toISOString();
     next.nextRetryAt = "";
@@ -494,6 +503,7 @@ export function sanitizeProjectionActor(input = {}) {
 }
 
 export function sanitizeProjectionErrorCode(value) {
+  if (value === null || value === undefined || String(value).trim() === "") return "";
   return normalizeErrorCode(value).slice(0, 100);
 }
 
