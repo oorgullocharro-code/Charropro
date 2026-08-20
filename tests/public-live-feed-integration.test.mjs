@@ -118,6 +118,11 @@ assert.equal(
 const firstOutboxState = firebase.read(`${first.projectionOutboxPath}/state`);
 assert.equal(firstOutboxState.status, "CLIENT_CONFIRMED");
 assert.equal(firstOutboxState.attempts, 1);
+assert.deepEqual(
+  firebase.outboxStateTransitions.slice(0, 3),
+  ["PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
+  "official score publication traverses fanout, outbox claim, projection and client confirmation without permission_denied"
+);
 assert.ok(firstOutboxState.projectedAt);
 assert.ok(firstOutboxState.clientConfirmedAt);
 assert.ok(firstOutboxState.targetRevision >= 1);
@@ -866,6 +871,7 @@ function createFirebaseTestAdapter() {
   return {
     privateWriteCount: 0,
     freshOutboxStateReads: 0,
+    outboxStateTransitions: [],
     requireFreshOutboxTransition: false,
     failPublicTransactions: false,
     failAfterPublicCommitOnce: false,
@@ -875,6 +881,7 @@ function createFirebaseTestAdapter() {
       data = structuredClone(value);
       this.privateWriteCount = 0;
       this.freshOutboxStateReads = 0;
+      this.outboxStateTransitions = [];
       this.requireFreshOutboxTransition = false;
       this.failPublicTransactions = false;
       this.failAfterPublicCommitOnce = false;
@@ -994,6 +1001,9 @@ function createFirebaseTestAdapter() {
         throw error;
       }
       assertFirebaseSdkSerializable(next, target.path || "snapshot");
+      if (target.path.includes("/projectionOutbox/") && target.path.endsWith("/state")) {
+        this.outboxStateTransitions.push(next.status);
+      }
       writePath(data, target.path, structuredClone(next));
       if (this.failAfterPublicCommitOnce && target.path.includes("/publicTournaments/")) {
         this.failAfterPublicCommitOnce = false;

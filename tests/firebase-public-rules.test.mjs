@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+
+const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
 const raw = await readFile(new URL("../firebase-rules-auditoria.json", import.meta.url), "utf8");
 const rules = JSON.parse(raw).rules.charropro;
@@ -96,6 +99,44 @@ assert.match(projectionJobRules.state[".write"], /!== 'VERIFIED'/);
 assert.match(projectionJobRules.state[".write"], /updatedBy\/uid/);
 assert.match(projectionJobRules.state[".write"], /retriedBy\/uid/);
 assert.match(projectionJobRules.state[".write"], /cancelledBy\/uid/);
+assert.match(
+  projectionJobRules.state[".write"],
+  /\(!data\.exists\(\) && newData\.child\('retriedBy\/uid'\)\.val\(\) === ''\)/,
+  "a blank retry actor is limited to initial state creation"
+);
+assert.match(
+  projectionJobRules.state[".write"],
+  /\(!data\.exists\(\) && newData\.child\('cancelledBy\/uid'\)\.val\(\) === ''\)/,
+  "a blank cancellation actor is limited to initial state creation"
+);
+assert.doesNotMatch(
+  projectionJobRules.state[".write"],
+  /\|\| newData\.child\('retriedBy\/uid'\)\.val\(\) === '' \|\|/,
+  "existing retry actors cannot be erased through the former global blank allowance"
+);
+assert.doesNotMatch(
+  projectionJobRules.state[".write"],
+  /\|\| newData\.child\('cancelledBy\/uid'\)\.val\(\) === '' \|\|/,
+  "existing cancellation actors cannot be erased through the former global blank allowance"
+);
+assert.match(
+  projectionJobRules.state[".write"],
+  /newData\.child\('retriedBy\/uid'\)\.val\(\) === data\.child\('retriedBy\/uid'\)\.val\(\)/,
+  "an unassigned retry actor remains stable across unrelated transitions"
+);
+assert.match(
+  projectionJobRules.state[".write"],
+  /newData\.child\('cancelledBy\/uid'\)\.val\(\) === data\.child\('cancelledBy\/uid'\)\.val\(\)/,
+  "an unassigned cancellation actor remains stable across unrelated transitions"
+);
+assert.match(
+  projectionJobRules.state[".write"],
+  /newData\.child\('claimedBy\/uid'\)\.val\(\) === data\.child\('claimedBy\/uid'\)\.val\(\)/
+);
+assert.match(
+  projectionJobRules.state[".write"],
+  /newData\.child\('lastAttemptBy\/uid'\)\.val\(\) === data\.child\('lastAttemptBy\/uid'\)\.val\(\)/
+);
 assert.match(projectionJobRules.state[".write"], /DEAD_LETTER/);
 assert.match(projectionJobRules.state[".write"], /SUPERSEDED/);
 assert.match(projectionJobRules.state[".write"], /CANCELLED/);
@@ -161,7 +202,8 @@ const authorizedOutboxProfile = (profile, tournamentId) => Boolean(
   profile.tournaments.includes(tournamentId)
 );
 const actorChangedSafely = (profile, current, next, key) => (
-  JSON.stringify(next[key] || {}) === JSON.stringify(current?.[key] || {}) ||
+  next[key]?.uid === current?.[key]?.uid ||
+  (!current && next[key]?.uid === "") ||
   next[key]?.uid === profile.uid
 );
 const canCreateProjectionIntent = (profile, next, current = null) => Boolean(
@@ -445,4 +487,245 @@ assert.equal(
   "verification fields are rejected before confirmation"
 );
 
+assert.equal(actorChangedSafely(userA, null, { retriedBy: { uid: "" } }, "retriedBy"), true);
+assert.equal(actorChangedSafely(userA, null, { cancelledBy: { uid: "" } }, "cancelledBy"), true);
+assert.equal(
+  actorChangedSafely(userA, { retriedBy: { uid: "user-a" } }, { retriedBy: { uid: "" } }, "retriedBy"),
+  false,
+  "an existing retry actor cannot be erased"
+);
+assert.equal(
+  actorChangedSafely(userA, { cancelledBy: { uid: "user-a" } }, { cancelledBy: { uid: "" } }, "cancelledBy"),
+  false,
+  "an existing cancellation actor cannot be erased"
+);
+
+if (process.env.CHARROPRO_RUN_FIREBASE_EMULATOR === "1") {
+  await runProjectionActorRulesAgainstEmulator();
+}
+
 console.log("firebase-public-rules.test.mjs: ok");
+
+async function runProjectionActorRulesAgainstEmulator() {
+  const projectId = String(process.env.FIREBASE_PROJECT_ID || "").trim();
+  const authHost = String(process.env.FIREBASE_AUTH_EMULATOR_HOST || "").trim();
+  const databaseHost = String(process.env.FIREBASE_DATABASE_EMULATOR_HOST || "").trim();
+  assert.equal(projectId, "demo-charropro-local", "Rules tests only run against the isolated local project");
+  assert.match(authHost, /^127\.0\.0\.1:\d+$/, "Rules tests require the loopback Auth Emulator");
+  assert.match(databaseHost, /^127\.0\.0\.1:\d+$/, "Rules tests require the loopback RTDB Emulator");
+  assert.equal(JSON.stringify(process.env).includes("charropro-e8a68"), false, "Rules tests cannot target Production");
+
+  process.env.FIREBASE_AUTH_EMULATOR_HOST = authHost;
+  process.env.FIREBASE_DATABASE_EMULATOR_HOST = databaseHost;
+  const { deleteApp, initializeApp } = requireFromFunctions("firebase-admin/app");
+  const { getAuth } = requireFromFunctions("firebase-admin/auth");
+  const { getDatabase } = requireFromFunctions("firebase-admin/database");
+  const app = initializeApp({
+    projectId,
+    databaseURL: `http://${databaseHost}?ns=${projectId}`
+  }, `public-rules-hardening-${Date.now()}`);
+  const auth = getAuth(app);
+  const database = getDatabase(app);
+  const suffix = `${Date.now()}-${process.pid}`;
+  const tournamentId = `rules-hardening-${suffix}`;
+  const users = [
+    { uid: `rules-supervisor-${suffix}`, email: `rules-supervisor-${suffix}@example.test`, role: "supervisor" },
+    { uid: `rules-judge-${suffix}`, email: `rules-judge-${suffix}@example.test`, role: "juez" },
+    { uid: `rules-operator-${suffix}`, email: `rules-operator-${suffix}@example.test`, role: "operador" }
+  ];
+  const password = "LocalRulesOnly-2026!";
+  const testRoot = `charropro/projectionOutbox/${tournamentId}`;
+
+  try {
+    for (const user of users) {
+      await auth.createUser({ uid: user.uid, email: user.email, password, emailVerified: true });
+      await database.ref(`charropro/users/${user.uid}`).set({
+        active: true,
+        role: user.role,
+        tournamentAccess: "all"
+      });
+      user.token = await signInToAuthEmulator(authHost, user.email, password);
+    }
+
+    const supervisor = users[0];
+    const judge = users[1];
+    const operator = users[2];
+
+    await seedProjectionJob(database, tournamentId, "initial-empty");
+    const initialProcessing = buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      retriedByUid: "",
+      cancelledByUid: ""
+    });
+    await expectRulesWriteAllowed(databaseHost, projectId, tournamentId, "initial-empty", supervisor.token, initialProcessing);
+
+    await seedProjectionJob(database, tournamentId, "retry-actor-history", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      retriedByUid: supervisor.uid
+    }));
+    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "retry-actor-history", supervisor.token,
+      buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+        attempts: 2,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid,
+        retriedByUid: ""
+      }));
+
+    await seedProjectionJob(database, tournamentId, "cancel-actor-history", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      cancelledByUid: supervisor.uid
+    }));
+    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "cancel-actor-history", supervisor.token,
+      buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+        attempts: 2,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid,
+        cancelledByUid: ""
+      }));
+
+    await seedProjectionJob(database, tournamentId, "legitimate-retry", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid
+    }));
+    await expectRulesWriteAllowed(databaseHost, projectId, tournamentId, "legitimate-retry", supervisor.token,
+      buildEmulatorProjectionState("PENDING", supervisor.uid, {
+        attempts: 1,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid,
+        retriedByUid: supervisor.uid
+      }));
+
+    await seedProjectionJob(database, tournamentId, "supervisor-cancel", buildEmulatorProjectionState("PENDING", supervisor.uid));
+    await expectRulesWriteAllowed(databaseHost, projectId, tournamentId, "supervisor-cancel", supervisor.token,
+      buildEmulatorProjectionState("CANCELLED", supervisor.uid, {
+        cancelledByUid: supervisor.uid,
+        cancelledReason: "operator-request",
+        cancelledAt: "2026-08-20T12:00:01.000Z"
+      }));
+
+    for (const user of [judge, operator]) {
+      const projectionId = `${user.role}-cancel-denied`;
+      await seedProjectionJob(database, tournamentId, projectionId, buildEmulatorProjectionState("PENDING", supervisor.uid));
+      await expectRulesWriteDenied(databaseHost, projectId, tournamentId, projectionId, user.token,
+        buildEmulatorProjectionState("CANCELLED", user.uid, {
+          cancelledByUid: user.uid,
+          cancelledReason: "unauthorized-cancel",
+          cancelledAt: "2026-08-20T12:00:01.000Z"
+        }));
+    }
+
+    await seedProjectionJob(database, tournamentId, "verified-denied", initialProcessing);
+    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "verified-denied", supervisor.token,
+      buildEmulatorProjectionState("VERIFIED", supervisor.uid, {
+        attempts: 1,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid,
+        verifiedAt: "2026-08-20T12:00:01.000Z",
+        targetRevision: 1,
+        targetFingerprint: "verified-fingerprint"
+      }));
+
+    await seedProjectionJob(database, tournamentId, "other-uid-denied", buildEmulatorProjectionState("PENDING", supervisor.uid));
+    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "other-uid-denied", judge.token,
+      buildEmulatorProjectionState("PROCESSING", judge.uid, {
+        attempts: 1,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: judge.uid
+      }));
+  } finally {
+    await database.ref(testRoot).remove();
+    await Promise.all(users.map(async (user) => {
+      await database.ref(`charropro/users/${user.uid}`).remove();
+      try {
+        await auth.deleteUser(user.uid);
+      } catch (error) {
+        if (error?.code !== "auth/user-not-found") throw error;
+      }
+    }));
+    await deleteApp(app);
+  }
+}
+
+async function seedProjectionJob(database, tournamentId, projectionId, state = null) {
+  const path = `charropro/projectionOutbox/${tournamentId}/${projectionId}`;
+  await database.ref(path).set({
+    intent: { projectionId, sourceRevision: 1 },
+    ...(state ? { state } : {})
+  });
+}
+
+function buildEmulatorProjectionState(status, actorUid, options = {}) {
+  const updatedAtMs = Number(options.updatedAtMs || Date.parse("2026-08-20T12:00:00.000Z"));
+  const actor = (uid) => ({ uid: String(uid ?? "") });
+  return {
+    status,
+    attempts: Number(options.attempts || 0),
+    updatedAt: new Date(updatedAtMs).toISOString(),
+    updatedAtMs,
+    nextRetryAt: "",
+    nextRetryAtMs: 0,
+    lastAttemptAt: "",
+    lastAttemptAtMs: 0,
+    lastErrorCode: "",
+    lastErrorMessage: "",
+    projectedAt: "",
+    clientConfirmedAt: "",
+    verifiedAt: String(options.verifiedAt || ""),
+    targetRevision: Number(options.targetRevision || 0),
+    targetFingerprint: String(options.targetFingerprint || ""),
+    leaseOwner: status === "PROCESSING" ? `lease-${actorUid}` : "",
+    leaseExpiresAtMs: status === "PROCESSING" ? updatedAtMs + 30000 : 0,
+    supersededBy: "",
+    deadLetterReason: "",
+    cancelledReason: String(options.cancelledReason || ""),
+    cancelledAt: String(options.cancelledAt || ""),
+    updatedBy: actor(actorUid),
+    lastAttemptBy: actor(options.lastAttemptByUid ?? ""),
+    claimedBy: actor(options.claimedByUid ?? ""),
+    retriedBy: actor(options.retriedByUid ?? ""),
+    cancelledBy: actor(options.cancelledByUid ?? ""),
+    sourceRevision: 1
+  };
+}
+
+async function signInToAuthEmulator(authHost, email, password) {
+  const response = await fetch(`http://${authHost}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=local-rules-test`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ email, password, returnSecureToken: true })
+  });
+  const body = await response.json();
+  assert.equal(response.ok, true, `Auth Emulator sign-in failed: ${JSON.stringify(body)}`);
+  assert.ok(body.idToken, "Auth Emulator returns an ID token");
+  return body.idToken;
+}
+
+async function writeProjectionState(databaseHost, projectId, tournamentId, projectionId, token, state) {
+  const path = ["charropro", "projectionOutbox", tournamentId, projectionId, "state"]
+    .map(encodeURIComponent)
+    .join("/");
+  const response = await fetch(`http://${databaseHost}/${path}.json?ns=${encodeURIComponent(projectId)}&auth=${encodeURIComponent(token)}`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(state)
+  });
+  return { ok: response.ok, status: response.status, body: await response.text() };
+}
+
+async function expectRulesWriteAllowed(databaseHost, projectId, tournamentId, projectionId, token, state) {
+  const result = await writeProjectionState(databaseHost, projectId, tournamentId, projectionId, token, state);
+  assert.equal(result.ok, true, `Rules unexpectedly denied ${projectionId}: ${result.status} ${result.body}`);
+}
+
+async function expectRulesWriteDenied(databaseHost, projectId, tournamentId, projectionId, token, state) {
+  const result = await writeProjectionState(databaseHost, projectId, tournamentId, projectionId, token, state);
+  assert.equal(result.ok, false, `Rules unexpectedly allowed ${projectionId}`);
+  assert.ok([401, 403].includes(result.status), `Rules denial uses an authorization status: ${result.status} ${result.body}`);
+}
