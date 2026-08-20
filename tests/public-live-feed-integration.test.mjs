@@ -47,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260813-scorer-operational-stabilization-checkpoint-001-v1"],
+  ["20260820-production-release-candidate-001-v1"],
   "all browser entrypoints share one firebaseSync module identity"
 );
 

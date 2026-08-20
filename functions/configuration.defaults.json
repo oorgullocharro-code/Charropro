@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260813-scorer-operational-stabilization-checkpoint-001-v1",
+      "appVersion": "20260820-production-release-candidate-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -116,6 +116,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "e7c082df542361c09c7f5aeb982b37d47838718f014c09e24fd81cb7555f93fa",
-  "fingerprint": "e7c082df542361c09c7f5aeb982b37d47838718f014c09e24fd81cb7555f93fa"
+  "checksum": "28b05ab81215b64679e576b7f296de37a33de1a65e0d5583612bee39b922ed84",
+  "fingerprint": "28b05ab81215b64679e576b7f296de37a33de1a65e0d5583612bee39b922ed84"
 }

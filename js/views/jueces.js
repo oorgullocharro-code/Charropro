@@ -1,5 +1,5 @@
 import { escapeHTML, html, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { loadState, state } from "../core/state.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+import { loadState, state } from "../core/state.js?v=20260820-production-release-candidate-001-v1";
 import {
   getFirebaseRuntimeDiagnostics,
   signInFirebaseUser,
@@ -7,7 +7,7 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState
-} from "../core/firebaseSync.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+} from "../core/firebaseSync.js?v=20260820-production-release-candidate-001-v1";
 import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 import { getTournamentIdFromUrl } from "../core/tournamentContext.js?v=20260708-recovery-001b-panel-status1";
 

@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260813-scorer-operational-stabilization-checkpoint-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260820-production-release-candidate-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",
