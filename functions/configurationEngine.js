@@ -231,6 +231,7 @@ function validateRuntimeConfigurationBaseline(input = {}) {
     "firebase.paths.userTournamentAccess",
     "firebase.paths.tournaments",
     "firebase.paths.configurationManagement",
+    "firebase.paths.ruleProfileLifecycle",
     "firebase.paths.backupFoundation",
     "firebase.paths.restoreFoundation"
   ]) {

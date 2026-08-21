@@ -1,0 +1,26 @@
+{
+  "registryVersion": "1.0.0",
+  "profiles": {
+    "FMCH_2026_LIBRE@0.6.0": {
+      "profileId": "FMCH_2026_LIBRE",
+      "version": "0.6.0",
+      "definitionStatus": "draft",
+      "scope": {
+        "type": "system",
+        "tenantId": "",
+        "organizationId": ""
+      },
+      "profileValid": true,
+      "contentFingerprint": "rptp_0f90f7a3944a82d7",
+      "catalogRuleCount": 731,
+      "suerteCount": 10,
+      "certification": {
+        "verdict": "PASS",
+        "remainingP0": 0,
+        "activationReadyEligibility": true,
+        "recordId": "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001",
+        "resolutionTicketId": "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-RESOLUTION-002"
+      }
+    }
+  }
+}

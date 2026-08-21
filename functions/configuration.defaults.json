@@ -63,6 +63,7 @@
         "historyStatistics": "charropro/history/statistics",
         "broadcastStudioSessions": "charropro/broadcastStudio/sessions",
         "configurationManagement": "charropro/configurationManagement",
+        "ruleProfileLifecycle": "charropro/ruleProfileLifecycle",
         "backupFoundation": "charropro/backupFoundation",
         "restoreFoundation": "charropro/restoreFoundation"
       },
@@ -116,6 +117,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "28b05ab81215b64679e576b7f296de37a33de1a65e0d5583612bee39b922ed84",
-  "fingerprint": "28b05ab81215b64679e576b7f296de37a33de1a65e0d5583612bee39b922ed84"
+  "checksum": "02ee9d64ea5b0e6e80d15ccc12b9481c792bdd25081f1b7e425b39c903c99312",
+  "fingerprint": "02ee9d64ea5b0e6e80d15ccc12b9481c792bdd25081f1b7e425b39c903c99312"
 }

@@ -31,6 +31,12 @@ const {
   createConfigurationRuntime,
   createFirebaseConfigurationAdapter
 } = require("./configurationService");
+const ruleProfileCertificationRegistry = require("./ruleProfileCertificationRegistry.json");
+const { RuleProfileLifecycleError } = require("./ruleProfileLifecycleEngine");
+const {
+  createFirebaseRuleProfileLifecycleAdapter,
+  createRuleProfileLifecycleRuntime
+} = require("./ruleProfileLifecycleService");
 
 admin.initializeApp();
 
@@ -44,8 +50,9 @@ const FUNCTIONS_CONFIG = getConfigurationValue(baselineConfiguration, "firebase.
 const APPLICATION_CONFIG = getConfigurationValue(baselineConfiguration, "application", {});
 const FUNCTIONS_REGION = getConfigurationValue(baselineConfiguration, "firebase.functionsRegion", "");
 const CONFIGURATION_ROOT_PATH = FIREBASE_PATHS.configurationManagement;
+const RULE_PROFILE_LIFECYCLE_ROOT_PATH = FIREBASE_PATHS.ruleProfileLifecycle;
 const CHARROPRO_ROOT_PATH = FIREBASE_PATHS.root;
-if (!FUNCTIONS_REGION || !CONFIGURATION_ROOT_PATH || !CHARROPRO_ROOT_PATH) {
+if (!FUNCTIONS_REGION || !CONFIGURATION_ROOT_PATH || !RULE_PROFILE_LIFECYCLE_ROOT_PATH || !CHARROPRO_ROOT_PATH) {
   throw new ConfigurationEngineError("configuration-bootstrap-required");
 }
 const backupRuntime = createBackupRuntime(createFirebaseBackupAdapter(admin), {
@@ -55,6 +62,10 @@ const restoreRuntime = createRestoreRuntime(createFirebaseRestoreAdapter(admin))
 const configurationRuntime = createConfigurationRuntime(createFirebaseConfigurationAdapter(admin, {
   rootPath: CONFIGURATION_ROOT_PATH
 }), { baseline: baselineConfiguration });
+const ruleProfileLifecycleRuntime = createRuleProfileLifecycleRuntime(
+  createFirebaseRuleProfileLifecycleAdapter(admin, { rootPath: RULE_PROFILE_LIFECYCLE_ROOT_PATH }),
+  { registry: ruleProfileCertificationRegistry }
+);
 
 const USERS_PATH = FIREBASE_PATHS.users;
 const USER_TOURNAMENT_ACCESS_PATH = FIREBASE_PATHS.userTournamentAccess;
@@ -337,6 +348,20 @@ exports.publishCharroProConfiguration = onCall({
   }
 });
 
+exports.transitionCharroProRuleProfileLifecycle = onCall({
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para administrar perfiles reglamentarios.");
+  try {
+    const actor = await requireRuleProfileLifecycleActor(callerUid, request.data || {});
+    return await ruleProfileLifecycleRuntime.transition(request.data || {}, actor);
+  } catch (error) {
+    throw toRuleProfileLifecycleHttpsError(error);
+  }
+});
+
 async function requireOfficialScoreActor(uid, tournamentId) {
   const cleanTournamentId = normalizeKey(tournamentId);
   const [profileSnapshot, selectedAccessSnapshot] = await Promise.all([
@@ -516,6 +541,35 @@ async function requireConfigurationActor(uid, data = {}, operation = "read") {
   };
 }
 
+async function requireRuleProfileLifecycleActor(uid, data = {}) {
+  const profileSnapshot = await admin.database().ref(`${USERS_PATH}/${uid}`).get();
+  const profile = profileSnapshot.val() || {};
+  if (profile.active !== true) throw new RuleProfileLifecycleError("rule-profile-user-inactive");
+  const role = String(profile.role || "").toLowerCase();
+  if (role !== "supervisor" && profile.platformAdmin !== true) {
+    throw new RuleProfileLifecycleError("rule-profile-role-denied");
+  }
+  const profileTenantId = String(profile.tenantId || "").slice(0, 128);
+  const profileOrganizationId = String(profile.organizationId || "").slice(0, 128);
+  const requestedTenantId = String(data.tenantId || "").slice(0, 128);
+  const requestedOrganizationId = String(data.organizationId || "").slice(0, 128);
+  if (requestedTenantId !== profileTenantId && profile.platformAdmin !== true) {
+    throw new RuleProfileLifecycleError("rule-profile-tenant-mismatch");
+  }
+  if (requestedOrganizationId !== profileOrganizationId && profile.platformAdmin !== true) {
+    throw new RuleProfileLifecycleError("rule-profile-organization-mismatch");
+  }
+  return {
+    uid,
+    name: String(profile.name || profile.email || "").slice(0, 180),
+    role,
+    tenantId: requestedTenantId,
+    organizationId: requestedOrganizationId,
+    platformAdmin: profile.platformAdmin === true,
+    active: true
+  };
+}
+
 function toBackupHttpsError(error) {
   if (error instanceof HttpsError) return error;
   const reason = String(error?.code || error?.message || "backup-error").slice(0, 160);
@@ -552,6 +606,23 @@ function toConfigurationHttpsError(error) {
   return new HttpsError(code, "No se pudo procesar la configuracion.", {
     reason,
     details: error instanceof ConfigurationEngineError ? error.details : undefined
+  });
+}
+
+function toRuleProfileLifecycleHttpsError(error) {
+  if (error instanceof HttpsError) return error;
+  const reason = String(error?.code || error?.message || "rule-profile-lifecycle-error").slice(0, 180);
+  const denied = reason.includes("denied") || reason.includes("auth-required") || reason.includes("inactive")
+    || reason.includes("platform-admin-required") || reason.includes("tenant-mismatch")
+    || reason.includes("organization-mismatch");
+  const conflict = reason.includes("conflict") || reason.includes("aborted") || reason.includes("overlap")
+    || reason.includes("fingerprint-mismatch");
+  const invalid = reason.includes("invalid") || reason.includes("required") || reason.includes("not-found")
+    || reason.includes("failed") || reason.includes("blocked") || reason.includes("not-eligible");
+  const code = denied ? "permission-denied" : conflict ? "aborted" : invalid ? "failed-precondition" : "internal";
+  return new HttpsError(code, "No se pudo ejecutar la transicion del perfil reglamentario.", {
+    reason,
+    details: error instanceof RuleProfileLifecycleError ? error.details : undefined
   });
 }
 
