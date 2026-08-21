@@ -1,61 +1,99 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "ticketId": "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001",
+  "resolutionTicketId": "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-RESOLUTION-002",
   "profile": {
     "profileId": "FMCH_2026_LIBRE",
     "version": "0.6.0",
     "status": "draft",
     "activationReady": false,
+    "activationReadyEligibility": true,
     "catalogRuleCount": 731,
     "suerteCount": 10,
-    "contentFingerprint": "rptp_a9988543eb21259f"
+    "previousContentFingerprint": "rptp_a9988543eb21259f",
+    "contentFingerprint": "rptp_0f90f7a3944a82d7",
+    "effectiveSportingFingerprints": {
+      "cala": "rules_512b29ab88ea10c9",
+      "piales": "rules_a61de6f81437d07a",
+      "colas": "rules_19ebf6083632ab6a",
+      "toro": "rules_a7a4e3df21a2e4ef",
+      "lazo": "rules_1ceab6e752f01bd5",
+      "pial_ruedo": "rules_df879e638dac2cd9",
+      "yegua": "rules_b36c8d91d564d747",
+      "manganas_pie": "rules_51832332563e0834",
+      "manganas_caballo": "rules_def9215e873fa762",
+      "paso": "rules_f40956bf2dae1b2b"
+    }
   },
   "sourceValidation": {
-    "sourcePdfSha256": "3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7",
+    "officialRulebook": {
+      "name": "Reglamento-Oficial-Charros-Libre-y-Juvenil-24-28-VF2-2026.pdf",
+      "sha256": "1343e2205c7b6599a2ab7e93a809a5a45bd5ab1aadaba2f5a25bf43db8b4af2b",
+      "pages": 108,
+      "status": "VERIFIED"
+    },
+    "officialTeamSheetSha256": "3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7",
     "fieldIdsReviewed": 239,
     "fieldIdsTotal": 239,
-    "sportsDecisionsRecorded": 0,
-    "directExpertEvidenceRecorded": 0,
-    "certificationEvidenceStatus": "MISSING"
+    "confirmedSportingCriteria": 1,
+    "certificationEvidenceStatus": "PRESENT"
   },
   "blockers": [
     {
       "blockerId": "CALA_ML_MD_MI_PC_CR",
-      "classification": "REQUIRES_SPORTING_AUTHORITY",
-      "status": "UNRESOLVED",
+      "classification": "RESOLVED_BY_OFFICIAL_SOURCE",
+      "status": "RESOLVED",
       "certificationRequired": true,
       "sourceQuestionId": "SCQ-002",
+      "resolution": "MD and MI map to the existing medio lado rules under scorer group ML; PC maps to the existing cambio de rectangulo rule under scorer group CR.",
+      "sportingValuesModified": false
+    },
+    {
+      "blockerId": "CALA_SIDE_BAD_POINTS_SUM_CONTROL",
+      "classification": "TECHNICAL_CONTROL_ONLY",
+      "status": "RESOLVED",
+      "certificationRequired": true,
+      "sourceQuestionId": "SCQ-002",
+      "resolution": "Non-sporting subtotal or validation control with no score effect.",
       "sportingValuesModified": false
     },
     {
       "blockerId": "COLEADERO_FOURTH_ROW",
-      "classification": "REQUIRES_SPORTING_AUTHORITY",
-      "status": "UNRESOLVED",
+      "classification": "RESOLVED_BY_OFFICIAL_SOURCE",
+      "status": "RESOLVED",
       "certificationRequired": true,
       "sourceQuestionId": "SCQ-004",
+      "resolution": "The sporting model remains three active coleadores with three opportunities each; the fourth row and bottom control are non-sporting administrative controls.",
       "sportingValuesModified": false
     },
     {
       "blockerId": "CONTRA_MASCARA_DUPLICATE_PRINTED_IDENTITY",
-      "classification": "REQUIRES_SPORTING_AUTHORITY",
-      "status": "UNRESOLVED",
+      "classification": "RESOLVED_BY_CONFIRMED_SPORTING_CRITERION",
+      "status": "RESOLVED",
       "certificationRequired": true,
       "sourceQuestionId": "USI-003",
+      "resolution": "One canonical identity manganas_caballo_base_contra_mascara at 14 points; no duplicate selection or charge.",
       "sportingValuesModified": false
     }
   ],
   "p0Gaps": [
-    { "gapId": "GAP-P0-CALA-001", "questionId": "SCQ-002", "status": "PENDING_CONFIRMATION" },
-    { "gapId": "GAP-P0-COLEADERO-001", "questionId": "SCQ-004", "status": "PENDING_CONFIRMATION" },
-    { "gapId": "GAP-P0-TERNA-001", "questionId": "SCQ-006", "status": "PENDING_CONFIRMATION" },
-    { "gapId": "GAP-P0-CLOSING-001", "questionId": "SCQ-011", "status": "PENDING_CONFIRMATION" },
-    { "gapId": "GAP-P0-SIGNATURES-001", "questionId": "SCQ-012", "status": "PENDING_CONFIRMATION" }
+    { "gapId": "GAP-P0-CALA-001", "questionId": "SCQ-002", "status": "RESOLVED", "resolution": "Official source and control classification" },
+    { "gapId": "GAP-P0-COLEADERO-001", "questionId": "SCQ-004", "status": "RESOLVED", "resolution": "Official source and administrative reclassification" },
+    { "gapId": "GAP-P0-TERNA-001", "questionId": "SCQ-006", "status": "RESOLVED", "resolution": "Official rulebook Arts. 149-155 and team sheet" },
+    { "gapId": "GAP-P0-CLOSING-001", "questionId": "SCQ-011", "status": "RESOLVED", "resolution": "Official closing controls and section scoring rules" },
+    { "gapId": "GAP-P0-SIGNATURES-001", "questionId": "SCQ-012", "status": "RESOLVED", "resolution": "Official rulebook Arts. 11, 14 and 26" }
+  ],
+  "nonBlockingDocumentationGaps": [
+    "Exact printable formula and presentation order for the Cala side subtotal",
+    "Exact administrative purpose of the fourth Coleadero name row",
+    "Exact administrative purpose of the fourth Coleadero bottom control",
+    "Exact export annotations and ordering for closing and signature controls"
   ],
   "certification": {
-    "verdict": "BLOCKED",
-    "reason": "SPORTING_AUTHORITY_DECISION_REQUIRED",
-    "remainingP0": 5,
-    "activationReadyEligibility": false,
+    "verdict": "PASS",
+    "reason": "SPORTING_BLOCKERS_RESOLVED",
+    "remainingP0": 0,
+    "activationReadyEligibility": true,
     "profileActivated": false,
     "tournamentProfileAssigned": false,
     "sportingValuesModified": false

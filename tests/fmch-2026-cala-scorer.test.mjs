@@ -46,7 +46,11 @@ assert.equal(effectiveCala.suerte.catalog.team_infr.length, 2);
 assert.equal(effectiveCala.suerte.catalog.desc.length, 36);
 assert.equal(effectiveCala.suerte.ruleResolution.profile.profileId, "FMCH_2026_LIBRE");
 assert.equal(effectiveCala.suerte.ruleResolution.profile.profileVersion, "0.6.0");
-assert.equal(effectiveCala.suerte.ruleMetadata.fieldIdMappingStatus, "FIELDID_MAPPING_BLOCKED");
+assert.equal(effectiveCala.suerte.ruleMetadata.fieldIdMappingStatus, "CERTIFIED_ALIASES_WITH_NON_SPORTING_CONTROL");
+assert.equal(effectiveCala.suerte.ruleMetadata.fieldIdMappings["FMCH.TEAM_SHEET.CALA.MD"].ruleId, "cala_medio_derecho");
+assert.equal(effectiveCala.suerte.ruleMetadata.fieldIdMappings["FMCH.TEAM_SHEET.CALA.MI"].ruleId, "cala_medio_izquierdo");
+assert.equal(effectiveCala.suerte.ruleMetadata.fieldIdMappings["FMCH.TEAM_SHEET.CALA.PC"].ruleId, "cala_cambio_rectangulo_costado");
+assert.equal(effectiveCala.suerte.ruleMetadata.nonSportingControls[0].scoringEffect, "NONE");
 assert.deepEqual(productCala, productCalaBefore, "profile resolution does not mutate Product Base");
 
 const calaTournamentOverride = resolveEffectiveRules({

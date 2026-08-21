@@ -67,8 +67,8 @@ assert.equal(pie.attempts, 3);
 assert.equal(caballo.attempts, 3);
 assert.equal(FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT, 3);
 assert.equal(pie.ruleMetadata.sportingCertification, "PASS");
-assert.equal(caballo.ruleMetadata.sportingCertification, "PASS_WITH_SOURCE_BLOCKER");
-assert.equal(caballo.ruleMetadata.contraMascaraIdentityStatus, "SOURCE_CONFIRMATION_REQUIRED");
+assert.equal(caballo.ruleMetadata.sportingCertification, "PASS");
+assert.equal(caballo.ruleMetadata.contraMascaraIdentityStatus, "RESOLVED_SINGLE_CANONICAL_IDENTITY");
 assert.equal(paso.ruleMetadata.sportingCertification, "PASS");
 assert.equal(FMCH_2026_LIBRE_PROFILE.metadata.loadedSuerteIds.length, 10);
 
@@ -144,7 +144,9 @@ assert.equal(timedPie.infr, 3);
 assert.ok(FMCH_2026_MANGANAS_CABALLO_BASE_RULES.length >= 19);
 const contraMascara = caballo.catalog.base.find((item) => item.id === "manganas_caballo_base_contra_mascara");
 assert.equal(contraMascara.pts, 14);
-assert.equal(contraMascara.metadata.sourceStatus, "SOURCE_CONFIRMATION_REQUIRED");
+assert.equal(contraMascara.metadata.sourceStatus, "CONFIRMED");
+assert.equal(contraMascara.metadata.sourceResolution, "SINGLE_CANONICAL_SPORTING_IDENTITY");
+assert.equal(contraMascara.metadata.simultaneousDuplicateSelectionAllowed, false);
 assert.equal(caballo.catalog.base.filter((item) => item.id === "manganas_caballo_base_contra_mascara").length, 1);
 
 let caballoAttempt = {

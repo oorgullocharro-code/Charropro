@@ -576,6 +576,68 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   ],
   suerteMetadata: {
     ...FMCH_2026_LIBRE_PROFILE_0_5_0.suerteMetadata,
+    cala: {
+      ...FMCH_2026_LIBRE_PROFILE_0_5_0.suerteMetadata.cala,
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "CERTIFIED_ALIASES_WITH_NON_SPORTING_CONTROL",
+      blockedFieldIds: [],
+      fieldIdMappings: {
+        "FMCH.TEAM_SHEET.CALA.MD": {
+          classification: "PRINTED_FIELD_ALIAS",
+          groupId: "ML",
+          ruleId: "cala_medio_derecho",
+          officialSourceArticle: 94,
+          officialSourcePage: 39
+        },
+        "FMCH.TEAM_SHEET.CALA.MI": {
+          classification: "PRINTED_FIELD_ALIAS",
+          groupId: "ML",
+          ruleId: "cala_medio_izquierdo",
+          officialSourceArticle: 94,
+          officialSourcePage: 39
+        },
+        "FMCH.TEAM_SHEET.CALA.PC": {
+          classification: "PRINTED_FIELD_ALIAS",
+          groupId: "CR",
+          ruleId: "cala_cambio_rectangulo_costado",
+          officialSourceArticle: 94,
+          officialSourcePage: 39
+        }
+      },
+      nonSportingControls: [{
+        fieldId: "FMCH.TEAM_SHEET.CALA.SIDE_BAD_POINTS_SUM_CONTROL",
+        classification: "CONTROL_SUBTOTAL_VALIDATION",
+        scoringEffect: "NONE",
+        exactAdministrativePurpose: "NON_BLOCKING_DOCUMENTATION_GAP"
+      }]
+    },
+    colas: {
+      ...FMCH_2026_LIBRE_PROFILE_0_5_0.suerteMetadata.colas,
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
+      fieldIdMappingStatus: "SPORTING_MODEL_CERTIFIED_WITH_NON_SPORTING_CONTROLS",
+      blockedFieldIds: [],
+      fourthRowStatus: "NON_SPORTING_ADMINISTRATIVE_ROW",
+      activeParticipantCount: 3,
+      opportunitiesPerParticipant: 3,
+      officialSourceArticles: [113, 114, 115, 121],
+      officialSourcePages: [50, 51],
+      nonSportingControls: [
+        {
+          fieldId: "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_04.NAME",
+          classification: "ADMINISTRATIVE_NON_COMPETITOR_ROW",
+          scoringEffect: "NONE",
+          exactAdministrativePurpose: "NON_BLOCKING_DOCUMENTATION_GAP"
+        },
+        {
+          fieldId: "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_04",
+          classification: "ADMINISTRATIVE_CONTROL",
+          scoringEffect: "NONE",
+          exactAdministrativePurpose: "NON_BLOCKING_DOCUMENTATION_GAP"
+        }
+      ]
+    },
     manganas_pie: {
       implementationStatus: "COMPLETE",
       sportingCertification: "PASS",
@@ -592,15 +654,20 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
       }
     },
     manganas_caballo: {
-      implementationStatus: "COMPLETE_WITH_BLOCKED_FIELDS",
-      sportingCertification: "PASS_WITH_SOURCE_BLOCKER",
+      implementationStatus: "COMPLETE",
+      sportingCertification: "PASS",
       fieldIdMappingStatus: "TRANSFORMATION_REQUIRED",
       scoringAttempts: FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
       rulebookVersion: FMCH_2026_MANGANAS_PASO_RULEBOOK_VERSION,
       quickFloreoTotal: true,
       optionalFloreoDetail: true,
-      blockedSourceItems: ["USI-003"],
-      contraMascaraIdentityStatus: "SOURCE_CONFIRMATION_REQUIRED",
+      blockedSourceItems: [],
+      contraMascaraIdentityStatus: "RESOLVED_SINGLE_CANONICAL_IDENTITY",
+      contraMascaraRuleId: "manganas_caballo_base_contra_mascara",
+      contraMascaraValue: 14,
+      contraMascaraDuplicateRuleCreated: false,
+      officialSourceArticle: 217,
+      officialSourcePage: 89,
       timerContract: {
         timerId: "timer_manganas_caballo",
         limitMs: FMCH_2026_MANGANAS_DURATION_MS,
@@ -623,10 +690,25 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   },
   metadata: {
     ...FMCH_2026_LIBRE_PROFILE_0_5_0.metadata,
-    implementationStatus: "all_ten_suertes_technical_complete_activation_blocked",
+    implementationStatus: "all_ten_suertes_technical_complete_sporting_certified_activation_pending",
     loadedSuerteIds: ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua", "manganas_pie", "manganas_caballo", "paso"],
     activationReady: false,
-    activationBlockReason: "Cala ML/CR frente a MD/MI/PC, cuarta fila de Coleadero y doble identidad Contra máscara requieren confirmación de fuente"
+    activationReadyEligibility: true,
+    sportingCertification: "PASS",
+    certificationTicket: "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-RESOLUTION-002",
+    officialRulebook: {
+      name: "Reglamento Oficial General para Competencias de Charros 2024-2028",
+      revision: "VF2-2026",
+      sha256: "1343e2205c7b6599a2ab7e93a809a5a45bd5ab1aadaba2f5a25bf43db8b4af2b"
+    },
+    remainingSportingP0Blockers: 0,
+    nonBlockingDocumentationGaps: [
+      "FMCH.TEAM_SHEET.CALA.SIDE_BAD_POINTS_SUM_CONTROL administrative usage",
+      "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_04.NAME administrative usage",
+      "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_04 administrative usage",
+      "Printed closing-control ordering and signature substitution annotations"
+    ],
+    activationBlockReason: "Sporting certification complete; lifecycle authority transition required"
   }
 });
 

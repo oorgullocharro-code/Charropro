@@ -99,9 +99,13 @@ export const FMCH_2026_MANGANAS_CABALLO_BASE_RULES = freezeRules([
   rule("manganas_caballo_base_espalda_yegua", "Espalda a la yegua", 14, { remate: true }),
   rule("manganas_caballo_base_contra_mascara", "Contra máscara", 14, {
     remate: true,
-    sourceStatus: "SOURCE_CONFIRMATION_REQUIRED",
+    sourceStatus: "CONFIRMED",
     sourceItem: "USI-003",
-    duplicatePrintedIdentityCollapsed: true
+    sourceResolution: "SINGLE_CANONICAL_SPORTING_IDENTITY",
+    officialSourceArticle: 217,
+    officialSourcePage: 89,
+    duplicatePrintedIdentityCollapsed: true,
+    simultaneousDuplicateSelectionAllowed: false
   }),
   rule("manganas_caballo_base_mascara_ancas_muro", "Máscara con ancas al muro", 14, { remate: true }),
   rule("manganas_caballo_base_contra_desden", "Contra desdén", 16, { remate: true }),

@@ -6,37 +6,49 @@
 - Version: `0.6.0`
 - Status before and after: `draft`
 - `activationReady` before and after: `false`
+- Activation-ready eligibility after certification: `true`
 - Catalog rules: `731`
 - Suertes: `10`
-- Canonical content fingerprint: `rptp_a9988543eb21259f`
+- Content fingerprint before: `rptp_a9988543eb21259f`
+- Content fingerprint after: `rptp_0f90f7a3944a82d7`
 - Fingerprint builder: `buildRuleProfileContentFingerprint()` in `js/data/ruleProfileTemporalPolicy.js`
 
-The fingerprint uses canonical safe cloning and stable value fingerprinting over contract version, profile identity/version, name, scope, source, rules, suerte metadata and profile metadata. It includes both sporting content and metadata. It is deterministic, but it is not a cryptographic sports-authority signature.
+The profile fingerprint changed because certification metadata and FieldID mappings changed. The effective sporting fingerprints for all ten suertes remain unchanged, proving that scores, penalties, bonuses, timers, opportunities, participant counts and sporting values were preserved.
 
 ## Source validation
 
-- Official sheet SHA-256 verified: `3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7`
+- Official rulebook SHA-256: `1343e2205c7b6599a2ab7e93a809a5a45bd5ab1aadaba2f5a25bf43db8b4af2b`
+- Official team sheet SHA-256: `3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7`
 - FieldID review: `239/239`
-- Formal sports decisions in `SPORTS_DECISIONS.md`: `0`
-- Direct interview/expert records in `INTERVIEW_RECORDS.md`: `0`
-- Required P0 gaps resolved: `0/5`
+- Confirmed sporting criterion: one canonical Contra mascara identity at 14 points.
+- Required P0 gaps resolved: `5/5`
 
 ## Blocker result
 
-- Cala: `BLOCKED`, `REQUIRES_SPORTING_AUTHORITY`.
-- Coleadero: `BLOCKED`, `REQUIRES_SPORTING_AUTHORITY`.
-- Contra mascara: `BLOCKED`, `REQUIRES_SPORTING_AUTHORITY`.
+- Cala `ML/MD/MI`: `RESOLVED_BY_OFFICIAL_SOURCE`. `ML` is the scorer group; `MD` and `MI` map to the existing right and left medio lado rules.
+- Cala `CR/PC`: `RESOLVED_BY_OFFICIAL_SOURCE`. `PC` is a printed-sheet alias for the existing cambio de rectangulo rule.
+- Cala side bad-points sum: `TECHNICAL_CONTROL_ONLY`, with no scoring effect.
+- Coleadero: `RESOLVED_BY_OFFICIAL_SOURCE`. The canonical model remains three active coleadores with three opportunities each; the fourth row and bottom control are non-sporting administrative controls.
+- Contra mascara: `RESOLVED_BY_CONFIRMED_SPORTING_CRITERION`. Exactly one RuleID remains at 14 points and simultaneous duplicate selection is prohibited.
 - Sporting modifications made by this ticket: `NO`.
 
-## Questions requiring an authorized answer
+## P0 closure
 
-1. Cala: define `P`, `T`, `LD`, `LI`, `MD`, `MI`, `PC` and `CR`; certify the relationship between the printed cells and scorer groups `ML/CR`; define the eight bad-point cells and `SUMA PUNTOS MALOS`, including whether the side sum is a rule, subtotal, validation, or non-scoring control.
-2. Coleadero: define the purpose of `PARTICIPANT_04.NAME` and `BOTTOM_CONTROL_04`; state explicitly whether the fourth row is an active competitor, substitute/reserve, administrative field, subtotal, or another control.
-3. Contra mascara: state whether the two printed mentions represent one repeated/editorial identity or two distinct sporting executions, and provide the distinguishing condition if they are distinct.
-4. Certification P0: provide formal answers for SCQ-006 (Terna), SCQ-011 (closing formula) and SCQ-012 (signatures/validity), in addition to SCQ-002 and SCQ-004 above.
+- SCQ-002 Cala: resolved by Art. 94 and the printed team-sheet structure.
+- SCQ-004 Coleadero: resolved by Arts. 113-115 and 121; three active coleadores preserved.
+- SCQ-006 Terna: resolved by Arts. 149-155 and the official team sheet; three charros and five shared opportunities preserved.
+- SCQ-011 Closing: resolved by the official sheet closing controls and section-specific scoring rules. Exact print/export order remains non-blocking.
+- SCQ-012 Signatures: resolved by Arts. 11, 14 and 26. Missing captain signature represents conformity under the stated conditions and does not invalidate the sporting result.
+
+## Non-blocking documentation gaps
+
+1. Exact printable formula and presentation order for the Cala side subtotal.
+2. Exact administrative purpose of the fourth Coleadero name row.
+3. Exact administrative purpose of the fourth Coleadero bottom control.
+4. Exact export annotations and ordering for closing/signature controls.
 
 ## Verdict
 
-`BLOQUEADO — SPORTING AUTHORITY DECISION REQUIRED`
+`PASS`
 
-The profile is not eligible for activation. This record does not activate the profile, assign it to a tournament, create lifecycle authority, or certify sporting content.
+The profile is eligible for a later controlled lifecycle transition, but this record does not activate it. `status` remains `draft`, `activationReady` remains `false`, and no tournament profile is assigned. Lifecycle and assignment authority remain separate future tickets.

@@ -139,11 +139,12 @@ assert.equal(effectiveColas.suerte.catalog.adic.length, 5);
 assert.equal(effectiveColas.suerte.catalog.infr.length, 23);
 assert.equal(effectiveColas.suerte.catalog.team_infr.length, 2);
 assert.equal(effectiveColas.suerte.catalog.desc.length, 15);
-assert.equal(effectiveColas.suerte.ruleMetadata.fourthRowStatus, "SOURCE_CONFIRMATION_REQUIRED");
-assert.deepEqual(effectiveColas.suerte.ruleMetadata.blockedFieldIds, [
-  "FMCH.TEAM_SHEET.COLEADERO.PARTICIPANT_04.NAME",
-  "FMCH.TEAM_SHEET.COLEADERO.BOTTOM_CONTROL_04"
-]);
+assert.equal(effectiveColas.suerte.ruleMetadata.fourthRowStatus, "NON_SPORTING_ADMINISTRATIVE_ROW");
+assert.deepEqual(effectiveColas.suerte.ruleMetadata.blockedFieldIds, []);
+assert.equal(effectiveColas.suerte.ruleMetadata.activeParticipantCount, 3);
+assert.equal(effectiveColas.suerte.ruleMetadata.opportunitiesPerParticipant, 3);
+assert.equal(effectiveColas.suerte.ruleMetadata.nonSportingControls.length, 2);
+assert.equal(effectiveColas.suerte.ruleMetadata.nonSportingControls.every((item) => item.scoringEffect === "NONE"), true);
 assert.equal(FMCH_2026_COLEADERO_BASE_RULES.every((rule) => rule.metadata.suppressGenericIcon), true);
 assert.equal(FMCH_2026_COLEADERO_BASE_RULES.every((rule) => rule.metadata.officialDiagramAvailable === false), true);
 assert.equal(FMCH_2026_COLEADERO_ADIC_RULES.filter((rule) => rule.metadata.exclusiveGroup === "distance").length, 3);

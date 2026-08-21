@@ -276,7 +276,7 @@ assert.equal(fmchCala.suerte.catalog.adic.length, 7);
 assert.equal(fmchCala.suerte.catalog.infr.length, 43);
 assert.equal(fmchCala.suerte.catalog.team_infr.length, 2);
 assert.equal(fmchCala.suerte.catalog.desc.length, 36);
-assert.equal(fmchCala.suerte.ruleMetadata.fieldIdMappingStatus, "FIELDID_MAPPING_BLOCKED");
+assert.equal(fmchCala.suerte.ruleMetadata.fieldIdMappingStatus, "CERTIFIED_ALIASES_WITH_NON_SPORTING_CONTROL");
 assert.ok(fmchCala.allRules.infr.some((rule) => rule.id === "cala_inf_no_correr_recto" && rule.enabled === false));
 assert.ok(fmchCala.allRules.desc.some((rule) => rule.id === "cala_desc_faena_incompleta" && rule.enabled === false));
 
