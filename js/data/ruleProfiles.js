@@ -87,13 +87,18 @@ import {
   FMCH_2026_PASO_INFR_RULES,
   FMCH_2026_PASO_TEAM_PENALTY_RULES
 } from "./fmch2026ManganasPasoRules.js?v=20260820-production-release-candidate-001-v1";
+import {
+  evaluateRuleProfileTemporalValidity
+} from "./ruleProfileTemporalPolicy.js?v=20260820-production-release-candidate-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
 export const RULE_PROFILE_STATUSES = Object.freeze([
   "skeleton",
   "draft",
+  "ready",
   "active",
+  "retired",
   "deprecated",
   "archived"
 ]);
@@ -717,6 +722,16 @@ export function resolveRuleProfileSelection(tournament = {}, options = {}) {
 
   const validation = validateRuleProfile(candidate);
   diagnostics.push(...validation.diagnostics);
+  const evaluationAt = options.evaluationAt ?? options.at ?? null;
+  const temporalCandidate = explicitProfile || candidate;
+  if (temporalCandidate?.temporalPolicyVersion || evaluationAt !== null) {
+    const temporal = evaluateRuleProfileTemporalValidity(temporalCandidate, {
+      at: evaluationAt,
+      exactVersion: true,
+      allowLegacyExact: options.allowLegacyExact !== false
+    });
+    diagnostics.push(...temporal.diagnostics);
+  }
   if (!ACTIVE_PROFILE_STATUSES.has(validation.profile.status)) {
     pushDiagnostic(diagnostics, "error", "profile-not-available-for-scoring", {
       layer: RULE_SOURCES.RULE_PROFILE,
@@ -858,12 +873,36 @@ function normalizeRuleProfile(profile = {}, diagnostics = []) {
     scope: normalizeText(source.scope || "competition", 80),
     status: normalizeText(source.status || "draft", 40).toLowerCase(),
     source: normalizeText(source.source, 240),
+    ...(source.temporalPolicyVersion ? { temporalPolicyVersion: normalizeText(source.temporalPolicyVersion, 40) } : {}),
+    ...(Object.hasOwn(source, "activationReady") ? { activationReady: source.activationReady === true } : {}),
+    ...copyTemporalProfileFields(source),
     rules: Array.isArray(source.rules)
       ? source.rules.slice(0, MAX_ARRAY).map((rule, index) => normalizeProfileRule(rule, index, diagnostics))
       : [],
     suerteMetadata: normalizeSuerteMetadata(source.suerteMetadata, diagnostics),
     metadata: source.metadata && typeof source.metadata === "object" ? source.metadata : {}
   };
+}
+
+function copyTemporalProfileFields(source) {
+  const output = {};
+  for (const key of [
+    "effectiveFrom",
+    "effectiveTo",
+    "createdAt",
+    "createdBy",
+    "updatedAt",
+    "updatedBy",
+    "activatedAt",
+    "activatedBy",
+    "retiredAt",
+    "retiredBy",
+    "revision",
+    "lifecycle"
+  ]) {
+    if (Object.hasOwn(source, key)) output[key] = source[key];
+  }
+  return output;
 }
 
 function normalizeSuerteMetadata(value, diagnostics) {
