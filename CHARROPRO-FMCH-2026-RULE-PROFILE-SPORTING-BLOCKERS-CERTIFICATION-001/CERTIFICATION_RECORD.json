@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0.0",
+  "ticketId": "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001",
+  "profile": {
+    "profileId": "FMCH_2026_LIBRE",
+    "version": "0.6.0",
+    "status": "draft",
+    "activationReady": false,
+    "catalogRuleCount": 731,
+    "suerteCount": 10,
+    "contentFingerprint": "rptp_a9988543eb21259f"
+  },
+  "sourceValidation": {
+    "sourcePdfSha256": "3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7",
+    "fieldIdsReviewed": 239,
+    "fieldIdsTotal": 239,
+    "sportsDecisionsRecorded": 0,
+    "directExpertEvidenceRecorded": 0,
+    "certificationEvidenceStatus": "MISSING"
+  },
+  "blockers": [
+    {
+      "blockerId": "CALA_ML_MD_MI_PC_CR",
+      "classification": "REQUIRES_SPORTING_AUTHORITY",
+      "status": "UNRESOLVED",
+      "certificationRequired": true,
+      "sourceQuestionId": "SCQ-002",
+      "sportingValuesModified": false
+    },
+    {
+      "blockerId": "COLEADERO_FOURTH_ROW",
+      "classification": "REQUIRES_SPORTING_AUTHORITY",
+      "status": "UNRESOLVED",
+      "certificationRequired": true,
+      "sourceQuestionId": "SCQ-004",
+      "sportingValuesModified": false
+    },
+    {
+      "blockerId": "CONTRA_MASCARA_DUPLICATE_PRINTED_IDENTITY",
+      "classification": "REQUIRES_SPORTING_AUTHORITY",
+      "status": "UNRESOLVED",
+      "certificationRequired": true,
+      "sourceQuestionId": "USI-003",
+      "sportingValuesModified": false
+    }
+  ],
+  "p0Gaps": [
+    { "gapId": "GAP-P0-CALA-001", "questionId": "SCQ-002", "status": "PENDING_CONFIRMATION" },
+    { "gapId": "GAP-P0-COLEADERO-001", "questionId": "SCQ-004", "status": "PENDING_CONFIRMATION" },
+    { "gapId": "GAP-P0-TERNA-001", "questionId": "SCQ-006", "status": "PENDING_CONFIRMATION" },
+    { "gapId": "GAP-P0-CLOSING-001", "questionId": "SCQ-011", "status": "PENDING_CONFIRMATION" },
+    { "gapId": "GAP-P0-SIGNATURES-001", "questionId": "SCQ-012", "status": "PENDING_CONFIRMATION" }
+  ],
+  "certification": {
+    "verdict": "BLOCKED",
+    "reason": "SPORTING_AUTHORITY_DECISION_REQUIRED",
+    "remainingP0": 5,
+    "activationReadyEligibility": false,
+    "profileActivated": false,
+    "tournamentProfileAssigned": false,
+    "sportingValuesModified": false
+  }
+}
