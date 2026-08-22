@@ -146,6 +146,7 @@ export function makeAccessSession(user = null, profile = null) {
       email: "",
       name: "",
       role: ROLES.SIN_ACCESO,
+      platformAdmin: false,
       active: false
     };
   }
@@ -159,6 +160,7 @@ export function makeAccessSession(user = null, profile = null) {
     email: user.email || profile?.email || "",
     name: profile?.name || user.displayName || user.email || "Usuario",
     role: normalizeRole(profile?.role),
+    platformAdmin: profile?.platformAdmin === true,
     active: profile?.active !== false,
     ...tournamentAccess
   };

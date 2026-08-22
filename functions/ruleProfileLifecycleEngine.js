@@ -27,6 +27,9 @@ const REQUEST_FIELDS = new Set([
   "profileId", "version", "requestedTransition", "expectedRevision", "idempotencyKey",
   "effectiveFrom", "effectiveTo", "reason", "tenantId", "organizationId"
 ]);
+const READ_REQUEST_FIELDS = new Set([
+  "profileId", "version", "tenantId", "organizationId"
+]);
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,159}$/;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$/;
 const IDEMPOTENCY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,179}$/;
@@ -161,6 +164,58 @@ function prepareRuleProfileLifecycleRequest(input = {}, actorInput = {}, certifi
     tenantId,
     organizationId,
     actor: authorization.actor
+  });
+}
+
+function readRuleProfileLifecycleState(currentInput, requestInput = {}, actorInput = {}, certificateInput = {}, options = {}) {
+  const source = safeClone(requestInput);
+  assertAllowedKeys(source, READ_REQUEST_FIELDS, "rule-profile-read-field-unsupported");
+  const certificate = validateCertificateOrThrow(certificateInput);
+  const profileId = normalizeId(source.profileId, "rule-profile-id-invalid");
+  const version = normalizeVersion(source.version);
+  if (profileId !== certificate.profileId || version !== certificate.version) {
+    throw new RuleProfileLifecycleError("rule-profile-certificate-identity-mismatch");
+  }
+  const authorization = authorizeRuleProfileLifecycleActor(actorInput, certificate);
+  if (!authorization.allowed) throw new RuleProfileLifecycleError(authorization.reason);
+  const scope = normalizeCertificateScope(certificate.scope);
+  const tenantId = normalizeOptionalId(source.tenantId);
+  const organizationId = normalizeOptionalId(source.organizationId);
+  if (tenantId !== scope.tenantId) throw new RuleProfileLifecycleError("rule-profile-tenant-mismatch");
+  if (organizationId !== scope.organizationId) {
+    throw new RuleProfileLifecycleError("rule-profile-organization-mismatch");
+  }
+
+  const certificateFingerprint = fingerprintRuleProfileCertificate(certificate);
+  const root = normalizeProfileRoot(currentInput, profileId);
+  const versionKey = buildRuleProfileVersionKey(version);
+  const container = normalizeVersionContainer(root.versions[versionKey], certificate, certificateFingerprint);
+  const state = container.state;
+  if (!RULE_PROFILE_LIFECYCLE_STATUSES.includes(state.status)
+    || !Number.isSafeInteger(state.revision) || state.revision < 0) {
+    throw new RuleProfileLifecycleError("rule-profile-persisted-state-invalid");
+  }
+  if (state.contentFingerprint !== certificate.contentFingerprint
+    || state.certificateFingerprint !== certificateFingerprint) {
+    throw new RuleProfileLifecycleError("rule-profile-fingerprint-mismatch");
+  }
+
+  return safeClone({
+    ok: true,
+    profileId,
+    version,
+    status: state.status,
+    revision: state.revision,
+    fingerprint: state.contentFingerprint,
+    activationReady: state.activationReady === true,
+    certification: {
+      verdict: certificate.certification.verdict,
+      remainingP0: certificate.certification.remainingP0,
+      activationReadyEligibility: certificate.certification.activationReadyEligibility
+    },
+    effectiveFrom: state.effectiveFrom || null,
+    effectiveTo: state.effectiveTo || null,
+    readAt: normalizeDate(options.now, "rule-profile-authoritative-time-required")
   });
 }
 
@@ -362,6 +417,10 @@ function normalizeVersionContainer(input, certificate, certificateFingerprint) {
   if (container.state.profileId !== certificate.profileId || container.state.version !== certificate.version) {
     throw new RuleProfileLifecycleError("rule-profile-persisted-identity-mismatch");
   }
+  container.state = {
+    ...buildInitialLifecycleState(certificate, certificateFingerprint),
+    ...container.state
+  };
   return container;
 }
 
@@ -497,6 +556,7 @@ module.exports = {
   fingerprintRuleProfileCertificate,
   getRuleProfileCertificate,
   prepareRuleProfileLifecycleRequest,
+  readRuleProfileLifecycleState,
   validateRuleProfileCertificate,
   validateRuleProfileCertificationRegistry
 };

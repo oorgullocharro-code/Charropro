@@ -6,7 +6,7 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_SOURCE,
   FMCH_2026_CALA_TEAM_PENALTY_RULES
-} from "./calaRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./calaRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_COLEADERO_ADIC_RULES,
   FMCH_2026_COLEADERO_BASE_RULES,
@@ -23,7 +23,7 @@ import {
   FMCH_2026_PIALES_INFR_RULES,
   FMCH_2026_PIALES_RULEBOOK_VERSION,
   FMCH_2026_PIALES_TEAM_PENALTY_RULES
-} from "./fmch2026PialesColeaderoRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./fmch2026PialesColeaderoRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_JINETEO_CLASSIFICATIONS,
   FMCH_2026_JINETEOS_SOURCE,
@@ -41,7 +41,7 @@ import {
   FMCH_2026_YEGUA_INFR_RULES,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_TEAM_PENALTY_RULES
-} from "./fmch2026JineteosRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./fmch2026JineteosRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_LAZO_ADIC_RULES,
   FMCH_2026_LAZO_BASE_RULES,
@@ -59,7 +59,7 @@ import {
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
   FMCH_2026_TERNA_RULEBOOK_VERSION,
   FMCH_2026_TERNA_SOURCE
-} from "./fmch2026TernaRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./fmch2026TernaRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_MANGANAS_CABALLO_ADIC_RULES,
   FMCH_2026_MANGANAS_CABALLO_BASE_RULES,
@@ -86,10 +86,11 @@ import {
   FMCH_2026_PASO_EXIT_DURATION_MS,
   FMCH_2026_PASO_INFR_RULES,
   FMCH_2026_PASO_TEAM_PENALTY_RULES
-} from "./fmch2026ManganasPasoRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./fmch2026ManganasPasoRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
+  buildRuleProfileContentFingerprint,
   evaluateRuleProfileTemporalValidity
-} from "./ruleProfileTemporalPolicy.js?v=20260820-production-release-candidate-001-v1";
+} from "./ruleProfileTemporalPolicy.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
@@ -771,6 +772,13 @@ export function resolveRuleProfileSelection(tournament = {}, options = {}) {
   const explicitFallback = tournament.ruleProfileFallback === "product_base";
 
   if (!profileId && !profileVersion && !explicitProfile) {
+    if (tournament.ruleProfilePolicyRequired === true) {
+      pushDiagnostic(diagnostics, "error", "profile-productive-default-assignment-required", {
+        layer: RULE_SOURCES.RULE_PROFILE,
+        category: tournament.category || ""
+      });
+      return resolveProfileFallback(diagnostics, false);
+    }
     return {
       valid: true,
       blocked: false,
@@ -790,9 +798,12 @@ export function resolveRuleProfileSelection(tournament = {}, options = {}) {
     return resolveProfileFallback(diagnostics, explicitFallback);
   }
 
-  const candidate = explicitProfile
+  const catalogCandidate = explicitProfile
     ? normalizeRuleProfile(explicitProfile, diagnostics)
     : getRuleProfile(profileId, profileVersion, options.registry || RULE_PROFILES);
+  const candidate = explicitProfile
+    ? catalogCandidate
+    : applyTournamentRuleProfileAssignment(catalogCandidate, tournament, diagnostics);
   if (!candidate || candidate.profileId !== profileId || candidate.version !== profileVersion) {
     pushDiagnostic(diagnostics, "error", "profile-not-found", {
       layer: RULE_SOURCES.RULE_PROFILE,
@@ -837,6 +848,46 @@ export function resolveRuleProfileSelection(tournament = {}, options = {}) {
     profile: validation.profile,
     reference: createProfileReference(validation.profile),
     diagnostics: dedupeDiagnostics(diagnostics)
+  };
+}
+
+function applyTournamentRuleProfileAssignment(candidate, tournament, diagnostics) {
+  if (!candidate) return candidate;
+  const assignment = tournament.ruleProfileAssignment;
+  if (!assignment) return candidate;
+  const validIdentity = assignment.authorityVersion === "1.0.0"
+    && assignment.tournamentId === tournament.id
+    && assignment.profileId === candidate.profileId
+    && assignment.version === candidate.version
+    && assignment.status === "active"
+    && Number.isSafeInteger(Number(assignment.revision))
+    && Number(assignment.revision) > 0;
+  if (!validIdentity) {
+    pushDiagnostic(diagnostics, "error", "profile-assignment-invalid", {
+      layer: RULE_SOURCES.RULE_PROFILE,
+      profileId: candidate.profileId,
+      profileVersion: candidate.version
+    });
+    return candidate;
+  }
+  const fingerprint = buildRuleProfileContentFingerprint(candidate);
+  if (assignment.contentFingerprint !== fingerprint) {
+    pushDiagnostic(diagnostics, "error", "profile-assignment-fingerprint-mismatch", {
+      layer: RULE_SOURCES.RULE_PROFILE,
+      expectedFingerprint: fingerprint,
+      actualFingerprint: assignment.contentFingerprint || ""
+    });
+    return candidate;
+  }
+  return {
+    ...candidate,
+    status: "active",
+    metadata: {
+      ...(candidate.metadata || {}),
+      lifecycleAuthority: assignment.authorityVersion,
+      assignmentRevision: Number(assignment.revision),
+      activationReady: true
+    }
   };
 }
 

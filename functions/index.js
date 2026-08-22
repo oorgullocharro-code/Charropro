@@ -34,9 +34,14 @@ const {
 const ruleProfileCertificationRegistry = require("./ruleProfileCertificationRegistry.json");
 const { RuleProfileLifecycleError } = require("./ruleProfileLifecycleEngine");
 const {
+  RuleProfileAssignmentError,
+  applyTournamentRuleProfileAssignment
+} = require("./ruleProfileAssignmentEngine");
+const {
   createFirebaseRuleProfileLifecycleAdapter,
   createRuleProfileLifecycleRuntime
 } = require("./ruleProfileLifecycleService");
+const { createFirebaseRestCas } = require("./firebaseRestCas");
 
 admin.initializeApp();
 
@@ -66,6 +71,7 @@ const ruleProfileLifecycleRuntime = createRuleProfileLifecycleRuntime(
   createFirebaseRuleProfileLifecycleAdapter(admin, { rootPath: RULE_PROFILE_LIFECYCLE_ROOT_PATH }),
   { registry: ruleProfileCertificationRegistry }
 );
+const firebaseRestCas = createFirebaseRestCas(admin);
 
 const USERS_PATH = FIREBASE_PATHS.users;
 const USER_TOURNAMENT_ACCESS_PATH = FIREBASE_PATHS.userTournamentAccess;
@@ -362,6 +368,72 @@ exports.transitionCharroProRuleProfileLifecycle = onCall({
   }
 });
 
+exports.getCharroProRuleProfileLifecycle = onCall({
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para consultar perfiles reglamentarios.");
+  try {
+    const actor = await requireRuleProfileLifecycleActor(callerUid, request.data || {});
+    return await ruleProfileLifecycleRuntime.read(request.data || {}, actor);
+  } catch (error) {
+    throw toRuleProfileLifecycleHttpsError(error);
+  }
+});
+
+exports.assignCharroProTournamentRuleProfile = onCall({
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para asignar perfiles reglamentarios.");
+  try {
+    const actor = await requireRuleProfileLifecycleActor(callerUid, request.data || {});
+    const lifecycle = await ruleProfileLifecycleRuntime.read({
+      profileId: request.data?.profileId,
+      version: request.data?.version,
+      tenantId: request.data?.tenantId,
+      organizationId: request.data?.organizationId
+    }, actor);
+    const certificate = ruleProfileCertificationRegistry.profiles[`${request.data?.profileId || ""}@${request.data?.version || ""}`];
+    if (!certificate) throw new RuleProfileAssignmentError("tournament-rule-profile-version-not-found");
+    const tournamentId = normalizeKey(request.data?.tournamentId);
+    const assignedAt = new Date().toISOString();
+    const outcome = await firebaseRestCas.compareAndSwap(`${TOURNAMENTS_PATH}/${tournamentId}`, (current) => {
+      try {
+        const applied = applyTournamentRuleProfileAssignment(
+          current || {},
+          request.data || {},
+          actor,
+          lifecycle,
+          certificate,
+          { now: assignedAt }
+        );
+        return { outcome: applied.outcome, state: applied.tournament };
+      } catch (error) {
+        return {
+          outcome: { ok: false, reason: error?.code || error?.message || "tournament-rule-profile-error" },
+          state: current || null
+        };
+      }
+    });
+    if (!outcome?.ok) {
+      throw new RuleProfileAssignmentError(outcome?.reason || "tournament-rule-profile-transaction-aborted", outcome || {});
+    }
+    await admin.database().ref(`${FIREBASE_PATHS.tournamentIndex}/${tournamentId}`).update({
+      ruleProfileId: outcome.assignment.profileId,
+      ruleProfileVersion: outcome.assignment.version,
+      ruleProfileStatus: outcome.assignment.status,
+      ruleProfileContentFingerprint: outcome.assignment.contentFingerprint,
+      ruleProfileAssignmentRevision: outcome.assignment.revision
+    });
+    return outcome;
+  } catch (error) {
+    throw toRuleProfileAssignmentHttpsError(error);
+  }
+});
+
 async function requireOfficialScoreActor(uid, tournamentId) {
   const cleanTournamentId = normalizeKey(tournamentId);
   const [profileSnapshot, selectedAccessSnapshot] = await Promise.all([
@@ -620,9 +692,26 @@ function toRuleProfileLifecycleHttpsError(error) {
   const invalid = reason.includes("invalid") || reason.includes("required") || reason.includes("not-found")
     || reason.includes("failed") || reason.includes("blocked") || reason.includes("not-eligible");
   const code = denied ? "permission-denied" : conflict ? "aborted" : invalid ? "failed-precondition" : "internal";
-  return new HttpsError(code, "No se pudo ejecutar la transicion del perfil reglamentario.", {
+  return new HttpsError(code, "No se pudo procesar el perfil reglamentario.", {
     reason,
     details: error instanceof RuleProfileLifecycleError ? error.details : undefined
+  });
+}
+
+function toRuleProfileAssignmentHttpsError(error) {
+  if (error instanceof HttpsError) return error;
+  const reason = String(error?.code || error?.message || "tournament-rule-profile-error").slice(0, 180);
+  const denied = reason.includes("denied") || reason.includes("auth-required") || reason.includes("inactive")
+    || reason.includes("platform-admin-required") || reason.includes("tenant-mismatch")
+    || reason.includes("organization-mismatch") || reason.includes("historical-scores-blocked");
+  const conflict = reason.includes("conflict") || reason.includes("aborted") || reason.includes("already-assigned");
+  const invalid = reason.includes("invalid") || reason.includes("mismatch") || reason.includes("not-found")
+    || reason.includes("not-active") || reason.includes("not-effective") || reason.includes("expired")
+    || reason.includes("blocked") || reason.includes("required");
+  const code = denied ? "permission-denied" : conflict ? "aborted" : invalid ? "failed-precondition" : "internal";
+  return new HttpsError(code, "No se pudo asignar el perfil reglamentario.", {
+    reason,
+    details: error instanceof RuleProfileAssignmentError ? error.details : undefined
   });
 }
 

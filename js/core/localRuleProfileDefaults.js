@@ -1,4 +1,4 @@
-import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260820-production-release-candidate-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260820-production-release-candidate-001-v1",
+      "appVersion": "20260822-scorer-save-next-latency-audit-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -112,11 +112,21 @@
     "federation": {
       "activeRulebookId": null,
       "convocatorias": [],
-      "officialConfiguration": {}
+      "officialConfiguration": {
+        "productiveRuleProfileDefaults": {
+          "Libre": {
+            "policyVersion": "1.0.0",
+            "policyId": "fmch-2026-libre-productive-default-v1",
+            "profileId": "FMCH_2026_LIBRE",
+            "version": "0.6.0",
+            "enabled": true
+          }
+        }
+      }
     }
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "02ee9d64ea5b0e6e80d15ccc12b9481c792bdd25081f1b7e425b39c903c99312",
-  "fingerprint": "02ee9d64ea5b0e6e80d15ccc12b9481c792bdd25081f1b7e425b39c903c99312"
+  "checksum": "69d7c53824cd50fd762a5c0513696c256102676814c5ceba4d974a68f47d3ffa",
+  "fingerprint": "69d7c53824cd50fd762a5c0513696c256102676814c5ceba4d974a68f47d3ffa"
 }

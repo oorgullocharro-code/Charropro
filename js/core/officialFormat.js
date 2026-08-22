@@ -1,12 +1,12 @@
-import { SUERTES } from "../data/suertes.js?v=20260820-production-release-candidate-001-v1";
+import { SUERTES } from "../data/suertes.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   calculateAttemptTotal,
   getAttemptTeamPenaltyTotal,
   getTeamCharreadaResta,
   getTeamCharreadaTotal,
   getTeamSuerteTotal
-} from "./scoring.js?v=20260820-production-release-candidate-001-v1";
-import { getTeam, scoreKey, state } from "./state.js?v=20260820-production-release-candidate-001-v1";
+} from "./scoring.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { getTeam, scoreKey, state } from "./state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import { createXlsxBlob } from "./xlsx.js?v=20260708-recovery-001b-panel-status1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";

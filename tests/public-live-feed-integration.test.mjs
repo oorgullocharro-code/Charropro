@@ -47,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260820-production-release-candidate-001-v1"],
+  ["20260822-scorer-save-next-latency-audit-001-v1"],
   "all browser entrypoints share one firebaseSync module identity"
 );
 
@@ -500,6 +500,78 @@ assert.equal(
   true
 );
 
+let releaseProjectionGate;
+firebase.projectionGate = new Promise((resolve) => {
+  releaseProjectionGate = resolve;
+});
+let releaseAuthorityGate;
+firebase.authorityGate = new Promise((resolve) => {
+  releaseAuthorityGate = resolve;
+});
+const deferredSettlements = [];
+const deferredStages = [];
+let resolveDeferredSettlements;
+const deferredSettlementsReady = new Promise((resolve) => {
+  resolveDeferredSettlements = resolve;
+});
+const deferredOptions = {
+  deferPublicProjection: true,
+  onTimingStage(stage) {
+    deferredStages.push(stage);
+  },
+  onBackgroundSettled(settlement) {
+    deferredSettlements.push(settlement);
+    if (deferredSettlements.length === 2) resolveDeferredSettlements();
+  }
+};
+const privateWritesBeforeDeferred = firebase.privateWriteCount;
+const deferredInput = {
+  publishedId: "published-latency-deferred",
+  scoreId: "score-latency-deferred",
+  suerteId: "latency_probe",
+  total: 44,
+  publishedAt: "2026-07-28T10:20:00.000Z",
+  attemptKey: `${tournamentId}__${charreadaId}__${teamId}__latency_probe__0__0`
+};
+let deferredCriticalReturned = false;
+const deferredFirstPromise = publishOfficial(deferredInput, deferredOptions).then((result) => {
+  deferredCriticalReturned = true;
+  return result;
+});
+await new Promise((resolve) => setTimeout(resolve, 10));
+assert.equal(deferredCriticalReturned, false, "authority/network delay must block pointer advancement");
+releaseAuthorityGate();
+firebase.authorityGate = null;
+const deferredFirst = await deferredFirstPromise;
+assert.equal(deferredFirst.ok, true);
+assert.equal(deferredFirst.backgroundPending, true);
+assert.equal(deferredFirst.privateWrite.ok, true);
+assert.deepEqual(deferredStages, ["T4", "T5"], "the critical write returns before projection reconciliation");
+assert.equal(deferredSettlements.length, 0, "the blocked projection is still running in background");
+
+const deferredDuplicate = await publishOfficial(deferredInput, deferredOptions);
+assert.equal(deferredDuplicate.ok, true);
+assert.equal(deferredDuplicate.idempotent, true);
+assert.equal(
+  firebase.privateWriteCount,
+  privateWritesBeforeDeferred + 1,
+  "an idempotent retry cannot duplicate the official score while projection is pending"
+);
+releaseProjectionGate();
+firebase.projectionGate = null;
+await Promise.race([
+  deferredSettlementsReady,
+  new Promise((_, reject) => setTimeout(() => reject(new Error("deferred-projection-timeout")), 2000))
+]);
+assert.equal(deferredSettlements.length, 2);
+assert.equal(deferredSettlements.some((settlement) => settlement.ok), true);
+assert.equal(deferredStages.filter((stage) => stage === "T12").length, 2);
+assert.equal(
+  firebase.read(`${deferredFirst.projectionOutboxPath}/state/status`),
+  "CLIENT_CONFIRMED",
+  "the background path reaches the same durable terminal state"
+);
+
 const sharedTournamentId = "tournament-shared-score-guard";
 const sharedCharreadaId = "charreada-shared-score-guard";
 const sharedTeamId = "team-shared-score-guard";
@@ -714,7 +786,7 @@ async function publishOfficial({
   revision = 1,
   attemptKey = `${tournamentId}__${charreadaId}__${teamId}__${suerteId}__0__0`,
   actorUid = "test-user"
-}) {
+}, runtimeOptions = {}) {
   const canonicalScoreId = `${charreadaId}__${teamId}__${suerteId}`;
   return firebaseSync.publishFirebaseOfficialScoreAtomic(
     tournamentId,
@@ -754,7 +826,8 @@ async function publishOfficial({
           team: { id: teamId, name: "Equipo Integration" },
           suerte: { id: suerteId, name: suerteId }
         }
-      }
+      },
+      ...runtimeOptions
     }
   );
 }
@@ -878,6 +951,8 @@ function createFirebaseTestAdapter() {
     failAfterPublicCommitOnce: false,
     failOutboxTransactionsOnce: false,
     failProjectedTransitionOnce: false,
+    projectionGate: null,
+    authorityGate: null,
     seed(value) {
       data = structuredClone(value);
       this.privateWriteCount = 0;
@@ -888,6 +963,8 @@ function createFirebaseTestAdapter() {
       this.failAfterPublicCommitOnce = false;
       this.failOutboxTransactionsOnce = false;
       this.failProjectedTransitionOnce = false;
+      this.projectionGate = null;
+      this.authorityGate = null;
       authUser = { uid: "test-user" };
     },
     read(path) {
@@ -972,6 +1049,9 @@ function createFirebaseTestAdapter() {
         error.code = "PERMISSION_DENIED";
         throw error;
       }
+      if (this.projectionGate && target.path.includes("/projectionOutbox/")) {
+        await this.projectionGate;
+      }
       if (this.failPublicTransactions && target.path.includes("/publicTournaments/")) {
         const error = new Error("permission denied");
         error.code = "PERMISSION_DENIED";
@@ -1041,6 +1121,7 @@ function createFirebaseTestAdapter() {
     httpsCallable(_functions, name) {
       if (name !== "publishCharroProOfficialScore") return async () => ({ data: null });
       return async (payload) => {
+        if (this.authorityGate) await this.authorityGate;
         const prepared = prepareOfficialScoreRequest(payload, {
           uid: authUser.uid,
           name: "Test User",

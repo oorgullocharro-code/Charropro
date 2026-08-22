@@ -3,9 +3,11 @@ const {
   applyRuleProfileLifecycleTransaction,
   buildRuleProfileProfileKey,
   getRuleProfileCertificate,
+  readRuleProfileLifecycleState,
   validateRuleProfileCertificationRegistry
 } = require("./ruleProfileLifecycleEngine");
 const { safeClone } = require("./configurationEngine");
+const { createFirebaseRestCas } = require("./firebaseRestCas");
 
 const RULE_PROFILE_LIFECYCLE_SERVICE_VERSION = "1.0.0";
 
@@ -19,6 +21,14 @@ function createRuleProfileLifecycleRuntime(adapter, options = {}) {
   }
   const registry = safeClone(registryValidation.registry);
   return Object.freeze({
+    async read(request = {}, actor = {}) {
+      const certificate = getRuleProfileCertificate(registry, request.profileId, request.version);
+      const current = await adapter.readProfile(request.profileId);
+      return safeClone({
+        lifecycleServiceVersion: RULE_PROFILE_LIFECYCLE_SERVICE_VERSION,
+        ...readRuleProfileLifecycleState(current, request, actor, certificate, { now: getRuntimeNow(options) })
+      });
+    },
     async transition(request = {}, actor = {}) {
       const certificate = getRuleProfileCertificate(registry, request.profileId, request.version);
       const now = getRuntimeNow(options);
@@ -39,21 +49,22 @@ function createRuleProfileLifecycleRuntime(adapter, options = {}) {
 function createFirebaseRuleProfileLifecycleAdapter(admin, options = {}) {
   if (!admin?.database) throw new RuleProfileLifecycleError("rule-profile-firebase-admin-required");
   const rootPath = normalizeRootPath(options.rootPath);
+  const restCas = createFirebaseRestCas(admin, options.restCas || {});
   return Object.freeze({
+    async readProfile(profileId) {
+      const profileKey = buildRuleProfileProfileKey(profileId);
+      const snapshot = await admin.database().ref(`${rootPath}/profiles/${profileKey}`).get();
+      return snapshot.exists() ? safeClone(snapshot.val()) : null;
+    },
     async transactProfile(profileId, updater) {
       const profileKey = buildRuleProfileProfileKey(profileId);
-      const target = admin.database().ref(`${rootPath}/profiles/${profileKey}`);
-      let outcome = null;
-      const transaction = await target.transaction((current) => {
+      return restCas.compareAndSwap(`${rootPath}/profiles/${profileKey}`, (current) => {
         const applied = updater(current || null);
-        outcome = safeClone(applied.outcome);
-        if (!applied.outcome?.ok) return;
-        return safeClone(applied.state);
-      }, undefined, false);
-      if (!transaction.committed && outcome?.ok) {
-        return { ok: false, reason: "rule-profile-transaction-aborted" };
-      }
-      return outcome || { ok: false, reason: "rule-profile-transaction-aborted" };
+        return {
+          outcome: safeClone(applied.outcome),
+          state: safeClone(applied.state)
+        };
+      });
     }
   });
 }
@@ -62,6 +73,10 @@ function createMemoryRuleProfileLifecycleAdapter(seed = {}) {
   let profiles = safeClone(seed.profiles || {});
   const locks = new Map();
   return Object.freeze({
+    async readProfile(profileId) {
+      const profileKey = buildRuleProfileProfileKey(profileId);
+      return safeClone(profiles[profileKey] || null);
+    },
     async transactProfile(profileId, updater) {
       const profileKey = buildRuleProfileProfileKey(profileId);
       const previous = locks.get(profileKey) || Promise.resolve();
@@ -99,7 +114,7 @@ function normalizeRootPath(value) {
 }
 
 function validateAdapter(adapter) {
-  if (typeof adapter?.transactProfile !== "function") {
+  if (typeof adapter?.readProfile !== "function" || typeof adapter?.transactProfile !== "function") {
     throw new RuleProfileLifecycleError("rule-profile-adapter-invalid");
   }
 }

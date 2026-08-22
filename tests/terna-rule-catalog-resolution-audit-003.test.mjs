@@ -107,8 +107,12 @@ assert.equal(seededTournament.ruleProfileVersion, "0.6.0");
 assert.equal(seededTournament.ruleProfile.status, "active");
 
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-assert.match(appSource, /state\.tournaments\.push\(applyLocalFmch2026RuleProfileDefault\(/,
-  "new local tournaments receive the controlled profile assignment");
+assert.match(appSource, /const tournament = applyProductiveRuleProfilePolicy\(applyLocalFmch2026RuleProfileDefault\(\{/,
+  "new tournaments preserve the local fixture default before applying productive policy");
+assert.match(appSource, /state\.tournaments\.push\(tournament\)/,
+  "the policy-resolved tournament is the record inserted into local state");
+assert.match(appSource, /if \(!liveConfigured\) return;[\s\S]*?assignFirebaseTournamentRuleProfile\(\{/,
+  "productive assignments use the server authority only when Firebase live is configured");
 assert.match(appSource, /if \(!existing\) ensureLocalRuleProfileForNewCharreada\(\)/,
   "a new charreada repairs a profileless local parent before scoring resolution");
 assert.match(appSource, /Object\.assign\(tournament, \{[\s\S]*?ruleProfileId:[\s\S]*?ruleProfileVersion:[\s\S]*?ruleProfile:/);

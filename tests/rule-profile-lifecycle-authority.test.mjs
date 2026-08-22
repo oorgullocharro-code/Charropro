@@ -153,6 +153,17 @@ assert.equal(active.status, "active");
 assert.equal(active.revision, 2);
 assert.equal(fixture.adapter.snapshot().profiles[profileKey].versions[versionKey].state.activatedAt, T1);
 
+// RTDB removes null-valued properties; a persisted READY record must still activate cleanly.
+const rtdbReadyFixture = runtimeFixture();
+await rtdbReadyFixture.runtime.transition(readyRequest, ADMIN);
+const rtdbRoundTrip = rtdbReadyFixture.adapter.snapshot();
+removeNullObjectProperties(rtdbRoundTrip);
+const rtdbFixture = runtimeFixture(registry, T1, createMemoryRuleProfileLifecycleAdapter(rtdbRoundTrip));
+const rtdbActive = await rtdbFixture.runtime.transition(activeRequest, ADMIN);
+assert.equal(rtdbActive.status, "active");
+assert.equal(rtdbActive.revision, 2);
+assert.equal(rtdbActive.effectiveTo, null);
+
 fixture.setNow(T2);
 const retired = await fixture.runtime.transition({
   ...requestBase,
@@ -317,3 +328,15 @@ assert.throws(
 );
 
 console.log("rule-profile-lifecycle-authority.test.mjs: ok");
+
+function removeNullObjectProperties(value) {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    value.forEach(removeNullObjectProperties);
+    return;
+  }
+  for (const key of Object.keys(value)) {
+    if (value[key] === null) delete value[key];
+    else removeNullObjectProperties(value[key]);
+  }
+}

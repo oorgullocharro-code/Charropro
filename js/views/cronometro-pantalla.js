@@ -1,7 +1,7 @@
 import { escapeHTML, html } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260820-production-release-candidate-001-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260820-production-release-candidate-001-v1";
-import { getOfficialTimerContextView, getTimerView } from "../core/timerRules.js?v=20260820-production-release-candidate-001-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { getOfficialTimerContextView, getTimerView } from "../core/timerRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();

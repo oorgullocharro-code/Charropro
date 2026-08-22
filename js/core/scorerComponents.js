@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260820-production-release-candidate-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

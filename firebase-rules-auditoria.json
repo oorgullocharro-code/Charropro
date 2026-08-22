@@ -23,7 +23,15 @@
           ".read": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/tournamentAccess').val() !== 'selected' || root.child('charropro/userTournamentAccess/' + auth.uid + '/' + $tournamentId).val() === true || root.child('charropro/users/' + auth.uid + '/tournamentIds/0').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/1').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/2').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/3').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/4').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/5').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/6').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/7').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/8').val() === $tournamentId || root.child('charropro/users/' + auth.uid + '/tournamentIds/9').val() === $tournamentId)",
           ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' && !newData.exists() && !data.child('publishedScores').exists() && !data.child('officialScoreLedger').exists() && !data.child('officialScoreAudit').exists()",
           "info": {
-            ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador')"
+            "ruleProfileId": { ".write": false },
+            "ruleProfileVersion": { ".write": false },
+            "ruleProfileStatus": { ".write": false },
+            "ruleProfileContentFingerprint": { ".write": false },
+            "ruleProfileAssignmentRevision": { ".write": false },
+            "ruleProfileAssignment": { ".write": false },
+            "$other": {
+              ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador') && $other !== 'ruleProfileId' && $other !== 'ruleProfileVersion' && $other !== 'ruleProfileStatus' && $other !== 'ruleProfileContentFingerprint' && $other !== 'ruleProfileAssignmentRevision' && $other !== 'ruleProfileAssignment'"
+            }
           },
           "teams": {
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador')"

@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260820-production-release-candidate-001-v1";
+const RELEASE_ID = "20260822-scorer-save-next-latency-audit-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({

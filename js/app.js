@@ -1,6 +1,6 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260820-production-release-candidate-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260820-production-release-candidate-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./data/calaRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -52,7 +52,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -72,13 +72,14 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260820-production-release-candidate-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { applyProductiveRuleProfilePolicy } from "./core/productiveRuleProfilePolicy.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260708-event-001b-engine-architecture1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260820-production-release-candidate-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260820-production-release-candidate-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260820-production-release-candidate-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -86,9 +87,9 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260820-production-release-candidate-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260820-production-release-candidate-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/timerRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -101,16 +102,20 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/scoring.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/scoringAttempt.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/scorerComponents.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import {
+  createScorerSaveLatencyTrace,
+  summarizeScorerSaveLatency
+} from "./core/scorerSaveLatency.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -120,12 +125,14 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/sync.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
+  assignFirebaseTournamentRuleProfile,
   createFirebaseTournamentBackup,
   deleteFirebaseTournament,
   getFirebaseRuntimeDiagnostics,
+  getFirebaseRuleProfileLifecycle,
   isFirebaseLiveConfigured,
   publishFirebaseGlobalRuleOverrides,
   publishFirebaseOfficialScoreAtomic,
@@ -134,7 +141,6 @@ import {
   publishFirebaseScoringButtonLayouts,
   publishFirebaseStatHistory,
   publishFirebaseTournamentState,
-  readFirebaseActiveCharreadaSnapshot,
   readFirebasePreparationSnapshot,
   readFirebasePublicProjectionOutbox,
   readFirebaseTournamentSafetySnapshot,
@@ -157,9 +163,10 @@ import {
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState,
   subscribeFirebaseUsers,
+  transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/firebaseSync.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -172,7 +179,7 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/pendingScoreReview.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildTournamentUrl,
@@ -225,7 +232,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260820-production-release-candidate-001-v1";
+} from "./core/state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -464,6 +471,9 @@ const ACTION_CAPABILITIES = {
   "edit-user-profile": "users",
   "save-user-profile": "users",
   "deactivate-user-profile": "users",
+  "refresh-rule-profile-lifecycle": "users",
+  "transition-rule-profile-lifecycle": "users",
+  "assign-tournament-rule-profile": "users",
   "save-stat-history": "supervise",
   "test-sync": "operate",
   "publish-live-state": "operate",
@@ -777,6 +787,9 @@ let activeScoringDraft = null;
 let officialPublishInProgress = false;
 let pendingTimeEvidenceCapture = null;
 let pendingBestColeadorModal = null;
+let pendingBestColeadorLatencyTrace = null;
+const scorerSaveLatencySamples = [];
+const finalizedScorerSaveLatencyTraces = new WeakSet();
 let pendingReviewPanelMode = "";
 let activePendingResolutionId = "";
 let pendingReviewDraftSyncTimer = null;
@@ -790,6 +803,39 @@ let lastScoreSaveStatus = {
   scoreId: "",
   projectionId: ""
 };
+
+function beginScorerSaveLatencyTrace(context = {}) {
+  const trace = createScorerSaveLatencyTrace({
+    traceId: `save:${Date.now().toString(36)}:${String(context?.suerte?.id || "unknown")}`
+  });
+  trace.mark("T0", {
+    suerteId: String(context?.suerte?.id || ""),
+    tournamentId: String(context?.tournament?.id || "")
+  });
+  return trace;
+}
+
+function markScorerSaveLatency(trace, stage, detail = {}) {
+  if (!trace) return null;
+  const snapshot = trace.mark(stage, detail);
+  if (snapshot.marks.T11 && snapshot.marks.T12) return finalizeScorerSaveLatency(trace, "completed");
+  return snapshot;
+}
+
+function finalizeScorerSaveLatency(trace, status = "completed", detail = {}) {
+  if (!trace || finalizedScorerSaveLatencyTraces.has(trace)) return trace?.snapshot?.() || null;
+  finalizedScorerSaveLatencyTraces.add(trace);
+  const snapshot = trace.finish(status, detail);
+  if (status === "completed") {
+    scorerSaveLatencySamples.push(snapshot);
+    if (scorerSaveLatencySamples.length > 50) scorerSaveLatencySamples.shift();
+  }
+  console.info("[scorer-save-latency-001] trace", JSON.stringify(snapshot));
+  if (status === "completed") {
+    console.info("[scorer-save-latency-001] summary", JSON.stringify(summarizeScorerSaveLatency(scorerSaveLatencySamples)));
+  }
+  return snapshot;
+}
 let lastRemoteAppStateAt = 0;
 let lastRemoteTournamentStateAt = 0;
 let lastTournamentStatePublishAt = 0;
@@ -803,6 +849,11 @@ let firebaseAccess = {
   active: false
 };
 let firebaseUsers = [];
+let ruleProfileLifecycleAdminState = {
+  loading: false,
+  error: "",
+  snapshot: null
+};
 let lastFirebaseError = "";
 let lastSyncError = "";
 let prepareState = readPrepareState();
@@ -1837,6 +1888,57 @@ function setScoreSaveStatus(next = {}) {
       ? next.projectionId
       : next.state === "saving" ? "" : lastScoreSaveStatus.projectionId
   };
+  updateScoreSaveStatusDom();
+}
+
+function updateScoreSaveStatusDom() {
+  const container = document.querySelector(".cp-bottom-sync");
+  if (!container) return;
+  container.classList.remove("connected", "saving", "syncing", "saved", "warning", "error");
+  container.classList.add(lastScoreSaveStatus.state || "connected");
+  const label = container.querySelector("strong");
+  const detail = container.querySelector("em");
+  if (label) label.textContent = lastScoreSaveStatus.label || "Conectado";
+  if (detail) detail.textContent = lastScoreSaveStatus.detail || "";
+}
+
+function setOfficialPublishButtonBusy(isBusy) {
+  const button = document.querySelector('[data-action="next-score"]');
+  if (!button) return;
+  button.disabled = Boolean(isBusy);
+  button.setAttribute("aria-busy", isBusy ? "true" : "false");
+}
+
+function settleOfficialScoreBackgroundPublication(settlement = {}, scoreId = "") {
+  const sameScore = !lastScoreSaveStatus.scoreId || lastScoreSaveStatus.scoreId === scoreId;
+  if (settlement.ok) {
+    if (sameScore && lastScoreSaveStatus.state !== "saving") {
+      setScoreSaveStatus({
+        state: "saved",
+        label: "Guardado ✓",
+        detail: `Sincronización remota completa ${formatScoreSaveTime(Date.now())}`,
+        savedAtMs: Date.now(),
+        scoreId,
+        projectionId: settlement.projectionId || ""
+      });
+    }
+    void refreshPublicProjectionRecoverySnapshot({ renderAfter: false });
+    return;
+  }
+  const reason = settlement.reason || settlement.publicSnapshot?.reason || "projection-background-failed";
+  setLastFirebaseError("public-snapshot-sync-failed", reason);
+  if (sameScore && lastScoreSaveStatus.state !== "saving") {
+    setScoreSaveStatus({
+      state: "warning",
+      label: "Pendiente de sincronizar",
+      detail: "El score oficial está guardado; Recovery reintentará la proyección pública.",
+      savedAtMs: Date.now(),
+      scoreId,
+      projectionId: settlement.projectionId || ""
+    });
+  }
+  schedulePublicProjectionRecovery(1500);
+  void refreshPublicProjectionRecoverySnapshot({ renderAfter: false });
 }
 
 function resetScoreSaveStatusForDraft() {
@@ -3899,8 +4001,123 @@ function renderDashboard() {
           ${charreadas.length ? renderCharreadasSummaryList(charreadas) : html`<div class="empty">Crea una charreada para iniciar el programa.</div>`}
         </div>
       </article>
+
+      ${firebaseAccess.platformAdmin === true ? renderRuleProfileLifecycleAdmin() : ""}
     </section>
   `;
+}
+
+function renderRuleProfileLifecycleAdmin() {
+  const snapshot = ruleProfileLifecycleAdminState.snapshot;
+  const transition = snapshot?.status === "draft"
+    ? "MARK_READY"
+    : snapshot?.status === "ready"
+      ? "ACTIVATE"
+      : "";
+  return html`
+    <article class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Perfil reglamentario productivo</h2>
+          <p class="card-subtitle">Autoridad global FMCH_2026_LIBRE 0.6.0.</p>
+        </div>
+        <button class="button" data-action="refresh-rule-profile-lifecycle" ${ruleProfileLifecycleAdminState.loading ? "disabled" : ""}>Consultar</button>
+      </div>
+      <div class="card-body">
+        ${ruleProfileLifecycleAdminState.error ? html`<p class="pill red">${escapeHTML(ruleProfileLifecycleAdminState.error)}</p>` : ""}
+        ${snapshot ? html`
+          <div class="quick-team-list">
+            <span class="pill blue">Estado ${escapeHTML(snapshot.status)}</span>
+            <span class="pill">Revisión ${escapeHTML(snapshot.revision)}</span>
+            <span class="pill green">Certificación ${escapeHTML(snapshot.certification?.verdict || "")}</span>
+            <span class="pill">P0 ${escapeHTML(snapshot.certification?.remainingP0 ?? "")}</span>
+          </div>
+          <p class="card-subtitle">Fingerprint ${escapeHTML(snapshot.fingerprint || "")}</p>
+          ${transition ? html`
+            <button class="button primary" data-action="transition-rule-profile-lifecycle" data-transition="${transition}">
+              ${transition === "MARK_READY" ? "Marcar READY" : "Activar perfil"}
+            </button>
+          ` : ""}
+          <div class="form-grid">
+            <div class="wide">
+              <label>Torneo para asignación explícita</label>
+              <input id="rule-profile-assignment-tournament-id" placeholder="torneo_...">
+            </div>
+          </div>
+          <button class="button" data-action="assign-tournament-rule-profile">Asignar FMCH al torneo</button>
+        ` : html`<p class="card-subtitle">Consulta el estado canónico antes de operar.</p>`}
+      </div>
+    </article>
+  `;
+}
+
+async function refreshRuleProfileLifecycleAdmin() {
+  if (firebaseAccess.platformAdmin !== true || ruleProfileLifecycleAdminState.loading) return;
+  ruleProfileLifecycleAdminState.loading = true;
+  ruleProfileLifecycleAdminState.error = "";
+  render();
+  const result = await getFirebaseRuleProfileLifecycle("FMCH_2026_LIBRE", "0.6.0");
+  ruleProfileLifecycleAdminState.loading = false;
+  if (!result.ok) {
+    ruleProfileLifecycleAdminState.error = result.reason || "No se pudo leer el lifecycle.";
+  } else {
+    ruleProfileLifecycleAdminState.snapshot = result;
+  }
+  render();
+}
+
+async function transitionRuleProfileLifecycleAdmin(transition) {
+  if (firebaseAccess.platformAdmin !== true) return;
+  const snapshot = ruleProfileLifecycleAdminState.snapshot;
+  if (!snapshot || !["MARK_READY", "ACTIVATE"].includes(transition)) return;
+  const label = transition === "MARK_READY" ? "DRAFT → READY" : "READY → ACTIVE";
+  if (!window.confirm(`Ejecutar ${label} para FMCH_2026_LIBRE 0.6.0?`)) return;
+  const result = await transitionFirebaseRuleProfileLifecycle({
+    profileId: snapshot.profileId,
+    version: snapshot.version,
+    requestedTransition: transition,
+    expectedRevision: snapshot.revision,
+    idempotencyKey: `fmch-2026-go-live-${transition.toLowerCase()}-${snapshot.revision}-${firebaseAccess.uid}`,
+    effectiveFrom: transition === "MARK_READY" ? snapshot.readAt : null,
+    reason: "CHARROPRO-FMCH-2026-PRODUCTION-GLOBAL-GO-LIVE-001"
+  });
+  if (!result.ok) {
+    ruleProfileLifecycleAdminState.error = result.reason || `${label} falló.`;
+    render();
+    return;
+  }
+  showToast(`${label} confirmado.`);
+  await refreshRuleProfileLifecycleAdmin();
+}
+
+async function assignTournamentRuleProfileAdmin() {
+  if (firebaseAccess.platformAdmin !== true) return;
+  const tournamentId = document.getElementById("rule-profile-assignment-tournament-id")?.value.trim() || "";
+  const tournament = state.tournaments.find((item) => item.id === tournamentId);
+  if (!tournament) {
+    showToast("Abre primero el torneo que deseas asignar.");
+    return;
+  }
+  if (!window.confirm(`Asignar FMCH_2026_LIBRE 0.6.0 a ${tournament.name}?`)) return;
+  const result = await assignFirebaseTournamentRuleProfile({
+    tournamentId,
+    profileId: "FMCH_2026_LIBRE",
+    version: "0.6.0",
+    expectedRevision: Number(tournament.ruleProfileAssignmentRevision || 0),
+    idempotencyKey: `fmch-assignment-${tournamentId}-${Number(tournament.ruleProfileAssignmentRevision || 0)}`,
+    source: "explicit",
+    reason: "CHARROPRO-FMCH-2026-PRODUCTION-GLOBAL-GO-LIVE-001",
+    tenantId: tournament.tenantId || "",
+    organizationId: tournament.organizationId || ""
+  });
+  if (!result.ok) {
+    showToast(`Asignación bloqueada: ${result.reason}`);
+    return;
+  }
+  applyRuleProfileAssignmentResult(tournament, result.assignment);
+  saveState({ silent: true });
+  showToast("Perfil FMCH asignado por autoridad canónica.");
+  render();
 }
 
 function renderLeaderboardMini(leaderboard, labels = getEntityLabels()) {
@@ -10560,6 +10777,14 @@ function showTournamentModal() {
             `).join("")}
           </select>
         </div>
+        <div>
+          <label>Categoria reglamentaria</label>
+          <select name="category">
+            ${TEAM_CATEGORIES.map((category) => html`
+              <option value="${escapeHTML(category)}" ${category === "Libre" ? "selected" : ""}>${escapeHTML(category)}</option>
+            `).join("")}
+          </select>
+        </div>
         <div class="wide">
           <label>Tipo de torneo</label>
           <div class="tournament-type-grid">
@@ -11024,6 +11249,9 @@ function handleAction(action, target) {
     "edit-user-profile": () => showUserProfileModal(target.dataset.uid),
     "save-user-profile": saveUserProfile,
     "deactivate-user-profile": () => toggleUserProfileActive(target.dataset.uid),
+    "refresh-rule-profile-lifecycle": refreshRuleProfileLifecycleAdmin,
+    "transition-rule-profile-lifecycle": () => transitionRuleProfileLifecycleAdmin(target.dataset.transition),
+    "assign-tournament-rule-profile": assignTournamentRuleProfileAdmin,
     "save-stat-history": saveStatHistory,
     "test-sync": testSync,
     "publish-live-state": publishLiveState,
@@ -11507,15 +11735,16 @@ async function saveStatHistory() {
   render();
 }
 
-function saveTournament() {
+async function saveTournament() {
   const form = document.getElementById("tournament-form");
   if (!form.reportValidity()) return;
   const data = Object.fromEntries(new FormData(form));
   const id = uid("torneo");
 
-  state.tournaments.push(applyLocalFmch2026RuleProfileDefault({
+  const tournament = applyProductiveRuleProfilePolicy(applyLocalFmch2026RuleProfileDefault({
     id,
     name: data.name.trim(),
+    category: data.category || "Libre",
     season: getSeasonFromInput(data.season || data.date),
     date: data.date,
     venue: data.venue.trim(),
@@ -11524,14 +11753,57 @@ function saveTournament() {
     individualAwardPlaces: 5,
     status: data.status || "preparacion"
   }, getFirebaseRuntimeDiagnostics()));
+  state.tournaments.push(tournament);
   state.activeTournamentId = id;
   state.activeCharreadaId = null;
   state.view = "dashboard";
   closeModal();
+  const liveConfigured = isFirebaseLiveConfigured();
+  if (liveConfigured) suppressNextSharedAppStatePublish = true;
   saveState();
-  scheduleFirebaseSync(100);
-	  render();
-	}
+  render();
+
+  if (!liveConfigured) return;
+  const published = await publishFirebaseTournamentState(id, state, getAccessActor());
+  if (!published.ok) {
+    showToast(`Torneo local creado; publicación pendiente: ${published.reason}`);
+    return;
+  }
+  setLocalTournamentVersion(id, published.version);
+  if (tournament.ruleProfilePolicyRequired !== true) return;
+
+  const policy = tournament.ruleProfilePolicy || {};
+  const assignment = await assignFirebaseTournamentRuleProfile({
+    tournamentId: id,
+    profileId: policy.profileId,
+    version: policy.version,
+    expectedRevision: 0,
+    idempotencyKey: `productive-default-${id}-0`,
+    source: "productive-default",
+    policyId: policy.policyId,
+    reason: "Default productivo canónico para torneo Libre",
+    tenantId: tournament.tenantId || "",
+    organizationId: tournament.organizationId || ""
+  });
+  if (!assignment.ok) {
+    showToast(`Torneo creado, pero el perfil reglamentario quedó bloqueado: ${assignment.reason}`);
+    return;
+  }
+  applyRuleProfileAssignmentResult(tournament, assignment.assignment);
+  saveState({ silent: true });
+  showToast("Torneo Libre creado con FMCH_2026_LIBRE 0.6.0.");
+  render();
+}
+
+function applyRuleProfileAssignmentResult(tournament, assignment) {
+  if (!tournament || !assignment) return;
+  tournament.ruleProfileId = assignment.profileId;
+  tournament.ruleProfileVersion = assignment.version;
+  tournament.ruleProfileStatus = assignment.status;
+  tournament.ruleProfileContentFingerprint = assignment.contentFingerprint;
+  tournament.ruleProfileAssignmentRevision = assignment.revision;
+  tournament.ruleProfileAssignment = assignment;
+}
 
 function selectRuleEditorSuerte(suerteId) {
   if (!suerteId) return;
@@ -13531,12 +13803,14 @@ function updatePublishedScoreErrorDiagnostics(tournamentId, result = {}) {
   saveFirebaseDiagnostics();
 }
 
-async function validateActiveCharreadaBeforePublish(tournamentId, scoreCharreadaId) {
+function validateActiveCharreadaBeforePublish(tournamentId, scoreCharreadaId) {
   const cleanTournamentId = String(tournamentId || "").trim();
   const cleanScoreCharreadaId = String(scoreCharreadaId || "").trim();
-  console.info("[publish-guard-c003] validando charreada activa", {
+  const localActiveCharreadaId = String(state.activeCharreadaId || "").trim();
+  console.info("[publish-guard-c003] validando contexto local previo a autoridad", {
     tournamentId: cleanTournamentId,
-    scoreCharreadaId: cleanScoreCharreadaId
+    scoreCharreadaId: cleanScoreCharreadaId,
+    activeCharreadaId: localActiveCharreadaId
   });
 
   if (!cleanTournamentId || !cleanScoreCharreadaId) {
@@ -13547,47 +13821,29 @@ async function validateActiveCharreadaBeforePublish(tournamentId, scoreCharreada
     return { ok: false, reason: "invalid-score-charreada", activeCharreadaId: "" };
   }
 
-  const remote = await readFirebaseActiveCharreadaSnapshot(cleanTournamentId);
-  console.info("[publish-guard-c003] respuesta remota", {
-    tournamentId: cleanTournamentId,
-    scoreCharreadaId: cleanScoreCharreadaId,
-    activeCharreadaId: remote.activeCharreadaId || "",
-    source: remote.source || "",
-    reason: remote.reason || ""
-  });
-
-  if (!remote.ok) {
-    console.warn("[publish-guard-c003] publicacion bloqueada", remote);
-    return {
-      ...remote,
-      ok: false,
-      scoreCharreadaId: cleanScoreCharreadaId
-    };
-  }
-
-  if (String(remote.activeCharreadaId || "") !== cleanScoreCharreadaId) {
+  if (localActiveCharreadaId && localActiveCharreadaId !== cleanScoreCharreadaId) {
     console.warn("[publish-guard-c003] charreada activa cambio", {
       tournamentId: cleanTournamentId,
       scoreCharreadaId: cleanScoreCharreadaId,
-      activeCharreadaId: remote.activeCharreadaId || ""
+      activeCharreadaId: localActiveCharreadaId
     });
     return {
       ok: false,
       reason: "active-charreada-changed",
       scoreCharreadaId: cleanScoreCharreadaId,
-      activeCharreadaId: remote.activeCharreadaId || ""
+      activeCharreadaId: localActiveCharreadaId
     };
   }
 
-  console.info("[publish-guard-c003] validacion ok", {
+  console.info("[publish-guard-c003] guard local ok; autoridad revalidara en transaccion", {
     tournamentId: cleanTournamentId,
     scoreCharreadaId: cleanScoreCharreadaId,
-    activeCharreadaId: remote.activeCharreadaId || ""
+    activeCharreadaId: localActiveCharreadaId
   });
   return {
     ok: true,
-    activeCharreadaId: remote.activeCharreadaId || "",
-    source: remote.source || ""
+    activeCharreadaId: localActiveCharreadaId,
+    source: "local-preflight-server-authoritative"
   };
 }
 
@@ -13615,7 +13871,7 @@ async function publishOfficialScoreForContext(context, options = {}) {
     return { ok: false, reason: "missing-score-data", missing };
   }
 
-  const guard = await validateActiveCharreadaBeforePublish(scoreNode.tournamentId, scoreNode.charreadaId);
+  const guard = validateActiveCharreadaBeforePublish(scoreNode.tournamentId, scoreNode.charreadaId);
   if (!guard.ok) {
     const message = getPublishGuardMessage(guard);
     setLastFirebaseError(guard.reason || "active-charreada-validation-failed", message);
@@ -13653,9 +13909,23 @@ async function publishOfficialScoreForContext(context, options = {}) {
     publishedScoreId: published.id || ""
   });
 
+  const backgroundPublication = {
+    returned: false,
+    settlement: null
+  };
   const result = await publishFirebaseOfficialScoreAtomic(scoreNode.tournamentId, scoreNode.id, scoreNode.payload, published, actor, {
-    livePayload: buildLivePayload({ includeOfficial: false })
+    livePayload: buildLivePayload({ includeOfficial: false }),
+    deferPublicProjection: true,
+    onTimingStage: (stage, detail) => markScorerSaveLatency(options.latencyTrace, stage, detail),
+    onBackgroundSettled: (settlement) => {
+      if (!backgroundPublication.returned) {
+        backgroundPublication.settlement = settlement;
+        return;
+      }
+      settleOfficialScoreBackgroundPublication(settlement, scoreNode.id);
+    }
   });
+  backgroundPublication.returned = true;
 
   if (!result.ok) {
     state.publishedScores = previousPublishedScores || [];
@@ -13686,6 +13956,32 @@ async function publishOfficialScoreForContext(context, options = {}) {
   );
 
   const savedAtMs = Date.now();
+  if (result.backgroundPending === true) {
+    setScoreSaveStatus({
+      state: "syncing",
+      label: "Sincronizando…",
+      detail: "Score oficial guardado; completando Portal Público en segundo plano.",
+      savedAtMs,
+      scoreId: scoreNode.id,
+      projectionId: result.projectionId || ""
+    });
+    logJudgeScore("score oficial guardado; sincronizacion secundaria en curso", {
+      scorePath: result.scorePath || "",
+      publishedPath: result.publishedPath || result.path || "",
+      auditPath: result.auditPath || "",
+      projectionId: result.projectionId || ""
+    });
+    if (backgroundPublication.settlement) {
+      settleOfficialScoreBackgroundPublication(backgroundPublication.settlement, scoreNode.id);
+    }
+    return {
+      ...result,
+      complete: false,
+      partialFailure: false,
+      published: committedPublished,
+      scoreId: scoreNode.id
+    };
+  }
   const publicSnapshotFailed = result.partialFailure === true || result.publicSnapshot?.ok === false;
   if (publicSnapshotFailed) {
     const publicFailureReason = result.publicSnapshot?.reason || "public-snapshot-sync-failed";
@@ -13900,7 +14196,10 @@ async function commitTernaAttemptAfterPublication(context, prepared, publishResu
   return { ...commit, timeAdditional, session: getOrCreateTernaSession(context) };
 }
 
-function continueOfficialScoreFlowAfterPublish(context = getCurrentContext()) {
+function continueOfficialScoreFlowAfterPublish(context = getCurrentContext(), latencyTrace = null) {
+  markScorerSaveLatency(latencyTrace, "T8", {
+    suerteId: String(context?.suerte?.id || "")
+  });
   suppressNextSharedAppStatePublish = true;
   if (activePendingResolutionId) {
     const resolved = state.pendingScoreReviews?.[activePendingResolutionId];
@@ -13909,10 +14208,13 @@ function continueOfficialScoreFlowAfterPublish(context = getCurrentContext()) {
       activePendingResolutionId = "";
       pendingReviewPanelMode = "";
       restoreScorerReturnContext(returnContext);
-      syncCurrentLiveState({ repeat: true });
       officialPublishInProgress = false;
       showToast("Pendiente resuelta. Regresaste al punto donde estabas calificando.");
+      markScorerSaveLatency(latencyTrace, "T9", { path: "pending-review-return" });
+      markScorerSaveLatency(latencyTrace, "T10", { path: "pending-review-return" });
       render();
+      markScorerSaveLatency(latencyTrace, "T11", { path: "pending-review-return" });
+      window.setTimeout(() => syncCurrentLiveState({ repeat: true }), 0);
       return;
     }
   }
@@ -13929,9 +14231,12 @@ function continueOfficialScoreFlowAfterPublish(context = getCurrentContext()) {
     stopTimer(true);
     advanceScoringPointer();
   }
-  syncCurrentLiveState({ repeat: true });
+  markScorerSaveLatency(latencyTrace, "T9", { path: "scoring-pointer" });
   officialPublishInProgress = false;
+  markScorerSaveLatency(latencyTrace, "T10", { path: "scoring-pointer" });
   render();
+  markScorerSaveLatency(latencyTrace, "T11", { path: "scoring-pointer" });
+  window.setTimeout(() => syncCurrentLiveState({ repeat: true }), 0);
 }
 
 function isColasContext(context = {}) {
@@ -14356,13 +14661,15 @@ function continueAfterBestColeadorModal() {
     return;
   }
   const summary = pendingBestColeadorModal;
+  const latencyTrace = pendingBestColeadorLatencyTrace;
   pendingBestColeadorModal = null;
+  pendingBestColeadorLatencyTrace = null;
   closeModal();
   console.info("[colas-001] best coleador modal closed", {
     scope: "charreada",
     winners: summary.winners?.map((entry) => entry.participantKey) || []
   });
-  continueOfficialScoreFlowAfterPublish();
+  continueOfficialScoreFlowAfterPublish(undefined, latencyTrace);
 }
 
 async function nextScore() {
@@ -14373,6 +14680,7 @@ async function nextScore() {
     return;
   }
   const context = getCurrentContext();
+  const latencyTrace = beginScorerSaveLatencyTrace(context);
   logJudgeScore("click Guardar y siguiente");
   if (!context) {
     setLastFirebaseError("missing-score-data", "Sin contexto de calificacion.");
@@ -14386,14 +14694,17 @@ async function nextScore() {
     logJudgeScore("error al guardar", { reason: "missing-score-data", missing: ["context"] });
     showToast("No se pudo guardar: faltan datos del score.");
     render({ preserveScoringScroll: true });
+    finalizeScorerSaveLatency(latencyTrace, "failed", { reason: "missing-context" });
     return;
   }
   if (isFmch2026ManganaSuerte(context.suerte?.id) && (context.attempt.manganaResult || "NOT_STARTED") === "NOT_STARTED") {
     showToast("Indica si la mangana fue lograda o no lograda antes de publicar.");
+    finalizeScorerSaveLatency(latencyTrace, "failed", { reason: "mangana-result-required" });
     return;
   }
   if (isFmch2026PasoSuerte(context.suerte?.id) && (context.attempt.pasoResult || "NOT_STARTED") === "NOT_STARTED") {
     showToast("Indica si el Paso fue logrado o no logrado antes de publicar.");
+    finalizeScorerSaveLatency(latencyTrace, "failed", { reason: "paso-result-required" });
     return;
   }
   if (activePendingResolutionId) {
@@ -14401,9 +14712,13 @@ async function nextScore() {
     if (!pendingDraftResult.ok) {
       showToast("No se pudo sincronizar el borrador pendiente. No se publicó.");
       render({ preserveScoringScroll: true });
+      finalizeScorerSaveLatency(latencyTrace, "failed", { reason: "pending-draft-sync-failed" });
       return;
     }
   }
+  markScorerSaveLatency(latencyTrace, "T1", {
+    suerteId: String(context.suerte?.id || "")
+  });
   officialPublishInProgress = true;
   setScoreSaveStatus({
     state: "saving",
@@ -14411,7 +14726,7 @@ async function nextScore() {
     detail: "Validando charreada activa...",
     scoreId: scoreKey(context.charreada.id, context.team.id, context.suerte.id)
   });
-  render({ preserveScoringScroll: true });
+  setOfficialPublishButtonBusy(true);
   let preparedTerna = null;
   try {
     if (context) {
@@ -14424,10 +14739,17 @@ async function nextScore() {
           ? "La Terna ya consumió sus cinco oportunidades."
           : "La oportunidad compartida cambió. Revisa la secuencia antes de publicar.");
         render({ preserveScoringScroll: true });
+        finalizeScorerSaveLatency(latencyTrace, "failed", { reason: preparedTerna.reason || "terna-prepare-failed" });
         return;
       }
+      markScorerSaveLatency(latencyTrace, "T2", {
+        terna: Boolean(preparedTerna.terna)
+      });
       markActiveScoringDraft(context);
       saveState({ silent: true });
+      markScorerSaveLatency(latencyTrace, "T3", {
+        localStateSaved: true
+      });
       const publicationContext = preparedTerna.terna
         ? {
             ...context,
@@ -14435,12 +14757,14 @@ async function nextScore() {
           }
         : context;
       const publishResult = await publishOfficialScoreForContext(publicationContext, {
-        attemptOverride: preparedTerna.terna ? publicationContext.attempt : null
+        attemptOverride: preparedTerna.terna ? publicationContext.attempt : null,
+        latencyTrace
       });
       if (!publishResult.ok) {
         rollbackTernaPublicationReservation(preparedTerna);
         officialPublishInProgress = false;
         render({ preserveScoringScroll: true });
+        finalizeScorerSaveLatency(latencyTrace, "failed", { reason: publishResult.reason || "publish-failed" });
         return;
       }
       const ternaCommit = await commitTernaAttemptAfterPublication(context, preparedTerna, publishResult);
@@ -14454,6 +14778,7 @@ async function nextScore() {
         });
         showToast("El score se publicó, pero la secuencia compartida de Terna requiere revisión.");
         render({ preserveScoringScroll: true });
+        finalizeScorerSaveLatency(latencyTrace, "partial", { reason: ternaCommit.reason || "terna-commit-failed" });
         return;
       }
       const pendingResolution = await completePendingResolutionAfterPublish(publishResult);
@@ -14467,8 +14792,12 @@ async function nextScore() {
         });
         showToast("El score se publicó, pero la pendiente requiere conciliación por concurrencia.");
         render({ preserveScoringScroll: true });
+        finalizeScorerSaveLatency(latencyTrace, "partial", { reason: pendingResolution.reason || "pending-review-conflict" });
         return;
       }
+      markScorerSaveLatency(latencyTrace, "T6", {
+        pendingReview: Boolean(activePendingResolutionId)
+      });
       if (firebaseAccess.role === ROLES.JUEZ) {
         console.info("[event-test] juez publico score", {
           tournamentId: context.tournament.id,
@@ -14483,9 +14812,15 @@ async function nextScore() {
       });
 
       releaseActiveScoringDraft(scoreKey(context.charreada.id, context.team.id, context.suerte.id));
+      markScorerSaveLatency(latencyTrace, "T7", {
+        localOfficialStateReconciled: true
+      });
     }
-    if (maybeShowBestColeadorModal(context)) return;
-    continueOfficialScoreFlowAfterPublish(context);
+    if (maybeShowBestColeadorModal(context)) {
+      pendingBestColeadorLatencyTrace = latencyTrace;
+      return;
+    }
+    continueOfficialScoreFlowAfterPublish(context, latencyTrace);
   } catch (error) {
     rollbackTernaPublicationReservation(preparedTerna);
     officialPublishInProgress = false;
@@ -14500,6 +14835,7 @@ async function nextScore() {
     console.error("[publish-atomic-c003] excepcion no controlada", error);
     showToast("No se pudo publicar la calificación oficial en CharroPro.");
     render({ preserveScoringScroll: true });
+    finalizeScorerSaveLatency(latencyTrace, "failed", { reason: "official-publish-exception" });
   }
 }
 

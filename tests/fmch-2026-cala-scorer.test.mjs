@@ -22,7 +22,7 @@ import {
 } from "../js/core/scoringAttempt.js";
 import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js";
 
-const RELEASE_ID = "20260820-production-release-candidate-001-v1";
+const RELEASE_ID = "20260822-scorer-save-next-latency-audit-001-v1";
 const publishedAt = "2026-08-08T18:00:00.000Z";
 
 assert.equal(FMCH_2026_CALA_RULEBOOK_VERSION, "fmch_2026_cala_0.2.0");

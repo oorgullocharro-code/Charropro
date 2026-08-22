@@ -54,14 +54,14 @@ import {
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260820-production-release-candidate-001-v1";
+} from "./pendingScoreReview.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260820-production-release-candidate-001-v1";
+} from "./timerRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -99,6 +99,14 @@ const AUDIT_PUBLISHED_SCORES_PATH = requireConfigurationValue("firebase.paths.au
 const PUBLIC_PROJECTION_OUTBOX_PATH = requireConfigurationValue("firebase.paths.projectionOutbox");
 const HISTORY_STATISTICS_PATH = requireConfigurationValue("firebase.paths.historyStatistics");
 const BROADCAST_STUDIO_SESSIONS_PATH = requireConfigurationValue("firebase.paths.broadcastStudioSessions");
+const RULE_PROFILE_ASSIGNMENT_FIELDS = new Set([
+  "ruleProfileId",
+  "ruleProfileVersion",
+  "ruleProfileStatus",
+  "ruleProfileContentFingerprint",
+  "ruleProfileAssignmentRevision",
+  "ruleProfileAssignment"
+]);
 const BROADCAST_TEMPORARY_ACCESS_TYPES = new Set(["program_main", "announcer_monitor"]);
 const PUBLIC_SNAPSHOT_VERSION = 1;
 const PUBLIC_SUERTES = [
@@ -789,6 +797,10 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       expectedRevision,
       idempotencyKey: operation.idempotencyKey
     });
+    notifyOfficialScoreTiming(options, "T4", {
+      tournamentId: cleanTournamentId,
+      scoreId: cleanScoreId
+    });
     const authorityResult = await callOfficialScoreAuthority({
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
@@ -800,6 +812,11 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       device: getOfficialScoreDevice(),
       livePayload
     }, options);
+    notifyOfficialScoreTiming(options, "T5", {
+      tournamentId: cleanTournamentId,
+      scoreId: cleanScoreId,
+      ok: Boolean(authorityResult?.ok)
+    });
     if (!authorityResult?.ok) {
       if (authorityResult?.conflict) clearOfficialScoreOperation(record.attemptKey);
       return {
@@ -832,40 +849,100 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       auditPath,
       livePath: options.livePayload ? livePath : ""
     };
-    const recovery = projectionId
-      ? await reconcileFirebasePublicProjectionOutbox(cleanTournamentId, actorRecord, {
+    const reconcileProjection = () => projectionId
+      ? reconcileFirebasePublicProjectionOutbox(cleanTournamentId, actorRecord, {
         projectionIds: [projectionId],
         manual: true,
         nowMs: now,
         jitter: options.jitter
       })
-      : { ok: false, reason: authorityResult.fanout?.reason || "official-score-fanout-pending", jobs: [] };
-    const projectionJob = recovery.jobs.find((job) => job.projectionId === projectionId) || {
+      : Promise.resolve({
+        ok: false,
+        reason: authorityResult.fanout?.reason || "official-score-fanout-pending",
+        jobs: []
+      });
+    if (options.deferPublicProjection === true) {
+      void reconcileProjection()
+        .then((recovery) => {
+          const settlement = buildOfficialScoreProjectionSettlement(recovery, projectionId);
+          notifyOfficialScoreTiming(options, "T12", {
+            tournamentId: cleanTournamentId,
+            scoreId: cleanScoreId,
+            projectionId,
+            ok: !settlement.partialFailure
+          });
+          notifyOfficialScoreBackgroundSettlement(options, {
+            ok: !settlement.partialFailure,
+            tournamentId: cleanTournamentId,
+            scoreId: cleanScoreId,
+            publishedScoreId,
+            projectionId,
+            projectionOutboxPath,
+            ...settlement
+          });
+        })
+        .catch((error) => {
+          const reason = normalizeFirebaseFailureReason(error);
+          notifyOfficialScoreTiming(options, "T12", {
+            tournamentId: cleanTournamentId,
+            scoreId: cleanScoreId,
+            projectionId,
+            ok: false
+          });
+          notifyOfficialScoreBackgroundSettlement(options, {
+            ok: false,
+            tournamentId: cleanTournamentId,
+            scoreId: cleanScoreId,
+            publishedScoreId,
+            projectionId,
+            projectionOutboxPath,
+            partialFailure: true,
+            reason,
+            publicSnapshot: normalizePublicSnapshotPublicationResult({ ok: false, reason })
+          });
+        });
+      return {
+        ok: true,
+        complete: false,
+        partialFailure: false,
+        backgroundPending: true,
+        privateWrite,
+        publicSnapshot: normalizePublicSnapshotPublicationResult({
+          ok: false,
+          pending: true,
+          reason: "projection-background-pending"
+        }),
+        projectionJob: {
+          projectionId,
+          status: "PENDING",
+          ok: false,
+          reason: "projection-background-pending"
+        },
+        projectionId,
+        projectionOutboxPath,
+        id: publishedScoreId,
+        published: canonicalRecord,
+        revision: Number(canonicalRecord?.revision || authorityResult.revision || 0),
+        idempotent: Boolean(authorityResult.idempotent),
+        scorePath,
+        path: publishedPath,
+        publishedPath,
+        auditPath,
+        livePath: privateWrite.livePath
+      };
+    }
+    const recovery = await reconcileProjection();
+    notifyOfficialScoreTiming(options, "T12", {
+      tournamentId: cleanTournamentId,
+      scoreId: cleanScoreId,
       projectionId,
-      status: "PENDING",
-      ok: false,
-      reason: recovery.reason || "projection-pending"
-    };
-    const publicSnapshot = normalizePublicSnapshotPublicationResult(
-      projectionJob.publicSnapshot || {
-        ok: [
-          PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
-          PUBLIC_PROJECTION_STATUSES.VERIFIED
-        ].includes(projectionJob.status),
-        clientConfirmed: projectionJob.status === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
-        verified: projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED,
-        authoritativelyVerified: projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED,
-        reason: projectionJob.reason || recovery.reason || "projection-pending"
-      }
-    );
-    const projectionConfirmed = (
-      projectionJob.status === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED
-      && publicSnapshot.clientConfirmed === true
-    ) || (
-      projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED
-      && publicSnapshot.verified === true
-    );
-    const partialFailure = !projectionConfirmed;
+      ok: Boolean(recovery?.ok)
+    });
+    const {
+      projectionJob,
+      publicSnapshot,
+      partialFailure
+    } = buildOfficialScoreProjectionSettlement(recovery, projectionId);
     console.info("[official-score-concurrency-001] autoridad confirmada", {
       tournamentId: cleanTournamentId,
       scoreId: cleanScoreId,
@@ -940,6 +1017,66 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
       detail: normalizeErrorDetail({ error, authority: authorityFailure })
     };
   }
+}
+
+function notifyOfficialScoreTiming(options = {}, stage = "", detail = {}) {
+  if (typeof options.onTimingStage !== "function") return;
+  try {
+    options.onTimingStage(stage, detail);
+  } catch (error) {
+    console.warn("[scorer-save-latency-001] timing callback ignored", {
+      stage,
+      reason: String(error?.message || error || "timing-callback-failed").slice(0, 160)
+    });
+  }
+}
+
+function notifyOfficialScoreBackgroundSettlement(options = {}, settlement = {}) {
+  if (typeof options.onBackgroundSettled !== "function") return;
+  try {
+    options.onBackgroundSettled(settlement);
+  } catch (error) {
+    console.warn("[scorer-save-latency-001] background callback ignored", {
+      reason: String(error?.message || error || "background-callback-failed").slice(0, 160)
+    });
+  }
+}
+
+function buildOfficialScoreProjectionSettlement(recovery = {}, projectionId = "") {
+  const projectionJob = (Array.isArray(recovery.jobs) ? recovery.jobs : [])
+    .find((job) => job.projectionId === projectionId) || {
+      projectionId,
+      status: "PENDING",
+      ok: false,
+      reason: recovery.reason || "projection-pending"
+    };
+  const publicSnapshot = normalizePublicSnapshotPublicationResult(
+    projectionJob.publicSnapshot || {
+      ok: [
+        PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+        PUBLIC_PROJECTION_STATUSES.VERIFIED
+      ].includes(projectionJob.status),
+      clientConfirmed: projectionJob.status === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+      verified: projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED,
+      authoritativelyVerified: projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED,
+      reason: projectionJob.reason || recovery.reason || "projection-pending"
+    }
+  );
+  const projectionConfirmed = (
+    projectionJob.status === PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED
+    && publicSnapshot.clientConfirmed === true
+  ) || (
+    projectionJob.status === PUBLIC_PROJECTION_STATUSES.VERIFIED
+    && publicSnapshot.verified === true
+  );
+  return {
+    recovery,
+    projectionJob,
+    publicSnapshot,
+    projectionConfirmed,
+    partialFailure: !projectionConfirmed,
+    reason: projectionConfirmed ? "" : publicSnapshot.reason || recovery.reason || "projection-pending"
+  };
 }
 
 async function callOfficialScoreAuthority(payload, options = {}) {
@@ -4232,6 +4369,72 @@ export async function signOutAuditUser() {
   return signOutFirebaseUser();
 }
 
+export async function getFirebaseRuleProfileLifecycle(profileId, version, context = {}) {
+  try {
+    const callable = httpsCallable(getFirebaseFunctions(), "getCharroProRuleProfileLifecycle");
+    const result = await callable(cleanUndefined({
+      profileId: String(profileId || "").trim(),
+      version: String(version || "").trim(),
+      tenantId: String(context.tenantId || "").trim(),
+      organizationId: String(context.organizationId || "").trim()
+    }));
+    return { ok: true, ...result.data };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error?.details?.reason || error?.code || error?.message || "functions-error"
+    };
+  }
+}
+
+export async function transitionFirebaseRuleProfileLifecycle(request = {}) {
+  try {
+    const callable = httpsCallable(getFirebaseFunctions(), "transitionCharroProRuleProfileLifecycle");
+    const result = await callable(cleanUndefined({
+      profileId: String(request.profileId || "").trim(),
+      version: String(request.version || "").trim(),
+      requestedTransition: String(request.requestedTransition || "").trim(),
+      expectedRevision: Number(request.expectedRevision),
+      idempotencyKey: String(request.idempotencyKey || "").trim(),
+      effectiveFrom: request.effectiveFrom || null,
+      effectiveTo: request.effectiveTo || null,
+      reason: String(request.reason || "").trim(),
+      tenantId: String(request.tenantId || "").trim(),
+      organizationId: String(request.organizationId || "").trim()
+    }));
+    return { ok: true, ...result.data };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error?.details?.reason || error?.code || error?.message || "functions-error"
+    };
+  }
+}
+
+export async function assignFirebaseTournamentRuleProfile(request = {}) {
+  try {
+    const callable = httpsCallable(getFirebaseFunctions(), "assignCharroProTournamentRuleProfile");
+    const result = await callable(cleanUndefined({
+      tournamentId: String(request.tournamentId || "").trim(),
+      profileId: String(request.profileId || "").trim(),
+      version: String(request.version || "").trim(),
+      expectedRevision: Number(request.expectedRevision),
+      idempotencyKey: String(request.idempotencyKey || "").trim(),
+      source: String(request.source || "explicit").trim(),
+      policyId: String(request.policyId || "").trim(),
+      reason: String(request.reason || "").trim(),
+      tenantId: String(request.tenantId || "").trim(),
+      organizationId: String(request.organizationId || "").trim()
+    }));
+    return { ok: true, ...result.data };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error?.details?.reason || error?.code || error?.message || "functions-error"
+    };
+  }
+}
+
 export async function readFirebasePreparationSnapshot(accessProfile = {}) {
   if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase" };
 
@@ -4525,8 +4728,14 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
       ...nonScoreRecord,
       meta
     });
+    const payloadInfo = payload.info || {};
+    const authoritativeInfo = {
+      ...omitRuleProfileAssignmentFields(payloadInfo),
+      ...pickRuleProfileAssignmentFields(remoteRecord.info || {})
+    };
     const authoritativeRecord = cleanUndefined({
       ...payload,
+      info: authoritativeInfo,
       meta: {
         ...meta,
         lastPublishedScore: remote.lastPublishedScore || null
@@ -4534,13 +4743,25 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
       scores: remoteRecord.scores || {},
       publishedScores: remoteRecord.publishedScores || {}
     });
-    const { meta: payloadMeta, ...statePayload } = payload;
+    const { meta: payloadMeta, info: _payloadInfo, ...statePayload } = payload;
     for (const [key, value] of Object.entries(payloadMeta || {})) {
       statePayload[`meta/${key}`] = value;
     }
+    const remoteInfo = remoteRecord.info || {};
+    const clientInfo = omitRuleProfileAssignmentFields(payloadInfo);
+    const clientInfoKeys = new Set([
+      ...Object.keys(omitRuleProfileAssignmentFields(remoteInfo)),
+      ...Object.keys(clientInfo)
+    ]);
+    for (const key of clientInfoKeys) {
+      statePayload[`info/${key}`] = Object.hasOwn(clientInfo, key) ? clientInfo[key] : null;
+    }
 
     await update(ref(getFirebaseDatabase(), path), statePayload);
-    await update(ref(getFirebaseDatabase(), `${TOURNAMENT_INDEX_PATH}/${cleanTournamentId}`), compactTournamentIndex(authoritativeRecord));
+    await update(
+      ref(getFirebaseDatabase(), `${TOURNAMENT_INDEX_PATH}/${cleanTournamentId}`),
+      omitRuleProfileAssignmentFields(compactTournamentIndex(authoritativeRecord))
+    );
     const publicSnapshot = await publishPublicTournamentSnapshot(cleanTournamentId, authoritativeRecord, { source: "tournamentState" });
     return { ok: true, version, publicSnapshot, scoreWriteGuard };
   } catch (error) {
@@ -4551,6 +4772,18 @@ export async function publishFirebaseTournamentState(tournamentId, appState = {}
     });
     return { ok: false, reason: error.message };
   }
+}
+
+function omitRuleProfileAssignmentFields(value = {}) {
+  return Object.fromEntries(
+    Object.entries(value || {}).filter(([key]) => !RULE_PROFILE_ASSIGNMENT_FIELDS.has(key))
+  );
+}
+
+function pickRuleProfileAssignmentFields(value = {}) {
+  return Object.fromEntries(
+    Object.entries(value || {}).filter(([key]) => RULE_PROFILE_ASSIGNMENT_FIELDS.has(key))
+  );
 }
 
 export function subscribeFirebaseTournamentState(tournamentId, callback) {
@@ -4764,8 +4997,11 @@ function getFirebaseAuth() {
 
 async function resolveAuthenticatedProjectionActor(actor = {}) {
   const auth = getFirebaseAuth();
-  if (typeof auth.authStateReady === "function") await auth.authStateReady();
-  const uid = String(auth.currentUser?.uid || "").trim();
+  let uid = String(auth.currentUser?.uid || "").trim();
+  if (!uid && typeof auth.authStateReady === "function") {
+    await auth.authStateReady();
+    uid = String(auth.currentUser?.uid || "").trim();
+  }
   if (!uid) return null;
   return sanitizeProjectionActor({
     ...actor,
