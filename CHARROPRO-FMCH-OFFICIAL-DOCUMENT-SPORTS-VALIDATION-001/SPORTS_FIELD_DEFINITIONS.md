@@ -1,5 +1,11 @@
 # Definiciones deportivas por FieldID
 
+> Baseline historico: `PENDING_VALIDATION` y `SPORTS_INFERENCE` describen el
+> conocimiento disponible al emitir este documento. La certificacion deportiva
+> posterior cerro los P0 sin cambiar valores. La matriz vigente reconciliada se
+> publica en
+> `CHARROPRO-FMCH-OFFICIAL-FORMAT-CERTIFICATION-STATE-RECONCILIATION-001/`.
+
 ## Estado
 
 Este catálogo cubre los 239 FieldID sin alterar su identidad ni orden visual. Una definición solo se presenta como regla oficial cuando la evidencia cita artículo aplicable. SPORTS_INFERENCE y PENDING_VALIDATION bloquean la implementación.

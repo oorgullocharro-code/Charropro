@@ -1,12 +1,20 @@
 # FMCH Official Document Data Mapping
 
+> Nota de vigencia: este dictamen es una fotografia anterior a la certificacion
+> deportiva final. Sus 239 identidades permanecen validas, pero los bloqueos
+> deportivos fueron reconciliados posteriormente. Consultar
+> `CHARROPRO-FMCH-OFFICIAL-FORMAT-CERTIFICATION-STATE-RECONCILIATION-001/`.
+> El estado vigente para el perfil documental 2024-2028 es `READY`: snapshot
+> inmutable, golden XLSX, assets embebidos y cero revisiones.
+
 ## Dictamen del mapeo
 
 **APROBADO como auditoria documental.**
 
 Los 239 campos oficiales tienen un registro 1:1 en FIELD_MAPPING.json. La evidencia distingue captura, persistencia, calculo, auditoria y exportacion.
 
-**Producto: NO LISTO para reproducir exactamente la hoja FMCH de forma historica, auditable y repetible.**
+**Estado historico al emitir esta auditoria: producto no listo. Este dictamen fue
+superado por la reconciliacion y certificacion posterior indicada arriba.**
 
 ## Resultado medido
 

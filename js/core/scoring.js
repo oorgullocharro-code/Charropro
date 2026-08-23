@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260822-scorer-save-next-latency-audit-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+} from "./state.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;
@@ -376,6 +376,8 @@ export function applyPuntaCalculation(attempt) {
   attempt.puntaMetrosCalificados = punta.metrosCalificados;
   attempt.puntaCentimetros = punta.centimetros;
   attempt.puntaPiquetes = punta.tiempos;
+  attempt.puntaPuntosDistancia = punta.puntosDistancia;
+  attempt.puntaPuntosTiempos = punta.puntosTiempos;
   attempt.puntaPts = punta.total;
 }
 

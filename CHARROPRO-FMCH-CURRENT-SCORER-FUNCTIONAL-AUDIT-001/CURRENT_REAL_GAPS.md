@@ -1,5 +1,12 @@
 # Brechas reales actuales
 
+> Nota de reconciliacion: las brechas deportivas de Cala, cuarta fila de
+> Coleadero, Suma Control y contra mascara que aparecen mas abajo reflejan el
+> momento de esta auditoria. La certificacion posterior las resolvio sin cambiar
+> valores deportivos. Las cuatro revisiones documentales y la insercion de
+> assets XLSX quedaron cerradas posteriormente para
+> `FMCH_TEAM_SHEET_2024_2028 1.0.0`.
+
 ## Reanudacion de la auditoria
 
 La evidencia visual pendiente se completo sobre `main` en

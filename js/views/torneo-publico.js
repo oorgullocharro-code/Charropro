@@ -1,3 +1,3 @@
-import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 
 bootstrapPublicPortal();

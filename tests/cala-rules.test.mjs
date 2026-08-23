@@ -28,6 +28,20 @@ puntaCases.forEach(([metros, tiempos, expected]) => {
   );
 });
 
+for (let centimeters = 0; centimeters <= 9000; centimeters += 1) {
+  for (let times = 1; times <= 5; times += 1) {
+    const breakdown = calculatePuntaBreakdown({
+      puntaMetros: centimeters / 100,
+      puntaPiquetes: times
+    });
+    assert.equal(
+      breakdown.puntosDistancia + breakdown.puntosTiempos,
+      breakdown.total,
+      `P + T at ${centimeters / 100}m / ${times} tiempos`
+    );
+  }
+}
+
 assert.equal(FMCH_2026_CALA_INFR_RULES.length, 43);
 assert.equal(FMCH_2026_CALA_DESC_RULES.length, 36);
 assert.deepEqual(calculatePuntaBreakdown({ puntaMetros: 8.51, puntaPiquetes: 1 }), {

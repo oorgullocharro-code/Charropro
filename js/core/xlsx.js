@@ -10,11 +10,29 @@ export function createXlsxBlob(workbook) {
 }
 
 function buildWorkbookFiles(workbook) {
-  const sheets = workbook.sheets.map((sheet, index) => ({
-    ...sheet,
-    id: index + 1,
-    file: `xl/worksheets/sheet${index + 1}.xml`
-  }));
+  let imageSequence = 0;
+  const sheets = workbook.sheets.map((sheet, index) => {
+    const id = index + 1;
+    const images = (sheet.images || []).map((image, imageIndex) => {
+      imageSequence += 1;
+      const extension = normalizeImageExtension(image.extension || image.mimeType);
+      const fileStem = safeMediaName(image.name || `image-${imageSequence}`);
+      return {
+        ...image,
+        id: imageIndex + 1,
+        relationshipId: `rId${imageIndex + 1}`,
+        mediaFile: `xl/media/${fileStem}-sheet${id}-${imageSequence}.${extension}`,
+        extension
+      };
+    });
+    return {
+      ...sheet,
+      id,
+      images,
+      file: `xl/worksheets/sheet${id}.xml`,
+      drawingFile: images.length ? `xl/drawings/drawing${id}.xml` : ""
+    };
+  });
 
   const files = [
     {
@@ -32,7 +50,7 @@ function buildWorkbookFiles(workbook) {
     },
     {
       path: "docProps/core.xml",
-      content: buildCoreProps()
+      content: buildCoreProps(workbook.generatedAt)
     },
     {
       path: "docProps/app.xml",
@@ -50,30 +68,30 @@ function buildWorkbookFiles(workbook) {
       path: "xl/styles.xml",
       content: buildStyles()
     },
-    ...sheets.map((sheet) => ({
-      path: sheet.file,
-      content: buildWorksheet(sheet)
-    }))
+    ...sheets.flatMap((sheet) => buildSheetFiles(sheet))
   ];
 
   return files;
 }
 
 function buildContentTypes(sheets) {
+  const hasPng = sheets.some((sheet) => sheet.images.some((image) => image.extension === "png"));
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
+  ${hasPng ? '<Default Extension="png" ContentType="image/png"/>' : ""}
   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
   <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
   <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
   ${sheets.map((sheet) => `<Override PartName="/${sheet.file}" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("\n  ")}
+  ${sheets.filter((sheet) => sheet.drawingFile).map((sheet) => `<Override PartName="/${sheet.drawingFile}" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`).join("\n  ")}
 </Types>`;
 }
 
-function buildCoreProps() {
-  const now = new Date().toISOString();
+function buildCoreProps(generatedAt) {
+  const now = normalizeIso(generatedAt) || new Date().toISOString();
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <dc:creator>CharroPro</dc:creator>
@@ -125,50 +143,84 @@ function buildWorkbookRels(sheets) {
 function buildStyles() {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="${XML_NS}">
-  <fonts count="7">
-    <font><sz val="10"/><name val="Arial"/></font>
-    <font><b/><sz val="14"/><color rgb="FFFFFFFF"/><name val="Arial"/></font>
+  <fonts count="12">
+    <font><sz val="7.5"/><name val="Arial"/></font>
+    <font><b/><sz val="15"/><color rgb="FF08752A"/><name val="Arial"/></font>
+    <font><b/><sz val="9"/><color rgb="FF000000"/><name val="Arial"/></font>
+    <font><b/><sz val="8"/><color rgb="FFE31B23"/><name val="Arial"/></font>
+    <font><b/><sz val="8"/><color rgb="FF000000"/><name val="Arial"/></font>
+    <font><sz val="7"/><color rgb="FF000000"/><name val="Arial"/></font>
+    <font><b/><sz val="6.5"/><color rgb="FF000000"/><name val="Arial"/></font>
     <font><b/><sz val="10"/><color rgb="FF000000"/><name val="Arial"/></font>
-    <font><b/><sz val="10"/><color rgb="FFCC0000"/><name val="Arial"/></font>
-    <font><b/><sz val="11"/><color rgb="FF000000"/><name val="Arial"/></font>
-    <font><b/><sz val="11"/><color rgb="FF0A7A20"/><name val="Arial"/></font>
-    <font><b/><sz val="16"/><color rgb="FF0A7A20"/><name val="Arial"/></font>
+    <font><b/><sz val="8"/><color rgb="FF08752A"/><name val="Arial"/></font>
+    <font><b/><sz val="11"/><color rgb="FFE31B23"/><name val="Arial"/></font>
+    <font><b/><sz val="12"/><color rgb="FF000000"/><name val="Arial"/></font>
+    <font><b/><sz val="5.5"/><color rgb="FFE31B23"/><name val="Arial"/></font>
   </fonts>
-  <fills count="8">
+  <fills count="7">
     <fill><patternFill patternType="none"/></fill>
     <fill><patternFill patternType="gray125"/></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FF111111"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFD9D9D9"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFF3F4F6"/><bgColor indexed="64"/></patternFill></fill>
     <fill><patternFill patternType="solid"><fgColor rgb="FFFFFFFF"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFE5E7EB"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFD9D9D9"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFE7E6E6"/><bgColor indexed="64"/></patternFill></fill>
     <fill><patternFill patternType="solid"><fgColor rgb="FFFFFF00"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFBFBFBF"/><bgColor indexed="64"/></patternFill></fill>
   </fills>
-  <borders count="2">
+  <borders count="5">
     <border><left/><right/><top/><bottom/><diagonal/></border>
     <border>
-      <left style="thin"><color rgb="FF9CA3AF"/></left>
-      <right style="thin"><color rgb="FF9CA3AF"/></right>
-      <top style="thin"><color rgb="FF9CA3AF"/></top>
-      <bottom style="thin"><color rgb="FF9CA3AF"/></bottom>
+      <left style="thin"><color rgb="FF000000"/></left>
+      <right style="thin"><color rgb="FF000000"/></right>
+      <top style="thin"><color rgb="FF000000"/></top>
+      <bottom style="thin"><color rgb="FF000000"/></bottom>
+      <diagonal/>
+    </border>
+    <border>
+      <left style="medium"><color rgb="FF000000"/></left>
+      <right style="medium"><color rgb="FF000000"/></right>
+      <top style="medium"><color rgb="FF000000"/></top>
+      <bottom style="medium"><color rgb="FF000000"/></bottom>
+      <diagonal/>
+    </border>
+    <border>
+      <left/><right/><top/>
+      <bottom style="medium"><color rgb="FF000000"/></bottom>
+      <diagonal/>
+    </border>
+    <border>
+      <left style="dotted"><color rgb="FF000000"/></left>
+      <right style="dotted"><color rgb="FF000000"/></right>
+      <top style="dotted"><color rgb="FF000000"/></top>
+      <bottom style="dotted"><color rgb="FF000000"/></bottom>
       <diagonal/>
     </border>
   </borders>
   <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-  <cellXfs count="13">
-    <xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
-    <xf numFmtId="0" fontId="2" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+  <cellXfs count="24">
+    <xf numFmtId="0" fontId="0" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="2" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="7" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment textRotation="90" horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="2" fillId="5" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="2" fillId="5" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="bottom"/></xf>
-    <xf numFmtId="0" fontId="6" fillId="5" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment textRotation="90" horizontal="center" vertical="center"/></xf>
-    <xf numFmtId="0" fontId="4" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="6" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="5" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="5" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="6" fillId="2" borderId="4" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="right" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="5" fillId="2" borderId="3" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="2" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="bottom"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="2" borderId="3" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="bottom"/></xf>
+    <xf numFmtId="0" fontId="6" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="10" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="10" fillId="6" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="11" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="6" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1" shrinkToFit="1"/></xf>
   </cellXfs>
   <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
@@ -179,13 +231,16 @@ function buildWorksheet(sheet) {
   const maxCols = Math.max(12, ...rows.map((row) => row.length), ...(sheet.widths || []).map((_, index) => index + 1));
   const lastRef = `${colName(maxCols)}${Math.max(rows.length, 1)}`;
   const merges = sheet.merges || [`A1:${colName(Math.min(maxCols, 14))}1`];
+  const freezeRows = Math.max(0, Math.floor(finiteNumber(sheet.freezeRows, 5)));
+  const margins = sheet.margins || {};
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="${XML_NS}" xmlns:r="${REL_NS}">
+  <sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
   <dimension ref="A1:${lastRef}"/>
   <sheetViews>
-    <sheetView workbookViewId="0">
-      <pane ySplit="5" topLeftCell="A6" activePane="bottomLeft" state="frozen"/>
+    <sheetView workbookViewId="0" showGridLines="${sheet.showGridLines === false ? 0 : 1}">
+      ${freezeRows ? `<pane ySplit="${freezeRows}" topLeftCell="A${freezeRows + 1}" activePane="bottomLeft" state="frozen"/>` : ""}
     </sheetView>
   </sheetViews>
   <sheetFormatPr defaultRowHeight="18"/>
@@ -196,9 +251,71 @@ function buildWorksheet(sheet) {
   <mergeCells count="${merges.length}">
     ${merges.map((ref) => `<mergeCell ref="${ref}"/>`).join("\n    ")}
   </mergeCells>
-  <pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>
-  <pageSetup orientation="landscape" paperSize="5" fitToWidth="1" fitToHeight="1"/>
+  <printOptions horizontalCentered="${sheet.horizontalCentered ? 1 : 0}" verticalCentered="0"/>
+  <pageMargins left="${finiteNumber(margins.left, 0.25)}" right="${finiteNumber(margins.right, 0.25)}" top="${finiteNumber(margins.top, 0.5)}" bottom="${finiteNumber(margins.bottom, 0.5)}" header="${finiteNumber(margins.header, 0.3)}" footer="${finiteNumber(margins.footer, 0.3)}"/>
+  <pageSetup orientation="${attr(sheet.orientation || "landscape")}" paperSize="${Math.max(1, Math.floor(finiteNumber(sheet.paperSize, 5)))}" fitToWidth="${Math.max(1, Math.floor(finiteNumber(sheet.fitToWidth, 1)))}" fitToHeight="${Math.max(1, Math.floor(finiteNumber(sheet.fitToHeight, 1)))}"/>
+  ${sheet.drawingFile ? '<drawing r:id="rId1"/>' : ""}
 </worksheet>`;
+}
+
+function buildSheetFiles(sheet) {
+  const files = [{ path: sheet.file, content: buildWorksheet(sheet) }];
+  if (!sheet.images.length) return files;
+  files.push({
+    path: `xl/worksheets/_rels/sheet${sheet.id}.xml.rels`,
+    content: buildWorksheetRelationships(sheet)
+  });
+  files.push({ path: sheet.drawingFile, content: buildDrawing(sheet) });
+  files.push({
+    path: `xl/drawings/_rels/drawing${sheet.id}.xml.rels`,
+    content: buildDrawingRelationships(sheet)
+  });
+  for (const image of sheet.images) {
+    files.push({ path: image.mediaFile, content: decodeBase64(image.base64) });
+  }
+  return files;
+}
+
+function buildWorksheetRelationships(sheet) {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${sheet.id}.xml"/>
+</Relationships>`;
+}
+
+function buildDrawing(sheet) {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="${REL_NS}">
+  ${sheet.images.map((image) => buildImageAnchor(image)).join("\n  ")}
+</xdr:wsDr>`;
+}
+
+function buildImageAnchor(image) {
+  const width = Math.max(1, finiteNumber(image.width, 96));
+  const height = Math.max(1, finiteNumber(image.height, 96));
+  const col = Math.max(0, Math.floor(finiteNumber(image.col, 0)));
+  const row = Math.max(0, Math.floor(finiteNumber(image.row, 0)));
+  const colOffset = Math.max(0, finiteNumber(image.colOffset, 0));
+  const rowOffset = Math.max(0, finiteNumber(image.rowOffset, 0));
+  const cx = Math.round(width * 9525);
+  const cy = Math.round(height * 9525);
+  return `<xdr:oneCellAnchor>
+    <xdr:from><xdr:col>${col}</xdr:col><xdr:colOff>${Math.round(colOffset * 9525)}</xdr:colOff><xdr:row>${row}</xdr:row><xdr:rowOff>${Math.round(rowOffset * 9525)}</xdr:rowOff></xdr:from>
+    <xdr:ext cx="${cx}" cy="${cy}"/>
+    <xdr:pic>
+      <xdr:nvPicPr><xdr:cNvPr id="${image.id}" name="${attr(image.name || `Image ${image.id}`)}"/><xdr:cNvPicPr/></xdr:nvPicPr>
+      <xdr:blipFill><a:blip r:embed="${image.relationshipId}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>
+      <xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr>
+    </xdr:pic>
+    <xdr:clientData/>
+  </xdr:oneCellAnchor>`;
+}
+
+function buildDrawingRelationships(sheet) {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  ${sheet.images.map((image) => `<Relationship Id="${image.relationshipId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${image.mediaFile.split("/").pop()}"/>`).join("\n  ")}
+</Relationships>`;
 }
 
 function buildColumns(maxCols, customWidths = []) {
@@ -244,20 +361,44 @@ function getCellStyle(value, fallback) {
 }
 
 const STYLE_INDEX = {
-  normal: 0,
-  title: 1,
-  header: 2,
-  section: 3,
-  red: 4,
-  total: 4,
-  subheader: 5,
+  plain: 0,
+  normal: 1,
+  grid: 1,
+  sectionTitle: 2,
+  section: 2,
+  groupHeader: 3,
+  compactGroupHeader: 23,
+  header: 4,
+  columnHeader: 4,
+  badHeader: 5,
+  scoreCell: 6,
+  badScoreCell: 7,
+  badCodeCell: 22,
+  totalCell: 8,
+  participant: 9,
+  substitute: 10,
+  documentControl: 11,
+  institutionTitle: 12,
+  plainLabel: 13,
+  headerValue: 14,
+  controlBox: 15,
+  signatureLabel: 16,
+  signatureLine: 17,
+  footer: 18,
+  footerRed: 19,
+  finalLabel: 20,
+  finalScore: 21,
+  title: 12,
+  red: 5,
+  total: 8,
+  subheader: 3,
   number: 6,
-  redHeader: 7,
-  verticalSection: 8,
-  whiteHeader: 9,
-  signature: 10,
-  greenTitle: 11,
-  highlight: 12
+  redHeader: 5,
+  verticalSection: 2,
+  whiteHeader: 4,
+  signature: 17,
+  greenTitle: 12,
+  highlight: 21
 };
 
 function getRowStyle(row, index) {
@@ -296,7 +437,7 @@ function zipStore(files) {
   const encoder = new TextEncoder();
   const entries = files.map((file) => ({
     name: encoder.encode(file.path),
-    data: encoder.encode(file.content),
+    data: file.content instanceof Uint8Array ? file.content : encoder.encode(file.content),
     path: file.path
   }));
 
@@ -318,6 +459,33 @@ function zipStore(files) {
   const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
   const end = endCentralDirectory(entries.length, centralSize, centralOffset);
   return concatUint8([...parts, ...centralParts, end]);
+}
+
+function decodeBase64(value) {
+  const raw = atob(String(value || "").replace(/^data:[^,]+,/, ""));
+  const bytes = new Uint8Array(raw.length);
+  for (let index = 0; index < raw.length; index += 1) bytes[index] = raw.charCodeAt(index);
+  return bytes;
+}
+
+function normalizeImageExtension(value) {
+  const normalized = String(value || "png").toLowerCase().replace(/^image\//, "").replace(/[^a-z0-9]/g, "");
+  return normalized === "png" ? normalized : "png";
+}
+
+function safeMediaName(value) {
+  return String(value || "image").toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/(^-|-$)/g, "") || "image";
+}
+
+function finiteNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function normalizeIso(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : "";
 }
 
 function localFileHeader(entry, crc) {

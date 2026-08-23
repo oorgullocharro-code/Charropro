@@ -20,9 +20,13 @@ import {
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
 } from "../js/core/scoringAttempt.js";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js";
+import {
+  applyPuntaCalculation,
+  calculateAttemptPointSummary,
+  calculateAttemptTotal
+} from "../js/core/scoring.js";
 
-const RELEASE_ID = "20260822-scorer-save-next-latency-audit-001-v1";
+const RELEASE_ID = "20260822-fmch-official-team-sheet-judge-review-001-v1";
 const publishedAt = "2026-08-08T18:00:00.000Z";
 
 assert.equal(FMCH_2026_CALA_RULEBOOK_VERSION, "fmch_2026_cala_0.2.0");
@@ -137,6 +141,7 @@ const legacyAttempt = {
   note: "Nota de Cala sintetica",
   timeEvidence: [{ id: "evidence_cala", timeMs: 0, timeText: "", label: "Evidencia sintetica" }]
 };
+applyPuntaCalculation(legacyAttempt);
 const context = {
   tournamentId: "tournament_cala",
   competitionId: "equipos_completo",
@@ -170,6 +175,9 @@ assert.equal(repeatedSelection.resolvedValue, 2);
 assert.equal(repeatedSelection.total, 4);
 assert.equal(attemptV2.scoring.calculationDetail.details.metros, 8);
 assert.equal(attemptV2.scoring.calculationDetail.details.metrosCalificados, 8);
+assert.equal(attemptV2.scoring.calculationDetail.details.distancePoints, 2);
+assert.equal(attemptV2.scoring.calculationDetail.details.timePoints, 3);
+assert.equal(attemptV2.scoring.calculationDetail.details.totalPoints, 5);
 assert.equal(attemptV2.context.ruleProfileId, "FMCH_2026_LIBRE");
 assert.equal(attemptV2.context.ruleProfileVersion, "0.6.0");
 
@@ -206,13 +214,82 @@ assert.equal(official.publication.frozen, true);
 assert.equal(official.context.ruleProfileVersion, "0.6.0");
 assert.equal(official.dq.ruleId, "cala_desc_caida_jinete");
 assert.equal(official.scoring.netAttemptPoints, -4);
+assert.equal(official.scoring.calculationDetail.details.distancePoints, 2);
+assert.equal(official.scoring.calculationDetail.details.timePoints, 3);
 assert.throws(() => { official.scoring.netAttemptPoints = 999; }, TypeError);
 assert.equal(calculateAttemptTotal({ ...legacyAttempt, desc: "Caida del jinete" }), -4);
+
+const inconsistentPuntaEvidence = structuredClone(attemptV2);
+inconsistentPuntaEvidence.scoring.calculationDetail.details.timePoints = 99;
+assert.throws(
+  () => buildOfficialScoringAttemptSnapshot(inconsistentPuntaEvidence, {
+    publishedAt,
+    officialRevision: 1,
+    source: "cala-punta-inconsistent-evidence-test"
+  }),
+  /attempt-cala-punta-evidence-total-mismatch/
+);
 
 const legacyPublishedScore = { total: 20, breakdown: { base: 20, adic: 0, infr: 0 } };
 const legacyPublishedBefore = structuredClone(legacyPublishedScore);
 resolveEffectiveRules({ suerte: productCala, profile: FMCH_2026_LIBRE_PROFILE });
 assert.deepEqual(legacyPublishedScore, legacyPublishedBefore, "legacy official scores are not recalculated");
+
+const puntaEvidenceCases = [
+  { name: "sin punta valida", meters: 5, times: 1, distancePoints: 0, timePoints: 0, total: 0 },
+  { name: "cero reglamentario", meters: 6, times: 4, distancePoints: 0, timePoints: 0, total: 0 },
+  { name: "distancia y tres tiempos", meters: 7, times: 3, distancePoints: 1, timePoints: 1, total: 2 },
+  { name: "distancia y dos tiempos", meters: 8, times: 2, distancePoints: 2, timePoints: 2, total: 4 },
+  { name: "distancia y un tiempo", meters: 9, times: 1, distancePoints: 3, timePoints: 3, total: 6 },
+  { name: "limite 51 centimetros", meters: 8.51, times: 1, distancePoints: 2, timePoints: 3, total: 5 },
+  { name: "sobre limite 51 centimetros", meters: 8.52, times: 1, distancePoints: 3, timePoints: 3, total: 6 }
+];
+
+for (const fixture of puntaEvidenceCases) {
+  const attempt = {
+    ...legacyAttempt,
+    puntaMetros: fixture.meters,
+    puntaPiquetes: fixture.times,
+    puntaPts: fixture.total,
+    puntaPuntosDistancia: null,
+    puntaPuntosTiempos: null
+  };
+  const totalBeforeEvidenceFreeze = attempt.puntaPts;
+  const calaSummaryBeforeEvidenceFreeze = calculateAttemptPointSummary(attempt);
+  applyPuntaCalculation(attempt);
+  assert.equal(attempt.puntaPuntosDistancia, fixture.distancePoints, `${fixture.name}: P`);
+  assert.equal(attempt.puntaPuntosTiempos, fixture.timePoints, `${fixture.name}: T`);
+  assert.equal(attempt.puntaPts, fixture.total, `${fixture.name}: total`);
+  assert.equal(attempt.puntaPuntosDistancia + attempt.puntaPuntosTiempos, attempt.puntaPts, `${fixture.name}: P + T`);
+  assert.equal(attempt.puntaPts, totalBeforeEvidenceFreeze, `${fixture.name}: total deportivo sin cambio`);
+  assert.deepEqual(
+    calculateAttemptPointSummary(attempt),
+    calaSummaryBeforeEvidenceFreeze,
+    `${fixture.name}: total de Cala sin cambio`
+  );
+
+  const summaryBeforeFreeze = calculateAttemptPointSummary(attempt);
+  const frozen = buildOfficialScoringAttemptSnapshot(
+    adaptLegacyAttemptToV2(attempt, context, { pointSummary: summaryBeforeFreeze }),
+    { publishedAt, officialRevision: 1, source: "cala-punta-evidence-freeze-test" }
+  );
+  assert.equal(frozen.scoring.calculationDetail.details.distancePoints, fixture.distancePoints);
+  assert.equal(frozen.scoring.calculationDetail.details.timePoints, fixture.timePoints);
+  assert.equal(frozen.scoring.calculationDetail.details.totalPoints, fixture.total);
+  assert.equal(frozen.scoring.calculationDetail.value, fixture.total);
+  assert.equal(frozen.scoring.goodPoints, summaryBeforeFreeze.goodPoints);
+  assert.equal(frozen.scoring.netAttemptPoints, summaryBeforeFreeze.netAttemptPoints);
+}
+
+const historicalWithoutPuntaSplit = structuredClone(legacyAttempt);
+delete historicalWithoutPuntaSplit.puntaPuntosDistancia;
+delete historicalWithoutPuntaSplit.puntaPuntosTiempos;
+const historicalAttemptV2 = adaptLegacyAttemptToV2(historicalWithoutPuntaSplit, context, {
+  pointSummary: calculateAttemptPointSummary(historicalWithoutPuntaSplit)
+});
+assert.equal(historicalAttemptV2.scoring.calculationDetail.details.distancePoints, null);
+assert.equal(historicalAttemptV2.scoring.calculationDetail.details.timePoints, null);
+assert.equal(historicalAttemptV2.scoring.calculationDetail.value, 5);
 
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const stateSource = readFileSync(new URL("../js/core/state.js", import.meta.url), "utf8");
@@ -222,6 +299,7 @@ assert.doesNotMatch(appSource, /data-field="puntaMetros"[^>]*max=/);
 assert.match(appSource, /function adjustRuleQuantity/);
 assert.match(appSource, /descRuleId/);
 assert.match(appSource, /async function nextScore\(\)[\s\S]*publishOfficialScoreForContext\(publicationContext,\s*\{[\s\S]*continueOfficialScoreFlowAfterPublish/);
+assert.match(appSource, /function buildPublishedScoreSnapshot\(context\)[\s\S]*applyPuntaCalculation\(attempt\)[\s\S]*cala-punta-evidence-total-mismatch/);
 assert.match(stateSource, /ruleQuantities:\s*\{\}/);
 assert.match(indexSource, new RegExp(RELEASE_ID));
 

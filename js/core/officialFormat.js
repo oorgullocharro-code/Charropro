@@ -1,802 +1,830 @@
-import { SUERTES } from "../data/suertes.js?v=20260822-scorer-save-next-latency-audit-001-v1";
 import {
-  calculateAttemptTotal,
-  getAttemptTeamPenaltyTotal,
-  getTeamCharreadaResta,
-  getTeamCharreadaTotal,
-  getTeamSuerteTotal
-} from "./scoring.js?v=20260822-scorer-save-next-latency-audit-001-v1";
-import { getTeam, scoreKey, state } from "./state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260708-recovery-001b-panel-status1";
+  createOfficialFormatSnapshot,
+  validateOfficialFormatSnapshot
+} from "./officialFormatSnapshot.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { state } from "./state.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
 
-export function buildOfficialPackage(charreadaId = state.activeCharreadaId) {
-  const charreada = state.charreadas.find((item) => item.id === charreadaId);
-  if (!charreada) {
+const SECTION_LABELS = Object.freeze({
+  cala: "CALA DE CABALLO",
+  piales: "PIALES EN EL LIENZO",
+  coleadero: "COLEADERO",
+  toro: "JINETEO DE TORO",
+  terna: "TERNA EN EL RUEDO",
+  yegua: "JINETEO DE YEGUA",
+  manganasPie: "MANGANAS A PIE",
+  manganasCaballo: "MANGANAS A CABALLO",
+  paso: "PASO DE LA MUERTE"
+});
+
+export function buildOfficialPackage(input = {}) {
+  const options = normalizePackageOptions(input);
+  const sourceState = options.state || state;
+  const charreadaId = options.charreadaId;
+  const charreada = (sourceState.charreadas || []).find((item) => item.id === charreadaId) || null;
+  const tournamentId = options.tournamentId || charreada?.tournamentId || "";
+  const tournament = (sourceState.tournaments || []).find((item) => item.id === tournamentId) || null;
+  const generatedAt = options.generatedAt || new Date().toISOString();
+
+  if (!charreada || !tournament) {
     return {
       format: OFFICIAL_FORMAT_NAME,
-      generatedAt: new Date().toISOString(),
-      sheets: []
+      generatedAt,
+      tournament: tournament ? compactTournament(tournament) : null,
+      charreada: charreada ? compactCharreada(charreada) : null,
+      sheets: [],
+      warnings: [],
+      errors: [!charreada ? "official-format-charreada-not-found" : "official-format-tournament-not-found"],
+      documentStatus: "BLOCKED_SOURCE"
     };
   }
 
-  const tournament = state.tournaments.find((item) => item.id === charreada.tournamentId) || null;
-  const sheets = charreada.teamIds
-    .map((teamId) => getTeam(teamId))
-    .filter(Boolean)
-    .map((team) => buildOfficialTeamSheet({ tournament, charreada, team }));
+  const teamIds = options.teamId ? [options.teamId] : [...(charreada.teamIds || [])];
+  const teams = teamIds
+    .map((teamId) => (sourceState.teams || []).find((team) => team.id === teamId))
+    .filter(Boolean);
+  const officialScores = options.officialScores || sourceState.publishedScores || [];
+  const officialScoreLedger = options.officialScoreLedger || sourceState.officialScoreLedger || {};
+  const sheets = teams.map((team) => {
+    const snapshot = createOfficialFormatSnapshot({
+      tournament,
+      charreada,
+      team,
+      officialScores,
+      officialScoreLedger
+    }, {
+      tournamentId,
+      charreadaId,
+      teamId: team.id,
+      generatedAt,
+      officialScoreIds: options.officialScoreIds,
+      officialScoreIdsByAttempt: options.officialScoreIdsByAttempt
+    });
+    return buildOfficialTeamSheet(snapshot);
+  });
 
+  const errors = [
+    ...(teams.length ? [] : ["official-format-team-not-found"]),
+    ...sheets.flatMap((sheet) => sheet.snapshot.errors)
+  ];
+  const warnings = sheets.flatMap((sheet) => sheet.snapshot.warnings);
   return {
     format: OFFICIAL_FORMAT_NAME,
-    generatedAt: new Date().toISOString(),
-    tournament: tournament
-      ? {
-          id: tournament.id,
-          name: tournament.name,
-          date: tournament.date,
-          venue: tournament.venue
-        }
-      : null,
-    charreada: {
-      id: charreada.id,
-      name: charreada.name,
-      date: charreada.date,
-      startTime: charreada.startTime,
-      status: charreada.status
-    },
-    sheets
+    generatedAt,
+    tournament: compactTournament(tournament),
+    charreada: compactCharreada(charreada),
+    sheets,
+    warnings: [...new Set(warnings)],
+    errors: [...new Set(errors)],
+    documentStatus: errors.length
+      ? "BLOCKED_SOURCE"
+      : sheets.some((sheet) => sheet.snapshot.documentStatus === "BLOCKED_DOCUMENTAL")
+        ? "BLOCKED_DOCUMENTAL"
+        : "READY"
   };
 }
 
-export function buildOfficialTeamSheet({ tournament, charreada, team }) {
-  const totalMalos = getTotalMalos(charreada.id, team.id);
-  const puntuacionFinal = getTeamCharreadaTotal(charreada.id, team.id);
+export function buildOfficialTeamSheet(snapshot) {
+  const validation = validateOfficialFormatSnapshot(snapshot);
+  const institutional = buildInstitutionalPresentation(snapshot);
   const header = {
-    evento: tournament?.name || "",
-    hora: charreada.startTime || "",
-    equipo: team.name || "",
-    fecha: charreada.date || tournament?.date || "",
-    capitan: team.captain || "",
-    lugar: tournament?.venue || ""
+    evento: snapshot.eventMetadata.name,
+    hora: snapshot.time,
+    equipo: snapshot.teamMetadata.name,
+    fecha: snapshot.date,
+    capitan: snapshot.captain,
+    lugar: snapshot.location
   };
-
-  const rows = [
-    ["FEDERACION MEXICANA DE CHARRERIA, A.C."],
-    ["FORMATO", OFFICIAL_FORMAT_NAME],
-    ["EVENTO", header.evento, "HORA", header.hora],
-    ["EQUIPO", header.equipo, "FECHA", header.fecha],
-    ["CAPITAN", header.capitan, "LUGAR", header.lugar],
-    [],
-    ...buildCalaRows(charreada, team),
-    [],
-    ...buildPialesRows(charreada, team),
-    [],
-    ...buildColeaderoRows(charreada, team),
-    [],
-    ...buildJineteoRows(charreada, team, "toro", "JINETEO DE TORO"),
-    [],
-    ...buildTernaRows(charreada, team),
-    [],
-    ...buildJineteoRows(charreada, team, "yegua", "JINETEO DE YEGUA"),
-    [],
-    ...buildThreeShotRows(charreada, team, "manganas_pie", "MANGANAS A PIE"),
-    [],
-    ...buildThreeShotRows(charreada, team, "manganas_caballo", "MANGANAS A CABALLO"),
-    [],
-    ...buildPasoRows(charreada, team),
-    [],
-    ["TOTAL, PUNTOS MALOS", totalMalos],
-    ["PUNTUACION FINAL", puntuacionFinal],
-    [],
-    ["JUEZ", "", "JUEZ", "", "JUEZ", "", "CAPITAN", header.capitan]
-  ];
-  const visual = buildOfficialVisualLayout({ charreada, team, header, totalMalos, puntuacionFinal });
-
+  const rows = buildSnapshotRows(snapshot, header);
+  const visual = buildOfficialVisualSheet(snapshot, header, institutional);
+  const images = buildInstitutionalImages(institutional, visual);
   return {
-    sheetName: safeSheetName(team.name),
-    teamId: team.id,
-    teamName: team.name,
+    sheetName: safeSheetName(snapshot.teamMetadata.name),
+    teamId: snapshot.teamId,
+    teamName: snapshot.teamMetadata.name,
     header,
-    totalMalos,
-    puntuacionFinal,
+    totalMalos: snapshot.badPoints.total,
+    puntuacionFinal: snapshot.finalScore,
+    officialScoreTotal: snapshot.officialScoreTotal,
+    documentStatus: snapshot.documentStatus,
+    institutional,
+    validation,
+    snapshot,
+    auditRows: rows,
     rows,
     visualRows: visual.rows,
     visualMerges: visual.merges,
     visualWidths: visual.widths,
-    visualRowHeights: visual.rowHeights
+    visualRowHeights: visual.rowHeights,
+    visualImages: images
   };
 }
 
-export function downloadOfficialFormatXlsx(charreadaId = state.activeCharreadaId) {
-  const official = buildOfficialPackage(charreadaId);
-  const blob = createXlsxBlob({
-    sheets: official.sheets.map((sheet) => ({
+export function buildOfficialWorkbook(officialPackage) {
+  return {
+    generatedAt: officialPackage?.generatedAt,
+    sheets: (officialPackage?.sheets || []).map((sheet) => ({
       name: sheet.sheetName,
       rows: sheet.visualRows || sheet.rows,
       merges: sheet.visualMerges,
       widths: sheet.visualWidths,
-      rowHeights: sheet.visualRowHeights
+      rowHeights: sheet.visualRowHeights,
+      images: sheet.visualImages,
+      orientation: "portrait",
+      paperSize: 1,
+      fitToWidth: 1,
+      fitToHeight: 1,
+      freezeRows: 0,
+      showGridLines: false,
+      horizontalCentered: true,
+      margins: {
+        left: 0.18,
+        right: 0.18,
+        top: 0.2,
+        bottom: 0.2,
+        header: 0,
+        footer: 0
+      }
     }))
-  });
+  };
+}
 
+export function createOfficialFormatXlsxBlob(input = {}) {
+  const official = input?.sheets ? input : buildOfficialPackage(input);
+  return createXlsxBlob(buildOfficialWorkbook(official));
+}
+
+export function downloadOfficialFormatXlsx(input = {}) {
+  const official = input?.sheets ? input : buildOfficialPackage(input);
+  const blob = createXlsxBlob(buildOfficialWorkbook(official));
   const filename = `${slug(official.charreada?.name || "charreada")}-formato-federacion.xlsx`;
   downloadBlob(filename, blob);
 }
 
 export const downloadOfficialFormatCsv = downloadOfficialFormatXlsx;
 
-function buildOfficialVisualLayout({ charreada, team, header, totalMalos, puntuacionFinal }) {
-  const rows = [];
+function buildSnapshotRows(snapshot, header) {
+  const institutional = buildInstitutionalPresentation(snapshot);
+  const rows = [
+    ["FEDERACION MEXICANA DE CHARRERIA, A.C."],
+    ["EVENTO", header.evento, "HORA", header.hora],
+    ["EQUIPO", header.equipo, "FECHA", header.fecha],
+    ["CAPITAN", header.capitan, "LUGAR", header.lugar],
+    []
+  ];
+
+  for (const [sectionId, section] of Object.entries(snapshot.suertes)) {
+    if (sectionId === "cala") {
+      const control = snapshot.documentalControls.calaSideBadPointsSumControl;
+      rows.push([
+        D("SUMA PUNTOS MALOS", control.fieldId, "DOCUMENT_CONTROL"),
+        control.value,
+        "CONTROL DOCUMENTAL",
+        "SIN EFECTO DE SCORE"
+      ]);
+    }
+    rows.push([SECTION_LABELS[sectionId] || sectionId]);
+    rows.push([
+      "#",
+      "SUERTE",
+      "CHARRO",
+      "OPORTUNIDAD",
+      "BASE",
+      "ADICIONALES",
+      "MALOS",
+      "INFRACCION EQUIPO",
+      "TOTAL OFICIAL",
+      "DETALLE CONGELADO",
+      "OFFICIAL SCORE ID"
+    ]);
+    section.attempts.forEach((attempt, index) => rows.push([
+      index + 1,
+      attempt.suerteName || attempt.suerteId,
+      attempt.charro,
+      attempt.opportunity?.number || attempt.attemptIndex + 1,
+      attempt.baseSelection?.total || 0,
+      sumSelectionTotals(attempt.additionalSelections),
+      attempt.individualBadPoints,
+      attempt.teamBadPoints,
+      attempt.total,
+      describeFrozenAttempt(attempt),
+      attempt.officialScoreId
+    ]));
+    if (sectionId === "coleadero") {
+      const administrativeRow = snapshot.documentalControls.coleaderoAdministrativeRow;
+      rows.push([
+        D("", administrativeRow.fieldId, "ADMINISTRATIVE_ROW"),
+        "", "", "", "", "", "", "", "", "", ""
+      ]);
+    }
+    rows.push([
+      "TOTAL",
+      SECTION_LABELS[sectionId] || sectionId,
+      "",
+      "",
+      "",
+      "",
+      "",
+      section.teamPenaltyTotal,
+      section.total,
+      "CONTROL",
+      section.total === section.officialScoreTotal ? "PASS" : "MISMATCH"
+    ]);
+    if (sectionId === "coleadero") {
+      const bottomControl = snapshot.documentalControls.coleaderoBottomControl04;
+      rows.push([
+        D("", bottomControl.fieldId, "DOCUMENT_CONTROL_EMPTY"),
+        "", "", "", "", "", "", "", "", "", ""
+      ]);
+    }
+    rows.push([]);
+  }
+
+  rows.push(["TOTAL PUNTOS MALOS", snapshot.badPoints.total]);
+  rows.push(["PUNTUACION FINAL", snapshot.finalScore]);
+  rows.push([]);
+  rows.push(snapshot.documentalControls.signatures.flatMap((signature) => [
+    D(signature.label, signature.fieldId, "MANUAL_SIGNATURE"),
+    ""
+  ]));
+  rows.push(["", "", institutional.conadeName]);
+  rows.push(["", "", institutional.sportsSecretariatPeriod]);
+  rows.push(["", "", institutional.institutionalQuote]);
+  return rows;
+}
+
+function buildInstitutionalPresentation(snapshot) {
+  const fields = new Map((snapshot.institutionalFields || []).map((field) => [field.fieldId, field]));
+  const field = (fieldId) => fields.get(fieldId) || {};
+  const federationLogo = field("FMCH.TEAM_SHEET.HEADER.FEDERATION_LOGO");
+  const conadeLogo = field("FMCH.TEAM_SHEET.FOOTER.CONADE_LOGO");
+  return {
+    profileId: snapshot.documentAuthority?.profileId || "",
+    version: snapshot.documentAuthority?.version || "",
+    sourceSha256: snapshot.documentAuthority?.sourceDocument?.sha256 || "",
+    federationLogo: {
+      path: federationLogo.value || "",
+      sha256: federationLogo.sha256 || "",
+      width: federationLogo.sourceCrop?.width || 0,
+      height: federationLogo.sourceCrop?.height || 0
+    },
+    conadeLogo: {
+      path: conadeLogo.value || "",
+      sha256: conadeLogo.sha256 || "",
+      width: conadeLogo.sourceCrop?.width || 0,
+      height: conadeLogo.sourceCrop?.height || 0
+    },
+    conadeName: field("FMCH.TEAM_SHEET.FOOTER.CONADE_NAME").value || "",
+    sportsSecretariatPeriod: field("FMCH.TEAM_SHEET.FOOTER.SPORTS_SECRETARIAT_PERIOD").value || "",
+    institutionalQuote: field("FMCH.TEAM_SHEET.FOOTER.INSTITUTIONAL_QUOTE").value || ""
+  };
+}
+
+function buildInstitutionalImages(institutional, visual) {
+  return [
+    {
+      name: "fmch-emblem",
+      mimeType: "image/png",
+      base64: authorizedAssetBase64(institutional.federationLogo),
+      col: 0,
+      row: 0,
+      width: 68,
+      height: 68
+    },
+    {
+      name: "conade-lockup",
+      mimeType: "image/png",
+      base64: authorizedAssetBase64(institutional.conadeLogo),
+      col: 1,
+      row: visual.conadeRow,
+      width: 92,
+      height: 48
+    }
+  ];
+}
+
+function authorizedAssetBase64(asset) {
+  if (!asset?.path || !asset.sha256) throw new Error("official-format-document-asset-authority-required");
+  const base64 = OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64[asset.path];
+  if (!base64) throw new Error(`official-format-document-asset-missing:${asset.path}`);
+  return base64;
+}
+
+function buildOfficialVisualSheet(snapshot, header, institutional) {
+  const rowCount = 64;
+  const columnCount = 32;
+  const rows = Array.from({ length: rowCount }, () => Array.from({ length: columnCount }, () => C("", "plain")));
   const merges = [];
-  const rowHeights = [];
-  const widths = [5, 22, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 16];
-  const columnCount = widths.length;
-  const row = (...cells) => pad(cells, columnCount);
-  const add = (cells, height = 21) => {
-    rows.push(row(...cells));
-    rowHeights.push(height);
-    return rows.length;
+  const rowHeights = Array(rowCount).fill(10.5);
+
+  mergeVisual(rows, merges, 1, 5, 2, 32, "FEDERACIÓN MEXICANA DE CHARRERÍA, A.C.", "institutionTitle");
+  headerField(rows, merges, 3, 5, 8, "EVENTO:", 9, 23, header.evento);
+  headerField(rows, merges, 3, 24, 27, "HORA:", 28, 32, header.hora);
+  headerField(rows, merges, 4, 5, 8, "EQUIPO:", 9, 23, header.equipo);
+  headerField(rows, merges, 4, 24, 27, "FECHA:", 28, 32, header.fecha);
+  headerField(rows, merges, 5, 5, 8, "CAPITÁN:", 9, 20, header.capitan);
+  headerField(rows, merges, 5, 21, 24, "LUGAR:", 25, 32, header.lugar);
+  rowHeights[0] = 25;
+  rowHeights[1] = 18;
+  rowHeights[2] = 13;
+  rowHeights[3] = 13;
+  rowHeights[4] = 18;
+
+  buildCalaVisual(rows, merges, snapshot, 6);
+  buildTripleAttemptVisual(rows, merges, snapshot.suertes.piales, {
+    row: 11,
+    title: "PIALES EN EL LIENZO",
+    sideValue: badPointsControlValue(snapshot, "piales"),
+    showT: false,
+    control: accumulatedControl(snapshot, "piales")
+  });
+  buildColeaderoVisual(rows, merges, snapshot, 16);
+  buildJineteoVisual(rows, merges, snapshot.suertes.toro, 25, "JINETEO DE TORO", "toro", badPointsControlValue(snapshot, "toro"), accumulatedControl(snapshot, "toro"));
+  buildTernaVisual(rows, merges, snapshot.suertes.terna, 30, badPointsControlValue(snapshot, "terna"), accumulatedControl(snapshot, "terna"));
+  buildJineteoVisual(rows, merges, snapshot.suertes.yegua, 37, "JINETEO DE YEGUA", "yegua", badPointsControlValue(snapshot, "yegua"), accumulatedControl(snapshot, "yegua"));
+  buildTripleAttemptVisual(rows, merges, snapshot.suertes.manganasPie, {
+    row: 42,
+    title: "MANGANAS A PIE",
+    sideValue: badPointsControlValue(snapshot, "manganasPie"),
+    showT: true,
+    control: accumulatedControl(snapshot, "manganasPie")
+  });
+  buildTripleAttemptVisual(rows, merges, snapshot.suertes.manganasCaballo, {
+    row: 47,
+    title: "MANGANAS A CABALLO",
+    sideValue: badPointsControlValue(snapshot, "manganasCaballo"),
+    showT: true,
+    control: accumulatedControl(snapshot, "manganasCaballo")
+  });
+  buildPasoVisual(rows, merges, snapshot.suertes.paso, 52, badPointsControlValue(snapshot, "paso"), accumulatedControl(snapshot, "paso"));
+  buildClosingVisual(rows, merges, snapshot, institutional, 57);
+
+  [11, 16, 30, 42, 47, 52].forEach((row) => { rowHeights[row - 1] = 14; });
+  rowHeights[5] = 18;
+  [7, 12, 17, 31, 43, 48].forEach((row) => { rowHeights[row - 1] = 17; });
+  rowHeights[31] = 17;
+  [25, 37].forEach((row) => { rowHeights[row - 1] = 34; });
+  rowHeights[51] = 23;
+  rowHeights[7] = 22;
+  rowHeights[25] = 22;
+  rowHeights[31] = 26;
+  rowHeights[37] = 22;
+  [9, 14, 23, 27, 35, 39, 45, 50, 55].forEach((row) => { rowHeights[row - 1] = 20; });
+  [10, 29, 41, 59].forEach((row) => { rowHeights[row - 1] = 4; });
+  [15, 24, 36, 46, 51, 56].forEach((row) => { rowHeights[row - 1] = 8; });
+  rowHeights[56] = 13;
+  rowHeights[57] = 16;
+  rowHeights[58] = 4;
+  rowHeights[59] = 13;
+  rowHeights[60] = 15;
+  rowHeights[61] = 15;
+  rowHeights[62] = 13;
+  rowHeights[63] = 13;
+
+  return {
+    rows,
+    merges,
+    widths: [7.5, 4, 4, 4, 4, 4, 4, 4, 4, ...Array(23).fill(3.15)],
+    rowHeights,
+    conadeRow: 61
   };
-  const addBlank = (height = 8) => add([], height);
-  const addSection = (title, sectionRows) => {
-    const start = rows.length + 1;
-    sectionRows.forEach((sectionRow, index) => {
-      add([index === 0 ? C(title, "verticalSection") : "", ...sectionRow], index === 0 ? 27 : 23);
+}
+
+function buildCalaVisual(rows, merges, snapshot, row) {
+  const section = snapshot.suertes.cala;
+  const attempt = section.attempts[0];
+  mergeVisual(rows, merges, row, 1, row + 1, 1, "SUMA\nPUNTOS\nMALOS", "documentControl");
+  putVisual(rows, row + 2, 1, snapshot.documentalControls.calaSideBadPointsSumControl.value, "documentControl");
+  mergeVisual(rows, merges, row, 2, row, 9, "CALA DE CABALLO", "sectionTitle");
+  mergeVisual(rows, merges, row + 1, 2, row + 2, 9, attempt?.charro || "", "participant");
+  mergeVisual(rows, merges, row, 10, row, 17, calaDistanceHeading(attempt), "groupHeader");
+  mergeVisual(rows, merges, row, 18, row, 26, "MALOS", "badHeader");
+  mergeVisual(rows, merges, row, 27, row, 29, "TOTAL\nMALOS", "groupHeader");
+  mergeVisual(rows, merges, row, 30, row, 32, "PUNTOS\nPARCIALES", "compactGroupHeader");
+  const headings = ["BASE", "P", "T", "LD", "LI", "MD", "MI", "PC"];
+  headings.forEach((heading, index) => putVisual(rows, row + 1, 10 + index, heading, "columnHeader"));
+  for (let col = 18; col <= 26; col += 1) putVisual(rows, row + 1, col, "", "columnHeader");
+  mergeVisual(rows, merges, row + 1, 27, row + 1, 29, "", "columnHeader");
+  mergeVisual(rows, merges, row + 1, 30, row + 1, 32, "", "columnHeader");
+  const values = calaScoreValues(attempt);
+  values.slice(0, 8).forEach((value, index) => putVisual(rows, row + 2, 10 + index, value, "scoreCell"));
+  const badValues = (attempt?.documentalEvidence?.badPointSlots || []).slice(0, 8).map(calaBadPointDisplay);
+  const badRanges = [[18, 18], [19, 19], [20, 20], [21, 21], [22, 22], [23, 23], [24, 24], [25, 26]];
+  badRanges.forEach(([start, end], index) => {
+    mergeVisual(rows, merges, row + 1, start, row + 1, end, "", "columnHeader");
+    mergeVisual(rows, merges, row + 2, start, row + 2, end, badValues[index] ?? "", "badCodeCell");
+  });
+  mergeVisual(rows, merges, row + 2, 27, row + 2, 29, attempt ? attempt.individualBadPoints : "", "totalCell");
+  mergeVisual(rows, merges, row + 2, 30, row + 2, 32, attempt ? attempt.total : "", "totalCell");
+  mergeVisual(rows, merges, row + 3, 2, row + 3, 9, "SUPLENTE", "substitute");
+  mergeVisual(rows, merges, row + 3, 20, row + 3, 27, "INFRACCIÓN AL EQUIPO", "plainLabel");
+  mergeVisual(rows, merges, row + 3, 28, row + 3, 32, section.teamPenaltyTotal || "-", "controlBox");
+}
+
+function buildTripleAttemptVisual(rows, merges, section, options) {
+  const { row, title, showT } = options;
+  const attempts = section.attempts || [];
+  mergeVisual(rows, merges, row, 1, row + 2, 1, options.sideValue || "", "documentControl");
+  mergeVisual(rows, merges, row, 2, row, 9, title, "sectionTitle");
+  mergeVisual(rows, merges, row + 1, 2, row + 2, 9, attempts[0]?.charro || "", "participant");
+  const groups = showT
+    ? [[10, 16], [17, 23], [24, 29]]
+    : [[10, 16], [17, 23], [24, 30]];
+  groups.forEach(([start, end], index) => {
+    mergeVisual(rows, merges, row, start, row, end, `${index + 1}${ordinalSuffix(index + 1)} TIRO`, "groupHeader");
+    const width = end - start + 1;
+    const goodEnd = start + Math.max(1, Math.floor(width / 3)) - 1;
+    const badEnd = goodEnd + Math.max(1, Math.floor(width / 3));
+    mergeVisual(rows, merges, row + 1, start, row + 1, goodEnd, "BUENO", "columnHeader");
+    mergeVisual(rows, merges, row + 1, goodEnd + 1, row + 1, badEnd, "MALOS", "badHeader");
+    mergeVisual(rows, merges, row + 1, badEnd + 1, row + 1, end, "TOTAL", "columnHeader");
+    const attempt = attempts[index];
+    mergeVisual(rows, merges, row + 2, start, row + 2, goodEnd, attempt ? attemptGoodExcludingTime(attempt) : "", "scoreCell");
+    mergeVisual(rows, merges, row + 2, goodEnd + 1, row + 2, badEnd, attempt ? attempt.individualBadPoints : "", "badScoreCell");
+    mergeVisual(rows, merges, row + 2, badEnd + 1, row + 2, end, attempt ? attemptNetExcludingTime(attempt) : "", "totalCell");
+  });
+  if (showT) {
+    putVisual(rows, row, 30, "T", "groupHeader");
+    putVisual(rows, row + 1, 30, "", "columnHeader");
+    putVisual(rows, row + 2, 30, sectionTimePoints(section), "scoreCell");
+  }
+  mergeVisual(rows, merges, row, 31, row + 1, 32, "TOTAL", "groupHeader");
+  mergeVisual(rows, merges, row + 2, 31, row + 2, 32, section.total, "totalCell");
+  mergeVisual(rows, merges, row + 3, 2, row + 3, 9, "SUPLENTE", "substitute");
+  if (showT) {
+    mergeVisual(rows, merges, row + 3, 11, row + 3, 18, "TERMINADO EN", "plainLabel");
+    mergeVisual(rows, merges, row + 3, 19, row + 3, 21, sectionTime(section), "controlBox");
+    mergeVisual(rows, merges, row + 3, 22, row + 3, 23, "MIN.", "plainLabel");
+  }
+  mergeVisual(rows, merges, row + 3, 24, row + 3, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
+  mergeVisual(rows, merges, row + 3, 29, row + 3, 32, section.teamPenaltyTotal || "-", "controlBox");
+  buildPostSectionControls(rows, merges, row + 4, options.control);
+}
+
+function buildColeaderoVisual(rows, merges, snapshot, row) {
+  const section = snapshot.suertes.coleadero;
+  const attempts = section.attempts || [];
+  mergeVisual(rows, merges, row, 1, row + 5, 1, badPointsControlValue(snapshot, "coleadero"), "documentControl");
+  mergeVisual(rows, merges, row, 2, row, 9, "COLEADERO", "sectionTitle");
+  const groups = [[10, 16], [17, 23], [24, 30]];
+  groups.forEach(([start, end], index) => {
+    mergeVisual(rows, merges, row, start, row, end, `${index + 1}${ordinalSuffix(index + 1)} PASADA`, "groupHeader");
+    mergeVisual(rows, merges, row + 1, start, row + 1, start + 1, "BUENOS", "columnHeader");
+    mergeVisual(rows, merges, row + 1, start + 2, row + 1, start + 4, "MALOS", "badHeader");
+    mergeVisual(rows, merges, row + 1, start + 5, row + 1, end, "TOTAL", "columnHeader");
+  });
+  mergeVisual(rows, merges, row, 31, row + 1, 32, "TOTAL", "groupHeader");
+  for (let participantIndex = 0; participantIndex < 4; participantIndex += 1) {
+    const dataRow = row + 2 + participantIndex;
+    const participantAttempts = participantIndex < 3
+      ? attempts.filter((attempt) => attempt.coleadorIndex === participantIndex)
+      : [];
+    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, participantAttempts[0]?.charro || "", "participant");
+    groups.forEach(([start, end], passIndex) => {
+      const attempt = participantAttempts.find((item) => item.attemptIndex === passIndex);
+      mergeVisual(rows, merges, dataRow, start, dataRow, start + 1, attempt ? attempt.goodPoints : "", "scoreCell");
+      mergeVisual(rows, merges, dataRow, start + 2, dataRow, start + 4, attempt ? attempt.individualBadPoints : "", "badScoreCell");
+      mergeVisual(rows, merges, dataRow, start + 5, dataRow, end, attempt ? attempt.total : "", "totalCell");
     });
-    const end = rows.length;
-    if (end > start) merges.push(`A${start}:A${end}`);
-  };
-  let runningTotal = 0;
-  const addScoreControl = (title, suerteTotal) => {
-    const previous = runningTotal;
-    const sectionTotal = Number(suerteTotal) || 0;
-    runningTotal += sectionTotal;
-    add([
-      "", "", "", "", "", "", "", "", "", "", "", "",
-      C(`${title} ACUMULADO`, "whiteHeader"),
-      C("ANTERIOR", "subheader"),
-      C(previous, "highlight"),
-      C("SUERTE", "subheader"),
-      C(sectionTotal, "highlight"),
-      C("TOTAL", "subheader"),
-      C(runningTotal, "highlight")
-    ], 24);
-  };
-
-  const cala = getAttempt(charreada.id, team.id, "cala", 0);
-  const piales = getAttempts(charreada.id, team.id, "piales");
-  const colas = getCollection(charreada.id, team.id, "colas") || [];
-  const toro = getAttempt(charreada.id, team.id, "toro", 0);
-  const lazo = getAttempts(charreada.id, team.id, "lazo");
-  const pialRuedo = getAttempts(charreada.id, team.id, "pial_ruedo");
-  const yegua = getAttempt(charreada.id, team.id, "yegua", 0);
-  const manganasPie = getAttempts(charreada.id, team.id, "manganas_pie");
-  const manganasCaballo = getAttempts(charreada.id, team.id, "manganas_caballo");
-  const paso = getAttempt(charreada.id, team.id, "paso", 0);
-  const ternaRoster = getTernaRosterParts(team.roster);
-  const calaAdic = buildCalaAdicGrid(cala);
-  const calaMalos = buildInfrGrid(cala, getSuerte("cala"), 10);
-
-  add([C("FEDERACION MEXICANA DE CHARRERIA, A.C.", "greenTitle")], 30);
-  merges.push("A1:X1");
-  add(["EVENTO:", header.evento, "", "HORA:", header.hora, "", "EQUIPO:", header.equipo, "", "FECHA:", header.fecha], 23);
-  add(["CAPITAN:", header.capitan, "", "LUGAR:", header.lugar], 23);
-  addBlank();
-
-  addSection("CALA DE CABALLO", [
-    [
-      C("CHARRO", "header"), C("BASE", "header"), C("P", "header"), C("T", "header"), C("LD", "header"),
-      C("LI", "header"), C("MD", "header"), C("MI", "header"), C("CR", "header"), C("TOTAL", "header"),
-      ...Array.from({ length: 10 }, (_, index) => C(index === 0 ? "MALOS" : "", "redHeader")),
-      C("TOTAL MALOS", "header"), C("PUNTOS PARCIALES", "header"), C("DETALLE", "header")
-    ],
-    [
-      team.roster?.cala || "", cala.base || 0, cala.puntaPts || 0, cala.puntaPiquetes || 1,
-      calaAdic.ld, calaAdic.li, calaAdic.md, calaAdic.mi, calaAdic.cr, goodPoints(cala),
-      ...calaMalos.labels.map((label) => C(label, "redHeader")), "", "", ""
-    ],
-    [
-      "", "", "", "", "", "", "", "", "", "",
-      ...calaMalos.values.map((value) => C(value, "red")),
-      cala.infr || 0, calculateAttemptTotal(cala), describeAttempt(cala, getSuerte("cala"))
-    ],
-    [C("SUPLENTE", "whiteHeader"), team.roster?.suplenteCala || ""],
-    [C("INFRACCION AL EQUIPO", "whiteHeader"), getTeamLevelPenalty(charreada.id, team.id, "cala")]
-  ]);
-  addScoreControl("CALA", getTeamSuerteTotal(charreada.id, team.id, "cala"));
-  addBlank();
-
-  addSection("PIALES EN EL LIENZO", [
-    [
-      C("CHARRO", "header"), C("1er TIRO BUENO", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"),
-      C("2do TIRO BUENO", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"),
-      C("3er TIRO BUENO", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"), C("TOTAL", "header"), C("DETALLE", "header")
-    ],
-    [
-      team.roster?.piales || "",
-      ...attemptTriplet(piales[0]), ...attemptTriplet(piales[1]), ...attemptTriplet(piales[2]),
-      getTeamSuerteTotal(charreada.id, team.id, "piales"),
-      piales.map((attempt, index) => `T${index + 1}: ${describeAttempt(attempt, getSuerte("piales"))}`).join(" | ")
-    ],
-    [C("SUPLENTE", "whiteHeader"), team.roster?.suplentePiales || ""],
-    [C("INFRACCION AL EQUIPO", "whiteHeader"), getTeamLevelPenalty(charreada.id, team.id, "piales")]
-  ]);
-  addScoreControl("PIALES", getTeamSuerteTotal(charreada.id, team.id, "piales"));
-  addBlank();
-
-  addSection("COLEADERO", [
-    [
-      C("COLEADOR", "header"), C("1a PASADA BUENOS", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"),
-      C("2a PASADA BUENOS", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"),
-      C("3a PASADA BUENOS", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"), C("TOTAL", "header"), C("DETALLE", "header")
-    ],
-    ...[0, 1, 2].map((index) => {
-      const attempts = colas[index] || [];
-      return [
-        team.roster?.colas?.[index] || `Coleador ${index + 1}`,
-        ...attemptTriplet(attempts[0]), ...attemptTriplet(attempts[1]), ...attemptTriplet(attempts[2]),
-        attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0),
-        attempts.map((attempt, attemptIndex) => `P${attemptIndex + 1}: ${describeAttempt(attempt, getSuerte("colas"))}`).join(" | ")
-      ];
-    }),
-    [C("SUPLENTE", "whiteHeader"), team.roster?.suplenteColas || ""],
-    [C("INFRACCION AL EQUIPO", "whiteHeader"), getTeamLevelPenalty(charreada.id, team.id, "colas")]
-  ]);
-  addScoreControl("COLEADERO", getTeamSuerteTotal(charreada.id, team.id, "colas"));
-  addBlank();
-
-  addSection("JINETEO DE TORO", buildJineteoVisualRows(team.roster?.toro || "", toro, getSuerte("toro"), "BAJARSE SIN SER LAZADO", getTeamLevelPenalty(charreada.id, team.id, "toro")));
-  addScoreControl("JINETEO TORO", getTeamSuerteTotal(charreada.id, team.id, "toro"));
-  addBlank();
-
-  addSection("TERNA EN EL RUEDO", [
-    [C("OPORT.", "header"), C("SUERTE", "header"), C("CHARRO", "header"), C("BASE/ADICIONALES", "header"), C("REMATE", "header"), C("MALOS", "redHeader"), C("T", "header"), C("TOTAL", "header"), C("DETALLE", "header")],
-    ...[
-      ...lazo.map((attempt, index) => [index + 1, "LAZO A LA CABEZA", ternaRoster[0], goodPoints(attempt), appliedPoints(attempt, getSuerte("lazo"), ["Remate"]), attempt.infr || 0, attempt.tiempo || "", calculateAttemptTotal(attempt), describeAttempt(attempt, getSuerte("lazo"))]),
-      ...pialRuedo.map((attempt, index) => [index + 1, "PIAL EN EL RUEDO", ternaRoster[1], goodPoints(attempt), appliedPoints(attempt, getSuerte("pial_ruedo"), ["Remate"]), attempt.infr || 0, attempt.tiempo || "", calculateAttemptTotal(attempt), describeAttempt(attempt, getSuerte("pial_ruedo"))]),
-      ["", "TERCER PARTICIPANTE", ternaRoster[2] || "", "", "", "", "", "", ""]
-    ],
-    [C("TERMINADO EN", "whiteHeader"), "", C("MIN.", "whiteHeader"), "", "", "", "", getTeamSuerteTotal(charreada.id, team.id, "lazo") + getTeamSuerteTotal(charreada.id, team.id, "pial_ruedo")],
-    [C("INFRACCION AL EQUIPO", "whiteHeader"), getTernaTeamLevelPenalty(charreada.id, team.id)]
-  ]);
-  addScoreControl("TERNA", getTeamSuerteTotal(charreada.id, team.id, "lazo") + getTeamSuerteTotal(charreada.id, team.id, "pial_ruedo"));
-  addBlank();
-
-  addSection("JINETEO DE YEGUA", buildJineteoVisualRows(team.roster?.yegua || "", yegua, getSuerte("yegua"), "BAJAR OREJA C/P", getTeamLevelPenalty(charreada.id, team.id, "yegua")));
-  addScoreControl("JINETEO YEGUA", getTeamSuerteTotal(charreada.id, team.id, "yegua"));
-  addBlank();
-
-  addSection("MANGANAS A PIE", buildManganasVisualRows(team.roster?.manganas_pie || "", manganasPie, "manganas_pie", getTeamLevelPenalty(charreada.id, team.id, "manganas_pie")));
-  addScoreControl("MANGANAS PIE", getTeamSuerteTotal(charreada.id, team.id, "manganas_pie"));
-  addBlank();
-
-  addSection("MANGANAS A CABALLO", buildManganasVisualRows(team.roster?.manganas_caballo || "", manganasCaballo, "manganas_caballo", getTeamLevelPenalty(charreada.id, team.id, "manganas_caballo")));
-  addScoreControl("MANGANAS CABALLO", getTeamSuerteTotal(charreada.id, team.id, "manganas_caballo"));
-  addBlank();
-
-  addSection("PASO DE LA MUERTE", [
-    [C("CHARRO", "header"), C("1ra VUELTA BASE", "header"), C("2da VUELTA BASE", "header"), C("DISTANCIA", "header"), C("CUARTA", "header"), C("REPAROS", "header"), C("OREJA C/P", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"), C("DETALLE", "header")],
-    [team.roster?.paso || "", appliedPoints(paso, getSuerte("paso"), ["1ra"]), appliedPoints(paso, getSuerte("paso"), ["2da"]), appliedPoints(paso, getSuerte("paso"), ["Distancia"]), appliedPoints(paso, getSuerte("paso"), ["Cuarta"]), appliedPoints(paso, getSuerte("paso"), ["Reparos"]), appliedPoints(paso, getSuerte("paso"), ["Oreja"]), paso.infr || 0, calculateAttemptTotal(paso), describeAttempt(paso, getSuerte("paso"))],
-    [C("SUPLENTE", "whiteHeader"), team.roster?.suplentePaso || ""],
-    [C("TIEMPO EN SALIR", "whiteHeader"), paso.tiempo || "", C("MIN.", "whiteHeader"), "", C("INFRACCION AL EQUIPO", "whiteHeader"), getTeamLevelPenalty(charreada.id, team.id, "paso")]
-  ]);
-  addScoreControl("PASO", getTeamSuerteTotal(charreada.id, team.id, "paso"));
-  addBlank();
-
-  add([
-    C("TOTAL, PUNTOS MALOS", "red"), totalMalos, "", "", "", "", "", "", "", "", "", "",
-    C("PUNTUACION FINAL", "subheader"), C(puntuacionFinal, "number")
-  ], 28);
-  addBlank(12);
-  add([C("JUEZ", "signature"), "", "", C("JUEZ", "signature"), "", "", C("JUEZ", "signature"), "", "", C("CAPITAN", "signature"), header.capitan], 30);
-
-  return { rows, merges, widths, rowHeights };
+    mergeVisual(rows, merges, dataRow, 31, dataRow, 32, participantAttempts.length ? sumAttempts(participantAttempts) : "", "totalCell");
+  }
+  mergeVisual(rows, merges, row + 6, 2, row + 6, 9, "SUPLENTE", "substitute");
+  mergeVisual(rows, merges, row + 6, 10, row + 6, 12, "", "documentControl");
+  mergeVisual(rows, merges, row + 6, 13, row + 6, 15, "SUMA\nCONTROL", "plainLabel");
+  mergeVisual(rows, merges, row + 6, 16, row + 6, 18, section.total, "documentControl");
+  mergeVisual(rows, merges, row + 6, 19, row + 6, 21, "", "documentControl");
+  mergeVisual(rows, merges, row + 6, 22, row + 6, 24, "", "documentControl");
+  mergeVisual(rows, merges, row + 7, 21, row + 7, 27, "INFRACCIÓN AL EQUIPO", "plainLabel");
+  mergeVisual(rows, merges, row + 7, 28, row + 7, 32, section.teamPenaltyTotal || "-", "controlBox");
+  buildPostSectionControls(rows, merges, row + 8, accumulatedControl(snapshot, "coleadero"));
 }
 
-function buildJineteoVisualRows(charro, attempt, suerte, bajarLabel, teamPenalty = 0) {
+function buildJineteoVisual(rows, merges, section, row, title, kind, sideValue, control) {
+  const attempt = section.attempts[0];
+  mergeVisual(rows, merges, row, 1, row + 1, 1, sideValue, "documentControl");
+  mergeVisual(rows, merges, row, 2, row, 9, title, "sectionTitle");
+  mergeVisual(rows, merges, row + 1, 2, row + 1, 9, attempt?.charro || "", "participant");
+  const labels = kind === "toro"
+    ? ["BASE", "PRETAL\nDE GASA", "1\nMANO", "PIERNAS", "TENTE\nMOSO", "VERIJERO", "PRETAL", "CAERSE Y\nLEVANTARSE", "BAJARSE SIN\nSER LAZADO", "TOTAL", "MALOS", "T", "TOTAL"]
+    : ["BASE", "PRETAL\nDE GASA", "PIERNAS", "1\nMANO", "TENTE\nMOSO", "VERIJERO", "PRETAL", "CAERSE Y\nLEVANTARSE", "BAJAR OREJA\nC/PIERN", "TOTAL", "MALOS", "T", "TOTAL"];
+  const ranges = [[10, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 27], [28, 29], [30, 30], [31, 32]];
+  const values = jineteoScoreValues(attempt, kind);
+  ranges.forEach(([start, end], index) => {
+    mergeVisual(rows, merges, row, start, row, end, labels[index], index === 10 ? "badHeader" : "columnHeader");
+    mergeVisual(rows, merges, row + 1, start, row + 1, end, values[index], index === 10 ? "badScoreCell" : index === 12 ? "totalCell" : "scoreCell");
+  });
+  mergeVisual(rows, merges, row + 2, 2, row + 2, 9, "SUPLENTE", "substitute");
+  mergeVisual(rows, merges, row + 2, 11, row + 2, 18, "TERMINADO EN", "plainLabel");
+  mergeVisual(rows, merges, row + 2, 19, row + 2, 21, sectionTime(section), "controlBox");
+  mergeVisual(rows, merges, row + 2, 22, row + 2, 23, "MIN.", "plainLabel");
+  mergeVisual(rows, merges, row + 2, 24, row + 2, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
+  mergeVisual(rows, merges, row + 2, 29, row + 2, 32, section.teamPenaltyTotal || "-", "controlBox");
+  buildPostSectionControls(rows, merges, row + 3, control);
+}
+
+function buildTernaVisual(rows, merges, section, row, sideValue, control) {
+  const attempts = section.attempts || [];
+  mergeVisual(rows, merges, row, 1, row + 4, 1, sideValue, "documentControl");
+  mergeVisual(rows, merges, row, 2, row, 9, "TERNA EN EL RUEDO", "sectionTitle");
+  mergeVisual(rows, merges, row, 10, row, 26, "5 OPORTUNIDADES", "groupHeader");
+  mergeVisual(rows, merges, row, 27, row + 1, 28, "MALOS", "badHeader");
+  mergeVisual(rows, merges, row, 29, row + 1, 29, "T", "groupHeader");
+  mergeVisual(rows, merges, row, 30, row + 1, 32, "TOTAL", "groupHeader");
+  mergeVisual(rows, merges, row + 1, 10, row + 1, 14, "BASE/ADICIONALES", "columnHeader");
+  mergeVisual(rows, merges, row + 1, 15, row + 1, 17, "REMATE", "columnHeader");
+  mergeVisual(rows, merges, row + 1, 18, row + 1, 22, "BASE/ADICIONALES", "columnHeader");
+  mergeVisual(rows, merges, row + 1, 23, row + 1, 26, "REMATE", "columnHeader");
+  for (let visualRow = 0; visualRow < 3; visualRow += 1) {
+    const left = attempts[visualRow * 2];
+    const right = attempts[visualRow * 2 + 1];
+    const dataRow = row + 2 + visualRow;
+    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, [left?.charro, right?.charro].filter(Boolean).join(" / "), "participant");
+    mergeVisual(rows, merges, dataRow, 10, dataRow, 14, left ? attemptGoodExcludingTime(left) : "", "scoreCell");
+    mergeVisual(rows, merges, dataRow, 15, dataRow, 17, attemptRemate(left), "scoreCell");
+    mergeVisual(rows, merges, dataRow, 18, dataRow, 22, right ? attemptGoodExcludingTime(right) : "", "scoreCell");
+    mergeVisual(rows, merges, dataRow, 23, dataRow, 26, attemptRemate(right), "scoreCell");
+    mergeVisual(rows, merges, dataRow, 27, dataRow, 28, finite(left?.individualBadPoints) + finite(right?.individualBadPoints), "badScoreCell");
+    mergeVisual(rows, merges, dataRow, 29, dataRow, 29, left || right ? attemptTimePoints(left) + attemptTimePoints(right) : "", "scoreCell");
+    mergeVisual(rows, merges, dataRow, 30, dataRow, 32, left || right ? finite(left?.total) + finite(right?.total) : "", "totalCell");
+  }
+  mergeVisual(rows, merges, row + 5, 2, row + 5, 9, "SUPLENTE", "substitute");
+  mergeVisual(rows, merges, row + 5, 10, row + 5, 16, "TERMINADO EN", "plainLabel");
+  mergeVisual(rows, merges, row + 5, 17, row + 5, 19, sectionTime(section), "controlBox");
+  mergeVisual(rows, merges, row + 5, 20, row + 5, 21, "MIN.", "plainLabel");
+  mergeVisual(rows, merges, row + 5, 22, row + 5, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
+  mergeVisual(rows, merges, row + 5, 29, row + 5, 32, section.teamPenaltyTotal || "-", "controlBox");
+  buildPostSectionControls(rows, merges, row + 6, control);
+}
+
+function buildPasoVisual(rows, merges, section, row, sideValue, control) {
+  const attempt = section.attempts[0];
+  mergeVisual(rows, merges, row, 1, row + 2, 1, sideValue, "documentControl");
+  mergeVisual(rows, merges, row, 2, row, 9, "PASO DE LA MUERTE", "sectionTitle");
+  mergeVisual(rows, merges, row + 1, 2, row + 2, 9, attempt?.charro || "", "participant");
+  mergeVisual(rows, merges, row, 10, row, 12, "1ra VUELTA", "groupHeader");
+  mergeVisual(rows, merges, row, 13, row, 15, "2da VUELTA", "groupHeader");
+  mergeVisual(rows, merges, row, 16, row, 27, "JINETEADA", "groupHeader");
+  mergeVisual(rows, merges, row, 28, row, 30, "MALOS", "badHeader");
+  mergeVisual(rows, merges, row, 31, row, 32, "TOTAL", "groupHeader");
+  const labels = ["BASE", "BASE", "DISTANCIA", "CUARTA", "REPAROS", "OREJA C/P", "", ""];
+  const ranges = [[10, 12], [13, 15], [16, 18], [19, 21], [22, 24], [25, 27], [28, 30], [31, 32]];
+  const values = pasoScoreValues(attempt);
+  ranges.forEach(([start, end], index) => {
+    mergeVisual(rows, merges, row + 1, start, row + 1, end, labels[index], index === 6 ? "badHeader" : "columnHeader");
+    mergeVisual(rows, merges, row + 2, start, row + 2, end, values[index], index === 6 ? "badScoreCell" : index === 7 ? "totalCell" : "scoreCell");
+  });
+  mergeVisual(rows, merges, row + 3, 2, row + 3, 9, "SUPLENTE", "substitute");
+  mergeVisual(rows, merges, row + 3, 10, row + 3, 16, "TIEMPO EN SALIR", "plainLabel");
+  mergeVisual(rows, merges, row + 3, 17, row + 3, 19, sectionTime(section), "controlBox");
+  mergeVisual(rows, merges, row + 3, 20, row + 3, 21, "MIN.", "plainLabel");
+  mergeVisual(rows, merges, row + 3, 22, row + 3, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
+  mergeVisual(rows, merges, row + 3, 29, row + 3, 32, section.teamPenaltyTotal || "-", "controlBox");
+  buildPostSectionControls(rows, merges, row + 4, control);
+}
+
+function buildPostSectionControls(rows, merges, row, control) {
+  mergeVisual(rows, merges, row, 22, row, 25, control?.previousTotal ?? "", "controlBox");
+  mergeVisual(rows, merges, row, 26, row, 28, control?.currentSuerteTotal ?? "", "controlBox");
+  mergeVisual(rows, merges, row, 29, row, 32, control?.newAccumulatedTotal ?? "", "controlBox");
+}
+
+function buildClosingVisual(rows, merges, snapshot, institutional, row) {
+  mergeVisual(rows, merges, row, 2, row, 5, snapshot.badPoints.total, "totalCell");
+  mergeVisual(rows, merges, row, 6, row, 12, "TOTAL, PUNTOS MALOS", "badHeader");
+  mergeVisual(rows, merges, row + 1, 15, row + 1, 25, "PUNTUACIÓN FINAL", "finalLabel");
+  mergeVisual(rows, merges, row + 1, 26, row + 1, 32, snapshot.finalScore, "finalScore");
+  const signatures = snapshot.documentalControls.signatures || [];
+  const signatureRanges = [[2, 9], [10, 17], [18, 25], [26, 32]];
+  signatureRanges.forEach(([start, end], index) => {
+    mergeVisual(rows, merges, row + 3, start, row + 3, end, signatures[index]?.label || "", "signatureLabel");
+    mergeVisual(rows, merges, row + 4, start, row + 4, end, "", "signatureLine");
+  });
+  mergeVisual(rows, merges, row + 5, 6, row + 5, 13, institutional.conadeName, "footer");
+  mergeVisual(rows, merges, row + 5, 14, row + 5, 32, institutional.sportsSecretariatPeriod, "footerRed");
+  mergeVisual(rows, merges, row + 6, 6, row + 7, 32, `“${institutional.institutionalQuote}”`, "footerRed");
+}
+
+function headerField(rows, merges, row, labelStart, labelEnd, label, valueStart, valueEnd, value) {
+  mergeVisual(rows, merges, row, labelStart, row, labelEnd, label, "plainLabel");
+  mergeVisual(rows, merges, row, valueStart, row, valueEnd, value || "", "headerValue");
+}
+
+function mergeVisual(rows, merges, startRow, startCol, endRow, endCol, value, style) {
+  for (let row = startRow; row <= endRow; row += 1) {
+    for (let col = startCol; col <= endCol; col += 1) putVisual(rows, row, col, "", style);
+  }
+  putVisual(rows, startRow, startCol, value, style);
+  if (startRow !== endRow || startCol !== endCol) merges.push(`${columnName(startCol)}${startRow}:${columnName(endCol)}${endRow}`);
+}
+
+function putVisual(rows, row, col, value, style) {
+  rows[row - 1][col - 1] = C(value ?? "", style);
+}
+
+function calaDistanceHeading(attempt) {
+  const detail = calculationItems(attempt?.calculationDetail).find((item) => item?.type === "cala_punta");
+  const meters = finiteOrBlank(detail?.details?.metrosCalificados ?? detail?.details?.metros);
+  const times = finiteOrBlank(detail?.details?.piquetes);
+  return `${meters === "" ? "_____" : meters} METROS EN ${times === "" ? "_____" : times} TIEMPOS`;
+}
+
+function calaScoreValues(attempt) {
+  if (!attempt) return Array(8).fill("");
+  const cala = attempt.documentalEvidence?.cala;
   return [
-    [C("CHARRO", "header"), C("BASE", "header"), C("PRETAL DE GASA", "header"), C("1 MANO", "header"), C("PIERNAS", "header"), C("TENTEMOSO", "header"), C("VERIJERO", "header"), C("PRETAL", "header"), C("CAERSE Y LEV.", "header"), C(bajarLabel, "header"), C("TOTAL", "header"), C("MALOS", "redHeader"), C("T", "header"), C("TOTAL FINAL", "header"), C("DETALLE", "header")],
-    [charro, attempt.base || 0, appliedPoints(attempt, suerte, ["Gasa"]), appliedPoints(attempt, suerte, ["1 Mano"]), appliedPoints(attempt, suerte, ["Piernas"]), appliedPoints(attempt, suerte, ["Tentemozo"]), appliedPoints(attempt, suerte, ["Verijero"]), appliedPoints(attempt, suerte, ["Pretal"]), appliedPoints(attempt, suerte, ["Caer"]), appliedPoints(attempt, suerte, ["Bajar"]), goodPoints(attempt), attempt.infr || 0, attempt.tiempo || "", calculateAttemptTotal(attempt), describeAttempt(attempt, suerte)],
-    [C("SUPLENTE", "whiteHeader"), ""],
-    [C("INFRACCION AL EQUIPO", "whiteHeader"), teamPenalty]
+    finiteOrBlank(attempt.baseSelection?.total),
+    finiteOrBlank(cala?.puntaDistancePoints),
+    finiteOrBlank(cala?.puntaTimePoints),
+    selectionTotal(attempt.additionalSelections, /lado_derecho/),
+    selectionTotal(attempt.additionalSelections, /lado_izquierdo/),
+    selectionTotal(attempt.additionalSelections, /medio_derecho/),
+    selectionTotal(attempt.additionalSelections, /medio_izquierdo/),
+    selectionTotal(attempt.additionalSelections, /cambio_rectangulo/)
   ];
 }
 
-function buildManganasVisualRows(charro, attempts, suerteId, teamPenalty = 0) {
-  const suerte = getSuerte(suerteId);
+function jineteoScoreValues(attempt, kind) {
+  if (!attempt) return Array(13).fill("");
+  const additional = attempt.additionalSelections || [];
+  const oneHandIndex = kind === "toro" ? 2 : 3;
+  const legsIndex = kind === "toro" ? 3 : 2;
+  const values = Array(13).fill("");
+  values[0] = finiteOrBlank(attempt.baseSelection?.total);
+  values[1] = selectionTotalByRuleIds(additional, [`${kind}_adic_pretal_gaza_dos_manos`]);
+  values[oneHandIndex] = selectionTotalByRuleIds(additional, [`${kind}_adic_una_mano`]);
+  values[legsIndex] = selectionTotalByRuleIds(additional, [`${kind}_adic_jugar_piernas`]);
+  values[4] = selectionTotalByRuleIds(additional, [`${kind}_adic_tentemozo`]);
+  values[5] = selectionTotalByRuleIds(additional, [`${kind}_adic_quitar_verijero`]);
+  values[6] = selectionTotalByRuleIds(additional, [`${kind}_adic_quitar_gaza_tentemozo`]);
+  values[7] = selectionTotalByRuleIds(additional, [`${kind}_adic_levanta_sin_ayuda`, `${kind}_adic_levanta_con_ayuda`]);
+  values[8] = selectionTotalByRuleIds(additional, [kind === "toro" ? "toro_adic_bajar_sin_lazo" : "yegua_adic_oreja_cruzar_pierna"]);
+  values[9] = attemptGoodExcludingTime(attempt);
+  values[10] = attempt.individualBadPoints;
+  values[11] = attemptTimePoints(attempt);
+  values[12] = attempt.total;
+  return values;
+}
+
+function calaBadPointDisplay(item) {
+  if (!item) return "";
+  const code = String(item.documentCode || "").trim();
+  return code ? `${code}\n${finite(item.value)}` : finite(item.value);
+}
+
+function attemptTimePoints(attempt) {
+  return finite(attempt?.documentalEvidence?.timePoints?.value);
+}
+
+function sectionTimePoints(section) {
+  return (section?.attempts || []).reduce((sum, attempt) => sum + attemptTimePoints(attempt), 0);
+}
+
+function attemptGoodExcludingTime(attempt) {
+  return finite(attempt?.goodPoints) - attemptTimePoints(attempt);
+}
+
+function attemptNetExcludingTime(attempt) {
+  return finite(attempt?.total) - attemptTimePoints(attempt);
+}
+
+function accumulatedControl(snapshot, sectionId) {
+  return snapshot?.documentalControls?.accumulatedBySection?.[sectionId] || null;
+}
+
+function selectionTotalByRuleIds(items, ruleIds) {
+  const allowed = new Set(ruleIds);
+  return (items || []).reduce((sum, item) => {
+    const ruleId = String(item?.selectedRuleId || item?.ruleId || item?.id || "");
+    return allowed.has(ruleId) ? sum + finite(item.total ?? item.resolvedValue ?? item.value) : sum;
+  }, 0);
+}
+
+function pasoScoreValues(attempt) {
+  if (!attempt) return Array(8).fill("");
+  const paso = attempt.documentalEvidence?.paso;
   return [
-    [C("CHARRO", "header"), C("1er TIRO BUENOS", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"), C("2do TIRO BUENOS", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"), C("3er TIRO BUENOS", "header"), C("MALOS", "redHeader"), C("TOTAL", "header"), C("T", "header"), C("TOTAL", "header"), C("DETALLE", "header")],
-    [charro, ...attemptTriplet(attempts[0]), ...attemptTriplet(attempts[1]), ...attemptTriplet(attempts[2]), attempts.map((attempt) => attempt?.tiempo).filter(Boolean).join(" | "), attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0), attempts.map((attempt, index) => `T${index + 1}: ${describeAttempt(attempt, suerte)}`).join(" | ")],
-    [C("SUPLENTE", "whiteHeader"), ""],
-    [C("TERMINADO EN", "whiteHeader"), "", C("MIN.", "whiteHeader"), "", C("INFRACCION AL EQUIPO", "whiteHeader"), teamPenalty]
+    finiteOrBlank(paso?.firstLapBase),
+    finiteOrBlank(paso?.secondLapBase),
+    selectionTotal(attempt.additionalSelections, /distancia/),
+    selectionTotal(attempt.additionalSelections, /cuartear|cuarta/),
+    selectionTotal(attempt.additionalSelections, /levantar|reparo/),
+    selectionTotal(attempt.additionalSelections, /oreja|pierna|apearse/),
+    attempt.individualBadPoints,
+    attempt.total
   ];
+}
+
+function attemptRemate(attempt) {
+  return attempt?.documentalEvidence?.remate?.remateLabel || "";
+}
+
+function sectionTime(section) {
+  const values = (section?.attempts || []).map((attempt) =>
+    attempt?.documentalEvidence?.officialTime?.formatted || ""
+  ).filter(Boolean);
+  return values.at(-1) || "";
+}
+
+function badPointsControlValue(snapshot, sectionId) {
+  return snapshot.documentalControls?.badPointsBySection?.[sectionId]?.value ?? "";
+}
+
+function selectionTotal(selections, pattern) {
+  const matches = (selections || []).filter((selection) => pattern.test(selectionId(selection)));
+  return matches.length ? matches.reduce((sum, selection) => sum + selectionPoints(selection), 0) : "";
+}
+
+function selectionId(selection) {
+  return String(selection?.selectedRuleId || selection?.ruleId || selection?.id || "").toLowerCase();
+}
+
+function selectionPoints(selection) {
+  return finite(selection?.total ?? selection?.resolvedValue ?? selection?.value);
+}
+
+function sumAttempts(attempts) {
+  return attempts.reduce((sum, attempt) => sum + finite(attempt?.total), 0);
+}
+
+function finiteOrBlank(value) {
+  if (value === null || value === undefined || value === "") return "";
+  const number = Number(value);
+  return Number.isFinite(number) ? number : "";
+}
+
+function calculationItems(value) {
+  if (Array.isArray(value)) return value;
+  return value && typeof value === "object" ? [value] : [];
+}
+
+function ordinalSuffix(value) {
+  return value === 1 ? "er" : value === 2 ? "do" : "er";
+}
+
+function columnName(colNumber) {
+  let name = "";
+  let current = colNumber;
+  while (current > 0) {
+    const remainder = (current - 1) % 26;
+    name = String.fromCharCode(65 + remainder) + name;
+    current = Math.floor((current - 1) / 26);
+  }
+  return name;
+}
+
+function describeFrozenAttempt(attempt) {
+  const labels = [];
+  if (attempt.baseSelection?.label) labels.push(attempt.baseSelection.label);
+  for (const selection of attempt.additionalSelections || []) if (selection.label) labels.push(`+ ${selection.label}`);
+  for (const selection of attempt.infractions || []) if (selection.label) labels.push(`- ${selection.label}`);
+  if (attempt.classification?.classificationLabel) labels.push(`CLAS: ${attempt.classification.classificationLabel}`);
+  if (attempt.sportStatus) labels.push(`ESTADO: ${attempt.sportStatus}`);
+  if (attempt.note) labels.push(`NOTA: ${attempt.note}`);
+  return labels.join("; ");
+}
+
+function sumSelectionTotals(selections) {
+  return (selections || []).reduce((sum, selection) => sum + finite(selection.total), 0);
+}
+
+function normalizePackageOptions(input) {
+  if (typeof input === "string") return { charreadaId: input };
+  return input && typeof input === "object" ? { ...input } : {};
+}
+
+function compactTournament(tournament) {
+  return {
+    id: tournament.id || "",
+    name: tournament.name || "",
+    date: tournament.date || "",
+    venue: tournament.venue || ""
+  };
+}
+
+function compactCharreada(charreada) {
+  return {
+    id: charreada.id || "",
+    tournamentId: charreada.tournamentId || "",
+    name: charreada.name || "",
+    date: charreada.date || "",
+    startTime: charreada.startTime || "",
+    status: charreada.status || ""
+  };
 }
 
 function C(value, style) {
   return { value, style };
 }
 
-function pad(cells, length) {
-  const output = cells.flat();
-  while (output.length < length) output.push("");
-  return output.slice(0, length);
-}
-
-function buildCalaRows(charreada, team) {
-  const suerte = getSuerte("cala");
-  const attempt = getAttempt(charreada.id, team.id, "cala", 0);
-  const teamPenalty = getTeamLevelPenalty(charreada.id, team.id, "cala");
-
-  return [
-    [
-      "CALA DE CABALLO",
-      "BASE",
-      "PUNTA",
-      "METROS",
-      "TIEMPOS",
-      "ADICIONALES",
-      "MALOS",
-      "TOTAL MALOS",
-      "PUNTOS PARCIALES",
-      "DETALLE"
-    ],
-    [
-      team.roster?.cala || "",
-      attempt.base || 0,
-      attempt.puntaPts || 0,
-      attempt.puntaMetros || 0,
-      attempt.puntaPiquetes || 1,
-      attempt.adic || 0,
-      attempt.infr || 0,
-      attempt.infr || 0,
-      calculateAttemptTotal(attempt),
-      describeAttempt(attempt, suerte)
-    ],
-    ["SUPLENTE", team.roster?.suplenteCala || ""],
-    ["INFRACCION AL EQUIPO", teamPenalty]
-  ];
-}
-
-function buildPialesRows(charreada, team) {
-  const suerte = getSuerte("piales");
-  const attempts = getAttempts(charreada.id, team.id, "piales");
-  return [
-    [
-      "PIALES EN EL LIENZO",
-      "1er TIRO BUENO",
-      "1er TIRO MALOS",
-      "1er TIRO TOTAL",
-      "2do TIRO BUENO",
-      "2do TIRO MALOS",
-      "2do TIRO TOTAL",
-      "3er TIRO BUENO",
-      "3er TIRO MALOS",
-      "3er TIRO TOTAL",
-      "TOTAL",
-      "DETALLE"
-    ],
-    [
-      team.roster?.piales || "",
-      ...attemptTriplet(attempts[0]),
-      ...attemptTriplet(attempts[1]),
-      ...attemptTriplet(attempts[2]),
-      getTeamSuerteTotal(charreada.id, team.id, "piales"),
-      attempts.map((attempt, index) => `T${index + 1}: ${describeAttempt(attempt, suerte)}`).join(" | ")
-    ],
-    ["SUPLENTE", team.roster?.suplentePiales || ""],
-    ["INFRACCION AL EQUIPO", getTeamLevelPenalty(charreada.id, team.id, "piales")]
-  ];
-}
-
-function buildColeaderoRows(charreada, team) {
-  const suerte = getSuerte("colas");
-  const collection = getCollection(charreada.id, team.id, "colas") || [];
-  const rows = [
-    [
-      "COLEADERO",
-      "COLEADOR",
-      "1a PASADA BUENOS",
-      "1a PASADA MALOS",
-      "1a PASADA TOTAL",
-      "2a PASADA BUENOS",
-      "2a PASADA MALOS",
-      "2a PASADA TOTAL",
-      "3a PASADA BUENOS",
-      "3a PASADA MALOS",
-      "3a PASADA TOTAL",
-      "TOTAL",
-      "DETALLE"
-    ]
-  ];
-
-  for (let index = 0; index < 3; index += 1) {
-    const attempts = collection[index] || [];
-    rows.push([
-      "",
-      team.roster?.colas?.[index] || `Coleador ${index + 1}`,
-      ...attemptTriplet(attempts[0]),
-      ...attemptTriplet(attempts[1]),
-      ...attemptTriplet(attempts[2]),
-      attempts.reduce((sum, attempt) => sum + calculateAttemptTotal(attempt), 0),
-      attempts.map((attempt, attemptIndex) => `P${attemptIndex + 1}: ${describeAttempt(attempt, suerte)}`).join(" | ")
-    ]);
-  }
-
-  rows.push(["SUPLENTE", team.roster?.suplenteColas || ""]);
-  rows.push(["INFRACCION AL EQUIPO", getTeamLevelPenalty(charreada.id, team.id, "colas")]);
-  return rows;
-}
-
-function buildJineteoRows(charreada, team, suerteId, title) {
-  const suerte = getSuerte(suerteId);
-  const attempt = getAttempt(charreada.id, team.id, suerteId, 0);
-  return [
-    [
-      title,
-      "BASE",
-      "PRETAL DE GASA",
-      "1 MANO",
-      "PIERNAS",
-      "TENTEMOSO",
-      "VERIJERO",
-      "PRETAL",
-      "CAERSE Y LEVANTARSE",
-      suerteId === "toro" ? "BAJARSE SIN SER LAZADO" : "BAJAR OREJA C/PIERN",
-      "TOTAL",
-      "MALOS",
-      "T",
-      "TOTAL FINAL",
-      "DETALLE"
-    ],
-    [
-      team.roster?.[suerteId] || "",
-      attempt.base || 0,
-      appliedPoints(attempt, suerte, ["Gasa"]),
-      appliedPoints(attempt, suerte, ["1 Mano"]),
-      appliedPoints(attempt, suerte, ["Piernas"]),
-      appliedPoints(attempt, suerte, ["Tentemozo"]),
-      appliedPoints(attempt, suerte, ["Verijero"]),
-      appliedPoints(attempt, suerte, ["Pretal"]),
-      appliedPoints(attempt, suerte, ["Caer"]),
-      appliedPoints(attempt, suerte, suerteId === "toro" ? ["Bajar sin lazo"] : ["Bajar Oreja"]),
-      goodPoints(attempt),
-      attempt.infr || 0,
-      attempt.tiempo || "",
-      calculateAttemptTotal(attempt),
-      describeAttempt(attempt, suerte)
-    ],
-    ["SUPLENTE", team.roster?.[`suplente_${suerteId}`] || ""],
-    ["INFRACCION AL EQUIPO", getTeamLevelPenalty(charreada.id, team.id, suerteId)]
-  ];
-}
-
-function buildTernaRows(charreada, team) {
-  const lazo = getSuerte("lazo");
-  const pial = getSuerte("pial_ruedo");
-  const lazoAttempts = getAttempts(charreada.id, team.id, "lazo");
-  const pialAttempts = getAttempts(charreada.id, team.id, "pial_ruedo");
-  const ternaRoster = getTernaRosterParts(team.roster);
-
-  const rows = [
-    [
-      "TERNA EN EL RUEDO",
-      "OPORTUNIDAD",
-      "SUERTE",
-      "CHARRO",
-      "BASE/ADICIONALES",
-      "REMATE",
-      "MALOS",
-      "T",
-      "TOTAL",
-      "DETALLE"
-    ]
-  ];
-
-  lazoAttempts.forEach((attempt, index) => {
-    rows.push([
-      "",
-      index + 1,
-      "LAZO A LA CABEZA",
-      ternaRoster[0],
-      goodPoints(attempt),
-      appliedPoints(attempt, lazo, ["Remate"]),
-      attempt.infr || 0,
-      attempt.tiempo || "",
-      calculateAttemptTotal(attempt),
-      describeAttempt(attempt, lazo)
-    ]);
-  });
-
-  pialAttempts.forEach((attempt, index) => {
-    rows.push([
-      "",
-      index + 1,
-      "PIAL EN EL RUEDO",
-      ternaRoster[1],
-      goodPoints(attempt),
-      appliedPoints(attempt, pial, ["Remate"]),
-      attempt.infr || 0,
-      attempt.tiempo || "",
-      calculateAttemptTotal(attempt),
-      describeAttempt(attempt, pial)
-    ]);
-  });
-
-  rows.push(["", "", "TERCER PARTICIPANTE", ternaRoster[2] || "", "", "", "", "", "", ""]);
-  rows.push(["TOTAL TERNA", "", "", "", "", "", "", "", getTeamSuerteTotal(charreada.id, team.id, "lazo") + getTeamSuerteTotal(charreada.id, team.id, "pial_ruedo")]);
-  rows.push(["INFRACCION AL EQUIPO", getTernaTeamLevelPenalty(charreada.id, team.id)]);
-  return rows;
-}
-
-function buildThreeShotRows(charreada, team, suerteId, title) {
-  const suerte = getSuerte(suerteId);
-  const attempts = getAttempts(charreada.id, team.id, suerteId);
-  return [
-    [
-      title,
-      "1er TIRO BUENOS",
-      "1er TIRO MALOS",
-      "1er TIRO TOTAL",
-      "2do TIRO BUENOS",
-      "2do TIRO MALOS",
-      "2do TIRO TOTAL",
-      "3er TIRO BUENOS",
-      "3er TIRO MALOS",
-      "3er TIRO TOTAL",
-      "T",
-      "TOTAL",
-      "DETALLE"
-    ],
-    [
-      team.roster?.[suerteId] || "",
-      ...attemptTriplet(attempts[0]),
-      ...attemptTriplet(attempts[1]),
-      ...attemptTriplet(attempts[2]),
-      attempts.map((attempt) => attempt?.tiempo).filter(Boolean).join(" | "),
-      getTeamSuerteTotal(charreada.id, team.id, suerteId),
-      attempts.map((attempt, index) => `T${index + 1}: ${describeAttempt(attempt, suerte)}`).join(" | ")
-    ],
-    ["SUPLENTE", team.roster?.[`suplente_${suerteId}`] || ""],
-    ["INFRACCION AL EQUIPO", getTeamLevelPenalty(charreada.id, team.id, suerteId)]
-  ];
-}
-
-function buildPasoRows(charreada, team) {
-  const suerte = getSuerte("paso");
-  const attempt = getAttempt(charreada.id, team.id, "paso", 0);
-  return [
-    [
-      "PASO DE LA MUERTE",
-      "1ra VUELTA BASE",
-      "2da VUELTA BASE",
-      "DISTANCIA",
-      "CUARTA",
-      "REPAROS",
-      "OREJA C/P",
-      "MALOS",
-      "TOTAL",
-      "DETALLE"
-    ],
-    [
-      team.roster?.paso || "",
-      appliedPoints(attempt, suerte, ["1ra"]),
-      appliedPoints(attempt, suerte, ["2da"]),
-      appliedPoints(attempt, suerte, ["Distancia"]),
-      appliedPoints(attempt, suerte, ["Cuarta"]),
-      appliedPoints(attempt, suerte, ["Reparos"]),
-      appliedPoints(attempt, suerte, ["Oreja"]),
-      attempt.infr || 0,
-      calculateAttemptTotal(attempt),
-      describeAttempt(attempt, suerte)
-    ],
-    ["SUPLENTE", team.roster?.suplentePaso || ""],
-    ["TIEMPO EN SALIR", attempt.tiempo || ""],
-    ["INFRACCION AL EQUIPO", getTeamLevelPenalty(charreada.id, team.id, "paso")]
-  ];
-}
-
-function getSuerte(id) {
-  return SUERTES.find((suerte) => suerte.id === id);
-}
-
-function getCollection(charreadaId, teamId, suerteId) {
-  return state.scores[scoreKey(charreadaId, teamId, suerteId)];
-}
-
-function getAttempts(charreadaId, teamId, suerteId) {
-  const collection = getCollection(charreadaId, teamId, suerteId);
-  return Array.isArray(collection) ? collection : [];
-}
-
-function getAttempt(charreadaId, teamId, suerteId, attemptIndex) {
-  const collection = getCollection(charreadaId, teamId, suerteId);
-  return collection?.[attemptIndex] || {};
-}
-
-function attemptTriplet(attempt = {}) {
-  return [goodPoints(attempt), attempt.infr || 0, calculateAttemptTotal(attempt)];
-}
-
-function goodPoints(attempt = {}) {
-  if (attempt.desc) return 0;
-  return (Number(attempt.base) || 0) + (Number(attempt.adic) || 0) + (Number(attempt.puntaPts) || 0);
-}
-
-function getTotalMalos(charreadaId, teamId) {
-  const attemptMalos = SUERTES.reduce((sum, suerte) => {
-    const collection = getCollection(charreadaId, teamId, suerte.id);
-    if (!collection) return sum;
-    const attempts = suerte.type === "coleadero" ? collection.flat() : collection;
-    return sum + attempts.reduce((subtotal, attempt) =>
-      subtotal + (Number(attempt.infr) || 0) + getAttemptTeamPenaltyTotal(attempt), 0);
-  }, 0);
-  const resta = getTeamCharreadaResta(charreadaId, teamId);
-  return attemptMalos + (resta < 0 ? Math.abs(resta) : 0);
-}
-
-function getTeamLevelPenalty(charreadaId, teamId, suerteId) {
-  const collection = getCollection(charreadaId, teamId, suerteId);
-  if (!collection) return 0;
-  const attempts = Array.isArray(collection[0]) ? collection.flat() : collection;
-  return attempts.reduce((sum, attempt) => sum + getAttemptTeamPenaltyTotal(attempt), 0);
-}
-
-function getTernaTeamLevelPenalty(charreadaId, teamId) {
-  return getTeamLevelPenalty(charreadaId, teamId, "lazo") + getTeamLevelPenalty(charreadaId, teamId, "pial_ruedo");
-}
-
-function getTernaRosterParts(roster = {}) {
-  const terna = Array.isArray(roster.terna) ? roster.terna : [];
-  return [
-    terna[0] || roster.lazo || "",
-    terna[1] || roster.pial_ruedo || "",
-    terna[2] || roster.terna_auxiliar || ""
-  ];
-}
-
-function buildCalaAdicGrid(attempt = {}) {
-  return {
-    ld: sumAppliedRules(attempt, ["cala_lado_derecho_velocidad", "cala_lado_derecho_pivote"]),
-    li: sumAppliedRules(attempt, ["cala_lado_izquierdo_velocidad", "cala_lado_izquierdo_pivote"]),
-    md: sumAppliedRules(attempt, ["cala_medio_derecho"]),
-    mi: sumAppliedRules(attempt, ["cala_medio_izquierdo"]),
-    cr: sumAppliedRules(attempt, ["cala_cambio_rectangulo_costado"])
-  };
-}
-
-function sumAppliedRules(attempt = {}, ids = []) {
-  const applied = attempt.applied || [];
-  const suerte = getSuerte("cala");
-  const catalog = [
-    ...(suerte?.catalog?.base || []),
-    ...(suerte?.catalog?.adic || []),
-    ...(suerte?.catalog?.infr || [])
-  ];
-
-  let used = false;
-  const total = ids.reduce((sum, id) => {
-    if (!applied.includes(id)) return sum;
-    used = true;
-    const rule = catalog.find((item) => item.id === id);
-    return sum + (Number(rule?.pts) || 0);
-  }, 0);
-  return used ? total : "";
-}
-
-function buildInfrGrid(attempt = {}, suerte, size = 10) {
-  const catalogInfr = suerte?.catalog?.infr || [];
-  const items = [];
-
-  (attempt.applied || []).forEach((id) => {
-    const rule = catalogInfr.find((item) => item.id === id);
-    if (rule) {
-      items.push({
-        label: abbreviateRule(rule),
-        pts: rule.pts
-      });
-    }
-  });
-
-  (attempt.customInfr || []).forEach((item) => {
-    items.push({
-      label: abbreviateCustom(item.label),
-      pts: Number(item.pts) || 0
-    });
-  });
-
-  if (!items.length && Number(attempt.infr || 0) > 0) {
-    items.push({ label: "M", pts: Number(attempt.infr) || 0 });
-  }
-
-  const labels = items.slice(0, size).map((item) => item.label);
-  const values = items.slice(0, size).map((item) => item.pts ? `-${item.pts}` : "");
-
-  while (labels.length < size) labels.push("");
-  while (values.length < size) values.push("");
-
-  return { labels, values };
-}
-
-const RULE_ABBREVIATIONS = {
-  cala_inf_abrir_hocico: "AH",
-  cala_inf_rabear_espiguear: "RE",
-  cala_inf_enjetarse: "ENJ",
-  cala_inf_cachetear: "CAC",
-  cala_inf_estrellar_despapar_gorbetear: "EDG",
-  cala_inf_alborotarse: "ALB",
-  cala_inf_no_correr_recto: "NCR",
-  cala_inf_no_poner_en_mano: "NPM",
-  cala_inf_cambiar_mano: "CM",
-  cala_inf_patada_una_extremidad: "PAT",
-  cala_inf_lados_caminando: "LC",
-  cala_inf_espalda_fin_lado: "EFL",
-  cala_inf_medio_incompleto: "MI",
-  cala_inf_anticiparse: "ANT",
-  cala_inf_ceja_fuera_linea: "CFL",
-  cala_inf_disminuir_velocidad_lado: "DVL",
-  cala_inf_disminuir_velocidad_ceja: "DVC",
-  cala_inf_sangrado: "SAN"
-};
-
-function abbreviateRule(rule) {
-  if (RULE_ABBREVIATIONS[rule.id]) return RULE_ABBREVIATIONS[rule.id];
-  return abbreviateCustom(rule.label);
-}
-
-function abbreviateCustom(label = "") {
-  const clean = String(label)
-    .replace(/\([^)]*\)/g, "")
-    .replace(/[-+]\d+/g, "")
-    .trim();
-  const words = clean.split(/\s+/).filter(Boolean);
-  if (!words.length) return "M";
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.map((word) => word[0]).join("").slice(0, 3).toUpperCase();
-}
-
-function describeAttempt(attempt = {}, suerte) {
-  const labels = [];
-  const catalogItems = [
-    ...(suerte?.catalog?.base || []),
-    ...(suerte?.catalog?.adic || []),
-    ...(suerte?.catalog?.infr || [])
-  ];
-
-  (attempt.applied || []).forEach((id) => {
-    const rule = catalogItems.find((item) => item.id === id);
-    if (rule) labels.push(rule.label);
-  });
-
-  (attempt.customAdic || []).forEach((item) => labels.push(`+${item.pts} ${item.label}`));
-  (attempt.customInfr || []).forEach((item) => labels.push(`-${item.pts} ${item.label}`));
-  if (attempt.desc) labels.push(`DESC: ${attempt.desc}`);
-  if (attempt.note) labels.push(`NOTA: ${attempt.note}`);
-
-  return labels.join("; ");
-}
-
-function appliedPoints(attempt = {}, suerte, labelNeedles = []) {
-  const needles = labelNeedles.map((needle) => needle.toLowerCase());
-  const catalogItems = [
-    ...(suerte?.catalog?.base || []),
-    ...(suerte?.catalog?.adic || [])
-  ];
-
-  return (attempt.applied || []).reduce((sum, id) => {
-    const rule = catalogItems.find((item) => item.id === id);
-    if (!rule) return sum;
-    const label = rule.label.toLowerCase();
-    const matches = needles.some((needle) => label.includes(needle));
-    return matches ? sum + rule.pts : sum;
-  }, 0);
+function D(value, documentFieldId, documentRole) {
+  return { value, documentFieldId, documentRole };
 }
 
 function safeSheetName(name) {
-  return String(name || "Equipo")
-    .replace(/[\\/?*[\]:]/g, " ")
-    .slice(0, 31)
-    .trim() || "Equipo";
+  return String(name || "Equipo").replace(/[\\/?*[\]:]/g, " ").slice(0, 31).trim() || "Equipo";
 }
 
 function downloadBlob(filename, blob) {
@@ -817,4 +845,9 @@ function slug(value) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+function finite(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
 }

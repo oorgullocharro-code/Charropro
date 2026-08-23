@@ -1,18 +1,18 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260708-recovery-001b-panel-status1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260822-scorer-save-next-latency-audit-001-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+} from "./timerRules.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
@@ -44,6 +44,8 @@ export const emptyAttempt = () => ({
   puntaMetrosCalificados: 0,
   puntaCentimetros: 0,
   puntaPiquetes: 1,
+  puntaPuntosDistancia: null,
+  puntaPuntosTiempos: null,
   distanceMeters: 0,
   distanceAdditionalPoints: 0,
   remateId: null,

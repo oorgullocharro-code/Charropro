@@ -11,7 +11,7 @@ const css = read("css/public-portal.css");
 
 assert.match(html, /id="public-portal-root"/);
 assert.match(html, /public-portal\.css\?v=20260728-public-portal-design-system-v2-001-sports-ui-v2/);
-assert.match(html, /torneo-publico\.js\?v=20260822-scorer-save-next-latency-audit-001-v1/);
+assert.match(html, /torneo-publico\.js\?v=20260822-fmch-official-team-sheet-judge-review-001-v1/);
 assert.match(entry, /bootstrapPublicPortal/);
 assert.ok(entry.split("\n").length <= 5, "legacy view entrypoint remains thin");
 

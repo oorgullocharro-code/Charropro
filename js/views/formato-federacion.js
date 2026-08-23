@@ -1,9 +1,12 @@
 import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260822-scorer-save-next-latency-audit-001-v1";
-import { getActiveCharreada, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { loadState, subscribeToLiveUpdates } from "../core/state.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 
 const root = document.getElementById("official-format-root");
-let selectedTeamId = new URLSearchParams(window.location.search).get("team") || "";
+const pageParams = new URLSearchParams(window.location.search);
+const tournamentId = pageParams.get("tournamentId") || "";
+const charreadaId = pageParams.get("charreadaId") || "";
+let selectedTeamId = pageParams.get("team") || "";
 
 loadState();
 render();
@@ -20,7 +23,7 @@ document.addEventListener("click", (event) => {
   }
 
   if (target.dataset.action === "download-official-xlsx") {
-    downloadOfficialFormatXlsx(state.activeCharreadaId);
+    downloadOfficialFormatXlsx({ tournamentId, charreadaId });
   }
 
   if (target.dataset.action === "print-official-sheet") {
@@ -30,11 +33,10 @@ document.addEventListener("click", (event) => {
 
 function render() {
   loadState();
-  const charreada = getActiveCharreada();
-  const official = buildOfficialPackage(state.activeCharreadaId);
+  const official = buildOfficialPackage({ tournamentId, charreadaId });
   const sheets = official.sheets || [];
 
-  if (!charreada || !sheets.length) {
+  if (!tournamentId || !charreadaId || !sheets.length) {
     root.innerHTML = html`
       <main class="official-page">
         <div class="official-toolbar">
@@ -42,7 +44,7 @@ function render() {
         </div>
         <div class="empty">
           <h1>Hoja Federacion</h1>
-          <p>No hay una charreada activa con equipos para mostrar.</p>
+          <p>Abre la hoja desde una charreada especifica para conservar el contexto historico oficial.</p>
         </div>
       </main>
     `;
@@ -90,23 +92,43 @@ function renderSheet(sheet) {
   const rows = sheet.visualRows || sheet.rows || [];
   const mergeInfo = buildMergeInfo(sheet.visualMerges || []);
   const widths = sheet.visualWidths || [];
+  const institutional = sheet.institutional || {};
 
   return html`
-    <table class="official-sheet">
-      <colgroup>
-        ${Array.from({ length: Math.max(...rows.map((row) => row.length), widths.length, 1) }, (_, index) => {
-          const width = Math.max(28, Number(widths[index] || 12) * 7);
-          return html`<col style="width:${width}px">`;
-        }).join("")}
-      </colgroup>
-      <tbody>
-        ${rows.map((row, rowIndex) => html`
-          <tr style="height:${Number(sheet.visualRowHeights?.[rowIndex] || 22)}px">
-            ${row.map((cell, colIndex) => renderCell(cell, rowIndex, colIndex, mergeInfo)).join("")}
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
+    <article class="official-document">
+      <header class="official-institutional-header">
+        <img
+          src="./${escapeHTML(institutional.federationLogo?.path || "")}"
+          alt="Emblema de la Federación Mexicana de Charrería"
+        >
+        <strong>FEDERACIÓN MEXICANA DE CHARRERÍA, A.C.</strong>
+      </header>
+      <table class="official-sheet">
+        <colgroup>
+          ${Array.from({ length: Math.max(...rows.map((row) => row.length), widths.length, 1) }, (_, index) => {
+            const width = Math.max(28, Number(widths[index] || 12) * 7);
+            return html`<col style="width:${width}px">`;
+          }).join("")}
+        </colgroup>
+        <tbody>
+          ${rows.map((row, rowIndex) => html`
+            <tr style="height:${Number(sheet.visualRowHeights?.[rowIndex] || 22)}px">
+              ${row.map((cell, colIndex) => renderCell(cell, rowIndex, colIndex, mergeInfo)).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+      <footer class="official-institutional-footer">
+        <img
+          src="./${escapeHTML(institutional.conadeLogo?.path || "")}"
+          alt="${escapeHTML(institutional.conadeName || "CONADE")}"
+        >
+        <div>
+          <p>${escapeHTML(institutional.sportsSecretariatPeriod || "")}</p>
+          <strong>${escapeHTML(institutional.institutionalQuote || "")}</strong>
+        </div>
+      </footer>
+    </article>
   `;
 }
 

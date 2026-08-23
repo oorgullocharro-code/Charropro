@@ -190,14 +190,14 @@ import {
   createProgramMainOutput,
   destroyProgramMainOutput,
   mountProgramMainOutput
-} from "./programMainOutput.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+} from "./programMainOutput.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import {
   configureAnnouncerMonitor,
   createAnnouncerMonitor,
   destroyAnnouncerMonitor,
   getAnnouncerSnapshot,
   mountAnnouncerMonitor
-} from "./announcerMonitor.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+} from "./announcerMonitor.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import {
   OUTPUT_SYNCHRONIZATION_VERSION,
   buildOutputSynchronizationSnapshot,
@@ -213,7 +213,7 @@ import {
   synchronizeAnnouncerMonitor,
   synchronizeProgramMain,
   validateOutputSynchronizationSnapshot
-} from "./outputSynchronization.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+} from "./outputSynchronization.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import {
   BROADCAST_REALTIME_TRANSPORT_VERSION,
   buildBroadcastRealtimeSnapshot,
@@ -1990,7 +1990,7 @@ export async function connectProductionConsoleRealtime(model, runtime, options =
   }
   runtime.realtimeContractUnsubscribe?.();
   runtime.realtimeContractUnsubscribe = null;
-  const firebaseApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260822-scorer-save-next-latency-audit-001-v1");
+  const firebaseApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1");
   if (options.authorizedContext && !options.adapter) throw consoleError("console-realtime-authorized-context-injection-forbidden");
   const context = options.authorizedContext || await firebaseApi.resolveCurrentBroadcastContext(contextSeed, {
     operation: "publish",

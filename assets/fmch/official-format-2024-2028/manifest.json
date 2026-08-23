@@ -1,0 +1,68 @@
+{
+  "profileId": "FMCH_TEAM_SHEET_2024_2028",
+  "version": "1.0.0",
+  "scope": "DOCUMENT_VERSION_ONLY",
+  "default": false,
+  "futureValidityInferred": false,
+  "sourceDocument": {
+    "name": "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028",
+    "url": "https://fmcharreria.org.mx/wp-content/uploads/HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028.pdf",
+    "sha256": "3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7",
+    "page": 1
+  },
+  "sourceRaster": {
+    "path": "tools/fmch-judge-questionnaire/assets/official-sheet-full.png",
+    "sha256": "c6be367e02a182fd8d2c116cce77e627cc890cc0c98d987073eff31a3e727a5f",
+    "width": 1224,
+    "height": 1931
+  },
+  "assets": [
+    {
+      "fieldIds": [
+        "FMCH.TEAM_SHEET.HEADER.FEDERATION_LOGO"
+      ],
+      "path": "assets/fmch/official-format-2024-2028/fmch-emblem.png",
+      "sha256": "f76354074a3ec45cd731c95e52439a8f8806a7bdeb0aa92f2eff117ae7b0ab56",
+      "mimeType": "image/png",
+      "width": 150,
+      "height": 150,
+      "sourceCrop": {
+        "x": 45,
+        "y": 22,
+        "width": 150,
+        "height": 150
+      }
+    },
+    {
+      "fieldIds": [
+        "FMCH.TEAM_SHEET.FOOTER.CONADE_LOGO",
+        "FMCH.TEAM_SHEET.FOOTER.CONADE_NAME"
+      ],
+      "path": "assets/fmch/official-format-2024-2028/conade-lockup.png",
+      "sha256": "56c192cad952528d60b9e312033ca68246eb9b63a9a01196ef0b4816bede42b5",
+      "mimeType": "image/png",
+      "width": 170,
+      "height": 88,
+      "sourceCrop": {
+        "x": 63,
+        "y": 1828,
+        "width": 170,
+        "height": 88
+      }
+    }
+  ],
+  "texts": [
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.CONADE_NAME",
+      "value": "Comisión Nacional de Cultura Física y Deporte"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.SPORTS_SECRETARIAT_PERIOD",
+      "value": "SECRETARÍA DEL DEPORTE 2024 - 2028"
+    },
+    {
+      "fieldId": "FMCH.TEAM_SHEET.FOOTER.INSTITUTIONAL_QUOTE",
+      "value": "Charrería, Tradición Ecuestre en México. Patrimonio Cultural Inmaterial de la Humanidad"
+    }
+  ]
+}

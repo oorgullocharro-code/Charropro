@@ -1,5 +1,9 @@
 # CHARROPRO-FMCH-OFFICIAL-DOCUMENT-SPORTS-VALIDATION-001
 
+> Dictamen historico superado en materia deportiva por la certificacion final
+> de `FMCH_2026_LIBRE 0.6.0` (`PASS`, P0 `0`). Se conserva como evidencia de la
+> etapa previa; no debe usarse para reabrir los P0 ya resueltos.
+
 ## Dictamen documental
 
 NO APROBADO para implementar el Exportador Oficial FMCH.

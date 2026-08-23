@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260822-scorer-save-next-latency-audit-001-v1",
+      "appVersion": "20260822-fmch-official-team-sheet-judge-review-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "69d7c53824cd50fd762a5c0513696c256102676814c5ceba4d974a68f47d3ffa",
-  "fingerprint": "69d7c53824cd50fd762a5c0513696c256102676814c5ceba4d974a68f47d3ffa"
+  "checksum": "f381ac2068e8f1e46aba8806611d32b09964371946af2fbacc5141dbc745f480",
+  "fingerprint": "f381ac2068e8f1e46aba8806611d32b09964371946af2fbacc5141dbc745f480"
 }

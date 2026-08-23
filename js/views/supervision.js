@@ -1,11 +1,11 @@
 import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { loadState, state } from "../core/state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { loadState, state } from "../core/state.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import {
   signInAuditUser,
   signOutAuditUser,
   subscribeAuditAuth,
   subscribeFirebaseAuditScores
-} from "../core/firebaseSync.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+} from "../core/firebaseSync.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
 
 const root = document.getElementById("supervision-root");

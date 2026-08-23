@@ -8611,6 +8611,62 @@ html.graphic-page #graphic-root {
   background: #d7d7d7;
 }
 
+.official-document {
+  width: max-content;
+  min-width: 1500px;
+  background: #fff;
+}
+
+.official-institutional-header {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 112px;
+  padding: 8px 28px;
+  color: #0a6b1b;
+  font-family: Georgia, serif;
+}
+
+.official-institutional-header img {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+}
+
+.official-institutional-header strong {
+  font-size: 27px;
+  text-align: center;
+}
+
+.official-document .official-sheet tbody tr:first-child {
+  display: none;
+}
+
+.official-institutional-footer {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  min-height: 104px;
+  padding: 8px 32px 16px;
+  color: #cc0000;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.official-institutional-footer img {
+  width: 170px;
+  height: 88px;
+  object-fit: contain;
+}
+
+.official-institutional-footer p,
+.official-institutional-footer strong {
+  display: block;
+  margin: 4px 0;
+}
+
 .official-sheet {
   border-collapse: collapse;
   table-layout: fixed;

@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260822-scorer-save-next-latency-audit-001-v1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260822-scorer-save-next-latency-audit-001-v1";
-import { getTeam, state } from "./state.js?v=20260822-scorer-save-next-latency-audit-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { getTeam, state } from "./state.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);

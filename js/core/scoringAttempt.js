@@ -363,6 +363,7 @@ export function validateScoringAttemptV2(attempt, options = {}) {
   for (const field of ["goodPoints", "individualBadPoints", "teamBadPoints", "netAttemptPoints", "teamAdjustedPoints"]) {
     if (!Number.isFinite(source.scoring?.[field])) errors.push(`attempt-${field}-invalid`);
   }
+  validateCalculationDetail(source.scoring?.calculationDetail, errors);
   if (source.dq?.active && !normalizeText(source.dq.reason, 1000)) errors.push("attempt-dq-reason-required");
   if (source.dq?.active && source.sportState?.status !== "DQ") errors.push("attempt-dq-status-conflict");
   validateClassification(source.sportState?.classification, errors);
@@ -543,6 +544,10 @@ function buildLegacyCalculationDetail(attempt, context) {
     });
   }
   if (suerteId !== "cala" && !attempt.puntaPts && !attempt.puntaMetros) return null;
+  const hasDistancePoints = attempt.puntaPuntosDistancia !== null
+    && attempt.puntaPuntosDistancia !== undefined;
+  const hasTimePoints = attempt.puntaPuntosTiempos !== null
+    && attempt.puntaPuntosTiempos !== undefined;
   return normalizeCalculationDetail({
     type: "cala_punta",
     value: finiteNumber(attempt.puntaPts, 0),
@@ -551,7 +556,10 @@ function buildLegacyCalculationDetail(attempt, context) {
       metros: finiteNumber(attempt.puntaMetros, 0),
       metrosCalificados: finiteNumber(attempt.puntaMetrosCalificados, finiteNumber(attempt.puntaMetros, 0)),
       centimetros: nonNegativeInteger(attempt.puntaCentimetros, 0),
-      piquetes: positiveInteger(attempt.puntaPiquetes, 1)
+      piquetes: positiveInteger(attempt.puntaPiquetes, 1),
+      distancePoints: hasDistancePoints ? finiteNumber(attempt.puntaPuntosDistancia, 0) : null,
+      timePoints: hasTimePoints ? finiteNumber(attempt.puntaPuntosTiempos, 0) : null,
+      totalPoints: finiteNumber(attempt.puntaPts, 0)
     }
   });
 }
@@ -820,6 +828,32 @@ function validateTiming(value, errors) {
   }
   for (const field of ["elapsedMs", "remainingMs"]) {
     if (value[field] !== null && (!Number.isFinite(value[field]) || value[field] < 0)) errors.push(`attempt-timing-${field}-invalid`);
+  }
+}
+
+function validateCalculationDetail(value, errors) {
+  if (!value || value.type !== "cala_punta") return;
+  const details = value.details || {};
+  const distancePoints = details.distancePoints ?? details.puntosDistancia;
+  const timePoints = details.timePoints ?? details.puntosTiempos;
+  const hasDistancePoints = distancePoints !== null && distancePoints !== undefined;
+  const hasTimePoints = timePoints !== null && timePoints !== undefined;
+  if (hasDistancePoints !== hasTimePoints) {
+    errors.push("attempt-cala-punta-evidence-incomplete");
+    return;
+  }
+  if (!hasDistancePoints) return;
+  if (!Number.isFinite(distancePoints) || !Number.isFinite(timePoints)) {
+    errors.push("attempt-cala-punta-evidence-invalid");
+    return;
+  }
+  const totalPoints = distancePoints + timePoints;
+  if (Math.abs(totalPoints - finiteNumber(value.value, 0)) > 0.000001) {
+    errors.push("attempt-cala-punta-evidence-total-mismatch");
+  }
+  if (details.totalPoints !== null && details.totalPoints !== undefined
+      && Math.abs(totalPoints - finiteNumber(details.totalPoints, 0)) > 0.000001) {
+    errors.push("attempt-cala-punta-evidence-detail-total-mismatch");
   }
 }
 
