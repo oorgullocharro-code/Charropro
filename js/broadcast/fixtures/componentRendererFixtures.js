@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "../componentLibrary.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

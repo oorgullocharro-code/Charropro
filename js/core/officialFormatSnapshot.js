@@ -1,9 +1,9 @@
-import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260824-scorer-interaction-latency-001-v1";
-import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260824-scorer-interaction-latency-001-v1";
+import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 import {
   DOCUMENTED_CALA_BAD_POINT_CODES,
   buildCalaDocumentAbbreviationMatrix
-} from "./officialFormatDocumentModel.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "./officialFormatDocumentModel.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 
 export const OFFICIAL_FORMAT_SNAPSHOT_VERSION = "1.2.0";
 

@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260824-scorer-interaction-latency-001-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

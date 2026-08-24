@@ -1,3 +1,3 @@
-import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260824-scorer-interaction-latency-001-v1";
+import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 
 bootstrapPublicPortal();

@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260824-scorer-interaction-latency-001-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });
@@ -46,8 +46,17 @@ assert.equal(queue.pendingCount(), 0);
 const cachedTournament = {
   id: "latency-tournament",
   type: "completo",
-  ruleProfileId: "PRODUCT_BASE",
-  ruleProfileVersion: "1.0.0",
+  ruleProfileId: "FMCH_2026_LIBRE",
+  ruleProfileVersion: "0.6.0",
+  ruleProfileAssignment: {
+    authorityVersion: "1.0.0",
+    tournamentId: "latency-tournament",
+    profileId: "FMCH_2026_LIBRE",
+    version: "0.6.0",
+    status: "active",
+    contentFingerprint: "rptp_0f90f7a3944a82d7",
+    revision: 1
+  },
   ruleOverridesUpdatedAt: "2026-08-24T00:00:00.000Z"
 };
 const cachedCharreada = {

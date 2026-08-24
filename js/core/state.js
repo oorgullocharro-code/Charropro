@@ -1,19 +1,19 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260824-scorer-interaction-latency-001-v1";
-import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260824-scorer-interaction-latency-001-v1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260824-scorer-interaction-latency-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260824-scorer-interaction-latency-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260824-scorer-interaction-latency-001-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260824-scorer-interaction-latency-001-v1";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "./timerRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -26,7 +26,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260824-scorer-interaction-latency-001-v1";
+} from "./localCache.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());
@@ -824,14 +824,17 @@ function expandScoringSuerteIds(suerteIds = []) {
 
 export function getCharreadaCompetitionContext(charreada = getActiveCharreada(), tournament = getActiveTournament()) {
   const legacyCompetitionType = getCompetitionTypeFromTournamentType(tournament?.type);
-  const selectedType = charreada?.competitionType || charreada?.competitionId || legacyCompetitionType;
-  const competition = getCompetitionType(selectedType);
-  const competitionType = charreada?.competitionType || competition.type;
-  const competitionScope = charreada?.competitionScope || competition.scope;
+  const competitionIdType = validateCompetitionType(charreada?.competitionId);
+  const selectedType = charreada?.competitionType
+    || (competitionIdType.valid ? competitionIdType.type : legacyCompetitionType);
+  const selectedTypeValidation = validateCompetitionType(selectedType);
+  const competition = selectedTypeValidation.valid ? getCompetitionType(selectedTypeValidation.type) : null;
+  const competitionType = competition?.type || "";
+  const competitionScope = charreada?.competitionScope || competition?.scope || "";
   const competitionId = charreada?.competitionId || competitionType;
   const rawSuerteIds = Array.isArray(charreada?.suerteIds) && charreada.suerteIds.length
     ? charreada.suerteIds
-    : competition.suerteIds;
+    : competition?.suerteIds || [];
   const suerteIds = expandScoringSuerteIds(rawSuerteIds);
   const context = {
     competitionType,
@@ -862,6 +865,7 @@ export function getCharreadaScoringSuertes(charreada = getActiveCharreada(), tou
   const suertesById = new Map(fullSuertes.map((suerte) => [suerte.id, suerte]));
   const suertes = competitionContext.suerteIds.map((suerteId) => suertesById.get(suerteId)).filter(Boolean);
   const resolved = suertes.length ? suertes : getTournamentSuertes(baseTournament, ruleOverrides);
+  if (!resolved.length) return [];
   scoringSuertesCache = {
     charreada,
     tournament,
@@ -873,6 +877,8 @@ export function getCharreadaScoringSuertes(charreada = getActiveCharreada(), tou
 }
 
 function buildScoringSuertesCacheSignature(charreada = {}, tournament = {}) {
+  const assignment = tournament?.ruleProfileAssignment || {};
+  const policy = tournament?.ruleProfilePolicy || {};
   return [
     charreada?.id || "",
     charreada?.competitionType || "",
@@ -884,6 +890,15 @@ function buildScoringSuertesCacheSignature(charreada = {}, tournament = {}) {
     tournament?.ruleProfileId || tournament?.ruleProfile?.profileId || "",
     tournament?.ruleProfileVersion || tournament?.ruleProfile?.version || "",
     tournament?.effectiveRulesFingerprint || tournament?.ruleProfile?.effectiveRulesFingerprint || "",
+    assignment?.authorityVersion || "",
+    assignment?.status || "",
+    assignment?.revision || "",
+    assignment?.contentFingerprint || "",
+    policy?.policyVersion || "",
+    policy?.policyId || "",
+    policy?.profileId || "",
+    policy?.version || "",
+    policy?.enabled === true ? "enabled" : "",
     tournament?.ruleOverridesUpdatedAt || "",
     state.settings?.globalRuleOverridesUpdatedAt || ""
   ].join("|");

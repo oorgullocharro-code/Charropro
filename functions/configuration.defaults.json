@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260824-scorer-interaction-latency-001-v1",
+      "appVersion": "20260824-global-fmch-scorer-resolution-fix-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "6c739f11f2cde710014d8f9869a0016c9939b15830a74861380ac1a0ce2ccf0c",
-  "fingerprint": "6c739f11f2cde710014d8f9869a0016c9939b15830a74861380ac1a0ce2ccf0c"
+  "checksum": "0bd61c63f2ea1ec437ff3ed9023b5be560df196f5e3522498412541ea9894bc1",
+  "fingerprint": "0bd61c63f2ea1ec437ff3ed9023b5be560df196f5e3522498412541ea9894bc1"
 }

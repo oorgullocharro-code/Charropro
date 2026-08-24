@@ -97,6 +97,15 @@ const LEGACY_TOURNAMENT_TYPE_MAP = Object.freeze({
   pialadero: "pialadero"
 });
 
+const COMPETITION_TYPE_ALIASES = Object.freeze({
+  equipos: "equipos_completo",
+  team: "equipos_completo",
+  teams: "equipos_completo",
+  por_equipos: "equipos_completo",
+  competition_team: "equipos_completo",
+  competencia_por_equipos: "equipos_completo"
+});
+
 export function getCompetitionType(type) {
   const normalizedType = normalizeCompetitionType(type);
   return COMPETITION_TYPE_BY_ID[normalizedType] || COMPETITION_TYPE_BY_ID.equipos_completo;
@@ -128,15 +137,16 @@ export function getCompetitionTypeFromTournamentType(tournamentType) {
 }
 
 export function validateCompetitionType(type) {
-  const normalizedType = String(type || "").trim();
-  if (!normalizedType) {
+  const sourceType = String(type || "").trim();
+  if (!sourceType) {
     return {
       valid: false,
-      type: normalizedType,
+      type: "",
       reason: "missing-type"
     };
   }
 
+  const normalizedType = normalizeCompetitionType(type);
   if (!COMPETITION_TYPE_BY_ID[normalizedType]) {
     return {
       valid: false,
@@ -153,6 +163,13 @@ export function validateCompetitionType(type) {
 }
 
 function normalizeCompetitionType(type) {
-  const validation = validateCompetitionType(type);
-  return validation.valid ? validation.type : "equipos_completo";
+  const sourceType = String(type || "").trim();
+  if (COMPETITION_TYPE_BY_ID[sourceType]) return sourceType;
+  const token = sourceType
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return COMPETITION_TYPE_ALIASES[token] || "";
 }

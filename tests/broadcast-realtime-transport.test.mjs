@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260824-scorer-interaction-latency-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",
