@@ -1,0 +1,1957 @@
+{
+  "generatedAt": "2026-08-24",
+  "tests": 87,
+  "entries": [
+    {
+      "test": "tests/access-session-platform-admin.test.mjs",
+      "targetModules": [
+        "js/core/firebaseSync.js",
+        "js/core/roles.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/scorer-save-latency.test.mjs",
+        "tests/scoring-attempt-v2.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/announcer-monitor.test.mjs",
+      "targetModules": [
+        "BROADCAST_ANNOUNCER_MONITOR_V1.md",
+        "announcer-monitor.html",
+        "css/announcer-monitor.css",
+        "js/broadcast/announcerMonitor.js",
+        "js/broadcast/broadcastRealtimeTransport.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-access-hub.test.mjs",
+        "tests/broadcast-realtime-transport.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/output-synchronization.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/program-main-output.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/backup-foundation.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "functions/backupFoundation.js",
+        "functions/backupService.js",
+        "functions/index.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/backup-restore-validation.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-ux.test.mjs",
+        "tests/release-management.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/backup-restore-validation.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "functions/backupFoundation.js",
+        "functions/index.js",
+        "functions/officialScoreConcurrency.js",
+        "functions/restoreEngine.js",
+        "functions/restoreService.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/backup-foundation.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-ux.test.mjs",
+        "tests/release-management.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-access-hub.test.mjs",
+      "targetModules": [
+        "announcer-monitor.html",
+        "broadcast-studio.html",
+        "css/broadcast-studio.css",
+        "js/broadcast/broadcastAccessHub.js",
+        "jueces.html",
+        "program-main-output.html",
+        "supervision.html"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/announcer-monitor.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/program-main-output.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-action-engine.test.mjs",
+      "targetModules": [
+        "js/broadcast/actionEngine.js",
+        "js/broadcast/broadcastOutput.js",
+        "js/broadcast/broadcastState.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-output.test.mjs",
+        "tests/broadcast-playground.test.mjs",
+        "tests/broadcast-state.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-variables.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-asset-manager.test.mjs",
+      "targetModules": [
+        "js/broadcast/assetManager.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-playground.test.mjs",
+        "tests/production-console.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-component-library.test.mjs",
+      "targetModules": [
+        "js/broadcast/componentLibrary.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-template-engine.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/template-renderer-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-component-renderer.test.mjs",
+      "targetModules": [
+        "js/broadcast/componentLibrary.js",
+        "js/broadcast/componentRenderer.js",
+        "js/broadcast/fixtures/componentRendererFixtures.js",
+        "production-console.html"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-component-library.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/broadcast-template-engine.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/template-renderer-integration.test.mjs",
+        "tests/theme-template-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-data-contract.test.mjs",
+      "targetModules": [
+        "js/broadcast/dataContract.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-output.test.mjs",
+        "tests/broadcast-playground.test.mjs",
+        "tests/production-console.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-output-routing.test.mjs",
+      "targetModules": [
+        "js/broadcast/outputRouting.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/output-synchronization.test.mjs",
+        "tests/production-console.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-output.test.mjs",
+      "targetModules": [
+        "js/broadcast/broadcastOutput.js",
+        "js/broadcast/broadcastState.js",
+        "js/broadcast/dataContract.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-action-engine.test.mjs",
+        "tests/broadcast-data-contract.test.mjs",
+        "tests/broadcast-playground.test.mjs",
+        "tests/broadcast-state.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-variables.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-playground.test.mjs",
+      "targetModules": [
+        "broadcast-playground.html",
+        "js/broadcast/assetManager.js",
+        "js/broadcast/broadcastOutput.js",
+        "js/broadcast/broadcastPlayground.js",
+        "js/broadcast/broadcastState.js",
+        "js/broadcast/dataContract.js",
+        "js/broadcast/fixtures/broadcastPlaygroundFixtures.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-action-engine.test.mjs",
+        "tests/broadcast-asset-manager.test.mjs",
+        "tests/broadcast-data-contract.test.mjs",
+        "tests/broadcast-output.test.mjs",
+        "tests/broadcast-state.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-variables.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-preview-engine.test.mjs",
+      "targetModules": [
+        "js/broadcast/previewEngine.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/production-console.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-program-engine.test.mjs",
+      "targetModules": [
+        "js/broadcast/programEngine.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/output-synchronization.test.mjs",
+        "tests/production-console.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-program-projection.test.mjs",
+      "targetModules": [
+        "fixtures/templateEngineFixtures.js",
+        "js/broadcast/outputRouting.js",
+        "js/broadcast/previewEngine.js",
+        "js/broadcast/productionConsole.js",
+        "js/broadcast/programEngine.js",
+        "js/broadcast/templateRendererIntegration.js",
+        "js/broadcast/themeTemplateIntegration.js",
+        "production-console.html"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-output-routing.test.mjs",
+        "tests/broadcast-preview-engine.test.mjs",
+        "tests/broadcast-program-engine.test.mjs",
+        "tests/broadcast-template-engine.test.mjs",
+        "tests/broadcast-theme-engine.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/output-synchronization.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/template-renderer-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-realtime-transport.test.mjs",
+      "targetModules": [
+        "js/broadcast/broadcastRealtimeTransport.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/announcer-monitor.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/program-main-output.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-state.test.mjs",
+      "targetModules": [
+        "js/broadcast/broadcastState.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-action-engine.test.mjs",
+        "tests/broadcast-output.test.mjs",
+        "tests/broadcast-playground.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-variables.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-studio-workspace.test.mjs",
+      "targetModules": [
+        "broadcast-studio.html",
+        "css/broadcast-studio.css",
+        "js/broadcast/broadcastStudioWorkspace.js",
+        "js/core/firebaseSync.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/broadcast-access-hub.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/scorer-save-latency.test.mjs",
+        "tests/scoring-attempt-v2.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-template-engine.test.mjs",
+      "targetModules": [
+        "fixtures/templateEngineFixtures.js",
+        "js/broadcast/componentLibrary.js",
+        "js/broadcast/templateEngine.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-component-library.test.mjs",
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/template-renderer-integration.test.mjs",
+        "tests/theme-template-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/broadcast-theme-engine.test.mjs",
+      "targetModules": [
+        "js/broadcast/productionConsole.js",
+        "js/broadcast/themeEngine.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/theme-template-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/browser-output.test.mjs",
+      "targetModules": [
+        "browser-output.html",
+        "css/browser-output.css",
+        "js/broadcast/browserOutput.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/cala-rules.test.mjs",
+      "targetModules": [
+        "js/data/calaRules.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/configuration-management.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "functions/configuration.defaults.json",
+        "functions/configurationEngine.js",
+        "functions/configurationService.js",
+        "functions/index.js",
+        "js/core/configurationBootstrap.js",
+        "js/core/firebaseSync.js",
+        "js/core/version.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-live-feed-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/development-infrastructure.test.mjs",
+      "targetModules": [
+        ".firebaserc",
+        ".gitignore",
+        "firebase.json",
+        "storage.rules",
+        "tools/development/emulatorSmokeTest.mjs",
+        "tools/development/environmentFoundation.mjs"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/firebase-broadcast-rules.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "js/broadcast/broadcastRealtimeTransport.js",
+        "js/core/firebaseSync.js"
+      ],
+      "category": "FIREBASE_RULES_OR_EMULATOR",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/announcer-monitor.test.mjs",
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-realtime-transport.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/firebase-public-rules.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "functions/package.json"
+      ],
+      "category": "FIREBASE_RULES_OR_EMULATOR",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-ux.test.mjs",
+        "tests/release-management.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "functions/configuration.defaults.json",
+        "functions/firebaseRestCas.js",
+        "functions/index.js",
+        "functions/package.json",
+        "functions/ruleProfileLifecycleService.js",
+        "js/core/firebaseSync.js"
+      ],
+      "category": "FIREBASE_RULES_OR_EMULATOR",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/firebase-runtime-local.test.mjs",
+      "targetModules": [
+        "js/core/firebaseRuntime.js"
+      ],
+      "category": "FIREBASE_RULES_OR_EMULATOR",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/fmch-2026-cala-scorer.test.mjs",
+      "targetModules": [
+        "index.html",
+        "js/app.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js",
+        "js/core/state.js",
+        "js/data/calaRules.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/cala-rules.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/fmch-judge-questionnaire.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js",
+        "js/core/state.js",
+        "js/data/fmch2026JineteosRules.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js",
+        "js/core/state.js",
+        "js/core/timerRules.js",
+        "js/data/fmch2026ManganasPasoRules.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js",
+        "js/core/state.js",
+        "js/data/fmch2026PialesColeaderoRules.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/fmch-2026-rule-profile-certification.test.mjs",
+      "targetModules": [
+        "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001/CERTIFICATION_RECORD.json",
+        "js/core/scoringAttempt.js",
+        "js/data/ruleProfileTemporalPolicy.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/productive-rule-profile-policy.test.mjs",
+        "tests/rule-profile-engine.test.mjs",
+        "tests/rule-profile-lifecycle-authority.test.mjs",
+        "tests/rule-profile-temporal-policy.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/fmch-2026-terna-complete.test.mjs",
+      "targetModules": [
+        "js/app.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js",
+        "js/core/state.js",
+        "js/core/timerRules.js",
+        "js/data/fmch2026TernaRules.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/fmch-judge-questionnaire.test.mjs",
+      "targetModules": [
+        "index.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/scorer-responsive-components.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/full-scorer-integration.test.mjs",
+      "targetModules": [
+        "js/app.js",
+        "js/core/flow.js",
+        "js/core/pendingScoreReview.js",
+        "js/core/state.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/rule-profile-engine.test.mjs",
+        "tests/scorer-information-hierarchy-compaction.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/live-bindings.test.mjs",
+      "targetModules": [
+        "js/broadcast/liveBindings.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/local-runtime-seed.test.mjs",
+      "targetModules": [
+        "tools/development/localRuntimeSeed.mjs"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/terna-rule-catalog-resolution-audit-003.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/official-format-authoritative-snapshot.test.mjs",
+      "targetModules": [
+        "CHARROPRO-FMCH-OFFICIAL-DOCUMENT-DATA-MAPPING-001/FIELD_MAPPING.json",
+        "CHARROPRO-FMCH-OFFICIAL-FORMAT-CERTIFICATION-STATE-RECONCILIATION-001/FIELD_RECONCILIATION.json",
+        "assets/fmch/official-format-2024-2028/manifest.json",
+        "js/core/officialFormat.js",
+        "js/core/officialFormatSnapshot.js",
+        "js/core/scoringAttempt.js"
+      ],
+      "category": "OFFICIAL_FORMAT",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/scorer-information-hierarchy-compaction.test.mjs",
+        "tests/scorer-responsive-components.test.mjs",
+        "tests/scorer-screen-by-screen-ux-refinement.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/official-format-html-print-geometry.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "formato-federacion.html",
+        "js/core/officialFormatDocumentModel.js",
+        "js/core/officialFormatHtml.js",
+        "js/data/calaRules.js",
+        "js/views/formato-federacion.js"
+      ],
+      "category": "OFFICIAL_FORMAT",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/cala-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/scorer-information-hierarchy-compaction.test.mjs",
+        "tests/scorer-responsive-components.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/official-format-pre-judge-final-corrections.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/core/officialFormat.js",
+        "js/core/officialFormatHtml.js",
+        "js/core/officialFormatSnapshot.js",
+        "js/views/formato-federacion.js"
+      ],
+      "category": "OFFICIAL_FORMAT",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/scorer-information-hierarchy-compaction.test.mjs",
+        "tests/scorer-responsive-components.test.mjs",
+        "tests/scorer-screen-by-screen-ux-refinement.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/official-format-semantic-field-certification.test.mjs",
+      "targetModules": [
+        "CHARROPRO-FMCH-OFFICIAL-DOCUMENT-DATA-MAPPING-001/FIELD_MAPPING.json",
+        "CHARROPRO-FMCH-OFFICIAL-DOCUMENT-SPECIFICATION-001/FIELD_DICTIONARY.json",
+        "CHARROPRO-FMCH-OFFICIAL-FORMAT-CERTIFICATION-STATE-RECONCILIATION-001/FIELD_RECONCILIATION.json",
+        "css/styles.css",
+        "js/core/officialFormat.js",
+        "js/core/officialFormatHtml.js",
+        "js/core/officialFormatSnapshot.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js"
+      ],
+      "category": "OFFICIAL_FORMAT",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/production-nav.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/official-score-concurrency.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "functions/index.js",
+        "functions/officialScoreConcurrency.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-ux.test.mjs",
+        "tests/release-management.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/official-timer-authority-sync.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "firebase-rules-auditoria.json",
+        "js/app.js",
+        "js/broadcast/announcerMonitor.js",
+        "js/broadcast/outputRouting.js",
+        "js/core/firebaseSync.js",
+        "js/core/sync.js",
+        "js/core/timerRules.js",
+        "js/views/cronometro-control.js",
+        "js/views/cronometro-pantalla.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/announcer-monitor.test.mjs",
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-output-routing.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/operational-validation-corrections-002.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js",
+        "js/core/pendingScoreReview.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js",
+        "js/data/fmch2026TernaRules.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/output-synchronization.test.mjs",
+      "targetModules": [
+        "js/broadcast/announcerMonitor.js",
+        "js/broadcast/outputRouting.js",
+        "js/broadcast/outputSynchronization.js",
+        "js/broadcast/programEngine.js",
+        "js/broadcast/programMainOutput.js"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/announcer-monitor.test.mjs",
+        "tests/broadcast-output-routing.test.mjs",
+        "tests/broadcast-program-engine.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/program-main-output.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/pending-score-review-workflow.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "js/app.js",
+        "js/core/firebaseSync.js",
+        "js/core/pendingScoreReview.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/production-console.test.mjs",
+      "targetModules": [
+        "css/production-console.css",
+        "js/broadcast/actionEngine.js",
+        "js/broadcast/assetManager.js",
+        "js/broadcast/broadcastOutput.js",
+        "js/broadcast/broadcastRealtimeTransport.js",
+        "js/broadcast/broadcastState.js",
+        "js/broadcast/componentLibrary.js",
+        "js/broadcast/componentRenderer.js",
+        "js/broadcast/dataContract.js",
+        "js/broadcast/outputRouting.js",
+        "js/broadcast/outputSynchronization.js",
+        "js/broadcast/previewEngine.js",
+        "js/broadcast/productionConsole.js",
+        "js/broadcast/programEngine.js",
+        "js/broadcast/programMainOutput.js",
+        "js/broadcast/templateEngine.js",
+        "js/broadcast/templateRendererIntegration.js",
+        "js/broadcast/themeEngine.js",
+        "js/broadcast/themeTemplateIntegration.js",
+        "production-console.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/announcer-monitor.test.mjs",
+        "tests/broadcast-action-engine.test.mjs",
+        "tests/broadcast-asset-manager.test.mjs",
+        "tests/broadcast-component-library.test.mjs",
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-data-contract.test.mjs",
+        "tests/broadcast-output-routing.test.mjs",
+        "tests/broadcast-output.test.mjs",
+        "tests/broadcast-playground.test.mjs",
+        "tests/broadcast-preview-engine.test.mjs",
+        "tests/broadcast-program-engine.test.mjs",
+        "tests/broadcast-program-projection.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/production-nav.test.mjs",
+      "targetModules": [
+        "PRODUCTION_NAV_V1.md",
+        "broadcast-studio.html",
+        "css/styles.css",
+        "index.html",
+        "js/app.js",
+        "js/core/roles.js",
+        "js/core/version.js",
+        "production-console.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/broadcast-access-hub.test.mjs",
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/fmch-judge-questionnaire.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/production-variables.test.mjs",
+      "targetModules": [
+        "js/broadcast/actionEngine.js",
+        "js/broadcast/broadcastState.js",
+        "js/broadcast/productionVariables.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-action-engine.test.mjs",
+        "tests/broadcast-output.test.mjs",
+        "tests/broadcast-playground.test.mjs",
+        "tests/broadcast-state.test.mjs",
+        "tests/production-console.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/productive-rule-profile-policy.test.mjs",
+      "targetModules": [
+        "js/core/productiveRuleProfilePolicy.js",
+        "js/data/ruleProfiles.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/rule-profile-engine.test.mjs",
+        "tests/rule-profile-lifecycle-authority.test.mjs",
+        "tests/rule-profile-temporal-policy.test.mjs",
+        "tests/scorer-information-hierarchy-compaction.test.mjs",
+        "tests/scorer-screen-by-screen-ux-refinement.test.mjs",
+        "tests/scorer-workspace-viewport-compaction.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/program-main-output.test.mjs",
+      "targetModules": [
+        "css/program-main-output.css",
+        "js/broadcast/broadcastRealtimeTransport.js",
+        "js/broadcast/programMainOutput.js",
+        "program-main-output.html"
+      ],
+      "category": "BROADCAST",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/announcer-monitor.test.mjs",
+        "tests/broadcast-access-hub.test.mjs",
+        "tests/broadcast-realtime-transport.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/output-synchronization.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-foundation-integration.test.mjs",
+      "targetModules": [
+        "js/public/publicPortalClient.js",
+        "js/public/publicProjection.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-live-feed.test.mjs",
+        "tests/public-portal-client.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-projection.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-live-feed-integration.test.mjs",
+      "targetModules": [
+        "functions/officialScoreConcurrency.js",
+        "functions/package.json",
+        "js/app.js",
+        "js/core/firebaseSync.js",
+        "js/public/publicLiveFeed.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-live-feed-templates.test.mjs",
+      "targetModules": [
+        "js/public/publicLiveFeed.js",
+        "js/publicPortal/liveFeedModel.js",
+        "js/publicPortal/liveFeedTemplates.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-live-feed.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-live-feed.test.mjs",
+      "targetModules": [
+        "js/public/publicLiveFeed.js",
+        "js/public/publicProjection.js",
+        "js/public/publicProjectionSchema.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-foundation-integration.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/public-live-feed-templates.test.mjs",
+        "tests/public-portal-client.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-projection.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-portal-client.test.mjs",
+      "targetModules": [
+        "js/public/publicPortalClient.js",
+        "js/public/publicProjection.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-foundation-integration.test.mjs",
+        "tests/public-live-feed.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-projection.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-portal-core.test.mjs",
+      "targetModules": [
+        "css/public-portal.css",
+        "js/publicPortal/portalApp.js",
+        "js/publicPortal/portalRender.js",
+        "js/publicPortal/portalRouter.js",
+        "js/publicPortal/portalSelectors.js",
+        "js/views/torneo-publico.js",
+        "torneo-publico.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-portal-design-system-v2.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-router.test.mjs",
+        "tests/public-portal-selectors.test.mjs",
+        "tests/public-portal-ux.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-portal-design-system-v2.test.mjs",
+      "targetModules": [
+        "css/public-portal.css",
+        "js/publicPortal/portalApp.js",
+        "js/publicPortal/portalRender.js",
+        "js/publicPortal/portalSelectors.js",
+        "torneo-publico.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-portal-core.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-router.test.mjs",
+        "tests/public-portal-selectors.test.mjs",
+        "tests/public-portal-ux.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-portal-partial-standings.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "js/public/publicProjection.js",
+        "js/public/publicProjectionSchema.js",
+        "js/publicPortal/portalRender.js",
+        "js/publicPortal/portalSelectors.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-foundation-integration.test.mjs",
+        "tests/public-live-feed.test.mjs",
+        "tests/public-portal-client.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-portal-router.test.mjs",
+      "targetModules": [
+        "js/publicPortal/portalRouter.js",
+        "torneo-publico.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-portal-core.test.mjs",
+        "tests/public-portal-design-system-v2.test.mjs",
+        "tests/public-portal-ux.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-portal-selectors.test.mjs",
+      "targetModules": [
+        "js/publicPortal/portalSelectors.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-portal-core.test.mjs",
+        "tests/public-portal-design-system-v2.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-ux.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-portal-ux.test.mjs",
+      "targetModules": [
+        "css/public-portal.css",
+        "firebase-rules-auditoria.json",
+        "js/publicPortal/portalApp.js",
+        "js/publicPortal/portalRender.js",
+        "js/publicPortal/portalRouter.js",
+        "js/publicPortal/portalSelectors.js",
+        "torneo-publico.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-portal-core.test.mjs",
+        "tests/public-portal-design-system-v2.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-projection-outbox.test.mjs",
+      "targetModules": [
+        "js/core/publicProjectionOutbox.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-projection.test.mjs",
+      "targetModules": [
+        "js/public/publicProjection.js",
+        "js/public/publicProjectionLegacyAdapter.js",
+        "js/public/publicProjectionSchema.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/public-foundation-integration.test.mjs",
+        "tests/public-live-feed.test.mjs",
+        "tests/public-portal-client.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/public-snapshot-cache-coherence.test.mjs",
+      "targetModules": [
+        "announcer-monitor.html",
+        "broadcast-studio.html",
+        "index.html",
+        "js/core/firebaseSync.js",
+        "js/core/scoring.js",
+        "js/core/sync.js",
+        "js/tournamentApp.js",
+        "jueces.html",
+        "locutores.html",
+        "production-console.html",
+        "program-main-output.html",
+        "supervision.html",
+        "torneo-publico.html",
+        "torneo.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/announcer-monitor.test.mjs",
+        "tests/broadcast-access-hub.test.mjs",
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/release-management.test.mjs",
+      "targetModules": [
+        "firebase-rules-auditoria.json",
+        "tools/release/releaseEngine.js",
+        "tools/release/releasePolicy.json"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/backup-foundation.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-public-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/official-score-concurrency.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/public-portal-partial-standings.test.mjs",
+        "tests/public-portal-ux.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/rule-profile-assignment-authority.test.mjs",
+      "targetModules": [
+        "functions/ruleProfileAssignmentEngine.js",
+        "functions/ruleProfileCertificationRegistry.json"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/rule-profile-lifecycle-authority.test.mjs",
+        "tests/rule-profile-lifecycle-read-authority.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/rule-profile-engine.test.mjs",
+      "targetModules": [
+        "js/app.js",
+        "js/core/scoring.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/rule-profile-lifecycle-authority.test.mjs",
+      "targetModules": [
+        "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001/CERTIFICATION_RECORD.json",
+        "functions/ruleProfileCertificationRegistry.json",
+        "functions/ruleProfileLifecycleEngine.js",
+        "functions/ruleProfileLifecycleService.js",
+        "js/data/ruleProfileTemporalPolicy.js",
+        "js/data/ruleProfiles.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/productive-rule-profile-policy.test.mjs",
+        "tests/rule-profile-assignment-authority.test.mjs",
+        "tests/rule-profile-engine.test.mjs",
+        "tests/rule-profile-lifecycle-read-authority.test.mjs",
+        "tests/rule-profile-temporal-policy.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/rule-profile-lifecycle-read-authority.test.mjs",
+      "targetModules": [
+        "functions/ruleProfileCertificationRegistry.json",
+        "functions/ruleProfileLifecycleEngine.js",
+        "functions/ruleProfileLifecycleService.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/rule-profile-assignment-authority.test.mjs",
+        "tests/rule-profile-lifecycle-authority.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/rule-profile-temporal-policy.test.mjs",
+      "targetModules": [
+        "js/data/ruleProfileTemporalPolicy.js",
+        "js/data/ruleProfiles.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/productive-rule-profile-policy.test.mjs",
+        "tests/rule-profile-engine.test.mjs",
+        "tests/rule-profile-lifecycle-authority.test.mjs",
+        "tests/scorer-information-hierarchy-compaction.test.mjs",
+        "tests/scorer-screen-by-screen-ux-refinement.test.mjs",
+        "tests/scorer-workspace-viewport-compaction.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/scorer-information-hierarchy-compaction.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js",
+        "js/core/scoringAttempt.js",
+        "js/data/ruleProfiles.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/scorer-responsive-components.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "index.html",
+        "js/app.js",
+        "js/core/scorerComponents.js",
+        "js/core/scoringAttempt.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/fmch-judge-questionnaire.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/scorer-save-latency.test.mjs",
+      "targetModules": [
+        "functions/officialScoreConcurrency.js",
+        "js/app.js",
+        "js/core/firebaseSync.js",
+        "js/core/scorerSaveLatency.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/scorer-screen-by-screen-ux-refinement.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js",
+        "js/core/scoringAttempt.js",
+        "js/data/fmch2026TernaRules.js",
+        "js/data/ruleProfiles.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/scorer-workspace-viewport-compaction.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js",
+        "js/core/flow.js",
+        "js/core/scoringAttempt.js",
+        "js/data/ruleProfiles.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-authoritative-snapshot.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/scoring-attempt-v2.test.mjs",
+      "targetModules": [
+        "functions/officialScoreConcurrency.js",
+        "js/app.js",
+        "js/core/firebaseSync.js",
+        "js/core/scoring.js",
+        "js/core/scoringAttempt.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/access-session-platform-admin.test.mjs",
+        "tests/backup-restore-validation.test.mjs",
+        "tests/broadcast-studio-workspace.test.mjs",
+        "tests/configuration-management.test.mjs",
+        "tests/firebase-broadcast-rules.test.mjs",
+        "tests/firebase-rule-profile-lifecycle-rules.test.mjs",
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/scoring-ui-final-polish.test.mjs",
+      "targetModules": [
+        "css/styles.css",
+        "js/app.js"
+      ],
+      "category": "SCORER",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-html-print-geometry.test.mjs",
+        "tests/official-format-pre-judge-final-corrections.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/supervisor-navigation.test.mjs",
+      "targetModules": [
+        "js/app.js",
+        "js/core/supervisorNavigation.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/rule-profile-engine.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/team-penalties-zero.test.mjs",
+      "targetModules": [
+        "js/core/scoring.js",
+        "js/core/state.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-format-semantic-field-certification.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/rule-profile-engine.test.mjs",
+        "tests/scoring-attempt-v2.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/template-renderer-integration.test.mjs",
+      "targetModules": [
+        "fixtures/templateEngineFixtures.js",
+        "js/broadcast/componentLibrary.js",
+        "js/broadcast/componentRenderer.js",
+        "js/broadcast/fixtures/componentRendererFixtures.js",
+        "js/broadcast/templateEngine.js",
+        "js/broadcast/templateRendererIntegration.js",
+        "production-console.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-component-library.test.mjs",
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/broadcast-template-engine.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/theme-template-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/terna-operational-flow.test.mjs",
+      "targetModules": [
+        "js/app.js",
+        "js/data/fmch2026TernaRules.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-live-feed-integration.test.mjs",
+        "tests/rule-profile-engine.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/terna-rule-catalog-resolution-audit-003.test.mjs",
+      "targetModules": [
+        "js/app.js",
+        "js/core/localRuleProfileDefaults.js",
+        "js/data/fmch2026TernaRules.js",
+        "js/data/ruleProfiles.js",
+        "js/data/suertes.js",
+        "tools/development/localRuntimeSeed.mjs"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/fmch-2026-cala-scorer.test.mjs",
+        "tests/fmch-2026-jineteos-dynamic-scorer.test.mjs",
+        "tests/fmch-2026-manganas-paso-scorer.test.mjs",
+        "tests/fmch-2026-piales-coleadero-scorer.test.mjs",
+        "tests/fmch-2026-rule-profile-certification.test.mjs",
+        "tests/fmch-2026-terna-complete.test.mjs",
+        "tests/full-scorer-integration.test.mjs",
+        "tests/local-runtime-seed.test.mjs",
+        "tests/official-timer-authority-sync.test.mjs",
+        "tests/operational-validation-corrections-002.test.mjs",
+        "tests/pending-score-review-workflow.test.mjs",
+        "tests/production-nav.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/theme-template-integration.test.mjs",
+      "targetModules": [
+        "fixtures/templateEngineFixtures.js",
+        "js/broadcast/productionConsole.js",
+        "js/broadcast/templateRendererIntegration.js",
+        "js/broadcast/themeEngine.js",
+        "js/broadcast/themeTemplateIntegration.js",
+        "production-console.html"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [
+        "tests/broadcast-component-renderer.test.mjs",
+        "tests/broadcast-program-projection.test.mjs",
+        "tests/broadcast-template-engine.test.mjs",
+        "tests/broadcast-theme-engine.test.mjs",
+        "tests/production-console.test.mjs",
+        "tests/production-nav.test.mjs",
+        "tests/public-snapshot-cache-coherence.test.mjs",
+        "tests/template-renderer-integration.test.mjs"
+      ],
+      "recommendation": "KEEP_TEST"
+    },
+    {
+      "test": "tests/tournament-context.test.mjs",
+      "targetModules": [
+        "js/core/tournamentContext.js"
+      ],
+      "category": "CORE_OR_INTEGRATION",
+      "status": "ACTIVE_BASELINE",
+      "possibleOverlap": [],
+      "recommendation": "KEEP_TEST"
+    }
+  ]
+}
