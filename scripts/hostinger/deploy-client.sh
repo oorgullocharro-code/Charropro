@@ -138,22 +138,26 @@ unzip -q "$remote_package" -d "$release"
 [[ -f "$release/index.html" && -f "$release/functions/configuration.defaults.json" && -d "$release/assets" && -d "$release/js" ]] || { echo 'ERROR=remote-release-invalid' >&2; exit 1; }
 actual_files="$(find "$release" -type f | wc -l)"
 [[ "$actual_files" == "$expected_files" ]] || { echo 'ERROR=remote-release-file-count-mismatch' >&2; exit 1; }
-read -r build checksum < <(python3 - "$release/functions/configuration.defaults.json" <<'PY'
+config_values="$(python3 - "$release/functions/configuration.defaults.json" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as handle:
     config = json.load(handle)
 print(config["values"]["system"]["appVersion"], config["checksum"])
 PY
-)
+)"
+build="${config_values%% *}"
+checksum="${config_values##* }"
 [[ "$build" == "$expected_build" && "$checksum" == "$expected_checksum" ]] || { echo 'ERROR=remote-release-config-mismatch' >&2; exit 1; }
 rsync -a "$release/" "$remote_dir/"
-read -r deployed_build deployed_checksum < <(python3 - "$remote_dir/functions/configuration.defaults.json" <<'PY'
+deployed_values="$(python3 - "$remote_dir/functions/configuration.defaults.json" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as handle:
     config = json.load(handle)
 print(config["values"]["system"]["appVersion"], config["checksum"])
 PY
-)
+)"
+deployed_build="${deployed_values%% *}"
+deployed_checksum="${deployed_values##* }"
 [[ "$deployed_build" == "$expected_build" && "$deployed_checksum" == "$expected_checksum" ]] || { echo 'ERROR=remote-deployed-config-mismatch' >&2; exit 1; }
 printf 'REMOTE_PACKAGE_SHA=%s\nREMOTE_TEMP_PATH=%s\nREMOTE_RELEASE_PATH=%s\nREMOTE_BUILD=%s\nREMOTE_CHECKSUM=%s\n' "$actual_sha" "$remote_package" "$release" "$deployed_build" "$deployed_checksum"
 REMOTE

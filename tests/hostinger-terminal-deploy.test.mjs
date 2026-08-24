@@ -12,7 +12,9 @@ const build = "TEST_BUILD_1";
 const checksum = "a".repeat(64);
 
 for (const name of ["verify-package.sh", "deploy-client.sh", "rollback-client.sh", "smoke-client.sh", "lib.sh"]) {
-  assert.match(readFileSync(new URL(name, scripts), "utf8"), /set -euo pipefail/);
+  const source = readFileSync(new URL(name, scripts), "utf8");
+  assert.match(source, /set -euo pipefail/);
+  if (name === "deploy-client.sh") assert.doesNotMatch(source, /< <\(/, "remote deploy does not depend on /dev/fd process substitution");
 }
 
 const validPackage = makePackage("valid", {
