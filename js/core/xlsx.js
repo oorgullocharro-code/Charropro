@@ -143,12 +143,12 @@ function buildWorkbookRels(sheets) {
 function buildStyles() {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="${XML_NS}">
-  <fonts count="12">
+  <fonts count="13">
     <font><sz val="7.5"/><name val="Arial"/></font>
     <font><b/><sz val="15"/><color rgb="FF08752A"/><name val="Arial"/></font>
     <font><b/><sz val="9"/><color rgb="FF000000"/><name val="Arial"/></font>
     <font><b/><sz val="8"/><color rgb="FFE31B23"/><name val="Arial"/></font>
-    <font><b/><sz val="8"/><color rgb="FF000000"/><name val="Arial"/></font>
+    <font><b/><sz val="7.5"/><color rgb="FF000000"/><name val="Arial"/></font>
     <font><sz val="7"/><color rgb="FF000000"/><name val="Arial"/></font>
     <font><b/><sz val="6.5"/><color rgb="FF000000"/><name val="Arial"/></font>
     <font><b/><sz val="10"/><color rgb="FF000000"/><name val="Arial"/></font>
@@ -156,6 +156,7 @@ function buildStyles() {
     <font><b/><sz val="11"/><color rgb="FFE31B23"/><name val="Arial"/></font>
     <font><b/><sz val="12"/><color rgb="FF000000"/><name val="Arial"/></font>
     <font><b/><sz val="5.5"/><color rgb="FFE31B23"/><name val="Arial"/></font>
+    <font><b/><sz val="6.5"/><color rgb="FFE31B23"/><name val="Arial"/></font>
   </fonts>
   <fills count="7">
     <fill><patternFill patternType="none"/></fill>
@@ -202,7 +203,7 @@ function buildStyles() {
     <xf numFmtId="0" fontId="7" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="6" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="12" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="5" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
@@ -233,6 +234,7 @@ function buildWorksheet(sheet) {
   const merges = sheet.merges || [`A1:${colName(Math.min(maxCols, 14))}1`];
   const freezeRows = Math.max(0, Math.floor(finiteNumber(sheet.freezeRows, 5)));
   const margins = sheet.margins || {};
+  const pageSetup = buildPageSetup(sheet);
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="${XML_NS}" xmlns:r="${REL_NS}">
@@ -253,9 +255,16 @@ function buildWorksheet(sheet) {
   </mergeCells>
   <printOptions horizontalCentered="${sheet.horizontalCentered ? 1 : 0}" verticalCentered="0"/>
   <pageMargins left="${finiteNumber(margins.left, 0.25)}" right="${finiteNumber(margins.right, 0.25)}" top="${finiteNumber(margins.top, 0.5)}" bottom="${finiteNumber(margins.bottom, 0.5)}" header="${finiteNumber(margins.header, 0.3)}" footer="${finiteNumber(margins.footer, 0.3)}"/>
-  <pageSetup orientation="${attr(sheet.orientation || "landscape")}" paperSize="${Math.max(1, Math.floor(finiteNumber(sheet.paperSize, 5)))}" fitToWidth="${Math.max(1, Math.floor(finiteNumber(sheet.fitToWidth, 1)))}" fitToHeight="${Math.max(1, Math.floor(finiteNumber(sheet.fitToHeight, 1)))}"/>
+  ${pageSetup}
   ${sheet.drawingFile ? '<drawing r:id="rId1"/>' : ""}
 </worksheet>`;
+}
+
+function buildPageSetup(sheet) {
+  const dimensions = sheet.paperWidth && sheet.paperHeight
+    ? ` paperWidth="${attr(sheet.paperWidth)}" paperHeight="${attr(sheet.paperHeight)}"`
+    : ` paperSize="${Math.max(1, Math.floor(finiteNumber(sheet.paperSize, 5)))}"`;
+  return `<pageSetup orientation="${attr(sheet.orientation || "landscape")}"${dimensions} fitToWidth="${Math.max(1, Math.floor(finiteNumber(sheet.fitToWidth, 1)))}" fitToHeight="${Math.max(1, Math.floor(finiteNumber(sheet.fitToHeight, 1)))}"/>`;
 }
 
 function buildSheetFiles(sheet) {

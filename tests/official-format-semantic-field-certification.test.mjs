@@ -128,8 +128,8 @@ function selection(id, label, value, quantity = 1, metadata = {}) {
 
 function participantName(teamValue, suerteId, coleadorIndex) {
   if (suerteId === "colas") return teamValue.roster.colas[coleadorIndex];
-  if (suerteId === "lazo") return teamValue.roster.terna[0];
-  if (suerteId === "pial_ruedo") return teamValue.roster.terna[1];
+  if (suerteId === "lazo") return teamValue.roster.terna[1];
+  if (suerteId === "pial_ruedo") return teamValue.roster.terna[2];
   return teamValue.roster[suerteId] || teamValue.name;
 }
 
@@ -395,9 +395,14 @@ for (const [teamIndex, teamValue] of teams.entries()) {
   const workbook = buildOfficialWorkbook(packageValue);
   const rows = workbook.sheets[0].rows;
   const cell = (row, col) => rows[row - 1][col - 1]?.value ?? rows[row - 1][col - 1];
-  assert.equal(cell(8, 18), "AH\n1");
-  assert.equal(cell(8, 19), "D\n1");
-  assert.equal(cell(8, 20), "R\n1");
+  assert.equal(cell(7, 18), "AH");
+  assert.equal(cell(7, 19), "D");
+  assert.equal(cell(7, 20), "R");
+  assert.equal(cell(7, 21), "-", "an infraction without a certified documentary abbreviation stays explicit");
+  assert.equal(cell(8, 18), 1);
+  assert.equal(cell(8, 19), 1);
+  assert.equal(cell(8, 20), 1);
+  assert.equal(cell(8, 21), 2);
   assert.equal(cell(26, 17), 4, "Tentemozo maps only to TENTE MOSO");
   assert.equal(cell(26, 21), 2, "Quitar gaza/tentemozo maps only to PRETAL");
   assert.equal(cell(26, 30), 2, "Toro T comes from the frozen time-points rule");
@@ -406,7 +411,18 @@ for (const [teamIndex, teamValue] of teams.entries()) {
   assert.equal(cell(38, 30), 3, "Yegua T comes from the frozen time-points rule");
   assert.equal(cell(44, 30), 2, "Manganas a pie T is the sum of frozen time-point selections");
   assert.equal(cell(49, 30), 1, "Manganas a caballo T is the sum of frozen time-point selections");
-  assert.equal(cell(32, 29), 3, "Terna row T sums the two frozen time-point selections");
+  assert.equal(cell(32, 2), `${teamValue.name} Cabecero`);
+  assert.equal(cell(32, 10), "-", "the first roster member has no invented Cabecero attempt");
+  assert.equal(cell(32, 18), "-", "the first roster member has no invented Pial attempt");
+  assert.equal(cell(33, 2), `${teamValue.name} Pialador`);
+  assert.equal(cell(33, 15), "Floreado", "Cabecero stays left on the actual performer row");
+  assert.equal(cell(33, 23), "-", "unused Pial cell is documentary dash");
+  assert.equal(cell(33, 29), 1, "Cabecero T stays on its performer row");
+  assert.equal(cell(34, 2), `${teamValue.name} Auxiliar`);
+  assert.equal(cell(34, 15), "-", "unused Cabecero cell is documentary dash");
+  assert.equal(cell(34, 23), "Corvero derecho", "Pial stays right on the actual performer row");
+  assert.equal(cell(34, 29), 2, "Pial T stays on its performer row");
+  assert.equal(cell(13, 17), 0, "a completed zero-point pial remains numeric zero");
   const controlRows = [15, 24, 28, 36, 40, 46, 51, 56];
   const controlSections = ["piales", "coleadero", "toro", "terna", "yegua", "manganasPie", "manganasCaballo", "paso"];
   controlRows.forEach((row, index) => {

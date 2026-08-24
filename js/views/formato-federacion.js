@@ -1,6 +1,6 @@
 import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
-import { loadState, subscribeToLiveUpdates } from "../core/state.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
+import { loadState, subscribeToLiveUpdates } from "../core/state.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
 
 const root = document.getElementById("official-format-root");
 const pageParams = new URLSearchParams(window.location.search);
@@ -92,6 +92,7 @@ function renderSheet(sheet) {
   const rows = sheet.visualRows || sheet.rows || [];
   const mergeInfo = buildMergeInfo(sheet.visualMerges || []);
   const widths = sheet.visualWidths || [];
+  const webColumnWidths = buildWebColumnWidths(rows, widths);
   const institutional = sheet.institutional || {};
 
   return html`
@@ -105,14 +106,13 @@ function renderSheet(sheet) {
       </header>
       <table class="official-sheet">
         <colgroup>
-          ${Array.from({ length: Math.max(...rows.map((row) => row.length), widths.length, 1) }, (_, index) => {
-            const width = Math.max(28, Number(widths[index] || 12) * 7);
-            return html`<col style="width:${width}px">`;
+          ${webColumnWidths.map((width) => {
+            return html`<col style="width:${width}%">`;
           }).join("")}
         </colgroup>
         <tbody>
           ${rows.map((row, rowIndex) => html`
-            <tr style="height:${Number(sheet.visualRowHeights?.[rowIndex] || 22)}px">
+            <tr>
               ${row.map((cell, colIndex) => renderCell(cell, rowIndex, colIndex, mergeInfo)).join("")}
             </tr>
           `).join("")}
@@ -130,6 +130,16 @@ function renderSheet(sheet) {
       </footer>
     </article>
   `;
+}
+
+function buildWebColumnWidths(rows, spreadsheetWidths) {
+  const count = Math.max(...rows.map((row) => row.length), spreadsheetWidths.length, 1);
+  const weights = Array.from({ length: count }, (_, index) => {
+    const value = Number(spreadsheetWidths[index]);
+    return Number.isFinite(value) && value > 0 ? Math.min(value, 12) : 3;
+  });
+  const total = weights.reduce((sum, value) => sum + value, 0) || count;
+  return weights.map((value) => Number(((value / total) * 100).toFixed(4)));
 }
 
 function renderCell(cell, rowIndex, colIndex, mergeInfo) {

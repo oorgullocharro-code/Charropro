@@ -29,7 +29,7 @@ const PROFILE_ID = "FMCH_2026_LIBRE";
 const PROFILE_VERSION = "0.6.0";
 const PROFILE_FINGERPRINT = "rptp_0f90f7a3944a82d7";
 const SOURCE_PDF_SHA256 = "3a14fe3d6add5add76033765b27227c44f04c8e31330ce4aeb3248828701dca7";
-const GOLDEN_XLSX_SHA256 = "0ffd7f7d17d30dc03d1a5ce91597ca610e531942873ae0a059a195a321cc38ac";
+const GOLDEN_XLSX_SHA256 = "ab9f3c401320d0fe2ffb442915366db9ca969fa82d08767927b9290a2061cd07";
 const RESOLVED_INSTITUTIONAL_FIELD_IDS = [
   "FMCH.TEAM_SHEET.HEADER.FEDERATION_LOGO",
   "FMCH.TEAM_SHEET.FOOTER.CONADE_LOGO",
@@ -382,7 +382,9 @@ const workbook = buildOfficialWorkbook(officialPackage);
 assert.equal(workbook.generatedAt, GENERATED_AT);
 assert.equal(workbook.sheets[0].images.length, 2, "XLSX declares both certified institutional assets");
 assert.equal(workbook.sheets[0].orientation, "portrait");
-assert.equal(workbook.sheets[0].paperSize, 1);
+assert.equal(workbook.sheets[0].paperSize, undefined);
+assert.equal(workbook.sheets[0].paperWidth, "8.5in");
+assert.equal(workbook.sheets[0].paperHeight, "13.403333in");
 assert.equal(workbook.sheets[0].fitToWidth, 1);
 assert.equal(workbook.sheets[0].fitToHeight, 1, "official sheet remains one Letter portrait page");
 assert.equal(workbook.sheets[0].showGridLines, false);
@@ -406,7 +408,10 @@ assert.equal(getCellValue(officialRows[12][30]), snapshot.suertes.piales.total, 
 assert.equal(getCellValue(officialRows[21][15]), snapshot.suertes.coleadero.total, "Coleadero 3x3 control equals the snapshot");
 assert.equal(getCellValue(officialRows[25][30]), snapshot.suertes.toro.total, "Toro total reaches the printable cell");
 assert.equal(
-  officialRows.slice(31, 34).reduce((sum, row) => sum + Number(getCellValue(row[29]) || 0), 0),
+  officialRows.slice(31, 34).reduce((sum, row) => {
+    const value = getCellValue(row[29]);
+    return sum + (typeof value === "number" ? value : 0);
+  }, 0),
   snapshot.suertes.terna.total,
   "Terna printable rows preserve the official section total"
 );
@@ -415,7 +420,8 @@ assert.equal(getCellValue(officialRows[43][30]), snapshot.suertes.manganasPie.to
 assert.equal(getCellValue(officialRows[48][30]), snapshot.suertes.manganasCaballo.total, "Manganas a caballo total reaches the printable cell");
 assert.equal(getCellValue(officialRows[53][30]), snapshot.suertes.paso.total, "Paso total reaches the printable cell");
 assert.equal(getCellValue(officialRows[7][0]), snapshot.documentalControls.calaSideBadPointsSumControl.value, "Cala side control preserves PDF order without changing score");
-assert.ok(officialRows[20].every((cell) => getCellValue(cell) === ""), "fourth Coleadero row is documentary and empty");
+assert.ok(officialRows[20].every((cell) => ["", "-"].includes(getCellValue(cell))), "fourth Coleadero row is documentary and has no competitor data");
+assert.equal(getCellValue(officialRows[20][1]), "-", "administrative Coleadero row is visibly unused");
 assert.equal(snapshot.suertes.coleadero.attempts.length, 9, "documentary row never creates a tenth Coleadero attempt");
 assert.deepEqual([1, 9, 17, 25].map((index) => getCellValue(officialRows[59][index])), ["JUEZ", "JUEZ", "JUEZ", "CAPITÁN"]);
 assert.ok(officialPackage.sheets[0].auditRows.some((row) => row.some((cell) => String(getCellValue(cell) || "").startsWith("official_"))), "technical traceability remains available outside the printable sheet");
@@ -437,7 +443,7 @@ assert.match(worksheetXml, /<drawing r:id="rId1"\/>/);
 assert.doesNotMatch(worksheetXml, /SELLO|FOLIO|AUTORIZACI[ÓO]N/i);
 assert.doesNotMatch(worksheetXml, /OFFICIAL SCORE ID|ATTEMPT KEY|DETALLE CONGELADO|FINGERPRINT|SCHEMAVERSION|CONTROL DOCUMENTAL/i);
 assert.match(worksheetXml, /<sheetView workbookViewId="0" showGridLines="0">/);
-assert.match(worksheetXml, /<pageSetup orientation="portrait" paperSize="1" fitToWidth="1" fitToHeight="1"\/>/);
+assert.match(worksheetXml, /<pageSetup orientation="portrait" paperWidth="8\.5in" paperHeight="13\.403333in" fitToWidth="1" fitToHeight="1"\/>/);
 assert.ok(xlsxFiles.has("xl/drawings/drawing1.xml"));
 const embeddedFmch = [...xlsxFiles.entries()].find(([name]) => name.includes("fmch-emblem"));
 const embeddedConade = [...xlsxFiles.entries()].find(([name]) => name.includes("conade-lockup"));

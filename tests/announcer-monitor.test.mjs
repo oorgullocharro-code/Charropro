@@ -619,7 +619,7 @@ const [sourceText, html, css, docs] = await Promise.all([
   readFile(new URL("../BROADCAST_ANNOUNCER_MONITOR_V1.md", import.meta.url), "utf8")
 ]);
 assert.match(html, /data-announcer-monitor-page/);
-assert.match(html, /announcerMonitor\.js\?v=20260822-fmch-official-team-sheet-judge-review-001-v1/);
+assert.match(html, /announcerMonitor\.js\?v=20260824-fmch-team-sheet-pre-judge-final-001-v1/);
 assert.match(html, /announcer-monitor\.css\?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e/);
 assert.equal(typeof api.connectAnnouncerMonitorRealtime, "function");
 assert.doesNotMatch(html, /<video\b|<iframe\b|autoplay|src="https?:|\bTake\b|\bCut\b|\bAuto\b/i);

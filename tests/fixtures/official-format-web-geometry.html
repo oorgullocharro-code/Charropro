@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Official format web geometry fixture</title>
+  <link rel="stylesheet" href="../../css/styles.css">
+</head>
+<body>
+  <main class="official-page">
+    <section class="official-sheet-wrap" id="fixture-wrap">
+      <article class="official-document" id="fixture-document">
+        <header class="official-institutional-header">
+          <img src="../../assets/fmch/official-format-2024-2028/fmch-emblem.png" alt="Emblema FMCH">
+          <strong>FEDERACIÓN MEXICANA DE CHARRERÍA, A.C.</strong>
+        </header>
+        <table class="official-sheet" id="fixture-sheet">
+          <colgroup id="fixture-columns"></colgroup>
+          <tbody>
+            <tr><td colspan="32"></td></tr>
+            <tr>
+              <td class="official-sectionTitle" colspan="8">CALA DE CABALLO</td>
+              <td class="official-groupHeader" colspan="9">8 METROS EN 2 TIEMPOS</td>
+              <td class="official-badHeader" colspan="9">MALOS</td>
+              <td class="official-groupHeader" colspan="3">TOTAL MALOS</td>
+              <td class="official-compactGroupHeader" colspan="3">PUNTOS PARCIALES</td>
+            </tr>
+            <tr>
+              <td class="official-participant" colspan="9">Charro Fixture Cala</td>
+              <td class="official-scoreCell">20</td>
+              <td class="official-scoreCell">2</td>
+              <td class="official-scoreCell">2</td>
+              <td class="official-scoreCell">3</td>
+              <td class="official-scoreCell">2</td>
+              <td class="official-scoreCell">1</td>
+              <td class="official-scoreCell">1</td>
+              <td class="official-scoreCell">1</td>
+              <td class="official-badCodeCell">AH</td>
+              <td class="official-badCodeCell">D</td>
+              <td class="official-badCodeCell">R</td>
+              <td class="official-badCodeCell">-</td>
+              <td class="official-badScoreCell">1</td>
+              <td class="official-badScoreCell">1</td>
+              <td class="official-badScoreCell">1</td>
+              <td class="official-badScoreCell" colspan="2">2</td>
+              <td class="official-totalCell" colspan="3">5</td>
+              <td class="official-totalCell" colspan="3">27</td>
+            </tr>
+            <tr>
+              <td class="official-sectionTitle" colspan="9">TERNA EN EL RUEDO</td>
+              <td class="official-groupHeader" colspan="8">CABECERO · 5 OPORTUNIDADES</td>
+              <td class="official-groupHeader" colspan="9">PIAL</td>
+              <td class="official-badHeader" colspan="2">MALOS</td>
+              <td class="official-groupHeader">T</td>
+              <td class="official-groupHeader" colspan="3">TOTAL</td>
+            </tr>
+            <tr>
+              <td class="official-participant" colspan="9">Charro Fixture Pialador</td>
+              <td class="official-scoreCell" colspan="5">10</td>
+              <td class="official-scoreCell" colspan="3">Floreado</td>
+              <td class="official-scoreCell" colspan="5">-</td>
+              <td class="official-scoreCell" colspan="4">-</td>
+              <td class="official-badScoreCell" colspan="2">0</td>
+              <td class="official-scoreCell">1</td>
+              <td class="official-totalCell" colspan="3">11</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </main>
+  <script>
+    const widths = [7.5, 4, 4, 4, 4, 4, 4, 4, 4, ...Array(23).fill(3.15)];
+    const total = widths.reduce((sum, value) => sum + value, 0);
+    document.getElementById("fixture-columns").innerHTML = widths
+      .map((value) => `<col style="width:${((value / total) * 100).toFixed(4)}%">`)
+      .join("");
+  </script>
+</body>
+</html>

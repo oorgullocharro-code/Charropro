@@ -1,12 +1,20 @@
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "./officialFormatSnapshot.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
-import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
-import { state } from "./state.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260822-fmch-official-team-sheet-judge-review-001-v1";
+} from "./officialFormatSnapshot.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
+import { state } from "./state.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
+export const OFFICIAL_FORMAT_PAPER = Object.freeze({
+  name: "OFICIO_MEXICANO_FMCH_2024_2028",
+  widthInches: 8.5,
+  heightInches: 13.403333,
+  widthMillimeters: 215.9,
+  heightMillimeters: 340.44,
+  sourcePagePoints: Object.freeze({ width: 612, height: 965.04 })
+});
 
 const SECTION_LABELS = Object.freeze({
   cala: "CALA DE CABALLO",
@@ -134,7 +142,8 @@ export function buildOfficialWorkbook(officialPackage) {
       rowHeights: sheet.visualRowHeights,
       images: sheet.visualImages,
       orientation: "portrait",
-      paperSize: 1,
+      paperWidth: `${OFFICIAL_FORMAT_PAPER.widthInches}in`,
+      paperHeight: `${OFFICIAL_FORMAT_PAPER.heightInches}in`,
       fitToWidth: 1,
       fitToHeight: 1,
       freezeRows: 0,
@@ -343,7 +352,7 @@ function buildOfficialVisualSheet(snapshot, header, institutional) {
   });
   buildColeaderoVisual(rows, merges, snapshot, 16);
   buildJineteoVisual(rows, merges, snapshot.suertes.toro, 25, "JINETEO DE TORO", "toro", badPointsControlValue(snapshot, "toro"), accumulatedControl(snapshot, "toro"));
-  buildTernaVisual(rows, merges, snapshot.suertes.terna, 30, badPointsControlValue(snapshot, "terna"), accumulatedControl(snapshot, "terna"));
+  buildTernaVisual(rows, merges, snapshot, 30, badPointsControlValue(snapshot, "terna"), accumulatedControl(snapshot, "terna"));
   buildJineteoVisual(rows, merges, snapshot.suertes.yegua, 37, "JINETEO DE YEGUA", "yegua", badPointsControlValue(snapshot, "yegua"), accumulatedControl(snapshot, "yegua"));
   buildTripleAttemptVisual(rows, merges, snapshot.suertes.manganasPie, {
     row: 42,
@@ -362,27 +371,29 @@ function buildOfficialVisualSheet(snapshot, header, institutional) {
   buildPasoVisual(rows, merges, snapshot.suertes.paso, 52, badPointsControlValue(snapshot, "paso"), accumulatedControl(snapshot, "paso"));
   buildClosingVisual(rows, merges, snapshot, institutional, 57);
 
-  [11, 16, 30, 42, 47, 52].forEach((row) => { rowHeights[row - 1] = 14; });
-  rowHeights[5] = 18;
-  [7, 12, 17, 31, 43, 48].forEach((row) => { rowHeights[row - 1] = 17; });
-  rowHeights[31] = 17;
-  [25, 37].forEach((row) => { rowHeights[row - 1] = 34; });
-  rowHeights[51] = 23;
-  rowHeights[7] = 22;
-  rowHeights[25] = 22;
-  rowHeights[31] = 26;
-  rowHeights[37] = 22;
-  [9, 14, 23, 27, 35, 39, 45, 50, 55].forEach((row) => { rowHeights[row - 1] = 20; });
+  [11, 16, 30, 42, 47, 52].forEach((row) => { rowHeights[row - 1] = 17; });
+  rowHeights[5] = 21;
+  [7, 12, 17, 31, 43, 48].forEach((row) => { rowHeights[row - 1] = 21; });
+  rowHeights[31] = 21;
+  [25, 37].forEach((row) => { rowHeights[row - 1] = 42; });
+  rowHeights[51] = 28;
+  rowHeights[7] = 27;
+  rowHeights[25] = 27;
+  rowHeights[31] = 24;
+  rowHeights[32] = 24;
+  rowHeights[33] = 24;
+  rowHeights[37] = 27;
+  [9, 14, 23, 27, 35, 39, 45, 50, 55].forEach((row) => { rowHeights[row - 1] = 24; });
   [10, 29, 41, 59].forEach((row) => { rowHeights[row - 1] = 4; });
   [15, 24, 36, 46, 51, 56].forEach((row) => { rowHeights[row - 1] = 8; });
-  rowHeights[56] = 13;
-  rowHeights[57] = 16;
+  rowHeights[56] = 16;
+  rowHeights[57] = 20;
   rowHeights[58] = 4;
-  rowHeights[59] = 13;
-  rowHeights[60] = 15;
-  rowHeights[61] = 15;
-  rowHeights[62] = 13;
-  rowHeights[63] = 13;
+  rowHeights[59] = 16;
+  rowHeights[60] = 19;
+  rowHeights[61] = 19;
+  rowHeights[62] = 16;
+  rowHeights[63] = 16;
 
   return {
     rows,
@@ -406,22 +417,23 @@ function buildCalaVisual(rows, merges, snapshot, row) {
   mergeVisual(rows, merges, row, 30, row, 32, "PUNTOS\nPARCIALES", "compactGroupHeader");
   const headings = ["BASE", "P", "T", "LD", "LI", "MD", "MI", "PC"];
   headings.forEach((heading, index) => putVisual(rows, row + 1, 10 + index, heading, "columnHeader"));
-  for (let col = 18; col <= 26; col += 1) putVisual(rows, row + 1, col, "", "columnHeader");
+  for (let col = 18; col <= 26; col += 1) putVisual(rows, row + 1, col, "-", "columnHeader");
   mergeVisual(rows, merges, row + 1, 27, row + 1, 29, "", "columnHeader");
   mergeVisual(rows, merges, row + 1, 30, row + 1, 32, "", "columnHeader");
   const values = calaScoreValues(attempt);
   values.slice(0, 8).forEach((value, index) => putVisual(rows, row + 2, 10 + index, value, "scoreCell"));
-  const badValues = (attempt?.documentalEvidence?.badPointSlots || []).slice(0, 8).map(calaBadPointDisplay);
+  const badSlots = (attempt?.documentalEvidence?.badPointSlots || []).slice(0, 8);
   const badRanges = [[18, 18], [19, 19], [20, 20], [21, 21], [22, 22], [23, 23], [24, 24], [25, 26]];
   badRanges.forEach(([start, end], index) => {
-    mergeVisual(rows, merges, row + 1, start, row + 1, end, "", "columnHeader");
-    mergeVisual(rows, merges, row + 2, start, row + 2, end, badValues[index] ?? "", "badCodeCell");
+    const slot = badSlots[index];
+    mergeVisual(rows, merges, row + 1, start, row + 1, end, slot ? calaBadPointCode(slot) : "-", "badCodeCell");
+    mergeVisual(rows, merges, row + 2, start, row + 2, end, slot ? finite(slot.value) : "-", "badScoreCell");
   });
   mergeVisual(rows, merges, row + 2, 27, row + 2, 29, attempt ? attempt.individualBadPoints : "", "totalCell");
   mergeVisual(rows, merges, row + 2, 30, row + 2, 32, attempt ? attempt.total : "", "totalCell");
   mergeVisual(rows, merges, row + 3, 2, row + 3, 9, "SUPLENTE", "substitute");
   mergeVisual(rows, merges, row + 3, 20, row + 3, 27, "INFRACCIÓN AL EQUIPO", "plainLabel");
-  mergeVisual(rows, merges, row + 3, 28, row + 3, 32, section.teamPenaltyTotal || "-", "controlBox");
+  mergeVisual(rows, merges, row + 3, 28, row + 3, 32, sectionValueOrDash(section, "teamPenaltyTotal"), "controlBox");
 }
 
 function buildTripleAttemptVisual(rows, merges, section, options) {
@@ -442,9 +454,9 @@ function buildTripleAttemptVisual(rows, merges, section, options) {
     mergeVisual(rows, merges, row + 1, goodEnd + 1, row + 1, badEnd, "MALOS", "badHeader");
     mergeVisual(rows, merges, row + 1, badEnd + 1, row + 1, end, "TOTAL", "columnHeader");
     const attempt = attempts[index];
-    mergeVisual(rows, merges, row + 2, start, row + 2, goodEnd, attempt ? attemptGoodExcludingTime(attempt) : "", "scoreCell");
-    mergeVisual(rows, merges, row + 2, goodEnd + 1, row + 2, badEnd, attempt ? attempt.individualBadPoints : "", "badScoreCell");
-    mergeVisual(rows, merges, row + 2, badEnd + 1, row + 2, end, attempt ? attemptNetExcludingTime(attempt) : "", "totalCell");
+    mergeVisual(rows, merges, row + 2, start, row + 2, goodEnd, attempt ? attemptGoodExcludingTime(attempt) : "-", "scoreCell");
+    mergeVisual(rows, merges, row + 2, goodEnd + 1, row + 2, badEnd, attempt ? attempt.individualBadPoints : "-", "badScoreCell");
+    mergeVisual(rows, merges, row + 2, badEnd + 1, row + 2, end, attempt ? attemptNetExcludingTime(attempt) : "-", "totalCell");
   });
   if (showT) {
     putVisual(rows, row, 30, "T", "groupHeader");
@@ -460,7 +472,7 @@ function buildTripleAttemptVisual(rows, merges, section, options) {
     mergeVisual(rows, merges, row + 3, 22, row + 3, 23, "MIN.", "plainLabel");
   }
   mergeVisual(rows, merges, row + 3, 24, row + 3, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
-  mergeVisual(rows, merges, row + 3, 29, row + 3, 32, section.teamPenaltyTotal || "-", "controlBox");
+  mergeVisual(rows, merges, row + 3, 29, row + 3, 32, sectionValueOrDash(section, "teamPenaltyTotal"), "controlBox");
   buildPostSectionControls(rows, merges, row + 4, options.control);
 }
 
@@ -482,14 +494,14 @@ function buildColeaderoVisual(rows, merges, snapshot, row) {
     const participantAttempts = participantIndex < 3
       ? attempts.filter((attempt) => attempt.coleadorIndex === participantIndex)
       : [];
-    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, participantAttempts[0]?.charro || "", "participant");
+    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, participantAttempts[0]?.charro || "-", "participant");
     groups.forEach(([start, end], passIndex) => {
       const attempt = participantAttempts.find((item) => item.attemptIndex === passIndex);
-      mergeVisual(rows, merges, dataRow, start, dataRow, start + 1, attempt ? attempt.goodPoints : "", "scoreCell");
-      mergeVisual(rows, merges, dataRow, start + 2, dataRow, start + 4, attempt ? attempt.individualBadPoints : "", "badScoreCell");
-      mergeVisual(rows, merges, dataRow, start + 5, dataRow, end, attempt ? attempt.total : "", "totalCell");
+      mergeVisual(rows, merges, dataRow, start, dataRow, start + 1, attempt ? attempt.goodPoints : "-", "scoreCell");
+      mergeVisual(rows, merges, dataRow, start + 2, dataRow, start + 4, attempt ? attempt.individualBadPoints : "-", "badScoreCell");
+      mergeVisual(rows, merges, dataRow, start + 5, dataRow, end, attempt ? attempt.total : "-", "totalCell");
     });
-    mergeVisual(rows, merges, dataRow, 31, dataRow, 32, participantAttempts.length ? sumAttempts(participantAttempts) : "", "totalCell");
+    mergeVisual(rows, merges, dataRow, 31, dataRow, 32, participantAttempts.length ? sumAttempts(participantAttempts) : "-", "totalCell");
   }
   mergeVisual(rows, merges, row + 6, 2, row + 6, 9, "SUPLENTE", "substitute");
   mergeVisual(rows, merges, row + 6, 10, row + 6, 12, "", "documentControl");
@@ -498,7 +510,7 @@ function buildColeaderoVisual(rows, merges, snapshot, row) {
   mergeVisual(rows, merges, row + 6, 19, row + 6, 21, "", "documentControl");
   mergeVisual(rows, merges, row + 6, 22, row + 6, 24, "", "documentControl");
   mergeVisual(rows, merges, row + 7, 21, row + 7, 27, "INFRACCIÓN AL EQUIPO", "plainLabel");
-  mergeVisual(rows, merges, row + 7, 28, row + 7, 32, section.teamPenaltyTotal || "-", "controlBox");
+  mergeVisual(rows, merges, row + 7, 28, row + 7, 32, sectionValueOrDash(section, "teamPenaltyTotal"), "controlBox");
   buildPostSectionControls(rows, merges, row + 8, accumulatedControl(snapshot, "coleadero"));
 }
 
@@ -521,15 +533,18 @@ function buildJineteoVisual(rows, merges, section, row, title, kind, sideValue, 
   mergeVisual(rows, merges, row + 2, 19, row + 2, 21, sectionTime(section), "controlBox");
   mergeVisual(rows, merges, row + 2, 22, row + 2, 23, "MIN.", "plainLabel");
   mergeVisual(rows, merges, row + 2, 24, row + 2, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
-  mergeVisual(rows, merges, row + 2, 29, row + 2, 32, section.teamPenaltyTotal || "-", "controlBox");
+  mergeVisual(rows, merges, row + 2, 29, row + 2, 32, sectionValueOrDash(section, "teamPenaltyTotal"), "controlBox");
   buildPostSectionControls(rows, merges, row + 3, control);
 }
 
-function buildTernaVisual(rows, merges, section, row, sideValue, control) {
+function buildTernaVisual(rows, merges, snapshot, row, sideValue, control) {
+  const section = snapshot.suertes.terna;
   const attempts = section.attempts || [];
+  const participantRows = buildTernaParticipantRows(snapshot, attempts);
   mergeVisual(rows, merges, row, 1, row + 4, 1, sideValue, "documentControl");
   mergeVisual(rows, merges, row, 2, row, 9, "TERNA EN EL RUEDO", "sectionTitle");
-  mergeVisual(rows, merges, row, 10, row, 26, "5 OPORTUNIDADES", "groupHeader");
+  mergeVisual(rows, merges, row, 10, row, 17, "CABECERO · 5 OPORTUNIDADES", "groupHeader");
+  mergeVisual(rows, merges, row, 18, row, 26, "PIAL", "groupHeader");
   mergeVisual(rows, merges, row, 27, row + 1, 28, "MALOS", "badHeader");
   mergeVisual(rows, merges, row, 29, row + 1, 29, "T", "groupHeader");
   mergeVisual(rows, merges, row, 30, row + 1, 32, "TOTAL", "groupHeader");
@@ -538,24 +553,25 @@ function buildTernaVisual(rows, merges, section, row, sideValue, control) {
   mergeVisual(rows, merges, row + 1, 18, row + 1, 22, "BASE/ADICIONALES", "columnHeader");
   mergeVisual(rows, merges, row + 1, 23, row + 1, 26, "REMATE", "columnHeader");
   for (let visualRow = 0; visualRow < 3; visualRow += 1) {
-    const left = attempts[visualRow * 2];
-    const right = attempts[visualRow * 2 + 1];
+    const participant = participantRows[visualRow];
+    const left = participant.left;
+    const right = participant.right;
     const dataRow = row + 2 + visualRow;
-    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, [left?.charro, right?.charro].filter(Boolean).join(" / "), "participant");
-    mergeVisual(rows, merges, dataRow, 10, dataRow, 14, left ? attemptGoodExcludingTime(left) : "", "scoreCell");
-    mergeVisual(rows, merges, dataRow, 15, dataRow, 17, attemptRemate(left), "scoreCell");
-    mergeVisual(rows, merges, dataRow, 18, dataRow, 22, right ? attemptGoodExcludingTime(right) : "", "scoreCell");
-    mergeVisual(rows, merges, dataRow, 23, dataRow, 26, attemptRemate(right), "scoreCell");
-    mergeVisual(rows, merges, dataRow, 27, dataRow, 28, finite(left?.individualBadPoints) + finite(right?.individualBadPoints), "badScoreCell");
-    mergeVisual(rows, merges, dataRow, 29, dataRow, 29, left || right ? attemptTimePoints(left) + attemptTimePoints(right) : "", "scoreCell");
-    mergeVisual(rows, merges, dataRow, 30, dataRow, 32, left || right ? finite(left?.total) + finite(right?.total) : "", "totalCell");
+    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, participant.name || "-", "participant");
+    mergeVisual(rows, merges, dataRow, 10, dataRow, 14, aggregateAttemptValue(left, attemptGoodExcludingTime), "scoreCell");
+    mergeVisual(rows, merges, dataRow, 15, dataRow, 17, aggregateRemate(left), "scoreCell");
+    mergeVisual(rows, merges, dataRow, 18, dataRow, 22, aggregateAttemptValue(right, attemptGoodExcludingTime), "scoreCell");
+    mergeVisual(rows, merges, dataRow, 23, dataRow, 26, aggregateRemate(right), "scoreCell");
+    mergeVisual(rows, merges, dataRow, 27, dataRow, 28, aggregateBoth(left, right, (attempt) => attempt.individualBadPoints), "badScoreCell");
+    mergeVisual(rows, merges, dataRow, 29, dataRow, 29, aggregateBoth(left, right, attemptTimePoints), "scoreCell");
+    mergeVisual(rows, merges, dataRow, 30, dataRow, 32, aggregateBoth(left, right, (attempt) => attempt.total), "totalCell");
   }
   mergeVisual(rows, merges, row + 5, 2, row + 5, 9, "SUPLENTE", "substitute");
   mergeVisual(rows, merges, row + 5, 10, row + 5, 16, "TERMINADO EN", "plainLabel");
   mergeVisual(rows, merges, row + 5, 17, row + 5, 19, sectionTime(section), "controlBox");
   mergeVisual(rows, merges, row + 5, 20, row + 5, 21, "MIN.", "plainLabel");
   mergeVisual(rows, merges, row + 5, 22, row + 5, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
-  mergeVisual(rows, merges, row + 5, 29, row + 5, 32, section.teamPenaltyTotal || "-", "controlBox");
+  mergeVisual(rows, merges, row + 5, 29, row + 5, 32, sectionValueOrDash(section, "teamPenaltyTotal"), "controlBox");
   buildPostSectionControls(rows, merges, row + 6, control);
 }
 
@@ -581,7 +597,7 @@ function buildPasoVisual(rows, merges, section, row, sideValue, control) {
   mergeVisual(rows, merges, row + 3, 17, row + 3, 19, sectionTime(section), "controlBox");
   mergeVisual(rows, merges, row + 3, 20, row + 3, 21, "MIN.", "plainLabel");
   mergeVisual(rows, merges, row + 3, 22, row + 3, 28, "INFRACCIÓN AL EQUIPO", "plainLabel");
-  mergeVisual(rows, merges, row + 3, 29, row + 3, 32, section.teamPenaltyTotal || "-", "controlBox");
+  mergeVisual(rows, merges, row + 3, 29, row + 3, 32, sectionValueOrDash(section, "teamPenaltyTotal"), "controlBox");
   buildPostSectionControls(rows, merges, row + 4, control);
 }
 
@@ -638,11 +654,11 @@ function calaScoreValues(attempt) {
     finiteOrBlank(attempt.baseSelection?.total),
     finiteOrBlank(cala?.puntaDistancePoints),
     finiteOrBlank(cala?.puntaTimePoints),
-    selectionTotal(attempt.additionalSelections, /lado_derecho/),
-    selectionTotal(attempt.additionalSelections, /lado_izquierdo/),
-    selectionTotal(attempt.additionalSelections, /medio_derecho/),
-    selectionTotal(attempt.additionalSelections, /medio_izquierdo/),
-    selectionTotal(attempt.additionalSelections, /cambio_rectangulo/)
+    selectionTotalOrZero(attempt.additionalSelections, /lado_derecho/),
+    selectionTotalOrZero(attempt.additionalSelections, /lado_izquierdo/),
+    selectionTotalOrZero(attempt.additionalSelections, /medio_derecho/),
+    selectionTotalOrZero(attempt.additionalSelections, /medio_izquierdo/),
+    selectionTotalOrZero(attempt.additionalSelections, /cambio_rectangulo/)
   ];
 }
 
@@ -668,10 +684,49 @@ function jineteoScoreValues(attempt, kind) {
   return values;
 }
 
-function calaBadPointDisplay(item) {
-  if (!item) return "";
-  const code = String(item.documentCode || "").trim();
-  return code ? `${code}\n${finite(item.value)}` : finite(item.value);
+function calaBadPointCode(item) {
+  return String(item?.documentCode || "").trim() || "-";
+}
+
+function buildTernaParticipantRows(snapshot, attempts) {
+  const roster = Array.isArray(snapshot.teamMetadata?.roster?.terna)
+    ? snapshot.teamMetadata.roster.terna.slice(0, 3).map((name) => String(name || "").trim())
+    : [];
+  const attemptNames = attempts.map((attempt) => String(attempt.charro || "").trim()).filter(Boolean);
+  const names = [...roster];
+  for (const name of attemptNames) {
+    if (names.includes(name) || names.length >= 3) continue;
+    names.push(name);
+  }
+  while (names.length < 3) names.push("");
+  return names.slice(0, 3).map((name) => ({
+    name,
+    left: name ? attempts.filter((attempt) => attempt.suerteId === "lazo" && attemptCharro(attempt) === name) : [],
+    right: name ? attempts.filter((attempt) => attempt.suerteId === "pial_ruedo" && attemptCharro(attempt) === name) : []
+  }));
+}
+
+function attemptCharro(attempt) {
+  return String(attempt?.charro || "").trim();
+}
+
+function aggregateAttemptValue(attempts, selector) {
+  return attempts.length ? attempts.reduce((sum, attempt) => sum + finite(selector(attempt)), 0) : "-";
+}
+
+function aggregateBoth(left, right, selector) {
+  const attempts = [...left, ...right];
+  return aggregateAttemptValue(attempts, selector);
+}
+
+function aggregateRemate(attempts) {
+  if (!attempts.length) return "-";
+  const labels = attempts.map(attemptRemate).filter(Boolean);
+  return labels.length ? [...new Set(labels)].join(" / ") : "-";
+}
+
+function sectionValueOrDash(section, key) {
+  return section?.attempts?.length ? finite(section[key]) : "-";
 }
 
 function attemptTimePoints(attempt) {
@@ -735,6 +790,11 @@ function badPointsControlValue(snapshot, sectionId) {
 function selectionTotal(selections, pattern) {
   const matches = (selections || []).filter((selection) => pattern.test(selectionId(selection)));
   return matches.length ? matches.reduce((sum, selection) => sum + selectionPoints(selection), 0) : "";
+}
+
+function selectionTotalOrZero(selections, pattern) {
+  const value = selectionTotal(selections, pattern);
+  return value === "" ? 0 : value;
 }
 
 function selectionId(selection) {

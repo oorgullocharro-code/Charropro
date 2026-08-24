@@ -16,7 +16,7 @@ import {
   updateScoringAttemptClassification
 } from "../js/core/scoringAttempt.js";
 
-const RELEASE_ID = "20260822-fmch-official-team-sheet-judge-review-001-v1";
+const RELEASE_ID = "20260824-fmch-team-sheet-pre-judge-final-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({

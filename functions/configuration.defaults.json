@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260822-fmch-official-team-sheet-judge-review-001-v1",
+      "appVersion": "20260824-fmch-team-sheet-pre-judge-final-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "f381ac2068e8f1e46aba8806611d32b09964371946af2fbacc5141dbc745f480",
-  "fingerprint": "f381ac2068e8f1e46aba8806611d32b09964371946af2fbacc5141dbc745f480"
+  "checksum": "63a99e675efef604bb3305a4026a95e002b4002230e652eb0359e0b21a131d44",
+  "fingerprint": "63a99e675efef604bb3305a4026a95e002b4002230e652eb0359e0b21a131d44"
 }

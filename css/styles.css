@@ -8612,8 +8612,10 @@ html.graphic-page #graphic-root {
 }
 
 .official-document {
-  width: max-content;
-  min-width: 1500px;
+  box-sizing: border-box;
+  width: min(1120px, 100%);
+  min-width: 920px;
+  margin: 0 auto;
   background: #fff;
 }
 
@@ -8668,9 +8670,12 @@ html.graphic-page #graphic-root {
 }
 
 .official-sheet {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  min-width: 1500px;
+  min-width: 0;
   background: #fff;
   color: #111;
   font-family: Arial, sans-serif;
@@ -8678,6 +8683,8 @@ html.graphic-page #graphic-root {
 }
 
 .official-sheet td {
+  box-sizing: border-box;
+  min-width: 0;
   border: 1px solid #8f8f8f;
   padding: 2px 4px;
   vertical-align: middle;
@@ -8687,60 +8694,124 @@ html.graphic-page #graphic-root {
   line-height: 1.05;
 }
 
-.official-sheet .official-greenTitle {
+.official-sheet .official-institutionTitle {
   color: #0a7a20;
   font-size: 16px;
   font-weight: 900;
   letter-spacing: .02em;
 }
 
-.official-sheet .official-header,
-.official-sheet .official-section,
-.official-sheet .official-subheader {
+.official-sheet .official-sectionTitle,
+.official-sheet .official-groupHeader,
+.official-sheet .official-compactGroupHeader,
+.official-sheet .official-columnHeader {
   background: #d9d9d9;
   font-weight: 900;
 }
 
-.official-sheet .official-whiteHeader {
-  background: #fff;
+.official-sheet .official-compactGroupHeader,
+.official-sheet .official-columnHeader {
+  font-size: 8px;
+}
+
+.official-sheet .official-participant,
+.official-sheet .official-headerValue {
+  text-align: left;
+}
+
+.official-sheet .official-participant {
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.official-sheet .official-substitute,
+.official-sheet .official-plainLabel {
+  font-size: 8px;
   font-weight: 900;
 }
 
-.official-sheet .official-red,
-.official-sheet .official-redHeader {
+.official-sheet .official-badHeader,
+.official-sheet .official-badScoreCell,
+.official-sheet .official-badCodeCell,
+.official-sheet .official-footerRed {
   color: #cc0000;
   font-weight: 900;
 }
 
-.official-sheet .official-redHeader {
+.official-sheet .official-badHeader {
   background: #f3f4f6;
 }
 
-.official-sheet .official-verticalSection {
-  background: #d9d9d9;
-  font-size: 12px;
-  font-weight: 900;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
+.official-sheet .official-scoreCell,
+.official-sheet .official-badScoreCell,
+.official-sheet .official-badCodeCell,
+.official-sheet .official-totalCell,
+.official-sheet .official-controlBox,
+.official-sheet .official-documentControl,
+.official-sheet .official-finalScore {
+  font-variant-numeric: tabular-nums;
 }
 
-.official-sheet .official-highlight {
-  background: #fff200;
-  font-weight: 900;
-}
-
-.official-sheet .official-number {
-  font-size: 16px;
+.official-sheet .official-totalCell,
+.official-sheet .official-controlBox,
+.official-sheet .official-finalScore {
   font-weight: 900;
 }
 
-.official-sheet .official-signature {
+.official-sheet .official-controlBox,
+.official-sheet .official-documentControl {
+  border: 2px solid #111;
+}
+
+.official-sheet .official-finalLabel,
+.official-sheet .official-finalScore {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.official-sheet .official-signatureLabel,
+.official-sheet .official-signatureLine {
   border-top: 2px solid #111;
   font-weight: 900;
-  vertical-align: bottom;
+}
+
+.official-sheet .official-footer,
+.official-sheet .official-footerRed {
+  border: 0;
+  font-size: 8px;
+}
+
+.official-sheet .official-badCodeCell {
+  font-size: 7px;
+}
+
+.official-sheet .official-sectionTitle,
+.official-sheet .official-groupHeader,
+.official-sheet .official-compactGroupHeader,
+.official-sheet .official-columnHeader,
+.official-sheet .official-badHeader {
+  line-height: 1.1;
+}
+
+.official-sheet .official-signatureLine {
+  height: 24px;
+}
+
+.official-sheet .official-finalScore {
+  background: #bfbfbf;
+  border: 2px solid #111;
+}
+
+.official-sheet .official-finalLabel {
+  font-weight: 900;
 }
 
 @media print {
+  @page {
+    size: 215.9mm 340.44mm;
+    margin: 4.6mm;
+  }
+
   body {
     background: #fff;
   }
@@ -8759,6 +8830,19 @@ html.graphic-page #graphic-root {
     padding: 0;
     background: #fff;
     overflow: visible;
+  }
+
+  .official-document {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .official-institutional-header {
+    min-height: 22mm;
+  }
+
+  .official-institutional-footer {
+    min-height: 20mm;
   }
 }
 
