@@ -1,28 +1,28 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/outputSynchronization.js?v=20260824-cache-buster-single-authority-001-v1";
+import * as api from "../js/broadcast/outputSynchronization.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine
-} from "../js/broadcast/outputRouting.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   createProgramEngine,
   getProgramSnapshot,
   prepareProgram,
   takeProgram
-} from "../js/broadcast/programEngine.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../js/broadcast/programEngine.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   configureAnnouncerMonitor,
   createAnnouncerMonitor,
   getAnnouncerSnapshot,
   mountAnnouncerMonitor
-} from "../js/broadcast/announcerMonitor.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../js/broadcast/announcerMonitor.js?v=20260824-scorer-interaction-latency-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";

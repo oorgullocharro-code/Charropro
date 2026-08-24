@@ -1,19 +1,19 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260824-cache-buster-single-authority-001-v1";
-import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260824-cache-buster-single-authority-001-v1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260824-cache-buster-single-authority-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260824-cache-buster-single-authority-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260824-scorer-interaction-latency-001-v1";
+import { getCompetitionType, getCompetitionTypeFromTournamentType } from "../data/competitionTypes.js?v=20260824-scorer-interaction-latency-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260824-scorer-interaction-latency-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260824-cache-buster-single-authority-001-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260824-cache-buster-single-authority-001-v1";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./timerRules.js?v=20260824-scorer-interaction-latency-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260824-scorer-interaction-latency-001-v1";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -26,7 +26,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./localCache.js?v=20260824-scorer-interaction-latency-001-v1";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());
@@ -122,6 +122,7 @@ const createInitialState = () => ({
 });
 
 export let state = createInitialState();
+let scoringSuertesCache = null;
 
 export function uid(prefix = "id") {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -844,14 +845,48 @@ export function getCharreadaCompetitionContext(charreada = getActiveCharreada(),
 }
 
 export function getCharreadaScoringSuertes(charreada = getActiveCharreada(), tournament = getActiveTournament(), ruleOverrides = state.settings?.globalRuleOverrides) {
+  const cacheSignature = buildScoringSuertesCacheSignature(charreada, tournament);
+  if (
+    scoringSuertesCache
+    && scoringSuertesCache.charreada === charreada
+    && scoringSuertesCache.tournament === tournament
+    && scoringSuertesCache.ruleOverrides === ruleOverrides
+    && scoringSuertesCache.signature === cacheSignature
+  ) {
+    return scoringSuertesCache.suertes;
+  }
   const competitionContext = getCharreadaCompetitionContext(charreada, tournament);
   const baseTournament = tournament || getActiveTournament();
   if (!competitionContext.suerteIds.length) return [];
   const fullSuertes = getTournamentSuertes({ ...(baseTournament || {}), type: "completo" }, ruleOverrides);
   const suertesById = new Map(fullSuertes.map((suerte) => [suerte.id, suerte]));
   const suertes = competitionContext.suerteIds.map((suerteId) => suertesById.get(suerteId)).filter(Boolean);
-  if (suertes.length) return suertes;
-  return getTournamentSuertes(baseTournament, ruleOverrides);
+  const resolved = suertes.length ? suertes : getTournamentSuertes(baseTournament, ruleOverrides);
+  scoringSuertesCache = {
+    charreada,
+    tournament,
+    ruleOverrides,
+    signature: cacheSignature,
+    suertes: resolved
+  };
+  return resolved;
+}
+
+function buildScoringSuertesCacheSignature(charreada = {}, tournament = {}) {
+  return [
+    charreada?.id || "",
+    charreada?.competitionType || "",
+    charreada?.competitionId || "",
+    charreada?.competitionScope || "",
+    Array.isArray(charreada?.suerteIds) ? charreada.suerteIds.join(",") : "",
+    tournament?.id || "",
+    tournament?.type || "",
+    tournament?.ruleProfileId || tournament?.ruleProfile?.profileId || "",
+    tournament?.ruleProfileVersion || tournament?.ruleProfile?.version || "",
+    tournament?.effectiveRulesFingerprint || tournament?.ruleProfile?.effectiveRulesFingerprint || "",
+    tournament?.ruleOverridesUpdatedAt || "",
+    state.settings?.globalRuleOverridesUpdatedAt || ""
+  ].join("|");
 }
 
 function buildIndividualParticipantEntry(participant = {}, index = 0, charreada = {}) {

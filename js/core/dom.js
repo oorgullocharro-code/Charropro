@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260824-cache-buster-single-authority-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260824-scorer-interaction-latency-001-v1";
 
 logCharroProVersion("runtime");
 

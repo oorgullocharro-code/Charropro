@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260824-scorer-interaction-latency-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",

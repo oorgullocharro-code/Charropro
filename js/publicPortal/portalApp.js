@@ -3,19 +3,19 @@ import {
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260824-cache-buster-single-authority-001-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../public/publicPortalClient.js?v=20260824-scorer-interaction-latency-001-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
-} from "./portalRouter.js?v=20260824-cache-buster-single-authority-001-v1";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./portalRouter.js?v=20260824-scorer-interaction-latency-001-v1";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./portalRender.js?v=20260824-scorer-interaction-latency-001-v1";
 
 export const PUBLIC_PORTAL_CORE_VERSION = "2.0.0";
 

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260824-cache-buster-single-authority-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260824-scorer-interaction-latency-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260824-cache-buster-single-authority-001-v1",
+      "appVersion": "20260824-scorer-interaction-latency-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "343b9b8c4780e5d948c095d07fe3c28859135b2c971e9012b4634ae7cea024be",
-  "fingerprint": "343b9b8c4780e5d948c095d07fe3c28859135b2c971e9012b4634ae7cea024be"
+  "checksum": "6c739f11f2cde710014d8f9869a0016c9939b15830a74861380ac1a0ce2ccf0c",
+  "fingerprint": "6c739f11f2cde710014d8f9869a0016c9939b15830a74861380ac1a0ce2ccf0c"
 }

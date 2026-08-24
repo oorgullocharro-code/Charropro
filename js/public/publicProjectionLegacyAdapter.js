@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260824-cache-buster-single-authority-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260824-scorer-interaction-latency-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260824-cache-buster-single-authority-001-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260824-cache-buster-single-authority-001-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260824-scorer-interaction-latency-001-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,15 +8,15 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../core/firebaseSync.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   getOfficialTimerContextView,
   getOfficialTimerControlView,
   normalizeOfficialTimerContext
-} from "../core/timerRules.js?v=20260824-cache-buster-single-authority-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../core/timerRules.js?v=20260824-scorer-interaction-latency-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260824-scorer-interaction-latency-001-v1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();

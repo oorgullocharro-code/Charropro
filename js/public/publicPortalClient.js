@@ -4,8 +4,8 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260824-cache-buster-single-authority-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./publicProjectionSchema.js?v=20260824-scorer-interaction-latency-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260824-scorer-interaction-latency-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

@@ -13,7 +13,7 @@ import {
   setOutputState,
   setPreviewState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./broadcastState.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   assignLayersToOutput,
   assignThemeToOutput,
@@ -22,16 +22,16 @@ import {
   setBroadcastOutputStatus,
   updateBroadcastOutput,
   updateBroadcastOutputHeartbeat
-} from "./broadcastOutput.js?v=20260824-cache-buster-single-authority-001-v1";
-import { getBroadcastAsset } from "./assetManager.js?v=20260824-cache-buster-single-authority-001-v1";
-import { validateBroadcastDataContract } from "./dataContract.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./broadcastOutput.js?v=20260824-scorer-interaction-latency-001-v1";
+import { getBroadcastAsset } from "./assetManager.js?v=20260824-scorer-interaction-latency-001-v1";
+import { validateBroadcastDataContract } from "./dataContract.js?v=20260824-scorer-interaction-latency-001-v1";
 import {
   expireProductionVariable,
   registerProductionVariable,
   resetProductionVariableValue,
   setProductionVariableValue,
   updateProductionVariable
-} from "./productionVariables.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "./productionVariables.js?v=20260824-scorer-interaction-latency-001-v1";
 
 export const BROADCAST_ACTION_ENGINE_VERSION = "1.1.0";
 

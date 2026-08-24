@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260824-cache-buster-single-authority-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../js/core/scoring.js?v=20260824-scorer-interaction-latency-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260824-scorer-interaction-latency-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260824-cache-buster-single-authority-001-v1";
+} from "../js/data/calaRules.js?v=20260824-scorer-interaction-latency-001-v1";
 
 const puntaCases = [
   [5, 1, 0],
