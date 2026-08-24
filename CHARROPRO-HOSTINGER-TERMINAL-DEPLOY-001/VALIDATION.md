@@ -29,3 +29,17 @@ Firebase Production Writes remain 0.
 - Secret/private-key scan: PASS.
 - Debugger scan: PASS.
 - Real environment file ignored: PASS.
+
+## Production deployment
+
+- SSH authentication: PASS.
+- Remote path: PASS.
+- Package and remote SHA: PASS.
+- Complete backup with remote SHA: PASS.
+- Extraction/staging: PASS.
+- Overlay deploy: PASS.
+- Remote build/checksum: PASS.
+- HTTP smoke: 5/5 PASS.
+- Deploy locks: PASS and released.
+- Rollback dry-run: PASS.
+- Firebase Production Writes: 0.
