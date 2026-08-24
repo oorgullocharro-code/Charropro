@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js";
+} from "../js/data/ruleProfiles.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js";
-import { calculateAttemptTotal } from "../js/core/scoring.js";
+} from "../js/data/suertes.js?v=20260824-cache-buster-single-authority-001-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260824-cache-buster-single-authority-001-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

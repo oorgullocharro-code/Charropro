@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260713-broadcast-output-001-output-v1";
+} from "./broadcastState.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260713-broadcast-output-001-output-v1";
+} from "./dataContract.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

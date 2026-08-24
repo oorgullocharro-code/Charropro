@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js";
+import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const render = read("js/publicPortal/portalRender.js");
 const app = read("js/publicPortal/portalApp.js");
@@ -67,7 +67,7 @@ assert.equal(fixture.includes("Asociacion"), false);
 assert.equal(css.includes("!important"), false);
 assert.equal(css.includes("linear-gradient"), false);
 assert.equal(css.includes("radial-gradient"), false);
-assert.match(html, /public-portal-design-system-v2-001-sports-ui-v2/);
+assert.match(html, /data-charropro-build-href="\.\/css\/public-portal\.css"/);
 for (const viewport of [320, 360, 390, 768, 1024, 1280, 1440, 1920]) {
   assert.match(responsiveFixture, new RegExp(`width: ${viewport}px`));
 }

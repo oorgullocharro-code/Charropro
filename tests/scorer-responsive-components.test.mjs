@@ -9,14 +9,14 @@ import {
   buildScorerRemateHistory,
   SCORER_COMPONENT_SYSTEM_VERSION,
   SCORER_RESPONSIVE_BREAKPOINTS
-} from "../js/core/scorerComponents.js";
+} from "../js/core/scorerComponents.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   normalizeScoringAttemptV2,
   setScoringAttemptDq,
   updateScoringAttemptClassification
-} from "../js/core/scoringAttempt.js";
+} from "../js/core/scoringAttempt.js?v=20260824-cache-buster-single-authority-001-v1";
 
-const RELEASE_ID = "20260824-fmch-team-sheet-html-print-geometry-001-v1";
+const RELEASE_ID = "20260824-cache-buster-single-authority-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({
@@ -247,6 +247,7 @@ assert.equal(buildScorerRemateHistory(Array.from({ length: 20 }, (_, index) => (
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("../css/styles.css", import.meta.url), "utf8");
 const indexSource = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const configurationSource = readFileSync(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8");
 assert.match(appSource, /data-action="previous-score"[\s\S]{0,220}Deshacer/);
 assert.match(appSource, /data-action="toggle-attempt-zero"[\s\S]{0,260}Marcar 0/);
 assert.match(appSource, /data-action="next-score"[\s\S]{0,260}Guardar y siguiente/);
@@ -258,6 +259,7 @@ assert.match(cssSource, /--scorer-touch-target:\s*56px/);
 assert.match(cssSource, /position:\s*sticky;[\s\S]{0,80}bottom:\s*0/);
 assert.match(cssSource, /repeat\(auto-fit,\s*minmax\(min\(100%,\s*var\(--scorer-rule-min\)\),\s*1fr\)\)/);
 assert.match(cssSource, /env\(safe-area-inset-bottom\)/);
-assert.match(indexSource, new RegExp(RELEASE_ID));
+assert.match(indexSource, /src="\.\/js\/core\/clientBootstrap\.js"/);
+assert.match(configurationSource, new RegExp(RELEASE_ID));
 
 console.log("Scorer responsive component system tests passed.");

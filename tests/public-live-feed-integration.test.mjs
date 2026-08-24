@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260824-cache-buster-single-authority-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -47,8 +47,8 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260824-fmch-team-sheet-html-print-geometry-001-v1"],
-  "all browser entrypoints share one firebaseSync module identity"
+  ["20260824-cache-buster-single-authority-001-v1"],
+  "all browser entrypoints use the canonical firebaseSync module identity"
 );
 
 assert.equal(

@@ -3,18 +3,18 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js";
-import { applyPuntaCalculation } from "../js/core/scoring.js";
+} from "../js/core/scoringAttempt.js?v=20260824-cache-buster-single-authority-001-v1";
+import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js";
+} from "../js/core/officialFormatSnapshot.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js";
-import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js";
+} from "../js/core/officialFormat.js?v=20260824-cache-buster-single-authority-001-v1";
+import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const TOURNAMENT_ID = "semantic-fmch-2024-2028";
 const CHARREADA_ID = "semantic-charreada-1";

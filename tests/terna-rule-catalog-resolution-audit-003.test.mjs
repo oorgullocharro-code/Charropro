@@ -4,19 +4,19 @@ import {
   applyLocalFmch2026RuleProfileDefault,
   buildLocalFmch2026RuleProfileAssignment,
   hasExplicitRuleProfileSelection
-} from "../js/core/localRuleProfileDefaults.js";
+} from "../js/core/localRuleProfileDefaults.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js";
-import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js";
+} from "../js/data/ruleProfiles.js?v=20260824-cache-buster-single-authority-001-v1";
+import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   buildFmch2026TernaOpportunityDraft,
   commitFmch2026TernaOpportunity,
   createFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js";
+} from "../js/data/fmch2026TernaRules.js?v=20260824-cache-buster-single-authority-001-v1";
 import { createLocalRuntimeSeedFixture } from "../tools/development/localRuntimeSeed.mjs";
 
 const productFingerprint = JSON.stringify(SUERTES);

@@ -1,18 +1,18 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { ROLES, roleCan } from "../js/core/roles.js?v=20260708-recovery-001b-panel-status1";
-import { CHARROPRO_APP_VERSION } from "../js/core/version.js";
+import { ROLES, roleCan } from "../js/core/roles.js?v=20260824-cache-buster-single-authority-001-v1";
+import { CHARROPRO_APP_VERSION } from "../js/core/version.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
 const cssSource = await readFile(new URL("../css/styles.css", import.meta.url), "utf8");
 const indexSource = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const documentation = await readFile(new URL("../PRODUCTION_NAV_V1.md", import.meta.url), "utf8");
-const version = "20260824-fmch-team-sheet-html-print-geometry-001-v1";
+const version = "20260824-cache-buster-single-authority-001-v1";
 
 assert.equal(CHARROPRO_APP_VERSION, version);
 assert.match(appSource, /const PRODUCTION_NAV_VERSION = CHARROPRO_APP_VERSION/);
-assert.match(indexSource, /styles\.css\?v=[a-z0-9-]+/);
-assert.match(indexSource, /app\.js\?v=[a-z0-9-]+/);
+assert.match(indexSource, /data-charropro-build-href="\.\/css\/styles\.css"/);
+assert.match(indexSource, /data-charropro-entry="\.\/js\/app\.js"/);
 
 // Navigation uses the existing view system and the single delegated click listener.
 assert.match(appSource, /const PRODUCTION_NAV_VIEW = "production"/);

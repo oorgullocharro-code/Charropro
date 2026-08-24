@@ -3,15 +3,15 @@ import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../js/public/publicProjection.js";
+} from "../js/public/publicProjection.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "../js/public/publicProjectionSchema.js";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js";
+} from "../js/public/publicProjectionSchema.js?v=20260824-cache-buster-single-authority-001-v1";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const baseSource = buildSource();
 const candidate = buildPublicProjection(baseSource, {

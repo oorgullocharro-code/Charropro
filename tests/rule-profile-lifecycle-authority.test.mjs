@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import engine from "../functions/ruleProfileLifecycleEngine.js";
-import service from "../functions/ruleProfileLifecycleService.js";
-import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js";
+import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260824-cache-buster-single-authority-001-v1";
+import service from "../functions/ruleProfileLifecycleService.js?v=20260824-cache-buster-single-authority-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   RULE_PROFILE_TEMPORAL_STATUSES,
   RULE_PROFILE_TEMPORAL_TRANSITIONS,
   buildRuleProfileContentFingerprint
-} from "../js/data/ruleProfileTemporalPolicy.js";
+} from "../js/data/ruleProfileTemporalPolicy.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const {
   REQUEST_TRANSITIONS,

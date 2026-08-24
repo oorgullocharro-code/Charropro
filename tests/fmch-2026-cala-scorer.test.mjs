@@ -8,25 +8,25 @@ import {
   FMCH_2026_CALA_RULEBOOK_VERSION,
   FMCH_2026_CALA_TEAM_PENALTY_RULES,
   calculatePuntaBreakdown
-} from "../js/data/calaRules.js";
+} from "../js/data/calaRules.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js";
-import { SUERTES } from "../js/data/suertes.js";
+} from "../js/data/ruleProfiles.js?v=20260824-cache-buster-single-authority-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js";
+} from "../js/core/scoringAttempt.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   applyPuntaCalculation,
   calculateAttemptPointSummary,
   calculateAttemptTotal
-} from "../js/core/scoring.js";
+} from "../js/core/scoring.js?v=20260824-cache-buster-single-authority-001-v1";
 
-const RELEASE_ID = "20260824-fmch-team-sheet-html-print-geometry-001-v1";
+const RELEASE_ID = "20260824-cache-buster-single-authority-001-v1";
 const publishedAt = "2026-08-08T18:00:00.000Z";
 
 assert.equal(FMCH_2026_CALA_RULEBOOK_VERSION, "fmch_2026_cala_0.2.0");
@@ -294,6 +294,7 @@ assert.equal(historicalAttemptV2.scoring.calculationDetail.value, 5);
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const stateSource = readFileSync(new URL("../js/core/state.js", import.meta.url), "utf8");
 const indexSource = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const configurationSource = readFileSync(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8");
 assert.match(appSource, /data-action="punta-input" data-field="puntaMetros"/);
 assert.doesNotMatch(appSource, /data-field="puntaMetros"[^>]*max=/);
 assert.match(appSource, /function adjustRuleQuantity/);
@@ -301,6 +302,7 @@ assert.match(appSource, /descRuleId/);
 assert.match(appSource, /async function nextScore\(\)[\s\S]*publishOfficialScoreForContext\(publicationContext,\s*\{[\s\S]*continueOfficialScoreFlowAfterPublish/);
 assert.match(appSource, /function buildPublishedScoreSnapshot\(context\)[\s\S]*applyPuntaCalculation\(attempt\)[\s\S]*cala-punta-evidence-total-mismatch/);
 assert.match(stateSource, /ruleQuantities:\s*\{\}/);
-assert.match(indexSource, new RegExp(RELEASE_ID));
+assert.match(indexSource, /src="\.\/js\/core\/clientBootstrap\.js"/);
+assert.match(configurationSource, new RegExp(RELEASE_ID));
 
 console.log("FMCH 2026 Cala scorer: catalog, Punta, quantities, DQ, Attempt V2 and freeze passed.");

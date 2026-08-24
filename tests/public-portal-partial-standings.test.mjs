@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildPublicProjection } from "../js/public/publicProjection.js";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js";
-import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260824-cache-buster-single-authority-001-v1";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260824-cache-buster-single-authority-001-v1";
+import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const source = buildSource();
 let projection = buildPublicProjection(source, {

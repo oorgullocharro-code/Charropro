@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const RELEASE_ID = "20260824-fmch-team-sheet-html-print-geometry-001-v1";
+const RELEASE_ID = "20260824-cache-buster-single-authority-001-v1";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const TARGET = path.join(ROOT, "js/core/firebaseSync.js");
 
@@ -21,16 +21,10 @@ for (const file of files) {
 
 const tournamentApp = path.join(ROOT, "js/tournamentApp.js");
 const tournamentSource = await readFile(tournamentApp, "utf8");
-assert.match(tournamentSource, /new URL\("\.\/app\.js", import\.meta\.url\)/);
 assert.match(
   tournamentSource,
-  new RegExp(`appModuleUrl\\.searchParams\\.set\\("v", "${RELEASE_ID}"\\)`)
+  new RegExp(`import\\("\\.\\/app\\.js\\?v=${RELEASE_ID}"\\)`)
 );
-edges.push({
-  from: tournamentApp,
-  to: path.join(ROOT, "js/app.js"),
-  specifier: `./app.js?v=${RELEASE_ID}`
-});
 
 const ancestors = collectAncestors(edges, TARGET);
 const protectedEdges = edges.filter(({ from, to }) => ancestors.has(from) && ancestors.has(to));
@@ -70,24 +64,24 @@ const currentRequests = new Set(protectedEdges.map(buildRequestKey));
 const priorCacheScenarios = {
   clean: [],
   previousRuleProfileRelease: [
-    "/js/app.js?v=20260808-rule-profile-engine-001-v1",
-    "/js/core/scoring.js?v=20260808-rule-profile-engine-001-v1",
-    "/js/core/firebaseSync.js?v=20260808-rule-profile-engine-001-v1"
+    "/js/app.js",
+    "/js/core/scoring.js",
+    "/js/core/firebaseSync.js"
   ],
   previousRelease: [
-    "/js/app.js?v=20260808-public-snapshot-critical-recovery-001-v3",
-    "/js/core/firebaseSync.js?v=20260808-public-snapshot-critical-recovery-001-v3"
+    "/js/app.js",
+    "/js/core/firebaseSync.js"
   ],
-  previousApp: ["/js/app.js?v=20260807-public-snapshot-critical-recovery-001-v1"],
-  previousSync: ["/js/core/sync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1"],
+  previousApp: ["/js/app.js"],
+  previousSync: ["/js/core/sync.js"],
   previousFirebase: [
-    "/js/core/firebaseSync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1",
-    "/js/core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1"
+    "/js/core/firebaseSync.js",
+    "/js/core/firebaseSync.js"
   ],
   olderRelease: [
-    "/js/app.js?v=20260807-public-snapshot-critical-recovery-001-v1",
-    "/js/core/sync.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1",
-    "/js/core/firebaseSync.js?v=20260807-public-snapshot-critical-recovery-001-v1"
+    "/js/app.js",
+    "/js/core/sync.js",
+    "/js/core/firebaseSync.js"
   ]
 };
 
@@ -127,14 +121,21 @@ async function listRuntimeFiles(root) {
 function listRelativeDependencies(source, file) {
   const dependencies = [];
   const patterns = file.endsWith(".html")
-    ? [/<script\b[^>]*\bsrc=["']([^"']+)["']/gi]
+    ? [
+        /<script\b[^>]*\bsrc=["']([^"']+)["']/gi,
+        /data-charropro-entry=["']([^"']+)["']/gi
+      ]
     : [
         /\b(?:import|export)\s+(?:[^"'()]*?\s+from\s*)?["']([^"']+)["']/g,
         /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g
       ];
   for (const pattern of patterns) {
     for (const match of source.matchAll(pattern)) {
-      if (match[1].startsWith(".")) dependencies.push(match[1]);
+      if (!match[1].startsWith(".")) continue;
+      const isStableBootstrap = match[1].endsWith("/clientBootstrap.js");
+      dependencies.push(file.endsWith(".html") && !isStableBootstrap
+        ? `${match[1]}?v=${RELEASE_ID}`
+        : match[1]);
     }
   }
   return dependencies;

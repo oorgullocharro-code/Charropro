@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260824-fmch-team-sheet-html-print-geometry-001-v1",
+      "appVersion": "20260824-cache-buster-single-authority-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "70418d6f8894013fb2df161ae0141ad38251f8f7ef3b922d8ed333c3f2bc76df",
-  "fingerprint": "70418d6f8894013fb2df161ae0141ad38251f8f7ef3b922d8ed333c3f2bc76df"
+  "checksum": "343b9b8c4780e5d948c095d07fe3c28859135b2c971e9012b4634ae7cea024be",
+  "fingerprint": "343b9b8c4780e5d948c095d07fe3c28859135b2c971e9012b4634ae7cea024be"
 }

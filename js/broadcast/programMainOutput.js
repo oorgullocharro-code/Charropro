@@ -9,7 +9,7 @@ import {
   setBrowserOutputDisplayMode,
   setBrowserOutputViewport,
   validateBrowserOutputProjection
-} from "./browserOutput.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./browserOutput.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   clearBroadcastComponentRenderer,
   createComponentRenderer,
@@ -17,11 +17,11 @@ import {
   getComponentRenderWarnings,
   renderBroadcastComponent,
   updateBroadcastComponentRender
-} from "./componentRenderer.js?v=20260715-program-main-output-001-official-program-visual-output-v1";
+} from "./componentRenderer.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "./componentLibrary.js?v=20260713-component-library-001-components-v1";
+} from "./componentLibrary.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const PROGRAM_MAIN_OUTPUT_VERSION = "1.0.0";
 
@@ -1608,9 +1608,9 @@ export async function connectProgramMainRealtime(instance, options = {}) {
     : new URLSearchParams(options.search ?? globalThis.location?.search ?? "");
   const requestContext = options.context || broadcastRealtimeContextFromParams(params);
   assertNoProgramMainExternalIdentity(requestContext);
-  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
+  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260824-cache-buster-single-authority-001-v1");
   const accessId = params.get("access") || options.accessId || null;
-  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1") : null);
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260824-cache-buster-single-authority-001-v1") : null);
   if (options.authorizedContext && !options.adapter) throw outputError("program-main-output-authorized-context-injection-forbidden");
   if (options.temporaryAccess && !options.adapter) throw outputError("program-main-output-temporary-access-injection-forbidden");
   const temporaryAccess = accessId

@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js";
+} from "../js/public/publicPortalClient.js?v=20260824-cache-buster-single-authority-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./programEngine.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

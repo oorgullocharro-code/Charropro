@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   applyPublicPortalConnection,
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js";
+} from "../js/public/publicPortalClient.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const qa = {
   tournament: {

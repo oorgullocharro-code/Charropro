@@ -26,7 +26,7 @@ import {
   takeProductionConsoleOfficialProgram,
   updateProductionConsoleOfficialPreviewLiveData,
   updateProductionConsoleOfficialProgramLiveData
-} from "./productionConsole.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "./productionConsole.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   applyProgramMainProjection,
   clearProgramMainOutput,
@@ -34,17 +34,18 @@ import {
   createProgramMainOutput,
   destroyProgramMainOutput,
   mountProgramMainOutput
-} from "./programMainOutput.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
-import { destroyTemplateRendererIntegration } from "./templateRendererIntegration.js?v=20260714-template-renderer-integration-001-composed-preview-v1";
-import { destroyThemeTemplateIntegration } from "./themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
-import { destroyPreviewEngine } from "./previewEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
-import { destroyProgramEngine } from "./programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
-import { destroyOutputRoutingEngine } from "./outputRouting.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
-import { destroyBroadcastRealtimeTransport } from "./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1";
-import { destroyLiveBindingsEngine } from "./liveBindings.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./programMainOutput.js?v=20260824-cache-buster-single-authority-001-v1";
+import { destroyTemplateRendererIntegration } from "./templateRendererIntegration.js?v=20260824-cache-buster-single-authority-001-v1";
+import { destroyThemeTemplateIntegration } from "./themeTemplateIntegration.js?v=20260824-cache-buster-single-authority-001-v1";
+import { destroyPreviewEngine } from "./previewEngine.js?v=20260824-cache-buster-single-authority-001-v1";
+import { destroyProgramEngine } from "./programEngine.js?v=20260824-cache-buster-single-authority-001-v1";
+import { destroyOutputRoutingEngine } from "./outputRouting.js?v=20260824-cache-buster-single-authority-001-v1";
+import { destroyBroadcastRealtimeTransport } from "./broadcastRealtimeTransport.js?v=20260824-cache-buster-single-authority-001-v1";
+import { destroyLiveBindingsEngine } from "./liveBindings.js?v=20260824-cache-buster-single-authority-001-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const BROADCAST_STUDIO_WORKSPACE_VERSION = "1.0.0";
-export const BROADCAST_STUDIO_APP_VERSION = "20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+export const BROADCAST_STUDIO_APP_VERSION = CHARROPRO_APP_VERSION;
 
 export const BROADCAST_STUDIO_FILTERS = Object.freeze([
   Object.freeze({ id: "all", label: "Todos" }),
@@ -543,7 +544,7 @@ export function createBroadcastStudioEngine(options = {}) {
       if (disposed) throw workspaceError("broadcast-studio-destroyed");
       emit({ connectionState: "preparing", context: null, operationStatus: "Esperando autenticación", error: null });
       try {
-        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1");
+        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260824-cache-buster-single-authority-001-v1");
         if (typeof runtime.firebaseBroadcastApi.subscribeFirebaseBroadcastContext !== "function") {
           throw workspaceError("broadcast-studio-context-subscriber-unavailable");
         }

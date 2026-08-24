@@ -1,7 +1,7 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260708-recovery-001b-panel-status1";
-import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
-import { renderOfficialFormatSheetHtml } from "../core/officialFormatHtml.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
-import { loadState, subscribeToLiveUpdates } from "../core/state.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260824-cache-buster-single-authority-001-v1";
+import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260824-cache-buster-single-authority-001-v1";
+import { renderOfficialFormatSheetHtml } from "../core/officialFormatHtml.js?v=20260824-cache-buster-single-authority-001-v1";
+import { loadState, subscribeToLiveUpdates } from "../core/state.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const root = document.getElementById("official-format-root");
 const pageParams = new URLSearchParams(window.location.search);

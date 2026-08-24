@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "./state.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

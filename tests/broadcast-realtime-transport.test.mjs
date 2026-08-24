@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

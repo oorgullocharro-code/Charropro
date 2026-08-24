@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as programApi from "../js/broadcast/programEngine.js";
+import * as programApi from "../js/broadcast/programEngine.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   PROGRAM_ENGINE_VERSION,
   BroadcastProgramError,
@@ -20,7 +20,7 @@ import {
   updateProgram,
   updateProgramLiveData,
   validateProgram
-} from "../js/broadcast/programEngine.js";
+} from "../js/broadcast/programEngine.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const T0 = "2026-07-15T16:00:00.000Z";
 const T1 = "2026-07-15T16:01:00.000Z";

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/broadcastAccessHub.js";
+import * as api from "../js/broadcast/broadcastAccessHub.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";
@@ -87,8 +87,8 @@ const sourceCode = await readFile(new URL("../js/broadcast/broadcastAccessHub.js
 for (const text of ["Consola de Producción", "Playground de Broadcast", "Program Main Output", "Announcer Monitor", "Browser Output Lab", "Portal de Jueces", "Portal de Supervisión"]) {
   assert.ok(sourceCode.includes(text), `missing access ${text}`);
 }
-assert.match(html, /20260727-broadcast-live-graphics-001-live-data-geometry-v1e/);
-assert.match(html, /broadcastStudioWorkspace\.js/);
+assert.match(html, /src="\.\/js\/core\/clientBootstrap\.js"/);
+assert.match(html, /data-charropro-entry="\.\/js\/broadcast\/broadcastStudioWorkspace\.js"/);
 assert.match(css, /@media \(max-width: 1180px\)/);
 assert.match(css, /@media \(max-width: 820px\)/);
 assert.match(css, /@media \(max-width: 560px\)/);

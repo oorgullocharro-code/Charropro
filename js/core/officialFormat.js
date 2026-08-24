@@ -1,8 +1,8 @@
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "./officialFormatSnapshot.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
-import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "./officialFormatSnapshot.js?v=20260824-cache-buster-single-authority-001-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   OFFICIAL_FORMAT_COLUMN_ROLES,
   OFFICIAL_FORMAT_COLUMN_WIDTHS,
@@ -11,9 +11,9 @@ import {
   OFFICIAL_FORMAT_TEXT_POLICY,
   OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
   buildOfficialFormatRowGeometry
-} from "./officialFormatDocumentModel.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
-import { state } from "./state.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "./officialFormatDocumentModel.js?v=20260824-cache-buster-single-authority-001-v1";
+import { state } from "./state.js?v=20260824-cache-buster-single-authority-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
 export { OFFICIAL_FORMAT_PAPER };

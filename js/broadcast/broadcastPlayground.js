@@ -2,7 +2,7 @@ import {
   buildBroadcastDataContract,
   getBroadcastField,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260713-broadcast-output-001-output-v1";
+} from "./dataContract.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   clearPreviewState,
   clearProgramState,
@@ -16,7 +16,7 @@ import {
   setOutputState,
   setPreviewState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260713-broadcast-output-001-output-v1";
+} from "./broadcastState.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   assignLayersToOutput,
   buildBroadcastOutputProjection,
@@ -29,13 +29,13 @@ import {
   updateBroadcastOutput,
   updateBroadcastOutputHeartbeat,
   validateBroadcastOutput
-} from "./broadcastOutput.js?v=20260713-broadcast-output-001-output-v1";
+} from "./broadcastOutput.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   listBroadcastAssets,
   registerBroadcastAsset,
   resolveBroadcastAsset,
   validateBroadcastAsset
-} from "./assetManager.js?v=20260713-asset-manager-001-assets-v1";
+} from "./assetManager.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   PLAYGROUND_ASSET_DEFINITIONS,
   PLAYGROUND_COMPETITIONS,
@@ -45,10 +45,11 @@ import {
   PLAYGROUND_OUTPUT_DEFINITIONS,
   buildPlaygroundFixture,
   getPlaygroundGraphicDefinition
-} from "./fixtures/broadcastPlaygroundFixtures.js?v=20260713-broadcast-playground-001-visual-test1";
+} from "./fixtures/broadcastPlaygroundFixtures.js?v=20260824-cache-buster-single-authority-001-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const BROADCAST_PLAYGROUND_VERSION = "1.0.0";
-export const BROADCAST_PLAYGROUND_APP_VERSION = "20260713-broadcast-playground-001-visual-test1";
+export const BROADCAST_PLAYGROUND_APP_VERSION = CHARROPRO_APP_VERSION;
 
 const DEFAULT_COMPETITION = "equipos_completo";
 const DEFAULT_COUNT = "three";

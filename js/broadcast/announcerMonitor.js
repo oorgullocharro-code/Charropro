@@ -7,7 +7,7 @@ import {
   mountBrowserOutput,
   setBrowserOutputViewport,
   validateBrowserOutputProjection
-} from "./browserOutput.js?v=20260715-browser-output-001-common-web-output-infrastructure-v1";
+} from "./browserOutput.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const ANNOUNCER_MONITOR_VERSION = "1.0.0";
 
@@ -1806,9 +1806,9 @@ export async function connectAnnouncerMonitorRealtime(instance, options = {}) {
     : new URLSearchParams(options.search ?? globalThis.location?.search ?? "");
   const requestContext = options.context || announcerRealtimeContextFromParams(params);
   assertNoAnnouncerExternalIdentity(requestContext);
-  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260716-broadcast-context-resolution-001-real-context-v1");
+  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260824-cache-buster-single-authority-001-v1");
   const accessId = params.get("access") || options.accessId || null;
-  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1") : null);
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260824-cache-buster-single-authority-001-v1") : null);
   if (options.authorizedContext && !options.adapter) throw monitorError("announcer-monitor-authorized-context-injection-forbidden");
   if (options.temporaryAccess && !options.adapter) throw monitorError("announcer-monitor-temporary-access-injection-forbidden");
   const temporaryAccess = accessId

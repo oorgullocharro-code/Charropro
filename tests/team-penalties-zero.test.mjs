@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "../js/core/scoring.js?v=20260824-cache-buster-single-authority-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

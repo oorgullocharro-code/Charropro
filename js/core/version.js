@@ -1,7 +1,7 @@
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap
-} from "./configurationBootstrap.js?v=20260801-configuration-management-001-v1";
+} from "./configurationBootstrap.js";
 
 const configurationBootstrap = await loadConfigurationBootstrap();
 

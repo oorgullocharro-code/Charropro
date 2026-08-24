@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js";
-import configurationService from "../functions/configurationService.js";
+import configurationEngine from "../functions/configurationEngine.js?v=20260824-cache-buster-single-authority-001-v1";
+import configurationService from "../functions/configurationService.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

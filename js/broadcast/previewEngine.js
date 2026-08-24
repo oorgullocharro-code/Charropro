@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./themeTemplateIntegration.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./liveBindings.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

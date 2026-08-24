@@ -2,22 +2,22 @@ import {
   getOutputRoute,
   routeAnnouncerMonitor,
   routeProgramToOutput
-} from "./outputRouting.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
-import { getProgramSnapshot } from "./programEngine.js?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e";
+} from "./outputRouting.js?v=20260824-cache-buster-single-authority-001-v1";
+import { getProgramSnapshot } from "./programEngine.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   applyProgramMainProjection,
   buildProgramMainOutputSnapshot,
   clearProgramMainOutput,
   getProgramMainOutputStatus,
   validateProgramMainProjection
-} from "./programMainOutput.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "./programMainOutput.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   clearAnnouncerMonitor,
   getAnnouncerSnapshot,
   getAnnouncerStatus,
   updateAnnouncerMonitor,
   validateAnnouncerProjection
-} from "./announcerMonitor.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "./announcerMonitor.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const OUTPUT_SYNCHRONIZATION_VERSION = "1.0.0";
 

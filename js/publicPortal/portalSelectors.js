@@ -1,5 +1,5 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260712-production-competitions-001-broadcast-context1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260824-cache-buster-single-authority-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

@@ -1,12 +1,12 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260712-production-competitions-001-broadcast-context1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   DEFAULT_GRAPHICS_CONFIG,
   applyGraphicsConfig,
   normalizeGraphicsConfig,
   readLocalGraphicsConfig,
   writeLocalGraphicsConfig
-} from "../core/graphicsConfig.js?v=20260708-recovery-001b-panel-status1";
-import { loadState, saveState, state } from "../core/state.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+} from "../core/graphicsConfig.js?v=20260824-cache-buster-single-authority-001-v1";
+import { loadState, saveState, state } from "../core/state.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   getLiveChannelFromUrl,
   publishFirebaseGraphicsConfig,
@@ -14,9 +14,9 @@ import {
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLiveCurrent
-} from "../core/firebaseSync.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260708-recovery-001b-panel-status1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260712-production-competitions-001-broadcast-context1";
+} from "../core/firebaseSync.js?v=20260824-cache-buster-single-authority-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260824-cache-buster-single-authority-001-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const root = document.getElementById("graphics-control-root");
 let liveChannel = "";

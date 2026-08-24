@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260727-public-portal-program-ux-001-program-phase-pm-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

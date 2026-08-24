@@ -9,7 +9,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js";
+} from "../js/core/firebaseRuntime.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

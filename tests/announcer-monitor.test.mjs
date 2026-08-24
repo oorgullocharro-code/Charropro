@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/announcerMonitor.js";
-import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js";
+import * as api from "../js/broadcast/announcerMonitor.js?v=20260824-cache-buster-single-authority-001-v1";
+import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   ANNOUNCER_MONITOR_DISPLAY_MODES,
   ANNOUNCER_MONITOR_ERROR_CODES,
@@ -26,7 +26,7 @@ import {
   validateAnnouncerMonitorConfig,
   validateAnnouncerProjection,
   validateAnnouncerSnapshot
-} from "../js/broadcast/announcerMonitor.js";
+} from "../js/broadcast/announcerMonitor.js?v=20260824-cache-buster-single-authority-001-v1";
 
 class MockStyle {
   constructor() { this.properties = new Map(); }
@@ -619,8 +619,8 @@ const [sourceText, html, css, docs] = await Promise.all([
   readFile(new URL("../BROADCAST_ANNOUNCER_MONITOR_V1.md", import.meta.url), "utf8")
 ]);
 assert.match(html, /data-announcer-monitor-page/);
-assert.match(html, /announcerMonitor\.js\?v=20260824-fmch-team-sheet-html-print-geometry-001-v1/);
-assert.match(html, /announcer-monitor\.css\?v=20260727-broadcast-live-graphics-001-live-data-geometry-v1e/);
+assert.match(html, /data-charropro-entry="\.\/js\/broadcast\/announcerMonitor\.js"/);
+assert.match(html, /data-charropro-build-href="\.\/css\/announcer-monitor\.css"/);
 assert.equal(typeof api.connectAnnouncerMonitorRealtime, "function");
 assert.doesNotMatch(html, /<video\b|<iframe\b|autoplay|src="https?:|\bTake\b|\bCut\b|\bAuto\b/i);
 assert.doesNotMatch(sourceText, /from\s+["'][^"']*(?:programEngine|previewEngine|firebase|state\.js)/i);

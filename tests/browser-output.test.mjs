@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as browserOutputApi from "../js/broadcast/browserOutput.js";
+import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   BROWSER_OUTPUT_DISPLAY_MODES,
   BROWSER_OUTPUT_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   validateBrowserOutputConfig,
   validateBrowserOutputProjection,
   validateBrowserOutputSnapshot
-} from "../js/broadcast/browserOutput.js";
+} from "../js/broadcast/browserOutput.js?v=20260824-cache-buster-single-authority-001-v1";
 
 class MockStyle {
   constructor() {
@@ -503,8 +503,8 @@ assert.equal(sourceText.includes("programEngine.js"), false);
 assert.equal(sourceText.includes("previewEngine.js"), false);
 assert.equal(sourceText.includes("outputRouting.js"), false);
 assert.match(labHtml, /LABORATORIO TÉCNICO — NO ES UNA SALIDA DE PRODUCCIÓN/);
-assert.match(labHtml, /browserOutput\.js\?v=20260715-browser-output-001-common-web-output-infrastructure-v1/);
-assert.match(labHtml, /browser-output\.css\?v=20260715-browser-output-001-common-web-output-infrastructure-v1/);
+assert.match(labHtml, /data-charropro-entry="\.\/js\/broadcast\/browserOutput\.js"/);
+assert.match(labHtml, /data-charropro-build-href="\.\/css\/browser-output\.css"/);
 for (const fixtureId of [
   "program-empty", "program-active", "announcer-operational", "timer-ready", "timer-running",
   "timer-paused", "timer-stopped", "timer-finished", "timer-stale", "output-unavailable", "output-disabled"

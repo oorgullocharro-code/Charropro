@@ -1,7 +1,7 @@
 import {
   instantiateBroadcastTemplate,
   cloneTemplateResult
-} from "./templateEngine.js?v=20260714-template-engine-001-template-v1";
+} from "./templateEngine.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   RENDERABLE_COMPONENT_TYPES,
   cloneComponentRenderResult,
@@ -12,11 +12,11 @@ import {
   renderBroadcastComponent,
   updateBroadcastComponentRender,
   validateComponentRenderTarget
-} from "./componentRenderer.js?v=20260714-component-renderer-001-renderer-v1";
+} from "./componentRenderer.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   cloneComponentInstance,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260713-component-library-001-components-v1";
+} from "./componentLibrary.js?v=20260824-cache-buster-single-authority-001-v1";
 
 export const TEMPLATE_RENDERER_INTEGRATION_VERSION = "1.0.0";
 

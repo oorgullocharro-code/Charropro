@@ -24,7 +24,7 @@ import {
   updateProductionVariable,
   validateProductionVariable,
   validateProductionVariablesSnapshot
-} from "../js/broadcast/productionVariables.js";
+} from "../js/broadcast/productionVariables.js?v=20260824-cache-buster-single-authority-001-v1";
 import {
   ACTION_RESULT_CODES,
   ACTION_TYPES,
@@ -32,8 +32,8 @@ import {
   createBroadcastAction,
   createBroadcastActionContext,
   dispatchBroadcastAction
-} from "../js/broadcast/actionEngine.js";
-import { createInitialBroadcastState } from "../js/broadcast/broadcastState.js?v=20260713-broadcast-output-001-output-v1";
+} from "../js/broadcast/actionEngine.js?v=20260824-cache-buster-single-authority-001-v1";
+import { createInitialBroadcastState } from "../js/broadcast/broadcastState.js?v=20260824-cache-buster-single-authority-001-v1";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:01:00.000Z";
