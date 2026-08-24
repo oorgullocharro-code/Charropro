@@ -1,4 +1,4 @@
-import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

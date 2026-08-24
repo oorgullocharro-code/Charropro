@@ -1,20 +1,22 @@
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "./officialFormatSnapshot.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
-import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
-import { state } from "./state.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
+} from "./officialFormatSnapshot.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+import {
+  OFFICIAL_FORMAT_COLUMN_ROLES,
+  OFFICIAL_FORMAT_COLUMN_WIDTHS,
+  OFFICIAL_FORMAT_DOCUMENT_MODEL_VERSION,
+  OFFICIAL_FORMAT_PAPER,
+  OFFICIAL_FORMAT_TEXT_POLICY,
+  OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
+  buildOfficialFormatRowGeometry
+} from "./officialFormatDocumentModel.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+import { state } from "./state.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
-export const OFFICIAL_FORMAT_PAPER = Object.freeze({
-  name: "OFICIO_MEXICANO_FMCH_2024_2028",
-  widthInches: 8.5,
-  heightInches: 13.403333,
-  widthMillimeters: 215.9,
-  heightMillimeters: 340.44,
-  sourcePagePoints: Object.freeze({ width: 612, height: 965.04 })
-});
+export { OFFICIAL_FORMAT_PAPER };
 
 const SECTION_LABELS = Object.freeze({
   cala: "CALA DE CABALLO",
@@ -127,6 +129,12 @@ export function buildOfficialTeamSheet(snapshot) {
     visualMerges: visual.merges,
     visualWidths: visual.widths,
     visualRowHeights: visual.rowHeights,
+    visualRowRoles: visual.rowRoles,
+    visualWebRowHeights: visual.webRowHeights,
+    visualColumnRoles: visual.columnRoles,
+    visualDocumentWidthPx: OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
+    documentModelVersion: OFFICIAL_FORMAT_DOCUMENT_MODEL_VERSION,
+    textPolicy: OFFICIAL_FORMAT_TEXT_POLICY,
     visualImages: images
   };
 }
@@ -150,12 +158,7 @@ export function buildOfficialWorkbook(officialPackage) {
       showGridLines: false,
       horizontalCentered: true,
       margins: {
-        left: 0.18,
-        right: 0.18,
-        top: 0.2,
-        bottom: 0.2,
-        header: 0,
-        footer: 0
+        ...OFFICIAL_FORMAT_PAPER.marginsInches
       }
     }))
   };
@@ -327,7 +330,7 @@ function buildOfficialVisualSheet(snapshot, header, institutional) {
   const columnCount = 32;
   const rows = Array.from({ length: rowCount }, () => Array.from({ length: columnCount }, () => C("", "plain")));
   const merges = [];
-  const rowHeights = Array(rowCount).fill(10.5);
+  const rowGeometry = buildOfficialFormatRowGeometry(rowCount);
 
   mergeVisual(rows, merges, 1, 5, 2, 32, "FEDERACIÓN MEXICANA DE CHARRERÍA, A.C.", "institutionTitle");
   headerField(rows, merges, 3, 5, 8, "EVENTO:", 9, 23, header.evento);
@@ -336,12 +339,6 @@ function buildOfficialVisualSheet(snapshot, header, institutional) {
   headerField(rows, merges, 4, 24, 27, "FECHA:", 28, 32, header.fecha);
   headerField(rows, merges, 5, 5, 8, "CAPITÁN:", 9, 20, header.capitan);
   headerField(rows, merges, 5, 21, 24, "LUGAR:", 25, 32, header.lugar);
-  rowHeights[0] = 25;
-  rowHeights[1] = 18;
-  rowHeights[2] = 13;
-  rowHeights[3] = 13;
-  rowHeights[4] = 18;
-
   buildCalaVisual(rows, merges, snapshot, 6);
   buildTripleAttemptVisual(rows, merges, snapshot.suertes.piales, {
     row: 11,
@@ -371,35 +368,14 @@ function buildOfficialVisualSheet(snapshot, header, institutional) {
   buildPasoVisual(rows, merges, snapshot.suertes.paso, 52, badPointsControlValue(snapshot, "paso"), accumulatedControl(snapshot, "paso"));
   buildClosingVisual(rows, merges, snapshot, institutional, 57);
 
-  [11, 16, 30, 42, 47, 52].forEach((row) => { rowHeights[row - 1] = 17; });
-  rowHeights[5] = 21;
-  [7, 12, 17, 31, 43, 48].forEach((row) => { rowHeights[row - 1] = 21; });
-  rowHeights[31] = 21;
-  [25, 37].forEach((row) => { rowHeights[row - 1] = 42; });
-  rowHeights[51] = 28;
-  rowHeights[7] = 27;
-  rowHeights[25] = 27;
-  rowHeights[31] = 24;
-  rowHeights[32] = 24;
-  rowHeights[33] = 24;
-  rowHeights[37] = 27;
-  [9, 14, 23, 27, 35, 39, 45, 50, 55].forEach((row) => { rowHeights[row - 1] = 24; });
-  [10, 29, 41, 59].forEach((row) => { rowHeights[row - 1] = 4; });
-  [15, 24, 36, 46, 51, 56].forEach((row) => { rowHeights[row - 1] = 8; });
-  rowHeights[56] = 16;
-  rowHeights[57] = 20;
-  rowHeights[58] = 4;
-  rowHeights[59] = 16;
-  rowHeights[60] = 19;
-  rowHeights[61] = 19;
-  rowHeights[62] = 16;
-  rowHeights[63] = 16;
-
   return {
     rows,
     merges,
-    widths: [7.5, 4, 4, 4, 4, 4, 4, 4, 4, ...Array(23).fill(3.15)],
-    rowHeights,
+    widths: OFFICIAL_FORMAT_COLUMN_WIDTHS,
+    columnRoles: OFFICIAL_FORMAT_COLUMN_ROLES,
+    rowHeights: rowGeometry.xlsxHeights,
+    webRowHeights: rowGeometry.webHeights,
+    rowRoles: rowGeometry.roles,
     conadeRow: 61
   };
 }
@@ -525,7 +501,7 @@ function buildJineteoVisual(rows, merges, section, row, title, kind, sideValue, 
   const ranges = [[10, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 27], [28, 29], [30, 30], [31, 32]];
   const values = jineteoScoreValues(attempt, kind);
   ranges.forEach(([start, end], index) => {
-    mergeVisual(rows, merges, row, start, row, end, labels[index], index === 10 ? "badHeader" : "columnHeader");
+    mergeVisual(rows, merges, row, start, row, end, labels[index], index === 10 ? "badHeader" : "compactColumnHeader");
     mergeVisual(rows, merges, row + 1, start, row + 1, end, values[index], index === 10 ? "badScoreCell" : index === 12 ? "totalCell" : "scoreCell");
   });
   mergeVisual(rows, merges, row + 2, 2, row + 2, 9, "SUPLENTE", "substitute");
@@ -618,7 +594,7 @@ function buildClosingVisual(rows, merges, snapshot, institutional, row) {
     mergeVisual(rows, merges, row + 3, start, row + 3, end, signatures[index]?.label || "", "signatureLabel");
     mergeVisual(rows, merges, row + 4, start, row + 4, end, "", "signatureLine");
   });
-  mergeVisual(rows, merges, row + 5, 6, row + 5, 13, institutional.conadeName, "footer");
+  mergeVisual(rows, merges, row + 5, 6, row + 5, 13, "", "footer");
   mergeVisual(rows, merges, row + 5, 14, row + 5, 32, institutional.sportsSecretariatPeriod, "footerRed");
   mergeVisual(rows, merges, row + 6, 6, row + 7, 32, `“${institutional.institutionalQuote}”`, "footerRed");
 }

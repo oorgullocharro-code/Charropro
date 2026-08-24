@@ -8545,6 +8545,12 @@ html.graphic-page #graphic-root {
   padding: 16px;
   background: #202326;
   color: #111;
+  overflow: visible;
+}
+
+.official-format-body,
+.official-format-body #official-format-root {
+  min-height: 100%;
   overflow: auto;
 }
 
@@ -8605,7 +8611,10 @@ html.graphic-page #graphic-root {
 }
 
 .official-sheet-wrap {
+  max-width: 100%;
   overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 12px;
   border-radius: 8px;
   background: #d7d7d7;
@@ -8613,8 +8622,9 @@ html.graphic-page #graphic-root {
 
 .official-document {
   box-sizing: border-box;
-  width: min(1120px, 100%);
-  min-width: 920px;
+  width: 1180px;
+  min-width: 1180px;
+  max-width: none;
   margin: 0 auto;
   background: #fff;
 }
@@ -8641,7 +8651,9 @@ html.graphic-page #graphic-root {
   text-align: center;
 }
 
-.official-document .official-sheet tbody tr:first-child {
+.official-document .official-row-institution-title,
+.official-document .official-row-footer-text,
+.official-document .official-row-footer-quote {
   display: none;
 }
 
@@ -8690,8 +8702,17 @@ html.graphic-page #graphic-root {
   vertical-align: middle;
   text-align: center;
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: anywhere;
+  word-break: normal;
   line-height: 1.05;
+}
+
+.official-sheet .official-row {
+  height: var(--official-row-height, 18px);
+}
+
+.official-sheet .official-row > td {
+  height: var(--official-row-height, 18px);
 }
 
 .official-sheet .official-institutionTitle {
@@ -8710,8 +8731,15 @@ html.graphic-page #graphic-root {
 }
 
 .official-sheet .official-compactGroupHeader,
+.official-sheet .official-compactColumnHeader,
 .official-sheet .official-columnHeader {
   font-size: 8px;
+}
+
+.official-sheet .official-compactColumnHeader {
+  background: #d9d9d9;
+  font-size: 7px;
+  font-weight: 900;
 }
 
 .official-sheet .official-participant,
@@ -8788,6 +8816,7 @@ html.graphic-page #graphic-root {
 .official-sheet .official-sectionTitle,
 .official-sheet .official-groupHeader,
 .official-sheet .official-compactGroupHeader,
+.official-sheet .official-compactColumnHeader,
 .official-sheet .official-columnHeader,
 .official-sheet .official-badHeader {
   line-height: 1.1;
@@ -8814,6 +8843,8 @@ html.graphic-page #graphic-root {
 
   body {
     background: #fff;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .official-toolbar,
@@ -8822,8 +8853,10 @@ html.graphic-page #graphic-root {
   }
 
   .official-page {
+    min-height: 0;
     padding: 0;
     background: #fff;
+    overflow: visible;
   }
 
   .official-sheet-wrap {
@@ -8833,8 +8866,13 @@ html.graphic-page #graphic-root {
   }
 
   .official-document {
-    width: 100%;
+    width: 229.6667mm;
     min-width: 0;
+    max-width: 229.6667mm;
+    margin: 0;
+    zoom: .9;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .official-institutional-header {
@@ -8843,6 +8881,11 @@ html.graphic-page #graphic-root {
 
   .official-institutional-footer {
     min-height: 20mm;
+  }
+
+  .official-sheet {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }
 

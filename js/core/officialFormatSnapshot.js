@@ -1,4 +1,9 @@
-import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260824-fmch-team-sheet-pre-judge-final-001-v1";
+import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
+import {
+  DOCUMENTED_CALA_BAD_POINT_CODES,
+  buildCalaDocumentAbbreviationMatrix
+} from "./officialFormatDocumentModel.js?v=20260824-fmch-team-sheet-html-print-geometry-001-v1";
 
 export const OFFICIAL_FORMAT_SNAPSHOT_VERSION = "1.2.0";
 
@@ -26,11 +31,7 @@ export const OFFICIAL_FORMAT_DOCUMENT_PROFILE = deepFreeze({
     width: 1224,
     height: 1931
   },
-  calaBadPointCodes: {
-    cala_inf_abrir_hocico: "AH",
-    cala_inf_estrellar_despapar_gorbetear: "D",
-    cala_inf_rabear_espiguear: "R"
-  },
+  calaBadPointCodes: DOCUMENTED_CALA_BAD_POINT_CODES,
   fields: [
     {
       fieldId: "FMCH.TEAM_SHEET.HEADER.FEDERATION_LOGO",
@@ -180,6 +181,10 @@ const MAX_DEPTH = 24;
 const MAX_ARRAY = 1000;
 const MAX_KEYS = 2000;
 const MAX_STRING = 20000;
+const CALA_DOCUMENT_ABBREVIATIONS = buildCalaDocumentAbbreviationMatrix(FMCH_2026_CALA_INFR_RULES);
+const CALA_DOCUMENT_ABBREVIATION_BY_RULE_ID = new Map(
+  CALA_DOCUMENT_ABBREVIATIONS.map((item) => [item.ruleId, item])
+);
 
 export function createOfficialFormatSnapshot(source = {}, options = {}) {
   const generatedAt = normalizeIso(options.generatedAt) || new Date().toISOString();
@@ -737,10 +742,14 @@ function buildDocumentalAttemptEvidence(attemptV2, scoring) {
   return {
     badPointSlots: (attemptV2.infractions || []).map((item) => {
       const ruleId = text(item.selectedRuleId || item.ruleId || item.id);
+      const documentAbbreviation = resolveCalaDocumentAbbreviation(ruleId);
       return {
         ruleId,
         label: text(item.label),
-        documentCode: resolveCalaDocumentCode(ruleId),
+        documentCode: documentAbbreviation?.code || null,
+        documentCodeSource: documentAbbreviation?.source || null,
+        documentProfileId: documentAbbreviation?.documentProfileId || null,
+        documentProfileVersion: documentAbbreviation?.documentProfileVersion || null,
         quantity: Math.max(1, finite(item.quantity, 1)),
         value: finite(item.total ?? item.resolvedValue ?? item.value),
         source: "ATTEMPT_V2_INFRACTIONS"
@@ -776,8 +785,8 @@ function buildDocumentalAttemptEvidence(attemptV2, scoring) {
   };
 }
 
-function resolveCalaDocumentCode(ruleId) {
-  return text(OFFICIAL_FORMAT_DOCUMENT_PROFILE.calaBadPointCodes?.[text(ruleId)]) || null;
+function resolveCalaDocumentAbbreviation(ruleId) {
+  return CALA_DOCUMENT_ABBREVIATION_BY_RULE_ID.get(text(ruleId)) || null;
 }
 
 function resolveFrozenTimePoints(suerteId, additionalSelections) {

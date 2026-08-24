@@ -143,7 +143,7 @@ function buildWorkbookRels(sheets) {
 function buildStyles() {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="${XML_NS}">
-  <fonts count="13">
+  <fonts count="14">
     <font><sz val="7.5"/><name val="Arial"/></font>
     <font><b/><sz val="15"/><color rgb="FF08752A"/><name val="Arial"/></font>
     <font><b/><sz val="9"/><color rgb="FF000000"/><name val="Arial"/></font>
@@ -157,6 +157,7 @@ function buildStyles() {
     <font><b/><sz val="12"/><color rgb="FF000000"/><name val="Arial"/></font>
     <font><b/><sz val="5.5"/><color rgb="FFE31B23"/><name val="Arial"/></font>
     <font><b/><sz val="6.5"/><color rgb="FFE31B23"/><name val="Arial"/></font>
+    <font><b/><sz val="5.5"/><color rgb="FF000000"/><name val="Arial"/></font>
   </fonts>
   <fills count="7">
     <fill><patternFill patternType="none"/></fill>
@@ -197,7 +198,7 @@ function buildStyles() {
     </border>
   </borders>
   <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-  <cellXfs count="24">
+  <cellXfs count="25">
     <xf numFmtId="0" fontId="0" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="0" fillId="2" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="7" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
@@ -222,6 +223,7 @@ function buildStyles() {
     <xf numFmtId="0" fontId="10" fillId="6" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
     <xf numFmtId="0" fontId="11" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="6" fillId="3" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1" shrinkToFit="1"/></xf>
+    <xf numFmtId="0" fontId="13" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1" shrinkToFit="1"/></xf>
   </cellXfs>
   <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
@@ -377,6 +379,7 @@ const STYLE_INDEX = {
   section: 2,
   groupHeader: 3,
   compactGroupHeader: 23,
+  compactColumnHeader: 24,
   header: 4,
   columnHeader: 4,
   badHeader: 5,

@@ -14,6 +14,7 @@ import {
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
 } from "../js/core/officialFormat.js";
+import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js";
 
 const TOURNAMENT_ID = "semantic-fmch-2024-2028";
 const CHARREADA_ID = "semantic-charreada-1";
@@ -366,7 +367,8 @@ for (const [teamIndex, teamValue] of teams.entries()) {
   assert.equal(snapshot.suertes.cala.attempts[0].documentalEvidence.cala.puntaDistancePoints, 2);
   assert.equal(snapshot.suertes.cala.attempts[0].documentalEvidence.cala.puntaTimePoints, 2);
   assert.deepEqual(snapshot.suertes.cala.attempts[0].documentalEvidence.badPointSlots.map((item) => item.value), [1, 1, 1, 2]);
-  assert.deepEqual(snapshot.suertes.cala.attempts[0].documentalEvidence.badPointSlots.map((item) => item.documentCode), ["AH", "D", "R", null]);
+  assert.deepEqual(snapshot.suertes.cala.attempts[0].documentalEvidence.badPointSlots.map((item) => item.documentCode), ["AH", "D", "R", "LCAC"]);
+  assert.deepEqual(snapshot.suertes.cala.attempts[0].documentalEvidence.badPointSlots.map((item) => item.documentCodeSource), ["DOCUMENTED", "DOCUMENTED", "DOCUMENTED", "GENERATED"]);
   assert.equal(snapshot.documentalControls.calaSideBadPointsSumControl.value, 9, "5 malos + 4 de infraccion al equipo = 9");
   assert.equal(snapshot.documentalControls.calaSideBadPointsSumControl.affectsScore, false);
   assert.equal(snapshot.suertes.toro.attempts[0].documentalEvidence.timePoints.value, 2);
@@ -398,7 +400,7 @@ for (const [teamIndex, teamValue] of teams.entries()) {
   assert.equal(cell(7, 18), "AH");
   assert.equal(cell(7, 19), "D");
   assert.equal(cell(7, 20), "R");
-  assert.equal(cell(7, 21), "-", "an infraction without a certified documentary abbreviation stays explicit");
+  assert.equal(cell(7, 21), "LCAC", "an infraction without a documented code receives the stable documentary code");
   assert.equal(cell(8, 18), 1);
   assert.equal(cell(8, 19), 1);
   assert.equal(cell(8, 20), 1);
@@ -445,6 +447,14 @@ for (const [teamIndex, teamValue] of teams.entries()) {
     mkdirSync(process.env.CHARROPRO_SEMANTIC_FIXTURE_DIR, { recursive: true });
     const suffix = teamIndex === 0 ? "paso-primera-vuelta" : "paso-segunda-vuelta";
     writeFileSync(`${process.env.CHARROPRO_SEMANTIC_FIXTURE_DIR}/formato-fmch-semantico-${suffix}.xlsx`, Buffer.from(await xlsx.arrayBuffer()));
+    writeFileSync(
+      `${process.env.CHARROPRO_SEMANTIC_FIXTURE_DIR}/formato-fmch-semantico-${suffix}.html`,
+      renderOfficialFormatStandaloneHtml(packageValue.sheets[0], {
+        title: `${teamValue.name} - Formato Federación`,
+        stylesheetHref: process.env.CHARROPRO_SEMANTIC_STYLESHEET_HREF || "../../../css/styles.css",
+        assetBasePath: process.env.CHARROPRO_SEMANTIC_ASSET_BASE_PATH || "../../../"
+      })
+    );
   }
 }
 

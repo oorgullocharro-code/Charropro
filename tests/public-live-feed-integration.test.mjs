@@ -47,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260824-fmch-team-sheet-pre-judge-final-001-v1"],
+  ["20260824-fmch-team-sheet-html-print-geometry-001-v1"],
   "all browser entrypoints share one firebaseSync module identity"
 );
 

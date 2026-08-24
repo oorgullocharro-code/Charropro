@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260824-fmch-team-sheet-pre-judge-final-001-v1",
+      "appVersion": "20260824-fmch-team-sheet-html-print-geometry-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "63a99e675efef604bb3305a4026a95e002b4002230e652eb0359e0b21a131d44",
-  "fingerprint": "63a99e675efef604bb3305a4026a95e002b4002230e652eb0359e0b21a131d44"
+  "checksum": "70418d6f8894013fb2df161ae0141ad38251f8f7ef3b922d8ed333c3f2bc76df",
+  "fingerprint": "70418d6f8894013fb2df161ae0141ad38251f8f7ef3b922d8ed333c3f2bc76df"
 }
