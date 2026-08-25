@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260825-user-access-bootstrap-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260825-user-access-bootstrap-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

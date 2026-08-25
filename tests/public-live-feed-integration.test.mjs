@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260825-user-access-bootstrap-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260825-user-access-bootstrap-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -47,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260825-user-access-bootstrap-001-v1"],
+  ["20260825-official-timer-lifecycle-sync-001-v1"],
   "all browser entrypoints use the canonical firebaseSync module identity"
 );
 

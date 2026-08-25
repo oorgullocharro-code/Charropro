@@ -25,14 +25,14 @@ import {
   updateBroadcastOutputHeartbeat,
   validateBroadcastOutput,
   validateOutputProjection
-} from "../js/broadcast/broadcastOutput.js?v=20260825-user-access-bootstrap-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 import {
   createInitialBroadcastState,
   setGraphicState,
   setPreviewState,
   setProgramState
-} from "../js/broadcast/broadcastState.js?v=20260825-user-access-bootstrap-001-v1";
-import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260825-user-access-bootstrap-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:05.000Z";

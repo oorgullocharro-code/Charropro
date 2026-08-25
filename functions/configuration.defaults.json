@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260825-user-access-bootstrap-001-v1",
+      "appVersion": "20260825-official-timer-lifecycle-sync-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "a03913c5a8b9d4502278f8a5a0b02c5d6e4c81c8c84209ab76867b611ef77293",
-  "fingerprint": "a03913c5a8b9d4502278f8a5a0b02c5d6e4c81c8c84209ab76867b611ef77293"
+  "checksum": "4760c6bdfebd1fdcd720ad1cdd1240ccfa329524863c3692d87e3369624c5c98",
+  "fingerprint": "4760c6bdfebd1fdcd720ad1cdd1240ccfa329524863c3692d87e3369624c5c98"
 }

@@ -509,58 +509,88 @@ export function buildOfficialTimerProjection(timer = {}, options = {}) {
 export function buildOfficialTimerDefinitionsFromContext(source = {}) {
   const context = source?.turn ? source : { turn: source };
   const turn = context.turn || {};
+  const suerte = turn.suerte || context.suerte || {};
   const tournamentId = normalizeTimerId(context.tournament?.id || context.tournamentId);
   const competitionId = normalizeTimerId(turn.competition?.competitionId || turn.competition?.id || context.charreada?.competitionId || context.competitionId || "equipos_completo");
   const charreadaId = normalizeTimerId(context.charreada?.id || context.charreadaId);
   const teamId = normalizeTimerId(turn.team?.id || context.team?.id || context.teamId);
   const participantId = normalizeTimerId(turn.participant?.id || context.participant?.id || context.participantId);
-  const suerteId = normalizeTimerId(turn.suerte?.id || context.suerte?.id || context.suerteId);
+  const suerteId = normalizeTimerId(suerte.id || context.suerteId);
+  const attemptIndex = Math.max(0, Math.trunc(finiteNumber(turn.attemptIndex ?? context.attemptIndex)));
+  const coleadorIndex = Math.max(0, Math.trunc(finiteNumber(turn.coleadorIndex ?? context.coleadorIndex)));
   const participantScopeId = teamId || participantId;
   if (!tournamentId || !charreadaId || !participantScopeId || !suerteId || suerteId === "cala") return [];
   const identity = { tournamentId, competitionId, charreadaId, teamId, participantId, suerteId };
-  const scope = `${charreadaId}:${participantScopeId}`;
+  const temporalMetadata = suerte.ruleMetadata || suerte.ruleResolution?.ruleMetadata || {};
+  const profileReference = suerte.ruleResolution?.profile || {};
+  const temporalContracts = Array.isArray(temporalMetadata.timerContracts)
+    ? temporalMetadata.timerContracts
+    : temporalMetadata.timerContract ? [temporalMetadata.timerContract] : [];
+  const withTemporalAuthority = (definition, contractId = definition.contextType) => {
+    const contract = temporalContracts.find((item) => (
+      normalizeTimerId(item?.timerId) === normalizeTimerId(contractId) ||
+      normalizeTimerId(item?.timerId) === normalizeTimerId(definition.contextType)
+    )) || null;
+    const durationMs = contract ? Math.max(0, finiteNumber(contract.limitMs)) : definition.durationMs;
+    return {
+      ...definition,
+      durationMs,
+      configuredDurationMs: durationMs,
+      mode: contract?.mode || (durationMs ? "countdown" : "manual"),
+      timerRuleId: contract?.timerId || null,
+      temporalRuleStatus: contract ? "CERTIFIED" : "TEMPORAL_RULE_MISSING",
+      temporalRuleSource: contract ? "rule_profile" : "legacy_compatibility",
+      ruleProfileId: profileReference.profileId || context.tournament?.ruleProfileId || null,
+      ruleProfileVersion: profileReference.profileVersion || context.tournament?.ruleProfileVersion || null,
+      ruleProfileFingerprint: context.tournament?.effectiveRulesFingerprint || context.tournament?.ruleProfileContentFingerprint || null
+    };
+  };
+  const baseScope = `${charreadaId}:${participantScopeId}`;
+  const scope = suerteId === "piales" || suerteId === "colas"
+    ? `${baseScope}:attempt-${attemptIndex}:participant-${coleadorIndex}`
+    : baseScope;
   if (suerteId === "toro" || suerteId === "yegua") {
-    return [{
+    return [withTemporalAuthority({
       ...identity,
       timerId: `timer_${suerteId}_apretalamiento:${scope}`,
       contextType: `${suerteId}_apretalamiento`,
       durationMs: 300000,
       label: suerteId === "toro" ? "Apretalamiento de Toro" : "Apretalamiento de Yegua"
-    }];
+    }, `${suerteId}_apretalamiento`)];
   }
   if (suerteId === "lazo" || suerteId === "pial_ruedo" || suerteId === "terna") {
-    return [{
+    return [withTemporalAuthority({
       ...identity,
       suerteId: "terna",
       timerId: `terna:${tournamentId}:${competitionId}:${charreadaId}:${participantScopeId}:timer`,
       contextType: "terna",
       durationMs: 420000,
       label: "Terna"
-    }];
+    }, "terna")];
   }
   if (suerteId === "manganas_pie" || suerteId === "manganas_caballo") {
-    return [{
+    return [withTemporalAuthority({
       ...identity,
       timerId: `timer_${suerteId}:${scope}`,
       contextType: `timer_${suerteId}`,
       durationMs: 420000,
       label: suerteId === "manganas_pie" ? "Manganas a Pie" : "Manganas a Caballo"
-    }];
+    }, `timer_${suerteId}`)];
   }
   if (suerteId === "paso") {
     return [
-      { ...identity, timerId: `timer_paso_3min:${scope}`, contextType: "timer_paso_3min", durationMs: 180000, label: "Paso: salida 3 min" },
-      { ...identity, timerId: `timer_paso_1min:${scope}`, contextType: "timer_paso_1min", durationMs: 60000, label: "Paso: desmonte 1 min" }
+      withTemporalAuthority({ ...identity, timerId: `timer_paso_3min:${scope}`, contextType: "timer_paso_3min", durationMs: 180000, label: "Paso: salida 3 min" }, "timer_paso_3min"),
+      withTemporalAuthority({ ...identity, timerId: `timer_paso_1min:${scope}`, contextType: "timer_paso_1min", durationMs: 60000, label: "Paso: desmonte 1 min" }, "timer_paso_1min")
     ];
   }
   const legacyRule = getTimerRuleForSource({ suerteId });
-  return [{
+  return [withTemporalAuthority({
     ...identity,
     timerId: `timer_${suerteId}:${scope}`,
     contextType: suerteId,
     durationMs: legacyRule.mode === "countdown" ? legacyRule.limitMs : 0,
     label: legacyRule.label || `Cronometro ${suerteId}`
-  }];
+  })];
 }
 
 export function selectOfficialTimerForContext(registry = {}, source = {}) {
@@ -571,6 +601,42 @@ export function selectOfficialTimerForContext(registry = {}, source = {}) {
     if (timer) return normalizeOfficialTimerContext(timer, definition);
   }
   return null;
+}
+
+export function resolveOfficialTimerSelection(input = {}) {
+  const definitions = Array.isArray(input.definitions) ? input.definitions.filter((item) => item?.timerId) : [];
+  const currentIds = new Set(definitions.map((item) => item.timerId));
+  const registry = input.registry && typeof input.registry === "object" ? input.registry : {};
+  const selectedTimerId = normalizeTimerId(input.selectedTimerId);
+  const selectedTimer = selectedTimerId && registry[selectedTimerId]
+    ? normalizeOfficialTimerContext(registry[selectedTimerId])
+    : null;
+
+  if (selectedTimerId && currentIds.has(selectedTimerId)) {
+    return {
+      timerId: selectedTimerId,
+      contextChanged: false,
+      blockedByActiveTimer: false,
+      previousTimerId: null
+    };
+  }
+
+  if (selectedTimer && (selectedTimer.status === "RUNNING" || selectedTimer.status === "PAUSED")) {
+    return {
+      timerId: selectedTimerId,
+      contextChanged: definitions.length > 0,
+      blockedByActiveTimer: definitions.length > 0,
+      previousTimerId: selectedTimerId
+    };
+  }
+
+  const nextTimerId = definitions[0]?.timerId || "";
+  return {
+    timerId: nextTimerId,
+    contextChanged: nextTimerId !== selectedTimerId,
+    blockedByActiveTimer: false,
+    previousTimerId: selectedTimerId || null
+  };
 }
 
 export function getOfficialTimerContextView(timer = {}, options = {}) {

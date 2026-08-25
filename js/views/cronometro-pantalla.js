@@ -1,7 +1,7 @@
-import { escapeHTML, html } from "../core/dom.js?v=20260825-user-access-bootstrap-001-v1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260825-user-access-bootstrap-001-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260825-user-access-bootstrap-001-v1";
-import { getOfficialTimerContextView, getTimerView } from "../core/timerRules.js?v=20260825-user-access-bootstrap-001-v1";
+import { escapeHTML, html } from "../core/dom.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { getOfficialTimerContextView, getTimerView } from "../core/timerRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();

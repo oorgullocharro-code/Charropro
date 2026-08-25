@@ -1,7 +1,7 @@
 import {
   COMPONENT_VISIBILITY,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260825-user-access-bootstrap-001-v1";
+} from "./componentLibrary.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 export const COMPONENT_RENDERER_VERSION = "1.0.0";
 

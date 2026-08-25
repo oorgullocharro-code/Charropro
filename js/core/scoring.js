@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260825-user-access-bootstrap-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260825-user-access-bootstrap-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260825-user-access-bootstrap-001-v1";
+} from "./state.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;

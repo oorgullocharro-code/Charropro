@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260825-user-access-bootstrap-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

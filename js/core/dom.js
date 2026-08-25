@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260825-user-access-bootstrap-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 logCharroProVersion("runtime");
 

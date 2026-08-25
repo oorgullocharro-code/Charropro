@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260825-user-access-bootstrap-001-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260825-user-access-bootstrap-001-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,15 +8,16 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260825-user-access-bootstrap-001-v1";
+} from "../core/firebaseSync.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   getOfficialTimerContextView,
   getOfficialTimerControlView,
-  normalizeOfficialTimerContext
-} from "../core/timerRules.js?v=20260825-user-access-bootstrap-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260825-user-access-bootstrap-001-v1";
+  normalizeOfficialTimerContext,
+  resolveOfficialTimerSelection
+} from "../core/timerRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -40,6 +41,7 @@ let officialTimersUnsubscribe = null;
 let pendingAction = null;
 let lastStatus = liveChannel ? "Esperando enlace vivo" : "Falta tournamentId en la URL";
 let lastObservedAtMs = 0;
+let contextTransitionBlocked = false;
 let accessSession = {
   ready: false,
   user: null,
@@ -172,6 +174,13 @@ function render() {
             ` : ""}
 
             ${view.paused && control.isOwner ? renderPauseReasonControls(timer.pauseReason) : ""}
+
+            ${contextTransitionBlocked ? html`
+              <section class="timer-control-observer" aria-live="assertive">
+                <strong>Cambio de suerte pendiente</strong>
+                <p>El tiempo activo conserva su contexto. Finaliza antes de preparar la nueva suerte.</p>
+              </section>
+            ` : ""}
 
             <div class="timer-control-secondary-actions">
               ${view.status !== "FINISHED" && control.isOwner
@@ -392,14 +401,20 @@ function getAvailableTimers() {
 }
 
 function reconcileSelectedTimer() {
-  const timers = getAvailableTimers();
-  if (!timers.length) {
-    selectedTimerId = "";
-    return;
+  const resolution = resolveOfficialTimerSelection({
+    selectedTimerId,
+    definitions: derivedDefinitions,
+    registry: officialRegistry
+  });
+  contextTransitionBlocked = resolution.blockedByActiveTimer;
+  if (contextTransitionBlocked) {
+    lastStatus = "Finaliza el tiempo activo antes de cambiar de suerte";
   }
-  if (!timers.some(({ definition }) => definition.timerId === selectedTimerId)) {
-    selectedTimerId = timers[0].definition.timerId;
-    writeSelectedTimerId(selectedTimerId);
+  if (resolution.timerId === selectedTimerId) return;
+  selectedTimerId = resolution.timerId;
+  writeSelectedTimerId(selectedTimerId);
+  if (resolution.contextChanged && selectedTimerId) {
+    lastStatus = "Nueva suerte preparada · lista para iniciar";
   }
 }
 

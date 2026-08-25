@@ -5,7 +5,7 @@ import {
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "../js/core/tournamentContext.js?v=20260825-user-access-bootstrap-001-v1";
+} from "../js/core/tournamentContext.js?v=20260825-official-timer-lifecycle-sync-001-v1";
 
 assert.equal(getTournamentIdFromUrl("?id=torneo_a"), "torneo_a");
 assert.equal(getTournamentIdFromUrl("?tournamentId=torneo_b"), "torneo_b");
