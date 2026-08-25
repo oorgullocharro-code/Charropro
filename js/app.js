@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260825-user-access-bootstrap-001-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260825-user-access-bootstrap-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./data/calaRules.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -52,7 +52,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -72,19 +72,19 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { applyProductiveRuleProfilePolicy } from "./core/productiveRuleProfilePolicy.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260825-user-access-bootstrap-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260825-user-access-bootstrap-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260825-user-access-bootstrap-001-v1";
+import { applyProductiveRuleProfilePolicy } from "./core/productiveRuleProfilePolicy.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/scorerContextResolution.js?v=20260825-user-access-bootstrap-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260825-user-access-bootstrap-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260825-user-access-bootstrap-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260825-user-access-bootstrap-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -92,9 +92,9 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/timerRules.js?v=20260825-user-access-bootstrap-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260825-user-access-bootstrap-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -107,27 +107,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/scoring.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/scoringAttempt.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/scorerComponents.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -137,7 +137,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/sync.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   assignFirebaseTournamentRuleProfile,
@@ -178,7 +178,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/firebaseSync.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -191,15 +191,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/pendingScoreReview.js?v=20260825-user-access-bootstrap-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/tournamentContext.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -209,8 +209,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/supervisorNavigation.js?v=20260825-user-access-bootstrap-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -244,7 +244,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./core/state.js?v=20260825-user-access-bootstrap-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -2321,8 +2321,15 @@ async function prepareSyncWithCharroPro() {
   }
 
   console.info("[prepare-22C] firebase synchronized", {
-    tournaments: Object.keys(result.tournaments || {}).length
+    tournaments: Object.keys(result.tournaments || {}).length,
+    status: result.status || "READY"
   });
+  firebaseAccess = {
+    ...firebaseAccess,
+    ...result.profile,
+    user: firebaseAccess.user,
+    ready: true
+  };
   applyPreparationSnapshot(result);
   const syncedAt = result.syncedAt || new Date().toISOString();
   prepareState = {
@@ -2331,6 +2338,7 @@ async function prepareSyncWithCharroPro() {
     version: OBS_PAGE_VERSION,
     step1: true,
     step2: true,
+    status: result.status || "READY",
     syncedAt
   };
   state.settings.lastPreparationSyncAt = syncedAt;
@@ -2351,7 +2359,9 @@ async function prepareSyncWithCharroPro() {
   configurePublicProjectionRecovery();
   closeModal();
   console.info("[prepare-22C] ready", { tournamentId: state.activeTournamentId || "" });
-  showToast("CharroPro sincronizado correctamente.");
+  showToast(result.status === "NO_ASSIGNMENTS"
+    ? "No tienes torneos asignados."
+    : "CharroPro sincronizado correctamente.");
   if (routeUserAfterLogin(firebaseAccess)) return;
   render({ preserveScoringScroll: state.view === "scoring" });
 }
@@ -2563,8 +2573,16 @@ function canAccessOperationalTournament(profile = firebaseAccess, tournamentId =
 function formatPreparationError(reason = "") {
   const messages = {
     "not-authenticated": "Inicia sesion antes de sincronizar.",
+    AUTH_NOT_LOGGED_IN: "Inicia sesion antes de sincronizar.",
     "missing-profile": "Tu usuario no tiene perfil activo en CharroPro.",
+    USER_PROFILE_MISSING: "Tu usuario no tiene perfil activo en CharroPro.",
     "inactive-user": "Tu usuario esta inactivo.",
+    USER_INACTIVE: "Tu usuario esta desactivado.",
+    ROLE_INVALID: "Tu usuario requiere revision de permisos.",
+    NO_TOURNAMENT_ASSIGNMENTS: "No tienes torneos asignados.",
+    TOURNAMENT_ACCESS_DENIED: "Tu usuario no tiene acceso al torneo asignado.",
+    BOOTSTRAP_READ_DENIED: "Tu usuario no tiene permiso para completar la sincronizacion.",
+    SYNC_FAILED: "No se pudo sincronizar CharroPro.",
     "permission-denied": "Tu usuario no tiene permiso para leer esta informacion.",
     "missing-firebase": "CharroPro no esta configurado para sincronizar."
   };
@@ -3703,6 +3721,13 @@ function renderTournamentEntry() {
 
 function getTournamentEntryEmptyState() {
   if (!state.tournaments.length) {
+    if (!roleCan(firebaseAccess.role, "manage")) {
+      return {
+        title: "No tienes torneos asignados",
+        message: "Pide a un supervisor que te asigne un torneo en preparacion o en vivo.",
+        action: ""
+      };
+    }
     return {
       title: "No hay torneos guardados",
       message: "Crea el primero para empezar a organizar equipos, charreadas y resultados.",

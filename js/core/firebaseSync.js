@@ -6,14 +6,20 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./firebaseRuntime.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../data/competitionTypes.js?v=20260825-user-access-bootstrap-001-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260825-user-access-bootstrap-001-v1";
+import {
+  USER_ACCESS_BOOTSTRAP_ERROR,
+  buildUserAccessBootstrapPlan,
+  diagnoseUserAccessBootstrap,
+  readUserAccessBootstrapTournaments
+} from "./userAccessBootstrap.js?v=20260825-user-access-bootstrap-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -21,20 +27,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../public/publicProjection.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../public/publicProjectionSchema.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -50,18 +56,18 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./publicProjectionOutbox.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./pendingScoreReview.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "./timerRules.js?v=20260825-user-access-bootstrap-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -2062,7 +2068,8 @@ export async function deleteFirebaseTournament(tournamentId, actor = {}) {
 
   let profile = null;
   try {
-    const profileSnapshot = await get(ref(getFirebaseDatabase(), `${USERS_PATH}/${authUser.uid}`));
+    const profilePath = `${USERS_PATH}/${authUser.uid}`;
+    const profileSnapshot = await readFirebasePreparationPath(profilePath);
     if (!profileSnapshot.exists()) {
       return buildDeleteTournamentError("missing-profile", { tournamentId: cleanTournamentId, uid: authUser.uid, email: authUser.email || "", actor });
     }
@@ -4440,56 +4447,101 @@ export async function readFirebasePreparationSnapshot(accessProfile = {}) {
 
   try {
     const authUser = getFirebaseAuth().currentUser;
-    if (!authUser?.uid) return { ok: false, reason: "not-authenticated" };
+    if (!authUser?.uid) return { ok: false, reason: USER_ACCESS_BOOTSTRAP_ERROR.AUTH_NOT_LOGGED_IN };
 
     const profileSnapshot = await get(ref(getFirebaseDatabase(), `${USERS_PATH}/${authUser.uid}`));
     if (!profileSnapshot.exists()) {
-      return { ok: false, reason: "missing-profile", uid: authUser.uid, email: authUser.email || "" };
+      return { ok: false, reason: USER_ACCESS_BOOTSTRAP_ERROR.USER_PROFILE_MISSING, uid: authUser.uid, email: authUser.email || "" };
     }
 
     const rawProfile = profileSnapshot.val() || {};
+    const profileValidation = buildUserAccessBootstrapPlan(rawProfile, {});
+    if (!profileValidation.ok) {
+      return {
+        ...profileValidation,
+        profile: {
+          ...rawProfile,
+          uid: authUser.uid,
+          email: rawProfile.email || authUser.email || "",
+          role: profileValidation.role || normalizeRole(rawProfile.role),
+          active: rawProfile.active === true,
+          ...normalizeTournamentAccess(rawProfile)
+        }
+      };
+    }
+
+    const userAccessPath = `charropro/userTournamentAccess/${authUser.uid}`;
+    const userAccessSnapshot = await readFirebasePreparationPath(userAccessPath);
+    const userTournamentAccess = userAccessSnapshot.val() || {};
+    const plan = buildUserAccessBootstrapPlan(rawProfile, userTournamentAccess);
+    const authorizedIds = plan.tournamentIds || [];
     const access = normalizeTournamentAccess(rawProfile);
     const profile = {
       ...rawProfile,
       uid: authUser.uid,
       email: rawProfile.email || authUser.email || "",
-      role: normalizeRole(rawProfile.role),
-      active: rawProfile.active !== false,
-      ...access
+      role: plan.role || normalizeRole(rawProfile.role),
+      active: rawProfile.active === true,
+      ...access,
+      tournamentIds: plan.globalIndexRead ? access.tournamentIds : authorizedIds
     };
+    if (!plan.ok) return { ...plan, profile };
 
-    if (profile.active !== true) return { ok: false, reason: "inactive-user", profile };
+    const scopedResult = await readUserAccessBootstrapTournaments(plan, {
+      readTournamentIndexRoot: async () => (await get(ref(getFirebaseDatabase(), TOURNAMENT_INDEX_PATH))).val() || {},
+      readTournamentIndexItem: async (tournamentId) => (await get(ref(getFirebaseDatabase(), `${TOURNAMENT_INDEX_PATH}/${normalizeLiveChannel(tournamentId)}`))).val(),
+      readTournament: async (tournamentId) => (await get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${normalizeLiveChannel(tournamentId)}`))).val(),
+      isPermissionDenied: (error) => normalizeFirebaseFailureReason(error) === "permission-denied"
+    });
+    if (!scopedResult.ok) {
+      return {
+        ...scopedResult,
+        profile,
+        detail: normalizeErrorDetail({ error: scopedResult.error })
+      };
+    }
 
-    const userAccessSnapshot = await get(ref(getFirebaseDatabase(), `charropro/userTournamentAccess/${authUser.uid}`));
-    const userTournamentAccess = userAccessSnapshot.val() || {};
-    const indexSnapshot = await get(ref(getFirebaseDatabase(), TOURNAMENT_INDEX_PATH));
-    const indexById = indexSnapshot.val() || {};
-    const visibleIds = resolveVisibleTournamentIds(profile, accessProfile, userTournamentAccess, indexById);
-    const tournamentIndex = Object.values(indexById)
-      .filter((item) => item?.id && visibleIds.has(item.id))
-      .sort((a, b) => Number(b.updatedAtMs || 0) - Number(a.updatedAtMs || 0));
-    const tournaments = {};
-
-    await Promise.all(tournamentIndex.map(async (item) => {
-      const id = normalizeLiveChannel(item.id);
-      if (!id) return;
-      const tournamentSnapshot = await get(ref(getFirebaseDatabase(), `${TOURNAMENTS_PATH}/${id}`));
-      const value = tournamentSnapshot.val();
-      if (value) tournaments[id] = inflateTournamentStatePayload(id, value);
-    }));
+    const tournaments = Object.fromEntries(Object.entries(scopedResult.tournaments || {})
+      .map(([id, value]) => [id, inflateTournamentStatePayload(id, value)]));
+    const accessDiagnostics = diagnoseUserAccessBootstrap({
+      uid: authUser.uid,
+      profile,
+      userTournamentAccess,
+      result: { ...scopedResult, tournaments }
+    });
 
     return {
       ok: true,
+      status: scopedResult.status,
       profile,
-      tournamentIndex,
+      tournamentIndex: scopedResult.tournamentIndex,
       userTournamentAccess,
       tournaments,
+      accessDiagnostics,
       syncedAt: new Date().toISOString(),
       syncedAtMs: Date.now()
     };
   } catch (error) {
     console.error("[CharroPro] readFirebasePreparationSnapshot failed", error);
-    return { ok: false, reason: normalizeFirebaseFailureReason(error), detail: normalizeErrorDetail({ error }) };
+    const permissionDenied = normalizeFirebaseFailureReason(error) === "permission-denied";
+    return {
+      ok: false,
+      status: "ACCESS_ERROR",
+      reason: permissionDenied
+        ? USER_ACCESS_BOOTSTRAP_ERROR.BOOTSTRAP_READ_DENIED
+        : USER_ACCESS_BOOTSTRAP_ERROR.SYNC_FAILED,
+      deniedPath: String(error?.bootstrapPath || ""),
+      detail: normalizeErrorDetail({ error })
+    };
+  }
+}
+
+async function readFirebasePreparationPath(path) {
+  try {
+    return await get(ref(getFirebaseDatabase(), path));
+  } catch (error) {
+    error.bootstrapPath = path;
+    throw error;
   }
 }
 

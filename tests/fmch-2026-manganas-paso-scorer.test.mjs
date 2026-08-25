@@ -22,29 +22,29 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "../js/data/fmch2026ManganasPasoRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../js/data/fmch2026ManganasPasoRules.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   FMCH_2026_LIBRE_PROFILE_0_5_0,
   getRuleProfile,
   resolveEffectiveRules,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260825-user-access-bootstrap-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq,
   validateScoringAttemptV2
-} from "../js/core/scoringAttempt.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260824-production-supervisor-scorer-context-001-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260825-user-access-bootstrap-001-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260825-user-access-bootstrap-001-v1";
+import { emptyAttempt } from "../js/core/state.js?v=20260825-user-access-bootstrap-001-v1";
 import {
   applyOfficialTimerCommand,
   createOfficialTimerContext,
   getOfficialTimerContextView,
   validateOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+} from "../js/core/timerRules.js?v=20260825-user-access-bootstrap-001-v1";
 
 const productPie = SUERTES.find((item) => item.id === "manganas_pie");
 const productCaballo = SUERTES.find((item) => item.id === "manganas_caballo");

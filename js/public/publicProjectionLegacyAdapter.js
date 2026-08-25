@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260825-user-access-bootstrap-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 
