@@ -7,6 +7,8 @@ const DEFAULT_TIMER_RULE = {
   limitMs: 0
 };
 
+const LEGACY_COLEADERO_LIMIT_MS = 15 * 1000;
+
 const TIMER_RULES = {
   colas: {
     mode: "countdown",
@@ -14,9 +16,530 @@ const TIMER_RULES = {
     activeLabel: "Tiempo de salida",
     pausedLabel: "Tiempo de salida pausado",
     expiredLabel: "Tiempo agotado",
-    limitMs: 15000
+    limitMs: LEGACY_COLEADERO_LIMIT_MS
   }
 };
+
+export const FMCH_OFFICIAL_TEMPORAL_POLICY_VERSION = "1.0.0";
+export const FMCH_OFFICIAL_TEMPORAL_CERTIFICATION_STATUSES = Object.freeze([
+  "CERTIFIED",
+  "CERTIFIED_NO_TIMER_REQUIRED",
+  "UNRESOLVED_REQUIRES_SPORTING_AUTHORITY"
+]);
+
+const FMCH_RULEBOOK_SOURCE = deepFreeze({
+  sourceId: "FMCH-REGULATION-2026",
+  title: "Reglamento Oficial General para Competencias de Charros 2024-2028",
+  revision: "VF2-2026",
+  sha256: "1343e2205c7b6599a2ab7e93a809a5a45bd5ab1aadaba2f5a25bf43db8b4af2b"
+});
+
+const TIMER_IDENTITY_BASE = Object.freeze([
+  "tournamentId",
+  "competitionId",
+  "charreadaId",
+  "teamId",
+  "suerteId",
+  "phaseId"
+]);
+
+const NO_PAUSE = deepFreeze({ allowed: false, conditions: [] });
+const NO_RESUME = deepFreeze({ allowed: false, condition: "NOT_APPLICABLE" });
+
+const FMCH_OFFICIAL_TEMPORAL_POLICY_DEFINITION = {
+  contractVersion: "1.0.0",
+  policyId: "FMCH_2026_LIBRE_OFFICIAL_TEMPORAL_RULES",
+  version: FMCH_OFFICIAL_TEMPORAL_POLICY_VERSION,
+  status: "CERTIFIED_NOT_ACTIVATED",
+  appliesTo: {
+    profileId: "FMCH_2026_LIBRE",
+    profileVersion: "0.6.0",
+    profileFingerprint: "rptp_0f90f7a3944a82d7"
+  },
+  source: FMCH_RULEBOOK_SOURCE,
+  auditedSuerteIds: [
+    "cala",
+    "piales",
+    "colas",
+    "toro",
+    "terna_cabecero",
+    "terna_pial",
+    "yegua",
+    "manganas_pie",
+    "manganas_caballo",
+    "paso"
+  ],
+  suertes: {
+    cala: {
+      certificationStatus: "CERTIFIED",
+      contracts: [
+        {
+          ruleId: "fmch_2026_cala_freno_review",
+          suerteId: "cala",
+          phaseId: "freno_review",
+          mode: "DEADLINE",
+          limitMs: 3 * 60 * 1000,
+          hardStop: true,
+          startCondition: "CALADOR_BOTH_FEET_ON_ARENA",
+          finishCondition: "CALADOR_MOUNTED",
+          pausePolicy: NO_PAUSE,
+          resumePolicy: NO_RESUME,
+          warningThresholdsMs: [60 * 1000, 2 * 60 * 1000],
+          expirationPolicy: "DISQUALIFY_CALA_REVIEW_AFTER_THREE_MINUTES",
+          scoreEffect: "ONE_BAD_POINT_AFTER_ONE_MINUTE; SECOND_BAD_POINT_AFTER_TWO_MINUTES",
+          transitionPolicy: "JUDGE_CONTROLLED",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+          sourceReferences: [{ articles: [76, 77], pages: [28], section: "CALA DE CABALLO" }],
+          certificationStatus: "CERTIFIED"
+        },
+        {
+          ruleId: "fmch_2026_cala_partidero_start",
+          suerteId: "cala",
+          phaseId: "partidero_start",
+          mode: "DEADLINE",
+          limitMs: 2 * 60 * 1000,
+          hardStop: true,
+          startCondition: "HORSE_ARRIVES_AT_PARTIDERO",
+          finishCondition: "HORSE_STARTS_FROM_PARTIDERO",
+          pausePolicy: NO_PAUSE,
+          resumePolicy: NO_RESUME,
+          warningThresholdsMs: [60 * 1000],
+          expirationPolicy: "DISQUALIFY_CALA_AFTER_TWO_MINUTES",
+          scoreEffect: "BAD_POINT_AFTER_ONE_MINUTE",
+          transitionPolicy: "JUDGE_CONTROLLED",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+          sourceReferences: [{ articles: [77], pages: [28], section: "CALA DE CABALLO" }],
+          certificationStatus: "CERTIFIED"
+        }
+      ]
+    },
+    piales: {
+      certificationStatus: "CERTIFIED",
+      contracts: [{
+        ruleId: "fmch_2026_piales_opportunity_readiness",
+        suerteId: "piales",
+        phaseId: "opportunity_readiness",
+        mode: "DEADLINE",
+        limitMs: null,
+        hardStop: false,
+        durationPolicy: {
+          type: "PREVIOUS_OPPORTUNITY_CONDITIONAL",
+          defaultDurationMs: 2 * 60 * 1000,
+          extendedDurationMs: 3 * 60 * 1000,
+          extensionResolutionCodes: [
+            "COUNTED_PIAL",
+            "ROPE_BREAK_WITH_PIAL",
+            "HONDILLA_BREAK_WITH_PIAL",
+            "KNOT_RELEASE_WITH_PIAL"
+          ]
+        },
+        startCondition: "JUDGE_INDICATES_TIME",
+        finishCondition: "PIALADOR_REQUESTS_MARE",
+        pausePolicy: NO_PAUSE,
+        resumePolicy: NO_RESUME,
+        warningThresholdsMs: [],
+        expirationPolicy: "CONTINUE_WITH_TWO_BAD_POINTS_PER_EXCEEDED_MINUTE",
+        scoreEffect: "TWO_BAD_POINTS_PER_MINUTE_AFTER_APPLICABLE_DEADLINE",
+        transitionPolicy: "NEW_TIMER_IDENTITY_PER_OPPORTUNITY",
+        identityDimensions: [...TIMER_IDENTITY_BASE, "participantId", "opportunityIndex"],
+        sourceReferences: [
+          { articles: [77], pages: [28], section: "PIALES EN LA MANGA DEL LIENZO" },
+          { articles: [96, 101], pages: [45, 46], section: "DE LOS PIALES EN LA MANGA DEL LIENZO" }
+        ],
+        certificationStatus: "CERTIFIED"
+      }]
+    },
+    colas: {
+      certificationStatus: "CERTIFIED",
+      contracts: [{
+        ruleId: "fmch_2026_coleadero_partidero_release",
+        suerteId: "colas",
+        phaseId: "partidero_release",
+        mode: "COUNTDOWN",
+        limitMs: 20 * 1000,
+        hardStop: true,
+        startCondition: "BULL_IN_PARTIDERO_AND_JUDGE_ORDERS_TIME",
+        finishCondition: "PARTIDERO_DOOR_OPENS_FOR_BULL_EXIT",
+        pausePolicy: { allowed: true, conditions: ["BULL_CAUGHT_IN_TUBES"] },
+        resumePolicy: { allowed: true, condition: "BULL_NO_LONGER_CAUGHT_IN_TUBES" },
+        warningThresholdsMs: [],
+        expirationPolicy: "JUDGE_ORDERS_BULL_RELEASE_AND_OPPORTUNITY_IS_USED",
+        scoreEffect: "NO_DIRECT_SCORE_CHANGE; OPPORTUNITY_COUNTS_AS_USED",
+        transitionPolicy: "NEW_TIMER_IDENTITY_PER_COLEADOR_OPPORTUNITY",
+        identityDimensions: [...TIMER_IDENTITY_BASE, "participantId", "coleadorIndex", "opportunityIndex"],
+        sourceReferences: [
+          { articles: [77], pages: [28], section: "COLEADERO" },
+          { articles: [112, 118], pages: [50, 51], section: "DEL COLEADERO" }
+        ],
+        certificationStatus: "CERTIFIED"
+      }]
+    },
+    toro: {
+      certificationStatus: "CERTIFIED",
+      contracts: [{
+        ruleId: "fmch_2026_toro_apretalamiento",
+        suerteId: "toro",
+        phaseId: "apretalamiento",
+        mode: "COUNTDOWN",
+        limitMs: 5 * 60 * 1000,
+        hardStop: true,
+        startCondition: "JUDGE_DETERMINES_BULL_READY_AND_ARENA_CLEAR",
+        finishCondition: "DOOR_OPEN_AT_NINETY_DEGREES_OR_BULL_HEAD_EXITS",
+        pausePolicy: NO_PAUSE,
+        resumePolicy: NO_RESUME,
+        warningThresholdsMs: [3 * 60 * 1000, 4 * 60 * 1000],
+        expirationPolicy: "LOSE_BULL_RIDE_AND_OPEN_DOOR_TO_BEGIN_TERNA",
+        scoreEffect: "ONE_ADDITIONAL_PER_SAVED_MINUTE_BEFORE_THREE; BAD_POINTS_AFTER_THREE",
+        transitionPolicy: "START_TERNA_AT_FIRST_OF_BULL_EXIT_OR_APRETALAMIENTO_EXPIRY_UNDER_JUDGE_AUTHORITY",
+        identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+        sourceReferences: [
+          { articles: [77], pages: [28], section: "JINETEO DE TORO" },
+          { articles: [134], pages: [57], section: "DEL JINETEO DE TORO" }
+        ],
+        certificationStatus: "CERTIFIED"
+      }]
+    },
+    terna_cabecero: {
+      certificationStatus: "CERTIFIED",
+      contracts: [{
+        ruleId: "fmch_2026_terna_shared_window",
+        suerteId: "terna",
+        phaseId: "shared_execution",
+        componentPhaseId: "cabecero",
+        mode: "SHARED_WINDOW",
+        limitMs: 7 * 60 * 1000,
+        hardStop: true,
+        startCondition: "FIRST_OF_BULL_EXIT_OR_APRETALAMIENTO_EXPIRY_UNDER_JUDGE_AUTHORITY",
+        finishCondition: "BULL_DOWN_ON_SIDE_AND_SHOULDER_AND_HEAD_LASSO_CLEARED",
+        pausePolicy: {
+          allowed: true,
+          conditions: ["BULL_JUMPS_OUT_OF_ARENA", "ACCIDENT", "SPORTS_COMMISSION_INDICATION", "BULL_FRACTURE_BEFORE_LASSO"]
+        },
+        resumePolicy: { allowed: true, condition: "JUDGES_AUTHORIZE_RESUME_AFTER_CAUSE_CLEARS" },
+        warningThresholdsMs: [],
+        expirationPolicy: "END_COMPLETE_TERNA_WINDOW",
+        scoreEffect: "IF_BOTH_LASSOS_COUNT_TWO_POINTS_PER_SAVED_MINUTE_SPLIT_ONE_AND_ONE",
+        transitionPolicy: "SHARED_WITH_PIAL; NEVER_RESTART_ON_COMPONENT_CHANGE",
+        identityDimensions: [...TIMER_IDENTITY_BASE.filter((key) => key !== "suerteId"), "sharedDomain:terna"],
+        sourceReferences: [
+          { articles: [77], pages: [29], section: "TERNA EN EL RUEDO" },
+          { articles: [154, 155], pages: [64], section: "DE LA TERNA EN EL RUEDO" },
+          { authority: "CERTIFIED_JUDGE_OPERATIONAL_INTERPRETATION", record: "CHARROPRO-TERNA-APRETALAMIENTO-TRANSITION-AUTHORITY-001" }
+        ],
+        certificationStatus: "CERTIFIED"
+      }]
+    },
+    terna_pial: {
+      certificationStatus: "CERTIFIED",
+      contracts: [{
+        ruleId: "fmch_2026_terna_shared_window",
+        suerteId: "terna",
+        phaseId: "shared_execution",
+        componentPhaseId: "pial",
+        mode: "SHARED_WINDOW",
+        limitMs: 7 * 60 * 1000,
+        hardStop: true,
+        startCondition: "FIRST_OF_BULL_EXIT_OR_APRETALAMIENTO_EXPIRY_UNDER_JUDGE_AUTHORITY",
+        finishCondition: "BULL_DOWN_ON_SIDE_AND_SHOULDER_AND_HEAD_LASSO_CLEARED",
+        pausePolicy: {
+          allowed: true,
+          conditions: ["BULL_JUMPS_OUT_OF_ARENA", "ACCIDENT", "SPORTS_COMMISSION_INDICATION", "BULL_FRACTURE_BEFORE_LASSO"]
+        },
+        resumePolicy: { allowed: true, condition: "JUDGES_AUTHORIZE_RESUME_AFTER_CAUSE_CLEARS" },
+        warningThresholdsMs: [],
+        expirationPolicy: "END_COMPLETE_TERNA_WINDOW",
+        scoreEffect: "IF_BOTH_LASSOS_COUNT_TWO_POINTS_PER_SAVED_MINUTE_SPLIT_ONE_AND_ONE",
+        transitionPolicy: "SHARED_WITH_CABECERO; NEVER_RESTART_ON_COMPONENT_CHANGE",
+        identityDimensions: [...TIMER_IDENTITY_BASE.filter((key) => key !== "suerteId"), "sharedDomain:terna"],
+        sourceReferences: [
+          { articles: [77], pages: [29], section: "TERNA EN EL RUEDO" },
+          { articles: [154, 155], pages: [64], section: "DE LA TERNA EN EL RUEDO" },
+          { authority: "CERTIFIED_JUDGE_OPERATIONAL_INTERPRETATION", record: "CHARROPRO-TERNA-APRETALAMIENTO-TRANSITION-AUTHORITY-001" }
+        ],
+        certificationStatus: "CERTIFIED"
+      }]
+    },
+    yegua: {
+      certificationStatus: "CERTIFIED",
+      contracts: [
+        {
+          ruleId: "fmch_2026_yegua_apretalamiento",
+          suerteId: "yegua",
+          phaseId: "apretalamiento",
+          mode: "COUNTDOWN",
+          limitMs: 5 * 60 * 1000,
+          hardStop: true,
+          startCondition: "JUDGE_DETERMINES_MARE_READY_AND_ARENA_CLEAR",
+          finishCondition: "DOOR_OPEN_AT_NINETY_DEGREES_OR_MARE_EXITS",
+          pausePolicy: NO_PAUSE,
+          resumePolicy: NO_RESUME,
+          warningThresholdsMs: [3 * 60 * 1000, 4 * 60 * 1000],
+          expirationPolicy: "LOSE_MARE_RIDE_AND_OPEN_DOOR_TO_BEGIN_MANGANAS_PIE",
+          scoreEffect: "ONE_ADDITIONAL_PER_SAVED_MINUTE_BEFORE_THREE; ONE_BAD_POINT_PER_MINUTE_AFTER_THREE",
+          transitionPolicy: "MANGANAS_PIE_STARTS_AFTER_RIDER_DISMOUNTS_OR_IS_THROWN_IF_SAME_MARE_IS_USED",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+          sourceReferences: [
+            { articles: [77], pages: [29], section: "JINETEO DE YEGUA" },
+            { articles: [171, 181], pages: [75, 77], section: "DEL JINETEO DE YEGUA" }
+          ],
+          certificationStatus: "CERTIFIED"
+        },
+        {
+          ruleId: "fmch_2026_yegua_dismount",
+          suerteId: "yegua",
+          phaseId: "dismount",
+          mode: "DEADLINE",
+          limitMs: 60 * 1000,
+          hardStop: false,
+          startCondition: "JUDGES_INDICATE_AFTER_MARE_STOPS_BUCKING",
+          finishCondition: "RIDER_DISMOUNTS",
+          pausePolicy: NO_PAUSE,
+          resumePolicy: NO_RESUME,
+          warningThresholdsMs: [],
+          expirationPolicy: "CONTINUE_WITH_ONE_BAD_POINT_PER_EXCEEDED_MINUTE",
+          scoreEffect: "ONE_BAD_POINT_PER_EXCEEDED_MINUTE",
+          transitionPolicy: "JUDGE_CONTROLLED",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+          sourceReferences: [{ articles: [77], pages: [29], section: "JINETEO DE YEGUA" }],
+          certificationStatus: "CERTIFIED"
+        }
+      ]
+    },
+    manganas_pie: {
+      certificationStatus: "CERTIFIED",
+      contracts: [{
+        ruleId: "fmch_2026_manganas_pie_execution",
+        suerteId: "manganas_pie",
+        phaseId: "execution",
+        mode: "COUNTDOWN",
+        limitMs: 7 * 60 * 1000,
+        hardStop: true,
+        startCondition: "JUDGES_INDICATE_START_OR_RIDER_DISMOUNTS_OR_IS_THROWN_WHEN_SAME_MARE_IS_USED",
+        finishCondition: "THREE_OPPORTUNITIES_RESOLVED_OR_SEVEN_MINUTES_ELAPSE",
+        pausePolicy: { allowed: true, conditions: ["MARE_JUMPS_OUT_OF_ARENA", "ACCIDENT", "SPORTS_COMMISSION_INDICATION"] },
+        resumePolicy: { allowed: true, condition: "JUDGES_AUTHORIZE_RESUME_AFTER_CAUSE_CLEARS" },
+        warningThresholdsMs: [],
+        expirationPolicy: "END_MANGANAS_PIE_AND_SCORE_ONLY_ATTEMPTED_OPPORTUNITIES",
+        scoreEffect: "ONE_ADDITIONAL_PER_SAVED_MINUTE_IF_AT_LEAST_ONE_OPPORTUNITY_IS_CONSUMMATED",
+        transitionPolicy: "BEGIN_TWO_MINUTE_CHANGEOVER_TO_MANGANAS_CABALLO",
+        identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+        sourceReferences: [
+          { articles: [77], pages: [29], section: "MANGANAS A PIE Y MANGANAS A CABALLO" },
+          { articles: [205, 206, 207], pages: [84], section: "DE LAS MANGANAS" }
+        ],
+        certificationStatus: "CERTIFIED"
+      }]
+    },
+    manganas_caballo: {
+      certificationStatus: "CERTIFIED",
+      contracts: [
+        {
+          ruleId: "fmch_2026_manganas_caballo_changeover",
+          suerteId: "manganas_caballo",
+          phaseId: "changeover",
+          mode: "COUNTDOWN",
+          limitMs: 2 * 60 * 1000,
+          hardStop: true,
+          startCondition: "MANGANAS_PIE_FINISHES",
+          finishCondition: "TWO_MINUTES_ELAPSE_OR_EVERYTHING_IS_READY",
+          pausePolicy: NO_PAUSE,
+          resumePolicy: NO_RESUME,
+          warningThresholdsMs: [],
+          expirationPolicy: "JUDGES_START_MANGANAS_CABALLO_EXECUTION",
+          scoreEffect: "SIX_TEAM_BAD_POINTS_IF_ARREADORES_MOVE_MARE_DURING_CHANGEOVER",
+          transitionPolicy: "START_EXECUTION_AT_EXPIRY_OR_EARLIER_WHEN_READY",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+          sourceReferences: [{ articles: [207], pages: [84], section: "DE LAS MANGANAS" }],
+          certificationStatus: "CERTIFIED"
+        },
+        {
+          ruleId: "fmch_2026_manganas_caballo_execution",
+          suerteId: "manganas_caballo",
+          phaseId: "execution",
+          mode: "COUNTDOWN",
+          limitMs: 7 * 60 * 1000,
+          hardStop: true,
+          startCondition: "CHANGEOVER_EXPIRES_OR_JUDGES_START_EARLY_WHEN_READY",
+          finishCondition: "THREE_OPPORTUNITIES_RESOLVED_OR_SEVEN_MINUTES_ELAPSE",
+          pausePolicy: { allowed: true, conditions: ["MARE_JUMPS_OUT_OF_ARENA", "ACCIDENT", "SPORTS_COMMISSION_INDICATION"] },
+          resumePolicy: { allowed: true, condition: "JUDGES_AUTHORIZE_RESUME_AFTER_CAUSE_CLEARS" },
+          warningThresholdsMs: [],
+          expirationPolicy: "END_MANGANAS_CABALLO_AND_SCORE_ONLY_ATTEMPTED_OPPORTUNITIES",
+          scoreEffect: "ONE_ADDITIONAL_PER_SAVED_MINUTE_IF_AT_LEAST_ONE_OPPORTUNITY_IS_CONSUMMATED",
+          transitionPolicy: "ADVANCE_TO_PASO_DE_LA_MUERTE",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId"],
+          sourceReferences: [
+            { articles: [77], pages: [29], section: "MANGANAS A PIE Y MANGANAS A CABALLO" },
+            { articles: [205, 206, 207], pages: [84], section: "DE LAS MANGANAS" }
+          ],
+          certificationStatus: "CERTIFIED"
+        }
+      ]
+    },
+    paso: {
+      certificationStatus: "CERTIFIED",
+      contracts: [
+        {
+          ruleId: "fmch_2026_paso_mare_exit",
+          suerteId: "paso",
+          phaseId: "mare_exit",
+          mode: "COUNTDOWN",
+          limitMs: 3 * 60 * 1000,
+          hardStop: true,
+          startCondition: "JUDGES_DETERMINE_ARENA_CLEAR_AND_MARE_READY",
+          finishCondition: "MARE_COMPLETELY_EXITS_BOX",
+          pausePolicy: NO_PAUSE,
+          resumePolicy: NO_RESUME,
+          warningThresholdsMs: [],
+          expirationPolicy: "END_PASO_OPPORTUNITY",
+          scoreEffect: "DISQUALIFY_WHEN_THREE_MINUTE_EXIT_LIMIT_IS_EXCEEDED",
+          transitionPolicy: "CONTINUE_ONLY_AFTER_VALID_MARE_EXIT",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId", "opportunityIndex"],
+          sourceReferences: [
+            { articles: [77], pages: [29, 30], section: "PASO DE LA MUERTE" },
+            { articles: [218, 221], pages: [93], section: "DEL PASO DE LA MUERTE" }
+          ],
+          certificationStatus: "CERTIFIED"
+        },
+        {
+          ruleId: "fmch_2026_paso_dismount",
+          suerteId: "paso",
+          phaseId: "dismount",
+          mode: "DEADLINE",
+          limitMs: 60 * 1000,
+          hardStop: false,
+          startCondition: "JUDGES_INDICATE_AFTER_MARE_STOPS_BUCKING",
+          finishCondition: "RIDER_DISMOUNTS",
+          pausePolicy: NO_PAUSE,
+          resumePolicy: NO_RESUME,
+          warningThresholdsMs: [],
+          expirationPolicy: "CONTINUE_WITH_ONE_BAD_POINT_PER_EXCEEDED_MINUTE",
+          scoreEffect: "ONE_BAD_POINT_PER_EXCEEDED_MINUTE",
+          transitionPolicy: "JUDGE_CONTROLLED",
+          identityDimensions: [...TIMER_IDENTITY_BASE, "participantId", "opportunityIndex"],
+          sourceReferences: [{ articles: [77, 225], pages: [30, 94], section: "PASO DE LA MUERTE" }],
+          certificationStatus: "CERTIFIED"
+        }
+      ]
+    }
+  }
+};
+
+export const FMCH_OFFICIAL_TEMPORAL_POLICY_FINGERPRINT = `fmchtp_${fingerprintTemporalValue(
+  FMCH_OFFICIAL_TEMPORAL_POLICY_DEFINITION
+)}`;
+
+export const FMCH_OFFICIAL_TEMPORAL_POLICY = deepFreeze({
+  ...FMCH_OFFICIAL_TEMPORAL_POLICY_DEFINITION,
+  contentFingerprint: FMCH_OFFICIAL_TEMPORAL_POLICY_FINGERPRINT
+});
+
+const FMCH_TEMPORAL_SUERTE_ALIASES = Object.freeze({
+  lazo: "terna_cabecero",
+  pial_ruedo: "terna_pial"
+});
+
+export function getFmchOfficialTemporalPolicy() {
+  return clonePlain(FMCH_OFFICIAL_TEMPORAL_POLICY);
+}
+
+export function validateFmchOfficialTemporalPolicy(policy = FMCH_OFFICIAL_TEMPORAL_POLICY) {
+  const errors = [];
+  const expectedSuerteIds = FMCH_OFFICIAL_TEMPORAL_POLICY_DEFINITION.auditedSuerteIds;
+  const actualSuerteIds = Object.keys(policy?.suertes || {});
+  if (policy?.policyId !== FMCH_OFFICIAL_TEMPORAL_POLICY_DEFINITION.policyId) errors.push("official-temporal-policy-id-invalid");
+  if (policy?.version !== FMCH_OFFICIAL_TEMPORAL_POLICY_VERSION) errors.push("official-temporal-policy-version-invalid");
+  if (policy?.appliesTo?.profileId !== "FMCH_2026_LIBRE" || policy?.appliesTo?.profileVersion !== "0.6.0") {
+    errors.push("official-temporal-profile-reference-invalid");
+  }
+  if (policy?.source?.sha256 !== FMCH_RULEBOOK_SOURCE.sha256) errors.push("official-temporal-source-sha-invalid");
+  if (JSON.stringify(actualSuerteIds) !== JSON.stringify(expectedSuerteIds)) errors.push("official-temporal-ten-suertes-required");
+  const ruleIds = new Set();
+  for (const suerteId of expectedSuerteIds) {
+    const suerte = policy?.suertes?.[suerteId];
+    if (!FMCH_OFFICIAL_TEMPORAL_CERTIFICATION_STATUSES.includes(suerte?.certificationStatus)) {
+      errors.push(`official-temporal-certification-status-invalid:${suerteId}`);
+    }
+    if (suerte?.certificationStatus === "CERTIFIED" && !suerte?.contracts?.length) {
+      errors.push(`official-temporal-contract-required:${suerteId}`);
+    }
+    for (const contract of suerte?.contracts || []) {
+      if (!contract.ruleId || !contract.phaseId || !contract.mode || !contract.startCondition || !contract.finishCondition) {
+        errors.push(`official-temporal-contract-incomplete:${suerteId}`);
+      }
+      if (ruleIds.has(`${contract.ruleId}:${contract.componentPhaseId || ""}`)) {
+        errors.push(`official-temporal-rule-duplicate:${contract.ruleId}`);
+      }
+      ruleIds.add(`${contract.ruleId}:${contract.componentPhaseId || ""}`);
+      if (!Array.isArray(contract.sourceReferences) || contract.sourceReferences.length === 0) {
+        errors.push(`official-temporal-source-required:${contract.ruleId}`);
+      }
+    }
+  }
+  const definition = clonePlain(policy || {});
+  delete definition.contentFingerprint;
+  if (`fmchtp_${fingerprintTemporalValue(definition)}` !== policy?.contentFingerprint) {
+    errors.push("official-temporal-policy-fingerprint-invalid");
+  }
+  return { valid: errors.length === 0, errors };
+}
+
+export function resolveFmchOfficialTemporalContracts(context = {}) {
+  const profileId = normalizeTimerId(context.profileId || context.ruleProfileId);
+  const profileVersion = String(context.profileVersion || context.ruleProfileVersion || "").trim();
+  if (profileId !== FMCH_OFFICIAL_TEMPORAL_POLICY.appliesTo.profileId
+    || profileVersion !== FMCH_OFFICIAL_TEMPORAL_POLICY.appliesTo.profileVersion) {
+    return { ok: false, code: "official-temporal-profile-unsupported", contracts: [] };
+  }
+  const requestedSuerteId = normalizeTimerId(context.suerteId || context.suerte?.id);
+  const suerteId = FMCH_TEMPORAL_SUERTE_ALIASES[requestedSuerteId] || requestedSuerteId;
+  const suerte = FMCH_OFFICIAL_TEMPORAL_POLICY.suertes[suerteId];
+  if (!suerte) return { ok: false, code: "official-temporal-suerte-unsupported", contracts: [] };
+  if (suerte.certificationStatus !== "CERTIFIED") {
+    return { ok: false, code: "official-temporal-rule-not-certified", contracts: [] };
+  }
+  const requestedPhaseId = normalizeTimerId(context.phaseId);
+  const sourceContracts = requestedPhaseId
+    ? suerte.contracts.filter((contract) => contract.phaseId === requestedPhaseId)
+    : suerte.contracts;
+  if (!sourceContracts.length) return { ok: false, code: "official-temporal-phase-unsupported", contracts: [] };
+  const contracts = [];
+  for (const sourceContract of sourceContracts) {
+    const resolved = resolveFmchTemporalDuration(sourceContract, context);
+    if (!resolved.ok) return { ok: false, code: resolved.code, contracts: [] };
+    contracts.push(resolved.contract);
+  }
+  return {
+    ok: true,
+    code: "official-temporal-rule-resolved",
+    policyId: FMCH_OFFICIAL_TEMPORAL_POLICY.policyId,
+    policyVersion: FMCH_OFFICIAL_TEMPORAL_POLICY.version,
+    policyFingerprint: FMCH_OFFICIAL_TEMPORAL_POLICY.contentFingerprint,
+    profileId,
+    profileVersion,
+    suerteId,
+    certificationStatus: suerte.certificationStatus,
+    contracts: clonePlain(contracts)
+  };
+}
+
+function resolveFmchTemporalDuration(contract, context) {
+  const next = clonePlain(contract);
+  if (!contract.durationPolicy) return { ok: true, contract: next };
+  if (contract.durationPolicy.type !== "PREVIOUS_OPPORTUNITY_CONDITIONAL") {
+    return { ok: false, code: "official-temporal-duration-policy-unsupported" };
+  }
+  const resolution = normalizeTimerId(context.previousOpportunityResolution).toUpperCase();
+  const validResolutions = ["NO_EXTENSION", ...contract.durationPolicy.extensionResolutionCodes];
+  if (!validResolutions.includes(resolution)) {
+    return { ok: false, code: "official-temporal-previous-opportunity-resolution-required" };
+  }
+  next.limitMs = contract.durationPolicy.extensionResolutionCodes.includes(resolution)
+    ? contract.durationPolicy.extendedDurationMs
+    : contract.durationPolicy.defaultDurationMs;
+  next.resolvedDurationReason = resolution;
+  return { ok: true, contract: next };
+}
 
 export const OFFICIAL_TIMER_CONTEXT_VERSION = "1.0.0";
 export const OFFICIAL_TIMER_STATUSES = Object.freeze([
@@ -881,6 +1404,32 @@ function toIso(value) {
 function finiteNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+function fingerprintTemporalValue(value) {
+  const text = stableTemporalStringify(value);
+  let left = 0x811c9dc5;
+  let right = 0x9e3779b9;
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    left = Math.imul(left ^ code, 0x01000193) >>> 0;
+    right = Math.imul(right ^ code, 0x85ebca6b) >>> 0;
+  }
+  return `${left.toString(16).padStart(8, "0")}${right.toString(16).padStart(8, "0")}`;
+}
+
+function stableTemporalStringify(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableTemporalStringify).join(",")}]`;
+  return `{${Object.keys(value).sort()
+    .map((key) => `${JSON.stringify(key)}:${stableTemporalStringify(value[key])}`).join(",")}}`;
+}
+
+function deepFreeze(value) {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+  Object.freeze(value);
+  for (const item of Object.values(value)) deepFreeze(item);
+  return value;
 }
 
 function clonePlain(value) {
