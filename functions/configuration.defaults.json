@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260824-global-fmch-scorer-resolution-fix-001-v1",
+      "appVersion": "20260824-production-supervisor-scorer-context-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "0bd61c63f2ea1ec437ff3ed9023b5be560df196f5e3522498412541ea9894bc1",
-  "fingerprint": "0bd61c63f2ea1ec437ff3ed9023b5be560df196f5e3522498412541ea9894bc1"
+  "checksum": "e0d56db510ceaf4b1437db5109b86cacd3042b8576bee082083ce11636e56678",
+  "fingerprint": "e0d56db510ceaf4b1437db5109b86cacd3042b8576bee082083ce11636e56678"
 }

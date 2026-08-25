@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./data/calaRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -25,7 +25,7 @@ import {
   getSelectedBaseRule,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -35,7 +35,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -52,7 +52,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -72,14 +72,19 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { applyProductiveRuleProfilePolicy } from "./core/productiveRuleProfilePolicy.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { applyProductiveRuleProfilePolicy } from "./core/productiveRuleProfilePolicy.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import {
+  SCORER_CONTEXT_STATUSES,
+  isScorerContextReady,
+  resolveScorerContextState
+} from "./core/scorerContextResolution.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -87,9 +92,9 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/timerRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -102,27 +107,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/scoring.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/scoringAttempt.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/scorerComponents.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -132,7 +137,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/sync.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   assignFirebaseTournamentRuleProfile,
@@ -173,7 +178,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/firebaseSync.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -186,15 +191,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/pendingScoreReview.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/tournamentContext.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -204,8 +209,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/supervisorNavigation.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -239,7 +244,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./core/state.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -382,7 +387,8 @@ const READ_ACTIONS = new Set([
   "clear-local-cache",
   "prepare-clear-cache",
   "prepare-sync",
-  "charreada-filter-teams"
+  "charreada-filter-teams",
+  "copy-scorer-context"
 ]);
 const ACTION_CAPABILITIES = {
   "new-tournament": "manage",
@@ -481,6 +487,7 @@ const ACTION_CAPABILITIES = {
   "refresh-rule-profile-lifecycle": "users",
   "transition-rule-profile-lifecycle": "users",
   "assign-tournament-rule-profile": "users",
+  "assign-current-tournament-rule-profile": "users",
   "save-stat-history": "supervise",
   "test-sync": "operate",
   "publish-live-state": "operate",
@@ -761,6 +768,9 @@ let firebaseAppStateUnsubscribe = null;
 let firebaseAppStateSubscriptionKey = "";
 let firebaseTournamentStateUnsubscribe = null;
 let firebaseTournamentStateId = "";
+const firebaseTournamentContextReadiness = new Map();
+const ruleProfileAssignmentRuntime = new Map();
+let tournamentCreationInProgress = false;
 let firebaseScoresUnsubscribe = null;
 let firebaseScoresTournamentId = "";
 let firebasePendingReviewsUnsubscribe = null;
@@ -811,6 +821,7 @@ const scorerPointerTraces = new WeakMap();
 const scorerInteractionSamples = [];
 const pendingScorerDraftTraces = [];
 const scorerLatencyDiagnosticsEnabled = new URLSearchParams(window.location.search).get("scorerLatency") === "1";
+const scorerContextDiagnosticsEnabled = new URLSearchParams(window.location.search).get("debugScorerContext") === "1";
 let activeScorerInteractionTrace = null;
 if (scorerLatencyDiagnosticsEnabled) document.documentElement.dataset.scorerLatency = "enabled";
 let lastScoreSaveStatus = {
@@ -1702,6 +1713,12 @@ function subscribeFirebaseAccess() {
     }
     if (isPreparationComplete() && isSupervisorPortalAccess(firebaseAccess) && !portalEntryRouteApplied) {
       if (routeUserAfterLogin(firebaseAccess)) return;
+    }
+    if (scorerContextDiagnosticsEnabled
+      && firebaseAccess.platformAdmin === true
+      && !ruleProfileLifecycleAdminState.snapshot
+      && !ruleProfileLifecycleAdminState.loading) {
+      window.setTimeout(() => refreshRuleProfileLifecycleAdmin(), 0);
     }
     render({ preserveScoringScroll: state.view === "scoring" });
   });
@@ -2968,6 +2985,7 @@ function startFirebaseAppStateSubscription() {
     }
     if (firebaseTournamentStateUnsubscribe) firebaseTournamentStateUnsubscribe();
     firebaseTournamentStateId = tournamentId;
+    firebaseTournamentContextReadiness.set(tournamentId, { loading: true, ready: false, error: "" });
     firebaseTournamentStateUnsubscribe = subscribeFirebaseTournamentState(tournamentId, (payload) => applyRemoteTournamentState(payload));
     startFirebaseScoresSubscription(tournamentId);
     startFirebasePendingReviewsSubscription(tournamentId);
@@ -3164,6 +3182,21 @@ function applyRemoteTournamentIndex(tournaments = []) {
 }
 
 function applyRemoteTournamentState(payload = {}) {
+  const readinessTournamentId = payload?.tournamentId || payload?.state?.tournament?.id || getTournamentContext().tournamentId || "";
+  if (payload?.error) {
+    if (readinessTournamentId) {
+      firebaseTournamentContextReadiness.set(readinessTournamentId, {
+        loading: false,
+        ready: false,
+        error: String(payload.reason || payload.error?.message || "tournament-context-read-error")
+      });
+    }
+    render({ preserveScoringScroll: state.view === "scoring" });
+    return;
+  }
+  if (readinessTournamentId) {
+    firebaseTournamentContextReadiness.set(readinessTournamentId, { loading: false, ready: true, error: "" });
+  }
   if (payload?.deleted) {
     if (IS_TOURNAMENT_APP && firebaseAccess.role === ROLES.SUPERVISOR) {
       window.location.replace(`./index.html${buildSupervisorPortalSearch(SUPERVISOR_TOURNAMENTS_VIEW, CHARROPRO_APP_VERSION)}`);
@@ -3924,7 +3957,17 @@ function renderDashboard() {
     : null;
   const scoringCharreada = activeCharreada;
   const scoringCharreadaLocked = isCharreadaFrozen(scoringCharreada);
-  const canScoreActiveCharreada = Boolean(canScore && canAccessTournament && scoringCharreada && !scoringCharreadaLocked && canScoreCharreada(scoringCharreada));
+  const scoringContextResolution = scoringCharreada
+    ? getScorerContextResolution(tournament, scoringCharreada)
+    : null;
+  const canScoreActiveCharreada = Boolean(
+    canScore
+    && canAccessTournament
+    && scoringCharreada
+    && !scoringCharreadaLocked
+    && canScoreCharreada(scoringCharreada)
+    && isScorerContextReady(scoringContextResolution)
+  );
   const judgeDisabledReason = getJudgeScoringDisabledReason({
     canScore,
     canAccessTournament,
@@ -3990,7 +4033,15 @@ function renderDashboard() {
                   .join("")}
               </div>
             ` : ""}
-            ${canScore && !canScoreActiveCharreada ? html`<div class="empty">${scoringCharreada ? "No puedes calificar esta charreada." : "No hay charreada activa todavia."}</div>` : ""}
+            ${canScore && !canScoreActiveCharreada ? html`
+              <div class="empty">${escapeHTML(
+                scoringCharreada && scoringContextResolution && !isScorerContextReady(scoringContextResolution)
+                  ? getScorerContextMessage(scoringContextResolution).detail
+                  : scoringCharreada
+                    ? "No puedes calificar esta charreada."
+                    : "No hay charreada activa todavia."
+              )}</div>
+            ` : ""}
           </div>
         </article>
 
@@ -4117,25 +4168,56 @@ async function assignTournamentRuleProfileAdmin() {
     return;
   }
   if (!window.confirm(`Asignar FMCH_2026_LIBRE 0.6.0 a ${tournament.name}?`)) return;
+  await assignRuleProfileToTournament(tournament, { source: "explicit" });
+}
+
+async function assignCurrentTournamentRuleProfile() {
+  const tournament = getActiveTournament();
+  if (!tournament || firebaseAccess.platformAdmin !== true) return;
+  if (!window.confirm(`Asignar FMCH_2026_LIBRE 0.6.0 a ${tournament.name}?`)) return;
+  closeModal();
+  await assignRuleProfileToTournament(tournament, { source: "explicit" });
+}
+
+async function assignRuleProfileToTournament(tournament, options = {}) {
+  if (!tournament?.id) return { ok: false, reason: "missing-tournament" };
+  if (firebaseAccess.platformAdmin !== true) {
+    const result = { ok: false, reason: "tournament-rule-profile-platform-admin-required" };
+    ruleProfileAssignmentRuntime.set(tournament.id, { status: "error", error: result.reason });
+    if (options.render !== false) render({ preserveScoringScroll: state.view === "scoring" });
+    return result;
+  }
+  const policy = tournament.ruleProfilePolicy || {};
+  const source = options.source === "productive-default" ? "productive-default" : "explicit";
+  const revision = Number(tournament.ruleProfileAssignmentRevision || 0);
+  ruleProfileAssignmentRuntime.set(tournament.id, { status: "pending", error: "" });
+  if (options.render !== false) render({ preserveScoringScroll: state.view === "scoring" });
   const result = await assignFirebaseTournamentRuleProfile({
-    tournamentId,
-    profileId: "FMCH_2026_LIBRE",
-    version: "0.6.0",
-    expectedRevision: Number(tournament.ruleProfileAssignmentRevision || 0),
-    idempotencyKey: `fmch-assignment-${tournamentId}-${Number(tournament.ruleProfileAssignmentRevision || 0)}`,
-    source: "explicit",
-    reason: "CHARROPRO-FMCH-2026-PRODUCTION-GLOBAL-GO-LIVE-001",
+    tournamentId: tournament.id,
+    profileId: policy.profileId || "FMCH_2026_LIBRE",
+    version: policy.version || "0.6.0",
+    expectedRevision: revision,
+    idempotencyKey: `${source === "productive-default" ? "productive-default" : "fmch-assignment"}-${tournament.id}-${revision}`,
+    source,
+    policyId: source === "productive-default" ? policy.policyId : "",
+    reason: source === "productive-default"
+      ? "Default productivo canonico para torneo Libre"
+      : "CHARROPRO-PRODUCTION-SUPERVISOR-SCORER-CONTEXT-RESOLUTION-001",
     tenantId: tournament.tenantId || "",
     organizationId: tournament.organizationId || ""
   });
   if (!result.ok) {
-    showToast(`Asignación bloqueada: ${result.reason}`);
-    return;
+    ruleProfileAssignmentRuntime.set(tournament.id, { status: "error", error: result.reason || "assignment-failed" });
+    if (options.notify !== false) showToast(`Asignacion bloqueada: ${result.reason}`);
+    if (options.render !== false) render({ preserveScoringScroll: state.view === "scoring" });
+    return result;
   }
+  ruleProfileAssignmentRuntime.delete(tournament.id);
   applyRuleProfileAssignmentResult(tournament, result.assignment);
   saveState({ silent: true });
-  showToast("Perfil FMCH asignado por autoridad canónica.");
-  render();
+  if (options.notify !== false) showToast("Perfil FMCH asignado por autoridad canonica.");
+  if (options.render !== false) render({ preserveScoringScroll: state.view === "scoring" });
+  return result;
 }
 
 function renderLeaderboardMini(leaderboard, labels = getEntityLabels()) {
@@ -4537,7 +4619,10 @@ function renderCharreadaProgramCard(charreada, activeCharreadaId = state.activeC
   const locked = isCharreadaFrozen(charreada);
   const canManage = roleCan(firebaseAccess.role, "manage");
   const canOperate = roleCan(firebaseAccess.role, "operate");
-  const canScoreThisCharreada = canScoreCharreada(charreada) && !locked;
+  const scorerContextResolution = getScorerContextResolution(getActiveTournament(), charreada);
+  const canScoreThisCharreada = canScoreCharreada(charreada)
+    && !locked
+    && isScorerContextReady(scorerContextResolution);
 
   return html`
     <article class="program-card ${isActive ? "active" : ""} ${locked ? "locked" : ""}">
@@ -4574,6 +4659,9 @@ function renderCharreadaProgramCard(charreada, activeCharreadaId = state.activeC
         ${roleCan(firebaseAccess.role, "score") ? html`<button class="button primary small" data-action="start-scoring" data-id="${charreada.id}" ${canScoreThisCharreada ? "" : "disabled"}>Calificar</button>` : ""}
         ${canManage ? html`<button class="button red small" data-action="delete-charreada" data-id="${charreada.id}" ${locked ? "disabled" : ""}>Eliminar</button>` : ""}
       </div>
+      ${!locked && !isScorerContextReady(scorerContextResolution) ? html`
+        <p class="card-subtitle">${escapeHTML(getScorerContextMessage(scorerContextResolution).detail)}</p>
+      ` : ""}
     </article>
   `;
 }
@@ -4760,7 +4848,10 @@ function renderCharreadasSummaryList(charreadas) {
         const isActive = charreada.id === activeCharreadaId;
         const participants = getCharreadaParticipantEntries(charreada);
         const canOperate = roleCan(firebaseAccess.role, "operate");
-        const canScoreThisCharreada = canScoreCharreada(charreada) && !isCharreadaFrozen(charreada);
+        const scorerContextResolution = getScorerContextResolution(getActiveTournament(), charreada);
+        const canScoreThisCharreada = canScoreCharreada(charreada)
+          && !isCharreadaFrozen(charreada)
+          && isScorerContextReady(scorerContextResolution);
         return html`
           <div class="program-summary-row ${isActive ? "active" : ""}">
             <div class="program-summary-main">
@@ -8206,6 +8297,12 @@ function renderScoring({ preserveScroll = false } = {}) {
   if (isSupervisorAccess()) enterSupervisorScoringReviewMode();
   else exitSupervisorScoringReviewMode();
 
+  const suertes = getCharreadaScoringSuertes(charreada, tournament);
+  const scorerContextResolution = getScorerContextResolution(tournament, charreada, suertes);
+  if (!isScorerContextReady(scorerContextResolution)) {
+    app.innerHTML = renderScorerContextBlock(scorerContextResolution);
+    return;
+  }
   ensureScoresForCharreada(charreada.id);
   const scoringEntries = getCharreadaScoringEntries(charreada);
   if (!scoringEntries.length) {
@@ -8217,21 +8314,6 @@ function renderScoring({ preserveScroll = false } = {}) {
             <p>${isIndividualCompetition(charreada)
               ? "Esta competencia requiere participantes individuales antes de poder calificarse."
               : "Esta charreada requiere equipos participantes antes de poder calificarse."}</p>
-            <button class="button primary" data-action="go-view" data-view="program" type="button">Volver al programa</button>
-          </div>
-        </section>
-      </main>
-    `;
-    return;
-  }
-  const suertes = getCharreadaScoringSuertes(charreada, tournament);
-  if (!suertes.length) {
-    app.innerHTML = html`
-      <main class="content">
-        <section class="card">
-          <div class="card-body empty">
-            <h2>Sin suertes calificables</h2>
-            <p>Esta competencia no tiene suertes configuradas para el calificador.</p>
             <button class="button primary" data-action="go-view" data-view="program" type="button">Volver al programa</button>
           </div>
         </section>
@@ -8278,12 +8360,173 @@ function renderScoring({ preserveScroll = false } = {}) {
       </main>
 
       ${renderPendingReviewPanel(context)}
+      ${renderScorerContextDiagnostics(scorerContextResolution)}
       ${renderScoringBottomBar(context)}
     </div>
   `;
   updateTimerDisplay();
   ensureTernaTimerTicker(context);
   restoreScoringScroll(scrollSnapshot);
+}
+
+function getScorerContextResolution(tournament = getActiveTournament(), charreada = getActiveCharreada(), suertes = null) {
+  const tournamentId = String(tournament?.id || "");
+  const assignment = tournament?.ruleProfileAssignment || null;
+  const readiness = firebaseTournamentContextReadiness.get(tournamentId) || null;
+  const competitionContext = charreada
+    ? getCharreadaCompetitionContext(charreada, tournament)
+    : { suerteIds: [] };
+  const availableSuertes = Array.isArray(suertes)
+    ? suertes
+    : charreada && tournament
+      ? getCharreadaScoringSuertes(charreada, tournament)
+      : [];
+  const remoteContextRequired = IS_TOURNAMENT_APP && isFirebaseLiveConfigured();
+  const runtimeReady = !remoteContextRequired || Boolean(assignment) || readiness?.ready === true;
+  const runtimeAssignment = ruleProfileAssignmentRuntime.get(tournamentId) || null;
+  return resolveScorerContextState({
+    tournament,
+    charreada,
+    availableSuertesCount: availableSuertes.length,
+    competitionSuerteIds: competitionContext.suerteIds || [],
+    runtimeReady,
+    runtimeError: readiness?.error || "",
+    assignmentRuntime: runtimeAssignment
+  });
+}
+
+function renderScorerContextBlock(resolution) {
+  const copy = getScorerContextMessage(resolution);
+  const canAssign = firebaseAccess.platformAdmin === true
+    && resolution.productiveDefaultAvailable
+    && !resolution.assignmentExists
+    && resolution.status !== SCORER_CONTEXT_STATUSES.LOADING;
+  return html`
+    <main class="content">
+      <section class="card">
+        <div class="card-body empty">
+          <h2>${escapeHTML(copy.title)}</h2>
+          <p>${escapeHTML(copy.detail)}</p>
+          <div class="inline-actions">
+            ${canAssign ? html`
+              <button class="button primary" data-action="assign-current-tournament-rule-profile" type="button">
+                Asignar FMCH al torneo
+              </button>
+            ` : ""}
+            <button class="button" data-action="go-view" data-view="program" type="button">Volver al programa</button>
+          </div>
+        </div>
+      </section>
+      ${renderScorerContextDiagnostics(resolution)}
+    </main>
+  `;
+}
+
+function getScorerContextMessage(resolution = {}) {
+  const messages = {
+    [SCORER_CONTEXT_STATUSES.LOADING]: {
+      title: "Cargando configuracion reglamentaria",
+      detail: "Estamos verificando el torneo, la charreada y su perfil antes de abrir el calificador."
+    },
+    [SCORER_CONTEXT_STATUSES.ASSIGNMENT_REQUIRED]: {
+      title: "Perfil reglamentario sin asignar",
+      detail: firebaseAccess.platformAdmin === true
+        ? "Este torneo Libre necesita una asignacion reglamentaria antes de calificar. Puedes completarla aqui."
+        : "Este torneo Libre necesita una asignacion reglamentaria. Solicita a un administrador de plataforma que la complete."
+    },
+    [SCORER_CONTEXT_STATUSES.ASSIGNMENT_PENDING]: {
+      title: "Asignando perfil reglamentario",
+      detail: "La autoridad esta validando la asignacion. El calificador se habilitara cuando termine."
+    },
+    [SCORER_CONTEXT_STATUSES.ASSIGNMENT_ERROR]: {
+      title: "No fue posible asignar el perfil",
+      detail: `La asignacion quedo pendiente de correccion: ${resolution.assignmentError || "error no especificado"}.`
+    },
+    [SCORER_CONTEXT_STATUSES.ASSIGNMENT_INVALID]: {
+      title: "Asignacion reglamentaria invalida",
+      detail: "La identidad, revision o huella del perfil no coincide. El calificador permanece bloqueado para proteger los resultados."
+    },
+    [SCORER_CONTEXT_STATUSES.PROFILE_ERROR]: {
+      title: "No fue posible resolver el perfil",
+      detail: "CharroPro no pudo validar el perfil reglamentario asignado a este torneo."
+    },
+    [SCORER_CONTEXT_STATUSES.UNSUPPORTED_COMPETITION]: {
+      title: "Sin suertes calificables",
+      detail: "Esta competencia no define una secuencia deportiva compatible con el calificador."
+    },
+    [SCORER_CONTEXT_STATUSES.NO_SUERTES]: {
+      title: "Catalogo deportivo vacio",
+      detail: "El perfil fue resuelto, pero su catalogo no contiene las suertes esperadas."
+    }
+  };
+  return messages[resolution.status] || messages[SCORER_CONTEXT_STATUSES.PROFILE_ERROR];
+}
+
+function renderScorerContextDiagnostics(resolution) {
+  if (!scorerContextDiagnosticsEnabled) return "";
+  const snapshot = buildScorerContextDiagnostics(resolution);
+  return html`
+    <section class="card scorer-context-diagnostics" aria-label="Diagnostico del contexto del calificador">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Diagnostico del calificador</h2>
+          <p class="card-subtitle">Lectura segura; no contiene credenciales ni datos personales.</p>
+        </div>
+        <button class="button small" data-action="copy-scorer-context" type="button">Copiar JSON</button>
+      </div>
+      <div class="card-body">
+        <pre id="scorer-context-diagnostics-json">${escapeHTML(JSON.stringify(snapshot, null, 2))}</pre>
+      </div>
+    </section>
+  `;
+}
+
+function buildScorerContextDiagnostics(resolution = {}) {
+  let cachedBuild = "unavailable";
+  try {
+    cachedBuild = localStorage.getItem(scopedStorageKey(APP_CACHE_VERSION_STORAGE_KEY)) || "missing";
+  } catch {
+    cachedBuild = "blocked";
+  }
+  return {
+    appBuild: CHARROPRO_APP_VERSION,
+    role: firebaseAccess.role || "",
+    platformAdmin: firebaseAccess.platformAdmin === true,
+    tournamentId: resolution.tournamentId || "",
+    charreadaId: resolution.charreadaId || "",
+    competitionType: resolution.competitionType || "",
+    category: resolution.category || "",
+    tournamentAssignmentExists: resolution.assignmentExists === true,
+    assignmentSource: resolution.assignmentSource || "",
+    assignmentStatus: resolution.assignmentStatus || "",
+    assignmentRevision: Number(resolution.assignmentRevision || 0),
+    assignmentProfileId: resolution.assignmentProfileId || "",
+    assignmentProfileVersion: resolution.assignmentProfileVersion || "",
+    assignmentFingerprint: resolution.assignmentFingerprint || "",
+    productiveDefaultAvailable: resolution.productiveDefaultAvailable === true,
+    productiveDefaultProfile: [resolution.productiveDefaultProfileId, resolution.productiveDefaultProfileVersion].filter(Boolean).join("@"),
+    profileResolved: resolution.profileResolved === true,
+    profileStatus: resolution.profileStatus || "",
+    profileRevision: Number(ruleProfileLifecycleAdminState.snapshot?.revision || 0),
+    profileFingerprint: resolution.profileFingerprint || "",
+    availableSuertesCount: Number(resolution.availableSuertesCount || 0),
+    resolutionStatus: resolution.status || "",
+    cacheStatus: cachedBuild === CHARROPRO_APP_VERSION ? "CURRENT" : `STALE_OR_MISSING:${cachedBuild}`
+  };
+}
+
+function copyScorerContextDiagnostics() {
+  const node = document.getElementById("scorer-context-diagnostics-json");
+  if (!node) return;
+  const value = node.textContent || "";
+  if (!navigator.clipboard?.writeText) {
+    showToast("Diagnostico listo para copiar.");
+    return;
+  }
+  navigator.clipboard.writeText(value).then(
+    () => showToast("Diagnostico copiado."),
+    () => showToast("No se pudo copiar el diagnostico.")
+  );
 }
 
 function buildScoringAttemptUiModel(context) {
@@ -11298,6 +11541,8 @@ function handleAction(action, target) {
     "refresh-rule-profile-lifecycle": refreshRuleProfileLifecycleAdmin,
     "transition-rule-profile-lifecycle": () => transitionRuleProfileLifecycleAdmin(target.dataset.transition),
     "assign-tournament-rule-profile": assignTournamentRuleProfileAdmin,
+    "assign-current-tournament-rule-profile": assignCurrentTournamentRuleProfile,
+    "copy-scorer-context": copyScorerContextDiagnostics,
     "save-stat-history": saveStatHistory,
     "test-sync": testSync,
     "publish-live-state": publishLiveState,
@@ -11785,6 +12030,7 @@ async function saveStatHistory() {
 }
 
 async function saveTournament() {
+  if (tournamentCreationInProgress) return;
   const form = document.getElementById("tournament-form");
   if (!form.reportValidity()) return;
   const data = Object.fromEntries(new FormData(form));
@@ -11802,46 +12048,59 @@ async function saveTournament() {
     individualAwardPlaces: 5,
     status: data.status || "preparacion"
   }, getFirebaseRuntimeDiagnostics()));
+  const liveConfigured = isFirebaseLiveConfigured();
+  if (liveConfigured && tournament.ruleProfilePolicyRequired === true && firebaseAccess.platformAdmin !== true) {
+    showToast("Un administrador de plataforma debe crear los torneos Libre productivos para asignar FMCH de forma canonica.");
+    return;
+  }
+  tournamentCreationInProgress = true;
+  const previousContext = {
+    activeTournamentId: state.activeTournamentId,
+    activeCharreadaId: state.activeCharreadaId,
+    view: state.view
+  };
   state.tournaments.push(tournament);
   state.activeTournamentId = id;
   state.activeCharreadaId = null;
   state.view = "dashboard";
-  closeModal();
-  const liveConfigured = isFirebaseLiveConfigured();
-  if (liveConfigured) suppressNextSharedAppStatePublish = true;
-  saveState();
-  render();
+  try {
+    if (liveConfigured) suppressNextSharedAppStatePublish = true;
+    saveState();
+    if (!liveConfigured) {
+      closeModal();
+      render();
+      return;
+    }
 
-  if (!liveConfigured) return;
-  const published = await publishFirebaseTournamentState(id, state, getAccessActor());
-  if (!published.ok) {
-    showToast(`Torneo local creado; publicación pendiente: ${published.reason}`);
-    return;
+    const published = await publishFirebaseTournamentState(id, state, getAccessActor());
+    if (!published.ok) {
+      state.tournaments = state.tournaments.filter((item) => item.id !== id);
+      Object.assign(state, previousContext);
+      saveState({ silent: true });
+      showToast(`No se pudo crear el torneo: ${published.reason}`);
+      return;
+    }
+    setLocalTournamentVersion(id, published.version);
+    if (tournament.ruleProfilePolicyRequired === true) {
+      const assignment = await assignRuleProfileToTournament(tournament, {
+        source: "productive-default",
+        render: false,
+        notify: false
+      });
+      if (!assignment.ok) {
+        showToast(`Torneo creado, pero no esta listo para calificar: ${assignment.reason}`);
+        return;
+      }
+    }
+    closeModal();
+    saveState({ silent: true });
+    showToast(tournament.ruleProfilePolicyRequired === true
+      ? "Torneo Libre creado y listo con FMCH_2026_LIBRE 0.6.0."
+      : "Torneo creado.");
+    render();
+  } finally {
+    tournamentCreationInProgress = false;
   }
-  setLocalTournamentVersion(id, published.version);
-  if (tournament.ruleProfilePolicyRequired !== true) return;
-
-  const policy = tournament.ruleProfilePolicy || {};
-  const assignment = await assignFirebaseTournamentRuleProfile({
-    tournamentId: id,
-    profileId: policy.profileId,
-    version: policy.version,
-    expectedRevision: 0,
-    idempotencyKey: `productive-default-${id}-0`,
-    source: "productive-default",
-    policyId: policy.policyId,
-    reason: "Default productivo canónico para torneo Libre",
-    tenantId: tournament.tenantId || "",
-    organizationId: tournament.organizationId || ""
-  });
-  if (!assignment.ok) {
-    showToast(`Torneo creado, pero el perfil reglamentario quedó bloqueado: ${assignment.reason}`);
-    return;
-  }
-  applyRuleProfileAssignmentResult(tournament, assignment.assignment);
-  saveState({ silent: true });
-  showToast("Torneo Libre creado con FMCH_2026_LIBRE 0.6.0.");
-  render();
 }
 
 function applyRuleProfileAssignmentResult(tournament, assignment) {
@@ -12675,6 +12934,16 @@ function startScoring(charreadaId = null) {
     });
   }
 
+  const scorerTournament = getActiveTournament();
+  const scorerCharreada = state.charreadas.find((item) => item.id === (charreadaId || state.activeCharreadaId)) || getActiveCharreada();
+  if (scorerTournament && scorerCharreada) {
+    const scorerContextResolution = getScorerContextResolution(scorerTournament, scorerCharreada);
+    if (!isScorerContextReady(scorerContextResolution)) {
+      showScorerContextBlockedModal(scorerContextResolution);
+      return;
+    }
+  }
+
   if (charreadaId && charreadaId !== state.activeCharreadaId) {
     activateCharreada(charreadaId, { scoring: true });
     return;
@@ -12695,6 +12964,24 @@ function startScoring(charreadaId = null) {
   saveState();
   syncCurrentLiveState();
   render();
+}
+
+function showScorerContextBlockedModal(resolution) {
+  const copy = getScorerContextMessage(resolution);
+  const canAssign = firebaseAccess.platformAdmin === true
+    && resolution.productiveDefaultAvailable
+    && !resolution.assignmentExists
+    && resolution.status !== SCORER_CONTEXT_STATUSES.LOADING;
+  showModal({
+    title: copy.title,
+    body: html`<p>${escapeHTML(copy.detail)}</p>`,
+    actions: html`
+      <button class="button" data-action="close-modal" type="button">Cerrar</button>
+      ${canAssign ? html`
+        <button class="button primary" data-action="assign-current-tournament-rule-profile" type="button">Asignar FMCH</button>
+      ` : ""}
+    `
+  });
 }
 
 function adjustPunta(field, delta) {

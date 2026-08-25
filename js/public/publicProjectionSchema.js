@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

@@ -4,19 +4,19 @@ import {
   applyLocalFmch2026RuleProfileDefault,
   buildLocalFmch2026RuleProfileAssignment,
   hasExplicitRuleProfileSelection
-} from "../js/core/localRuleProfileDefaults.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/core/localRuleProfileDefaults.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   buildFmch2026TernaOpportunityDraft,
   commitFmch2026TernaOpportunity,
   createFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import { createLocalRuntimeSeedFixture } from "../tools/development/localRuntimeSeed.mjs";
 
 const productFingerprint = JSON.stringify(SUERTES);
@@ -111,8 +111,10 @@ assert.match(appSource, /const tournament = applyProductiveRuleProfilePolicy\(ap
   "new tournaments preserve the local fixture default before applying productive policy");
 assert.match(appSource, /state\.tournaments\.push\(tournament\)/,
   "the policy-resolved tournament is the record inserted into local state");
-assert.match(appSource, /if \(!liveConfigured\) return;[\s\S]*?assignFirebaseTournamentRuleProfile\(\{/,
-  "productive assignments use the server authority only when Firebase live is configured");
+assert.match(appSource, /if \(!liveConfigured\) \{[\s\S]*?return;[\s\S]*?assignRuleProfileToTournament\(tournament, \{[\s\S]*?source: "productive-default"/,
+  "productive creation routes the canonical default through the shared assignment boundary only when Firebase live is configured");
+assert.match(appSource, /async function assignRuleProfileToTournament\([\s\S]*?assignFirebaseTournamentRuleProfile\(\{/,
+  "the shared assignment boundary delegates to the trusted server authority");
 assert.match(appSource, /if \(!existing\) ensureLocalRuleProfileForNewCharreada\(\)/,
   "a new charreada repairs a profileless local parent before scoring resolution");
 assert.match(appSource, /Object\.assign\(tournament, \{[\s\S]*?ruleProfileId:[\s\S]*?ruleProfileVersion:[\s\S]*?ruleProfile:/);

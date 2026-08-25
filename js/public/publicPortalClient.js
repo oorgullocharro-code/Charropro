@@ -4,8 +4,8 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./publicProjectionSchema.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

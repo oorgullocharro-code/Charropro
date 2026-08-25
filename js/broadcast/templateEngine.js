@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./componentLibrary.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

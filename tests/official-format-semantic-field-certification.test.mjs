@@ -3,18 +3,18 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
-import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/core/officialFormat.js?v=20260824-production-supervisor-scorer-context-001-v1";
+import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 const TOURNAMENT_ID = "semantic-fmch-2024-2028";
 const CHARREADA_ID = "semantic-charreada-1";

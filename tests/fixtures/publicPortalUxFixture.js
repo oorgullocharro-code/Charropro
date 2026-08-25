@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260824-production-supervisor-scorer-context-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

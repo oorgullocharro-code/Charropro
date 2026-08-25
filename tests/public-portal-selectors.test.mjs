@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

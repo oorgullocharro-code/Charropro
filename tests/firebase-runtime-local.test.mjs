@@ -9,7 +9,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

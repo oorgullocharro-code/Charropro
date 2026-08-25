@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260824-global-fmch-scorer-resolution-fix-001-v1";
+} from "./state.js?v=20260824-production-supervisor-scorer-context-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;
