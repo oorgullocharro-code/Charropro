@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./broadcastState.js?v=20260825-official-timer-live-context-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./dataContract.js?v=20260825-official-timer-live-context-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

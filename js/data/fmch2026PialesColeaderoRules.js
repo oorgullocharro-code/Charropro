@@ -184,6 +184,15 @@ export function getSelectedBaseRule(attempt = {}, catalog = {}) {
   return (Array.isArray(catalog.base) ? catalog.base : []).find((ruleItem) => applied.has(ruleItem.id)) || null;
 }
 
+export function resolveFmch2026PialesPreviousOpportunityTimerResolution(attempt) {
+  if (!attempt || typeof attempt !== "object") return "";
+  const applied = new Set(Array.isArray(attempt.applied) ? attempt.applied : []);
+  const registeredPial = Boolean(String(attempt.remateId || "").trim());
+  if (registeredPial && !attempt.desc) return "COUNTED_PIAL";
+  if (registeredPial && applied.has("piales_desc_rotura_reata")) return "ROPE_BREAK_WITH_PIAL";
+  return "NO_EXTENSION";
+}
+
 export function resolveConditionalBasePoints(attempt = {}, catalog = {}) {
   const baseRule = getSelectedBaseRule(attempt, catalog);
   if (!baseRule) return 0;

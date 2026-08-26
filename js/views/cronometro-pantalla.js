@@ -1,13 +1,19 @@
-import { escapeHTML, html } from "../core/dom.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { getOfficialTimerContextView, getTimerView } from "../core/timerRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { escapeHTML, html } from "../core/dom.js?v=20260825-official-timer-live-context-001-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260825-official-timer-live-context-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260825-official-timer-live-context-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260825-official-timer-live-context-001-v1";
+import {
+  compareOfficialTimerSnapshots,
+  deriveOfficialTimerLiveDisplay,
+  officialTimerTicker
+} from "../core/officialTimerLiveDisplay.js?v=20260825-official-timer-live-context-001-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();
 
 let remotePayload = null;
 let timer = {};
+const liveTickerSubscription = officialTimerTicker.subscribe(updateScreen);
 
 loadState();
 timer = chooseFreshTimer(state.liveTimer, readStoredLiveTimer());
@@ -28,8 +34,6 @@ if (liveChannel) {
     updateScreen();
   }, liveChannel);
 }
-
-window.setInterval(updateScreen, 100);
 
 document.addEventListener("click", requestFullscreen);
 document.addEventListener("keydown", (event) => {
@@ -61,21 +65,23 @@ function render() {
   updateScreen();
 }
 
-function updateScreen() {
+function updateScreen(now = Date.now()) {
   const panel = document.getElementById("timer-display-panel");
   const stateLabel = document.getElementById("timer-display-state");
   const display = document.getElementById("timer-display-clock");
   const context = document.getElementById("timer-display-context");
 
   if (panel) {
-    const view = getDisplayTimerView();
+    const view = getDisplayTimerView(now);
     panel.classList.toggle("running", Boolean(timer.running));
     panel.classList.toggle("paused", !timer.running);
     panel.classList.toggle("expired", Boolean(view.expired));
   }
-  if (stateLabel) stateLabel.textContent = getDisplayTimerView().stateLabel;
-  if (display) display.textContent = getDisplayTimerView().formatted;
+  const view = getDisplayTimerView(now);
+  if (stateLabel) stateLabel.textContent = view.stateLabel;
+  if (display) display.textContent = view.formatted;
   if (context) context.textContent = getLiveContextText();
+  liveTickerSubscription.setActive(view.running);
 }
 
 function getLiveContextText() {
@@ -97,9 +103,9 @@ function getTimerSource() {
   };
 }
 
-function getDisplayTimerView() {
+function getDisplayTimerView(now = Date.now()) {
   if (!timer.official) return getTimerView(timer, getTimerSource());
-  const view = getOfficialTimerContextView({
+  const view = deriveOfficialTimerLiveDisplay({
     ...timer,
     status: timer.officialStatus || String(timer.status || "READY").toUpperCase(),
     durationMs: Number(timer.durationMs ?? timer.limitMs ?? 0),
@@ -107,10 +113,9 @@ function getDisplayTimerView() {
     runningSince: timer.runningSince || null,
     wallStartedAt: timer.startedAt || null,
     wallFinishedAt: timer.stoppedAt || null
-  });
+  }, now);
   return {
     ...view,
-    formatted: view.formattedRemaining,
     stateLabel: timer.stateLabel || getOfficialStateLabel(view.status)
   };
 }
@@ -159,6 +164,10 @@ function chooseFreshTimer(primary, secondary) {
 
 function shouldAdoptTimer(incoming) {
   const current = normalizeTimer(timer);
+  if (incoming.official || current.official) {
+    const comparison = compareOfficialTimerSnapshots(current, incoming);
+    if (comparison.reason !== "official-timer-revision-duplicate") return comparison.adopt;
+  }
   const incomingRevision = Number(incoming.revision || 0);
   const currentRevision = Number(current.revision || 0);
   if (incomingRevision && currentRevision && incomingRevision !== currentRevision) {

@@ -6,7 +6,7 @@ import {
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "../js/core/timerRules.js?v=20260825-official-timer-live-context-001-v1";
 
 const now = Date.parse("2026-08-25T18:00:00.000Z");
 const context = (suerteId, extra = {}) => ({
@@ -98,7 +98,7 @@ const certifiedManganas = buildOfficialTimerDefinitionsFromContext({
   }
 })[0];
 assert.equal(certifiedManganas.temporalRuleStatus, "CERTIFIED");
-assert.equal(certifiedManganas.temporalRuleSource, "rule_profile");
+assert.equal(certifiedManganas.temporalRuleSource, "certified_temporal_policy");
 assert.equal(certifiedManganas.durationMs, 420000);
 assert.equal(certifiedManganas.ruleProfileFingerprint, "rptp_0f90f7a3944a82d7");
 assert.equal(colasFirst.temporalRuleStatus, "TEMPORAL_RULE_MISSING", "legacy compatibility is never presented as a certified FMCH timer rule");

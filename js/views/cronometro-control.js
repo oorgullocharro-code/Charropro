@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260825-official-timer-live-context-001-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260825-official-timer-live-context-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,16 +8,21 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "../core/firebaseSync.js?v=20260825-official-timer-live-context-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
+  formatTimerMs,
   getOfficialTimerContextView,
   getOfficialTimerControlView,
   normalizeOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../core/timerRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "../core/timerRules.js?v=20260825-official-timer-live-context-001-v1";
+import {
+  deriveOfficialTimerLiveDisplay,
+  officialTimerTicker
+} from "../core/officialTimerLiveDisplay.js?v=20260825-official-timer-live-context-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260825-official-timer-live-context-001-v1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -48,6 +53,7 @@ let accessSession = {
   role: ROLES.SIN_ACCESO,
   active: false
 };
+const liveTickerSubscription = officialTimerTicker.subscribe(updateDisplay);
 
 render();
 subscribeFirebaseAuthSession((session) => {
@@ -66,8 +72,6 @@ if (liveChannel) {
     render();
   }, liveChannel);
 }
-
-window.setInterval(updateDisplay, 100);
 
 root.addEventListener("click", (event) => {
   const target = event.target.closest("[data-action]");
@@ -115,6 +119,7 @@ function render() {
   const primaryDisabled = Boolean(
     pendingAction ||
     !timer ||
+    definition?.temporalPolicyStatus === "TEMPORAL_POLICY_UNAVAILABLE" ||
     view?.finished ||
     control?.hasController && !control.isOwner
   );
@@ -139,12 +144,14 @@ function render() {
             <strong id="timer-control-context">${escapeHTML(definition?.label || getLiveContextText())}</strong>
           </div>
 
+          ${definition ? renderOperatorContext(definition) : ""}
+
           ${timers.length > 1 ? renderTimerSelector(timers) : ""}
 
           ${timer ? html`
             <div class="timer-control-clock ${view.running ? "running" : view.paused ? "paused" : "ready"}" id="timer-control-clock">
               <span id="timer-control-state">${escapeHTML(getTimerStateLabel(view.status))}</span>
-              <strong id="timer-control-display">${escapeHTML(view.formattedRemaining)}</strong>
+              <strong id="timer-control-display">${escapeHTML(deriveOfficialTimerLiveDisplay(timer).formatted)}</strong>
               <em id="timer-control-owner">Control: ${escapeHTML(control.controllerLabel)}</em>
             </div>
 
@@ -173,6 +180,13 @@ function render() {
               </section>
             ` : ""}
 
+            ${definition.temporalPolicyStatus === "TEMPORAL_POLICY_UNAVAILABLE" ? html`
+              <section class="timer-control-observer" aria-live="assertive">
+                <strong>Politica temporal no disponible</strong>
+                <p>${escapeHTML(definition.temporalPolicyCode || "La identidad temporal no coincide con el perfil certificado.")}</p>
+              </section>
+            ` : ""}
+
             ${view.paused && control.isOwner ? renderPauseReasonControls(timer.pauseReason) : ""}
 
             ${contextTransitionBlocked ? html`
@@ -191,7 +205,7 @@ function render() {
           ` : html`
             <section class="timer-control-empty">
               <strong>Sin cronometro deportivo en este turno</strong>
-              <p>Cala no agrega un timer. El control se habilitara al recibir un contexto temporal vigente.</p>
+              <p>El control se habilitara al recibir un contexto temporal vigente.</p>
             </section>
           `}
 
@@ -218,15 +232,34 @@ function renderTimerSelector(timers) {
   `;
 }
 
+function renderOperatorContext(definition) {
+  const context = buildOperatorContext(definition);
+  return html`
+    <section class="timer-operator-context" aria-label="Contexto del cronometro oficial">
+      <div class="timer-operator-primary">
+        <span>${escapeHTML(context.charreada)}</span>
+        <strong>${escapeHTML(context.suerte)}</strong>
+        <em>${escapeHTML(context.phase)}</em>
+      </div>
+      <dl>
+        <div><dt>Equipo / participante</dt><dd>${escapeHTML(context.actor)}</dd></div>
+        <div><dt>Oportunidad</dt><dd>${escapeHTML(context.opportunity)}</dd></div>
+        <div><dt>Regla temporal</dt><dd>${escapeHTML(context.rule)}</dd></div>
+        <div><dt>Tiempo reglamentario</dt><dd>${escapeHTML(context.duration)}</dd></div>
+      </dl>
+    </section>
+  `;
+}
+
 function renderSecondaryTimers(timers) {
   return html`
     <section class="timer-control-secondary-list" aria-label="Otros cronometros disponibles">
       ${timers.filter(({ definition }) => definition.timerId !== selectedTimerId).map(({ timer, definition }) => {
-        const view = getOfficialTimerContextView(timer || createTimerFromDefinition(definition));
+        const view = deriveOfficialTimerLiveDisplay(timer || createTimerFromDefinition(definition));
         return html`
           <button type="button" data-action="select-official-timer" data-timer-id="${escapeHTML(definition.timerId)}">
             <span>${escapeHTML(definition.label || timer?.label || "Cronometro")}</span>
-            <strong>${escapeHTML(view.formattedRemaining)}</strong>
+            <strong>${escapeHTML(view.formatted)}</strong>
             <em>${escapeHTML(view.status)}</em>
           </button>
         `;
@@ -434,7 +467,21 @@ function getSelectedTimer() {
   if (!definition) return null;
   const registered = officialRegistry[definition.timerId];
   return registered
-    ? normalizeOfficialTimerContext(registered, definition)
+    ? normalizeOfficialTimerContext({
+        ...registered,
+        label: definition.label || registered.label,
+        suerteLabel: definition.suerteLabel || registered.suerteLabel,
+        phaseId: definition.phaseId || registered.phaseId,
+        phaseLabel: definition.phaseLabel || registered.phaseLabel,
+        teamName: definition.teamName || registered.teamName,
+        participantName: definition.participantName || registered.participantName,
+        attemptIndex: definition.attemptIndex ?? registered.attemptIndex,
+        opportunityIndex: definition.opportunityIndex ?? registered.opportunityIndex,
+        coleadorIndex: definition.coleadorIndex ?? registered.coleadorIndex,
+        timerRuleId: definition.timerRuleId || registered.timerRuleId,
+        temporalPolicyStatus: definition.temporalPolicyStatus || registered.temporalPolicyStatus,
+        temporalPolicyCode: definition.temporalPolicyCode || registered.temporalPolicyCode
+      }, definition)
     : createTimerFromDefinition(definition);
 }
 
@@ -442,20 +489,24 @@ function createTimerFromDefinition(definition) {
   return normalizeOfficialTimerContext(createOfficialTimerContext(definition), definition);
 }
 
-function updateDisplay() {
+function updateDisplay(now = Date.now()) {
   const timer = getSelectedTimer();
-  if (!timer) return;
-  const view = getOfficialTimerContextView(timer);
+  if (!timer) {
+    liveTickerSubscription.setActive(false);
+    return;
+  }
+  const view = deriveOfficialTimerLiveDisplay(timer, now);
   const display = document.getElementById("timer-control-display");
   const stateLabel = document.getElementById("timer-control-state");
   const clock = document.getElementById("timer-control-clock");
-  if (display) display.textContent = view.formattedRemaining;
+  if (display) display.textContent = view.formatted;
   if (stateLabel) stateLabel.textContent = getTimerStateLabel(view.status);
   if (clock) {
     clock.classList.toggle("running", view.running);
     clock.classList.toggle("paused", view.paused);
     clock.classList.toggle("expired", view.expired);
   }
+  liveTickerSubscription.setActive(view.running);
 }
 
 function refreshScreen() {
@@ -518,6 +569,38 @@ function getLiveContextText() {
   const team = remotePayload?.turn?.team?.name || remotePayload?.turn?.participant?.name || "";
   const suerte = remotePayload?.turn?.suerte?.fullName || remotePayload?.turn?.suerte?.name || "";
   return [charreadaName, team, suerte].filter(Boolean).join(" / ");
+}
+
+function buildOperatorContext(definition = {}) {
+  const charreada = remotePayload?.charreada?.name || requestedCharreadaId || "Sin charreada activa";
+  const suerte = definition.suerteLabel
+    || remotePayload?.turn?.suerte?.fullName
+    || remotePayload?.turn?.suerte?.name
+    || definition.suerteId
+    || "Sin suerte";
+  const phase = definition.phaseLabel || definition.label || "Tiempo oficial";
+  const actor = definition.participantName || definition.teamName
+    || remotePayload?.turn?.participant?.name
+    || remotePayload?.turn?.team?.name
+    || "Sin participante";
+  const opportunityNumber = Number(definition.opportunityIndex || 0) + 1;
+  const opportunity = definition.suerteId === "terna"
+    ? "Ventana compartida"
+    : `Oportunidad ${opportunityNumber}`;
+  const rule = definition.temporalPolicyStatus === "ACTIVE"
+    ? `${definition.timerRuleId} · ${definition.temporalPolicyVersion}`
+    : definition.temporalRuleSource === "legacy_compatibility"
+      ? "Compatibilidad legacy explicita"
+      : "No disponible";
+  return {
+    charreada,
+    suerte,
+    phase,
+    actor,
+    opportunity,
+    rule,
+    duration: definition.durationMs ? formatTimerMs(definition.durationMs) : "Sin duracion certificada"
+  };
 }
 
 function getConnectionAge() {

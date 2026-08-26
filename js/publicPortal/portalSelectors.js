@@ -1,5 +1,5 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260825-official-timer-live-context-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260825-official-timer-live-context-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

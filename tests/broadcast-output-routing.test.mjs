@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as routingApi from "../js/broadcast/outputRouting.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import * as routingApi from "../js/broadcast/outputRouting.js?v=20260825-official-timer-live-context-001-v1";
 import {
   OUTPUT_ROUTING_VERSION,
   OUTPUT_ROUTE_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   updateOutputRoute,
   validateOutputRoute,
   validateOutputRoutingSnapshot
-} from "../js/broadcast/outputRouting.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260825-official-timer-live-context-001-v1";
 
 const T0 = "2026-07-15T18:00:00.000Z";
 const T1 = "2026-07-15T18:00:01.000Z";
@@ -191,7 +191,11 @@ function timerState(status = "running", revision = 7, overrides = {}) {
     status,
     formattedTime: "00:42.18",
     elapsedMs: 42180,
+    officialElapsedMs: 40000,
     remainingMs: null,
+    durationMs: 300000,
+    mode: "countdown",
+    runningSince: status === "running" ? T0 : null,
     startedAt: T0,
     pausedAt: status === "paused" ? T1 : null,
     stoppedAt: new Set(["stopped", "finished"]).has(status) ? T1 : null,
@@ -354,6 +358,10 @@ for (const status of ["ready", "running", "paused", "stopped", "finished", "unav
   assert.equal(result.projection.status, status);
   assert.equal(result.projection.formattedTime, "00:42.18");
   assert.equal(result.projection.elapsedMs, 42180);
+  assert.equal(result.projection.officialElapsedMs, 40000);
+  assert.equal(result.projection.durationMs, 300000);
+  assert.equal(result.projection.mode, "countdown");
+  assert.equal(result.projection.runningSince, status === "running" ? T0 : null);
   assert.equal(result.projection.sourceRevision, input.sourceRevision);
   assert.equal("controls" in result.projection, false);
   assert.equal("interval" in result.projection, false);

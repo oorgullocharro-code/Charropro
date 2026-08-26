@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260825-official-timer-lifecycle-sync-001-v1",
+      "appVersion": "20260825-official-timer-live-context-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "4760c6bdfebd1fdcd720ad1cdd1240ccfa329524863c3692d87e3369624c5c98",
-  "fingerprint": "4760c6bdfebd1fdcd720ad1cdd1240ccfa329524863c3692d87e3369624c5c98"
+  "checksum": "1505cb158c7dde182f2df2852c20bc9b2f0c654931d6ae48e81e3fed6c893b56",
+  "fingerprint": "1505cb158c7dde182f2df2852c20bc9b2f0c654931d6ae48e81e3fed6c893b56"
 }

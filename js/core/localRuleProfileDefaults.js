@@ -1,4 +1,4 @@
-import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260825-official-timer-live-context-001-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

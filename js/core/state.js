@@ -1,19 +1,19 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260825-official-timer-live-context-001-v1";
+import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260825-official-timer-live-context-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260825-official-timer-live-context-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260825-official-timer-live-context-001-v1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260825-official-timer-live-context-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./timerRules.js?v=20260825-official-timer-live-context-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260825-official-timer-live-context-001-v1";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260825-official-timer-live-context-001-v1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -26,7 +26,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./localCache.js?v=20260825-official-timer-live-context-001-v1";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());
@@ -1058,7 +1058,23 @@ export function getOrCreateOfficialTimer(timerId, definition = {}) {
     tournamentId: definition.tournamentId || timer.tournamentId || state.activeTournamentId || "",
     competitionId: definition.competitionId || timer.competitionId || "",
     charreadaId: definition.charreadaId || timer.charreadaId || "",
-    teamId: definition.teamId || timer.teamId || ""
+    teamId: definition.teamId || timer.teamId || "",
+    suerteLabel: definition.suerteLabel || timer.suerteLabel || "",
+    phaseId: definition.phaseId || timer.phaseId || "",
+    phaseLabel: definition.phaseLabel || timer.phaseLabel || "",
+    teamName: definition.teamName || timer.teamName || "",
+    participantName: definition.participantName || timer.participantName || "",
+    attemptIndex: definition.attemptIndex ?? timer.attemptIndex ?? 0,
+    opportunityIndex: definition.opportunityIndex ?? timer.opportunityIndex ?? 0,
+    coleadorIndex: definition.coleadorIndex ?? timer.coleadorIndex ?? 0,
+    label: definition.label || timer.label || "Cronometro oficial",
+    mode: definition.mode || timer.mode || "countdown",
+    timerRuleId: definition.timerRuleId || timer.timerRuleId || null,
+    temporalPolicyStatus: definition.temporalPolicyStatus || timer.temporalPolicyStatus || null,
+    temporalPolicyCode: definition.temporalPolicyCode || timer.temporalPolicyCode || null,
+    temporalPolicyId: definition.temporalPolicyId || timer.temporalPolicyId || null,
+    temporalPolicyVersion: definition.temporalPolicyVersion || timer.temporalPolicyVersion || null,
+    temporalFingerprint: definition.temporalFingerprint || timer.temporalFingerprint || null
   };
   return state.officialTimers[timerId];
 }

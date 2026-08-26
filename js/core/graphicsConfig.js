@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260825-official-timer-live-context-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

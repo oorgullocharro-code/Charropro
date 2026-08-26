@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260825-official-timer-live-context-001-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/broadcastAccessHub.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import * as api from "../js/broadcast/broadcastAccessHub.js?v=20260825-official-timer-live-context-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";

@@ -1,10 +1,14 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260825-official-timer-live-context-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260825-official-timer-live-context-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260825-official-timer-live-context-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260825-official-timer-live-context-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260825-official-timer-live-context-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260825-official-timer-live-context-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260825-official-timer-live-context-001-v1";
+import {
+  deriveOfficialTimerLiveDisplay,
+  officialTimerTicker
+} from "../core/officialTimerLiveDisplay.js?v=20260825-official-timer-live-context-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";
@@ -19,6 +23,7 @@ let remoteGraphicsConfig = null;
 let firebaseGraphicsConfig = null;
 let firebaseUnsubscribe = null;
 const RANKING_TEAM_LIMIT = 10;
+const liveTickerSubscription = officialTimerTicker.subscribe(updateTimerGraphicDisplay);
 
 loadState();
 configureGraphicCanvas();
@@ -31,12 +36,6 @@ subscribeToLiveUpdates(() => {
   ensureRemotePolling();
   render();
 });
-window.setInterval(() => {
-  ensureFirebaseLive();
-  ensureRemotePolling();
-  render();
-}, 100);
-
 function render() {
   if (!liveChannel) {
     root.innerHTML = renderMissingTournamentGraphic();
@@ -53,8 +52,10 @@ function render() {
 
   if (view === "timer") {
     root.innerHTML = renderTimerGraphic(payload.timer);
+    updateTimerGraphicDisplay();
     return;
   }
+  liveTickerSubscription.setActive(false);
 
 	  if (view === "turn") {
 	    root.innerHTML = renderTurnGraphic(payload);
@@ -235,12 +236,32 @@ function renderTimerGraphic(timer) {
   const safeTimer = timer || {};
   return html`
     <main class="graphic-stage">
-      <aside class="graphic-timer graphic-widget ${safeTimer.running ? "running" : "paused"} ${safeTimer.expired ? "expired" : ""}">
-        <span>${escapeHTML(safeTimer.stateLabel || (safeTimer.running ? "Cronometro" : "Cronometro pausado"))}</span>
-        <strong>${escapeHTML(safeTimer.formatted || "00:00.0")}</strong>
+      <aside class="graphic-timer graphic-widget ${safeTimer.running ? "running" : "paused"} ${safeTimer.expired ? "expired" : ""}" id="graphic-timer-panel">
+        <span id="graphic-timer-state">${escapeHTML(safeTimer.stateLabel || (safeTimer.running ? "Cronometro" : "Cronometro pausado"))}</span>
+        <strong id="graphic-timer-value">${escapeHTML(safeTimer.formatted || "00:00.0")}</strong>
       </aside>
     </main>
   `;
+}
+
+function updateTimerGraphicDisplay(now = Date.now()) {
+  if (view !== "timer") {
+    liveTickerSubscription.setActive(false);
+    return;
+  }
+  const timer = getRenderPayload()?.timer || {};
+  const live = deriveOfficialTimerLiveDisplay(timer, now);
+  const panel = document.getElementById("graphic-timer-panel");
+  const state = document.getElementById("graphic-timer-state");
+  const value = document.getElementById("graphic-timer-value");
+  if (panel) {
+    panel.classList.toggle("running", live.running);
+    panel.classList.toggle("paused", !live.running);
+    panel.classList.toggle("expired", live.expired);
+  }
+  if (state) state.textContent = timer.stateLabel || live.stateLabel;
+  if (value) value.textContent = live.formatted;
+  liveTickerSubscription.setActive(live.running);
 }
 
 function renderTurnGraphic(payload) {
@@ -1058,6 +1079,20 @@ function hasStoredLocalState() {
 
 function buildLiveTimer(timer = {}, payload = {}) {
   const normalized = normalizeTimer(timer);
+  if (normalized.official) {
+    const live = deriveOfficialTimerLiveDisplay(normalized);
+    return {
+      ...normalized,
+      elapsedLiveMs: live.elapsedMs,
+      displayMs: live.displayMs,
+      remainingMs: live.remainingMs,
+      formatted: live.formatted,
+      mode: live.mode,
+      limitMs: live.durationMs,
+      stateLabel: normalized.stateLabel || live.stateLabel,
+      expired: live.expired
+    };
+  }
   const view = getTimerView(normalized, {
     charreada: payload?.charreada || null,
     turn: payload?.turn || null
@@ -1111,6 +1146,11 @@ function normalizeTimer(timer = {}) {
   return {
     ...timer,
     running: Boolean(timer.running ?? timer.isRunning ?? timer.active),
+    official: Boolean(timer.official),
+    officialStatus: timer.officialStatus || "",
+    runningSince: timer.runningSince || null,
+    officialElapsedMs: Number(timer.officialElapsedMs ?? elapsedMs ?? 0),
+    durationMs: Number(timer.durationMs ?? timer.limitMs ?? 0),
     startedAt: startedAt === "" ? null : startedAt,
     elapsedMs: Number(elapsedMs || 0),
     revision: Number(timer.revision || 0),

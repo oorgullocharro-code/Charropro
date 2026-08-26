@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260825-official-timer-live-context-001-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

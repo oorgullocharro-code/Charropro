@@ -3452,6 +3452,69 @@ th.num {
   white-space: nowrap;
 }
 
+.timer-operator-context {
+  min-width: 0;
+  border: 1px solid #343d4b;
+  border-radius: 8px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  background: #111720;
+}
+
+.timer-operator-primary {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.timer-operator-primary span,
+.timer-operator-context dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.timer-operator-primary strong {
+  overflow-wrap: anywhere;
+  font-size: clamp(22px, 6vw, 36px);
+  line-height: 1;
+}
+
+.timer-operator-primary em {
+  color: #f4ce73;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.timer-operator-context dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.timer-operator-context dl > div {
+  min-width: 0;
+  border-left: 2px solid #3a4454;
+  padding-left: 8px;
+}
+
+.timer-operator-context dt,
+.timer-operator-context dd {
+  margin: 0;
+}
+
+.timer-operator-context dd {
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+  color: #e9edf4;
+  font-size: 13px;
+  font-weight: 850;
+}
+
 .timer-control-clock {
   min-width: 0;
   border: 1px solid #303846;
@@ -3705,6 +3768,20 @@ th.num {
   .timer-control-panel {
     padding: 10px;
     gap: 8px;
+  }
+
+  .timer-operator-context {
+    padding: 9px;
+    gap: 7px;
+  }
+
+  .timer-operator-context dl {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .timer-operator-primary strong {
+    font-size: 22px;
   }
 
   .timer-control-clock {

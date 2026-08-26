@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260825-official-timer-lifecycle-sync-001-v1");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260825-official-timer-lifecycle-sync-001-v1");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260825-official-timer-lifecycle-sync-001-v1");
+const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260825-official-timer-live-context-001-v1");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260825-official-timer-live-context-001-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260825-official-timer-live-context-001-v1");
 
 const tournament = applyProductiveRuleProfilePolicy({ id: "supervisor-production", category: "Libre", type: "completo" });
 Object.assign(tournament, assignmentFields(tournament.id));

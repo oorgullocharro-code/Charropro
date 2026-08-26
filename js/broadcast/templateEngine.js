@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./componentLibrary.js?v=20260825-official-timer-live-context-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

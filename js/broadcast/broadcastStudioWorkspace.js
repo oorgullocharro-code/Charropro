@@ -26,7 +26,7 @@ import {
   takeProductionConsoleOfficialProgram,
   updateProductionConsoleOfficialPreviewLiveData,
   updateProductionConsoleOfficialProgramLiveData
-} from "./productionConsole.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./productionConsole.js?v=20260825-official-timer-live-context-001-v1";
 import {
   applyProgramMainProjection,
   clearProgramMainOutput,
@@ -34,15 +34,15 @@ import {
   createProgramMainOutput,
   destroyProgramMainOutput,
   mountProgramMainOutput
-} from "./programMainOutput.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { destroyTemplateRendererIntegration } from "./templateRendererIntegration.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { destroyThemeTemplateIntegration } from "./themeTemplateIntegration.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { destroyPreviewEngine } from "./previewEngine.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { destroyProgramEngine } from "./programEngine.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { destroyOutputRoutingEngine } from "./outputRouting.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { destroyBroadcastRealtimeTransport } from "./broadcastRealtimeTransport.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { destroyLiveBindingsEngine } from "./liveBindings.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./programMainOutput.js?v=20260825-official-timer-live-context-001-v1";
+import { destroyTemplateRendererIntegration } from "./templateRendererIntegration.js?v=20260825-official-timer-live-context-001-v1";
+import { destroyThemeTemplateIntegration } from "./themeTemplateIntegration.js?v=20260825-official-timer-live-context-001-v1";
+import { destroyPreviewEngine } from "./previewEngine.js?v=20260825-official-timer-live-context-001-v1";
+import { destroyProgramEngine } from "./programEngine.js?v=20260825-official-timer-live-context-001-v1";
+import { destroyOutputRoutingEngine } from "./outputRouting.js?v=20260825-official-timer-live-context-001-v1";
+import { destroyBroadcastRealtimeTransport } from "./broadcastRealtimeTransport.js?v=20260825-official-timer-live-context-001-v1";
+import { destroyLiveBindingsEngine } from "./liveBindings.js?v=20260825-official-timer-live-context-001-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260825-official-timer-live-context-001-v1";
 
 export const BROADCAST_STUDIO_WORKSPACE_VERSION = "1.0.0";
 export const BROADCAST_STUDIO_APP_VERSION = CHARROPRO_APP_VERSION;
@@ -544,7 +544,7 @@ export function createBroadcastStudioEngine(options = {}) {
       if (disposed) throw workspaceError("broadcast-studio-destroyed");
       emit({ connectionState: "preparing", context: null, operationStatus: "Esperando autenticación", error: null });
       try {
-        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260825-official-timer-lifecycle-sync-001-v1");
+        runtime.firebaseBroadcastApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260825-official-timer-live-context-001-v1");
         if (typeof runtime.firebaseBroadcastApi.subscribeFirebaseBroadcastContext !== "function") {
           throw workspaceError("broadcast-studio-context-subscriber-unavailable");
         }

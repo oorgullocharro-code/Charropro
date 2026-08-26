@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+} from "./programEngine.js?v=20260825-official-timer-live-context-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 
@@ -705,13 +705,27 @@ function buildTimerProjection(timer, options) {
     status,
     formattedTime: nullableText(timer.formattedTime ?? timer.display) ?? NOT_AVAILABLE,
     elapsedMs: finiteNonNegativeOrNull(timer.elapsedMs ?? timer.elapsed),
+    officialElapsedMs: finiteNonNegativeOrNull(timer.officialElapsedMs ?? timer.elapsedMs ?? timer.elapsed),
     remainingMs: finiteNonNegativeOrNull(timer.remainingMs ?? timer.remaining),
+    durationMs: finiteNonNegativeOrNull(timer.durationMs ?? timer.limitMs),
+    mode: nullableText(timer.mode),
+    runningSince: normalizeNullableIso(timer.runningSince),
     startedAt: normalizeNullableIso(timer.startedAt),
     pausedAt: normalizeNullableIso(timer.pausedAt),
     stoppedAt: normalizeNullableIso(timer.stoppedAt),
     pauseReason: nullableText(timer.pauseReason),
     sourceRevision,
     contextRef: sanitizeTimerContext(timer.contextRef),
+    suerteLabel: nullableText(timer.suerteLabel),
+    phaseId: nullableText(timer.phaseId),
+    phaseLabel: nullableText(timer.phaseLabel),
+    teamName: nullableText(timer.teamName),
+    participantName: nullableText(timer.participantName),
+    opportunityIndex: finiteNonNegativeOrNull(timer.opportunityIndex),
+    timerRuleId: nullableText(timer.timerRuleId),
+    temporalPolicyId: nullableText(timer.temporalPolicyId),
+    temporalPolicyVersion: nullableText(timer.temporalPolicyVersion),
+    temporalFingerprint: nullableText(timer.temporalFingerprint),
     generatedAt,
     alertState: nullableText(timer.alertState),
     suerte: compactEntity(timer.suerte, ["id", "name"]),

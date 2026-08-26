@@ -270,9 +270,12 @@ const FIELD_VISIBILITY = Object.freeze({
   "timer.remaining": "public",
   "timer.running": "public",
   "timer.paused": "public",
+  "timer.runningSince": "production",
   "timer.startedAt": "production",
   "timer.updatedAt": "production",
   "timer.limit": "public",
+  "timer.duration": "public",
+  "timer.mode": "public",
   "timer.status": "public",
   "timer.display": "public",
   "timer.revision": "production",
@@ -554,7 +557,8 @@ export function validateBroadcastDataContract(contract) {
     "timer.value",
     "timer.elapsed",
     "timer.remaining",
-    "timer.limit"
+    "timer.limit",
+    "timer.duration"
   ];
   numericPaths.forEach((path) => {
     const value = getBroadcastField(contract, path, undefined);
@@ -589,6 +593,7 @@ export function validateBroadcastDataContract(contract) {
     "source.generatedAt",
     "score.timestamp",
     "timer.startedAt",
+    "timer.runningSince",
     "timer.updatedAt",
     "production.updatedAt",
     "system.lastUpdate"
@@ -991,9 +996,12 @@ function buildTimer(context, envelope, warnings) {
     remaining: numberOrNull(firstDefined(raw.remaining, raw.remainingMs)),
     running: booleanOrNull(raw.running),
     paused: booleanOrNull(raw.paused),
+    runningSince: normalizeIsoDate(raw.runningSince),
     startedAt: normalizeIsoDate(raw.startedAt),
     updatedAt: normalizeIsoDate(firstDefined(raw.updatedAt, raw.timestamp)),
     limit: numberOrNull(firstDefined(raw.limit, raw.limitMs)),
+    duration: numberOrNull(firstDefined(raw.duration, raw.durationMs, raw.limit, raw.limitMs)),
+    mode: nullableString(raw.mode),
     status: nullableString(raw.status),
     display: nullableString(firstDefined(raw.display, raw.timeText, raw.valueText)),
     revision: finiteNumberOr(raw.revision, 0),

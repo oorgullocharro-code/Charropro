@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260825-official-timer-lifecycle-sync-001-v1";
-import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260825-official-timer-lifecycle-sync-001-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260825-official-timer-live-context-001-v1";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260825-official-timer-live-context-001-v1";
+import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260825-official-timer-live-context-001-v1";
 
 const source = buildSource();
 let projection = buildPublicProjection(source, {
