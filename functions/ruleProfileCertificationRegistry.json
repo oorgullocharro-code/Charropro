@@ -21,6 +21,27 @@
         "recordId": "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001",
         "resolutionTicketId": "CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-RESOLUTION-002"
       }
+    },
+    "FMCH_2026_LIBRE@0.6.1": {
+      "profileId": "FMCH_2026_LIBRE",
+      "version": "0.6.1",
+      "definitionStatus": "draft",
+      "scope": {
+        "type": "system",
+        "tenantId": "",
+        "organizationId": ""
+      },
+      "profileValid": true,
+      "contentFingerprint": "rptp_10e596046446e850",
+      "catalogRuleCount": 734,
+      "suerteCount": 10,
+      "certification": {
+        "verdict": "PASS",
+        "remainingP0": 0,
+        "activationReadyEligibility": true,
+        "recordId": "CHARROPRO-FMCH-2026-LIBRE-0.6.1-BRAKE-REVIEW-RULE-RECONCILIATION-001",
+        "resolutionTicketId": "CHARROPRO-FMCH-2026-LIBRE-0.6.1-BRAKE-REVIEW-RULE-RECONCILIATION-001"
+      }
     }
   }
 }

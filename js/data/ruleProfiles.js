@@ -91,6 +91,13 @@ import {
   buildRuleProfileContentFingerprint,
   evaluateRuleProfileTemporalValidity
 } from "./ruleProfileTemporalPolicy.js?v=20260825-official-timer-live-context-001-v1";
+import {
+  FMCH_2026_BRAKE_REVIEW_CANONICAL_RULE_IDS,
+  FMCH_2026_BRAKE_REVIEW_PHASE_ID,
+  FMCH_2026_BRAKE_REVIEW_RECONCILIATION,
+  FMCH_2026_BRAKE_REVIEW_SOURCE,
+  buildFmch2026BrakeReviewProfileRules
+} from "./fmch2026BrakeReviewRules.js?v=20260825-official-timer-live-context-001-v1";
 
 export const RULE_PROFILE_CONTRACT_VERSION = "1.0.0";
 
@@ -566,7 +573,7 @@ export const FMCH_2026_LIBRE_PROFILE_0_5_0 = deepFreeze({
   }
 });
 
-export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
+export const FMCH_2026_LIBRE_PROFILE_0_6_0 = deepFreeze({
   ...FMCH_2026_LIBRE_PROFILE_0_5_0,
   version: "0.6.0",
   rules: [
@@ -713,10 +720,59 @@ export const FMCH_2026_LIBRE_PROFILE = deepFreeze({
   }
 });
 
+// The productive alias remains pinned to the active 0.6.0 definition.
+export const FMCH_2026_LIBRE_PROFILE = FMCH_2026_LIBRE_PROFILE_0_6_0;
+
+export const FMCH_2026_LIBRE_PROFILE_0_6_1 = deepFreeze({
+  ...FMCH_2026_LIBRE_PROFILE_0_6_0,
+  version: "0.6.1",
+  rules: buildFmch2026BrakeReviewProfileRules(FMCH_2026_LIBRE_PROFILE_0_6_0.rules),
+  suerteMetadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_6_0.suerteMetadata,
+    cala: {
+      ...FMCH_2026_LIBRE_PROFILE_0_6_0.suerteMetadata.cala,
+      brakeReview: {
+        phaseId: FMCH_2026_BRAKE_REVIEW_PHASE_ID,
+        phaseOwnership: "BRAKE_REVIEW",
+        implementationStatus: "RULES_CERTIFIED_FLOW_PENDING",
+        auditedConcepts: FMCH_2026_BRAKE_REVIEW_RECONCILIATION.length,
+        sportingRules: FMCH_2026_BRAKE_REVIEW_CANONICAL_RULE_IDS.length,
+        missingRules: 0,
+        missingFieldIds: 0,
+        canonicalRuleIds: FMCH_2026_BRAKE_REVIEW_CANONICAL_RULE_IDS,
+        nonScoringTransitions: [
+          "FORCE_MAJEURE_APPROVED_CHANGE",
+          "WAITING_PARADE_AND_JUDGES_CALL"
+        ],
+        temporalCompatibility: {
+          status: "CERTIFIED_RULE_COMPATIBLE_RUNTIME_WIRING_DEFERRED",
+          policyId: "FMCH_2026_LIBRE_OFFICIAL_TEMPORAL_RULES",
+          policyVersion: "1.0.0",
+          policyFingerprint: "fmchtp_7d1e001181026f6d",
+          sourceProfileVersion: "0.6.0",
+          contractRuleId: "fmch_2026_cala_freno_review"
+        }
+      }
+    }
+  },
+  metadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_6_0.metadata,
+    implementationStatus: "all_ten_suertes_certified_brake_review_rules_reconciled_flow_pending",
+    activationReady: false,
+    activationReadyEligibility: true,
+    sportingCertification: "PASS",
+    certificationTicket: FMCH_2026_BRAKE_REVIEW_SOURCE,
+    derivedFromVersion: "0.6.0",
+    remainingSportingP0Blockers: 0,
+    activationBlockReason: "Lifecycle transition and Pre-Cala operational phase wiring remain pending"
+  }
+});
+
 export const RULE_PROFILES = deepFreeze([
   FMCH_2026_LIBRE_PROFILE_0_4_0,
   FMCH_2026_LIBRE_PROFILE_0_5_0,
-  FMCH_2026_LIBRE_PROFILE
+  FMCH_2026_LIBRE_PROFILE_0_6_0,
+  FMCH_2026_LIBRE_PROFILE_0_6_1
 ]);
 
 export function buildRuleIdentity(suerteId, category, ruleId) {
@@ -735,6 +791,20 @@ export function getRuleProfile(profileId, version, registry = RULE_PROFILES) {
   return normalizeRegistry(registry).find((profile) =>
     profile?.profileId === cleanProfileId && profile?.version === cleanVersion
   ) || null;
+}
+
+export function getRuleProfileRulesByPhase(profile = {}, phaseId, options = {}) {
+  const cleanPhaseId = normalizeId(phaseId);
+  if (!cleanPhaseId) return [];
+  return (profile.rules || [])
+    .filter((rule) => options.includeDisabled === true || rule?.enabled !== false)
+    .filter((rule) => {
+      const metadata = rule?.metadata || {};
+      const phaseIds = Array.isArray(metadata.phaseIds) ? metadata.phaseIds : [];
+      return normalizeId(metadata.phaseId) === cleanPhaseId
+        || phaseIds.some((candidate) => normalizeId(candidate) === cleanPhaseId);
+    })
+    .map((rule) => cloneDeclarative(rule, [], "phase-rule"));
 }
 
 export function validateRuleProfile(profile = {}) {
@@ -924,7 +994,10 @@ export function resolveEffectiveRules({
     { allowNewRules: true }
   );
 
-  const profileRules = (profile?.rules || []).filter((rule) => normalizeId(rule?.suerteId || rule?.suerte) === suerteId);
+  const requestedPhaseId = normalizeId(context.phaseId || context.phase);
+  const profileRules = (profile?.rules || [])
+    .filter((rule) => normalizeId(rule?.suerteId || rule?.suerte) === suerteId)
+    .filter((rule) => ruleAppliesToResolutionPhase(rule, requestedPhaseId));
   catalog = applyRulePatches(catalog, profileRules, suerteId, RULE_SOURCES.RULE_PROFILE, diagnostics, {
     profileId: profile?.profileId || "",
     profileVersion: profile?.version || ""
@@ -1402,8 +1475,23 @@ function normalizeResolutionContext(context = {}) {
     tournamentId: normalizeId(context.tournamentId),
     competitionId: normalizeId(context.competitionId),
     category: normalizeText(context.category, 120),
-    phase: normalizeText(context.phase, 120)
+    phase: normalizeText(context.phase || context.phaseId, 120)
   };
+}
+
+function ruleAppliesToResolutionPhase(rule = {}, requestedPhaseId = "") {
+  const metadata = rule.metadata || {};
+  const primaryPhaseId = normalizeId(metadata.phaseId);
+  const phaseIds = Array.isArray(metadata.phaseIds)
+    ? metadata.phaseIds.map((value) => normalizeId(value)).filter(Boolean)
+    : [];
+  const hasPhaseOwnership = Boolean(primaryPhaseId || phaseIds.length);
+  if (requestedPhaseId) {
+    if (primaryPhaseId === requestedPhaseId || phaseIds.includes(requestedPhaseId)) return true;
+    return requestedPhaseId !== "freno_review" && !hasPhaseOwnership;
+  }
+  if (!hasPhaseOwnership) return true;
+  return phaseIds.includes("cala_execution");
 }
 
 function mergeSuerteMetadata(diagnostics, ...layers) {
