@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260825-official-timer-live-context-001-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/data/suertes.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

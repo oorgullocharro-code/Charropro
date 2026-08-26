@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260825-official-timer-live-context-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",
@@ -444,6 +444,11 @@ const FMCH_TEMPORAL_SUERTE_ALIASES = Object.freeze({
   pial_ruedo: "terna_pial"
 });
 
+const FMCH_TEMPORAL_PROFILE_COMPATIBILITY = Object.freeze({
+  "FMCH_2026_LIBRE@0.6.0": "rptp_0f90f7a3944a82d7",
+  "FMCH_2026_LIBRE@0.6.1": "rptp_10e596046446e850"
+});
+
 export function getFmchOfficialTemporalPolicy() {
   return clonePlain(FMCH_OFFICIAL_TEMPORAL_POLICY);
 }
@@ -492,8 +497,7 @@ export function validateFmchOfficialTemporalPolicy(policy = FMCH_OFFICIAL_TEMPOR
 export function resolveFmchOfficialTemporalContracts(context = {}) {
   const profileId = normalizeTimerId(context.profileId || context.ruleProfileId);
   const profileVersion = String(context.profileVersion || context.ruleProfileVersion || "").trim();
-  if (profileId !== FMCH_OFFICIAL_TEMPORAL_POLICY.appliesTo.profileId
-    || profileVersion !== FMCH_OFFICIAL_TEMPORAL_POLICY.appliesTo.profileVersion) {
+  if (!FMCH_TEMPORAL_PROFILE_COMPATIBILITY[`${profileId}@${profileVersion}`]) {
     return { ok: false, code: "official-temporal-profile-unsupported", contracts: [] };
   }
   const requestedSuerteId = normalizeTimerId(context.suerteId || context.suerte?.id);
@@ -557,10 +561,11 @@ export function resolveFmchOfficialTemporalRuntimePolicy(context = {}) {
   if (profileId !== FMCH_OFFICIAL_TEMPORAL_POLICY.appliesTo.profileId) {
     return unavailable("official-temporal-runtime-profile-unsupported");
   }
-  if (profileVersion !== FMCH_OFFICIAL_TEMPORAL_POLICY.appliesTo.profileVersion) {
+  const compatibleFingerprint = FMCH_TEMPORAL_PROFILE_COMPATIBILITY[`${profileId}@${profileVersion}`];
+  if (!compatibleFingerprint) {
     return unavailable("official-temporal-runtime-version-unsupported");
   }
-  if (profileFingerprint !== FMCH_OFFICIAL_TEMPORAL_POLICY.appliesTo.profileFingerprint) {
+  if (profileFingerprint !== compatibleFingerprint) {
     return unavailable("official-temporal-runtime-profile-fingerprint-mismatch");
   }
   const explicitPolicyId = String(context.temporalPolicyId || "").trim();
@@ -724,6 +729,7 @@ export function createOfficialTimerContext(definition = {}, options = {}) {
     phaseLabel: nullableTimerText(definition.phaseLabel, 160),
     teamName: nullableTimerText(definition.teamName, 200),
     participantName: nullableTimerText(definition.participantName, 200),
+    horseName: nullableTimerText(definition.horseName, 200),
     attemptIndex: Math.max(0, Math.trunc(finiteNumber(definition.attemptIndex))),
     opportunityIndex: Math.max(0, Math.trunc(finiteNumber(definition.opportunityIndex ?? definition.attemptIndex))),
     coleadorIndex: Math.max(0, Math.trunc(finiteNumber(definition.coleadorIndex))),
@@ -788,6 +794,7 @@ export function normalizeOfficialTimerContext(timer = {}, definition = {}) {
     phaseLabel: nullableTimerText(timer.phaseLabel || definition.phaseLabel, 160),
     teamName: nullableTimerText(timer.teamName || definition.teamName, 200),
     participantName: nullableTimerText(timer.participantName || definition.participantName, 200),
+    horseName: nullableTimerText(timer.horseName || definition.horseName, 200),
     attemptIndex: Math.max(0, Math.trunc(finiteNumber(timer.attemptIndex ?? definition.attemptIndex))),
     opportunityIndex: Math.max(0, Math.trunc(finiteNumber(timer.opportunityIndex ?? definition.opportunityIndex ?? timer.attemptIndex))),
     coleadorIndex: Math.max(0, Math.trunc(finiteNumber(timer.coleadorIndex ?? definition.coleadorIndex))),
@@ -1132,6 +1139,7 @@ export function buildOfficialTimerProjection(timer = {}, options = {}) {
     phaseLabel: current.phaseLabel,
     teamName: current.teamName,
     participantName: current.participantName,
+    horseName: current.horseName,
     opportunityIndex: current.opportunityIndex,
     timerRuleId: current.timerRuleId,
     temporalPolicyStatus: current.temporalPolicyStatus,
@@ -1171,6 +1179,7 @@ export function buildOfficialTimerDefinitionsFromContext(source = {}) {
     suerteLabel: normalizeTimerText(suerte.fullName || suerte.name || suerte.label || suerteId, 160),
     teamName: nullableTimerText(turn.team?.name || context.team?.name, 200),
     participantName: nullableTimerText(turn.participant?.name || context.participant?.name || turn.team?.participantName, 200),
+    horseName: nullableTimerText(turn.participant?.horseName || context.participant?.horseName || turn.team?.horseName || context.team?.horseName, 200),
     attemptIndex,
     opportunityIndex: attemptIndex,
     coleadorIndex
@@ -1369,7 +1378,7 @@ function temporalPhaseLabel(phaseId, componentPhaseId = "") {
   if (componentPhaseId === "cabecero") return "Cabecero";
   if (componentPhaseId === "pial") return "Pial en el ruedo";
   const labels = {
-    freno_review: "Revision y monta",
+    freno_review: "Revision de freno",
     partidero_start: "Salida del partidero",
     opportunity_readiness: "Preparacion de oportunidad",
     partidero_release: "Salida del partidero",

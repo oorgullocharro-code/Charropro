@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/programMainOutput.js?v=20260825-official-timer-live-context-001-v1";
-import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260825-official-timer-live-context-001-v1";
+import * as api from "../js/broadcast/programMainOutput.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   BroadcastProgramMainOutputError,
   PROGRAM_MAIN_OUTPUT_DISPLAY_MODES,
@@ -28,7 +28,7 @@ import {
   validateProgramMainOutputConfig,
   validateProgramMainOutputSnapshot,
   validateProgramMainProjection
-} from "../js/broadcast/programMainOutput.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 class MockStyle {
   constructor() {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260825-official-timer-live-context-001-v1";
+import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const {
   RULE_PROFILE_ASSIGNMENT_AUTHORITY_VERSION,

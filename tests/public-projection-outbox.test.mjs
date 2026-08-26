@@ -16,7 +16,7 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
-} from "../js/core/publicProjectionOutbox.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/core/publicProjectionOutbox.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const T0 = Date.parse("2026-07-29T12:00:00.000Z");
 const base = {

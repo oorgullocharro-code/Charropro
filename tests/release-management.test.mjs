@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
-import releaseEngine from "../tools/release/releaseEngine.js?v=20260825-official-timer-live-context-001-v1";
+import releaseEngine from "../tools/release/releaseEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const {
   RELEASE_ENGINE_VERSION,

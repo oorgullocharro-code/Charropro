@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260825-official-timer-live-context-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/core/scoring.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

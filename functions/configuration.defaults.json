@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260825-official-timer-live-context-001-v1",
+      "appVersion": "20260826-pre-cala-brake-review-official-phase-002-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "1505cb158c7dde182f2df2852c20bc9b2f0c654931d6ae48e81e3fed6c893b56",
-  "fingerprint": "1505cb158c7dde182f2df2852c20bc9b2f0c654931d6ae48e81e3fed6c893b56"
+  "checksum": "e09ed5d640ebd75189c33f37ba295176c736893a00c74166780e425a064a666d",
+  "fingerprint": "e09ed5d640ebd75189c33f37ba295176c736893a00c74166780e425a064a666d"
 }

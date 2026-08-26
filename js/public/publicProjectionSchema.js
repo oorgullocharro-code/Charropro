@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260825-official-timer-live-context-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

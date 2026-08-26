@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/core/timerRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",
@@ -19,9 +19,19 @@ assert.equal(active.policyVersion, "1.0.0");
 assert.equal(active.policyFingerprint, "fmchtp_7d1e001181026f6d");
 assert.equal(FMCH_OFFICIAL_TEMPORAL_POLICY.contentFingerprint, active.policyFingerprint);
 
+const brakeReviewProfile = resolveFmchOfficialTemporalRuntimePolicy({
+  ...certified,
+  profileVersion: "0.6.1",
+  profileFingerprint: "rptp_10e596046446e850"
+});
+assert.equal(brakeReviewProfile.ok, true);
+assert.equal(brakeReviewProfile.status, "ACTIVE");
+assert.equal(brakeReviewProfile.policyFingerprint, active.policyFingerprint);
+
 for (const [name, context, code] of [
   ["profile", { ...certified, profileId: "PRODUCT_BASE" }, "official-temporal-runtime-profile-unsupported"],
-  ["version", { ...certified, profileVersion: "0.6.1" }, "official-temporal-runtime-version-unsupported"],
+  ["version", { ...certified, profileVersion: "0.7.0" }, "official-temporal-runtime-version-unsupported"],
+  ["0.6.1 fingerprint", { ...certified, profileVersion: "0.6.1" }, "official-temporal-runtime-profile-fingerprint-mismatch"],
   ["fingerprint", { ...certified, profileFingerprint: "wrong" }, "official-temporal-runtime-profile-fingerprint-mismatch"]
 ]) {
   const result = resolveFmchOfficialTemporalRuntimePolicy(context);

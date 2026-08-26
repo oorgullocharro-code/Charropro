@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260825-official-timer-live-context-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

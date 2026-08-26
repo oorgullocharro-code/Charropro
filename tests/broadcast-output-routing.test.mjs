@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as routingApi from "../js/broadcast/outputRouting.js?v=20260825-official-timer-live-context-001-v1";
+import * as routingApi from "../js/broadcast/outputRouting.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   OUTPUT_ROUTING_VERSION,
   OUTPUT_ROUTE_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   updateOutputRoute,
   validateOutputRoute,
   validateOutputRoutingSnapshot
-} from "../js/broadcast/outputRouting.js?v=20260825-official-timer-live-context-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const T0 = "2026-07-15T18:00:00.000Z";
 const T1 = "2026-07-15T18:00:01.000Z";

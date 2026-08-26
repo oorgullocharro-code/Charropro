@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260825-official-timer-live-context-001-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260825-official-timer-live-context-001-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,7 +8,7 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260825-official-timer-live-context-001-v1";
+} from "../core/firebaseSync.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
@@ -17,12 +17,12 @@ import {
   getOfficialTimerControlView,
   normalizeOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../core/timerRules.js?v=20260825-official-timer-live-context-001-v1";
+} from "../core/timerRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260825-official-timer-live-context-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260825-official-timer-live-context-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -242,7 +242,9 @@ function renderOperatorContext(definition) {
         <em>${escapeHTML(context.phase)}</em>
       </div>
       <dl>
-        <div><dt>Equipo / participante</dt><dd>${escapeHTML(context.actor)}</dd></div>
+        <div><dt>Equipo</dt><dd>${escapeHTML(context.team)}</dd></div>
+        <div><dt>Competidor</dt><dd>${escapeHTML(context.participant)}</dd></div>
+        ${context.horse ? html`<div><dt>Caballo</dt><dd>${escapeHTML(context.horse)}</dd></div>` : ""}
         <div><dt>Oportunidad</dt><dd>${escapeHTML(context.opportunity)}</dd></div>
         <div><dt>Regla temporal</dt><dd>${escapeHTML(context.rule)}</dd></div>
         <div><dt>Tiempo reglamentario</dt><dd>${escapeHTML(context.duration)}</dd></div>
@@ -475,6 +477,7 @@ function getSelectedTimer() {
         phaseLabel: definition.phaseLabel || registered.phaseLabel,
         teamName: definition.teamName || registered.teamName,
         participantName: definition.participantName || registered.participantName,
+        horseName: definition.horseName || registered.horseName,
         attemptIndex: definition.attemptIndex ?? registered.attemptIndex,
         opportunityIndex: definition.opportunityIndex ?? registered.opportunityIndex,
         coleadorIndex: definition.coleadorIndex ?? registered.coleadorIndex,
@@ -579,10 +582,15 @@ function buildOperatorContext(definition = {}) {
     || definition.suerteId
     || "Sin suerte";
   const phase = definition.phaseLabel || definition.label || "Tiempo oficial";
-  const actor = definition.participantName || definition.teamName
+  const team = definition.teamName || remotePayload?.turn?.team?.name || "Sin equipo";
+  const participant = definition.participantName
     || remotePayload?.turn?.participant?.name
-    || remotePayload?.turn?.team?.name
-    || "Sin participante";
+    || remotePayload?.turn?.team?.participantName
+    || "Sin competidor";
+  const horse = definition.horseName
+    || remotePayload?.turn?.participant?.horseName
+    || remotePayload?.turn?.team?.horseName
+    || "";
   const opportunityNumber = Number(definition.opportunityIndex || 0) + 1;
   const opportunity = definition.suerteId === "terna"
     ? "Ventana compartida"
@@ -596,7 +604,9 @@ function buildOperatorContext(definition = {}) {
     charreada,
     suerte,
     phase,
-    actor,
+    team,
+    participant,
+    horse,
     opportunity,
     rule,
     duration: definition.durationMs ? formatTimerMs(definition.durationMs) : "Sin duracion certificada"

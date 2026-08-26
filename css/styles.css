@@ -19,6 +19,240 @@
   --radius: 8px;
 }
 
+/* Official Pre-Cala Brake Review */
+.brake-review-page {
+  min-height: 100dvh;
+  padding: clamp(12px, 2vw, 24px);
+  color: #f8fafc;
+  background: #101417;
+}
+
+.brake-review-header,
+.brake-review-context,
+.brake-review-clock,
+.brake-review-decisions,
+.brake-review-protocol {
+  width: min(960px, 100%);
+  margin-inline: auto;
+}
+
+.brake-review-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.brake-review-header span,
+.brake-review-context span,
+.brake-review-clock > span,
+.brake-review-protocol > span,
+.brake-review-dq-banner span {
+  display: block;
+  color: #aeb8bf;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.brake-review-header h1 {
+  margin: 2px 0 0;
+  font-size: clamp(1.45rem, 3vw, 2.1rem);
+  letter-spacing: 0;
+}
+
+.brake-review-header > strong {
+  color: #b8f2cc;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.brake-review-context {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #39434a;
+  border-radius: 6px;
+  background: #39434a;
+}
+
+.brake-review-context > div {
+  min-width: 0;
+  padding: 10px 12px;
+  background: #1a2024;
+}
+
+.brake-review-context strong {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-top: 3px;
+  font-size: 0.9rem;
+}
+
+.brake-review-clock {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid #4a555c;
+  border-radius: 8px;
+  background: #1a2024;
+  text-align: center;
+}
+
+.brake-review-clock > strong {
+  display: block;
+  margin: 4px 0 10px;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(3.4rem, 13vw, 7.5rem);
+  line-height: 0.95;
+}
+
+.brake-review-clock.running > strong { color: #b8f2cc; }
+.brake-review-clock.paused > strong { color: #ffd28a; }
+
+.brake-review-thresholds {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.brake-review-thresholds span {
+  padding: 8px;
+  border: 1px solid #465159;
+  border-radius: 5px;
+  color: #c7d0d6;
+  font-size: 0.8rem;
+}
+
+.brake-review-thresholds span.applied {
+  border-color: #d15353;
+  color: #ffffff;
+  background: #5b2323;
+}
+
+.brake-review-timer-button {
+  min-height: 52px;
+  min-width: min(100%, 320px);
+}
+
+.brake-review-decisions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.brake-review-decision {
+  display: flex;
+  min-height: 92px;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid #465159;
+  border-radius: 7px;
+  color: #ffffff;
+  background: #20282d;
+  text-align: left;
+  cursor: pointer;
+}
+
+.brake-review-decision.authorized { border-color: #3d8b61; background: #183c2b; }
+.brake-review-decision.infraction { border-color: #b98a42; background: #4b351b; }
+.brake-review-decision.dq { border-color: #b84e4e; background: #4c2020; }
+.brake-review-decision:disabled { opacity: 0.45; cursor: not-allowed; }
+.brake-review-decision strong { font-size: 1rem; }
+.brake-review-decision span { color: #d5dde2; font-size: 0.8rem; }
+
+.brake-review-rule-picker {
+  min-width: 0;
+}
+
+.brake-review-rule-picker summary {
+  list-style: none;
+}
+
+.brake-review-rule-picker summary::-webkit-details-marker { display: none; }
+
+.brake-review-rule-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.brake-review-rule {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 9px 11px;
+  border: 1px solid #465159;
+  border-radius: 5px;
+  color: #f8fafc;
+  background: #171c20;
+  text-align: left;
+}
+
+.brake-review-rule.selected {
+  border-color: #efb45d;
+  background: #513719;
+}
+
+.brake-review-rule strong { color: #ffd28a; }
+
+.brake-review-dq-banner,
+.brake-review-publish-dq {
+  grid-column: 1 / -1;
+}
+
+.brake-review-dq-banner {
+  padding: 14px;
+  border: 1px solid #b84e4e;
+  border-radius: 7px;
+  background: #4c2020;
+}
+
+.brake-review-dq-banner strong {
+  display: block;
+  margin: 2px 0;
+  font-size: 1.4rem;
+}
+
+.brake-review-dq-banner p { margin: 0; color: #f4c7c7; }
+.brake-review-publish-dq { min-height: 54px; }
+
+.brake-review-protocol {
+  margin-top: 14px;
+  padding: clamp(18px, 4vw, 36px);
+  border: 1px solid #4a555c;
+  border-radius: 8px;
+  background: #1a2024;
+  text-align: center;
+}
+
+.brake-review-protocol h2 { margin: 5px 0; font-size: clamp(1.35rem, 3vw, 2rem); }
+.brake-review-protocol p { margin: 0 0 18px; color: #c7d0d6; }
+.brake-review-protocol .button { min-height: 54px; min-width: min(100%, 320px); }
+
+@media (max-width: 760px) {
+  .brake-review-page { padding: 10px; }
+  .brake-review-header { grid-template-columns: auto 1fr; }
+  .brake-review-header > strong { grid-column: 1 / -1; text-align: left; }
+  .brake-review-context { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .brake-review-context > div:last-child { grid-column: 1 / -1; }
+  .brake-review-clock { padding: 14px 10px; }
+  .brake-review-thresholds { gap: 5px; }
+  .brake-review-thresholds span { padding: 7px 4px; font-size: 0.7rem; }
+  .brake-review-decisions { grid-template-columns: 1fr; }
+  .brake-review-decision { min-height: 74px; }
+}
+
 * { box-sizing: border-box; }
 
 html,

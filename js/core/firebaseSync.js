@@ -6,20 +6,20 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260825-official-timer-live-context-001-v1";
+} from "./firebaseRuntime.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260825-official-timer-live-context-001-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260825-official-timer-live-context-001-v1";
+} from "../data/competitionTypes.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260825-official-timer-live-context-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260825-official-timer-live-context-001-v1";
+} from "./userAccessBootstrap.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -27,20 +27,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260825-official-timer-live-context-001-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260825-official-timer-live-context-001-v1";
+} from "../public/publicProjection.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260825-official-timer-live-context-001-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260825-official-timer-live-context-001-v1";
+} from "../public/publicProjectionSchema.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -56,18 +56,25 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260825-official-timer-live-context-001-v1";
+} from "./publicProjectionOutbox.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260825-official-timer-live-context-001-v1";
+} from "./pendingScoreReview.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
+  getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260825-official-timer-live-context-001-v1";
+} from "./timerRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import {
+  BRAKE_REVIEW_ACTIONS,
+  applyBrakeReviewCommand,
+  getBrakeReviewStateFromTimer,
+  isBrakeReviewProfile
+} from "./brakeReviewPhase.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -2538,6 +2545,258 @@ export async function applyFirebaseOfficialTimerAuthority(definition = {}, reque
       projectionResult,
       authorityAcceptedAt,
       authorityAcceptedAtMs
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      detail: normalizeErrorDetail({ error }),
+      timer: conflictTimer
+    };
+  }
+}
+
+export async function applyFirebaseBrakeReviewAuthority(definition = {}, request = {}, options = {}) {
+  if (!isFirebaseLiveConfigured()) return { ok: false, reason: "missing-firebase" };
+  if (!isBrakeReviewProfile(definition)) return { ok: false, reason: "brake-review-profile-mismatch" };
+  const tournamentId = normalizeLiveChannel(definition.tournamentId || options.tournamentId);
+  const timerId = String(definition.timerId || request.timerId || "").trim();
+  const path = getFirebaseOfficialTimerPath(tournamentId, timerId);
+  if (!tournamentId || !timerId || !path) return { ok: false, reason: "brake-review-identity-required" };
+
+  const auth = getFirebaseAuth();
+  if (typeof auth.authStateReady === "function") await auth.authStateReady();
+  const authUser = auth.currentUser;
+  if (!authUser?.uid) return { ok: false, reason: "not-authenticated" };
+
+  const acceptedAtMs = resolveFirebaseTimerNow(options.now ?? request.acceptedAt);
+  const acceptedAt = new Date(acceptedAtMs).toISOString();
+  const actor = compactTimerAuthorityActor({
+    ...(options.actor || request.actor || {}),
+    id: authUser.uid,
+    uid: authUser.uid
+  });
+  const controller = {
+    ...(request.controller || options.controller || {}),
+    controllerUid: authUser.uid,
+    controllerRole: actor.role
+  };
+  const commandId = String(request.commandId || "").trim();
+  if (!commandId) return { ok: false, reason: "brake-review-command-id-required" };
+  let transition = null;
+  let conflictTimer = null;
+  let failureReason = "brake-review-transaction-conflict";
+
+  try {
+    const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (currentValue) => {
+      let current = null;
+      try {
+        current = currentValue
+          ? normalizeOfficialTimerContext(currentValue, definition)
+          : createOfficialTimerContext(definition, { now: acceptedAtMs, source: request.source || "brake-review" });
+      } catch {
+        failureReason = "brake-review-invalid-timer";
+        return;
+      }
+      if (
+        current.timerId !== timerId
+        || current.tournamentId && current.tournamentId !== tournamentId
+        || current.charreadaId && definition.charreadaId && current.charreadaId !== definition.charreadaId
+        || current.teamId && definition.teamId && current.teamId !== definition.teamId
+      ) {
+        failureReason = "brake-review-identity-conflict";
+        conflictTimer = current;
+        return;
+      }
+
+      const currentReview = getBrakeReviewStateFromTimer(current, {
+        ...definition,
+        timerId,
+        timerRevision: current.revision
+      });
+      if (currentReview.commandIds.includes(commandId)) {
+        transition = { ok: true, idempotent: true, timer: current, review: currentReview };
+        conflictTimer = current;
+        return;
+      }
+      if (request.expectedTimerRevision !== undefined && Number(request.expectedTimerRevision) !== current.revision) {
+        failureReason = "official-timer-revision-conflict";
+        conflictTimer = current;
+        return;
+      }
+      const occupiedByOtherController = Boolean(current.controllerUid && current.controllerUid !== authUser.uid);
+      if (occupiedByOtherController) {
+        failureReason = "official-timer-controller-conflict";
+        conflictTimer = current;
+        return;
+      }
+
+      const live = getOfficialTimerContextView(current, { now: acceptedAtMs, definition });
+      const shouldFinish = request.action === BRAKE_REVIEW_ACTIONS.AUTHORIZE
+        || live.expired;
+      const effectiveController = current.controllerUid === authUser.uid && current.controllerId
+        ? {
+            controllerId: current.controllerId,
+            controllerUid: current.controllerUid,
+            controllerRole: current.controllerRole,
+            controllerSessionId: current.controllerSessionId,
+            controllerType: current.controllerType
+          }
+        : controller;
+      let nextTimer = null;
+      if (shouldFinish && current.status !== "FINISHED") {
+        const finished = applyOfficialTimerCommand(current, {
+          type: "FINISH",
+          commandId,
+          controller: effectiveController,
+          actor,
+          acceptedAt,
+          issuedAt: request.issuedAt || acceptedAt,
+          source: request.source || "brake-review"
+        }, {
+          definition,
+          expectedRevision: current.revision,
+          now: acceptedAtMs,
+          actor,
+          controller: effectiveController,
+          requireCommandId: true,
+          enforceOwnership: true,
+          autoClaim: true,
+          source: request.source || "brake-review"
+        });
+        if (!finished.ok) {
+          failureReason = finished.reason;
+          conflictTimer = current;
+          return;
+        }
+        nextTimer = finished.timer;
+      } else {
+        nextTimer = normalizeOfficialTimerContext({
+          ...current,
+          officialElapsedMs: live.officialElapsedMs,
+          runningSince: current.status === "RUNNING" ? acceptedAt : current.runningSince,
+          revision: current.revision + 1,
+          controllerId: current.controllerId || effectiveController.controllerId,
+          controllerUid: current.controllerUid || effectiveController.controllerUid,
+          controllerRole: current.controllerRole || effectiveController.controllerRole,
+          controllerSessionId: current.controllerSessionId || effectiveController.controllerSessionId,
+          controllerType: current.controllerType || effectiveController.controllerType,
+          controllerClaimedAt: current.controllerClaimedAt || acceptedAt,
+          controllerLeaseExpiresAtMs: acceptedAtMs + 45_000,
+          lastCommandId: commandId,
+          commandIds: [...(current.commandIds || []), commandId].slice(-100),
+          lastOperation: `BRAKE_REVIEW_${String(request.action || "UPDATE").toUpperCase()}`,
+          commandSource: request.source || "brake-review",
+          actor,
+          authorityAcceptedAt: acceptedAt,
+          updatedAt: acceptedAt,
+          authorityAudit: [...(current.authorityAudit || []), {
+            commandId,
+            operation: `BRAKE_REVIEW_${String(request.action || "UPDATE").toUpperCase()}`,
+            controllerId: current.controllerId || effectiveController.controllerId,
+            controllerType: current.controllerType || effectiveController.controllerType,
+            actorId: actor.id,
+            issuedAt: request.issuedAt || acceptedAt,
+            acceptedAt,
+            fromRevision: current.revision,
+            toRevision: current.revision + 1,
+            result: "accepted"
+          }].slice(-100)
+        }, definition);
+      }
+
+      const reviewResult = applyBrakeReviewCommand(currentReview, {
+        ...request,
+        commandId,
+        expectedRevision: request.expectedReviewRevision ?? currentReview.revision,
+        elapsedMs: live.officialElapsedMs,
+        timerRevision: nextTimer.revision,
+        actor,
+        acceptedAt,
+        source: request.source || "brake-review"
+      }, {
+        actor,
+        catalog: options.catalog || request.catalog || {},
+        context: {
+          ...definition,
+          timerId,
+          timerRevision: nextTimer.revision,
+          elapsedMs: live.officialElapsedMs
+        },
+        now: acceptedAtMs
+      });
+      if (!reviewResult.ok) {
+        failureReason = reviewResult.reason;
+        conflictTimer = current;
+        return;
+      }
+      transition = {
+        ok: true,
+        idempotent: false,
+        timer: nextTimer,
+        review: reviewResult.review
+      };
+      return cleanUndefined({
+        ...nextTimer,
+        brakeReview: reviewResult.review,
+        timerKey: normalizeFirebaseTimerKey(timerId),
+        tournamentId,
+        competitionId: String(definition.competitionId || nextTimer.competitionId || "equipos_completo"),
+        charreadaId: String(definition.charreadaId || nextTimer.charreadaId || ""),
+        teamId: String(definition.teamId || nextTimer.teamId || ""),
+        participantId: String(definition.participantId || nextTimer.participantId || ""),
+        suerteId: String(definition.suerteId || nextTimer.suerteId || "cala"),
+        label: String(definition.label || nextTimer.label || "Revision de freno"),
+        authorityAcceptedAt: acceptedAt,
+        actor
+      });
+    }, { applyLocally: false });
+
+    if (!transaction.committed && transition?.idempotent && conflictTimer) {
+      const timer = normalizeOfficialTimerContext(conflictTimer, definition);
+      return {
+        ok: true,
+        idempotent: true,
+        path,
+        timer,
+        review: getBrakeReviewStateFromTimer(timer, definition)
+      };
+    }
+    if (!transaction.committed || !transition?.ok) {
+      return {
+        ok: false,
+        conflict: true,
+        reason: failureReason,
+        timer: transaction.snapshot?.exists()
+          ? normalizeOfficialTimerContext(transaction.snapshot.val(), definition)
+          : conflictTimer
+      };
+    }
+    const timer = normalizeOfficialTimerContext(transaction.snapshot.val(), definition);
+    const projection = buildOfficialTimerProjection(timer, { now: acceptedAtMs });
+    let projectionResult = { ok: true };
+    try {
+      await writeLiveUpdate({
+        timer: projection,
+        "current/action": "official_brake_review_update",
+        "current/timer": projection,
+        firebaseUpdatedAt: acceptedAtMs,
+        liveChannel: tournamentId,
+        timestamp: acceptedAt
+      }, tournamentId);
+    } catch (error) {
+      projectionResult = { ok: false, reason: normalizeFirebaseFailureReason(error) };
+    }
+    return {
+      ok: true,
+      idempotent: false,
+      path,
+      timer,
+      review: getBrakeReviewStateFromTimer(timer, definition),
+      projection,
+      projectionResult,
+      authorityAcceptedAt: acceptedAt,
+      authorityAcceptedAtMs: acceptedAtMs
     };
   } catch (error) {
     return {

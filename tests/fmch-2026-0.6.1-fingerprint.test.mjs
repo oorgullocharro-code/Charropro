@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 const require = createRequire(import.meta.url);
 const { createMemoryRuleProfileLifecycleAdapter, createRuleProfileLifecycleRuntime } = require("../functions/ruleProfileLifecycleService.js");

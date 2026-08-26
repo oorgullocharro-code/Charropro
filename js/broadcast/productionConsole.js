@@ -3,7 +3,7 @@ import {
   buildBroadcastDataContract,
   getBroadcastField,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260825-official-timer-live-context-001-v1";
+} from "./dataContract.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   BROADCAST_STATE_VERSION,
   cloneBroadcastState,
@@ -11,7 +11,7 @@ import {
   getBroadcastQueue,
   getBroadcastStateWarnings,
   validateBroadcastState
-} from "./broadcastState.js?v=20260825-official-timer-live-context-001-v1";
+} from "./broadcastState.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   BROADCAST_OUTPUT_VERSION,
   buildBroadcastOutputProjection,
@@ -21,21 +21,21 @@ import {
   registerBroadcastOutput,
   removeBroadcastOutput,
   validateBroadcastOutput
-} from "./broadcastOutput.js?v=20260825-official-timer-live-context-001-v1";
+} from "./broadcastOutput.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   ASSET_MANAGER_VERSION,
   listBroadcastAssets,
   registerBroadcastAsset,
   resolveBroadcastAsset,
   validateBroadcastAsset
-} from "./assetManager.js?v=20260825-official-timer-live-context-001-v1";
+} from "./assetManager.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   PLAYGROUND_ASSET_DEFINITIONS,
   PLAYGROUND_GRAPHIC_DEFINITIONS,
   PLAYGROUND_LAYER_IDS,
   PLAYGROUND_OUTPUT_DEFINITIONS,
   buildPlaygroundFixture
-} from "./fixtures/broadcastPlaygroundFixtures.js?v=20260825-official-timer-live-context-001-v1";
+} from "./fixtures/broadcastPlaygroundFixtures.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   ACTION_CONFIRMATION_TYPES,
   ACTION_TYPES,
@@ -45,7 +45,7 @@ import {
   createBroadcastActionContext,
   dispatchBroadcastAction,
   requiresBroadcastActionConfirmation
-} from "./actionEngine.js?v=20260825-official-timer-live-context-001-v1";
+} from "./actionEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   PRODUCTION_VARIABLES_VERSION,
   PRODUCTION_VARIABLE_DEFINITIONS,
@@ -54,7 +54,7 @@ import {
   registerProductionVariable,
   resolveProductionVariables,
   validateProductionVariable
-} from "./productionVariables.js?v=20260825-official-timer-live-context-001-v1";
+} from "./productionVariables.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   COMPONENT_LIBRARY_VERSION,
   buildComponentSnapshot,
@@ -63,7 +63,7 @@ import {
   registerBroadcastComponent,
   removeBroadcastComponent,
   validateBroadcastComponent
-} from "./componentLibrary.js?v=20260825-official-timer-live-context-001-v1";
+} from "./componentLibrary.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   COMPONENT_RENDERER_VERSION,
   buildComponentRenderSnapshot,
@@ -73,13 +73,13 @@ import {
   destroyComponentRenderer,
   renderBroadcastComponent,
   updateBroadcastComponentRender
-} from "./componentRenderer.js?v=20260825-official-timer-live-context-001-v1";
+} from "./componentRenderer.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "./fixtures/componentRendererFixtures.js?v=20260825-official-timer-live-context-001-v1";
+} from "./fixtures/componentRendererFixtures.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   TEMPLATE_ENGINE_VERSION,
   buildTemplateSnapshot,
@@ -92,12 +92,12 @@ import {
   registerBroadcastTemplate,
   removeBroadcastTemplate,
   validateBroadcastTemplate
-} from "./templateEngine.js?v=20260825-official-timer-live-context-001-v1";
+} from "./templateEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   TEMPLATE_ENGINE_FIXTURES,
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../../fixtures/templateEngineFixtures.js?v=20260825-official-timer-live-context-001-v1";
+} from "../../fixtures/templateEngineFixtures.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   TEMPLATE_RENDERER_INTEGRATION_VERSION,
   buildTemplateRenderSnapshot,
@@ -109,7 +109,7 @@ import {
   renderTemplateInstance,
   updateTemplateRender,
   validateTemplateRenderSnapshot
-} from "./templateRendererIntegration.js?v=20260825-official-timer-live-context-001-v1";
+} from "./templateRendererIntegration.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   THEME_ENGINE_VERSION,
   activateBroadcastTheme,
@@ -123,7 +123,7 @@ import {
   publishBroadcastTheme,
   resolveBroadcastTheme,
   validateBroadcastTheme
-} from "./themeEngine.js?v=20260825-official-timer-live-context-001-v1";
+} from "./themeEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   THEME_TEMPLATE_INTEGRATION_VERSION,
   buildThemeTemplateSnapshot,
@@ -135,7 +135,7 @@ import {
   resolveThemeForTemplate,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260825-official-timer-live-context-001-v1";
+} from "./themeTemplateIntegration.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   PREVIEW_ENGINE_VERSION,
   clearPreview as clearOfficialPreview,
@@ -147,7 +147,7 @@ import {
   renderPreview as renderOfficialPreview,
   updatePreviewLiveData as updateOfficialPreviewLiveData,
   updatePreview as updateOfficialPreview
-} from "./previewEngine.js?v=20260825-official-timer-live-context-001-v1";
+} from "./previewEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   PROGRAM_ENGINE_VERSION,
   autoProgram as autoOfficialProgram,
@@ -163,7 +163,7 @@ import {
   updateProgramLiveData as updateOfficialProgramLiveData,
   updateProgram as updateOfficialProgram,
   validateProgram
-} from "./programEngine.js?v=20260825-official-timer-live-context-001-v1";
+} from "./programEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   OUTPUT_ROUTING_VERSION,
   buildOutputRoutingSnapshot,
@@ -183,21 +183,21 @@ import {
   routeTimerDisplay,
   updateOutputRoute,
   validateOutputRoutingSnapshot
-} from "./outputRouting.js?v=20260825-official-timer-live-context-001-v1";
+} from "./outputRouting.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   destroyProgramMainOutput,
   mountProgramMainOutput
-} from "./programMainOutput.js?v=20260825-official-timer-live-context-001-v1";
+} from "./programMainOutput.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   configureAnnouncerMonitor,
   createAnnouncerMonitor,
   destroyAnnouncerMonitor,
   getAnnouncerSnapshot,
   mountAnnouncerMonitor
-} from "./announcerMonitor.js?v=20260825-official-timer-live-context-001-v1";
+} from "./announcerMonitor.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   OUTPUT_SYNCHRONIZATION_VERSION,
   buildOutputSynchronizationSnapshot,
@@ -213,7 +213,7 @@ import {
   synchronizeAnnouncerMonitor,
   synchronizeProgramMain,
   validateOutputSynchronizationSnapshot
-} from "./outputSynchronization.js?v=20260825-official-timer-live-context-001-v1";
+} from "./outputSynchronization.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   BROADCAST_REALTIME_TRANSPORT_VERSION,
   buildBroadcastRealtimeSnapshot,
@@ -223,7 +223,7 @@ import {
   destroyBroadcastRealtimeTransport,
   disconnectBroadcastRealtimeTransport,
   publishBroadcastProjection
-} from "./broadcastRealtimeTransport.js?v=20260825-official-timer-live-context-001-v1";
+} from "./broadcastRealtimeTransport.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 import {
   LIVE_BINDINGS_VERSION,
   applyLiveBindingsToProgram,
@@ -232,8 +232,8 @@ import {
   destroyLiveBindingsEngine,
   registerLiveBinding,
   resolveLiveBindings
-} from "./liveBindings.js?v=20260825-official-timer-live-context-001-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260825-official-timer-live-context-001-v1";
+} from "./liveBindings.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
 
 export const PRODUCTION_CONSOLE_VERSION = "1.0.0";
 export const PRODUCTION_CONSOLE_APP_VERSION = CHARROPRO_APP_VERSION;
@@ -1990,7 +1990,7 @@ export async function connectProductionConsoleRealtime(model, runtime, options =
   }
   runtime.realtimeContractUnsubscribe?.();
   runtime.realtimeContractUnsubscribe = null;
-  const firebaseApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260825-official-timer-live-context-001-v1");
+  const firebaseApi = options.firebaseApi || await import("../core/firebaseSync.js?v=20260826-pre-cala-brake-review-official-phase-002-v1");
   if (options.authorizedContext && !options.adapter) throw consoleError("console-realtime-authorized-context-injection-forbidden");
   const context = options.authorizedContext || await firebaseApi.resolveCurrentBroadcastContext(contextSeed, {
     operation: "publish",
