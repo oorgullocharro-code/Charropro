@@ -7,9 +7,9 @@ import {
   mergePublicLiveFeeds,
   normalizePublicLiveFeedEvent,
   validatePublicLiveFeed
-} from "../js/public/publicLiveFeed.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/public/publicLiveFeed.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const source = {
   publishedScores: {

@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/data/calaRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const puntaCases = [
   [5, 1, 0],

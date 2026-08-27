@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/core/timerRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",

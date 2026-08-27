@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./themeTemplateIntegration.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./liveBindings.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

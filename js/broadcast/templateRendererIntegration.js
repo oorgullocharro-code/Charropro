@@ -1,7 +1,7 @@
 import {
   instantiateBroadcastTemplate,
   cloneTemplateResult
-} from "./templateEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./templateEngine.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   RENDERABLE_COMPONENT_TYPES,
   cloneComponentRenderResult,
@@ -12,11 +12,11 @@ import {
   renderBroadcastComponent,
   updateBroadcastComponentRender,
   validateComponentRenderTarget
-} from "./componentRenderer.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./componentRenderer.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   cloneComponentInstance,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./componentLibrary.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export const TEMPLATE_RENDERER_INTEGRATION_VERSION = "1.0.0";
 

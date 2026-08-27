@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260826-pre-cala-brake-review-official-phase-002-v1",
+      "appVersion": "20260826-fmch-2026-061-production-activation-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -116,9 +116,9 @@
         "productiveRuleProfileDefaults": {
           "Libre": {
             "policyVersion": "1.0.0",
-            "policyId": "fmch-2026-libre-productive-default-v1",
+            "policyId": "fmch-2026-libre-productive-default-v2",
             "profileId": "FMCH_2026_LIBRE",
-            "version": "0.6.0",
+            "version": "0.6.1",
             "enabled": true
           }
         }
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "e09ed5d640ebd75189c33f37ba295176c736893a00c74166780e425a064a666d",
-  "fingerprint": "e09ed5d640ebd75189c33f37ba295176c736893a00c74166780e425a064a666d"
+  "checksum": "4aa0afe6c3cfb2d04d139316b9dc3abbccee36e93f2c862ad8c5d22d74b1de98",
+  "fingerprint": "4aa0afe6c3cfb2d04d139316b9dc3abbccee36e93f2c862ad8c5d22d74b1de98"
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { makeAccessSession } from "../js/core/roles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { makeAccessSession } from "../js/core/roles.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const user = Object.freeze({ uid: "user-1", email: "user@example.test", displayName: "User" });
 

@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./data/calaRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -26,7 +26,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -36,7 +36,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -53,7 +53,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./data/fmch2026TernaRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -73,20 +73,23 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { applyProductiveRuleProfilePolicy } from "./core/productiveRuleProfilePolicy.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260826-fmch-2026-061-production-activation-v1";
+import {
+  applyProductiveRuleProfilePolicy,
+  resolveProductiveRuleProfileDefault
+} from "./core/productiveRuleProfilePolicy.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/scorerContextResolution.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -94,11 +97,11 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/timerRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "./core/officialTimerLiveDisplay.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -109,9 +112,9 @@ import {
   getBrakeReviewStateFromTimer,
   hasPendingBrakeReviewTemporalConsequences,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/brakeReviewPhase.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -124,27 +127,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/scoring.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/scoringAttempt.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/scorerComponents.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/scorerSaveLatency.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/scorerInteractionLatency.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -154,7 +157,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/sync.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -196,7 +199,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/firebaseSync.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -209,15 +212,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/pendingScoreReview.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/tournamentContext.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -227,8 +230,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/supervisorNavigation.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -262,7 +265,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./core/state.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -4134,6 +4137,7 @@ function renderDashboard() {
 }
 
 function renderRuleProfileLifecycleAdmin() {
+  const policy = resolveProductiveRuleProfileDefault("Libre");
   const snapshot = ruleProfileLifecycleAdminState.snapshot;
   const transition = snapshot?.status === "draft"
     ? "MARK_READY"
@@ -4145,7 +4149,7 @@ function renderRuleProfileLifecycleAdmin() {
       <div class="card-header">
         <div>
           <h2 class="card-title">Perfil reglamentario productivo</h2>
-          <p class="card-subtitle">Autoridad global FMCH_2026_LIBRE 0.6.0.</p>
+          <p class="card-subtitle">Autoridad global ${escapeHTML(policy?.profileId || "")} ${escapeHTML(policy?.version || "")}.</p>
         </div>
         <button class="button" data-action="refresh-rule-profile-lifecycle" ${ruleProfileLifecycleAdminState.loading ? "disabled" : ""}>Consultar</button>
       </div>
@@ -4182,7 +4186,8 @@ async function refreshRuleProfileLifecycleAdmin() {
   ruleProfileLifecycleAdminState.loading = true;
   ruleProfileLifecycleAdminState.error = "";
   render();
-  const result = await getFirebaseRuleProfileLifecycle("FMCH_2026_LIBRE", "0.6.0");
+  const policy = resolveProductiveRuleProfileDefault("Libre");
+  const result = await getFirebaseRuleProfileLifecycle(policy?.profileId, policy?.version);
   ruleProfileLifecycleAdminState.loading = false;
   if (!result.ok) {
     ruleProfileLifecycleAdminState.error = result.reason || "No se pudo leer el lifecycle.";
@@ -4197,7 +4202,7 @@ async function transitionRuleProfileLifecycleAdmin(transition) {
   const snapshot = ruleProfileLifecycleAdminState.snapshot;
   if (!snapshot || !["MARK_READY", "ACTIVATE"].includes(transition)) return;
   const label = transition === "MARK_READY" ? "DRAFT → READY" : "READY → ACTIVE";
-  if (!window.confirm(`Ejecutar ${label} para FMCH_2026_LIBRE 0.6.0?`)) return;
+  if (!window.confirm(`Ejecutar ${label} para ${snapshot.profileId} ${snapshot.version}?`)) return;
   const result = await transitionFirebaseRuleProfileLifecycle({
     profileId: snapshot.profileId,
     version: snapshot.version,
@@ -4205,7 +4210,7 @@ async function transitionRuleProfileLifecycleAdmin(transition) {
     expectedRevision: snapshot.revision,
     idempotencyKey: `fmch-2026-go-live-${transition.toLowerCase()}-${snapshot.revision}-${firebaseAccess.uid}`,
     effectiveFrom: transition === "MARK_READY" ? snapshot.readAt : null,
-    reason: "CHARROPRO-FMCH-2026-PRODUCTION-GLOBAL-GO-LIVE-001"
+    reason: "CHARROPRO-FMCH-2026-PRODUCTION-ACTIVATION-001"
   });
   if (!result.ok) {
     ruleProfileLifecycleAdminState.error = result.reason || `${label} falló.`;
@@ -4224,14 +4229,16 @@ async function assignTournamentRuleProfileAdmin() {
     showToast("Abre primero el torneo que deseas asignar.");
     return;
   }
-  if (!window.confirm(`Asignar FMCH_2026_LIBRE 0.6.0 a ${tournament.name}?`)) return;
+  const policy = resolveProductiveRuleProfileDefault("Libre");
+  if (!window.confirm(`Asignar ${policy?.profileId || ""} ${policy?.version || ""} a ${tournament.name}?`)) return;
   await assignRuleProfileToTournament(tournament, { source: "explicit" });
 }
 
 async function assignCurrentTournamentRuleProfile() {
   const tournament = getActiveTournament();
   if (!tournament || firebaseAccess.platformAdmin !== true) return;
-  if (!window.confirm(`Asignar FMCH_2026_LIBRE 0.6.0 a ${tournament.name}?`)) return;
+  const policy = resolveProductiveRuleProfileDefault("Libre");
+  if (!window.confirm(`Asignar ${policy?.profileId || ""} ${policy?.version || ""} a ${tournament.name}?`)) return;
   closeModal();
   await assignRuleProfileToTournament(tournament, { source: "explicit" });
 }
@@ -4245,14 +4252,15 @@ async function assignRuleProfileToTournament(tournament, options = {}) {
     return result;
   }
   const policy = tournament.ruleProfilePolicy || {};
+  const productiveDefault = resolveProductiveRuleProfileDefault(tournament.category);
   const source = options.source === "productive-default" ? "productive-default" : "explicit";
   const revision = Number(tournament.ruleProfileAssignmentRevision || 0);
   ruleProfileAssignmentRuntime.set(tournament.id, { status: "pending", error: "" });
   if (options.render !== false) render({ preserveScoringScroll: state.view === "scoring" });
   const result = await assignFirebaseTournamentRuleProfile({
     tournamentId: tournament.id,
-    profileId: policy.profileId || "FMCH_2026_LIBRE",
-    version: policy.version || "0.6.0",
+    profileId: policy.profileId || productiveDefault?.profileId || "",
+    version: policy.version || productiveDefault?.version || "",
     expectedRevision: revision,
     idempotencyKey: `${source === "productive-default" ? "productive-default" : "fmch-assignment"}-${tournament.id}-${revision}`,
     source,
@@ -12480,7 +12488,7 @@ async function saveTournament() {
     closeModal();
     saveState({ silent: true });
     showToast(tournament.ruleProfilePolicyRequired === true
-      ? "Torneo Libre creado y listo con FMCH_2026_LIBRE 0.6.0."
+      ? `Torneo Libre creado y listo con ${tournament.ruleProfileId} ${tournament.ruleProfileVersion}.`
       : "Torneo creado.");
     render();
   } finally {

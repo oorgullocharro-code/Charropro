@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./officialTimerLiveDisplay.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

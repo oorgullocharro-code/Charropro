@@ -1,5 +1,5 @@
-import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export const SCORER_CONTEXT_RESOLUTION_VERSION = "1.0.0";
 

@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260826-pre-cala-brake-review-official-phase-002-v1");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260826-pre-cala-brake-review-official-phase-002-v1");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260826-pre-cala-brake-review-official-phase-002-v1");
+const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260826-fmch-2026-061-production-activation-v1");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260826-fmch-2026-061-production-activation-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260826-fmch-2026-061-production-activation-v1");
 
 const tournament = applyProductiveRuleProfilePolicy({
   id: "new-libre-tournament",
@@ -62,12 +62,12 @@ function assignmentFields(tournamentId) {
     authorityVersion: "1.0.0",
     tournamentId,
     profileId: "FMCH_2026_LIBRE",
-    version: "0.6.0",
+    version: "0.6.1",
     status: "active",
-    contentFingerprint: "rptp_0f90f7a3944a82d7",
+    contentFingerprint: "rptp_10e596046446e850",
     revision: 1,
     source: "productive-default",
-    policyId: "fmch-2026-libre-productive-default-v1"
+    policyId: "fmch-2026-libre-productive-default-v2"
   };
   return {
     ruleProfileId: assignment.profileId,

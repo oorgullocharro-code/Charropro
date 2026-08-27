@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

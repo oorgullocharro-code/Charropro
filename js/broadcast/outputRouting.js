@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./programEngine.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

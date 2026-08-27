@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const ROOT = new URL("../", import.meta.url);
-const BUILD = "20260826-pre-cala-brake-review-official-phase-002-v1";
+const BUILD = "20260826-fmch-2026-061-production-activation-v1";
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 assert.equal(configuration.values.system.appVersion, BUILD, "configuration is the canonical build authority");
 

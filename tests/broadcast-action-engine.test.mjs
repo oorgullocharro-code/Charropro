@@ -26,18 +26,18 @@ import {
   requiresBroadcastActionConfirmation,
   validateBroadcastAction,
   validateBroadcastActionContext
-} from "../js/broadcast/actionEngine.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/broadcast/actionEngine.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   createInitialBroadcastState,
   getBroadcastQueue,
   setPreviewState,
   validateBroadcastState
-} from "../js/broadcast/broadcastState.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/broadcast/broadcastState.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   getBroadcastOutput,
   registerBroadcastOutput,
   removeBroadcastOutput
-} from "../js/broadcast/broadcastOutput.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:00:01.000Z";

@@ -1,9 +1,9 @@
-import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   DOCUMENTED_CALA_BAD_POINT_CODES,
   buildCalaDocumentAbbreviationMatrix
-} from "./officialFormatDocumentModel.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./officialFormatDocumentModel.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export const OFFICIAL_FORMAT_SNAPSHOT_VERSION = "1.2.0";
 

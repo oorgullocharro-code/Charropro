@@ -1,4 +1,4 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
@@ -9,8 +9,8 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { getTeam, scoreKey, state, uid } from "./state.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./scoring.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { getTeam, scoreKey, state, uid } from "./state.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export function buildStatisticalHistorySnapshot(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

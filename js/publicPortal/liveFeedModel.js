@@ -1,5 +1,5 @@
-import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export const PUBLIC_LIVE_FEED_FILTERS = Object.freeze(["all", "score", "turn", "penalty", "timer"]);
 export const PUBLIC_LIVE_FEED_RENDER_LIMIT = 50;

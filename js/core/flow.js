@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "./state.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

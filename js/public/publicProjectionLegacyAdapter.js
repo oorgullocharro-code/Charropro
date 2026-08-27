@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

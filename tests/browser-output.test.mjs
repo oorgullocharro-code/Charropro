@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260826-fmch-2026-061-production-activation-v1";
 import {
   BROWSER_OUTPUT_DISPLAY_MODES,
   BROWSER_OUTPUT_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   validateBrowserOutputConfig,
   validateBrowserOutputProjection,
   validateBrowserOutputSnapshot
-} from "../js/broadcast/browserOutput.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/broadcast/browserOutput.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 class MockStyle {
   constructor() {

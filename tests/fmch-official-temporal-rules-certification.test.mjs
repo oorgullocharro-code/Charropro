@@ -7,9 +7,9 @@ import {
   getFmchOfficialTemporalPolicy,
   resolveFmchOfficialTemporalContracts,
   validateFmchOfficialTemporalPolicy
-} from "../js/core/timerRules.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260826-pre-cala-brake-review-official-phase-002-v1";
+} from "../js/core/timerRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260826-fmch-2026-061-production-activation-v1";
 
 const PROFILE_CONTEXT = Object.freeze({
   profileId: "FMCH_2026_LIBRE",
