@@ -1,4 +1,4 @@
-import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

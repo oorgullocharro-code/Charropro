@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

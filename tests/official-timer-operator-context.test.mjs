@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 function context(suerteId, extra = {}) {
   return {

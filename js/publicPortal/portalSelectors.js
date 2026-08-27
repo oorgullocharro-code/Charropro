@@ -1,5 +1,5 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

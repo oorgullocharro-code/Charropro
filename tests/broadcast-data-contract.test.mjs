@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/broadcast/dataContract.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

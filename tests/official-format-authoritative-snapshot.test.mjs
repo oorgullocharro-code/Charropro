@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/core/scoringAttempt.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   OFFICIAL_FORMAT_DOCUMENT_PROFILE,
   OFFICIAL_FORMAT_DOCUMENTAL_REVIEW_ITEMS,
@@ -13,12 +13,12 @@ import {
   OFFICIAL_FORMAT_UNSUPPORTED_DOCUMENTAL_FIELDS,
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/core/officialFormat.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const GENERATED_AT = "2026-08-22T18:00:00.000Z";
 const PUBLISHED_AT = "2026-08-22T17:00:00.000Z";

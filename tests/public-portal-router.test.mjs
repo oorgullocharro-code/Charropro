@@ -6,7 +6,7 @@ import {
   sanitizePortalDay,
   sanitizePortalId,
   sanitizePortalView
-} from "../js/publicPortal/portalRouter.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/publicPortal/portalRouter.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const initial = parsePublicPortalRoute(
   "https://example.test/torneo-publico.html?tournamentId=torneo_1&view=resultados&competitionId=charro-libre&charreadaId=final-1"

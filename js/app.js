@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./data/calaRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -26,7 +26,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -36,7 +36,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -53,7 +53,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./data/fmch2026TernaRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -73,23 +73,23 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/scorerContextResolution.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -97,11 +97,12 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   deriveOfficialTimerLiveDisplay,
-  officialTimerTicker
-} from "./core/officialTimerLiveDisplay.js?v=20260826-fmch-2026-061-production-activation-v1";
+  officialTimerTicker,
+  updateOfficialTimerDomDisplays
+} from "./core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -112,9 +113,9 @@ import {
   getBrakeReviewStateFromTimer,
   hasPendingBrakeReviewTemporalConsequences,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/brakeReviewPhase.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -127,27 +128,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/scoring.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/scoringAttempt.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/scorerComponents.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/scorerSaveLatency.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/scorerInteractionLatency.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -157,7 +158,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/sync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -199,7 +200,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -212,15 +213,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/pendingScoreReview.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/tournamentContext.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -230,8 +231,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/supervisorNavigation.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -265,7 +266,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -8438,7 +8439,7 @@ function renderScoring({ preserveScroll = false } = {}) {
     </div>
   `;
   updateTimerDisplay();
-  ensureTernaTimerTicker(context);
+  ensureOfficialTimerTicker();
   restoreScoringScroll(scrollSnapshot);
 }
 
@@ -15740,29 +15741,12 @@ function hydrateTimerFromState() {
   }
 }
 
-function ensureTernaTimerTicker(context = getCurrentContext()) {
-  const active = isFmch2026TernaSuerte(context?.suerte?.id)
-    || isFmch2026ManganaSuerte(context?.suerte?.id)
-    || isFmch2026PasoSuerte(context?.suerte?.id)
-    || ["toro", "yegua"].includes(context?.suerte?.id);
-  if (!active) {
-    officialTimerTickerSubscription.setActive(false);
-    return;
-  }
+function ensureOfficialTimerTicker() {
   updateTernaTimerDisplays();
 }
 
 function updateTernaTimerDisplays(now = Date.now()) {
-  let hasRunningTimer = false;
-  document.querySelectorAll(".terna-timer-display[data-terna-timer-id], .official-timer-display[data-official-timer-id]").forEach((display) => {
-    const timerId = display.dataset.ternaTimerId || display.dataset.officialTimerId;
-    const timer = state.officialTimers?.[timerId];
-    if (!timer) return;
-    const live = deriveOfficialTimerLiveDisplay(timer, now);
-    display.textContent = live.formatted;
-    display.dataset.timerStatus = live.status;
-    hasRunningTimer ||= live.running;
-  });
+  const { hasRunningTimer } = updateOfficialTimerDomDisplays(document, state.officialTimers, now);
   officialTimerTickerSubscription.setActive(hasRunningTimer);
   if (state.view === "scoring") {
     const brakeRuntime = getBrakeReviewRuntime();

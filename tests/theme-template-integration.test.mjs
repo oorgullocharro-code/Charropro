@@ -22,25 +22,25 @@ import {
   updateThemedTemplateRender,
   validateThemeTemplateIntegrationContext,
   validateThemeTemplateSnapshot
-} from "../js/broadcast/themeTemplateIntegration.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/broadcast/themeTemplateIntegration.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   createProductionConsoleModel
-} from "../js/broadcast/productionConsole.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/broadcast/productionConsole.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   createBroadcastTheme,
   getBroadcastTheme,
   publishBroadcastTheme,
   resolveBroadcastTheme
-} from "../js/broadcast/themeEngine.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/broadcast/themeEngine.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   createTemplateRendererIntegration,
   destroyTemplateRendererIntegration,
   prepareTemplateRender
-} from "../js/broadcast/templateRendererIntegration.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/broadcast/templateRendererIntegration.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../fixtures/templateEngineFixtures.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../fixtures/templateEngineFixtures.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 class MockClassList {
   constructor(element) { this.element = element; }

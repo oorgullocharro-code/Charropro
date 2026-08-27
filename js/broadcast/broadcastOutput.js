@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./broadcastState.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./dataContract.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 let nextId = 0;
 const pending = new Map();

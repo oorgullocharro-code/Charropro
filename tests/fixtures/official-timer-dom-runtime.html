@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Official Timer DOM Runtime Fixture</title>
+</head>
+<body>
+  <main>
+    <strong class="official-timer-display" data-official-timer-id="timer-dom-test">--</strong>
+    <output id="timer-dom-result">pending</output>
+  </main>
+  <script type="module">
+    import { updateOfficialTimerDomDisplays } from "../../js/core/officialTimerLiveDisplay.js?v=blocker003-dom";
+
+    const t0 = Date.parse("2026-08-27T12:00:00.000Z");
+    const registry = {
+      "timer-dom-test": {
+        timerId: "timer-dom-test",
+        status: "RUNNING",
+        mode: "countdown",
+        durationMs: 20000,
+        officialElapsedMs: 0,
+        runningSince: new Date(t0).toISOString()
+      }
+    };
+    const display = document.querySelector("[data-official-timer-id='timer-dom-test']");
+    const values = [t0, t0 + 1000, t0 + 2000].map((now) => {
+      updateOfficialTimerDomDisplays(document, registry, now);
+      return display.textContent;
+    });
+    const result = {
+      values,
+      unique: new Set(values).size,
+      status: display.dataset.timerStatus,
+      nodeCount: document.querySelectorAll("[data-official-timer-id='timer-dom-test']").length
+    };
+    document.getElementById("timer-dom-result").textContent = JSON.stringify(result);
+    document.documentElement.dataset.validation = result.unique === 3 && result.nodeCount === 1 ? "pass" : "fail";
+  </script>
+</body>
+</html>

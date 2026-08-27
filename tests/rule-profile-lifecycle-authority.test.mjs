@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260826-fmch-2026-061-production-activation-v1";
-import service from "../functions/ruleProfileLifecycleService.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260826-fmch-2026-061-production-activation-v1";
+import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import service from "../functions/ruleProfileLifecycleService.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   RULE_PROFILE_TEMPORAL_STATUSES,
   RULE_PROFILE_TEMPORAL_TRANSITIONS,
   buildRuleProfileContentFingerprint
-} from "../js/data/ruleProfileTemporalPolicy.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/data/ruleProfileTemporalPolicy.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const {
   REQUEST_TRANSITIONS,

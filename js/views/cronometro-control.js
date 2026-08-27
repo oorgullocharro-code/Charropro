@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,7 +8,7 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
@@ -17,12 +17,12 @@ import {
   getOfficialTimerControlView,
   normalizeOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../core/timerRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();

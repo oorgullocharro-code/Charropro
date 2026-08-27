@@ -1,12 +1,12 @@
-import { escapeHTML, html } from "../core/dom.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { escapeHTML, html } from "../core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();

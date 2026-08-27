@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260826-fmch-2026-061-production-activation-v1",
+      "appVersion": "20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "4aa0afe6c3cfb2d04d139316b9dc3abbccee36e93f2c862ad8c5d22d74b1de98",
-  "fingerprint": "4aa0afe6c3cfb2d04d139316b9dc3abbccee36e93f2c862ad8c5d22d74b1de98"
+  "checksum": "023c372093c6e2c0fa4014a895dbe18e639b97359428c0c4403df6f9dd20b710",
+  "fingerprint": "023c372093c6e2c0fa4014a895dbe18e639b97359428c0c4403df6f9dd20b710"
 }

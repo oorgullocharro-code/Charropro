@@ -3,19 +3,19 @@ import {
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../public/publicPortalClient.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
-} from "./portalRouter.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./portalRouter.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./portalRender.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 export const PUBLIC_PORTAL_CORE_VERSION = "2.0.0";
 

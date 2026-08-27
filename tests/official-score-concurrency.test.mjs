@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260826-fmch-2026-061-production-activation-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const {
   OFFICIAL_SCORE_LEDGER_VERSION,

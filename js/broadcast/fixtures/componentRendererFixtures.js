@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../componentLibrary.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

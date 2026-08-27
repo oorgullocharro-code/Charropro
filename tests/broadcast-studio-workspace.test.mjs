@@ -8,10 +8,10 @@ import {
   createBroadcastStudioContextBridge,
   createBroadcastStudioController,
   filterBroadcastStudioGraphics
-} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 assert.equal(BROADCAST_STUDIO_WORKSPACE_VERSION, "1.0.0");
-assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260826-fmch-2026-061-production-activation-v1");
+assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1");
 assert.equal(BROADCAST_STUDIO_GRAPHICS.length, 15);
 assert.equal(new Set(BROADCAST_STUDIO_GRAPHICS.map((entry) => entry.id)).size, 15);
 assert.deepEqual(BROADCAST_STUDIO_FILTERS.map((entry) => entry.label), [

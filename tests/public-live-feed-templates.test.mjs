@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildPublicLiveFeedModel,
   sanitizePublicLiveFeedFilter
-} from "../js/publicPortal/liveFeedModel.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/publicPortal/liveFeedModel.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const labels = {
   teamName: "Rancho Norte",

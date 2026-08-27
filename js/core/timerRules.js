@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "./officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",
@@ -864,7 +864,7 @@ export function applyOfficialTimerCommand(timer = {}, command = {}, options = {}
       return { ok: false, reason: "official-timer-controller-conflict", timer: current };
     }
     if (!current.controllerId) {
-      if (options.autoClaim !== true || !isPrimaryTimerController(controller)) {
+      if (options.autoClaim !== true || !canAutoClaimOfficialTimer(controller, current, options.definition)) {
         return { ok: false, reason: "official-timer-control-not-claimed", timer: current };
       }
       assignOfficialTimerController(next, controller, nowMs, options.leaseMs);
@@ -1424,7 +1424,7 @@ export function resolveOfficialTimerSelection(input = {}) {
     };
   }
 
-  if (selectedTimer && (selectedTimer.status === "RUNNING" || selectedTimer.status === "PAUSED")) {
+  if (selectedTimer?.status === "RUNNING") {
     return {
       timerId: selectedTimerId,
       contextChanged: definitions.length > 0,
@@ -1577,6 +1577,13 @@ function normalizeControllerType(value) {
 
 function isPrimaryTimerController(controller) {
   return ["field_remote", "web_remote"].includes(controller?.controllerType);
+}
+
+function canAutoClaimOfficialTimer(controller, timer = {}, definition = {}) {
+  if (isPrimaryTimerController(controller)) return true;
+  const phaseId = normalizeTimerId(definition.phaseId || timer.phaseId);
+  return phaseId === "freno_review"
+    && ["scorer_backup", "supervisor_backup"].includes(controller?.controllerType);
 }
 
 function isAuthorizedTakeoverController(controller) {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewToCalaAttempt } from "../js/core/brakeReviewPhase.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewToCalaAttempt } from "../js/core/brakeReviewPhase.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { emptyAttempt } from "../js/core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import { catalog, command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = command(freshReview(), BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, {

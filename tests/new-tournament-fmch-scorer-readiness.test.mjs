@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260826-fmch-2026-061-production-activation-v1");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260826-fmch-2026-061-production-activation-v1");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260826-fmch-2026-061-production-activation-v1");
+const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1");
 
 const tournament = applyProductiveRuleProfilePolicy({
   id: "new-libre-tournament",

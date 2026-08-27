@@ -171,6 +171,23 @@ export function createOfficialTimerTicker(options = {}) {
   });
 }
 
+export function updateOfficialTimerDomDisplays(root, registry = {}, now = Date.now()) {
+  if (!root?.querySelectorAll) return Object.freeze({ updatedCount: 0, hasRunningTimer: false });
+  let updatedCount = 0;
+  let hasRunningTimer = false;
+  root.querySelectorAll(".terna-timer-display[data-terna-timer-id], .official-timer-display[data-official-timer-id]").forEach((display) => {
+    const timerId = display?.dataset?.ternaTimerId || display?.dataset?.officialTimerId;
+    const timer = timerId ? registry?.[timerId] : null;
+    if (!timer) return;
+    const live = deriveOfficialTimerLiveDisplay(timer, now);
+    display.textContent = live.formatted;
+    display.dataset.timerStatus = live.status;
+    hasRunningTimer ||= live.running;
+    updatedCount += 1;
+  });
+  return Object.freeze({ updatedCount, hasRunningTimer });
+}
+
 export const officialTimerTicker = createOfficialTimerTicker();
 
 function normalizeStatus(snapshot) {

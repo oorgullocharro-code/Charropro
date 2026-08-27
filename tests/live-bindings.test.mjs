@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260826-fmch-2026-061-production-activation-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

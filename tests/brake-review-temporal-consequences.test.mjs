@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260826-fmch-2026-061-production-activation-v1";
+import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(59_999), []);
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(60_000), []);

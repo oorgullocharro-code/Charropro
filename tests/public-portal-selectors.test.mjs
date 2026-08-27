@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

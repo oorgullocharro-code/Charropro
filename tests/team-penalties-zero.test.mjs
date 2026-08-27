@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/core/scoring.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

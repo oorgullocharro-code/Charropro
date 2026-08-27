@@ -4,19 +4,19 @@ import {
   applyLocalFmch2026RuleProfileDefault,
   buildLocalFmch2026RuleProfileAssignment,
   hasExplicitRuleProfileSelection
-} from "../js/core/localRuleProfileDefaults.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/core/localRuleProfileDefaults.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260826-fmch-2026-061-production-activation-v1";
-import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/data/ruleProfiles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import {
   buildFmch2026TernaOpportunityDraft,
   commitFmch2026TernaOpportunity,
   createFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260826-fmch-2026-061-production-activation-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
 import { createLocalRuntimeSeedFixture } from "../tools/development/localRuntimeSeed.mjs";
 
 const productFingerprint = JSON.stringify(SUERTES);
