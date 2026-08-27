@@ -1,19 +1,19 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../data/fmch2026TernaRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -26,7 +26,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./localCache.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());
@@ -100,6 +100,7 @@ const createInitialState = () => ({
     elapsedMs: 0,
     updatedAt: null
   },
+  currentTimerContext: null,
   officialTimers: {},
   ternaSessions: {},
   lastPublishedScore: null,
@@ -339,6 +340,9 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
   const officialTimers = Object.fromEntries(
     Object.entries(source.officialTimers || {}).filter(([, timer]) => timer?.tournamentId === cleanTournamentId)
   );
+  const currentTimerContext = source.currentTimerContext?.tournamentId === cleanTournamentId
+    ? source.currentTimerContext
+    : null;
   const activeCharreadaId = charreadaIds.has(source.activeCharreadaId) ? source.activeCharreadaId : charreadas[0]?.id || null;
 
   return {
@@ -354,6 +358,7 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
     publishedScores,
     statHistorySnapshots,
     ternaSessions,
+    currentTimerContext,
     officialTimers,
     lastPublishedScore: publishedScores.find((record) => record.id === source.lastPublishedScore?.id) || null,
     settings: {

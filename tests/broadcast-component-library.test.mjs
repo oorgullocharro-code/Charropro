@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

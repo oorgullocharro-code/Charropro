@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

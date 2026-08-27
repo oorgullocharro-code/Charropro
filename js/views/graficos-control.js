@@ -1,12 +1,12 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   DEFAULT_GRAPHICS_CONFIG,
   applyGraphicsConfig,
   normalizeGraphicsConfig,
   readLocalGraphicsConfig,
   writeLocalGraphicsConfig
-} from "../core/graphicsConfig.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { loadState, saveState, state } from "../core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../core/graphicsConfig.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { loadState, saveState, state } from "../core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   getLiveChannelFromUrl,
   publishFirebaseGraphicsConfig,
@@ -14,9 +14,9 @@ import {
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLiveCurrent
-} from "../core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../core/firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const root = document.getElementById("graphics-control-root");
 let liveChannel = "";

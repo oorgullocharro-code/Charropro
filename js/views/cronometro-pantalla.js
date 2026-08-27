@@ -1,12 +1,13 @@
-import { escapeHTML, html } from "../core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { escapeHTML, html } from "../core/dom.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -22,8 +23,9 @@ render();
 if (liveChannel) {
   subscribeFirebaseLive((payload) => {
     remotePayload = payload;
+    const currentProjection = buildOfficialTimerProjectionFromCurrentContext(payload?.currentTimerContext || {});
     const incoming = normalizeTimer({
-      ...(payload?.timer || {}),
+      ...(currentProjection || payload?.timer || {}),
       firebaseUpdatedAt: payload?.firebaseUpdatedAt || 0,
       updatedAt: payload?.timer?.updatedAt || payload?.timestamp || null
     });
@@ -86,8 +88,8 @@ function updateScreen(now = Date.now()) {
 
 function getLiveContextText() {
   const charreada = remotePayload?.charreada?.name || state.charreadas.find((item) => item.id === state.activeCharreadaId)?.name || "";
-  const team = remotePayload?.turn?.team?.name || "";
-  const suerte = remotePayload?.turn?.suerte?.fullName || "";
+  const team = remotePayload?.currentTimerContext?.teamName || remotePayload?.turn?.team?.name || "";
+  const suerte = remotePayload?.currentTimerContext?.suerteLabel || remotePayload?.turn?.suerte?.fullName || "";
   return [charreada, team, suerte].filter(Boolean).join(" / ");
 }
 

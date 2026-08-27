@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

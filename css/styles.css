@@ -3944,12 +3944,34 @@ th.num {
   font-weight: 800;
 }
 
+.timer-control-secondary-command {
+  min-height: 48px;
+  width: 100%;
+  border-color: #ffce65;
+  color: #fff5d6;
+  font-weight: 900;
+}
+
+.timer-control-history {
+  border-top: 1px solid #343d4b;
+  padding-top: 10px;
+}
+
+.timer-control-history summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .timer-control-secondary-list {
+  margin-top: 8px;
   display: grid;
   gap: 6px;
 }
 
-.timer-control-secondary-list button {
+.timer-control-secondary-list article {
   min-height: 48px;
   border: 1px solid #343d4b;
   border-radius: 6px;
@@ -3960,22 +3982,21 @@ th.num {
   padding: 8px 10px;
   background: #111720;
   color: #e9edf4;
-  font: inherit;
   text-align: left;
 }
 
-.timer-control-secondary-list button span {
+.timer-control-secondary-list article span {
   overflow: hidden;
   font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.timer-control-secondary-list button strong {
+.timer-control-secondary-list article strong {
   font-variant-numeric: tabular-nums;
 }
 
-.timer-control-secondary-list button em {
+.timer-control-secondary-list article em {
   color: var(--muted);
   font-size: 11px;
   font-style: normal;

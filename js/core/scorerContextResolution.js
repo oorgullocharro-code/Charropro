@@ -1,5 +1,5 @@
-import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 export const SCORER_CONTEXT_RESOLUTION_VERSION = "1.0.0";
 

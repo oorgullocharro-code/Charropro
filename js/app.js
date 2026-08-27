@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./data/calaRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -26,7 +26,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -36,7 +36,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -53,7 +53,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./data/fmch2026TernaRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -73,23 +73,23 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/scorerContextResolution.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -97,12 +97,19 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
+  officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import {
+  TORO_TO_TERNA_HANDOFF,
+  buildOfficialCurrentTimerContext,
+  buildToroToTernaReadyDefinition,
+  resolveOfficialCurrentTimerContext
+} from "./core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -113,9 +120,9 @@ import {
   getBrakeReviewStateFromTimer,
   hasPendingBrakeReviewTemporalConsequences,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/brakeReviewPhase.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -128,27 +135,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/scoring.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/scoringAttempt.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/scorerComponents.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/scorerSaveLatency.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/scorerInteractionLatency.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -158,7 +165,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/sync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -200,7 +207,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -213,15 +220,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/pendingScoreReview.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/tournamentContext.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -231,8 +238,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/supervisorNavigation.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -266,7 +273,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -463,6 +470,7 @@ const ACTION_CAPABILITIES = {
   "clear-custom-form": "score",
   "remove-custom": "score",
   "select-scoring-classification": "score",
+  "apply-jineteo-timing": "score",
   "adjust-mangana-floreo": "score",
   "toggle-mangana-floreo-detail": "score",
   "adjust-mangana-pulls": "score",
@@ -3131,6 +3139,17 @@ function applyRemoteOfficialTimers(payload = {}) {
   const retained = Object.fromEntries(Object.entries(state.officialTimers || {})
     .filter(([, timer]) => timer?.tournamentId !== payload.tournamentId));
   state.officialTimers = { ...retained, ...(payload.registry || {}) };
+  const currentTimer = state.currentTimerContext?.timerId
+    ? state.officialTimers[state.currentTimerContext.timerId]
+    : null;
+  if (currentTimer) {
+    state.currentTimerContext = buildOfficialCurrentTimerContext(currentTimer, state.currentTimerContext, {
+      sourceRevision: state.currentTimerContext.sourceRevision,
+      contextRevision: state.currentTimerContext.contextRevision,
+      transition: state.currentTimerContext.transition,
+      handoffFromTimerId: state.currentTimerContext.handoffFromTimerId
+    });
+  }
   if (state.view === "scoring") render({ preserveScoringScroll: true });
 }
 
@@ -8606,6 +8625,7 @@ function copyScorerContextDiagnostics() {
 function buildScoringAttemptUiModel(context) {
   const ternaRuntime = getTernaRuntime(context);
   const fmchSportTimers = getFmch2026SportTimerRuntimes(context);
+  const overlappingTimerRuntime = getOverlappingCurrentTimerRuntime(context, fmchSportTimers[0]?.timer?.timerId);
   const attemptV2 = adaptLegacyAttemptToV2(
     context.attempt,
     buildScoringAttemptV2Context(context),
@@ -8622,8 +8642,8 @@ function buildScoringAttemptUiModel(context) {
           primary: true,
           kind: "terna"
         }]
-      : fmchSportTimers.length
-        ? fmchSportTimers.map((runtime, index) => ({
+      : overlappingTimerRuntime
+        ? [overlappingTimerRuntime, ...fmchSportTimers].map((runtime, index) => ({
             timerId: runtime.timer.timerId,
             label: runtime.label,
             display: runtime.view.formattedRemaining,
@@ -8631,13 +8651,22 @@ function buildScoringAttemptUiModel(context) {
             primary: index === 0,
             kind: runtime.kind
           }))
-        : [{
-          timerId: `scorer_${context.suerte.id}`,
-          label: getTimerLabel(),
-          display: formatTimer(),
-          status: timerRunning ? "corriendo" : "control externo",
-          primary: true
-        }],
+        : fmchSportTimers.length
+          ? fmchSportTimers.map((runtime, index) => ({
+            timerId: runtime.timer.timerId,
+            label: runtime.label,
+            display: runtime.view.formattedRemaining,
+            status: runtime.view.status,
+            primary: index === 0,
+            kind: runtime.kind
+            }))
+          : [{
+            timerId: `scorer_${context.suerte.id}`,
+            label: getTimerLabel(),
+            display: formatTimer(),
+            status: timerRunning ? "corriendo" : "control externo",
+            primary: true
+          }],
     sharedTimer: null,
     remateHistory: ternaRuntime
       ? (ternaRuntime.session.remateHistory?.[context.suerte.id === "lazo" ? "HEAD" : "PIAL"] || []).map((item) => ({
@@ -9370,7 +9399,7 @@ function renderOfficialSportTimer(runtime) {
     <article class="cp-sport-timer ${view.paused ? "paused" : ""}" data-timer-kind="${escapeHTML(runtime.kind)}">
       <span>${escapeHTML(runtime.label)}</span>
       <strong class="official-timer-display" data-official-timer-id="${escapeHTML(runtime.timer.timerId)}">${escapeHTML(view.formattedRemaining)}</strong>
-      <em>${escapeHTML(view.status)}${view.pauseReason ? ` · ${view.pauseReason}` : ""} · Control: ${escapeHTML(control.controllerLabel)}</em>
+      <em>${escapeHTML(officialTimerDisplayStateLabel(view.status))}${view.pauseReason ? ` · ${view.pauseReason}` : ""} · Control: ${escapeHTML(control.controllerLabel)}</em>
       <small>Real ${escapeHTML(formatTimerMs(view.wallElapsedMs))} · oficial ${escapeHTML(formatTimerMs(view.officialElapsedMs))}</small>
       <div class="cp-sport-timer-actions">
         ${renderScorerTimerControlButtons(runtime, control)}
@@ -9508,7 +9537,7 @@ function renderJineteoMainPanel(context) {
       <div class="cp-jineteo-controls cp-operational-control-bar">
         <div class="cp-jineteo-timing-summary">
           <span>Apretalamiento</span>
-          <strong>${escapeHTML(timerView.status || "READY")}</strong>
+          <strong>${escapeHTML(officialTimerDisplayStateLabel(timerView.status || "READY"))}</strong>
           <em>${timing.disqualified
             ? "Pierde la jineteada"
             : timing.minute5Penalty ? "Dos infracciones" : timing.minute4Penalty ? "Una infracción" : timing.timeSavedQuantity ? `+${timing.timeSavedQuantity} por tiempo` : "Sin ajuste"}</em>
@@ -9531,6 +9560,21 @@ function renderJineteoMainPanel(context) {
         : ""}
     </section>
   `;
+}
+
+function getOverlappingCurrentTimerRuntime(context, localTimerId = "") {
+  const current = state.currentTimerContext;
+  if (!current?.timerId || current.timerId === localTimerId) return null;
+  if (context?.suerte?.id !== "toro" || current.suerteId !== "terna") return null;
+  const timer = state.officialTimers?.[current.timerId];
+  if (!timer) return null;
+  return {
+    kind: "orchestrated_current",
+    label: current.suerteLabel || current.phaseLabel || "Terna en el Ruedo",
+    definition: current,
+    timer,
+    view: getOfficialTimerContextView(timer, { definition: current })
+  };
 }
 
 function renderTernaMainPanel(context) {
@@ -9576,7 +9620,7 @@ function renderTernaMainPanel(context) {
         </article>
         <article class="cp-terna-counted cp-terna-time-reference">
           <span>Tiempo Terna</span>
-          <strong>${escapeHTML(timer.status)}</strong>
+          <strong>${escapeHTML(officialTimerDisplayStateLabel(timer.status))}</strong>
           <em>Cuenta oficial visible en cabecera</em>
         </article>
       </div>
@@ -9687,7 +9731,7 @@ function renderPasoMainPanel(context, attemptView) {
           <div class="cp-paso-timer-controls" aria-label="Controles temporales del Paso">
             ${timers.map((runtime) => html`
               <section>
-                <div><span>${escapeHTML(runtime.kind === "paso_exit" ? "Salida" : "Desmonte")}</span><strong>${escapeHTML(runtime.view.status)}</strong></div>
+                <div><span>${escapeHTML(runtime.kind === "paso_exit" ? "Salida" : "Desmonte")}</span><strong>${escapeHTML(officialTimerDisplayStateLabel(runtime.view.status))}</strong></div>
                 <div class="cp-sport-timer-actions">${renderScorerTimerControlButtons(runtime)}</div>
               </section>
             `).join("")}
@@ -14229,10 +14273,66 @@ async function applyFmchSportTimerCommand(timerKind, command) {
   const context = getCurrentContext();
   const runtime = getFmch2026SportTimerRuntimes(context).find((item) => item.kind === timerKind);
   if (!runtime) return;
-  await executeScorerTimerAuthority(runtime, {
+  const result = await executeScorerTimerAuthority(runtime, {
     type: command,
     reason: command === "PAUSE" ? "Pausa oficial autorizada" : "",
     source: "scorer_backup"
+  });
+  if (result.ok && command === "FINISH") {
+    await prepareTernaCurrentTimerAfterToroFinish(result.timer || runtime.timer, context, getScorerTimerController(), getAccessActor());
+  }
+}
+
+async function prepareTernaCurrentTimerAfterToroFinish(finishedTimer, context, controller, actor) {
+  const source = {
+    tournament: context?.tournament,
+    charreada: context?.charreada,
+    turn: {
+      competition: {
+        id: context?.charreada?.competitionId || context?.competitionContext?.competitionId || "equipos_completo",
+        competitionId: context?.charreada?.competitionId || context?.competitionContext?.competitionId || "equipos_completo"
+      },
+      team: context?.competitionContext?.isIndividualCompetition ? null : context?.team,
+      participant: context?.competitionContext?.isIndividualCompetition ? context?.participant || context?.team : null,
+      suerte: context?.suerte,
+      attemptIndex: context?.attemptIndex || 0,
+      coleadorIndex: context?.coleadorIndex || 0
+    }
+  };
+  const definition = buildToroToTernaReadyDefinition(source, finishedTimer);
+  if (!definition) return { ok: true, skipped: true };
+  const existing = state.officialTimers?.[definition.timerId] || null;
+  const result = await applyFirebaseOfficialTimerAuthority(definition, {
+    operation: "CLAIM_CONTROL",
+    timerId: definition.timerId,
+    commandId: createScorerTimerCommandId(definition.timerId, "PREPARE_TERNA_READY"),
+    expectedRevision: Number(existing?.revision || 0),
+    promoteCurrentContext: true,
+    currentContextTransition: TORO_TO_TERNA_HANDOFF,
+    handoffFromTimerId: finishedTimer.timerId,
+    controller,
+    actor,
+    source: "official-timer-orchestration",
+    issuedAt: new Date().toISOString()
+  }, { actor });
+  if (result.timer) setOfficialTimer(result.timer);
+  if (result.ok) {
+    state.currentTimerContext = resolveOfficialCurrentTimerContext({
+      source,
+      registry: state.officialTimers,
+      currentTimerContext: buildCurrentContextFromAuthorityResult(result, definition, finishedTimer.timerId),
+      transition: TORO_TO_TERNA_HANDOFF,
+      handoffFromTimerId: finishedTimer.timerId
+    });
+  }
+  return result;
+}
+
+function buildCurrentContextFromAuthorityResult(result, definition, handoffFromTimerId) {
+  return buildOfficialCurrentTimerContext(result.timer || definition, definition, {
+    now: result.authorityAcceptedAtMs,
+    transition: TORO_TO_TERNA_HANDOFF,
+    handoffFromTimerId
   });
 }
 
@@ -14248,6 +14348,8 @@ function getScorerTimerController() {
 
 function getScorerTimerRuntime(timerId, context = getCurrentContext()) {
   if (!timerId || !context) return null;
+  const overlapping = getOverlappingCurrentTimerRuntime(context);
+  if (overlapping?.timer?.timerId === timerId) return overlapping;
   const terna = getTernaRuntime(context);
   if (terna?.timer?.timerId === timerId) return terna;
   return getFmch2026SportTimerRuntimes(context).find((runtime) => runtime.timer?.timerId === timerId) || null;
@@ -14278,6 +14380,7 @@ async function executeScorerTimerAuthority(runtime, request = {}) {
     timerId: runtime.timer.timerId,
     commandId,
     expectedRevision: Number(runtime.timer.revision || 0),
+    promoteCurrentContext: true,
     controller: getScorerTimerController(),
     actor: getAccessActor(),
     issuedAt: new Date().toISOString()
@@ -16096,6 +16199,9 @@ function subscribeExternalTimerControl() {
   if (firebaseTimerUnsubscribe) firebaseTimerUnsubscribe();
   firebaseTimerChannel = liveChannel;
   firebaseTimerUnsubscribe = subscribeFirebaseLive((payload) => {
+    if (payload?.currentTimerContext?.timerId) {
+      state.currentTimerContext = payload.currentTimerContext;
+    }
     const incoming = normalizeTimer({
       ...(payload?.timer || {}),
       updatedAt: payload?.timer?.updatedAt || payload?.timestamp || null

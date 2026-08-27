@@ -6,7 +6,7 @@ import {
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../js/core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const now = Date.parse("2026-08-25T18:00:00.000Z");
 const context = (suerteId, extra = {}) => ({
@@ -45,13 +45,13 @@ runningToro = applyOfficialTimerCommand(runningToro, {
   commandId: "start-toro",
   actor: { id: "judge_a", uid: "judge_a", role: "juez" }
 }, { definition: toroDefinition, now: now + 1000, expectedRevision: 0, requireCommandId: true }).timer;
-const blockedChange = resolveOfficialTimerSelection({
+const activeContextChange = resolveOfficialTimerSelection({
   selectedTimerId: runningToro.timerId,
   definitions: [yeguaDefinition],
   registry: { [runningToro.timerId]: runningToro }
 });
-assert.equal(blockedChange.timerId, runningToro.timerId);
-assert.equal(blockedChange.blockedByActiveTimer, true, "an active timer never moves silently to another suerte");
+assert.equal(activeContextChange.timerId, yeguaDefinition.timerId);
+assert.equal(activeContextChange.blockedByActiveTimer, false, "an authoritative context change always wins over historical RUNNING state");
 
 const currentSelection = resolveOfficialTimerSelection({
   selectedTimerId: yeguaDefinition.timerId,
@@ -112,11 +112,12 @@ assert.equal(projection.sourceRevision, runningToro.revision);
 const remoteSource = readFileSync(new URL("../js/views/cronometro-control.js", import.meta.url), "utf8");
 const scorerSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const firebaseSource = readFileSync(new URL("../js/core/firebaseSync.js", import.meta.url), "utf8");
-assert.match(remoteSource, /resolveOfficialTimerSelection/);
-assert.match(remoteSource, /Finaliza el tiempo activo antes de cambiar de suerte/);
+assert.match(remoteSource, /resolveOfficialCurrentTimerContext/);
+assert.doesNotMatch(remoteSource, /Finaliza el tiempo activo antes de cambiar de suerte/);
 assert.match(scorerSource, /subscribeFirebaseOfficialTimers\(tournamentId, applyRemoteOfficialTimers\)/);
 assert.match(scorerSource, /state\.view === "scoring"\) render\(\{ preserveScoringScroll: true \}\)/);
 assert.match(firebaseSource, /"current\/timer": projection/);
+assert.match(firebaseSource, /"current\/currentTimerContext"/);
 assert.match(firebaseSource, /official_timer_update/);
 
 console.log("official-timer-lifecycle-reuse.test.mjs: ok");

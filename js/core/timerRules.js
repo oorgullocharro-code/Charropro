@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",
@@ -729,7 +729,9 @@ export function createOfficialTimerContext(definition = {}, options = {}) {
     phaseLabel: nullableTimerText(definition.phaseLabel, 160),
     teamName: nullableTimerText(definition.teamName, 200),
     participantName: nullableTimerText(definition.participantName, 200),
+    horseId: nullableTimerId(definition.horseId),
     horseName: nullableTimerText(definition.horseName, 200),
+    attemptId: nullableTimerId(definition.attemptId),
     attemptIndex: Math.max(0, Math.trunc(finiteNumber(definition.attemptIndex))),
     opportunityIndex: Math.max(0, Math.trunc(finiteNumber(definition.opportunityIndex ?? definition.attemptIndex))),
     coleadorIndex: Math.max(0, Math.trunc(finiteNumber(definition.coleadorIndex))),
@@ -794,7 +796,9 @@ export function normalizeOfficialTimerContext(timer = {}, definition = {}) {
     phaseLabel: nullableTimerText(timer.phaseLabel || definition.phaseLabel, 160),
     teamName: nullableTimerText(timer.teamName || definition.teamName, 200),
     participantName: nullableTimerText(timer.participantName || definition.participantName, 200),
+    horseId: nullableTimerId(timer.horseId || definition.horseId),
     horseName: nullableTimerText(timer.horseName || definition.horseName, 200),
+    attemptId: nullableTimerId(timer.attemptId || definition.attemptId),
     attemptIndex: Math.max(0, Math.trunc(finiteNumber(timer.attemptIndex ?? definition.attemptIndex))),
     opportunityIndex: Math.max(0, Math.trunc(finiteNumber(timer.opportunityIndex ?? definition.opportunityIndex ?? timer.attemptIndex))),
     coleadorIndex: Math.max(0, Math.trunc(finiteNumber(timer.coleadorIndex ?? definition.coleadorIndex))),
@@ -1179,7 +1183,9 @@ export function buildOfficialTimerDefinitionsFromContext(source = {}) {
     suerteLabel: normalizeTimerText(suerte.fullName || suerte.name || suerte.label || suerteId, 160),
     teamName: nullableTimerText(turn.team?.name || context.team?.name, 200),
     participantName: nullableTimerText(turn.participant?.name || context.participant?.name || turn.team?.participantName, 200),
+    horseId: normalizeTimerId(turn.participant?.horseId || context.participant?.horseId || turn.team?.horseId || context.team?.horseId),
     horseName: nullableTimerText(turn.participant?.horseName || context.participant?.horseName || turn.team?.horseName || context.team?.horseName, 200),
+    attemptId: normalizeTimerId(turn.attempt?.attemptId || turn.attempt?.id || context.attemptId),
     attemptIndex,
     opportunityIndex: attemptIndex,
     coleadorIndex
@@ -1409,27 +1415,13 @@ export function selectOfficialTimerForContext(registry = {}, source = {}) {
 export function resolveOfficialTimerSelection(input = {}) {
   const definitions = Array.isArray(input.definitions) ? input.definitions.filter((item) => item?.timerId) : [];
   const currentIds = new Set(definitions.map((item) => item.timerId));
-  const registry = input.registry && typeof input.registry === "object" ? input.registry : {};
   const selectedTimerId = normalizeTimerId(input.selectedTimerId);
-  const selectedTimer = selectedTimerId && registry[selectedTimerId]
-    ? normalizeOfficialTimerContext(registry[selectedTimerId])
-    : null;
-
   if (selectedTimerId && currentIds.has(selectedTimerId)) {
     return {
       timerId: selectedTimerId,
       contextChanged: false,
       blockedByActiveTimer: false,
       previousTimerId: null
-    };
-  }
-
-  if (selectedTimer?.status === "RUNNING") {
-    return {
-      timerId: selectedTimerId,
-      contextChanged: definitions.length > 0,
-      blockedByActiveTimer: definitions.length > 0,
-      previousTimerId: selectedTimerId
     };
   }
 

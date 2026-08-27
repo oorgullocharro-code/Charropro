@@ -9,7 +9,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../js/core/firebaseRuntime.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

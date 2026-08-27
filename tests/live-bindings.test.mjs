@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

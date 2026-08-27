@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const source = buildSource();
 let projection = buildPublicProjection(source, {

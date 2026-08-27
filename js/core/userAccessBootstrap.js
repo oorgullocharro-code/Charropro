@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

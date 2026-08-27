@@ -1,14 +1,15 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";
@@ -169,7 +170,7 @@ function getRenderPayload() {
   if (remotePayload) {
     return {
       ...remotePayload,
-      timer: buildLiveTimer(hasTimerValue(remotePayload.timer) ? remotePayload.timer : localTimer, remotePayload)
+      timer: buildLiveTimer(getPayloadTimer(remotePayload, localTimer), remotePayload)
     };
   }
 
@@ -193,7 +194,7 @@ function getRenderPayload() {
 
     return {
       ...remotePayload,
-      timer: buildLiveTimer(hasTimerValue(remotePayload.timer) ? remotePayload.timer : localTimer, remotePayload)
+      timer: buildLiveTimer(getPayloadTimer(remotePayload, localTimer), remotePayload)
     };
   }
 
@@ -202,6 +203,11 @@ function getRenderPayload() {
     ...payload,
     timer: buildLiveTimer(chooseFreshTimer(payload.timer, localTimer), payload)
   };
+}
+
+function getPayloadTimer(payload = {}, fallback = {}) {
+  return buildOfficialTimerProjectionFromCurrentContext(payload.currentTimerContext || {})
+    || (hasTimerValue(payload.timer) ? payload.timer : fallback);
 }
 
 function getRenderConfig(payload) {

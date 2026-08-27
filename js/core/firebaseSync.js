@@ -6,20 +6,20 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./firebaseRuntime.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../data/competitionTypes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./userAccessBootstrap.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -27,20 +27,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../public/publicProjection.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../public/publicProjectionSchema.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -56,11 +56,11 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./publicProjectionOutbox.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./pendingScoreReview.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
@@ -68,13 +68,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer,
   isBrakeReviewProfile
-} from "./brakeReviewPhase.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./brakeReviewPhase.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -2192,6 +2193,7 @@ export async function publishFirebaseTurn(payload, options = {}) {
       tournament: compactTournament(payload.tournament),
       charreada: compactCharreada(payload.charreada),
       turn: compactTurn(payload.turn),
+      currentTimerContext: compactCurrentTimerContext(payload.currentTimerContext),
       timer: compactTimer(payload.timer),
       coleadero: compactColeadero(payload.coleadero),
       published: compactPublishedScore(payload.published)
@@ -2495,12 +2497,13 @@ export async function applyFirebaseOfficialTimerAuthority(definition = {}, reque
       const timer = normalizeOfficialTimerContext(conflictTimer, definition);
       const authorityAcceptedAt = timer.authorityAcceptedAt || timer.updatedAt;
       const authorityAcceptedAtMs = resolveFirebaseTimerNow(authorityAcceptedAt);
+      const projection = buildOfficialTimerProjection(timer, { now: authorityAcceptedAtMs });
       return {
         ok: true,
         idempotent: true,
         path,
         timer,
-        projection: buildOfficialTimerProjection(timer, { now: authorityAcceptedAtMs }),
+        projection,
         projectionResult: { ok: true, skipped: true },
         authorityAcceptedAt,
         authorityAcceptedAtMs
@@ -2523,19 +2526,15 @@ export async function applyFirebaseOfficialTimerAuthority(definition = {}, reque
     const authorityAcceptedAt = timer.authorityAcceptedAt || acceptedAt;
     const authorityAcceptedAtMs = resolveFirebaseTimerNow(authorityAcceptedAt);
     const projection = buildOfficialTimerProjection(timer, { now: authorityAcceptedAtMs });
-    let projectionResult = { ok: true };
-    try {
-      await writeLiveUpdate({
-        timer: projection,
-        "current/action": "official_timer_update",
-        "current/timer": projection,
-        firebaseUpdatedAt: authorityAcceptedAtMs,
-        liveChannel: tournamentId,
-        timestamp: authorityAcceptedAt
-      }, tournamentId);
-    } catch (error) {
-      projectionResult = { ok: false, reason: normalizeFirebaseFailureReason(error) };
-    }
+    const projectionResult = await publishOfficialTimerLiveProjection({
+      timer,
+      definition,
+      projection,
+      tournamentId,
+      acceptedAt: authorityAcceptedAt,
+      acceptedAtMs: authorityAcceptedAtMs,
+      request
+    });
     return {
       ok: true,
       idempotent: Boolean(transition.idempotent),
@@ -2553,6 +2552,32 @@ export async function applyFirebaseOfficialTimerAuthority(definition = {}, reque
       detail: normalizeErrorDetail({ error }),
       timer: conflictTimer
     };
+  }
+}
+
+async function publishOfficialTimerLiveProjection(input = {}) {
+  const updates = {
+    timer: input.projection,
+    "current/action": "official_timer_update",
+    "current/timer": input.projection,
+    firebaseUpdatedAt: input.acceptedAtMs,
+    liveChannel: input.tournamentId,
+    timestamp: input.acceptedAt
+  };
+  if (input.request?.promoteCurrentContext === true) {
+    updates["current/currentTimerContext"] = buildOfficialCurrentTimerContext(input.timer, input.definition, {
+      now: input.acceptedAtMs,
+      sourceRevision: input.request.sourceRevision,
+      contextRevision: input.request.contextRevision,
+      transition: input.request.currentContextTransition,
+      handoffFromTimerId: input.request.handoffFromTimerId
+    });
+  }
+  try {
+    await writeLiveUpdate(updates, input.tournamentId);
+    return { ok: true, promotedCurrentContext: input.request?.promoteCurrentContext === true };
+  } catch (error) {
+    return { ok: false, reason: normalizeFirebaseFailureReason(error) };
   }
 }
 
@@ -2780,6 +2805,11 @@ export async function applyFirebaseBrakeReviewAuthority(definition = {}, request
         timer: projection,
         "current/action": "official_brake_review_update",
         "current/timer": projection,
+        "current/currentTimerContext": buildOfficialCurrentTimerContext(timer, definition, {
+          now: acceptedAtMs,
+          sourceRevision: request.sourceRevision,
+          contextRevision: request.contextRevision
+        }),
         firebaseUpdatedAt: acceptedAtMs,
         liveChannel: tournamentId,
         timestamp: acceptedAt
@@ -5821,6 +5851,7 @@ function compactLivePayload(payload = {}) {
     tournament: compactTournament(payload.tournament),
     charreada: compactCharreada(payload.charreada),
     turn: compactTurn(payload.turn),
+    currentTimerContext: compactCurrentTimerContext(payload.currentTimerContext),
     timer: compactTimer(payload.timer),
     graphicsConfig: payload.graphicsConfig || null,
 	    leaderboard: (payload.leaderboard || []).map(compactLeaderboardItem),
@@ -6169,6 +6200,7 @@ function compactTurn(turn) {
     },
     attemptIndex: Number(turn.attemptIndex || 0),
     coleadorIndex: Number(turn.coleadorIndex || 0),
+    previousOpportunityResolution: turn.previousOpportunityResolution || "",
     attempt: compactAttempt(turn.attempt),
     charro: turn.charro || ""
   };
@@ -6268,6 +6300,53 @@ function compactTimer(timer) {
     clientId: timer.clientId || "",
     updatedAt: timer.updatedAt || null
   };
+}
+
+function compactCurrentTimerContext(context) {
+  if (!context?.timerId) return null;
+  return cleanUndefined({
+    contractVersion: context.contractVersion || "1.0.0",
+    timerId: context.timerId,
+    timerDefinitionId: context.timerDefinitionId || "",
+    tournamentId: context.tournamentId || "",
+    competitionId: context.competitionId || "",
+    charreadaId: context.charreadaId || "",
+    ruleProfileId: context.ruleProfileId || "",
+    ruleProfileVersion: context.ruleProfileVersion || "",
+    ruleProfileFingerprint: context.ruleProfileFingerprint || "",
+    temporalPolicyId: context.temporalPolicyId || "",
+    temporalPolicyVersion: context.temporalPolicyVersion || "",
+    temporalPolicyFingerprint: context.temporalPolicyFingerprint || "",
+    phase: context.phase || "",
+    phaseLabel: context.phaseLabel || "",
+    suerteId: context.suerteId || "",
+    suerteLabel: context.suerteLabel || "",
+    teamId: context.teamId || "",
+    teamName: context.teamName || "",
+    participantId: context.participantId || "",
+    participantName: context.participantName || "",
+    horseId: context.horseId || "",
+    horseName: context.horseName || "",
+    attemptId: context.attemptId || "",
+    attemptIndex: Number(context.attemptIndex || 0),
+    opportunityIndex: Number(context.opportunityIndex || 0),
+    coleadorIndex: Number(context.coleadorIndex || 0),
+    durationMs: Number(context.durationMs || 0),
+    mode: context.mode || "",
+    status: context.status || "READY",
+    startedAt: context.startedAt || null,
+    runningSince: context.runningSince || null,
+    pausedAt: context.pausedAt || null,
+    finishedAt: context.finishedAt || null,
+    elapsedMs: Number(context.elapsedMs || 0),
+    remainingMs: context.remainingMs === null || context.remainingMs === undefined ? null : Number(context.remainingMs || 0),
+    timerRevision: Number(context.timerRevision || 0),
+    sourceRevision: Number(context.sourceRevision || 0),
+    contextRevision: Number(context.contextRevision || 0),
+    transition: context.transition || null,
+    handoffFromTimerId: context.handoffFromTimerId || null,
+    generatedAt: context.generatedAt || null
+  });
 }
 
 function normalizeFirebaseTimerKey(timerId) {

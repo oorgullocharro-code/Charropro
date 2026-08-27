@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,21 +8,27 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../core/firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   formatTimerMs,
   getOfficialTimerContextView,
   getOfficialTimerControlView,
-  normalizeOfficialTimerContext,
-  resolveOfficialTimerSelection
-} from "../core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+  normalizeOfficialTimerContext
+} from "../core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import {
+  TORO_TO_TERNA_HANDOFF,
+  buildOfficialCurrentTimerContext,
+  buildToroToTernaReadyDefinition,
+  partitionOfficialTimerHistory,
+  resolveOfficialCurrentTimerContext
+} from "../core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -41,12 +47,12 @@ const pauseReasons = [
 let remotePayload = null;
 let officialRegistry = {};
 let derivedDefinitions = [];
-let selectedTimerId = readSelectedTimerId();
+let currentTimerContext = null;
+let selectedTimerId = "";
 let officialTimersUnsubscribe = null;
 let pendingAction = null;
 let lastStatus = liveChannel ? "Esperando enlace vivo" : "Falta tournamentId en la URL";
 let lastObservedAtMs = 0;
-let contextTransitionBlocked = false;
 let accessSession = {
   ready: false,
   user: null,
@@ -66,7 +72,7 @@ if (liveChannel) {
   subscribeFirebaseLive((payload) => {
     remotePayload = payload;
     derivedDefinitions = buildOfficialTimerDefinitionsFromContext(payload || {});
-    reconcileSelectedTimer();
+    reconcileCurrentTimerContext();
     if (!payload?.timer && !derivedDefinitions.length) lastStatus = "Esperando contexto deportivo";
     else if (!pendingAction) lastStatus = "Conectado en vivo";
     render();
@@ -78,10 +84,9 @@ root.addEventListener("click", (event) => {
   if (!target) return;
   const action = target.dataset.action;
   if (action === "timer-primary") sendPrimaryTimerCommand();
-  if (action === "finish-timer") finishSelectedTimer();
+  if (action === "timer-secondary") sendSecondaryTimerCommand();
   if (action === "claim-timer-control") claimSelectedTimerControl();
   if (action === "set-pause-reason") updatePauseReason(target.dataset.reason);
-  if (action === "select-official-timer") selectOfficialTimer(target.dataset.timerId);
   if (action === "timer-login-open") showTimerLogin();
   if (action === "timer-login-close") closeTimerLogin();
   if (action === "timer-login") signInTimerAccess();
@@ -100,7 +105,7 @@ function subscribeOfficialTimerAuthority() {
     }
     officialRegistry = snapshot.registry || {};
     lastObservedAtMs = snapshot.observedAtMs || Date.now();
-    reconcileSelectedTimer();
+    reconcileCurrentTimerContext();
     if (!pendingAction) lastStatus = "Sincronizado con Timer Authority";
     render();
   });
@@ -119,6 +124,7 @@ function render() {
   const primaryDisabled = Boolean(
     pendingAction ||
     !timer ||
+    !primaryCommand ||
     definition?.temporalPolicyStatus === "TEMPORAL_POLICY_UNAVAILABLE" ||
     view?.finished ||
     control?.hasController && !control.isOwner
@@ -146,8 +152,6 @@ function render() {
 
           ${definition ? renderOperatorContext(definition) : ""}
 
-          ${timers.length > 1 ? renderTimerSelector(timers) : ""}
-
           ${timer ? html`
             <div class="timer-control-clock ${view.running ? "running" : view.paused ? "paused" : "ready"}" id="timer-control-clock">
               <span id="timer-control-state">${escapeHTML(getTimerStateLabel(view.status))}</span>
@@ -170,6 +174,16 @@ function render() {
               </button>
             </div>
 
+            ${getSecondaryCommand(view.status) && control.isOwner ? html`
+              <button
+                class="button timer-control-secondary-command"
+                data-action="timer-secondary"
+                data-command="${escapeHTML(getSecondaryCommand(view.status))}"
+                type="button"
+                ${pendingAction ? "disabled" : ""}
+              >${escapeHTML(getSecondaryLabel(view.status))}</button>
+            ` : ""}
+
             ${control.hasController && !control.isOwner ? html`
               <section class="timer-control-observer" aria-live="polite">
                 <strong>Modo observador</strong>
@@ -189,17 +203,7 @@ function render() {
 
             ${view.paused && control.isOwner ? renderPauseReasonControls(timer.pauseReason) : ""}
 
-            ${contextTransitionBlocked ? html`
-              <section class="timer-control-observer" aria-live="assertive">
-                <strong>Cambio de suerte pendiente</strong>
-                <p>El tiempo activo conserva su contexto. Finaliza antes de preparar la nueva suerte.</p>
-              </section>
-            ` : ""}
-
             <div class="timer-control-secondary-actions">
-              ${view.status !== "FINISHED" && control.isOwner
-                ? html`<button class="button" data-action="finish-timer" type="button" ${pendingAction ? "disabled" : ""}>Finalizar</button>`
-                : ""}
               <span>${escapeHTML(getConnectionAge())}</span>
             </div>
           ` : html`
@@ -209,27 +213,12 @@ function render() {
             </section>
           `}
 
-          ${timers.length > 1 ? renderSecondaryTimers(timers) : ""}
+          ${timers.length > 1 ? renderTimerHistory(timers) : ""}
         </section>
       </section>
     </main>
   `;
   updateDisplay();
-}
-
-function renderTimerSelector(timers) {
-  return html`
-    <nav class="timer-context-selector" aria-label="Seleccionar cronometro">
-      ${timers.map(({ timer, definition }) => html`
-        <button
-          type="button"
-          data-action="select-official-timer"
-          data-timer-id="${escapeHTML(definition.timerId)}"
-          class="${definition.timerId === selectedTimerId ? "active" : ""}"
-        >${escapeHTML(definition.label || timer?.label || definition.contextType)}</button>
-      `).join("")}
-    </nav>
-  `;
 }
 
 function renderOperatorContext(definition) {
@@ -253,20 +242,25 @@ function renderOperatorContext(definition) {
   `;
 }
 
-function renderSecondaryTimers(timers) {
+function renderTimerHistory(timers) {
+  const history = partitionOfficialTimerHistory(currentTimerContext, officialRegistry).historical;
+  if (!history.length) return "";
   return html`
-    <section class="timer-control-secondary-list" aria-label="Otros cronometros disponibles">
-      ${timers.filter(({ definition }) => definition.timerId !== selectedTimerId).map(({ timer, definition }) => {
-        const view = deriveOfficialTimerLiveDisplay(timer || createTimerFromDefinition(definition));
+    <details class="timer-control-history">
+      <summary>Historial de cronometros (${history.length})</summary>
+      <section class="timer-control-secondary-list" aria-label="Historial de cronometros">
+      ${history.map((timer) => {
+        const view = deriveOfficialTimerLiveDisplay(timer);
         return html`
-          <button type="button" data-action="select-official-timer" data-timer-id="${escapeHTML(definition.timerId)}">
-            <span>${escapeHTML(definition.label || timer?.label || "Cronometro")}</span>
+          <article>
+            <span>${escapeHTML(timer.label || timer.suerteLabel || "Cronometro")}</span>
             <strong>${escapeHTML(view.formatted)}</strong>
-            <em>${escapeHTML(view.status)}</em>
-          </button>
+            <em>${escapeHTML(getTimerStateLabel(view.status))}</em>
+          </article>
         `;
       }).join("")}
-    </section>
+      </section>
+    </details>
   `;
 }
 
@@ -332,6 +326,26 @@ async function sendPrimaryTimerCommand() {
   }
   const type = getPrimaryCommand(timer.status);
   if (!type) return;
+  if (type === "FINISH" && !window.confirm("Finalizar este cronometro oficial? Esta accion no reinicia el tiempo.")) return;
+  const result = await executeAuthorityRequest(definition, timer, {
+    type,
+    source: "field_remote"
+  }, getPendingLabel(type));
+  if (result?.ok && type === "FINISH") await prepareTernaAfterToroFinish(result.timer || timer);
+}
+
+async function sendSecondaryTimerCommand() {
+  if (!requireTimerAccess() || pendingAction) return;
+  const timer = getSelectedTimer();
+  const definition = getSelectedDefinition();
+  if (!timer || !definition) return;
+  const control = getOfficialTimerControlView(timer, getRemoteController());
+  if (control.hasController && !control.isOwner) {
+    showToast(`${control.controllerLabel} conserva el control.`);
+    return;
+  }
+  const type = getSecondaryCommand(timer.status);
+  if (!type) return;
   await executeAuthorityRequest(definition, timer, {
     type,
     reason: type === "PAUSE" ? "Pausa autorizada" : "",
@@ -368,18 +382,6 @@ async function updatePauseReason(reason) {
   }, "GUARDANDO MOTIVO...");
 }
 
-async function finishSelectedTimer() {
-  if (!requireTimerAccess() || pendingAction) return;
-  const timer = getSelectedTimer();
-  const definition = getSelectedDefinition();
-  if (!timer || !definition || timer.status === "FINISHED") return;
-  if (!window.confirm("Finalizar este cronometro oficial? Esta accion no reinicia el tiempo.")) return;
-  await executeAuthorityRequest(definition, timer, {
-    type: "FINISH",
-    source: "field_remote"
-  }, "FINALIZANDO...");
-}
-
 async function executeAuthorityRequest(definition, timer, request, label) {
   const commandId = createCommandId();
   const issuedAtMs = Date.now();
@@ -391,6 +393,7 @@ async function executeAuthorityRequest(definition, timer, request, label) {
     timerId: definition.timerId,
     commandId,
     expectedRevision: Number(timer.revision || 0),
+    promoteCurrentContext: true,
     controller: getRemoteController(),
     actor: getRemoteActor(),
     issuedAt: new Date(issuedAtMs).toISOString()
@@ -410,7 +413,33 @@ async function executeAuthorityRequest(definition, timer, request, label) {
     showToast(lastStatus);
   }
   pendingAction = null;
+  reconcileCurrentTimerContext();
   render();
+  return result;
+}
+
+async function prepareTernaAfterToroFinish(finishedTimer) {
+  const definition = buildToroToTernaReadyDefinition(remotePayload || {}, finishedTimer);
+  if (!definition) return;
+  const existing = officialRegistry[definition.timerId] || createTimerFromDefinition(definition);
+  const result = await executeAuthorityRequest(definition, existing, {
+    operation: "CLAIM_CONTROL",
+    promoteCurrentContext: true,
+    currentContextTransition: TORO_TO_TERNA_HANDOFF,
+    handoffFromTimerId: finishedTimer.timerId,
+    reason: "Apretalamiento finalizado; Terna preparada en READY",
+    source: "official-timer-orchestration"
+  }, "PREPARANDO TERNA...");
+  if (result?.ok) {
+    currentTimerContext = buildOfficialCurrentTimerContext(result.timer, definition, {
+      now: result.authorityAcceptedAtMs,
+      transition: TORO_TO_TERNA_HANDOFF,
+      handoffFromTimerId: finishedTimer.timerId
+    });
+    selectedTimerId = currentTimerContext.timerId;
+    lastStatus = "Terna preparada · LISTO para inicio manual";
+    render();
+  }
 }
 
 function getAvailableTimers() {
@@ -435,42 +464,37 @@ function getAvailableTimers() {
     });
 }
 
-function reconcileSelectedTimer() {
-  const resolution = resolveOfficialTimerSelection({
-    selectedTimerId,
+function reconcileCurrentTimerContext() {
+  const previousTimerId = currentTimerContext?.timerId || "";
+  currentTimerContext = resolveOfficialCurrentTimerContext({
+    source: remotePayload || {},
     definitions: derivedDefinitions,
-    registry: officialRegistry
+    registry: officialRegistry,
+    currentTimerContext: remotePayload?.currentTimerContext || currentTimerContext
   });
-  contextTransitionBlocked = resolution.blockedByActiveTimer;
-  if (contextTransitionBlocked) {
-    lastStatus = "Finaliza el tiempo activo antes de cambiar de suerte";
-  }
-  if (resolution.timerId === selectedTimerId) return;
-  selectedTimerId = resolution.timerId;
-  writeSelectedTimerId(selectedTimerId);
-  if (resolution.contextChanged && selectedTimerId) {
+  selectedTimerId = currentTimerContext?.timerId || "";
+  if (selectedTimerId && selectedTimerId !== previousTimerId) {
     lastStatus = "Nueva suerte preparada · lista para iniciar";
   }
 }
 
-function selectOfficialTimer(timerId) {
-  if (!getAvailableTimers().some(({ definition }) => definition.timerId === timerId)) return;
-  selectedTimerId = timerId;
-  writeSelectedTimerId(timerId);
-  render();
-}
-
 function getSelectedDefinition() {
-  return getAvailableTimers().find(({ definition }) => definition.timerId === selectedTimerId)?.definition || null;
+  return derivedDefinitions.find((definition) => definition.timerId === selectedTimerId)
+    || (currentTimerContext?.timerId === selectedTimerId ? currentTimerContext : null)
+    || null;
 }
 
 function getSelectedTimer() {
   const definition = getSelectedDefinition();
   if (!definition) return null;
-  const registered = officialRegistry[definition.timerId];
+  const registered = officialRegistry[definition.timerId] || (currentTimerContext?.timerId === definition.timerId ? currentTimerContext : null);
   return registered
-    ? normalizeOfficialTimerContext({
+      ? normalizeOfficialTimerContext({
         ...registered,
+        wallStartedAt: registered.wallStartedAt || registered.startedAt || null,
+        wallFinishedAt: registered.wallFinishedAt || registered.finishedAt || null,
+        officialElapsedMs: registered.officialElapsedMs ?? registered.elapsedMs ?? 0,
+        revision: registered.revision ?? registered.timerRevision ?? 0,
         label: definition.label || registered.label,
         suerteLabel: definition.suerteLabel || registered.suerteLabel,
         phaseId: definition.phaseId || registered.phaseId,
@@ -481,7 +505,8 @@ function getSelectedTimer() {
         attemptIndex: definition.attemptIndex ?? registered.attemptIndex,
         opportunityIndex: definition.opportunityIndex ?? registered.opportunityIndex,
         coleadorIndex: definition.coleadorIndex ?? registered.coleadorIndex,
-        timerRuleId: definition.timerRuleId || registered.timerRuleId,
+        timerRuleId: definition.timerRuleId || definition.timerDefinitionId || registered.timerRuleId,
+        temporalFingerprint: definition.temporalFingerprint || definition.temporalPolicyFingerprint || registered.temporalFingerprint,
         temporalPolicyStatus: definition.temporalPolicyStatus || registered.temporalPolicyStatus,
         temporalPolicyCode: definition.temporalPolicyCode || registered.temporalPolicyCode
       }, definition)
@@ -541,16 +566,27 @@ function getRemoteActor() {
 
 function getPrimaryCommand(status) {
   if (status === "READY") return "START";
+  if (status === "RUNNING") return "FINISH";
+  return "";
+}
+
+function getPrimaryLabel(status) {
+  if (status === "RUNNING") return "FINALIZAR";
+  if (status === "PAUSED") return "PAUSADO";
+  if (status === "FINISHED") return "FINALIZADO";
+  return "INICIAR";
+}
+
+function getSecondaryCommand(status) {
   if (status === "RUNNING") return "PAUSE";
   if (status === "PAUSED") return "RESUME";
   return "";
 }
 
-function getPrimaryLabel(status) {
-  if (status === "RUNNING") return "PAUSA";
-  if (status === "PAUSED") return "CONTINUAR";
-  if (status === "FINISHED") return "FINALIZADO";
-  return "START";
+function getSecondaryLabel(status) {
+  if (status === "RUNNING") return "PAUSAR";
+  if (status === "PAUSED") return "REANUDAR";
+  return "";
 }
 
 function getPendingLabel(type) {
@@ -561,10 +597,10 @@ function getPendingLabel(type) {
 }
 
 function getTimerStateLabel(status) {
-  if (status === "RUNNING") return "TIEMPO EN CURSO";
-  if (status === "PAUSED") return "TIEMPO PAUSADO";
-  if (status === "FINISHED") return "TIEMPO FINALIZADO";
-  return "LISTO PARA INICIAR";
+  if (status === "RUNNING") return "CORRIENDO";
+  if (status === "PAUSED") return "PAUSADO";
+  if (status === "FINISHED") return "FINALIZADO";
+  return "LISTO";
 }
 
 function getLiveContextText() {
@@ -628,22 +664,6 @@ function vibrateOnAck() {
     navigator.vibrate?.(35);
   } catch {
     // Vibracion es una mejora progresiva; el ACK visual es suficiente.
-  }
-}
-
-function readSelectedTimerId() {
-  try {
-    return sessionStorage.getItem(getScopedLocalStorageKey("official_timer_selected", liveChannel)) || "";
-  } catch {
-    return "";
-  }
-}
-
-function writeSelectedTimerId(timerId) {
-  try {
-    sessionStorage.setItem(getScopedLocalStorageKey("official_timer_selected", liveChannel), timerId);
-  } catch {
-    // La seleccion en memoria sigue disponible.
   }
 }
 

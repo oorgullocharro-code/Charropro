@@ -1,14 +1,19 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import {
+  buildOfficialTimerProjectionFromCurrentContext,
+  resolveOfficialCurrentTimerContext,
+  resolvePreviousPialesOpportunity
+} from "./officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -29,7 +34,8 @@ export function buildLivePayload(options = {}) {
   const tournament = context?.tournament || getActiveTournament();
   const tournamentPayload = tournament ? { ...tournament, globalRuleOverrides: state.settings.globalRuleOverrides || {} } : null;
   const leaderboard = charreada ? buildCharreadaLeaderboard(charreada.id) : [];
-  const timer = buildTimerPayload();
+  const timerBundle = buildCurrentTimerPayload({ sourceRevision: contractRevision });
+  const timer = timerBundle.timer;
   const published = state.lastPublishedScore || null;
   const broadcastContext = buildBroadcastContext({
     context,
@@ -124,10 +130,12 @@ export function buildLivePayload(options = {}) {
           suerte: context.suerte,
           attemptIndex: context.attemptIndex,
           coleadorIndex: context.coleadorIndex,
+          previousOpportunityResolution: resolveLivePialesPreviousOpportunity(context),
           attempt: options.includeDraftAttempt === false ? emptyLiveAttempt(context.attempt) : context.attempt,
           charro: getCharroName(context)
         }
       : null,
+    currentTimerContext: timerBundle.currentTimerContext,
     timer,
     graphicsConfig: normalizeGraphicsConfig(state.settings.graphicsConfig || readLocalGraphicsConfig()),
 	  leaderboard,
@@ -434,11 +442,65 @@ export function getActiveLiveChannel(tournament = getActiveTournament()) {
 }
 
 export function buildTimerPayload() {
+  return buildCurrentTimerPayload().timer;
+}
+
+export function buildCurrentTimerPayload(options = {}) {
   const timer = chooseFreshTimer(state.liveTimer, readStoredLiveTimer()) || {};
   const baseElapsedMs = Number(timer.elapsedMs || 0);
   const context = getCurrentContext();
   const source = context ? { ...context, charreada: getActiveCharreada() } : {};
-  const officialSource = context ? {
+  const officialSource = context ? buildOfficialTimerSource(context) : {};
+  const currentTimerContext = context ? resolveOfficialCurrentTimerContext({
+    source: {
+      ...officialSource,
+      currentTimerContext: state.currentTimerContext
+    },
+    registry: state.officialTimers,
+    currentTimerContext: state.currentTimerContext,
+    sourceRevision: options.sourceRevision,
+    now: options.now
+  }) : null;
+  if (currentTimerContext) {
+    state.currentTimerContext = currentTimerContext;
+    return {
+      currentTimerContext,
+      timer: buildOfficialTimerProjectionFromCurrentContext(currentTimerContext, { now: options.now })
+    };
+  }
+  const officialTimer = selectOfficialTimerForContext(state.officialTimers, officialSource);
+  if (officialTimer) return {
+    currentTimerContext: null,
+    timer: buildOfficialTimerProjection(officialTimer)
+  };
+  const view = getTimerView(timer, source);
+
+  return {
+    currentTimerContext: null,
+    timer: {
+      revision: Number(timer.revision || 0),
+      running: Boolean(timer.running),
+      startedAt: timer.startedAt || null,
+      elapsedMs: baseElapsedMs,
+      elapsedLiveMs: view.elapsedMs,
+      displayMs: view.displayMs,
+      remainingMs: view.remainingMs,
+      formatted: view.formatted,
+      mode: view.rule.mode,
+      limitMs: view.rule.limitMs,
+      limitLabel: view.rule.label,
+      stateLabel: view.stateLabel,
+      expired: view.expired,
+      scopeKey: getTimerScopeKey(source),
+      updatedAtMs: Number(timer.updatedAtMs || 0),
+      clientId: timer.clientId || "",
+      updatedAt: timer.updatedAt || null
+    }
+  };
+}
+
+function buildOfficialTimerSource(context) {
+  return {
     tournament: context.tournament,
     charreada: getActiveCharreada(),
     turn: {
@@ -448,32 +510,29 @@ export function buildTimerPayload() {
       },
       team: context.competitionContext?.isIndividualCompetition ? null : context.team,
       participant: context.competitionContext?.isIndividualCompetition ? context.participant || context.team : null,
-      suerte: context.suerte
+      suerte: context.suerte,
+      attemptIndex: context.attemptIndex,
+      coleadorIndex: context.coleadorIndex,
+      previousOpportunityResolution: resolveLivePialesPreviousOpportunity(context),
+      attempt: context.attempt
     }
-  } : {};
-  const officialTimer = selectOfficialTimerForContext(state.officialTimers, officialSource);
-  if (officialTimer) return buildOfficialTimerProjection(officialTimer);
-  const view = getTimerView(timer, source);
-
-  return {
-    revision: Number(timer.revision || 0),
-    running: Boolean(timer.running),
-    startedAt: timer.startedAt || null,
-    elapsedMs: baseElapsedMs,
-    elapsedLiveMs: view.elapsedMs,
-    displayMs: view.displayMs,
-    remainingMs: view.remainingMs,
-    formatted: view.formatted,
-    mode: view.rule.mode,
-    limitMs: view.rule.limitMs,
-    limitLabel: view.rule.label,
-    stateLabel: view.stateLabel,
-    expired: view.expired,
-    scopeKey: getTimerScopeKey(source),
-    updatedAtMs: Number(timer.updatedAtMs || 0),
-    clientId: timer.clientId || "",
-    updatedAt: timer.updatedAt || null
   };
+}
+
+function resolveLivePialesPreviousOpportunity(context) {
+  if (context?.suerte?.id !== "piales") return Number(context?.attemptIndex || 0) === 0 ? "NO_EXTENSION" : "";
+  const attemptIndex = Math.max(0, Number(context.attemptIndex || 0));
+  if (attemptIndex === 0) return "NO_EXTENSION";
+  const key = scoreKey(context.charreada?.id, context.team?.id, "piales");
+  return resolvePreviousPialesOpportunity({
+    tournamentId: context.tournament?.id,
+    charreadaId: context.charreada?.id,
+    suerteId: "piales",
+    teamId: context.team?.id,
+    participantId: context.participant?.id || context.team?.id,
+    currentOpportunityIndex: attemptIndex,
+    attempts: state.scores[key]
+  });
 }
 
 function readStoredLiveTimer() {

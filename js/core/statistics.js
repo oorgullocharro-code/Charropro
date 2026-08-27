@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
   buildTournamentTeamStandings,
   calculateAttemptTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { scoreKey, state } from "./state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./scoring.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { scoreKey, state } from "./state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 export function buildCharroProStatsCenter(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

@@ -6,8 +6,9 @@ import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../js/core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 const T0 = Date.parse("2026-08-27T12:00:00.000Z");
 const tournament = {
@@ -218,6 +219,23 @@ async function validateTimerAuthorityRulesInEmulator() {
     });
     const nextValue = cleanJson({ ...nextStarted.timer, timerKey: nextKey, actor: { id: uid, name: "Juez local", role: "juez" } });
     assert.equal(await clientWrite(databaseHost, namespace, `charropro/tournaments/${tournamentId}/officialTimers/${nextKey}`, token, nextValue), 200);
+    const currentTimerContext = cleanJson(buildOfficialCurrentTimerContext(nextStarted.timer, nextDefinition, {
+      now: T0 + 15000,
+      sourceRevision: 2,
+      contextRevision: 2
+    }));
+    assert.equal(await clientWrite(
+      databaseHost,
+      namespace,
+      `charropro/live/${tournamentId}/current/currentTimerContext`,
+      token,
+      currentTimerContext
+    ), 200, "the existing live/current Rules accept the authority-derived context without a Rules change");
+    const deviceOne = await clientRead(databaseHost, namespace, `charropro/live/${tournamentId}/current/currentTimerContext`, token);
+    const deviceTwo = await clientRead(databaseHost, namespace, `charropro/live/${tournamentId}/current/currentTimerContext`, token);
+    assert.deepEqual(deviceTwo, deviceOne, "two independent Emulator clients reconstruct the same current timer context");
+    assert.equal(deviceOne.timerId, nextDefinition.timerId);
+    assert.equal(deviceOne.status, "RUNNING");
     const historicalRead = await ownerRead(databaseHost, namespace, `charropro/tournaments/${tournamentId}/officialTimers/${timerKey}`);
     assert.equal(historicalRead.status, "PAUSED");
     assert.equal(historicalRead.officialElapsedMs, 12000);
@@ -226,6 +244,7 @@ async function validateTimerAuthorityRulesInEmulator() {
     assert.equal(nextRead.timerId, nextDefinition.timerId);
   } finally {
     await ownerDelete(databaseHost, namespace, `charropro/tournaments/${tournamentId}`);
+    await ownerDelete(databaseHost, namespace, `charropro/live/${tournamentId}`);
     await ownerDelete(databaseHost, namespace, `charropro/users/${uid}`);
     await ownerDelete(databaseHost, namespace, `charropro/userTournamentAccess/${uid}`);
     try { await auth.deleteUser(uid); } catch (error) { if (error?.code !== "auth/user-not-found") throw error; }
@@ -252,6 +271,13 @@ async function clientWrite(host, namespace, path, token, value) {
   });
   await response.text();
   return response.status;
+}
+
+async function clientRead(host, namespace, path, token) {
+  const response = await fetch(`http://${host}/${path}.json?ns=${encodeURIComponent(namespace)}&auth=${encodeURIComponent(token)}`);
+  const body = await response.text();
+  assert.equal(response.ok, true, body);
+  return JSON.parse(body);
 }
 
 async function ownerWrite(host, namespace, path, value) {

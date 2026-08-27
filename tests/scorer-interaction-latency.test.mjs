@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

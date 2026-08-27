@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "./programEngine.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260827-pre-cala-brake-review-timer-authority-context-blocker-003-v1";
+import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
 import { actor, catalog, command, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const first = command(freshReview(), BRAKE_REVIEW_ACTIONS.SYNC_TEMPORAL, {
