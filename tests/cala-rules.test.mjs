@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "../js/data/calaRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

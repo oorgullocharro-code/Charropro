@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

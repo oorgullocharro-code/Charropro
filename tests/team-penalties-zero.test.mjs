@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "../js/core/scoring.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

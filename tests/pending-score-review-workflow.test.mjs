@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",

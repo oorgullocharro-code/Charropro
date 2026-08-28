@@ -1,9 +1,9 @@
-import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
-import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 import {
   DOCUMENTED_CALA_BAD_POINT_CODES,
   buildCalaDocumentAbbreviationMatrix
-} from "./officialFormatDocumentModel.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "./officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 export const OFFICIAL_FORMAT_SNAPSHOT_VERSION = "1.2.0";
 
@@ -123,6 +123,10 @@ const SECTION_ORDER = Object.freeze([
   "manganasCaballo",
   "paso"
 ]);
+
+const REQUIRED_SUERTE_COMPONENTS = Object.freeze({
+  terna: Object.freeze(["lazo", "pial_ruedo"])
+});
 
 const TIME_POINT_RULE_IDS = Object.freeze({
   toro: Object.freeze(["toro_adic_tiempo_ahorrado"]),
@@ -866,7 +870,12 @@ function validateRequiredSuertes(charreada, attempts, errors) {
   const required = Array.isArray(charreada.suerteIds) ? charreada.suerteIds.map(text).filter(Boolean) : [];
   if (!required.length) return;
   const present = new Set(attempts.map((attempt) => attempt.suerteId));
-  for (const suerteId of required) if (!present.has(suerteId)) errors.push(`official-format-required-suerte-missing:${suerteId}`);
+  for (const suerteId of required) {
+    const components = REQUIRED_SUERTE_COMPONENTS[suerteId] || [suerteId];
+    for (const componentId of components) {
+      if (!present.has(componentId)) errors.push(`official-format-required-suerte-missing:${componentId}`);
+    }
+  }
 }
 
 function buildSourceRevision(attempts) {

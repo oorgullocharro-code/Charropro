@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260827-scorer-global-timer-reactivity-recovery-001-v1",
+      "appVersion": "20260828-fmch-terna-federation-format-official-score-recovery-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "6cec5ca4735ed851fe09c6e4f253b89d6672b6b542436ef43558aa1e11e8a4e6",
-  "fingerprint": "6cec5ca4735ed851fe09c6e4f253b89d6672b6b542436ef43558aa1e11e8a4e6"
+  "checksum": "6071e638cfd38c8fe3a373e815123423d4912fd1d9e4acde592205ad69f51947",
+  "fingerprint": "6071e638cfd38c8fe3a373e815123423d4912fd1d9e4acde592205ad69f51947"
 }

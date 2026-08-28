@@ -9,7 +9,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

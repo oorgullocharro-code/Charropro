@@ -16,7 +16,7 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
-} from "../js/core/publicProjectionOutbox.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "../js/core/publicProjectionOutbox.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const T0 = Date.parse("2026-07-29T12:00:00.000Z");
 const base = {

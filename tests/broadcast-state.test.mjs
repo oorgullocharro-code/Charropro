@@ -22,7 +22,7 @@ import {
   setPreviewState,
   setProgramState,
   validateBroadcastState
-} from "../js/broadcast/broadcastState.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:01.000Z";

@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

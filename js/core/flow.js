@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+} from "./state.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

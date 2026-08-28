@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewToCalaAttempt } from "../js/core/brakeReviewPhase.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewToCalaAttempt } from "../js/core/brakeReviewPhase.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+import { emptyAttempt } from "../js/core/state.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
 import { catalog, command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = command(freshReview(), BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, {
