@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   OFFICIAL_FORMAT_DOCUMENT_PROFILE,
   OFFICIAL_FORMAT_DOCUMENTAL_REVIEW_ITEMS,
@@ -13,12 +13,12 @@ import {
   OFFICIAL_FORMAT_UNSUPPORTED_DOCUMENTAL_FIELDS,
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/officialFormat.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const GENERATED_AT = "2026-08-22T18:00:00.000Z";
 const PUBLISHED_AT = "2026-08-22T17:00:00.000Z";
@@ -246,7 +246,7 @@ function buildGoldenRecords() {
     ...[0, 1, 2].flatMap((coleadorIndex) => [0, 1, 2].map((attemptIndex) => buildRecord("colas", attemptIndex, coleadorIndex))),
     buildRecord("toro"),
     buildRecord("lazo", 0),
-    buildRecord("pial_ruedo", 1),
+    buildRecord("pial_ruedo", 1, 1),
     buildRecord("yegua"),
     ...[0, 1, 2].map((index) => buildRecord("manganas_pie", index)),
     ...[0, 1, 2].map((index) => buildRecord("manganas_caballo", index)),

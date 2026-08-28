@@ -379,6 +379,7 @@ export function buildFmch2026TernaOpportunityDraft(session = {}, input = {}) {
     type,
     suerteId: type === "HEAD" ? "lazo" : "pial_ruedo",
     participantId: input.participantId,
+    participantSlot: input.participantSlot,
     participantName: input.participantName,
     attemptIndex: input.attemptIndex ?? sequence - 1,
     status: "PENDING_PUBLICATION",
@@ -402,6 +403,9 @@ export function buildFmch2026TernaOfficialAttempt(attempt = {}, opportunity = {}
     ...currentAttempt,
     sharedOpportunityId: currentOpportunity.sharedOpportunityId || currentAttempt.sharedOpportunityId || null,
     sharedSequenceNumber: currentOpportunity.sharedSequenceNumber || currentAttempt.sharedSequenceNumber || null,
+    participantId: currentOpportunity.participantId || currentAttempt.participantId || null,
+    participantSlot: currentOpportunity.participantSlot || currentAttempt.participantSlot || null,
+    participantName: currentOpportunity.participantName || currentAttempt.participantName || null,
     opportunityType: currentOpportunity.type || currentAttempt.opportunityType || null,
     opportunityStatus: "CONSUMED"
   };
@@ -523,6 +527,7 @@ export function buildFmch2026TernaRemateHistory(history = []) {
       remateId: normalizeId(entry.remateId),
       remateLabel: String(entry.remateLabel || "").slice(0, 240),
       participantId: normalizeId(entry.participantId),
+      participantSlot: positiveInteger(entry.participantSlot, 0),
       participantName: String(entry.participantName || "").slice(0, 240)
     });
   });
@@ -621,6 +626,7 @@ function normalizeOpportunity(value = {}) {
     type: normalizeTernaType(value.type || value.suerteId),
     suerteId: normalizeTernaType(value.type || value.suerteId) === "HEAD" ? "lazo" : "pial_ruedo",
     participantId: normalizeId(value.participantId),
+    participantSlot: positiveInteger(value.participantSlot, 0),
     participantName: String(value.participantName || "").slice(0, 240),
     attemptIndex: nonNegativeInteger(value.attemptIndex),
     status: String(value.status || "AVAILABLE").slice(0, 80),

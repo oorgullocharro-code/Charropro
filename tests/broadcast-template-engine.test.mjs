@@ -21,12 +21,12 @@ import {
   updateBroadcastTemplate,
   validateBroadcastTemplate,
   validateTemplateSnapshot
-} from "../js/broadcast/templateEngine.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/broadcast/templateEngine.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../fixtures/templateEngineFixtures.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../fixtures/templateEngineFixtures.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const T0 = "2026-07-14T12:00:00.000Z";
 const T1 = "2026-07-14T12:01:00.000Z";

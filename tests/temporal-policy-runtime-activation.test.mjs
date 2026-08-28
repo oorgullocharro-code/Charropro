@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",

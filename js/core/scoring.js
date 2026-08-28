@@ -1,12 +1,13 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;
@@ -394,8 +395,7 @@ function compactCharreada(charreada, index) {
 function getRosterNameForSuerte(team = {}, suerte = {}, coleadorIndex = 0) {
   const roster = team.roster || {};
   if (suerte?.type === "coleadero") return roster.colas?.[coleadorIndex] || `Coleador ${coleadorIndex + 1}`;
-  if (suerte?.id === "lazo") return roster.terna?.[0] || roster.lazo || "";
-  if (suerte?.id === "pial_ruedo") return roster.terna?.[1] || roster.pial_ruedo || "";
+  if (["lazo", "pial_ruedo"].includes(suerte?.id)) return getTernaParticipant(team, coleadorIndex).participantName;
   return roster[suerte?.id] || "";
 }
 

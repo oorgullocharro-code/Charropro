@@ -1,21 +1,27 @@
 import assert from "node:assert/strict";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildOfficialTeamSheet,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/officialFormat.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import {
+  buildCanonicalTernaRoster,
+  getCanonicalTernaRoster,
+  getTernaParticipant,
+  isCanonicalTernaParticipant
+} from "../js/core/ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const {
   applyOfficialScoreTransaction,
@@ -46,9 +52,42 @@ const team = {
   name: "Equipo Terna Oficial",
   category: "Libre",
   roster: {
-    terna: ["Charro 1", "Charro 2", "Charro 3"]
+    terna: buildCanonicalTernaRoster(TEAM_ID, ["Charro 1", "Charro 2", "Charro 3"])
   }
 };
+assert.deepEqual(
+  team.roster.terna.map(({ participantSlot, participantName }) => ({ participantSlot, participantName })),
+  [
+    { participantSlot: 1, participantName: "Charro 1" },
+    { participantSlot: 2, participantName: "Charro 2" },
+    { participantSlot: 3, participantName: "Charro 3" }
+  ]
+);
+assert.ok(team.roster.terna.every(isCanonicalTernaParticipant));
+assert.equal(getTernaParticipant(team, 1).participantId, team.roster.terna[1].participantId);
+const renamedRoster = buildCanonicalTernaRoster(
+  TEAM_ID,
+  ["Charro 1", "Charro 2 actualizado", "Charro 3"],
+  team.roster.terna
+);
+assert.deepEqual(
+  renamedRoster.map((participant) => participant.participantId),
+  team.roster.terna.map((participant) => participant.participantId),
+  "editing names never changes participant row identity"
+);
+assert.deepEqual(
+  getCanonicalTernaRoster(structuredClone(team)),
+  team.roster.terna,
+  "Firebase/snapshot serialization preserves the canonical three-participant roster"
+);
+assert.deepEqual(
+  getCanonicalTernaRoster({
+    id: TEAM_ID,
+    roster: { terna: ["", "", ""], lazo: "Charro 1", pial_ruedo: "Charro 2", terna_auxiliar: "Charro 3" }
+  }).map((participant) => participant.participantName),
+  ["Charro 1", "Charro 2", "Charro 3"],
+  "legacy aliases are promoted into the canonical roster without losing participant names"
+);
 const charreada = {
   id: CHARREADA_ID,
   tournamentId: TOURNAMENT_ID,
@@ -90,7 +129,7 @@ const failedHead = publishTernaComponent({
   suerteId: "lazo",
   attemptIndex: 0,
   participantId: "charro-1",
-  participantSlot: 0,
+  participantSlot: 1,
   participantName: "Charro 1",
   baseRuleId: null,
   additionalRuleIds: [],
@@ -101,14 +140,14 @@ const failedHead = publishTernaComponent({
 });
 storedTournament = failedHead.tournament;
 assert.equal(failedHead.outcome.ok, true);
-assert.equal(failedHead.outcome.record.breakdown.attemptV2.identity.participantSlot, 0);
+assert.equal(failedHead.outcome.record.breakdown.attemptV2.identity.participantSlot, 1);
 assert.equal(failedHead.outcome.record.total, 0);
 
 const head = publishTernaComponent({
   suerteId: "lazo",
   attemptIndex: 1,
   participantId: "charro-2",
-  participantSlot: 1,
+  participantSlot: 2,
   participantName: "Publicación Cabecero Charro Dos",
   baseRuleId: "lazo_base_floreado",
   additionalRuleIds: [
@@ -128,14 +167,14 @@ storedTournament = head.tournament;
 assert.equal(head.outcome.ok, true);
 assert.equal(head.outcome.record.breakdown.attemptV2.identity.suerteId, "lazo");
 assert.equal(head.outcome.record.breakdown.attemptV2.identity.participantId, "charro-2");
-assert.equal(head.outcome.record.breakdown.attemptV2.identity.participantSlot, 1);
+assert.equal(head.outcome.record.breakdown.attemptV2.identity.participantSlot, 2);
 assert.equal(head.outcome.record.total, 26);
 
 const pial = publishTernaComponent({
   suerteId: "pial_ruedo",
   attemptIndex: 2,
   participantId: "charro-3",
-  participantSlot: 2,
+  participantSlot: 3,
   participantName: "Publicación Pial Charro Tres",
   baseRuleId: "pial_ruedo_base_contraviento_izquierdo",
   additionalRuleIds: ["pial_ruedo_adic_resorte_corvejones"],
@@ -147,12 +186,16 @@ storedTournament = pial.tournament;
 assert.equal(pial.outcome.ok, true);
 assert.equal(pial.outcome.record.breakdown.attemptV2.identity.suerteId, "pial_ruedo");
 assert.equal(pial.outcome.record.breakdown.attemptV2.identity.participantId, "charro-3");
-assert.equal(pial.outcome.record.breakdown.attemptV2.identity.participantSlot, 2);
+assert.equal(pial.outcome.record.breakdown.attemptV2.identity.participantSlot, 3);
 assert.equal(pial.outcome.record.total, 20);
 
 const activeOfficialScores = Object.values(storedTournament.publishedScores).filter((record) => !record.superseded);
 assert.equal(activeOfficialScores.length, 3, "Official Score preserves failed and successful Terna attempts");
 assert.equal(activeOfficialScores.reduce((sum, record) => sum + record.total, 0), 46, "the official team total includes complete Terna");
+assert.ok(
+  activeOfficialScores.every((record) => record.team.roster.terna.every(isCanonicalTernaParticipant)),
+  "every Firebase Official Score carries the canonical three-participant roster"
+);
 
 const formatSnapshot = createOfficialFormatSnapshot({
   tournament: tournamentInfo,
@@ -173,13 +216,13 @@ assert.equal(formatSnapshot.suertes.terna.attempts.length, 3);
 assert.equal(formatSnapshot.suertes.terna.officialScoreTotal, 46);
 assert.equal(formatSnapshot.suertes.terna.attempts[0].suerteId, "lazo");
 assert.equal(formatSnapshot.suertes.terna.attempts[0].participantId, "charro-1");
-assert.equal(formatSnapshot.suertes.terna.attempts[0].participantSlot, 0);
+assert.equal(formatSnapshot.suertes.terna.attempts[0].participantSlot, 1);
 assert.equal(formatSnapshot.suertes.terna.attempts[1].suerteId, "lazo");
 assert.equal(formatSnapshot.suertes.terna.attempts[1].participantId, "charro-2");
-assert.equal(formatSnapshot.suertes.terna.attempts[1].participantSlot, 1);
+assert.equal(formatSnapshot.suertes.terna.attempts[1].participantSlot, 2);
 assert.equal(formatSnapshot.suertes.terna.attempts[2].suerteId, "pial_ruedo");
 assert.equal(formatSnapshot.suertes.terna.attempts[2].participantId, "charro-3");
-assert.equal(formatSnapshot.suertes.terna.attempts[2].participantSlot, 2);
+assert.equal(formatSnapshot.suertes.terna.attempts[2].participantSlot, 3);
 
 const formatSheet = buildOfficialTeamSheet(formatSnapshot);
 const visualField = (fieldId) => formatSheet.visualRows.flat().find((cell) => cell?.fieldId === fieldId);
@@ -245,6 +288,43 @@ assert.equal(reconnectedField("FMCH.TEAM_SHEET.TERNA.ROW_01.TOTAL"), 0);
 assert.equal(reconnectedField("FMCH.TEAM_SHEET.TERNA.ROW_02.TOTAL"), 26);
 assert.equal(reconnectedField("FMCH.TEAM_SHEET.TERNA.ROW_03.TOTAL"), 20);
 assert.equal(reconnectedSnapshot.suertes.terna.officialScoreTotal, 46, "refresh/reconnect and publication order preserve Terna row ownership");
+
+const slotOnlyOfficialScores = structuredClone({
+  [head.outcome.record.id]: head.outcome.record,
+  [pial.outcome.record.id]: pial.outcome.record
+});
+for (const record of Object.values(slotOnlyOfficialScores)) {
+  delete record.breakdown.attemptV2.identity.participantId;
+  record.breakdown.attemptV2.identity.participantSlot = 0;
+  record.breakdown.attemptV2.context.participantName = "";
+  record.charro = team.name;
+}
+const slotOnlyTeam = structuredClone(team);
+slotOnlyTeam.roster.terna = ["", "", ""];
+const slotOnlySnapshot = createOfficialFormatSnapshot({
+  tournament: tournamentInfo,
+  charreada,
+  team: slotOnlyTeam,
+  officialScores: slotOnlyOfficialScores,
+  officialScoreLedger: {}
+}, {
+  tournamentId: TOURNAMENT_ID,
+  charreadaId: CHARREADA_ID,
+  teamId: TEAM_ID,
+  generatedAt: "2026-08-28T15:05:15.000Z"
+});
+const slotOnlySheet = buildOfficialTeamSheet(slotOnlySnapshot);
+const slotOnlyField = (fieldId) => slotOnlySheet.visualRows.flat().find((cell) => cell?.fieldId === fieldId)?.value;
+assert.equal(slotOnlySnapshot.suertes.terna.officialScoreTotal, 46);
+assert.equal(slotOnlyField("FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_01"), 26);
+assert.equal(slotOnlyField("FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_02"), 20);
+assert.equal(slotOnlyField("FMCH.TEAM_SHEET.TERNA.ROW_01.TOTAL"), 46);
+assert.equal(slotOnlyField("FMCH.TEAM_SHEET.TERNA.ROW_02.TOTAL"), "-");
+assert.equal(slotOnlyField("FMCH.TEAM_SHEET.TERNA.ROW_03.TOTAL"), "-");
+const slotOnlyHtml = renderOfficialFormatSheetHtml(slotOnlySheet);
+assert.match(slotOnlyHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_01\.BASE_ADDITIONALES_01"[^>]*>26<\/td>/);
+assert.match(slotOnlyHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_01\.BASE_ADDITIONALES_02"[^>]*>20<\/td>/);
+assert.match(slotOnlyHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_01\.TOTAL"[^>]*>46<\/td>/);
 
 const incompleteFormatSnapshot = createOfficialFormatSnapshot({
   tournament: tournamentInfo,
@@ -373,7 +453,7 @@ function publishTernaComponent({
     tournament: { id: TOURNAMENT_ID, name: tournamentInfo.name },
     charreada,
     competition: { id: "equipos_completo", type: "equipos_completo", scope: "team" },
-    team: { id: TEAM_ID, name: team.name },
+    team: { id: TEAM_ID, name: team.name, roster: { terna: structuredClone(team.roster.terna) } },
     suerte: {
       id: suerteId,
       name: effective.suerte.name,

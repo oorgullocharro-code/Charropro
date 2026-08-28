@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

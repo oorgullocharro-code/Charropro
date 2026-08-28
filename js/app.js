@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./data/calaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -26,7 +26,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -36,7 +36,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -53,7 +53,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -73,23 +73,30 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/scorerContextResolution.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import {
+  buildCanonicalTernaRoster,
+  getCanonicalTernaRoster,
+  getTernaParticipant,
+  getTernaParticipantName,
+  isCanonicalTernaParticipant
+} from "./core/ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -97,23 +104,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/officialTimerOrchestration.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -126,9 +133,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/brakeReviewPhase.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -141,27 +148,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/scorerComponents.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -171,7 +178,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/sync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -213,7 +220,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/firebaseSync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -226,15 +233,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/pendingScoreReview.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/tournamentContext.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -244,8 +251,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/supervisorNavigation.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -279,7 +286,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -453,6 +460,7 @@ const ACTION_CAPABILITIES = {
   "select-attempt": "score",
   "select-coleadero-attempt": "score",
   "select-coleador": "score",
+  "select-terna-participant": "score",
   "select-terna-suerte": "score",
   "select-terna-history": "score",
   "punta-step": "score",
@@ -550,6 +558,7 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "select-attempt",
   "select-coleadero-attempt",
   "select-coleador",
+  "select-terna-participant",
   "punta-step",
   "punta-set",
   "punta-input",
@@ -9169,6 +9178,9 @@ function getOfficialTimerDefinitionsForScoringContext(context = getCurrentContex
 function buildScoringAttemptV2Context(context, attempt = context.attempt) {
   const isIndividualCompetition = Boolean(context.competitionContext?.isIndividualCompetition);
   const participantName = getPublishedCharroName(context);
+  const ternaParticipant = !isIndividualCompetition && isFmch2026TernaSuerte(context.suerte?.id)
+    ? getTernaParticipant(context.team, context.coleadorIndex)
+    : null;
   const resolution = context.suerte?.ruleResolution || {};
   return {
     tournamentId: context.tournament?.id,
@@ -9177,9 +9189,11 @@ function buildScoringAttemptV2Context(context, attempt = context.attempt) {
       || "equipos_completo",
     competitionScope: isIndividualCompetition ? "individual" : "team",
     charreadaId: context.charreada?.id,
-    participantId: isIndividualCompetition ? context.participant?.id || context.team?.id : null,
+    participantId: isIndividualCompetition
+      ? context.participant?.id || context.team?.id
+      : ternaParticipant?.participantId || null,
     teamId: isIndividualCompetition ? null : context.team?.id,
-    participantName: isIndividualCompetition ? participantName : null,
+    participantName: isIndividualCompetition || ternaParticipant ? participantName : null,
     teamName: isIndividualCompetition ? null : context.team?.name,
     horseName: isIndividualCompetition ? context.participant?.horseName || context.team?.horseName : null,
     suerteId: context.suerte?.id,
@@ -9188,7 +9202,7 @@ function buildScoringAttemptV2Context(context, attempt = context.attempt) {
     category: context.team?.category || context.charreada?.category || null,
     phase: getCharreadaPhase(context.charreada),
     opportunityNumber: Number(context.attemptIndex || 0) + 1,
-    participantSlot: Number(context.coleadorIndex || 0),
+    participantSlot: ternaParticipant?.participantSlot ?? Number(context.coleadorIndex || 0),
     opportunityType: context.suerte?.id,
     sharedOpportunityId: attempt.sharedOpportunityId,
     sharedSequenceNumber: attempt.sharedSequenceNumber,
@@ -9679,6 +9693,7 @@ function renderTernaMainPanel(context) {
   const nextContextLabel = getTernaNextContextLabel(context, session, currentType);
   const canFinishSession = canFinishFmch2026TernaSession(session);
   const pendingSessionReview = hasPendingTernaSessionReview(context);
+  const participants = getCanonicalTernaRoster(context.team);
   return html`
     <section class="cp-scoring-card cp-main-suerte-panel cp-terna-panel" data-terna-status="${escapeHTML(session.status)}">
       <header>
@@ -9691,6 +9706,16 @@ function renderTernaMainPanel(context) {
       <div class="cp-terna-switch" role="group" aria-label="Cambiar score de Terna">
         <button class="button ${currentType === "HEAD" ? "primary" : ""}" data-action="select-terna-suerte" data-id="lazo" type="button" ${activeSuerteId && activeSuerteId !== "lazo" ? "disabled" : ""}>Lazo Cabecero</button>
         <button class="button ${currentType === "PIAL" ? "primary" : ""}" data-action="select-terna-suerte" data-id="pial_ruedo" type="button" ${activeSuerteId && activeSuerteId !== "pial_ruedo" ? "disabled" : ""}>Pial en el Ruedo</button>
+      </div>
+      <div class="cp-terna-switch" role="group" aria-label="Seleccionar participante de Terna">
+        ${participants.map((participant, index) => html`
+          <button
+            class="button ${index === context.coleadorIndex ? "primary" : ""}"
+            data-action="select-terna-participant"
+            data-index="${index}"
+            type="button"
+          >${participant.participantSlot}. ${escapeHTML(participant.participantName || "Sin registrar")}</button>
+        `).join("")}
       </div>
       <div class="cp-terna-dashboard">
         <article class="cp-terna-counter">
@@ -9780,10 +9805,12 @@ function charroNameForTerna(context) {
 
 function getTernaNextContextLabel(context, session, currentType) {
   const completion = getCurrentTernaAttemptCompletion(context);
+  const participant = getTernaParticipant(context.team, context.coleadorIndex);
   const draft = buildFmch2026TernaOpportunityDraft(session, {
     type: currentType,
-    participantId: context.team?.id,
-    participantName: charroNameForTerna(context),
+    participantId: participant.participantId,
+    participantSlot: participant.participantSlot,
+    participantName: participant.participantName,
     attemptIndex: context.attemptIndex,
     result: completion.result,
     countsForTerna: completion.countsForTerna
@@ -11992,6 +12019,7 @@ function handleAction(action, target) {
     },
     "select-suerte": () => selectScoringSuerte(Number(target.dataset.index)),
     "select-terna-suerte": () => selectTernaSuerte(target.dataset.id),
+    "select-terna-participant": () => selectTernaParticipant(Number(target.dataset.index)),
     "select-terna-history": () => selectTernaHistory(target),
     "select-team": () => selectScoringTeam(Number(target.dataset.index)),
     "select-attempt": () => {
@@ -12140,9 +12168,21 @@ function setTernaScoringPointer(suerteId, session = null) {
   if (index < 0) return false;
   state.scoringSuerteIdx = index;
   state.scoringAttemptIdx = Math.max(0, Number(session?.currentOpportunity || 1) - 1);
-  state.scoringColeadorIdx = 0;
   saveScoringNavigationDraft();
   return true;
+}
+
+function selectTernaParticipant(index) {
+  const context = getCurrentContext();
+  if (!context || !isFmch2026TernaSuerte(context.suerte?.id)) return;
+  const participant = getTernaParticipant(context.team, index);
+  if (!participant.participantName) {
+    showToast(`Registra el participante ${participant.participantSlot} de Terna antes de calificar.`);
+    return;
+  }
+  state.scoringColeadorIdx = Math.max(0, Math.min(2, Number(index) || 0));
+  saveScoringNavigationDraft();
+  render();
 }
 
 function selectTernaHistory(target) {
@@ -12157,7 +12197,7 @@ function selectTernaHistory(target) {
   if (index < 0) return;
   state.scoringSuerteIdx = index;
   state.scoringAttemptIdx = Math.max(0, Number(entry.attemptIndex || entry.sharedSequenceNumber - 1));
-  state.scoringColeadorIdx = 0;
+  state.scoringColeadorIdx = Math.max(0, Math.min(2, Number(entry.participantSlot || 1) - 1));
   saveScoringNavigationDraft();
   render();
 }
@@ -12871,10 +12911,11 @@ function saveTeam() {
   SUERTES.filter((suerte) => suerte.id !== "colas").forEach((suerte) => {
     roster[suerte.id] = data.get(`roster.${suerte.id}`)?.trim() || "";
   });
-  roster.terna = [0, 1, 2].map((index) => data.get(`roster.terna.${index}`)?.trim() || "");
-  roster.lazo = roster.terna[0] || roster.lazo || "";
-  roster.pial_ruedo = roster.terna[1] || roster.pial_ruedo || "";
-  roster.terna_auxiliar = roster.terna[2] || "";
+  const ternaNames = [0, 1, 2].map((index) => data.get(`roster.terna.${index}`)?.trim() || "");
+  roster.terna = buildCanonicalTernaRoster(id, ternaNames, existing?.roster?.terna);
+  roster.lazo = roster.terna[0].participantName || roster.lazo || "";
+  roster.pial_ruedo = roster.terna[1].participantName || roster.pial_ruedo || "";
+  roster.terna_auxiliar = roster.terna[2].participantName || "";
   roster.colas = [0, 1, 2].map((index) => data.get(`roster.colas.${index}`)?.trim() || "");
 
 	  const payload = {
@@ -13042,9 +13083,9 @@ function createBlankRoster() {
 function getTernaRosterParts(roster = {}) {
   const terna = Array.isArray(roster.terna) ? roster.terna : [];
   return [
-    terna[0] || roster.lazo || "",
-    terna[1] || roster.pial_ruedo || "",
-    terna[2] || roster.terna_auxiliar || ""
+    getTernaParticipantName(terna[0]) || roster.lazo || "",
+    getTernaParticipantName(terna[1]) || roster.pial_ruedo || "",
+    getTernaParticipantName(terna[2]) || roster.terna_auxiliar || ""
   ];
 }
 
@@ -13684,10 +13725,11 @@ function reconcileTernaRemateConstraint(context) {
   const runtime = getTernaRuntime(context);
   if (!runtime) return;
   const ruleId = "pial_ruedo_desc_repetir_remate";
+  const participant = getTernaParticipant(context.team, context.coleadorIndex);
   const shouldDisqualify = shouldDisqualifyRepeatedFmch2026TernaRemate(runtime.session, {
     type: "PIAL",
-    participantId: context.participant?.id || "",
-    participantName: getPublishedCharroName(context),
+    participantId: participant.participantId,
+    participantName: participant.participantName,
     remateId: context.attempt.remateId,
     sharedOpportunityId: context.attempt.sharedOpportunityId
   });
@@ -13987,7 +14029,10 @@ function compactPublishedTeam(team) {
     participantName: team.participantName || "",
     horseName: team.horseName || "",
     category: team.category || "Libre",
-    association: team.association || ""
+    association: team.association || "",
+    roster: {
+      terna: getCanonicalTernaRoster(team)
+    }
   };
 }
 
@@ -14011,7 +14056,7 @@ function getPublishedCharroName(context) {
   if (context.suerte?.type === "coleadero") {
     return context.team?.roster?.colas?.[context.coleadorIndex] || `Coleador ${Number(context.coleadorIndex || 0) + 1}`;
   }
-  return getRosterNameForSuerte(context.team, context.suerte) || context.team?.name || "";
+  return getRosterNameForSuerte(context.team, context.suerte, context.coleadorIndex) || context.team?.name || "";
 }
 
 function buildPublishedBreakdown(context, attempt, publication = {}) {
@@ -14995,6 +15040,10 @@ function reconcileCommittedOfficialScore(previousRecords = [], committed = {}) {
 
 function prepareTernaAttemptForPublication(context) {
   if (!isFmch2026TernaSuerte(context?.suerte?.id)) return { ok: true, terna: false };
+  const participant = getTernaParticipant(context.team, context.coleadorIndex);
+  if (!isCanonicalTernaParticipant(participant)) {
+    return { ok: false, reason: "terna-participant-identity-missing" };
+  }
   reconcileTernaRemateConstraint(context);
   const runtime = getTernaRuntime(context);
   if (!runtime) return { ok: false, reason: "terna-session-missing" };
@@ -15015,8 +15064,9 @@ function prepareTernaAttemptForPublication(context) {
   const draft = existing
     ? { ok: true, opportunity: {
         ...existing,
-        participantId: context.participant?.id || existing.participantId || "",
-        participantName: getPublishedCharroName(context),
+        participantId: participant.participantId,
+        participantSlot: participant.participantSlot,
+        participantName: participant.participantName,
         attemptIndex: context.attemptIndex,
         result,
         qualifiesForTerna: completion.qualifiesForTerna,
@@ -15028,8 +15078,9 @@ function prepareTernaAttemptForPublication(context) {
       }, correction: true }
     : buildFmch2026TernaOpportunityDraft(runtime.session, {
         type: context.suerte.id,
-        participantId: context.participant?.id || "",
-        participantName: getPublishedCharroName(context),
+        participantId: participant.participantId,
+        participantSlot: participant.participantSlot,
+        participantName: participant.participantName,
         attemptIndex: context.attemptIndex,
         result,
         countsForTerna: completion.countsForTerna,
@@ -15665,9 +15716,13 @@ async function nextScore() {
       preparedTerna = prepareTernaAttemptForPublication(context);
       if (!preparedTerna.ok) {
         officialPublishInProgress = false;
-        showToast(preparedTerna.reason === "terna-opportunity-limit-reached"
-          ? "La Terna ya consumió sus cinco oportunidades."
-          : "La oportunidad compartida cambió. Revisa la secuencia antes de publicar.");
+        showToast(
+          preparedTerna.reason === "terna-opportunity-limit-reached"
+            ? "La Terna ya consumió sus cinco oportunidades."
+            : preparedTerna.reason === "terna-participant-identity-missing"
+              ? "Registra y selecciona al participante de Terna antes de publicar."
+              : "La oportunidad compartida cambió. Revisa la secuencia antes de publicar."
+        );
         render({ preserveScoringScroll: true });
         finalizeScorerSaveLatency(latencyTrace, "failed", { reason: preparedTerna.reason || "terna-prepare-failed" });
         return;
@@ -15914,13 +15969,14 @@ function getCharroName(context) {
   if (context.suerte.type === "coleadero") {
     return context.team.roster.colas?.[context.coleadorIndex] || `Coleador ${context.coleadorIndex + 1}`;
   }
-  return getRosterNameForSuerte(context.team, context.suerte) || "Sin registrar";
+  return getRosterNameForSuerte(context.team, context.suerte, context.coleadorIndex) || "Sin registrar";
 }
 
-function getRosterNameForSuerte(team = {}, suerte = {}) {
+function getRosterNameForSuerte(team = {}, suerte = {}, coleadorIndex = 0) {
   const roster = team.roster || {};
-  if (suerte?.id === "lazo") return roster.terna?.[0] || roster.lazo || "";
-  if (suerte?.id === "pial_ruedo") return roster.terna?.[1] || roster.pial_ruedo || "";
+  if (["lazo", "pial_ruedo"].includes(suerte?.id)) {
+    return getTernaParticipant(team, coleadorIndex).participantName;
+  }
   return roster[suerte?.id] || "";
 }
 

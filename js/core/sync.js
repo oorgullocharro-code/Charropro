@@ -1,19 +1,20 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildOfficialTimerProjectionFromCurrentContext,
   resolveOfficialCurrentTimerContext,
   resolvePreviousPialesOpportunity
-} from "./officialTimerOrchestration.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./officialTimerOrchestration.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -700,8 +701,9 @@ export function getCharroName(context) {
   if (context.suerte.type === "coleadero") {
     return roster.colas?.[context.coleadorIndex] || `Coleador ${context.coleadorIndex + 1}`;
   }
-  if (context.suerte.id === "lazo") return roster.terna?.[0] || roster.lazo || "Sin registrar";
-  if (context.suerte.id === "pial_ruedo") return roster.terna?.[1] || roster.pial_ruedo || "Sin registrar";
+  if (["lazo", "pial_ruedo"].includes(context.suerte.id)) {
+    return getTernaParticipant(context.team, context.coleadorIndex).participantName || "Sin registrar";
+  }
   return roster[context.suerte.id] || "Sin registrar";
 }
 

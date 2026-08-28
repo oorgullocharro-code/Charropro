@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import backupService from "../functions/backupService.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import backupService from "../functions/backupService.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const {
   BACKUP_FOUNDATION_VERSION,

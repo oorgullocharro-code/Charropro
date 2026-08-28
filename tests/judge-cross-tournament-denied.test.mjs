@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import { createBootstrapHarness, executeBootstrap, profile, TOURNAMENT_A, TOURNAMENT_B, tournamentIndex, tournamentRecord } from "./helpers/userAccessBootstrapTestHarness.mjs";
 
 const { result, reads } = await executeBootstrap(

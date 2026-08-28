@@ -10,7 +10,7 @@ import {
   normalizeFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const identity = {
   tournamentId: "demo-local-fmch-2026",
@@ -26,6 +26,8 @@ assert.equal(canFinishFmch2026TernaSession(session), false, "an empty Terna cann
 const firstDraft = buildFmch2026TernaOpportunityDraft(session, {
   type: "HEAD",
   participantId: "cabecero-a",
+  participantSlot: 1,
+  participantName: "Charro 1",
   result: "VALID",
   countsForTerna: true
 });
@@ -47,6 +49,9 @@ session = firstCommit.session;
 assert.equal(resolveFmch2026TernaNextSuerteId(session), "pial_ruedo", "official Cabecero advances to Pial");
 assert.equal(session.sharedTimerId, `${session.ternaSessionId}:timer`);
 assert.equal(session.history[0].sharedOpportunityId, `${session.ternaSessionId}:op:1`);
+assert.equal(session.history[0].participantId, "cabecero-a");
+assert.equal(session.history[0].participantSlot, 1);
+assert.equal(session.history[0].participantName, "Charro 1");
 
 session = consume(session, "PIAL", 2, false);
 assert.equal(resolveFmch2026TernaNextSuerteId(session), "pial_ruedo", "a failed Pial keeps Pial active");
@@ -87,9 +92,57 @@ for (const usedCount of [1, 2, 4]) {
   assert.deepEqual(reloaded, closed.session, "reload preserves explicit closed-unused opportunities");
 }
 
+let repeatedParticipantSession = createFmch2026TernaSession({ ...identity, teamId: "equipo-identidad-repetida" });
+repeatedParticipantSession = consume(repeatedParticipantSession, "HEAD", 1, false, {
+  participantId: "charro-1",
+  participantSlot: 1,
+  participantName: "Charro 1"
+});
+repeatedParticipantSession = consume(repeatedParticipantSession, "HEAD", 2, false, {
+  participantId: "charro-1",
+  participantSlot: 1,
+  participantName: "Charro 1"
+});
+assert.deepEqual(
+  repeatedParticipantSession.history.map(({ participantId, participantSlot }) => ({ participantId, participantSlot })),
+  [
+    { participantId: "charro-1", participantSlot: 1 },
+    { participantId: "charro-1", participantSlot: 1 }
+  ],
+  "multiple attempts from one charro remain owned by the same roster slot"
+);
+assert.deepEqual(
+  normalizeFmch2026TernaSession(structuredClone(repeatedParticipantSession), repeatedParticipantSession).history,
+  repeatedParticipantSession.history,
+  "refresh/reconnect preserves participant identity on every consumed opportunity"
+);
+
+let transitionIdentitySession = createFmch2026TernaSession({ ...identity, teamId: "equipo-identidad-transicion" });
+transitionIdentitySession = consume(transitionIdentitySession, "HEAD", 1, true, {
+  participantId: "charro-2",
+  participantSlot: 2,
+  participantName: "Charro 2"
+});
+const pialTransitionDraft = buildFmch2026TernaOpportunityDraft(transitionIdentitySession, {
+  type: "PIAL",
+  participantId: "charro-2",
+  participantSlot: 2,
+  participantName: "Charro 2",
+  result: "ZERO",
+  countsForTerna: false
+});
+assert.equal(pialTransitionDraft.ok, true);
+assert.equal(pialTransitionDraft.opportunity.participantId, "charro-2");
+assert.equal(pialTransitionDraft.opportunity.participantSlot, 2, "Cabecero to Pial preserves the selected participant slot");
+
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 assert.match(appSource, /resolveFmch2026TernaNextSuerteId\(session\)/);
 assert.match(appSource, /setTernaScoringPointer\(nextSuerteId, session\)/);
+assert.match(appSource, /select-terna-participant/);
+assert.match(appSource, /buildCanonicalTernaRoster\(id, ternaNames, existing\?\.roster\?\.terna\)/);
+assert.match(appSource, /function compactPublishedTeam\(team\)[\s\S]*?roster:\s*\{[\s\S]*?terna: getCanonicalTernaRoster\(team\)/);
+assert.match(appSource, /participantSlot: participant\.participantSlot/);
+assert.match(appSource, /terna-participant-identity-missing/);
 assert.match(appSource, /hasPendingTernaSessionReview\(context\)/);
 assert.match(appSource, /executeScorerTimerAuthority\(runtime, \{[\s\S]*?type: "FINISH"/);
 assert.match(appSource, /advanceAfterCompletedTernaSession\(\)/);
@@ -100,10 +153,13 @@ assert.doesNotMatch(appSource, /Attempt V3/);
 
 console.log("terna-operational-flow.test.mjs: ok");
 
-function consume(source, type, sequence, countsForTerna) {
+function consume(source, type, sequence, countsForTerna, participant = {}) {
+  const participantSlot = participant.participantSlot || ((sequence - 1) % 3) + 1;
   const draft = buildFmch2026TernaOpportunityDraft(source, {
     type,
-    participantId: `${type.toLowerCase()}-${sequence}`,
+    participantId: participant.participantId || `${type.toLowerCase()}-${sequence}`,
+    participantSlot,
+    participantName: participant.participantName || `Charro ${participantSlot}`,
     result: countsForTerna ? "VALID" : "ZERO",
     countsForTerna
   });

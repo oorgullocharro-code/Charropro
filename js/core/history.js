@@ -1,4 +1,4 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
@@ -9,8 +9,9 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { getTeam, scoreKey, state, uid } from "./state.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getTeam, scoreKey, state, uid } from "./state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 export function buildStatisticalHistorySnapshot(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;
@@ -233,7 +234,6 @@ function addPerformance(records, tournament, charreada, team, suerte, attempts =
 function getRosterNameForSuerte(team = {}, suerte = {}, coleadorIndex = 0) {
   const roster = team.roster || {};
   if (suerte?.type === "coleadero") return roster.colas?.[coleadorIndex] || `Coleador ${coleadorIndex + 1}`;
-  if (suerte?.id === "lazo") return roster.terna?.[0] || roster.lazo || "";
-  if (suerte?.id === "pial_ruedo") return roster.terna?.[1] || roster.pial_ruedo || "";
+  if (["lazo", "pial_ruedo"].includes(suerte?.id)) return getTernaParticipant(team, coleadorIndex).participantName;
   return roster[suerte?.id] || "";
 }

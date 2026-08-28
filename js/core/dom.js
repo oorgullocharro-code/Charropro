@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 logCharroProVersion("runtime");
 

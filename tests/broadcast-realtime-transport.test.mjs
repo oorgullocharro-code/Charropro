@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

@@ -1,8 +1,8 @@
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "./officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./officialFormatSnapshot.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   OFFICIAL_FORMAT_COLUMN_ROLES,
   OFFICIAL_FORMAT_COLUMN_WIDTHS,
@@ -11,9 +11,9 @@ import {
   OFFICIAL_FORMAT_TEXT_POLICY,
   OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
   buildOfficialFormatRowGeometry
-} from "./officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { state } from "./state.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./officialFormatDocumentModel.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { state } from "./state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
 export { OFFICIAL_FORMAT_PAPER };
@@ -669,7 +669,7 @@ function buildTernaParticipantRows(snapshot, attempts) {
   const roster = Array.isArray(snapshot.teamMetadata?.roster?.terna)
     ? snapshot.teamMetadata.roster.terna.slice(0, 3).map(normalizeTernaRosterParticipant)
     : [];
-  while (roster.length < 3) roster.push({ participantId: "", name: "" });
+  while (roster.length < 3) roster.push({ participantId: "", participantSlot: roster.length + 1, name: "" });
   const rows = roster.slice(0, 3).map((participant) => ({ ...participant, left: [], right: [] }));
 
   for (const attempt of attempts) {
@@ -685,10 +685,11 @@ function normalizeTernaRosterParticipant(value) {
   if (value && typeof value === "object") {
     return {
       participantId: String(value.participantId || value.id || "").trim(),
+      participantSlot: Number(value.participantSlot || 0),
       name: String(value.name || value.participantName || "").trim()
     };
   }
-  return { participantId: "", name: String(value || "").trim() };
+  return { participantId: "", participantSlot: 0, name: String(value || "").trim() };
 }
 
 function resolveTernaParticipantRow(rows, attempt) {
@@ -696,27 +697,17 @@ function resolveTernaParticipantRow(rows, attempt) {
   if (participantId) {
     const identityRow = rows.findIndex((row) => row.participantId && row.participantId === participantId);
     if (identityRow >= 0) return identityRow;
-    if (Number.isInteger(attempt?.participantSlot) && attempt.participantSlot >= 0 && attempt.participantSlot < rows.length) {
-      return attempt.participantSlot;
-    }
   }
-  const normalizedName = normalizeParticipantName(attemptCharro(attempt));
-  return normalizedName
-    ? rows.findIndex((row) => normalizeParticipantName(row.name) === normalizedName)
+  const participantSlot = Number(attempt?.participantSlot);
+  const hasCanonicalRoster = rows.some((row) => row.participantId || row.participantSlot > 0);
+  if (hasCanonicalRoster) {
+    return Number.isInteger(participantSlot) && participantSlot >= 1 && participantSlot <= rows.length
+      ? participantSlot - 1
+      : -1;
+  }
+  return Number.isInteger(participantSlot) && participantSlot >= 0 && participantSlot < rows.length
+    ? participantSlot
     : -1;
-}
-
-function attemptCharro(attempt) {
-  return String(attempt?.charro || "").trim();
-}
-
-function normalizeParticipantName(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function aggregateAttemptValue(attempts, selector) {

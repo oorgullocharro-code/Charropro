@@ -3,18 +3,19 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/core/officialFormat.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildCanonicalTernaRoster, getTernaParticipantName } from "../js/core/ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const TOURNAMENT_ID = "semantic-fmch-2024-2028";
 const CHARREADA_ID = "semantic-charreada-1";
@@ -109,7 +110,7 @@ function team(id, name) {
       piales: `${name} Piales`,
       colas: [`${name} Coleador 1`, `${name} Coleador 2`, `${name} Coleador 3`],
       toro: `${name} Jinete Toro`,
-      terna: [`${name} Cabecero`, `${name} Pialador`, `${name} Auxiliar`],
+      terna: buildCanonicalTernaRoster(id, [`${name} Cabecero`, `${name} Pialador`, `${name} Auxiliar`]),
       yegua: `${name} Jinete Yegua`,
       manganas_pie: `${name} Manganeador Pie`,
       manganas_caballo: `${name} Manganeador Caballo`,
@@ -127,10 +128,11 @@ function selection(id, label, value, quantity = 1, metadata = {}) {
   return { id, label, pts: value, quantity, metadata };
 }
 
-function participantName(teamValue, suerteId, coleadorIndex) {
+function participantName(teamValue, suerteId, coleadorIndex, participantSlot) {
   if (suerteId === "colas") return teamValue.roster.colas[coleadorIndex];
-  if (suerteId === "lazo") return teamValue.roster.terna[1];
-  if (suerteId === "pial_ruedo") return teamValue.roster.terna[2];
+  if (["lazo", "pial_ruedo"].includes(suerteId)) {
+    return getTernaParticipantName(teamValue.roster.terna[participantSlot - 1]);
+  }
   return teamValue.roster[suerteId] || teamValue.name;
 }
 
@@ -139,6 +141,7 @@ function officialRecord(teamValue, input) {
     suerteId,
     attemptIndex = 0,
     coleadorIndex = 0,
+    participantSlot = coleadorIndex,
     base = selection(`${suerteId}_base_fixture`, "Base fixture", 0),
     additional = [],
     infractions = [],
@@ -158,11 +161,11 @@ function officialRecord(teamValue, input) {
     participantId: null,
     suerteId,
     opportunityNumber: attemptIndex + 1,
-    participantSlot: coleadorIndex,
+    participantSlot,
     category: "Libre",
     phase: "Final",
     teamName: teamValue.name,
-    participantName: participantName(teamValue, suerteId, coleadorIndex),
+    participantName: participantName(teamValue, suerteId, coleadorIndex, participantSlot),
     catalog: { base: [base], adic: additional, infr: infractions, team_infr: teamPenalties, desc: [] },
     ruleResolution: {
       contractVersion: "1.0.0",
@@ -282,6 +285,7 @@ function recordsForTeam(teamValue, pasoVuelta) {
     }),
     officialRecord(teamValue, {
       suerteId: "lazo",
+      participantSlot: 2,
       base: selection("lazo_base_floreado", "Floreado", 10),
       additional: [selection("lazo_adic_tiempo_no_usado", "Tiempo oficial no utilizado", 1)],
       officialElapsedMs: 71000,
@@ -290,6 +294,7 @@ function recordsForTeam(teamValue, pasoVuelta) {
     officialRecord(teamValue, {
       suerteId: "pial_ruedo",
       attemptIndex: 1,
+      participantSlot: 3,
       base: selection("pial_ruedo_base_corvero_derecho", "Corvero derecho", 10),
       additional: [selection("pial_ruedo_adic_tiempo_no_usado", "Tiempo oficial no utilizado", 1, 2)],
       infractions: [selection("pial_ruedo_bad_fixture", "Malo pial", 1)],

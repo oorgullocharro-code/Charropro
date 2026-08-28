@@ -4,7 +4,7 @@ import {
   FMCH_2026_LIBRE_PROFILE_0_6_0,
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   getRuleProfileRulesByPhase
-} from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 const dictionary = JSON.parse(readFileSync("CHARROPRO-FMCH-OFFICIAL-DOCUMENT-SPECIFICATION-001/FIELD_DICTIONARY.json", "utf8"));
 const fieldIds = new Set(dictionary.fields.map((field) => field.fieldId));

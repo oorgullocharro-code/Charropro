@@ -1,19 +1,20 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getCanonicalTernaRoster } from "./ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -26,7 +27,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+} from "./localCache.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());
@@ -432,8 +433,15 @@ function flattenScoreCollection(collection) {
 }
 
 function normalizeTeam(team = {}) {
+  const roster = team.roster && typeof team.roster === "object" ? { ...team.roster } : {};
+  const terna = getCanonicalTernaRoster({ ...team, roster });
+  roster.terna = terna;
+  roster.lazo = terna[0]?.participantName || roster.lazo || "";
+  roster.pial_ruedo = terna[1]?.participantName || roster.pial_ruedo || "";
+  roster.terna_auxiliar = terna[2]?.participantName || roster.terna_auxiliar || "";
   return {
     ...team,
+    roster,
     participantName: String(team.participantName || "").trim(),
     horseName: String(team.horseName || "").trim(),
     category: cleanCategory(team.category)

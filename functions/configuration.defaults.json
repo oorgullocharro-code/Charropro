@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260828-fmch-terna-federation-format-row-ownership-001-v1",
+      "appVersion": "20260828-fmch-terna-participant-identity-roster-persistence-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "15bfaaff66d896b01a8ac8a6cc972a877c47c5970bb4a78e1b251a7c8a76131c",
-  "fingerprint": "15bfaaff66d896b01a8ac8a6cc972a877c47c5970bb4a78e1b251a7c8a76131c"
+  "checksum": "25399c9b612de13eefe5a5d578d9f596a252e3e5fe0d238d81fb8c844dbe46ab",
+  "fingerprint": "25399c9b612de13eefe5a5d578d9f596a252e3e5fe0d238d81fb8c844dbe46ab"
 }
