@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "./state.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;

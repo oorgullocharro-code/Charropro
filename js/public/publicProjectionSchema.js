@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay
-} from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 const T0 = Date.parse("2026-08-25T12:00:00.000Z");
 const base = { timerId: "timer-1", durationMs: 60000, officialElapsedMs: 10000, sourceRevision: 1 };

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 let nextId = 0;
 const pending = new Map();

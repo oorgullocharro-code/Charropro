@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

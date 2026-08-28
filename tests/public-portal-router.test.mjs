@@ -6,7 +6,7 @@ import {
   sanitizePortalDay,
   sanitizePortalId,
   sanitizePortalView
-} from "../js/publicPortal/portalRouter.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "../js/publicPortal/portalRouter.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 const initial = parsePublicPortalRoute(
   "https://example.test/torneo-publico.html?tournamentId=torneo_1&view=resultados&competitionId=charro-libre&charreadaId=final-1"

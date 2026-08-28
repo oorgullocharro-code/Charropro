@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "./officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

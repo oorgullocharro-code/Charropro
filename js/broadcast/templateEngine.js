@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "./componentLibrary.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

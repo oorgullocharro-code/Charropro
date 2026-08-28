@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

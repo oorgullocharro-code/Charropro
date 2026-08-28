@@ -3,10 +3,13 @@
 ## Correctivo funcional
 
 - `js/core/officialFormatSnapshot.js`: resuelve la identidad agrupada de Terna
-  en la validación de suertes requeridas.
+  y conserva `participantId`/`participantSlot` desde Attempt V2.
+- `js/core/officialFormat.js`: fija las tres filas al orden canónico del roster,
+  elimina el fallback por suerte y proyecta solo ejecución/remate válidos sin
+  ocultar malos, tiempo o totales oficiales.
 - `tests/fmch-terna-federation-official-score-recovery.test.mjs`: cobertura real
   Scorer -> Attempt V2 -> Official Score -> Team Total -> Formato Federación ->
-  resultados.
+  resultados, incluyendo ownership de fila, orden y reconexión.
 
 ## Publicación
 

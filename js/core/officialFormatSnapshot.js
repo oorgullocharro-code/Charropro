@@ -1,9 +1,9 @@
-import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
-import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 import {
   DOCUMENTED_CALA_BAD_POINT_CODES,
   buildCalaDocumentAbbreviationMatrix
-} from "./officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "./officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 export const OFFICIAL_FORMAT_SNAPSHOT_VERSION = "1.2.0";
 
@@ -512,6 +512,10 @@ function buildSnapshotAttempt(record, scope, errors, warnings) {
     suerteName: text(record.suerte?.fullName || record.suerte?.name),
     attemptIndex: Math.max(0, finite(record.attemptIndex)),
     coleadorIndex: Math.max(0, finite(record.coleadorIndex)),
+    participantId: text(identity.participantId),
+    participantSlot: Number.isInteger(identity.participantSlot) && identity.participantSlot >= 0
+      ? identity.participantSlot
+      : null,
     charro: text(record.charro || attemptV2.context?.participantName),
     opportunity: safeClone(attemptV2.sportState?.opportunity || {}),
     classification: safeClone(attemptV2.sportState?.classification || {}),

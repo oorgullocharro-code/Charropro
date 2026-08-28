@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/broadcastAccessHub.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import * as api from "../js/broadcast/broadcastAccessHub.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";

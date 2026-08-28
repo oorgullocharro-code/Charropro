@@ -1,21 +1,21 @@
 import assert from "node:assert/strict";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 import {
   buildOfficialTeamSheet,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
-import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
-import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "../js/core/officialFormat.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 const {
   applyOfficialScoreTransaction,
@@ -46,7 +46,7 @@ const team = {
   name: "Equipo Terna Oficial",
   category: "Libre",
   roster: {
-    terna: ["Cabecero Registrado", "Pialador Registrado", "Auxiliar Oficial"]
+    terna: ["Charro 1", "Charro 2", "Charro 3"]
   }
 };
 const charreada = {
@@ -86,10 +86,30 @@ let storedTournament = {
   publishedScores: {}
 };
 
-const head = publishTernaComponent({
+const failedHead = publishTernaComponent({
   suerteId: "lazo",
   attemptIndex: 0,
-  participantName: "Cabecero Publicado",
+  participantId: "charro-1",
+  participantSlot: 0,
+  participantName: "Charro 1",
+  baseRuleId: null,
+  additionalRuleIds: [],
+  expectedTotal: 0,
+  notAchieved: true,
+  idempotencyKey: "score:terna-head-failed-row-0001",
+  nowMs: Date.parse(PUBLISHED_AT)
+});
+storedTournament = failedHead.tournament;
+assert.equal(failedHead.outcome.ok, true);
+assert.equal(failedHead.outcome.record.breakdown.attemptV2.identity.participantSlot, 0);
+assert.equal(failedHead.outcome.record.total, 0);
+
+const head = publishTernaComponent({
+  suerteId: "lazo",
+  attemptIndex: 1,
+  participantId: "charro-2",
+  participantSlot: 1,
+  participantName: "Publicación Cabecero Charro Dos",
   baseRuleId: "lazo_base_floreado",
   additionalRuleIds: [
     "lazo_adic_arracadas",
@@ -101,31 +121,37 @@ const head = publishTernaComponent({
     "lazo_adic_pararse_pasada"
   ],
   expectedTotal: 26,
-  idempotencyKey: "score:terna-head-recovery-0001",
-  nowMs: Date.parse(PUBLISHED_AT)
+  idempotencyKey: "score:terna-head-row-two-0001",
+  nowMs: Date.parse(PUBLISHED_AT) + 2000
 });
 storedTournament = head.tournament;
 assert.equal(head.outcome.ok, true);
 assert.equal(head.outcome.record.breakdown.attemptV2.identity.suerteId, "lazo");
+assert.equal(head.outcome.record.breakdown.attemptV2.identity.participantId, "charro-2");
+assert.equal(head.outcome.record.breakdown.attemptV2.identity.participantSlot, 1);
 assert.equal(head.outcome.record.total, 26);
 
 const pial = publishTernaComponent({
   suerteId: "pial_ruedo",
-  attemptIndex: 1,
-  participantName: "Pialador Publicado",
+  attemptIndex: 2,
+  participantId: "charro-3",
+  participantSlot: 2,
+  participantName: "Publicación Pial Charro Tres",
   baseRuleId: "pial_ruedo_base_contraviento_izquierdo",
   additionalRuleIds: ["pial_ruedo_adic_resorte_corvejones"],
   expectedTotal: 20,
-  idempotencyKey: "score:terna-pial-recovery-0001",
+  idempotencyKey: "score:terna-pial-row-three-0001",
   nowMs: Date.parse(PUBLISHED_AT) + 1000
 });
 storedTournament = pial.tournament;
 assert.equal(pial.outcome.ok, true);
 assert.equal(pial.outcome.record.breakdown.attemptV2.identity.suerteId, "pial_ruedo");
+assert.equal(pial.outcome.record.breakdown.attemptV2.identity.participantId, "charro-3");
+assert.equal(pial.outcome.record.breakdown.attemptV2.identity.participantSlot, 2);
 assert.equal(pial.outcome.record.total, 20);
 
 const activeOfficialScores = Object.values(storedTournament.publishedScores).filter((record) => !record.superseded);
-assert.equal(activeOfficialScores.length, 2, "Official Score preserves both Terna components");
+assert.equal(activeOfficialScores.length, 3, "Official Score preserves failed and successful Terna attempts");
 assert.equal(activeOfficialScores.reduce((sum, record) => sum + record.total, 0), 46, "the official team total includes complete Terna");
 
 const formatSnapshot = createOfficialFormatSnapshot({
@@ -143,25 +169,47 @@ const formatSnapshot = createOfficialFormatSnapshot({
 const formatValidation = validateOfficialFormatSnapshot(formatSnapshot);
 assert.equal(formatValidation.valid, true, formatValidation.errors.join(", "));
 assert.equal(formatSnapshot.documentStatus, "READY");
-assert.equal(formatSnapshot.suertes.terna.attempts.length, 2);
+assert.equal(formatSnapshot.suertes.terna.attempts.length, 3);
 assert.equal(formatSnapshot.suertes.terna.officialScoreTotal, 46);
 assert.equal(formatSnapshot.suertes.terna.attempts[0].suerteId, "lazo");
-assert.equal(formatSnapshot.suertes.terna.attempts[1].suerteId, "pial_ruedo");
+assert.equal(formatSnapshot.suertes.terna.attempts[0].participantId, "charro-1");
+assert.equal(formatSnapshot.suertes.terna.attempts[0].participantSlot, 0);
+assert.equal(formatSnapshot.suertes.terna.attempts[1].suerteId, "lazo");
+assert.equal(formatSnapshot.suertes.terna.attempts[1].participantId, "charro-2");
+assert.equal(formatSnapshot.suertes.terna.attempts[1].participantSlot, 1);
+assert.equal(formatSnapshot.suertes.terna.attempts[2].suerteId, "pial_ruedo");
+assert.equal(formatSnapshot.suertes.terna.attempts[2].participantId, "charro-3");
+assert.equal(formatSnapshot.suertes.terna.attempts[2].participantSlot, 2);
 
 const formatSheet = buildOfficialTeamSheet(formatSnapshot);
 const visualField = (fieldId) => formatSheet.visualRows.flat().find((cell) => cell?.fieldId === fieldId);
-assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_01")?.value, 26);
-assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_01.TOTAL")?.value, 26);
-assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_02")?.value, 20);
-assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_02.TOTAL")?.value, 20);
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.PARTICIPANT_01.NAME")?.value, "Charro 1");
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.PARTICIPANT_02.NAME")?.value, "Charro 2");
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.PARTICIPANT_03.NAME")?.value, "Charro 3");
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_01")?.value, "-");
 assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_01.BASE_ADDITIONALES_02")?.value, "-");
-assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_01")?.value, "-");
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_01.TOTAL")?.value, 0, "the real failed-attempt zero remains numeric");
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_01")?.value, 26);
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_02.BASE_ADDITIONALES_02")?.value, "-");
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_02.TOTAL")?.value, 26);
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_03.BASE_ADDITIONALES_01")?.value, "-");
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_03.BASE_ADDITIONALES_02")?.value, 20);
+assert.equal(visualField("FMCH.TEAM_SHEET.TERNA.ROW_03.TOTAL")?.value, 20);
+assert.equal(
+  [1, 2, 3].reduce((sum, row) => {
+    const value = visualField(`FMCH.TEAM_SHEET.TERNA.ROW_0${row}.TOTAL`)?.value;
+    return sum + (Number.isFinite(value) ? value : 0);
+  }, 0),
+  46,
+  "the three participant rows preserve the official Terna total"
+);
 
 const renderedHtml = renderOfficialFormatSheetHtml(formatSheet);
-assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_01\.BASE_ADDITIONALES_01"[^>]*>26<\/td>/);
-assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_01\.TOTAL"[^>]*>26<\/td>/);
-assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_02\.BASE_ADDITIONALES_02"[^>]*>20<\/td>/);
-assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_02\.TOTAL"[^>]*>20<\/td>/);
+assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_01\.BASE_ADDITIONALES_01"[^>]*>-<\/td>/);
+assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_02\.BASE_ADDITIONALES_01"[^>]*>26<\/td>/);
+assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_02\.TOTAL"[^>]*>26<\/td>/);
+assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_03\.BASE_ADDITIONALES_02"[^>]*>20<\/td>/);
+assert.match(renderedHtml, /data-field-id="FMCH\.TEAM_SHEET\.TERNA\.ROW_03\.TOTAL"[^>]*>20<\/td>/);
 
 const xlsx = createOfficialFormatXlsxBlob({
   generatedAt: "2026-08-28T15:05:00.000Z",
@@ -169,10 +217,34 @@ const xlsx = createOfficialFormatXlsxBlob({
 });
 const xlsxFiles = readStoredZip(Buffer.from(await xlsx.arrayBuffer()));
 const worksheetXml = xlsxFiles.get("xl/worksheets/sheet1.xml")?.toString("utf8") || "";
-assert.equal(readNumericXlsxCell(worksheetXml, "J32"), 26, "the XLSX Cabecero value cell materializes LAZO 26");
-assert.equal(readNumericXlsxCell(worksheetXml, "AD32"), 26, "the XLSX Cabecero total cell materializes 26");
-assert.equal(readNumericXlsxCell(worksheetXml, "R33"), 20, "the XLSX Pial value cell materializes PIAL_RUEDO 20");
-assert.equal(readNumericXlsxCell(worksheetXml, "AD33"), 20, "the XLSX Pial total cell materializes 20");
+assert.equal(readNumericXlsxCell(worksheetXml, "J32"), null, "failed Cabecero is not materialized as a numeric score in row 1");
+assert.equal(readNumericXlsxCell(worksheetXml, "AD32"), 0, "the XLSX preserves the real failed-attempt total zero");
+assert.equal(readNumericXlsxCell(worksheetXml, "J33"), 26, "the XLSX Cabecero value belongs to roster row 2");
+assert.equal(readNumericXlsxCell(worksheetXml, "AD33"), 26, "the XLSX Cabecero total belongs to roster row 2");
+assert.equal(readNumericXlsxCell(worksheetXml, "R34"), 20, "the XLSX Pial value belongs to roster row 3");
+assert.equal(readNumericXlsxCell(worksheetXml, "AD34"), 20, "the XLSX Pial total belongs to roster row 3");
+
+const reorderedOfficialScores = Object.fromEntries(
+  Object.entries(structuredClone(storedTournament.publishedScores)).reverse()
+);
+const reconnectedSnapshot = createOfficialFormatSnapshot({
+  tournament: structuredClone(tournamentInfo),
+  charreada: structuredClone(charreada),
+  team: structuredClone(team),
+  officialScores: reorderedOfficialScores,
+  officialScoreLedger: structuredClone(storedTournament.officialScoreLedger)
+}, {
+  tournamentId: TOURNAMENT_ID,
+  charreadaId: CHARREADA_ID,
+  teamId: TEAM_ID,
+  generatedAt: "2026-08-28T15:05:00.000Z"
+});
+const reconnectedSheet = buildOfficialTeamSheet(reconnectedSnapshot);
+const reconnectedField = (fieldId) => reconnectedSheet.visualRows.flat().find((cell) => cell?.fieldId === fieldId)?.value;
+assert.equal(reconnectedField("FMCH.TEAM_SHEET.TERNA.ROW_01.TOTAL"), 0);
+assert.equal(reconnectedField("FMCH.TEAM_SHEET.TERNA.ROW_02.TOTAL"), 26);
+assert.equal(reconnectedField("FMCH.TEAM_SHEET.TERNA.ROW_03.TOTAL"), 20);
+assert.equal(reconnectedSnapshot.suertes.terna.officialScoreTotal, 46, "refresh/reconnect and publication order preserve Terna row ownership");
 
 const incompleteFormatSnapshot = createOfficialFormatSnapshot({
   tournament: tournamentInfo,
@@ -206,10 +278,13 @@ console.log("fmch-terna-federation-official-score-recovery.test.mjs: ok");
 function publishTernaComponent({
   suerteId,
   attemptIndex,
+  participantId,
+  participantSlot,
   participantName,
   baseRuleId,
   additionalRuleIds,
   expectedTotal,
+  notAchieved = false,
   idempotencyKey,
   nowMs
 }) {
@@ -218,26 +293,29 @@ function publishTernaComponent({
     profile
   });
   assert.equal(effective.valid, true);
-  const baseRule = effective.suerte.catalog.base.find((rule) => rule.id === baseRuleId);
+  const baseRule = baseRuleId
+    ? effective.suerte.catalog.base.find((rule) => rule.id === baseRuleId)
+    : null;
   const additionalRules = additionalRuleIds.map((ruleId) =>
     effective.suerte.catalog.adic.find((rule) => rule.id === ruleId)
   );
-  assert.ok(baseRule, `base rule ${baseRuleId} is available`);
+  if (baseRuleId) assert.ok(baseRule, `base rule ${baseRuleId} is available`);
   assert.ok(additionalRules.every(Boolean), "all additional rules are available");
   const additionalTotal = additionalRules.reduce((sum, rule) => sum + Number(rule.pts), 0);
-  const resolvedTotal = Number(baseRule.pts) + additionalTotal;
+  const resolvedTotal = Number(baseRule?.pts || 0) + additionalTotal;
   assert.equal(resolvedTotal, expectedTotal);
   const legacyAttempt = {
-    base: Number(baseRule.pts),
+    base: Number(baseRule?.pts || 0),
     adic: additionalTotal,
     infr: 0,
-    applied: [baseRule.id, ...additionalRules.map((rule) => rule.id)],
-    ruleQuantities: Object.fromEntries([baseRule, ...additionalRules].map((rule) => [rule.id, 1])),
-    remateId: baseRule.id,
-    remateLabel: baseRule.label,
-    remateMetadata: { source: "RULE_PROFILE" },
+    applied: [baseRule, ...additionalRules].filter(Boolean).map((rule) => rule.id),
+    ruleQuantities: Object.fromEntries([baseRule, ...additionalRules].filter(Boolean).map((rule) => [rule.id, 1])),
+    remateId: baseRule?.id || "",
+    remateLabel: baseRule?.label || "",
+    remateMetadata: baseRule ? { source: "RULE_PROFILE" } : null,
     attempted: true,
-    initializedBase: true,
+    notAchieved,
+    initializedBase: Boolean(baseRule),
     sharedOpportunityId: `terna:${TOURNAMENT_ID}:${CHARREADA_ID}:${TEAM_ID}:op:${attemptIndex + 1}`,
     sharedSequenceNumber: attemptIndex + 1,
     sharedTimerId: `terna:${TOURNAMENT_ID}:${CHARREADA_ID}:${TEAM_ID}:timer`,
@@ -261,9 +339,10 @@ function publishTernaComponent({
     competitionScope: "team",
     charreadaId: CHARREADA_ID,
     teamId: TEAM_ID,
+    participantId,
     suerteId,
     opportunityNumber: attemptIndex + 1,
-    participantSlot: suerteId === "pial_ruedo" ? 1 : 0,
+    participantSlot,
     participantName,
     teamName: team.name,
     category: "Libre",

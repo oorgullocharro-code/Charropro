@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "./broadcastState.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+} from "./dataContract.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

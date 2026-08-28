@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-row-ownership-001-v1";
 
 const dqRules = new Map(FMCH_2026_LIBRE_PROFILE_0_6_1.rules
   .filter((rule) => rule.suerteId === "cala" && rule.category === "desc")

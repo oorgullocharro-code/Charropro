@@ -13,5 +13,5 @@ editar perfiles deportivos certificados.
 
 ## Alcance
 
-El rollback restaura la validación documental anterior y la identidad del build.
+El rollback restaura el mapping de filas anterior y la identidad del build.
 No requiere rollback de RTDB Rules, Firebase Functions, lifecycle ni datos.

@@ -3,7 +3,8 @@
 ## Decisión
 
 APROBADO para deploy exclusivo del cliente web mediante el pipeline Hostinger
-Terminal existente.
+Terminal existente con build
+`20260828-fmch-terna-federation-format-row-ownership-001-v1`.
 
 ## Targets
 
