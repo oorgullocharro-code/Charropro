@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../js/core/timerRules.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",

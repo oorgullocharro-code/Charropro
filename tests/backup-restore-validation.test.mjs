@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import restoreEngine from "../functions/restoreEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import restoreService from "../functions/restoreService.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import restoreEngine from "../functions/restoreEngine.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import restoreService from "../functions/restoreService.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const {
   buildBackupArchive,

@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

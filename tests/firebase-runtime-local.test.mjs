@@ -9,7 +9,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

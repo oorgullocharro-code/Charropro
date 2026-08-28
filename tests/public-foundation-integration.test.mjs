@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   applyPublicPortalConnection,
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const qa = {
   tournament: {

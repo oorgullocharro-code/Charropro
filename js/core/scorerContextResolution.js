@@ -1,5 +1,5 @@
-import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 export const SCORER_CONTEXT_RESOLUTION_VERSION = "1.0.0";
 

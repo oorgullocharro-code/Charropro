@@ -4,8 +4,8 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "./publicProjectionSchema.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

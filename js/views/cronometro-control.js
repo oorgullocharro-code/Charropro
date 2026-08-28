@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import { getScopedLocalStorageKey } from "../core/state.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { getScopedLocalStorageKey } from "../core/state.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   applyFirebaseOfficialTimerAuthority,
   getLiveChannelFromUrl,
@@ -8,7 +8,7 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseLive,
   subscribeFirebaseOfficialTimers
-} from "../core/firebaseSync.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../core/firebaseSync.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
@@ -16,19 +16,19 @@ import {
   getOfficialTimerContextView,
   getOfficialTimerControlView,
   normalizeOfficialTimerContext
-} from "../core/timerRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../core/timerRules.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   partitionOfficialTimerHistory,
   resolveOfficialCurrentTimerContext
-} from "../core/officialTimerOrchestration.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../core/officialTimerOrchestration.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const root = document.getElementById("timer-control-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -326,7 +326,6 @@ async function sendPrimaryTimerCommand() {
   }
   const type = getPrimaryCommand(timer.status);
   if (!type) return;
-  if (type === "FINISH" && !window.confirm("Finalizar este cronometro oficial? Esta accion no reinicia el tiempo.")) return;
   const result = await executeAuthorityRequest(definition, timer, {
     type,
     source: "field_remote"

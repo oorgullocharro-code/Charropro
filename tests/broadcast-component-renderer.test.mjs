@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1");
-const { getCharreadaScoringSuertes, getCharreadaCompetitionContext } = await import("../js/core/state.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1");
+const { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1");
+const { getCharreadaScoringSuertes, getCharreadaCompetitionContext } = await import("../js/core/state.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1");
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 const tournament = applyProductiveRuleProfilePolicy({ id: "assignment-contract", category: "Libre", type: "completo" });

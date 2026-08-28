@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1",
+      "appVersion": "20260827-scorer-global-timer-reactivity-recovery-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "7ba358b5b7cfec3e46de425d9cbedc7b2c40fddc171a06863cde40bdce950a15",
-  "fingerprint": "7ba358b5b7cfec3e46de425d9cbedc7b2c40fddc171a06863cde40bdce950a15"
+  "checksum": "6cec5ca4735ed851fe09c6e4f253b89d6672b6b542436ef43558aa1e11e8a4e6",
+  "fingerprint": "6cec5ca4735ed851fe09c6e4f253b89d6672b6b542436ef43558aa1e11e8a4e6"
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { makeAccessSession } from "../js/core/roles.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { makeAccessSession } from "../js/core/roles.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const user = Object.freeze({ uid: "user-1", email: "user@example.test", displayName: "User" });
 

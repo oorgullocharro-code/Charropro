@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "../js/data/calaRules.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

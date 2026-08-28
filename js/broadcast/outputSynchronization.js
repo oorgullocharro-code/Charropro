@@ -2,22 +2,22 @@ import {
   getOutputRoute,
   routeAnnouncerMonitor,
   routeProgramToOutput
-} from "./outputRouting.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
-import { getProgramSnapshot } from "./programEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "./outputRouting.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
+import { getProgramSnapshot } from "./programEngine.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   applyProgramMainProjection,
   buildProgramMainOutputSnapshot,
   clearProgramMainOutput,
   getProgramMainOutputStatus,
   validateProgramMainProjection
-} from "./programMainOutput.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "./programMainOutput.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 import {
   clearAnnouncerMonitor,
   getAnnouncerSnapshot,
   getAnnouncerStatus,
   updateAnnouncerMonitor,
   validateAnnouncerProjection
-} from "./announcerMonitor.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "./announcerMonitor.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 export const OUTPUT_SYNCHRONIZATION_VERSION = "1.0.0";
 

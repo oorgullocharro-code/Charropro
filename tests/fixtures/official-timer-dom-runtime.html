@@ -14,7 +14,7 @@
     import { updateOfficialTimerDomDisplays } from "../../js/core/officialTimerLiveDisplay.js?v=blocker003-dom";
 
     const t0 = Date.parse("2026-08-27T12:00:00.000Z");
-    const registry = {
+    let registry = {
       "timer-dom-test": {
         timerId: "timer-dom-test",
         status: "RUNNING",
@@ -25,18 +25,69 @@
       }
     };
     const display = document.querySelector("[data-official-timer-id='timer-dom-test']");
-    const values = [t0, t0 + 1000, t0 + 2000].map((now) => {
+    const runningValues = [t0, t0 + 1000, t0 + 2000].map((now) => {
       updateOfficialTimerDomDisplays(document, registry, now);
       return display.textContent;
     });
+    registry["timer-dom-test"] = {
+      ...registry["timer-dom-test"],
+      status: "PAUSED",
+      officialElapsedMs: 2000,
+      runningSince: null
+    };
+    const pausedValues = [t0 + 3000, t0 + 6000].map((now) => {
+      updateOfficialTimerDomDisplays(document, registry, now);
+      return display.textContent;
+    });
+    registry["timer-dom-test"] = {
+      ...registry["timer-dom-test"],
+      status: "RUNNING",
+      runningSince: new Date(t0 + 6000).toISOString()
+    };
+    const resumedValues = [t0 + 7000, t0 + 8000].map((now) => {
+      updateOfficialTimerDomDisplays(document, registry, now);
+      return display.textContent;
+    });
+    registry["timer-dom-test"] = {
+      ...registry["timer-dom-test"],
+      status: "FINISHED",
+      officialElapsedMs: 4000,
+      runningSince: null
+    };
+    const finishedValues = [t0 + 9000, t0 + 12000].map((now) => {
+      updateOfficialTimerDomDisplays(document, registry, now);
+      return display.textContent;
+    });
+    display.dataset.officialTimerId = "timer-dom-replacement";
+    registry = {
+      ...registry,
+      "timer-dom-replacement": {
+        timerId: "timer-dom-replacement",
+        status: "READY",
+        mode: "countdown",
+        durationMs: 20000,
+        officialElapsedMs: 0
+      }
+    };
+    updateOfficialTimerDomDisplays(document, registry, t0 + 13000);
+    const replacementValue = display.textContent;
     const result = {
-      values,
-      unique: new Set(values).size,
+      runningValues,
+      pausedValues,
+      resumedValues,
+      finishedValues,
+      replacementValue,
       status: display.dataset.timerStatus,
-      nodeCount: document.querySelectorAll("[data-official-timer-id='timer-dom-test']").length
+      nodeCount: document.querySelectorAll(".official-timer-display").length
     };
     document.getElementById("timer-dom-result").textContent = JSON.stringify(result);
-    document.documentElement.dataset.validation = result.unique === 3 && result.nodeCount === 1 ? "pass" : "fail";
+    const passed = runningValues.join("|") === "00:20.0|00:19.0|00:18.0"
+      && pausedValues[0] === pausedValues[1]
+      && resumedValues[0] !== resumedValues[1]
+      && finishedValues[0] === finishedValues[1]
+      && replacementValue === "00:20.0"
+      && result.nodeCount === 1;
+    document.documentElement.dataset.validation = passed ? "pass" : "fail";
   </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 const dqRules = new Map(FMCH_2026_LIBRE_PROFILE_0_6_1.rules
   .filter((rule) => rule.suerteId === "cala" && rule.category === "desc")

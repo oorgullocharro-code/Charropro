@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+} from "./programEngine.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

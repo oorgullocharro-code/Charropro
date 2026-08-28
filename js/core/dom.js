@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260827-scorer-global-timer-reactivity-recovery-001-v1";
 
 logCharroProVersion("runtime");
 
