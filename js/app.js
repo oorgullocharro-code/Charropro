@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -14,7 +14,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./data/calaRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -26,7 +26,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -36,7 +36,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -53,7 +53,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -73,23 +73,23 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/scorerContextResolution.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -97,32 +97,35 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/timerRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
+  reconcileOfficialTimerConsumerState,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/officialTimerOrchestration.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   applyBrakeReviewToCalaAttempt,
+  buildBrakeReviewBatchState,
   getBrakeReviewRuleConsequence,
   getBrakeReviewRules,
   getBrakeReviewStateFromTimer,
   hasPendingBrakeReviewTemporalConsequences,
+  isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/brakeReviewPhase.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -135,27 +138,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/scoring.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/scoringAttempt.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/scorerComponents.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -165,7 +168,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/sync.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -207,7 +210,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/firebaseSync.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -220,15 +223,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/pendingScoreReview.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/tournamentContext.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -238,8 +241,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/supervisorNavigation.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -273,7 +276,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./core/state.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -3138,19 +3141,27 @@ function applyRemoteOfficialTimers(payload = {}) {
   if (payload.error || payload.tournamentId !== state.activeTournamentId) return;
   const retained = Object.fromEntries(Object.entries(state.officialTimers || {})
     .filter(([, timer]) => timer?.tournamentId !== payload.tournamentId));
-  state.officialTimers = { ...retained, ...(payload.registry || {}) };
-  const currentTimer = state.currentTimerContext?.timerId
-    ? state.officialTimers[state.currentTimerContext.timerId]
-    : null;
-  if (currentTimer) {
-    state.currentTimerContext = buildOfficialCurrentTimerContext(currentTimer, state.currentTimerContext, {
-      sourceRevision: state.currentTimerContext.sourceRevision,
-      contextRevision: state.currentTimerContext.contextRevision,
-      transition: state.currentTimerContext.transition,
-      handoffFromTimerId: state.currentTimerContext.handoffFromTimerId
-    });
-  }
-  if (state.view === "scoring") render({ preserveScoringScroll: true });
+  applyScorerOfficialTimerEvent({
+    registry: retained,
+    incomingRegistry: payload.registry || {},
+    source: "official-timers"
+  });
+}
+
+function applyScorerOfficialTimerEvent(input = {}) {
+  const reconciled = reconcileOfficialTimerConsumerState({
+    registry: input.registry || state.officialTimers,
+    incomingRegistry: input.incomingRegistry,
+    currentTimerContext: state.currentTimerContext,
+    incomingCurrentTimerContext: input.incomingCurrentTimerContext,
+    now: input.now ?? Date.now()
+  });
+  state.officialTimers = reconciled.registry;
+  state.currentTimerContext = reconciled.currentTimerContext;
+  if (state.view !== "scoring") return reconciled;
+  if (reconciled.changed) render({ preserveScoringScroll: true });
+  else updateTernaTimerDisplays();
+  return reconciled;
 }
 
 function applyRemotePendingScoreReviews(payload = {}) {
@@ -8407,7 +8418,7 @@ function renderScoring({ preserveScroll = false } = {}) {
     return;
   }
   if (state.scoringSuerteIdx >= suertes.length) state.scoringSuerteIdx = 0;
-  const context = getCurrentContext();
+  let context = getCurrentContext();
   if (!context) {
     if (isSupervisorTournamentAccess(firebaseAccess)) navigateTournamentAppView("program", { replace: true });
     else {
@@ -8416,9 +8427,14 @@ function renderScoring({ preserveScroll = false } = {}) {
     }
     return;
   }
+  const brakeReviewBatchRuntime = getBrakeReviewBatchRuntime();
+  if (brakeReviewBatchRuntime && !brakeReviewBatchRuntime.batch.calaReady) {
+    alignScoringPointerToBrakeReviewBatch(brakeReviewBatchRuntime);
+    context = getCurrentContext();
+  }
   const charroName = getCharroName(context);
-  const brakeReviewRuntime = getBrakeReviewRuntime(context);
-  if (brakeReviewRuntime && brakeReviewRuntime.review.stage !== BRAKE_REVIEW_STAGES.CALA_READY) {
+  const brakeReviewRuntime = getBrakeReviewRuntime(context, brakeReviewBatchRuntime);
+  if (brakeReviewRuntime && !brakeReviewBatchRuntime?.batch.calaReady) {
     app.innerHTML = renderBrakeReviewPhase(context, brakeReviewRuntime, charroName);
     updateTernaTimerDisplays();
     scheduleBrakeReviewTemporalSync(brakeReviewRuntime);
@@ -8693,8 +8709,14 @@ function buildScoringAttemptUiModel(context) {
   });
 }
 
-function getBrakeReviewRuntime(context = getCurrentContext()) {
+function getBrakeReviewRuntime(context = getCurrentContext(), batchRuntime = null) {
   if (!context || context.suerte?.id !== "cala" || !isBrakeReviewProfile(context.tournament)) return null;
+  const batchPresentation = batchRuntime?.presentations?.find((presentation) => presentation.teamId === context.team?.id);
+  if (batchPresentation) return { ...batchPresentation.runtime, batch: batchRuntime.batch };
+  return buildBrakeReviewPresentationRuntime(context);
+}
+
+function buildBrakeReviewPresentationRuntime(context) {
   const definition = getOfficialTimerDefinitionsForScoringContext(context)
     .find((item) => item.phaseId === "freno_review");
   if (!definition || definition.temporalPolicyStatus === "TEMPORAL_POLICY_UNAVAILABLE") return null;
@@ -8723,6 +8745,53 @@ function getBrakeReviewRuntime(context = getCurrentContext()) {
     catalog,
     rules: getBrakeReviewRules(catalog)
   };
+}
+
+function getBrakeReviewBatchRuntime() {
+  const tournament = getActiveTournament();
+  const charreada = getActiveCharreada();
+  if (!tournament || !charreada || !isBrakeReviewProfile(tournament)) return null;
+  const suertes = getCharreadaScoringSuertes(charreada, tournament, state.settings.globalRuleOverrides);
+  const calaIndex = suertes.findIndex((suerte) => suerte.id === "cala");
+  const cala = suertes[calaIndex];
+  const entries = getCharreadaScoringEntries(charreada);
+  if (!cala || !entries.length) return null;
+  const competitionContext = getCharreadaCompetitionContext(charreada, tournament);
+  const presentations = entries.map((team, teamIndex) => {
+    const collection = state.scores[scoreKey(charreada.id, team.id, cala.id)];
+    const attempt = Array.isArray(collection) ? collection[0] : collection || null;
+    const context = {
+      tournament,
+      charreada,
+      suerte: cala,
+      team,
+      attempt,
+      competitionContext,
+      participant: competitionContext.isIndividualCompetition ? team : null,
+      teamIndex,
+      attemptIndex: 0,
+      coleadorIndex: 0
+    };
+    const runtime = buildBrakeReviewPresentationRuntime(context);
+    return {
+      teamId: team.id,
+      teamIndex,
+      timerId: runtime?.timer?.timerId || "",
+      review: runtime?.review || {},
+      context,
+      runtime
+    };
+  }).filter((presentation) => presentation.runtime);
+  const batch = buildBrakeReviewBatchState(presentations);
+  return { batch, presentations, calaIndex };
+}
+
+function alignScoringPointerToBrakeReviewBatch(batchRuntime) {
+  const teamIndex = Number(batchRuntime?.batch?.current?.teamIndex ?? batchRuntime?.batch?.currentIndex ?? 0);
+  state.scoringSuerteIdx = Math.max(0, Number(batchRuntime?.calaIndex || 0));
+  state.scoringTeamIdx = Math.max(0, teamIndex);
+  state.scoringAttemptIdx = 0;
+  state.scoringColeadorIdx = 0;
 }
 
 function getBrakeReviewRuleCatalogForContext(context = {}) {
@@ -8755,6 +8824,7 @@ function getScoringCatalogForContext(context = {}) {
 
 function renderBrakeReviewPhase(context, runtime, charroName) {
   const { timer, view, review } = runtime;
+  const batch = runtime.batch || buildBrakeReviewBatchState([{ teamId: context.team?.id, timerId: timer.timerId, review }]);
   const pending = brakeReviewPendingIds.has(timer.timerId) || scorerTimerPendingIds.has(timer.timerId);
   const manualRules = runtime.rules.filter((rule) => ![
     "cala_inf_revision_freno_mas_un_minuto",
@@ -8766,7 +8836,7 @@ function renderBrakeReviewPhase(context, runtime, charroName) {
   const selected = new Set(review.appliedRuleIds || []);
   const statusLabel = {
     [BRAKE_REVIEW_STAGES.REVIEW]: view.status === "READY" ? "Lista para iniciar" : view.status === "RUNNING" ? "Revision en curso" : "Revision pausada",
-    [BRAKE_REVIEW_STAGES.PROTOCOL]: "Revision concluida · protocolo previo",
+    [BRAKE_REVIEW_STAGES.PROTOCOL]: batch.allCompleted ? "Revisiones concluidas · protocolo previo" : "Revision individual concluida",
     [BRAKE_REVIEW_STAGES.JUDGES_CALL]: "Llamada de jueces",
     [BRAKE_REVIEW_STAGES.DISQUALIFIED]: "Descalificacion determinada"
   }[review.stage] || review.stage;
@@ -8791,7 +8861,7 @@ function renderBrakeReviewPhase(context, runtime, charroName) {
       <header class="brake-review-header">
         <button class="button" data-action="exit-scoring" type="button">Salir</button>
         <div>
-          <span>Fase oficial pre-Cala</span>
+          <span>Fase oficial pre-Cala · Equipo ${batch.currentIndex + 1} de ${batch.queue.length}</span>
           <h1>Revision de freno</h1>
         </div>
         <strong>${escapeHTML(statusLabel)}</strong>
@@ -8845,7 +8915,7 @@ function renderBrakeReviewPhase(context, runtime, charroName) {
           ` : ""}
           <button class="brake-review-decision authorized" data-action="brake-review-authorize" type="button" ${pending || view.status === "READY" || review.stage === BRAKE_REVIEW_STAGES.DISQUALIFIED ? "disabled" : ""}>
             <strong>Autorizado</strong>
-            <span>Cerrar revision y pasar a protocolo</span>
+            <span>${batch.currentIndex < batch.queue.length - 1 ? "Cerrar revision y continuar con el siguiente equipo" : "Cerrar ultima revision y pasar a protocolo"}</span>
           </button>
           <details class="brake-review-rule-picker">
             <summary class="brake-review-decision infraction">
@@ -8862,7 +8932,7 @@ function renderBrakeReviewPhase(context, runtime, charroName) {
             <div class="brake-review-rule-list">${dqRules.map((rule) => renderBrakeReviewRuleButton(rule, selected, pending)).join("")}</div>
           </details>
           ${review.stage === BRAKE_REVIEW_STAGES.DISQUALIFIED ? html`
-            <button class="button red brake-review-publish-dq" data-action="brake-review-publish-dq" type="button" ${pending ? "disabled" : ""}>Publicar DQ y continuar</button>
+            <button class="button red brake-review-publish-dq" data-action="brake-review-publish-dq" type="button" ${pending ? "disabled" : ""}>Confirmar DQ y continuar</button>
           ` : ""}
         </section>
       `}
@@ -8881,7 +8951,7 @@ function renderBrakeReviewRuleButton(rule, selected, pending) {
 }
 
 function reconcileBrakeReviewCalaAttempt(context, runtime) {
-  if (!context?.attempt || runtime.review.stage !== BRAKE_REVIEW_STAGES.CALA_READY) return;
+  if (!context?.attempt || !runtime.batch?.calaReady || !isCompletedBrakeReview(runtime.review)) return;
   const before = JSON.stringify({
     applied: context.attempt.applied,
     ruleQuantities: context.attempt.ruleQuantities,
@@ -8956,8 +9026,26 @@ async function applyBrakeReviewAuthorityCommand(action, ruleId = "", source = "s
       ? "La revision cambio en otro dispositivo. Se recupero el estado oficial."
       : "No se pudo registrar la decision de Revision de Freno.");
   }
+  if (result.ok) applyBrakeReviewBatchNavigation(action);
   render({ preserveScoringScroll: true });
   return result;
+}
+
+function applyBrakeReviewBatchNavigation(action) {
+  const batchRuntime = getBrakeReviewBatchRuntime();
+  if (!batchRuntime) return;
+  if ([BRAKE_REVIEW_ACTIONS.AUTHORIZE, BRAKE_REVIEW_ACTIONS.CONFIRM_DISQUALIFICATION].includes(action)) {
+    alignScoringPointerToBrakeReviewBatch(batchRuntime);
+    saveScoringNavigationDraft();
+    return;
+  }
+  if (action === BRAKE_REVIEW_ACTIONS.MARK_CALA_READY && batchRuntime.batch.calaReady) {
+    state.scoringSuerteIdx = batchRuntime.calaIndex;
+    state.scoringTeamIdx = 0;
+    state.scoringAttemptIdx = 0;
+    state.scoringColeadorIdx = 0;
+    saveScoringNavigationDraft();
+  }
 }
 
 async function applyBrakeReviewTimerCommand(command) {
@@ -8978,18 +9066,13 @@ async function applyBrakeReviewTimerCommand(command) {
 }
 
 async function publishBrakeReviewDq() {
-  const context = getCurrentContext();
-  const runtime = getBrakeReviewRuntime(context);
-  if (!context || !runtime || runtime.review.stage !== BRAKE_REVIEW_STAGES.DISQUALIFIED) return;
-  Object.assign(context.attempt, applyBrakeReviewToCalaAttempt(context.attempt, runtime.review, runtime.catalog));
-  const scoringContext = {
-    ...context,
-    suerte: { ...context.suerte, catalog: getScoringCatalogForContext(context) }
-  };
-  recalculateAttemptRuleTotal(scoringContext, "infr");
-  reconcileAttemptConditionalRules(scoringContext);
-  saveState({ silent: true });
-  await nextScore();
+  const runtime = getBrakeReviewRuntime();
+  if (!runtime || runtime.review.stage !== BRAKE_REVIEW_STAGES.DISQUALIFIED) return;
+  await applyBrakeReviewAuthorityCommand(
+    BRAKE_REVIEW_ACTIONS.CONFIRM_DISQUALIFICATION,
+    runtime.review.dqRuleId || "",
+    "scorer-brake-review-dq-confirm"
+  );
 }
 
 function getTernaRuntime(context = getCurrentContext()) {
@@ -16200,7 +16283,10 @@ function subscribeExternalTimerControl() {
   firebaseTimerChannel = liveChannel;
   firebaseTimerUnsubscribe = subscribeFirebaseLive((payload) => {
     if (payload?.currentTimerContext?.timerId) {
-      state.currentTimerContext = payload.currentTimerContext;
+      applyScorerOfficialTimerEvent({
+        incomingCurrentTimerContext: payload.currentTimerContext,
+        source: "live-current"
+      });
     }
     const incoming = normalizeTimer({
       ...(payload?.timer || {}),

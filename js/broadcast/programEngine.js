@@ -1,10 +1,10 @@
 import {
   PREVIEW_ENGINE_VERSION,
   validatePreview
-} from "./previewEngine.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./previewEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   applyLiveBindingsToProjection
-} from "./liveBindings.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./liveBindings.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 

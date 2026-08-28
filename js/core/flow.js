@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./state.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

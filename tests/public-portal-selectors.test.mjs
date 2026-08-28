@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

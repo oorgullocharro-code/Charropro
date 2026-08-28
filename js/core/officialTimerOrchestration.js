@@ -1,10 +1,10 @@
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./timerRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 export const OFFICIAL_CURRENT_TIMER_CONTEXT_VERSION = "1.0.0";
 export const TORO_TO_TERNA_HANDOFF = "TORO_TO_TERNA_READY";
@@ -97,6 +97,75 @@ export function buildOfficialTimerProjectionFromCurrentContext(context = {}, opt
     officialElapsedMs: normalized.elapsedMs,
     revision: normalized.timerRevision
   }, { now: options.now ?? Date.now() });
+}
+
+export function buildOfficialTimerSnapshotFromCurrentContext(context = {}, options = {}) {
+  const normalized = normalizeProjectedContext(context);
+  if (!normalized?.timerId) return null;
+  const now = options.now ?? Date.now();
+  return normalizeOfficialTimerContext({
+    ...normalized,
+    contextType: normalized.phase || normalized.timerDefinitionId || "official",
+    timerRuleId: normalized.timerDefinitionId,
+    temporalFingerprint: normalized.temporalPolicyFingerprint,
+    phaseId: normalized.phase,
+    wallStartedAt: normalized.startedAt,
+    wallFinishedAt: normalized.finishedAt,
+    officialElapsedMs: normalized.elapsedMs,
+    revision: normalized.timerRevision,
+    createdAt: normalized.createdAt || normalized.generatedAt || new Date(now).toISOString(),
+    updatedAt: normalized.updatedAt || normalized.generatedAt || new Date(now).toISOString()
+  });
+}
+
+export function reconcileOfficialTimerConsumerState(input = {}) {
+  const previousContext = normalizeProjectedContext(input.currentTimerContext);
+  const incomingContext = normalizeProjectedContext(input.incomingCurrentTimerContext);
+  const registry = {
+    ...normalizeRegistry(input.registry),
+    ...normalizeRegistry(input.incomingRegistry)
+  };
+  const selectedContext = incomingContext || previousContext;
+  const projectedSnapshot = incomingContext
+    ? buildOfficialTimerSnapshotFromCurrentContext(incomingContext, input)
+    : null;
+  const registeredSnapshot = selectedContext ? registry[selectedContext.timerId] : null;
+  const contextSnapshot = selectedContext
+    ? selectFreshestTimerSnapshot(projectedSnapshot, registeredSnapshot)
+      || buildOfficialTimerSnapshotFromCurrentContext(selectedContext, input)
+    : null;
+  if (contextSnapshot?.timerId) registry[contextSnapshot.timerId] = contextSnapshot;
+
+  const currentTimerContext = contextSnapshot
+    ? buildOfficialCurrentTimerContext(contextSnapshot, selectedContext, {
+        now: input.now,
+        sourceRevision: selectedContext?.sourceRevision,
+        contextRevision: selectedContext?.contextRevision,
+        transition: selectedContext?.transition,
+        handoffFromTimerId: selectedContext?.handoffFromTimerId
+      })
+    : selectedContext;
+  const timerIdChanged = cleanText(previousContext?.timerId) !== cleanText(currentTimerContext?.timerId);
+  const timerRevisionChanged = nonNegativeInteger(previousContext?.timerRevision)
+    !== nonNegativeInteger(currentTimerContext?.timerRevision);
+  const statusChanged = cleanText(previousContext?.status) !== cleanText(currentTimerContext?.status);
+
+  return {
+    registry,
+    currentTimerContext,
+    timerIdChanged,
+    timerRevisionChanged,
+    statusChanged,
+    changed: timerIdChanged || timerRevisionChanged || statusChanged
+  };
+}
+
+function selectFreshestTimerSnapshot(projectedSnapshot, registeredSnapshot) {
+  if (!projectedSnapshot) return registeredSnapshot || null;
+  if (!registeredSnapshot) return projectedSnapshot;
+  return nonNegativeInteger(projectedSnapshot.revision) >= nonNegativeInteger(registeredSnapshot.revision)
+    ? projectedSnapshot
+    : registeredSnapshot;
 }
 
 export function partitionOfficialTimerHistory(currentContext = {}, registry = {}) {

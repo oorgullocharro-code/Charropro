@@ -104,57 +104,57 @@ import {
   cutProductionConsoleOfficialProgram,
   autoProductionConsoleOfficialProgram,
   validateProductionConsoleModel
-} from "../js/broadcast/productionConsole.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/productionConsole.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   configureBroadcastRealtimeTransport,
   connectBroadcastRealtimeTransport,
   createBroadcastRealtimeTransport,
   destroyBroadcastRealtimeTransport
-} from "../js/broadcast/broadcastRealtimeTransport.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { destroyProgramEngine, validateProgram } from "../js/broadcast/programEngine.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/broadcastRealtimeTransport.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { destroyPreviewEngine, validatePreview } from "../js/broadcast/previewEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { destroyProgramEngine, validateProgram } from "../js/broadcast/programEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   destroyOutputRoutingEngine,
   listOutputRoutes,
   validateOutputRoutingSnapshot
-} from "../js/broadcast/outputRouting.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   configureOutputSynchronization,
   createOutputSynchronization,
   startOutputSynchronization,
   synchronizeProgramMain
-} from "../js/broadcast/outputSynchronization.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/outputSynchronization.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { validateBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { findBroadcastComponent, listBroadcastComponents, validateBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { listBroadcastThemes, resolveBroadcastTheme, validateBroadcastTheme } from "../js/broadcast/themeEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { COMPONENT_RENDERER_VERSION, destroyComponentRenderer } from "../js/broadcast/componentRenderer.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { getBroadcastQueue, validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { getBroadcastOutput, validateBroadcastOutput } from "../js/broadcast/broadcastOutput.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { validateBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { listBroadcastAssets, validateBroadcastAsset } from "../js/broadcast/assetManager.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { ACTION_TYPES } from "../js/broadcast/actionEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { findBroadcastComponent, listBroadcastComponents, validateBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   createBroadcastTemplate,
   getRegisteredTemplate,
   listRegisteredTemplates,
   registerBroadcastTemplate,
   validateTemplateSnapshot
-} from "../js/broadcast/templateEngine.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/templateEngine.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   TEMPLATE_RENDERER_INTEGRATION_VERSION,
   destroyTemplateRendererIntegration,
   validateTemplateRenderSnapshot
-} from "../js/broadcast/templateRendererIntegration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/templateRendererIntegration.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   THEME_TEMPLATE_INTEGRATION_VERSION,
   destroyThemeTemplateIntegration,
   validateThemeTemplateSnapshot
-} from "../js/broadcast/themeTemplateIntegration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/themeTemplateIntegration.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const T0 = "2026-07-13T20:00:00.000Z";
 const T1 = "2026-07-13T20:00:01.000Z";
@@ -163,7 +163,7 @@ const T3 = "2026-07-13T20:00:03.000Z";
 const T4 = "2026-07-13T20:00:04.000Z";
 
 assert.equal(PRODUCTION_CONSOLE_VERSION, "1.0.0");
-assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260827-official-timer-orchestration-state-machine-failsafe-001-v1");
+assert.equal(PRODUCTION_CONSOLE_APP_VERSION, "20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1");
 assert.equal(COMPONENT_RENDERER_VERSION, "1.0.0");
 assert.equal(TEMPLATE_RENDERER_INTEGRATION_VERSION, "1.0.0");
 assert.equal(THEME_TEMPLATE_INTEGRATION_VERSION, "1.0.0");

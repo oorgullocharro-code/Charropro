@@ -1,13 +1,13 @@
-import { escapeHTML, html } from "../core/dom.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { escapeHTML, html } from "../core/dom.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();

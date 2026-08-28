@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   BROWSER_OUTPUT_DISPLAY_MODES,
   BROWSER_OUTPUT_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   validateBrowserOutputConfig,
   validateBrowserOutputProjection,
   validateBrowserOutputSnapshot
-} from "../js/broadcast/browserOutput.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/browserOutput.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 class MockStyle {
   constructor() {

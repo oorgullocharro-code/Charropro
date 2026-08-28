@@ -6,9 +6,9 @@ import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
-import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/core/timerRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
+import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const T0 = Date.parse("2026-08-27T12:00:00.000Z");
 const tournament = {

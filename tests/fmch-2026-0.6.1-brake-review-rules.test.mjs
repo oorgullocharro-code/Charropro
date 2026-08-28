@@ -4,11 +4,11 @@ import {
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   getRuleProfileRulesByPhase,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   FMCH_2026_BRAKE_REVIEW_PHASE_ID,
   FMCH_2026_BRAKE_REVIEW_RECONCILIATION
-} from "../js/data/fmch2026BrakeReviewRules.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/data/fmch2026BrakeReviewRules.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const ruleMap = new Map(FMCH_2026_LIBRE_PROFILE_0_6_1.rules.map((rule) => [rule.ruleId, rule]));
 const phaseRules = getRuleProfileRulesByPhase(FMCH_2026_LIBRE_PROFILE_0_6_1, FMCH_2026_BRAKE_REVIEW_PHASE_ID);

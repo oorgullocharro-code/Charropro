@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

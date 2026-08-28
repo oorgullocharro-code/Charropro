@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

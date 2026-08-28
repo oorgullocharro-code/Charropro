@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

@@ -8,15 +8,15 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./publicProjectionSchema.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./publicLiveFeed.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../data/competitionTypes.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 export const PUBLIC_PROJECTION_VERSION = "2.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({

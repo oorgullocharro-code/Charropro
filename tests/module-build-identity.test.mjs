@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 
-const BUILD = "20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+const BUILD = "20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 const files = await collect(new URL("../js/", import.meta.url));
 const identities = new Map();
 const violations = [];

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260827-official-timer-orchestration-state-machine-failsafe-001-v1",
+      "appVersion": "20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "360ad0c5743b15fca4e7a5e6059d4d0aba19c39f0b835e95e965f76f7477dd6d",
-  "fingerprint": "360ad0c5743b15fca4e7a5e6059d4d0aba19c39f0b835e95e965f76f7477dd6d"
+  "checksum": "7ba358b5b7cfec3e46de425d9cbedc7b2c40fddc171a06863cde40bdce950a15",
+  "fingerprint": "7ba358b5b7cfec3e46de425d9cbedc7b2c40fddc171a06863cde40bdce950a15"
 }

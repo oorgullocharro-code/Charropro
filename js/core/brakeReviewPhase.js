@@ -24,10 +24,16 @@ export const BRAKE_REVIEW_RESULTS = Object.freeze({
   AUTHORIZED_WITH_INFRACTIONS: "AUTHORIZED_WITH_INFRACTIONS",
   DISQUALIFIED: "DISQUALIFIED"
 });
+export const BRAKE_REVIEW_BATCH_STATUSES = Object.freeze({
+  NOT_STARTED: "NOT_STARTED",
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED"
+});
 export const BRAKE_REVIEW_ACTIONS = Object.freeze({
   SYNC_TEMPORAL: "SYNC_TEMPORAL",
   TOGGLE_RULE: "TOGGLE_RULE",
   AUTHORIZE: "AUTHORIZE",
+  CONFIRM_DISQUALIFICATION: "CONFIRM_DISQUALIFICATION",
   OPEN_PROTOCOL: "OPEN_PROTOCOL",
   CALL_JUDGES: "CALL_JUDGES",
   MARK_CALA_READY: "MARK_CALA_READY"
@@ -166,6 +172,57 @@ export function getBrakeReviewStateFromTimer(timer = {}, context = {}) {
     : createBrakeReviewState({ ...context, timerId: timer.timerId, timerRevision: timer.revision });
 }
 
+export function buildBrakeReviewBatchState(presentations = []) {
+  const queue = (Array.isArray(presentations) ? presentations : []).map((presentation, index) => {
+    const review = normalizeBrakeReviewState(presentation?.review || {}, presentation?.context || {});
+    return {
+      ...clone(presentation || {}),
+      index,
+      teamId: clean(presentation?.teamId || review.teamId),
+      timerId: clean(presentation?.timerId || review.timerId),
+      review,
+      completed: isCompletedBrakeReview(review)
+    };
+  });
+  const firstIncompleteIndex = queue.findIndex((presentation) => !presentation.completed);
+  const completed = queue.filter((presentation) => presentation.completed);
+  const allCompleted = queue.length > 0 && completed.length === queue.length;
+  const currentIndex = allCompleted
+    ? Math.max(0, queue.length - 1)
+    : Math.max(0, firstIncompleteIndex);
+  const current = queue[currentIndex] || null;
+  const finalReview = queue.at(-1)?.review || null;
+  const hasActivity = queue.some((presentation) => (
+    presentation.review.revision > 0
+    || presentation.review.stage !== BRAKE_REVIEW_STAGES.REVIEW
+    || Number(presentation.review.elapsedMs || 0) > 0
+  ));
+  const status = allCompleted
+    ? BRAKE_REVIEW_BATCH_STATUSES.COMPLETED
+    : hasActivity ? BRAKE_REVIEW_BATCH_STATUSES.IN_PROGRESS : BRAKE_REVIEW_BATCH_STATUSES.NOT_STARTED;
+  return {
+    status,
+    queue,
+    current,
+    currentIndex,
+    currentBrakeReviewTeamId: current?.teamId || null,
+    completedBrakeReviews: completed.map((presentation) => presentation.teamId),
+    remainingBrakeReviews: queue.filter((presentation) => !presentation.completed).map((presentation) => presentation.teamId),
+    allCompleted,
+    protocolStage: allCompleted ? finalReview?.stage || null : null,
+    calaReady: allCompleted && finalReview?.stage === BRAKE_REVIEW_STAGES.CALA_READY
+  };
+}
+
+export function isCompletedBrakeReview(review = {}) {
+  const normalized = normalizeBrakeReviewState(review);
+  return [
+    BRAKE_REVIEW_STAGES.PROTOCOL,
+    BRAKE_REVIEW_STAGES.JUDGES_CALL,
+    BRAKE_REVIEW_STAGES.CALA_READY
+  ].includes(normalized.stage);
+}
+
 export function resolveBrakeReviewTemporalRuleIds(elapsedMs) {
   const elapsed = Math.max(0, Number(elapsedMs || 0));
   return TEMPORAL_RULES.filter((rule) => (
@@ -246,6 +303,16 @@ export function applyBrakeReviewCommand(review = {}, request = {}, options = {})
     next.result = current.appliedRuleIds.length
       ? BRAKE_REVIEW_RESULTS.AUTHORIZED_WITH_INFRACTIONS
       : BRAKE_REVIEW_RESULTS.AUTHORIZED;
+    next.authorizedAt = now;
+    next.authorizedBy = actor;
+  }
+
+  if (action === BRAKE_REVIEW_ACTIONS.CONFIRM_DISQUALIFICATION) {
+    if (current.stage !== BRAKE_REVIEW_STAGES.DISQUALIFIED || !current.dqRuleId) {
+      return fail("brake-review-disqualification-confirm-invalid-state", current);
+    }
+    next.stage = BRAKE_REVIEW_STAGES.PROTOCOL;
+    next.result = BRAKE_REVIEW_RESULTS.DISQUALIFIED;
     next.authorizedAt = now;
     next.authorizedBy = actor;
   }

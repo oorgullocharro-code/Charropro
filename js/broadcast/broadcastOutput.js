@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./broadcastState.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "./dataContract.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

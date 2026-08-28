@@ -31,7 +31,7 @@ import {
   validateBroadcastAsset,
   validateBroadcastAssetManifest,
   validateBroadcastAssetVariant
-} from "../js/broadcast/assetManager.js?v=20260827-official-timer-orchestration-state-machine-failsafe-001-v1";
+} from "../js/broadcast/assetManager.js?v=20260827-scorer-live-timer-reactivity-brake-review-batch-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:01:00.000Z";
