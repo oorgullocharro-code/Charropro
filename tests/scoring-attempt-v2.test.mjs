@@ -17,8 +17,8 @@ import {
   setScoringAttemptDq,
   updateScoringAttemptClassification,
   validateScoringAttemptV2
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 const publishedAt = "2026-08-08T12:00:00.000Z";
 const actor = { id: "judge_1", name: "Juez Sintetico", role: "Juez" };

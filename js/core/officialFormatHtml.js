@@ -99,9 +99,11 @@ function renderCell(cell, rowIndex, colIndex, mergeInfo) {
   const merge = mergeInfo.starts.get(skipKey);
   const value = getCellValue(cell);
   const style = getCellStyle(cell);
+  const fieldId = getCellFieldId(cell);
   const attrs = [
     merge?.rowspan > 1 ? `rowspan="${merge.rowspan}"` : "",
-    merge?.colspan > 1 ? `colspan="${merge.colspan}"` : ""
+    merge?.colspan > 1 ? `colspan="${merge.colspan}"` : "",
+    fieldId ? `data-field-id="${escapeHTML(fieldId)}"` : ""
   ].filter(Boolean).join(" ");
 
   return `<td class="${escapeHTML(style ? `official-${style}` : "")}"${attrs ? ` ${attrs}` : ""}>${escapeHTML(value)}</td>`;
@@ -114,6 +116,11 @@ function getCellValue(cell) {
 
 function getCellStyle(cell) {
   if (cell && typeof cell === "object" && !Array.isArray(cell) && "style" in cell) return String(cell.style || "");
+  return "";
+}
+
+function getCellFieldId(cell) {
+  if (cell && typeof cell === "object" && !Array.isArray(cell) && "fieldId" in cell) return String(cell.fieldId || "");
   return "";
 }
 

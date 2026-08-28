@@ -17,7 +17,7 @@ import {
   updatePreview,
   updatePreviewLiveData,
   validatePreview
-} from "../js/broadcast/previewEngine.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+} from "../js/broadcast/previewEngine.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 const T0 = "2026-07-15T12:00:00.000Z";
 const T1 = "2026-07-15T12:01:00.000Z";

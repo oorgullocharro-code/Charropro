@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { FMCH_2026_CALA_INFR_RULES } from "../js/data/calaRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../js/data/calaRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 import {
   DOCUMENTED_CALA_BAD_POINT_CODES,
   OFFICIAL_FORMAT_COLUMN_ROLES,
@@ -12,7 +12,7 @@ import {
   OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
   buildCalaDocumentAbbreviationMatrix,
   buildOfficialFormatRowGeometry
-} from "../js/core/officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+} from "../js/core/officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 const cssSource = readFileSync(new URL("../css/styles.css", import.meta.url), "utf8");
 const viewSource = readFileSync(new URL("../js/views/formato-federacion.js", import.meta.url), "utf8");

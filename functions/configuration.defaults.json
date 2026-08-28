@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260828-fmch-terna-federation-format-official-score-recovery-001-v1",
+      "appVersion": "20260828-fmch-terna-federation-format-official-score-recovery-001b-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "6071e638cfd38c8fe3a373e815123423d4912fd1d9e4acde592205ad69f51947",
-  "fingerprint": "6071e638cfd38c8fe3a373e815123423d4912fd1d9e4acde592205ad69f51947"
+  "checksum": "d045fac34d26d06c5e08d36bda22e89f90d8068a1a6c779c3e515d8f4699e5ff",
+  "fingerprint": "d045fac34d26d06c5e08d36bda22e89f90d8068a1a6c779c3e515d8f4699e5ff"
 }

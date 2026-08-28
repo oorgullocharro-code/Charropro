@@ -1,8 +1,8 @@
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "./officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
-import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+} from "./officialFormatSnapshot.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 import {
   OFFICIAL_FORMAT_COLUMN_ROLES,
   OFFICIAL_FORMAT_COLUMN_WIDTHS,
@@ -11,9 +11,9 @@ import {
   OFFICIAL_FORMAT_TEXT_POLICY,
   OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
   buildOfficialFormatRowGeometry
-} from "./officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
-import { state } from "./state.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+} from "./officialFormatDocumentModel.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { state } from "./state.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
 export { OFFICIAL_FORMAT_PAPER };
@@ -533,14 +533,15 @@ function buildTernaVisual(rows, merges, snapshot, row, sideValue, control) {
     const left = participant.left;
     const right = participant.right;
     const dataRow = row + 2 + visualRow;
-    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, participant.name || "-", "participant");
-    mergeVisual(rows, merges, dataRow, 10, dataRow, 14, aggregateAttemptValue(left, attemptGoodExcludingTime), "scoreCell");
-    mergeVisual(rows, merges, dataRow, 15, dataRow, 17, aggregateRemate(left), "scoreCell");
-    mergeVisual(rows, merges, dataRow, 18, dataRow, 22, aggregateAttemptValue(right, attemptGoodExcludingTime), "scoreCell");
-    mergeVisual(rows, merges, dataRow, 23, dataRow, 26, aggregateRemate(right), "scoreCell");
-    mergeVisual(rows, merges, dataRow, 27, dataRow, 28, aggregateBoth(left, right, (attempt) => attempt.individualBadPoints), "badScoreCell");
-    mergeVisual(rows, merges, dataRow, 29, dataRow, 29, aggregateBoth(left, right, attemptTimePoints), "scoreCell");
-    mergeVisual(rows, merges, dataRow, 30, dataRow, 32, aggregateBoth(left, right, (attempt) => attempt.total), "totalCell");
+    const fieldPrefix = `FMCH.TEAM_SHEET.TERNA.ROW_${String(visualRow + 1).padStart(2, "0")}`;
+    mergeVisual(rows, merges, dataRow, 2, dataRow, 9, participant.name || "-", "participant", `FMCH.TEAM_SHEET.TERNA.PARTICIPANT_${String(visualRow + 1).padStart(2, "0")}.NAME`);
+    mergeVisual(rows, merges, dataRow, 10, dataRow, 14, aggregateAttemptValue(left, attemptGoodExcludingTime), "scoreCell", `${fieldPrefix}.BASE_ADDITIONALES_01`);
+    mergeVisual(rows, merges, dataRow, 15, dataRow, 17, aggregateRemate(left), "scoreCell", `${fieldPrefix}.REMATE_01`);
+    mergeVisual(rows, merges, dataRow, 18, dataRow, 22, aggregateAttemptValue(right, attemptGoodExcludingTime), "scoreCell", `${fieldPrefix}.BASE_ADDITIONALES_02`);
+    mergeVisual(rows, merges, dataRow, 23, dataRow, 26, aggregateRemate(right), "scoreCell", `${fieldPrefix}.REMATE_02`);
+    mergeVisual(rows, merges, dataRow, 27, dataRow, 28, aggregateBoth(left, right, (attempt) => attempt.individualBadPoints), "badScoreCell", `${fieldPrefix}.MALOS`);
+    mergeVisual(rows, merges, dataRow, 29, dataRow, 29, aggregateBoth(left, right, attemptTimePoints), "scoreCell", `${fieldPrefix}.T`);
+    mergeVisual(rows, merges, dataRow, 30, dataRow, 32, aggregateBoth(left, right, (attempt) => attempt.total), "totalCell", `${fieldPrefix}.TOTAL`);
   }
   mergeVisual(rows, merges, row + 5, 2, row + 5, 9, "SUPLENTE", "substitute");
   mergeVisual(rows, merges, row + 5, 10, row + 5, 16, "TERMINADO EN", "plainLabel");
@@ -604,16 +605,16 @@ function headerField(rows, merges, row, labelStart, labelEnd, label, valueStart,
   mergeVisual(rows, merges, row, valueStart, row, valueEnd, value || "", "headerValue");
 }
 
-function mergeVisual(rows, merges, startRow, startCol, endRow, endCol, value, style) {
+function mergeVisual(rows, merges, startRow, startCol, endRow, endCol, value, style, fieldId = "") {
   for (let row = startRow; row <= endRow; row += 1) {
     for (let col = startCol; col <= endCol; col += 1) putVisual(rows, row, col, "", style);
   }
-  putVisual(rows, startRow, startCol, value, style);
+  putVisual(rows, startRow, startCol, value, style, fieldId);
   if (startRow !== endRow || startCol !== endCol) merges.push(`${columnName(startCol)}${startRow}:${columnName(endCol)}${endRow}`);
 }
 
-function putVisual(rows, row, col, value, style) {
-  rows[row - 1][col - 1] = C(value ?? "", style);
+function putVisual(rows, row, col, value, style, fieldId = "") {
+  rows[row - 1][col - 1] = C(value ?? "", style, fieldId);
 }
 
 function calaDistanceHeading(attempt) {
@@ -668,22 +669,34 @@ function buildTernaParticipantRows(snapshot, attempts) {
   const roster = Array.isArray(snapshot.teamMetadata?.roster?.terna)
     ? snapshot.teamMetadata.roster.terna.slice(0, 3).map((name) => String(name || "").trim())
     : [];
-  const attemptNames = attempts.map((attempt) => String(attempt.charro || "").trim()).filter(Boolean);
-  const names = [...roster];
-  for (const name of attemptNames) {
-    if (names.includes(name) || names.length >= 3) continue;
-    names.push(name);
+  while (roster.length < 3) roster.push("");
+  const rows = roster.slice(0, 3).map((name) => ({ name, left: [], right: [] }));
+
+  for (const attempt of attempts) {
+    const name = attemptCharro(attempt);
+    const normalizedName = normalizeParticipantName(name);
+    let rowIndex = normalizedName
+      ? rows.findIndex((row) => normalizeParticipantName(row.name) === normalizedName)
+      : -1;
+    if (rowIndex < 0) rowIndex = attempt.suerteId === "pial_ruedo" ? 1 : 0;
+    if (!rows[rowIndex].name) rows[rowIndex].name = name;
+    if (attempt.suerteId === "lazo") rows[rowIndex].left.push(attempt);
+    if (attempt.suerteId === "pial_ruedo") rows[rowIndex].right.push(attempt);
   }
-  while (names.length < 3) names.push("");
-  return names.slice(0, 3).map((name) => ({
-    name,
-    left: name ? attempts.filter((attempt) => attempt.suerteId === "lazo" && attemptCharro(attempt) === name) : [],
-    right: name ? attempts.filter((attempt) => attempt.suerteId === "pial_ruedo" && attemptCharro(attempt) === name) : []
-  }));
+  return rows;
 }
 
 function attemptCharro(attempt) {
   return String(attempt?.charro || "").trim();
+}
+
+function normalizeParticipantName(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function aggregateAttemptValue(attempts, selector) {
@@ -851,8 +864,8 @@ function compactCharreada(charreada) {
   };
 }
 
-function C(value, style) {
-  return { value, style };
+function C(value, style, fieldId = "") {
+  return fieldId ? { value, style, fieldId } : { value, style };
 }
 
 function D(value, documentFieldId, documentRole) {

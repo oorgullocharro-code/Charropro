@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 const T0 = Date.parse("2026-08-25T12:00:00.000Z");
 for (const seconds of [10, 30, 60, 300]) {

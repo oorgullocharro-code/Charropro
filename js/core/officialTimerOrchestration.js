@@ -1,10 +1,10 @@
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+} from "./timerRules.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 export const OFFICIAL_CURRENT_TIMER_CONTEXT_VERSION = "1.0.0";
 export const TORO_TO_TERNA_HANDOFF = "TORO_TO_TERNA_READY";

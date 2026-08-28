@@ -5,9 +5,9 @@ import {
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   getRuleProfile,
   resolveEffectiveRules
-} from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 assert.equal(FMCH_2026_LIBRE_PROFILE, FMCH_2026_LIBRE_PROFILE_0_6_0);
 assert.equal(getRuleProfile("FMCH_2026_LIBRE", "0.6.0"), FMCH_2026_LIBRE_PROFILE_0_6_0);

@@ -1,4 +1,4 @@
-import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001-v1";
+import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260828-fmch-terna-federation-format-official-score-recovery-001b-v1";
 
 export function createScorerOfficialTimerConsumer(options = {}) {
   const readState = typeof options.readState === "function" ? options.readState : () => ({});
