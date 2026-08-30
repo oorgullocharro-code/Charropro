@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import {
   compareOfficialTimerSnapshots,
-  deriveOfficialTimerLiveDisplay
-} from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+  deriveOfficialTimerLiveDisplay,
+  formatOfficialTimerMs
+} from "../js/core/officialTimerLiveDisplay.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const T0 = Date.parse("2026-08-25T12:00:00.000Z");
 const base = { timerId: "timer-1", durationMs: 60000, officialElapsedMs: 10000, sourceRevision: 1 };
@@ -15,6 +16,26 @@ assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "RUNNING", runnin
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "FINISHED", officialElapsedMs: 42000 }, T0 + 50000).elapsedMs, 42000);
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "STALE" }, T0).stateLabel, "DESACTUALIZADO");
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "OFFLINE" }, T0).stateLabel, "SIN CONEXION");
+
+const overtime = deriveOfficialTimerLiveDisplay({
+  timerId: "timer-overtime",
+  status: "RUNNING",
+  mode: "countdown",
+  durationMs: 1000,
+  officialElapsedMs: 0,
+  runningSince: T0
+}, T0 + 1100);
+assert.equal(overtime.remainingMs, -100);
+assert.equal(overtime.overtimeMs, 100);
+assert.equal(overtime.formatted, "-00:00.1");
+assert.equal(overtime.alertState, "overtime");
+assert.equal(overtime.overtime, true);
+assert.equal(formatOfficialTimerMs(0), "00:00.0");
+assert.equal(formatOfficialTimerMs(-0), "00:00.0");
+assert.equal(formatOfficialTimerMs(-17400), "-00:17.4");
+assert.equal(formatOfficialTimerMs(-63200), "-01:03.2");
+assert.equal(formatOfficialTimerMs(Number.NaN), "00:00.0");
+assert.equal(formatOfficialTimerMs(Number.POSITIVE_INFINITY), "00:00.0");
 
 assert.deepEqual(compareOfficialTimerSnapshots(
   { timerId: "piales", sourceRevision: 11 },

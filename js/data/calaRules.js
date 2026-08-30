@@ -301,6 +301,56 @@ export function normalizeTeamPenalty(rule = {}) {
   };
 }
 
+export function applyFmch2026CalaPartideroTiming(attempt = {}, timingInput = {}) {
+  const next = {
+    ...attempt,
+    applied: Array.isArray(attempt.applied) ? [...new Set(attempt.applied.map(String))] : [],
+    ruleQuantities: { ...(attempt.ruleQuantities || {}) }
+  };
+  const elapsedMs = Math.max(0, Number(timingInput.officialElapsedMs) || 0);
+  const durationMs = Math.max(0, Number(timingInput.durationMs) || 120000);
+  const remainingMs = durationMs - elapsedMs;
+  const overtimeMs = Math.max(0, -remainingMs);
+  const infractionRuleId = "cala_inf_arrancar_despues_un_minuto";
+  const dqRuleId = "cala_desc_dos_minutos";
+  setCalaRuleQuantity(next, infractionRuleId, elapsedMs > 60000 ? 1 : 0);
+  if (elapsedMs > durationMs) {
+    next.desc = CALA_DESC_RULES.find((item) => item.id === dqRuleId)?.label || "Rebasar dos minutos sin arrancar";
+    next.descRuleId = dqRuleId;
+    next.autoDescRuleId = dqRuleId;
+  } else if (next.autoDescRuleId === dqRuleId) {
+    next.desc = null;
+    next.descRuleId = null;
+    next.autoDescRuleId = null;
+  }
+  next.timing = {
+    ...(attempt.timing || {}),
+    timerId: String(timingInput.timerId || attempt.timing?.timerId || "timer_cala_partidero_start"),
+    officialElapsedMs: elapsedMs,
+    elapsedMs,
+    durationMs,
+    remainingMs,
+    overtimeMs,
+    alertState: overtimeMs > 0 ? "overtime" : "normal",
+    status: String(timingInput.status || attempt.timing?.status || "CAPTURED"),
+    adjustments: [
+      ...(elapsedMs > 60000 ? [{ selectedRuleId: infractionRuleId, resolvedValue: 1, quantity: 1 }] : []),
+      ...(elapsedMs > durationMs ? [{ selectedRuleId: dqRuleId, resolvedValue: 0, quantity: 1 }] : [])
+    ]
+  };
+  return next;
+}
+
+function setCalaRuleQuantity(attempt, ruleId, quantity) {
+  if (quantity > 0) {
+    if (!attempt.applied.includes(ruleId)) attempt.applied.push(ruleId);
+    attempt.ruleQuantities[ruleId] = quantity;
+    return;
+  }
+  attempt.applied = attempt.applied.filter((id) => id !== ruleId);
+  delete attempt.ruleQuantities[ruleId];
+}
+
 export function normalizeCalaRuleOverrideCatalog(catalog = {}) {
   if (!catalog || typeof catalog !== "object") return catalog || {};
   if (!hasLegacyCalaCatalog(catalog)) return catalog;

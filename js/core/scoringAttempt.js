@@ -745,7 +745,9 @@ function normalizeTiming(value = {}, legacyText = "") {
     officialElapsedMs: nullableNonNegativeNumber(value?.officialElapsedMs ?? value?.elapsedMs),
     wallElapsedMs: nullableNonNegativeNumber(value?.wallElapsedMs),
     elapsedMs: nullableNonNegativeNumber(value?.elapsedMs),
-    remainingMs: nullableNonNegativeNumber(value?.remainingMs),
+    remainingMs: nullableFiniteNumber(value?.remainingMs),
+    overtimeMs: nullableNonNegativeNumber(value?.overtimeMs),
+    alertState: normalizeText(value?.alertState, 40) || null,
     startedAt: normalizeIso(value?.startedAt) || null,
     endedAt: normalizeIso(value?.endedAt) || null,
     status: normalizeText(value?.status || value?.timingStatus, 80) || null,
@@ -754,6 +756,8 @@ function normalizeTiming(value = {}, legacyText = "") {
       timerId: nullableId(timer?.timerId || timer?.id),
       officialElapsedMs: nullableNonNegativeNumber(timer?.officialElapsedMs ?? timer?.elapsedMs),
       wallElapsedMs: nullableNonNegativeNumber(timer?.wallElapsedMs),
+      remainingMs: nullableFiniteNumber(timer?.remainingMs),
+      overtimeMs: nullableNonNegativeNumber(timer?.overtimeMs),
       status: normalizeText(timer?.status, 80) || null
     })).filter((timer) => timer.timerId),
     adjustments: (Array.isArray(value?.adjustments || value?.timeAdjustments)
@@ -997,6 +1001,12 @@ function nullableNonNegativeNumber(value) {
   if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function nullableFiniteNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
 function normalizeIso(value) {

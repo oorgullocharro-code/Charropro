@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as routingApi from "../js/broadcast/outputRouting.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import * as routingApi from "../js/broadcast/outputRouting.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   OUTPUT_ROUTING_VERSION,
   OUTPUT_ROUTE_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   updateOutputRoute,
   validateOutputRoute,
   validateOutputRoutingSnapshot
-} from "../js/broadcast/outputRouting.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const T0 = "2026-07-15T18:00:00.000Z";
 const T1 = "2026-07-15T18:00:01.000Z";
@@ -367,6 +367,20 @@ for (const status of ["ready", "running", "paused", "stopped", "finished", "unav
   assert.equal("interval" in result.projection, false);
   assert.deepEqual(input, inputClone);
 }
+const overtimeRoute = routeTimerDisplay(engine, "route-timer-display", timerState("finished", timerRevision++, {
+  formattedTime: "-00:00.1",
+  remainingMs: -100,
+  overtimeMs: 100,
+  overtime: true,
+  alertState: "overtime"
+}), {
+  now: T2,
+  context: { tenantId: "tenant_a", tournamentId: "tournament_a", competitionId: "competition_a" }
+});
+assert.equal(overtimeRoute.projection.remainingMs, -100);
+assert.equal(overtimeRoute.projection.overtimeMs, 100);
+assert.equal(overtimeRoute.projection.overtime, true);
+assert.equal(overtimeRoute.projection.alertState, "overtime");
 
 // Expected revision failures are atomic.
 const beforeConflict = getOutputRoute(engine, "route-timer-display", { now: T2 });

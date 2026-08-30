@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 
@@ -118,6 +118,22 @@ assert.equal(teamContract.ranking.scope, "team");
 assert.equal(teamContract.ranking.entries[0].teamId, "equipo_1");
 assert.equal(teamContract.ranking.entries[0].participantId, null);
 assert.equal(validateBroadcastDataContract(teamContract).valid, true);
+
+const overtimeContract = build({
+  ...teamSource,
+  timer: {
+    ...teamSource.timer,
+    remainingMs: -100,
+    overtimeMs: 100,
+    overtime: true,
+    alertState: "overtime"
+  }
+});
+assert.equal(overtimeContract.timer.remaining, -100);
+assert.equal(overtimeContract.timer.overtimeMs, 100);
+assert.equal(overtimeContract.timer.overtime, true);
+assert.equal(overtimeContract.timer.alertState, "overtime");
+assert.equal(validateBroadcastDataContract(overtimeContract).valid, true);
 
 const nestedPayloadContract = build({
   broadcastContext: teamSource,

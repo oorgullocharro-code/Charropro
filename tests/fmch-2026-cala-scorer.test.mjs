@@ -7,26 +7,27 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_RULEBOOK_VERSION,
   FMCH_2026_CALA_TEAM_PENALTY_RULES,
+  applyFmch2026CalaPartideroTiming,
   calculatePuntaBreakdown
-} from "../js/data/calaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/data/calaRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   applyPuntaCalculation,
   calculateAttemptPointSummary,
   calculateAttemptTotal
-} from "../js/core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
-const RELEASE_ID = "20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+const RELEASE_ID = "20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 const publishedAt = "2026-08-08T18:00:00.000Z";
 
 assert.equal(FMCH_2026_CALA_RULEBOOK_VERSION, "fmch_2026_cala_0.2.0");
@@ -109,6 +110,15 @@ assert.equal(calculatePuntaBreakdown({ puntaMetros: 8.51, puntaPiquetes: 1 }).me
 assert.equal(calculatePuntaBreakdown({ puntaMetros: 8.52, puntaPiquetes: 1 }).metrosCalificados, 9);
 assert.equal(calculatePuntaBreakdown({ puntaMetros: 90, puntaPiquetes: 1 }).total, 87);
 assert.equal(calculatePuntaBreakdown({ puntaMetros: 8, puntaPiquetes: 5 }).total, 0);
+
+const calaBeforeThreshold = applyFmch2026CalaPartideroTiming({}, { officialElapsedMs: 60000, durationMs: 120000 });
+assert.equal(calaBeforeThreshold.ruleQuantities.cala_inf_arrancar_despues_un_minuto || 0, 0);
+const calaAfterThreshold = applyFmch2026CalaPartideroTiming({}, { officialElapsedMs: 60001, durationMs: 120000 });
+assert.equal(calaAfterThreshold.ruleQuantities.cala_inf_arrancar_despues_un_minuto, 1);
+const calaOvertime = applyFmch2026CalaPartideroTiming({}, { officialElapsedMs: 120001, durationMs: 120000 });
+assert.equal(calaOvertime.timing.remainingMs, -1);
+assert.equal(calaOvertime.timing.overtimeMs, 1);
+assert.equal(calaOvertime.descRuleId, "cala_desc_dos_minutos");
 
 const repeatableRule = effectiveCala.suerte.catalog.infr.find((rule) => rule.id === "cala_inf_lados_caminando");
 assert.equal(repeatableRule.metadata.repeatable, true);

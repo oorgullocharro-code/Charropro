@@ -15,20 +15,22 @@ import {
   FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID,
   FMCH_2026_PIALES_RULEBOOK_VERSION,
   FMCH_2026_PIALES_TEAM_PENALTY_RULES,
+  applyFmch2026PialesTiming,
   buildPialesRemateHistory,
   calculatePialesDistanceAdditional,
+  resolveFmch2026PialesTiming,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "../js/data/fmch2026PialesColeaderoRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/data/fmch2026PialesColeaderoRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { createScoreCollection, emptyAttempt } from "../js/core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { createScoreCollection, emptyAttempt } from "../js/core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const publishedAt = "2026-08-08T20:00:00.000Z";
 const productPiales = SUERTES.find((suerte) => suerte.id === "piales");
@@ -78,6 +80,28 @@ assert.equal(shouldDisqualifyRepeatedThirdPialesRemate(pialesAttempts, 2, piales
 assert.equal(shouldDisqualifyRepeatedThirdPialesRemate(pialesAttempts, 1, pialesAttempts[1].remateId), false);
 assert.equal(buildPialesRemateHistory(pialesAttempts).length, 3);
 assert.ok(effectivePiales.suerte.catalog.desc.some((rule) => rule.id === FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID));
+
+assert.deepEqual(resolveFmch2026PialesTiming(120000, 120000), {
+  officialElapsedMs: 120000,
+  durationMs: 120000,
+  remainingMs: 0,
+  overtimeMs: 0,
+  penaltyQuantity: 0
+});
+assert.equal(resolveFmch2026PialesTiming(120001, 120000).penaltyQuantity, 1);
+assert.equal(resolveFmch2026PialesTiming(180001, 120000).penaltyQuantity, 2);
+const pialesOvertime = applyFmch2026PialesTiming(emptyAttempt(), {
+  timerId: "timer_piales:participant-a:opportunity-2",
+  officialElapsedMs: 120001,
+  durationMs: 120000,
+  status: "FINISHED"
+});
+assert.equal(pialesOvertime.ruleQuantities.piales_infr_tiempo_excedido_minuto, 1);
+assert.equal(pialesOvertime.timing.remainingMs, -1);
+assert.equal(pialesOvertime.timing.overtimeMs, 1);
+const pialesOvertimeV2 = adaptLegacyAttemptToV2(pialesOvertime, buildContext(effectivePiales.suerte, 1));
+assert.equal(pialesOvertimeV2.timing.remainingMs, -1, "Attempt V2 preserves signed temporal evidence");
+assert.equal(pialesOvertimeV2.timing.overtimeMs, 1);
 
 const pialesAttempt = {
   ...emptyAttempt(),

@@ -9,13 +9,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   getOfficialTimerControlView,
-  normalizeOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+  normalizeOfficialTimerContext,
+  validateOfficialTimerContext
+} from "../js/core/timerRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine,
   routeTimerDisplay
-} from "../js/broadcast/outputRouting.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const T0 = Date.parse("2026-08-11T12:00:00.000Z");
 const definition = {
@@ -53,6 +54,24 @@ const scorer = {
   controllerSessionId: "scorer_tab",
   controllerType: "scorer_backup"
 };
+
+const overtimeDefinition = { timerId: "timer_overtime", durationMs: 1000, mode: "countdown" };
+let overtimeTimer = createOfficialTimerContext(overtimeDefinition, { now: T0 });
+overtimeTimer = applyOfficialTimerCommand(overtimeTimer, { type: "START", commandId: "ot_start" }, {
+  definition: overtimeDefinition,
+  now: T0,
+  expectedRevision: 0,
+  requireCommandId: true
+}).timer;
+overtimeTimer = applyOfficialTimerCommand(overtimeTimer, { type: "FINISH", commandId: "ot_finish" }, {
+  definition: overtimeDefinition,
+  now: T0 + 1100,
+  expectedRevision: 1,
+  requireCommandId: true
+}).timer;
+assert.equal(overtimeTimer.officialElapsedMs, 1100, "authority preserves certified overtime evidence");
+assert.equal(getOfficialTimerContextView(overtimeTimer, { now: T0 + 1100 }).remainingMs, -100);
+assert.equal(validateOfficialTimerContext(overtimeTimer).valid, true);
 
 function command(timer, type, controller, actor, commandId, now, expectedRevision = timer.revision) {
   return applyOfficialTimerCommand(timer, {

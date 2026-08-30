@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import restoreEngine from "../functions/restoreEngine.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import restoreService from "../functions/restoreService.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import restoreEngine from "../functions/restoreEngine.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import restoreService from "../functions/restoreService.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const {
   buildBackupArchive,

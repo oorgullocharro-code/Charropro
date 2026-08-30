@@ -239,6 +239,8 @@ export function resolveFmch2026JineteoTiming(elapsedMs, classificationId, option
     : Math.min(3, Math.floor((180000 - safeElapsedMs) / 60000));
   return {
     elapsedMs: safeElapsedMs,
+    remainingMs: 300000 - safeElapsedMs,
+    overtimeMs: Math.max(0, safeElapsedMs - 300000),
     timeSavedQuantity,
     minute4Penalty: safeElapsedMs > 180000,
     minute5Penalty: safeElapsedMs > 240000,
@@ -246,7 +248,7 @@ export function resolveFmch2026JineteoTiming(elapsedMs, classificationId, option
   };
 }
 
-export function applyFmch2026JineteoTiming(attempt = {}, suerte = {}, elapsedMs = 0) {
+export function applyFmch2026JineteoTiming(attempt = {}, suerte = {}, elapsedMs = 0, options = {}) {
   if (!isFmch2026JineteoSuerte(suerte?.id)) return cloneAttempt(attempt);
   const next = cloneAttempt(attempt);
   const classificationId = getClassification(next.classification).classificationId;
@@ -255,6 +257,7 @@ export function applyFmch2026JineteoTiming(attempt = {}, suerte = {}, elapsedMs 
   const timeRules = [...(catalog.adic || []), ...(catalog.infr || [])]
     .filter((ruleItem) => ruleItem.metadata?.timingAdjustment);
   const timeRuleIds = new Set(timeRules.map((ruleItem) => ruleItem.id));
+  if (suerte.id === "yegua") timeRuleIds.add("yegua_infr_desmonte_tardio");
   next.applied = (Array.isArray(next.applied) ? next.applied : []).filter((ruleId) => !timeRuleIds.has(ruleId));
   next.ruleQuantities = { ...(next.ruleQuantities || {}) };
   timeRuleIds.forEach((ruleId) => delete next.ruleQuantities[ruleId]);
@@ -263,6 +266,12 @@ export function applyFmch2026JineteoTiming(attempt = {}, suerte = {}, elapsedMs 
   setQuantity(next, `${prefix}_adic_tiempo_ahorrado`, timing.timeSavedQuantity);
   setQuantity(next, `${prefix}_infr_apretalamiento_minuto_4`, timing.minute4Penalty ? 1 : 0);
   setQuantity(next, `${prefix}_infr_apretalamiento_minuto_5`, timing.minute5Penalty ? 1 : 0);
+  const dismountTiming = prefix === "yegua" && options.dismountOfficialElapsedMs !== undefined
+    ? resolveFmch2026YeguaDismountTiming(options.dismountOfficialElapsedMs)
+    : null;
+  if (dismountTiming) {
+    setQuantity(next, "yegua_infr_desmonte_tardio", dismountTiming.penaltyQuantity);
+  }
 
   const dqRuleId = `${prefix}_desc_apretalamiento_mas_5_min`;
   const dqRule = (catalog.desc || []).find((ruleItem) => ruleItem.id === dqRuleId);
@@ -279,17 +288,39 @@ export function applyFmch2026JineteoTiming(attempt = {}, suerte = {}, elapsedMs 
   next.timing = {
     timerId: `${prefix}_apretalamiento`,
     elapsedMs: timing.elapsedMs,
-    remainingMs: Math.max(0, 300000 - timing.elapsedMs),
+    remainingMs: timing.remainingMs,
+    overtimeMs: timing.overtimeMs,
+    alertState: timing.overtimeMs > 0 ? "overtime" : "normal",
     status: timing.disqualified ? "EXPIRED" : "CAPTURED",
     legacyText: formatElapsed(timing.elapsedMs),
     adjustments: [
       ...(timing.timeSavedQuantity ? [{ ruleId: `${prefix}_adic_tiempo_ahorrado`, category: "additional", resolvedValue: 1, quantity: timing.timeSavedQuantity }] : []),
       ...(timing.minute4Penalty ? [{ ruleId: `${prefix}_infr_apretalamiento_minuto_4`, category: "infraction", resolvedValue: 1, quantity: 1 }] : []),
       ...(timing.minute5Penalty ? [{ ruleId: `${prefix}_infr_apretalamiento_minuto_5`, category: "infraction", resolvedValue: 1, quantity: 1 }] : []),
-      ...(timing.disqualified ? [{ ruleId: dqRuleId, category: "disqualification", resolvedValue: 0, quantity: 1 }] : [])
-    ]
+      ...(timing.disqualified ? [{ ruleId: dqRuleId, category: "disqualification", resolvedValue: 0, quantity: 1 }] : []),
+      ...(dismountTiming?.penaltyQuantity ? [{ ruleId: "yegua_infr_desmonte_tardio", category: "infraction", resolvedValue: 1, quantity: dismountTiming.penaltyQuantity }] : [])
+    ],
+    secondaryTimers: dismountTiming ? [{
+      timerId: String(options.dismountTimerId || "timer_yegua_dismount"),
+      officialElapsedMs: dismountTiming.officialElapsedMs,
+      remainingMs: dismountTiming.remainingMs,
+      overtimeMs: dismountTiming.overtimeMs,
+      status: dismountTiming.overtimeMs > 0 ? "EXCEEDED" : "CAPTURED"
+    }] : []
   };
   return reconcileFmch2026JineteoAttempt(next, suerte);
+}
+
+export function resolveFmch2026YeguaDismountTiming(officialElapsedMs = 0) {
+  const elapsedMs = Math.max(0, Number(officialElapsedMs) || 0);
+  const remainingMs = 60000 - elapsedMs;
+  const overtimeMs = Math.max(0, -remainingMs);
+  return {
+    officialElapsedMs: elapsedMs,
+    remainingMs,
+    overtimeMs,
+    penaltyQuantity: overtimeMs > 0 ? Math.ceil(overtimeMs / 60000) : 0
+  };
 }
 
 function resolveCatalogTotal(attempt, rules = [], classificationId, customKey) {

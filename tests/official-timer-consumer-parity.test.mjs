@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const now = Date.parse("2026-08-25T12:00:12.300Z");
 const snapshot = {
@@ -17,6 +17,12 @@ const values = ["scorer", "graphics", "timer-display", "control", "broadcast"].m
 );
 assert.deepEqual(new Set(values).size, 1);
 assert.equal(values[0], "00:16.7");
+
+const overtimeValues = ["scorer", "graphics", "timer-display", "control", "broadcast"].map(() =>
+  deriveOfficialTimerLiveDisplay({ ...snapshot, durationMs: 3000 }, now).formatted
+);
+assert.deepEqual(new Set(overtimeValues).size, 1);
+assert.equal(overtimeValues[0], "-00:00.3");
 
 const sources = {
   scorer: readFileSync(new URL("../js/app.js", import.meta.url), "utf8"),

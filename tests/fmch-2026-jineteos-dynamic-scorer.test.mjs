@@ -15,18 +15,19 @@ import {
   applyFmch2026JineteoTiming,
   reconcileFmch2026JineteoAttempt,
   resolveFmch2026JineteoTiming,
+  resolveFmch2026YeguaDismountTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "../js/data/fmch2026JineteosRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules, validateRuleProfile } from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { SUERTES, resolveTournamentRules } from "../js/data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/data/fmch2026JineteosRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules, validateRuleProfile } from "../js/data/ruleProfiles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { SUERTES, resolveTournamentRules } from "../js/data/suertes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { emptyAttempt } from "../js/core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const productToro = SUERTES.find((suerte) => suerte.id === "toro");
 const productYegua = SUERTES.find((suerte) => suerte.id === "yegua");
@@ -146,6 +147,8 @@ assert.equal(calculateAttemptTotal(noRepara), 6);
 
 assert.deepEqual(resolveFmch2026JineteoTiming(60000, "EXCELENTE"), {
   elapsedMs: 60000,
+  remainingMs: 240000,
+  overtimeMs: 0,
   timeSavedQuantity: 2,
   minute4Penalty: false,
   minute5Penalty: false,
@@ -155,6 +158,9 @@ assert.equal(resolveFmch2026JineteoTiming(180001, "BUENA").minute4Penalty, true)
 assert.equal(resolveFmch2026JineteoTiming(240001, "BUENA").minute5Penalty, true);
 assert.equal(resolveFmch2026JineteoTiming(300001, "BUENA").disqualified, true);
 assert.equal(resolveFmch2026JineteoTiming(60000, "MINIMA").timeSavedQuantity, 0);
+assert.equal(resolveFmch2026YeguaDismountTiming(60000).penaltyQuantity, 0);
+assert.equal(resolveFmch2026YeguaDismountTiming(60001).penaltyQuantity, 1);
+assert.equal(resolveFmch2026YeguaDismountTiming(120001).penaltyQuantity, 2);
 
 let timedToro = setFmch2026JineteoClassification(emptyAttempt(), effectiveToro.suerte, "BUENA");
 timedToro = applyFmch2026JineteoTiming(timedToro, effectiveToro.suerte, 60000);
@@ -174,6 +180,21 @@ assert.equal(timedYegua.adic, 2);
 timedYegua = applyFmch2026JineteoTiming(timedYegua, effectiveYegua.suerte, 300001);
 assert.equal(timedYegua.descRuleId, "yegua_desc_apretalamiento_mas_5_min");
 assert.equal(calculateAttemptTotal(timedYegua), -2);
+const timedYeguaDismount = applyFmch2026JineteoTiming(
+  setFmch2026JineteoClassification(emptyAttempt(), effectiveYegua.suerte, "EXCELENTE"),
+  effectiveYegua.suerte,
+  120000,
+  { dismountTimerId: "timer_yegua_dismount:fixture", dismountOfficialElapsedMs: 60001 }
+);
+assert.equal(timedYeguaDismount.applied.includes("yegua_infr_desmonte_tardio"), true);
+assert.equal(timedYeguaDismount.timing.secondaryTimers[0].overtimeMs, 1);
+const correctedYeguaDismount = applyFmch2026JineteoTiming(
+  timedYeguaDismount,
+  effectiveYegua.suerte,
+  120000,
+  { dismountTimerId: "timer_yegua_dismount:fixture", dismountOfficialElapsedMs: 60000 }
+);
+assert.equal(correctedYeguaDismount.applied.includes("yegua_infr_desmonte_tardio"), false);
 
 const timedNoRepara = applyFmch2026JineteoTiming(noRepara, effectiveYegua.suerte, 60000);
 assert.equal(timedNoRepara.adic, 0);

@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

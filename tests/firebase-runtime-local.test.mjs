@@ -9,7 +9,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

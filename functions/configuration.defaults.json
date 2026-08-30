@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260828-fmch-terna-participant-identity-roster-persistence-001-v1",
+      "appVersion": "20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "25399c9b612de13eefe5a5d578d9f596a252e3e5fe0d238d81fb8c844dbe46ab",
-  "fingerprint": "25399c9b612de13eefe5a5d578d9f596a252e3e5fe0d238d81fb8c844dbe46ab"
+  "checksum": "d07c493d4f48baf9cc83f706040283a27af3b00a18b415d4b96fd9f619686ff3",
+  "fingerprint": "d07c493d4f48baf9cc83f706040283a27af3b00a18b415d4b96fd9f619686ff3"
 }

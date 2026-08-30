@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const ROOT = new URL("../", import.meta.url);
-const BUILD = "20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+const BUILD = "20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 assert.equal(configuration.values.system.appVersion, BUILD, "configuration is the canonical build authority");
 

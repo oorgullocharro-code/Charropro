@@ -7,7 +7,7 @@ import {
   mountBrowserOutput,
   setBrowserOutputViewport,
   validateBrowserOutputProjection
-} from "./browserOutput.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./browserOutput.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 export const ANNOUNCER_MONITOR_VERSION = "1.0.0";
 
@@ -839,14 +839,17 @@ function normalizeContext(value, currentValue) {
 function normalizeTimer(value) {
   const source = isRecord(value) ? value : {};
   const status = TIMER_STATES.has(source.status) ? source.status : (source.status ? "unavailable" : "unavailable");
+  const overtimeMs = finiteNonNegativeOrNull(source.overtimeMs);
   return {
     timerId: nullableText(source.timerId ?? source.id),
     status,
     formattedTime: preserveValue(source.formattedTime ?? source.display),
     elapsedMs: finiteNonNegativeOrNull(source.elapsedMs),
-    remainingMs: finiteNonNegativeOrNull(source.remainingMs),
+    remainingMs: finiteOrNull(source.remainingMs),
+    overtimeMs,
+    overtime: source.overtime === true || Number(overtimeMs || 0) > 0,
+    alertState: source.alertState === "overtime" || Number(overtimeMs || 0) > 0 ? "overtime" : "normal",
     sourceRevision: nonNegativeInteger(source.sourceRevision ?? source.revision) ? Number(source.sourceRevision ?? source.revision) : null,
-    alertState: nullableText(source.alertState),
     startedAt: normalizeNullableIso(source.startedAt),
     pausedAt: normalizeNullableIso(source.pausedAt),
     stoppedAt: normalizeNullableIso(source.stoppedAt),
@@ -1682,6 +1685,12 @@ function finiteNonNegativeOrNull(value) {
   return Number.isFinite(number) && number >= 0 ? number : null;
 }
 
+function finiteOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
 function normalizeResolution(value) {
   return { width: Number(value?.width), height: Number(value?.height) };
 }
@@ -1806,9 +1815,9 @@ export async function connectAnnouncerMonitorRealtime(instance, options = {}) {
     : new URLSearchParams(options.search ?? globalThis.location?.search ?? "");
   const requestContext = options.context || announcerRealtimeContextFromParams(params);
   assertNoAnnouncerExternalIdentity(requestContext);
-  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1");
+  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1");
   const accessId = params.get("access") || options.accessId || null;
-  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1") : null);
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1") : null);
   if (options.authorizedContext && !options.adapter) throw monitorError("announcer-monitor-authorized-context-injection-forbidden");
   if (options.temporaryAccess && !options.adapter) throw monitorError("announcer-monitor-temporary-access-injection-forbidden");
   const temporaryAccess = accessId

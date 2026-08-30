@@ -1,15 +1,15 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";
@@ -1092,11 +1092,14 @@ function buildLiveTimer(timer = {}, payload = {}) {
       elapsedLiveMs: live.elapsedMs,
       displayMs: live.displayMs,
       remainingMs: live.remainingMs,
+      overtimeMs: live.overtimeMs,
       formatted: live.formatted,
       mode: live.mode,
       limitMs: live.durationMs,
       stateLabel: normalized.stateLabel || live.stateLabel,
-      expired: live.expired
+      expired: live.expired,
+      overtime: live.overtime,
+      alertState: live.alertState
     };
   }
   const view = getTimerView(normalized, {

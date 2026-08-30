@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 function context(suerteId, extra = {}) {
   return {

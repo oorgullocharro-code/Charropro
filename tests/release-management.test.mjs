@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
-import releaseEngine from "../tools/release/releaseEngine.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import releaseEngine from "../tools/release/releaseEngine.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const {
   RELEASE_ENGINE_VERSION,

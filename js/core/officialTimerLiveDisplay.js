@@ -21,9 +21,10 @@ export function deriveOfficialTimerLiveDisplay(snapshot = {}, now = Date.now()) 
   );
   const canInterpolate = status === "RUNNING" && anchorMs !== null;
   const interpolatedMs = canInterpolate ? Math.max(0, nowMs - anchorMs) : 0;
-  const elapsedMs = clampElapsed(officialElapsedBaseMs + interpolatedMs, durationMs);
+  const elapsedMs = nonNegativeNumber(officialElapsedBaseMs + interpolatedMs);
   const mode = normalizeMode(snapshot.mode, durationMs);
-  const remainingMs = durationMs > 0 ? Math.max(0, durationMs - elapsedMs) : null;
+  const remainingMs = durationMs > 0 ? durationMs - elapsedMs : null;
+  const overtimeMs = durationMs > 0 ? Math.max(0, elapsedMs - durationMs) : 0;
   const displayMs = mode === "countdown" && remainingMs !== null ? remainingMs : elapsedMs;
 
   return Object.freeze({
@@ -40,11 +41,14 @@ export function deriveOfficialTimerLiveDisplay(snapshot = {}, now = Date.now()) 
     officialElapsedBaseMs,
     elapsedMs,
     remainingMs,
+    overtimeMs,
     displayMs,
     formattedElapsed: formatOfficialTimerMs(elapsedMs),
     formattedRemaining: formatOfficialTimerMs(remainingMs ?? elapsedMs),
     formatted: formatOfficialTimerMs(displayMs),
     expired: Boolean(durationMs > 0 && elapsedMs >= durationMs),
+    overtime: overtimeMs > 0,
+    alertState: overtimeMs > 0 ? "overtime" : "normal",
     sourceRevision: nonNegativeInteger(snapshot.sourceRevision ?? snapshot.revision),
     anchorMs,
     derivedAtMs: nowMs,
@@ -53,11 +57,14 @@ export function deriveOfficialTimerLiveDisplay(snapshot = {}, now = Date.now()) 
 }
 
 export function formatOfficialTimerMs(value) {
-  const safeMs = nonNegativeNumber(value);
-  const minutes = Math.floor(safeMs / 60000);
-  const seconds = Math.floor((safeMs % 60000) / 1000);
-  const decimals = Math.floor((safeMs % 1000) / 100);
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${decimals}`;
+  const numeric = Number(value);
+  const safeMs = Number.isFinite(numeric) ? Math.trunc(numeric) : 0;
+  const negative = safeMs < 0;
+  const absoluteMs = Math.abs(safeMs);
+  const minutes = Math.floor(absoluteMs / 60000);
+  const seconds = Math.floor((absoluteMs % 60000) / 1000);
+  const decimals = Math.floor((absoluteMs % 1000) / 100);
+  return `${negative ? "-" : ""}${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${decimals}`;
 }
 
 export function officialTimerDisplayStateLabel(status) {
@@ -182,6 +189,8 @@ export function updateOfficialTimerDomDisplays(root, registry = {}, now = Date.n
     const live = deriveOfficialTimerLiveDisplay(timer, now);
     display.textContent = live.formatted;
     display.dataset.timerStatus = live.status;
+    display.dataset.timerAlertState = live.alertState;
+    display.classList?.toggle?.("overtime", live.overtime);
     hasRunningTimer ||= live.running;
     updatedCount += 1;
   });
@@ -217,11 +226,6 @@ function normalizeIdentity(value = {}) {
 
 function snapshotFreshness(value = {}) {
   return parseTimestamp(value.updatedAt ?? value.generatedAt ?? value.authorityAcceptedAt) || 0;
-}
-
-function clampElapsed(elapsedMs, durationMs) {
-  const safe = nonNegativeNumber(elapsedMs);
-  return durationMs > 0 ? Math.min(durationMs, safe) : safe;
 }
 
 function parseTimestamp(value) {

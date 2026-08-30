@@ -22,29 +22,29 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "../js/data/fmch2026ManganasPasoRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/data/fmch2026ManganasPasoRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   FMCH_2026_LIBRE_PROFILE_0_5_0,
   getRuleProfile,
   resolveEffectiveRules,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq,
   validateScoringAttemptV2
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { emptyAttempt } from "../js/core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   applyOfficialTimerCommand,
   createOfficialTimerContext,
   getOfficialTimerContextView,
   validateOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/timerRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const productPie = SUERTES.find((item) => item.id === "manganas_pie");
 const productCaballo = SUERTES.find((item) => item.id === "manganas_caballo");
@@ -120,9 +120,11 @@ assert.equal(shouldDisqualifyRepeatedManganaRemate([{ remateId: "r1" }], 3, "r1"
 assert.deepEqual(resolveFmch2026ManganaTiming(240000, { hasConsumed: true }), {
   officialElapsedMs: 240000,
   remainingMs: 180000,
+  overtimeMs: 0,
   completeUnusedMinutes: 3,
   minuteSevenPenalty: false,
-  expired: false
+  expired: false,
+  disqualified: false
 });
 assert.equal(resolveFmch2026ManganaTiming(240000, { hasConsumed: false }).completeUnusedMinutes, 0);
 assert.equal(resolveFmch2026ManganaTiming(FMCH_2026_MANGANAS_DURATION_MS, { hasConsumed: true }).expired, true);
@@ -139,6 +141,47 @@ assert.equal(timedPie.timing.wallElapsedMs, 300000);
 assert.equal(timedPie.adic, 12);
 timedPie = applyFmch2026ManganaTiming(timedPie, pie, { officialElapsedMs: 400000, hasConsumed: true, placedInMinuteSeven: true });
 assert.equal(timedPie.infr, 3);
+const overtimePie = applyFmch2026ManganaTiming(timedPie, pie, {
+  officialElapsedMs: FMCH_2026_MANGANAS_DURATION_MS + 1,
+  hasConsumed: true
+});
+assert.equal(overtimePie.timing.remainingMs, -1);
+assert.equal(overtimePie.timing.overtimeMs, 1);
+assert.equal(overtimePie.descRuleId, "manganas_pie_desc_tiempo_agotado");
+assert.equal(overtimePie.ruleQuantities.manganas_pie_adic_tiempo_no_usado || 0, 0);
+assert.equal(
+  applyFmch2026ManganaTiming(pieAttempt, pie, {
+    officialElapsedMs: 240000,
+    hasConsumed: false
+  }).ruleQuantities.manganas_pie_adic_tiempo_no_usado || 0,
+  0,
+  "unused-time additional requires a consummated mangana"
+);
+assert.equal(
+  applyFmch2026ManganaTiming(pieAttempt, pie, {
+    officialElapsedMs: 240000,
+    hasConsumed: true,
+    sequenceComplete: false
+  }).ruleQuantities.manganas_pie_adic_tiempo_no_usado || 0,
+  0,
+  "intermediate opportunities preserve evidence without duplicating the sequence bonus"
+);
+const idempotentPieTiming = applyFmch2026ManganaTiming(timedPie, pie, {
+  timerId: "timer_manganas_pie:idempotent",
+  officialElapsedMs: 240000,
+  hasConsumed: true,
+  sequenceComplete: true
+});
+assert.deepEqual(
+  applyFmch2026ManganaTiming(idempotentPieTiming, pie, {
+    timerId: "timer_manganas_pie:idempotent",
+    officialElapsedMs: 240000,
+    hasConsumed: true,
+    sequenceComplete: true
+  }),
+  idempotentPieTiming,
+  "refresh/reconnect cannot duplicate a deterministic temporal consequence"
+);
 
 // Checkpoint B: Manganas a Caballo.
 assert.ok(FMCH_2026_MANGANAS_CABALLO_BASE_RULES.length >= 19);
@@ -263,6 +306,10 @@ assert.equal(calculateAttemptTotal(pasoRegular), 21);
 assert.deepEqual(resolveFmch2026PasoTiming({ exitOfficialElapsedMs: 120000, dismountOfficialElapsedMs: 60000 }), {
   exitElapsedMs: 120000,
   dismountElapsedMs: 60000,
+  exitRemainingMs: 60000,
+  exitOvertimeMs: 0,
+  dismountRemainingMs: 0,
+  dismountOvertimeMs: 0,
   exitDisqualified: false,
   dismountPenaltyQuantity: 0
 });

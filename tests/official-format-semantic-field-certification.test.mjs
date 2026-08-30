@@ -2,20 +2,21 @@ import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import {
   adaptLegacyAttemptToV2,
-  buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+  buildOfficialScoringAttemptSnapshot,
+  setScoringAttemptDq
+} from "../js/core/scoringAttempt.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { buildCanonicalTernaRoster, getTernaParticipantName } from "../js/core/ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/core/officialFormat.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { buildCanonicalTernaRoster, getTernaParticipantName } from "../js/core/ternaParticipantIdentity.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const TOURNAMENT_ID = "semantic-fmch-2024-2028";
 const CHARREADA_ID = "semantic-charreada-1";
@@ -150,7 +151,8 @@ function officialRecord(teamValue, input) {
     punta = null,
     officialElapsedMs = null,
     remate = null,
-    vuelta = null
+    vuelta = null,
+    disqualification = null
   } = input;
   const context = {
     tournamentId: TOURNAMENT_ID,
@@ -201,7 +203,7 @@ function officialRecord(teamValue, input) {
     legacy.puntaPiquetes = punta.times;
     applyPuntaCalculation(legacy);
   }
-  const draft = adaptLegacyAttemptToV2(legacy, context, { adaptedAt: GENERATED_AT });
+  let draft = adaptLegacyAttemptToV2(legacy, context, { adaptedAt: GENERATED_AT });
   if (officialElapsedMs !== null) {
     draft.timing = {
       timerId: `timer_${suerteId}_${teamValue.id}`,
@@ -213,6 +215,14 @@ function officialRecord(teamValue, input) {
   }
   if (remate) draft.sportState.remate = remate;
   if (vuelta) draft.sportState.vuelta = vuelta;
+  if (disqualification) {
+    draft = setScoringAttemptDq(draft, {
+      active: true,
+      ruleId: disqualification.ruleId,
+      reason: disqualification.reason,
+      source: "TEMPORAL_RULE"
+    });
+  }
   const attemptV2 = buildOfficialScoringAttemptSnapshot(draft, {
     publishedAt: GENERATED_AT,
     officialRevision: 1,
@@ -279,7 +289,7 @@ function recordsForTeam(teamValue, pasoVuelta) {
         selection("toro_adic_quitar_gaza_tentemozo", "Quitar pretal de gaza o tentemozo", 2),
         selection("toro_adic_tiempo_ahorrado", "Tiempo ahorrado", 1, 2)
       ],
-      infractions: [selection("toro_bad_fixture", "Malo toro", 2)],
+      infractions: [selection("toro_infr_apretalamiento_minuto_4", "Apretalamiento después de 3 minutos", 1)],
       teamPenalties: [selection("toro_team_fixture", "Infraccion equipo Toro", 4)],
       officialElapsedMs: 41000
     }),
@@ -309,7 +319,7 @@ function recordsForTeam(teamValue, pasoVuelta) {
         selection("yegua_adic_quitar_gaza_tentemozo", "Quitar pretal de gaza o tentemozo", 2),
         selection("yegua_adic_tiempo_ahorrado", "Tiempo ahorrado", 1, 3)
       ],
-      infractions: [selection("yegua_bad_fixture", "Malo yegua", 2)],
+      infractions: [selection("yegua_infr_desmonte_tardio", "Demora al desmontar después del primer minuto", 1)],
       teamPenalties: [selection("yegua_team_fixture", "Infraccion equipo Yegua", 2)],
       officialElapsedMs: 123000
     }),
@@ -320,14 +330,14 @@ function recordsForTeam(teamValue, pasoVuelta) {
       suerteId: "piales",
       attemptIndex: index,
       base: selection(`piales_base_fixture_${index}`, `Pial ${index + 1}`, index === 1 ? 0 : 14 + index),
-      infractions: index === 0 ? [selection("piales_bad_fixture", "Malo piales", 2)] : []
+      infractions: index === 0 ? [selection("piales_infr_tiempo_excedido_minuto", "Cada minuto excedente del tiempo", 2)] : []
     }));
     records.push(officialRecord(teamValue, {
       suerteId: "manganas_pie",
       attemptIndex: index,
       base: selection(`manganas_pie_base_fixture_${index}`, `Mangana pie ${index + 1}`, index === 1 ? 0 : 10),
       additional: index === 0 ? [selection("manganas_pie_adic_tiempo_no_usado", "Minuto no utilizado", 1, 2)] : [],
-      infractions: index === 2 ? [selection("manganas_pie_bad_fixture", "Malo manganas pie", 1)] : [],
+      infractions: index === 2 ? [selection("manganas_pie_infr_minuto_7", "Mangana puesta en minuto siete", 3)] : [],
       officialElapsedMs: 182000 + index * 1000
     }));
     records.push(officialRecord(teamValue, {
@@ -336,7 +346,10 @@ function recordsForTeam(teamValue, pasoVuelta) {
       base: selection(`manganas_caballo_base_fixture_${index}`, `Mangana caballo ${index + 1}`, index === 0 ? 14 : 0),
       additional: index === 0 ? [selection("manganas_caballo_adic_tiempo_no_usado", "Minuto no utilizado", 1)] : [],
       infractions: index === 0 ? [selection("manganas_caballo_bad_fixture", "Malo manganas caballo", 2)] : [],
-      officialElapsedMs: 243000 + index * 1000
+      officialElapsedMs: 243000 + index * 1000,
+      disqualification: pasoVuelta === 2 && index === 2
+        ? { ruleId: "manganas_caballo_desc_tiempo_agotado", reason: "Tiempo mayor a siete minutos" }
+        : null
     }));
     for (let coleadorIndex = 0; coleadorIndex < 3; coleadorIndex += 1) {
       records.push(officialRecord(teamValue, {
@@ -382,6 +395,14 @@ for (const [teamIndex, teamValue] of teams.entries()) {
   assert.equal(snapshot.suertes.yegua.attempts[0].documentalEvidence.timePoints.value, 3);
   assert.equal(snapshot.suertes.manganasPie.attempts[0].documentalEvidence.timePoints.value, 2);
   assert.equal(snapshot.suertes.manganasCaballo.attempts[0].documentalEvidence.timePoints.value, 1);
+  assert.equal(snapshot.suertes.piales.attempts[0].infractions[0].selectedRuleId, "piales_infr_tiempo_excedido_minuto");
+  assert.equal(snapshot.suertes.toro.attempts[0].infractions[0].selectedRuleId, "toro_infr_apretalamiento_minuto_4");
+  assert.equal(snapshot.suertes.yegua.attempts[0].infractions[0].selectedRuleId, "yegua_infr_desmonte_tardio");
+  assert.equal(snapshot.suertes.manganasPie.attempts[2].infractions[0].selectedRuleId, "manganas_pie_infr_minuto_7");
+  if (teamIndex === 1) {
+    assert.equal(snapshot.suertes.manganasCaballo.attempts[2].sportStatus, "DQ");
+    assert.equal(snapshot.suertes.manganasCaballo.attempts[2].total, 0);
+  }
   assert.equal(snapshot.suertes.terna.attempts[0].documentalEvidence.remate.remateLabel, "Floreado");
   assert.equal(snapshot.suertes.terna.attempts[1].documentalEvidence.remate.remateLabel, "Corvero derecho");
   assert.equal(snapshot.suertes.paso.attempts[0].documentalEvidence.paso.vuelta, teamIndex + 1);

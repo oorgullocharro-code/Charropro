@@ -268,6 +268,9 @@ const FIELD_VISIBILITY = Object.freeze({
   "timer.value": "public",
   "timer.elapsed": "public",
   "timer.remaining": "public",
+  "timer.overtimeMs": "public",
+  "timer.overtime": "public",
+  "timer.alertState": "public",
   "timer.running": "public",
   "timer.paused": "public",
   "timer.runningSince": "production",
@@ -989,11 +992,15 @@ function buildRanking(context, envelope, competition, participant, team, warning
 
 function buildTimer(context, envelope, warnings) {
   const raw = firstRecord(context.timer, envelope.timer);
+  const overtimeMs = numberOrNull(raw.overtimeMs);
   return {
     id: nullableId(firstDefined(raw.id, raw.timerId)),
     value: numberOrNull(firstDefined(raw.value, raw.valueMs, raw.elapsedMs)),
     elapsed: numberOrNull(firstDefined(raw.elapsed, raw.elapsedMs)),
     remaining: numberOrNull(firstDefined(raw.remaining, raw.remainingMs)),
+    overtimeMs,
+    overtime: booleanOrNull(raw.overtime) ?? (overtimeMs === null ? null : overtimeMs > 0),
+    alertState: nullableString(raw.alertState),
     running: booleanOrNull(raw.running),
     paused: booleanOrNull(raw.paused),
     runningSince: normalizeIsoDate(raw.runningSince),

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 
 const storage = new Map();
 globalThis.localStorage = { getItem: (key) => storage.get(String(key)) ?? null, setItem: (key, value) => storage.set(String(key), String(value)), removeItem: (key) => storage.delete(String(key)) };
-const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1");
+const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1");
 
 const assignment = (id) => ({ authorityVersion: "1.0.0", tournamentId: id, profileId: "FMCH_2026_LIBRE", version: "0.6.0", status: "active", contentFingerprint: "rptp_0f90f7a3944a82d7", revision: 1 });
 const tournamentA = { id: "tournament-a", type: "completo", ruleProfileId: "FMCH_2026_LIBRE", ruleProfileVersion: "0.6.0", ruleProfileAssignment: assignment("tournament-a") };

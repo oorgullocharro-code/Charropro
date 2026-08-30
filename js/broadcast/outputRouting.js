@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./programEngine.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 
@@ -699,6 +699,9 @@ function buildTimerProjection(timer, options) {
   if (sourceRevision === null) throw routingError("output-route-timer-source-invalid", { field: "sourceRevision" });
   const generatedAt = normalizeNullableIso(timer.generatedAt);
   if (!generatedAt) throw routingError("output-route-timer-source-invalid", { field: "generatedAt" });
+  const remainingMs = finiteOrNull(timer.remainingMs ?? timer.remaining);
+  const overtimeMs = finiteNonNegativeOrNull(timer.overtimeMs)
+    ?? (remainingMs !== null && remainingMs < 0 ? Math.abs(remainingMs) : 0);
   const projection = {
     kind: "timer-display",
     timerId,
@@ -706,7 +709,10 @@ function buildTimerProjection(timer, options) {
     formattedTime: nullableText(timer.formattedTime ?? timer.display) ?? NOT_AVAILABLE,
     elapsedMs: finiteNonNegativeOrNull(timer.elapsedMs ?? timer.elapsed),
     officialElapsedMs: finiteNonNegativeOrNull(timer.officialElapsedMs ?? timer.elapsedMs ?? timer.elapsed),
-    remainingMs: finiteNonNegativeOrNull(timer.remainingMs ?? timer.remaining),
+    remainingMs,
+    overtimeMs,
+    overtime: timer.overtime === true || overtimeMs > 0,
+    alertState: timer.alertState === "overtime" || overtimeMs > 0 ? "overtime" : "normal",
     durationMs: finiteNonNegativeOrNull(timer.durationMs ?? timer.limitMs),
     mode: nullableText(timer.mode),
     runningSince: normalizeNullableIso(timer.runningSince),
@@ -727,7 +733,6 @@ function buildTimerProjection(timer, options) {
     temporalPolicyVersion: nullableText(timer.temporalPolicyVersion),
     temporalFingerprint: nullableText(timer.temporalFingerprint),
     generatedAt,
-    alertState: nullableText(timer.alertState),
     suerte: compactEntity(timer.suerte, ["id", "name"]),
     team: compactEntity(timer.team, ["id", "name"]),
     participant: compactEntity(timer.participant, ["id", "name"]),
@@ -1260,6 +1265,12 @@ function finiteNonNegativeOrNull(value) {
   if (value === null || value === undefined) return null;
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function finiteOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
 function uniqueStrings(values) {

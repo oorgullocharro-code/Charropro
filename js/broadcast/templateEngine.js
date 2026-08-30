@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./componentLibrary.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

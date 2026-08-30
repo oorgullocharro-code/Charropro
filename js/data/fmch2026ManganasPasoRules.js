@@ -378,12 +378,16 @@ export function shouldDisqualifyRepeatedManganaRemate(attempts = [], activeIndex
 export function resolveFmch2026ManganaTiming(officialElapsedMs = 0, options = {}) {
   const elapsed = Math.max(0, Number(officialElapsedMs) || 0);
   const hasConsumed = options.hasConsumed === true;
+  const sequenceComplete = options.sequenceComplete !== false;
+  const remainingMs = FMCH_2026_MANGANAS_DURATION_MS - elapsed;
   return {
     officialElapsedMs: elapsed,
-    remainingMs: Math.max(0, FMCH_2026_MANGANAS_DURATION_MS - elapsed),
-    completeUnusedMinutes: hasConsumed ? Math.max(0, Math.floor((FMCH_2026_MANGANAS_DURATION_MS - elapsed) / 60000)) : 0,
-    minuteSevenPenalty: options.placedInMinuteSeven === true,
-    expired: elapsed >= FMCH_2026_MANGANAS_DURATION_MS
+    remainingMs,
+    overtimeMs: Math.max(0, -remainingMs),
+    completeUnusedMinutes: hasConsumed && sequenceComplete ? Math.max(0, Math.floor(remainingMs / 60000)) : 0,
+    minuteSevenPenalty: hasConsumed && options.placedInMinuteSeven === true,
+    expired: elapsed >= FMCH_2026_MANGANAS_DURATION_MS,
+    disqualified: elapsed > FMCH_2026_MANGANAS_DURATION_MS
   };
 }
 
@@ -393,17 +397,31 @@ export function applyFmch2026ManganaTiming(attempt = {}, suerte = {}, timingInpu
   const prefix = suerte.id;
   setRuleQuantity(next, `${prefix}_adic_tiempo_no_usado`, timing.completeUnusedMinutes);
   setRuleQuantity(next, `${prefix}_infr_minuto_7`, timing.minuteSevenPenalty ? 1 : 0);
+  const dqRuleId = `${prefix}_desc_tiempo_agotado`;
+  const dqRule = (suerte.catalog?.desc || []).find((item) => item.id === dqRuleId);
+  if (timing.disqualified) {
+    next.desc = dqRule?.label || "Tiempo mayor a siete minutos";
+    next.descRuleId = dqRuleId;
+    next.autoDescRuleId = dqRuleId;
+  } else if (next.autoDescRuleId === dqRuleId) {
+    next.desc = null;
+    next.descRuleId = null;
+    next.autoDescRuleId = null;
+  }
   next.timing = {
     timerId: timingInput.timerId || `timer_${prefix}`,
     officialElapsedMs: timing.officialElapsedMs,
     elapsedMs: timing.officialElapsedMs,
     remainingMs: timing.remainingMs,
+    overtimeMs: timing.overtimeMs,
+    alertState: timing.overtimeMs > 0 ? "overtime" : "normal",
     wallElapsedMs: Math.max(0, Number(timingInput.wallElapsedMs) || 0),
     status: timingInput.status || (timing.expired ? "EXPIRED" : "CAPTURED"),
     legacyText: timingInput.legacyText || null,
     adjustments: [
       ...(timing.completeUnusedMinutes ? [{ selectedRuleId: `${prefix}_adic_tiempo_no_usado`, resolvedValue: 1, quantity: timing.completeUnusedMinutes }] : []),
-      ...(timing.minuteSevenPenalty ? [{ selectedRuleId: `${prefix}_infr_minuto_7`, resolvedValue: 3, quantity: 1 }] : [])
+      ...(timing.minuteSevenPenalty ? [{ selectedRuleId: `${prefix}_infr_minuto_7`, resolvedValue: 3, quantity: 1 }] : []),
+      ...(timing.disqualified ? [{ selectedRuleId: dqRuleId, resolvedValue: 0, quantity: 1 }] : [])
     ]
   };
   return reconcileFmch2026ManganaAttempt(next, suerte);
@@ -462,6 +480,10 @@ export function resolveFmch2026PasoTiming(input = {}) {
   return {
     exitElapsedMs,
     dismountElapsedMs,
+    exitRemainingMs: FMCH_2026_PASO_EXIT_DURATION_MS - exitElapsedMs,
+    exitOvertimeMs: Math.max(0, exitElapsedMs - FMCH_2026_PASO_EXIT_DURATION_MS),
+    dismountRemainingMs: FMCH_2026_PASO_DISMOUNT_DURATION_MS - dismountElapsedMs,
+    dismountOvertimeMs: Math.max(0, dismountElapsedMs - FMCH_2026_PASO_DISMOUNT_DURATION_MS),
     exitDisqualified: exitElapsedMs > FMCH_2026_PASO_EXIT_DURATION_MS || input.exitExpired === true,
     dismountPenaltyQuantity: Math.max(0, Math.ceil((dismountElapsedMs - FMCH_2026_PASO_DISMOUNT_DURATION_MS) / 60000))
   };
@@ -484,10 +506,15 @@ export function applyFmch2026PasoTiming(attempt = {}, suerte = {}, input = {}) {
     timerId: input.timerId || "timer_paso_3min",
     officialElapsedMs: timing.exitElapsedMs,
     elapsedMs: timing.exitElapsedMs,
+    remainingMs: timing.exitRemainingMs,
+    overtimeMs: timing.exitOvertimeMs,
+    alertState: timing.exitOvertimeMs > 0 ? "overtime" : "normal",
     status: timing.exitDisqualified ? "EXPIRED" : "CAPTURED",
     secondaryTimers: [{
       timerId: input.dismountTimerId || "timer_paso_1min",
       officialElapsedMs: timing.dismountElapsedMs,
+      remainingMs: timing.dismountRemainingMs,
+      overtimeMs: timing.dismountOvertimeMs,
       status: timing.dismountPenaltyQuantity ? "EXCEEDED" : "CAPTURED"
     }],
     adjustments: [

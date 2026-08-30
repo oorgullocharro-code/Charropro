@@ -3,15 +3,15 @@ import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../js/public/publicProjection.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/public/publicProjection.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "../js/public/publicProjectionSchema.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/public/publicProjectionSchema.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const baseSource = buildSource();
 const candidate = buildPublicProjection(baseSource, {

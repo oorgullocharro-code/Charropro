@@ -43,7 +43,7 @@ const TYPE_PATHS = Object.freeze({
   standings: Object.freeze(["statistics.standings", "ranking", "ranking.entries"]),
   official_timer: Object.freeze([
     "timer", "timer.value", "timer.elapsed", "timer.remaining", "timer.running", "timer.paused",
-    "timer.runningSince", "timer.duration", "timer.mode", "timer.status", "timer.display", "timer.revision"
+    "timer.runningSince", "timer.duration", "timer.mode", "timer.status", "timer.display", "timer.remaining", "timer.overtimeMs", "timer.overtime", "timer.alertState", "timer.revision"
   ]),
   next_team: Object.freeze(["turn.nextTeam"]),
   next_participant: Object.freeze(["turn.nextParticipant"]),

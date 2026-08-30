@@ -1,4 +1,4 @@
-import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../data/ruleProfiles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

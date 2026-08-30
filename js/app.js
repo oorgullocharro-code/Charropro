@@ -1,32 +1,34 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
   CALA_TEAM_PENALTY_RULES,
   FMCH_2026_CALA_RULEBOOK_VERSION,
+  applyFmch2026CalaPartideroTiming,
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./data/calaRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
   FMCH_2026_PIALES_REPEATED_REMATE_DQ_RULE_ID,
   FMCH_2026_PIALES_RULEBOOK_VERSION,
   buildPialesRemateHistory,
+  applyFmch2026PialesTiming,
   calculatePialesDistanceAdditional,
   getSelectedBaseRule,
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -36,7 +38,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -53,7 +55,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -73,30 +75,30 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/scorerContextResolution.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   getTernaParticipantName,
   isCanonicalTernaParticipant
-} from "./core/ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/ternaParticipantIdentity.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -104,23 +106,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/timerRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/officialTimerOrchestration.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -133,9 +135,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/brakeReviewPhase.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -148,27 +150,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/scoringAttempt.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/scorerComponents.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -178,7 +180,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/sync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -220,7 +222,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/firebaseSync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -233,15 +235,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/pendingScoreReview.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/tournamentContext.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -251,8 +253,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/supervisorNavigation.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -286,7 +288,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -13890,6 +13892,45 @@ function markAttemptZeroIfBlank(attempt = {}) {
 function freezeCurrentFmchSportAttempt(context) {
   if (!context?.attempt) return;
   const runtimes = getFmch2026SportTimerRuntimes(context);
+  if (context.suerte?.id === "cala") {
+    const runtime = runtimes.find((item) => item.kind === "cala_partidero");
+    if (runtime) {
+      Object.assign(context.attempt, applyFmch2026CalaPartideroTiming(context.attempt, {
+        timerId: runtime.timer.timerId,
+        officialElapsedMs: runtime.view.officialElapsedMs,
+        durationMs: runtime.view.durationMs,
+        status: runtime.view.status
+      }));
+      reconcileAttemptConditionalRules(context);
+    }
+  }
+  if (context.suerte?.id === "piales") {
+    const runtime = runtimes[0];
+    if (runtime) {
+      Object.assign(context.attempt, applyFmch2026PialesTiming(context.attempt, {
+        timerId: runtime.timer.timerId,
+        officialElapsedMs: runtime.view.officialElapsedMs,
+        durationMs: runtime.view.durationMs,
+        status: runtime.view.status
+      }));
+      reconcileAttemptConditionalRules(context);
+    }
+  }
+  if (isFmch2026JineteoSuerte(context.suerte?.id) && context.attempt.classification?.classificationId) {
+    const runtime = runtimes[0];
+    if (runtime) {
+      const dismount = context.suerte.id === "yegua"
+        ? runtimes.find((item) => item.phaseId === "dismount")
+        : null;
+      Object.assign(
+        context.attempt,
+        applyFmch2026JineteoTiming(context.attempt, context.suerte, runtime.view.officialElapsedMs, {
+          dismountTimerId: dismount?.timer?.timerId,
+          dismountOfficialElapsedMs: dismount?.view?.officialElapsedMs
+        })
+      );
+    }
+  }
   if (isFmch2026ManganaSuerte(context.suerte?.id)) {
     reconcileManganaRemateConstraint(context);
     if (context.attempt.notAchieved && context.attempt.manganaResult === "NOT_STARTED") {
@@ -13897,19 +13938,24 @@ function freezeCurrentFmchSportAttempt(context) {
     }
     const runtime = runtimes[0];
     if (runtime) {
-      context.attempt.timing = {
-        ...(context.attempt.timing || {}),
+      const attempts = getAttemptsForContext(context);
+      const currentAchieved = context.attempt.manganaResult === "ACHIEVED";
+      const hasConsumed = currentAchieved || attempts.some((attempt) => attempt?.manganaResult === "ACHIEVED");
+      Object.assign(context.attempt, applyFmch2026ManganaTiming(context.attempt, context.suerte, {
         timerId: runtime.timer.timerId,
         officialElapsedMs: runtime.view.officialElapsedMs,
-        elapsedMs: runtime.view.officialElapsedMs,
-        remainingMs: runtime.view.remainingMs,
         wallElapsedMs: runtime.view.wallElapsedMs,
-        startedAt: runtime.timer.wallStartedAt,
-        endedAt: runtime.timer.wallFinishedAt,
         status: runtime.view.status,
         legacyText: runtime.view.formattedRemaining,
-        adjustments: Array.isArray(context.attempt.timing?.adjustments) ? context.attempt.timing.adjustments : []
-      };
+        hasConsumed,
+        sequenceComplete: context.attemptIndex >= FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT - 1
+          || runtime.view.status === "FINISHED",
+        placedInMinuteSeven: currentAchieved
+          && runtime.view.officialElapsedMs >= 6 * 60 * 1000
+          && runtime.view.officialElapsedMs <= FMCH_2026_MANGANAS_DURATION_MS
+      }));
+      context.attempt.timing.startedAt = runtime.timer.wallStartedAt;
+      context.attempt.timing.endedAt = runtime.timer.wallFinishedAt;
     }
     Object.assign(context.attempt, reconcileFmch2026ManganaAttempt(context.attempt, context.suerte));
   }
@@ -13917,24 +13963,22 @@ function freezeCurrentFmchSportAttempt(context) {
     const exit = runtimes.find((item) => item.kind === "paso_exit");
     const dismount = runtimes.find((item) => item.kind === "paso_dismount");
     if (exit && dismount) {
-      context.attempt.timing = {
-        ...(context.attempt.timing || {}),
+      Object.assign(context.attempt, applyFmch2026PasoTiming(context.attempt, context.suerte, {
         timerId: exit.timer.timerId,
-        officialElapsedMs: exit.view.officialElapsedMs,
-        elapsedMs: exit.view.officialElapsedMs,
-        remainingMs: exit.view.remainingMs,
-        wallElapsedMs: exit.view.wallElapsedMs,
-        startedAt: exit.timer.wallStartedAt,
-        endedAt: exit.timer.wallFinishedAt,
-        status: exit.view.status,
+        dismountTimerId: dismount.timer.timerId,
+        exitOfficialElapsedMs: exit.view.officialElapsedMs,
+        dismountOfficialElapsedMs: dismount.view.officialElapsedMs,
+        exitExpired: exit.view.officialElapsedMs > FMCH_2026_PASO_EXIT_DURATION_MS,
         secondaryTimers: [{
           timerId: dismount.timer.timerId,
           officialElapsedMs: dismount.view.officialElapsedMs,
           wallElapsedMs: dismount.view.wallElapsedMs,
           status: dismount.view.status
-        }],
-        adjustments: Array.isArray(context.attempt.timing?.adjustments) ? context.attempt.timing.adjustments : []
-      };
+        }]
+      }));
+      context.attempt.timing.wallElapsedMs = exit.view.wallElapsedMs;
+      context.attempt.timing.startedAt = exit.timer.wallStartedAt;
+      context.attempt.timing.endedAt = exit.timer.wallFinishedAt;
     }
     Object.assign(context.attempt, reconcileFmch2026PasoAttempt(context.attempt, context.suerte));
   }

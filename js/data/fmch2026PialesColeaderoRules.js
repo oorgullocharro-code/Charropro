@@ -203,6 +203,55 @@ export function resolveConditionalBasePoints(attempt = {}, catalog = {}) {
   return annulled ? 0 : Number(baseRule.pts || 0);
 }
 
+export function resolveFmch2026PialesTiming(officialElapsedMs = 0, limitMs = 0) {
+  const elapsedMs = Math.max(0, Number(officialElapsedMs) || 0);
+  const durationMs = Math.max(0, Number(limitMs) || 0);
+  const remainingMs = durationMs ? durationMs - elapsedMs : null;
+  const overtimeMs = remainingMs === null ? 0 : Math.max(0, -remainingMs);
+  return {
+    officialElapsedMs: elapsedMs,
+    durationMs,
+    remainingMs,
+    overtimeMs,
+    penaltyQuantity: overtimeMs > 0 ? Math.ceil(overtimeMs / 60000) : 0
+  };
+}
+
+export function applyFmch2026PialesTiming(attempt = {}, timingInput = {}) {
+  const next = {
+    ...attempt,
+    applied: Array.isArray(attempt.applied) ? [...new Set(attempt.applied.map(String))] : [],
+    ruleQuantities: { ...(attempt.ruleQuantities || {}) }
+  };
+  const ruleId = "piales_infr_tiempo_excedido_minuto";
+  const timing = resolveFmch2026PialesTiming(
+    timingInput.officialElapsedMs,
+    timingInput.durationMs ?? timingInput.limitMs
+  );
+  if (timing.penaltyQuantity) {
+    if (!next.applied.includes(ruleId)) next.applied.push(ruleId);
+    next.ruleQuantities[ruleId] = timing.penaltyQuantity;
+  } else {
+    next.applied = next.applied.filter((id) => id !== ruleId);
+    delete next.ruleQuantities[ruleId];
+  }
+  next.timing = {
+    ...(attempt.timing || {}),
+    timerId: String(timingInput.timerId || attempt.timing?.timerId || "timer_piales"),
+    officialElapsedMs: timing.officialElapsedMs,
+    elapsedMs: timing.officialElapsedMs,
+    durationMs: timing.durationMs,
+    remainingMs: timing.remainingMs,
+    overtimeMs: timing.overtimeMs,
+    alertState: timing.overtimeMs > 0 ? "overtime" : "normal",
+    status: String(timingInput.status || attempt.timing?.status || "CAPTURED"),
+    adjustments: timing.penaltyQuantity
+      ? [{ selectedRuleId: ruleId, resolvedValue: 2, quantity: timing.penaltyQuantity }]
+      : []
+  };
+  return next;
+}
+
 function rule(id, label, pts, metadata = {}) {
   return { id, label, pts, metadata };
 }

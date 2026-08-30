@@ -1,4 +1,4 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
@@ -9,9 +9,9 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { getTeam, scoreKey, state, uid } from "./state.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getTeam, scoreKey, state, uid } from "./state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 export function buildStatisticalHistorySnapshot(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

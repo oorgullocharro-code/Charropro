@@ -3602,6 +3602,13 @@ th.num {
   letter-spacing: 0;
 }
 
+.official-timer-display.overtime,
+.terna-timer-display.overtime,
+.timer-control-clock.expired strong,
+.timer-display-panel.expired strong {
+  color: #ff5c5c;
+}
+
 .timer-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

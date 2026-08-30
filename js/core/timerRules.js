@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",
@@ -927,9 +927,7 @@ export function applyOfficialTimerCommand(timer = {}, command = {}, options = {}
     next.wallFinishedAt = now;
   }
 
-  next.officialElapsedMs = current.durationMs
-    ? Math.min(current.durationMs, Math.max(0, next.officialElapsedMs))
-    : Math.max(0, next.officialElapsedMs);
+  next.officialElapsedMs = Math.max(0, next.officialElapsedMs);
   next.commandSource = normalizeTimerText(command?.source || options.source || current.source || "scorer", 120);
   next.actor = actor;
   next.lastCommandId = commandId;
@@ -1113,6 +1111,7 @@ export function buildOfficialTimerProjection(timer = {}, options = {}) {
     elapsedLiveMs: view.officialElapsedMs,
     displayMs: view.remainingMs ?? view.officialElapsedMs,
     remainingMs: view.remainingMs,
+    overtimeMs: view.overtimeMs,
     formatted: view.formattedRemaining,
     formattedTime: view.formattedRemaining,
     display: view.formattedRemaining,
@@ -1121,6 +1120,8 @@ export function buildOfficialTimerProjection(timer = {}, options = {}) {
     durationMs: current.durationMs,
     mode: current.mode || (current.durationMs ? "countdown" : "elapsed"),
     expired: view.expired,
+    overtime: view.overtime,
+    alertState: view.alertState,
     revision: current.revision,
     sourceRevision: current.revision,
     generatedAt,
@@ -1454,12 +1455,15 @@ export function getOfficialTimerContextView(timer = {}, options = {}) {
     durationMs: current.durationMs,
     officialElapsedMs,
     remainingMs,
+    overtimeMs: liveDisplay.overtimeMs,
     wallElapsedMs,
     pauseReason: current.pauseReason,
     revision: current.revision,
     formattedElapsed: liveDisplay.formattedElapsed,
     formattedRemaining: liveDisplay.formattedRemaining,
-    expired: liveDisplay.expired
+    expired: liveDisplay.expired,
+    overtime: liveDisplay.overtime,
+    alertState: liveDisplay.alertState
   };
 }
 
@@ -1477,7 +1481,6 @@ export function validateOfficialTimerContext(timer = {}) {
   if (normalized) {
     if (normalized.status === "RUNNING" && !normalized.runningSince) errors.push("official-timer-running-since-required");
     if (normalized.status !== "RUNNING" && normalized.runningSince) errors.push("official-timer-running-since-unexpected");
-    if (normalized.durationMs && normalized.officialElapsedMs > normalized.durationMs) errors.push("official-timer-elapsed-overflow");
   }
   return { valid: errors.length === 0, errors, timer: normalized };
 }
@@ -1517,8 +1520,7 @@ function resolveOfficialElapsedMs(timer, nowMs) {
   if (timer.status !== "RUNNING" || !timer.runningSince) return base;
   const startedMs = Date.parse(timer.runningSince);
   if (!Number.isFinite(startedMs)) return base;
-  const elapsed = base + Math.max(0, nowMs - startedMs);
-  return timer.durationMs ? Math.min(timer.durationMs, elapsed) : elapsed;
+  return base + Math.max(0, nowMs - startedMs);
 }
 
 function resolveNowMs(value) {

@@ -17,7 +17,7 @@ import {
   updatePreview,
   updatePreviewLiveData,
   validatePreview
-} from "../js/broadcast/previewEngine.js?v=20260828-fmch-terna-participant-identity-roster-persistence-001-v1";
+} from "../js/broadcast/previewEngine.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
 
 const T0 = "2026-07-15T12:00:00.000Z";
 const T1 = "2026-07-15T12:01:00.000Z";
