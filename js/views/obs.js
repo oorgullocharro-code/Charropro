@@ -1,11 +1,11 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 const root = document.getElementById("obs-root");
 const liveChannel = getLiveChannelFromUrl();

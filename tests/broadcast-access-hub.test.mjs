@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/broadcastAccessHub.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import * as api from "../js/broadcast/broadcastAccessHub.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";

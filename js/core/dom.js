@@ -1,6 +1,8 @@
-import { logCharroProVersion } from "./version.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 logCharroProVersion("runtime");
+
+const activeToastMessages = new Map();
 
 export function html(strings, ...values) {
   return strings.reduce((result, part, index) => result + part + (values[index] ?? ""), "");
@@ -27,17 +29,26 @@ export function showToast(message) {
   const root = document.getElementById("toast-root");
   if (!root) return;
 
+  const normalizedMessage = String(message || "");
+  const active = activeToastMessages.get(normalizedMessage);
+  if (active && active.isConnected !== false) return active;
+
   const node = document.createElement("div");
   node.className = "toast";
-  node.textContent = message;
+  node.textContent = normalizedMessage;
   root.appendChild(node);
+  activeToastMessages.set(normalizedMessage, node);
 
   window.setTimeout(() => {
     node.style.opacity = "0";
     node.style.transform = "translateY(-6px)";
     node.style.transition = "opacity .2s, transform .2s";
-    window.setTimeout(() => node.remove(), 220);
+    window.setTimeout(() => {
+      node.remove();
+      if (activeToastMessages.get(normalizedMessage) === node) activeToastMessages.delete(normalizedMessage);
+    }, 220);
   }, 2300);
+  return node;
 }
 
 export function closeModal() {

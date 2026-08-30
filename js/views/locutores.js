@@ -1,20 +1,20 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { getCharroName } from "../core/sync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { getCharroName } from "../core/sync.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 import {
   calculateAttemptTotal,
   getTeamCharreadaTotal,
   getTeamSuerteTotal
-} from "../core/scoring.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+} from "../core/scoring.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 import {
   getLiveChannelFromUrl,
   signInFirebaseUser,
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLiveCurrent
-} from "../core/firebaseSync.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+} from "../core/firebaseSync.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 const root = document.getElementById("locutores-root");
 const liveChannel = getLiveChannelFromUrl();

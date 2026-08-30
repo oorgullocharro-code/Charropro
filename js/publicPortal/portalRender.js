@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

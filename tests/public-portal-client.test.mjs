@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

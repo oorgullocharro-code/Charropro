@@ -48,6 +48,43 @@ const ALLOWED_ROLES = new Set(["juez", "supervisor", "operador"]);
 const MAX_AUDIT_ENTRIES = 100;
 const MAX_COMMAND_IDS = 100;
 
+export function createBrakeReviewAutomaticCommandGuard() {
+  const pending = new Map();
+  const terminalFailures = new Set();
+
+  return Object.freeze({
+    begin(key, commandId) {
+      const normalizedKey = clean(key);
+      const normalizedCommandId = clean(commandId);
+      if (!normalizedKey || !normalizedCommandId || pending.has(normalizedKey) || terminalFailures.has(normalizedKey)) {
+        return false;
+      }
+      pending.set(normalizedKey, normalizedCommandId);
+      return true;
+    },
+    complete(key, succeeded) {
+      const normalizedKey = clean(key);
+      if (!normalizedKey) return;
+      pending.delete(normalizedKey);
+      if (succeeded !== true) terminalFailures.add(normalizedKey);
+    },
+    commandId(key) {
+      return pending.get(clean(key)) || "";
+    },
+    reset(key) {
+      const normalizedKey = clean(key);
+      pending.delete(normalizedKey);
+      terminalFailures.delete(normalizedKey);
+    },
+    diagnostics() {
+      return Object.freeze({
+        pending: pending.size,
+        terminalFailures: terminalFailures.size
+      });
+    }
+  });
+}
+
 export function isBrakeReviewProfile(context = {}) {
   const source = context.tournament || context;
   const profileId = clean(source.ruleProfileId || source.profileId);

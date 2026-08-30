@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1",
+      "appVersion": "20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "d07c493d4f48baf9cc83f706040283a27af3b00a18b415d4b96fd9f619686ff3",
-  "fingerprint": "d07c493d4f48baf9cc83f706040283a27af3b00a18b415d4b96fd9f619686ff3"
+  "checksum": "01660f01a02160a4b900ff7c87424aa4004d832b4b13c329718853382ef4697c",
+  "fingerprint": "01660f01a02160a4b900ff7c87424aa4004d832b4b13c329718853382ef4697c"
 }

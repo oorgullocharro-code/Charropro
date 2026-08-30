@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+} from "./state.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

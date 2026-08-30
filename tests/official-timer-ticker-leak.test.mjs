@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 let nextId = 0;
 const pending = new Map();

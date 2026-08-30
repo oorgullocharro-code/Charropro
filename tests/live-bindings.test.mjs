@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

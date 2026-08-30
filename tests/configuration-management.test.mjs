@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
-import configurationService from "../functions/configurationService.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import configurationService from "../functions/configurationService.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

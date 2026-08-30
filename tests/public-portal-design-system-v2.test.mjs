@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js?v=20260829-fmch-official-timer-negative-overtime-temporal-scoring-integration-001-v1";
+import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
 
 const render = read("js/publicPortal/portalRender.js");
 const app = read("js/publicPortal/portalApp.js");
