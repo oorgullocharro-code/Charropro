@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
-import service from "../functions/ruleProfileLifecycleService.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import service from "../functions/ruleProfileLifecycleService.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 
 const {
   RuleProfileLifecycleError,

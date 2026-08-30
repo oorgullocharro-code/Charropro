@@ -7,9 +7,9 @@ import {
   getFmchOfficialTemporalPolicy,
   resolveFmchOfficialTemporalContracts,
   validateFmchOfficialTemporalPolicy
-} from "../js/core/timerRules.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
-import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+} from "../js/core/timerRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 
 const PROFILE_CONTEXT = Object.freeze({
   profileId: "FMCH_2026_LIBRE",

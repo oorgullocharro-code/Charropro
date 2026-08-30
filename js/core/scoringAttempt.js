@@ -830,8 +830,11 @@ function validateTiming(value, errors) {
     errors.push("attempt-timing-invalid");
     return;
   }
-  for (const field of ["elapsedMs", "remainingMs"]) {
-    if (value[field] !== null && (!Number.isFinite(value[field]) || value[field] < 0)) errors.push(`attempt-timing-${field}-invalid`);
+  if (value.elapsedMs !== null && (!Number.isFinite(value.elapsedMs) || value.elapsedMs < 0)) {
+    errors.push("attempt-timing-elapsedMs-invalid");
+  }
+  if (value.remainingMs !== null && !Number.isFinite(value.remainingMs)) {
+    errors.push("attempt-timing-remainingMs-invalid");
   }
 }
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 
 const definitions = buildOfficialTimerDefinitionsFromContext({
   tournament: {

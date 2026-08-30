@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

@@ -22,7 +22,7 @@ import {
   setPreviewState,
   setProgramState,
   validateBroadcastState
-} from "../js/broadcast/broadcastState.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:01.000Z";

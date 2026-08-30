@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1",
+      "appVersion": "20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "01660f01a02160a4b900ff7c87424aa4004d832b4b13c329718853382ef4697c",
-  "fingerprint": "01660f01a02160a4b900ff7c87424aa4004d832b4b13c329718853382ef4697c"
+  "checksum": "f682b5eed1a8808bd4140e27e7a98dc8bc2aa7cc950758cb7e859fb6b3a1cfe7",
+  "fingerprint": "f682b5eed1a8808bd4140e27e7a98dc8bc2aa7cc950758cb7e859fb6b3a1cfe7"
 }

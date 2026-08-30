@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 import { actor, catalog, command, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const first = command(freshReview(), BRAKE_REVIEW_ACTIONS.SYNC_TEMPORAL, {

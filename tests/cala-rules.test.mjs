@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260829-official-timer-overtime-rtdb-rules-compatibility-001-v1";
+} from "../js/data/calaRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
 
 const puntaCases = [
   [5, 1, 0],
