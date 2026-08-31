@@ -4,7 +4,7 @@ import {
   buildGraphicTimerPresentation,
   formatGraphicTimerMs,
   readGraphicTimerPresentationOptions
-} from "../js/views/graficoTimerPresentation.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/views/graficoTimerPresentation.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 assert.equal(formatGraphicTimerMs(12_100, { showMinutes: false }), "12.1");
 assert.equal(formatGraphicTimerMs(-12_100, { showMinutes: false }), "-12.1");

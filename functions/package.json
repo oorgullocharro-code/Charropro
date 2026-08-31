@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "scripts": {
     "deploy": "firebase deploy --only functions:upsertCharroProUser,functions:publishCharroProOfficialScore,functions:deliverCharroProOfficialScoreFanout,functions:requestCharroProBackup,functions:cancelCharroProBackup,functions:executeCharroProBackup,functions:scheduleCharroProBackups,functions:validateCharroProRestore,functions:requestCharroProRestore,functions:cancelCharroProRestore,functions:executeCharroProRestore,functions:getCharroProConfiguration,functions:publishCharroProConfiguration,functions:transitionCharroProRuleProfileLifecycle,functions:getCharroProRuleProfileLifecycle,functions:assignCharroProTournamentRuleProfile,functions:deleteCharroProTournament"

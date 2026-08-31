@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   formatOfficialFieldTimerMs,
   getOfficialFieldTimerFormat
-} from "../js/core/officialFieldTimerDisplay.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/core/officialFieldTimerDisplay.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 const cases = new Map([
   [14_400, "14.4"],

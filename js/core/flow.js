@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "./state.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

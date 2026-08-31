@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {
@@ -376,11 +376,12 @@ destroyComponentRenderer(snapshotRenderer);
 
 // The renderer source is pure browser rendering code without forbidden integration or execution paths.
 const source = await readFile(new URL("../js/broadcast/componentRenderer.js", import.meta.url), "utf8");
+const sourceWithoutBuildQueries = source.replace(/\?v=[A-Za-z0-9._-]+/g, "");
 for (const forbidden of [
   "innerHTML", "insertAdjacentHTML", "document.write", "eval(", "new Function", "setInterval",
   "requestAnimationFrame", "addEventListener", "WebSocket", "EventSource", "live/current",
   "publicTournaments", "../core/state.js", "firebase", ".program =", ".preview =", ".outputs ="
-]) assert.equal(source.includes(forbidden), false, forbidden);
+]) assert.equal(sourceWithoutBuildQueries.includes(forbidden), false, forbidden);
 assert.equal(source.includes("textContent"), true);
 assert.equal(source.includes("STYLE_PROPERTIES"), true);
 assert.equal(source.includes("safeSetAttribute"), true);

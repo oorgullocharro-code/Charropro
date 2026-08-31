@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260831-official-field-timer-responsive-display-recovery-001-v1",
+      "appVersion": "20260831-firebase-functions-node22-runtime-migration-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "5bd5ebec7991ed544045176bbcb6fc364bc6a112b255958e765a03ba50e04664",
-  "fingerprint": "5bd5ebec7991ed544045176bbcb6fc364bc6a112b255958e765a03ba50e04664"
+  "checksum": "ce64090d4a19488c432974ad52d2e21ebe41da4f68393831406594f31b8f1578",
+  "fingerprint": "ce64090d4a19488c432974ad52d2e21ebe41da4f68393831406594f31b8f1578"
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { formatOfficialTimerMs } from "../js/core/officialTimerLiveDisplay.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { formatOfficialTimerMs } from "../js/core/officialTimerLiveDisplay.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 const values = [-100, -59_900, -60_000, -599_900, -5_999_900].map(formatOfficialTimerMs);
 assert.deepEqual(values, ["-00:00.1", "-00:59.9", "-01:00.0", "-09:59.9", "-99:59.9"]);

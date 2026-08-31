@@ -1,5 +1,5 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

@@ -21,12 +21,12 @@ import {
   updateBroadcastTemplate,
   validateBroadcastTemplate,
   validateTemplateSnapshot
-} from "../js/broadcast/templateEngine.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/templateEngine.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../fixtures/templateEngineFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../fixtures/templateEngineFixtures.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 const T0 = "2026-07-14T12:00:00.000Z";
 const T1 = "2026-07-14T12:01:00.000Z";
@@ -616,11 +616,12 @@ assert.equal({}.polluted, undefined);
 
 // The engine imports Component Library only and contains no renderer/state/persistence integration.
 const source = await readFile(new URL("../js/broadcast/templateEngine.js", import.meta.url), "utf8");
+const sourceWithoutBuildQueries = source.replace(/\?v=[A-Za-z0-9._-]+/g, "");
 for (const forbidden of [
   "componentRenderer.js", "broadcastState.js", "broadcastOutput.js", "productionVariables.js", "assetManager.js",
   "firebase", "localStorage", "sessionStorage", "innerHTML", "insertAdjacentHTML", "eval(", "new Function",
   "WebSocket", "EventSource", "setInterval", ".program =", ".preview =", ".outputs ="
-]) assert.equal(source.includes(forbidden), false, forbidden);
+]) assert.equal(sourceWithoutBuildQueries.includes(forbidden), false, forbidden);
 assert.equal(source.includes("componentLibrary.js"), true);
 assert.equal(source.includes("resolveComponentBindings"), true);
 

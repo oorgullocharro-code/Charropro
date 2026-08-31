@@ -20,27 +20,27 @@ import {
   setPlaygroundVisibility,
   takePlaygroundToProgram,
   validatePlaygroundModel
-} from "../js/broadcast/broadcastPlayground.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/broadcastPlayground.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   PLAYGROUND_ASSET_DEFINITIONS,
   PLAYGROUND_COMPETITIONS,
   PLAYGROUND_GRAPHIC_DEFINITIONS,
   PLAYGROUND_OUTPUT_DEFINITIONS,
   buildPlaygroundFixture
-} from "../js/broadcast/fixtures/broadcastPlaygroundFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/fixtures/broadcastPlaygroundFixtures.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   buildBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   getBroadcastOutput,
   validateBroadcastOutput
-} from "../js/broadcast/broadcastOutput.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   listBroadcastAssets,
   validateBroadcastAsset
-} from "../js/broadcast/assetManager.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/assetManager.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 const T0 = "2026-07-13T18:30:00.000Z";
 const T1 = "2026-07-13T18:30:01.000Z";
@@ -49,7 +49,7 @@ const T3 = "2026-07-13T18:30:03.000Z";
 const T4 = "2026-07-13T18:30:04.000Z";
 
 assert.equal(BROADCAST_PLAYGROUND_VERSION, "1.0.0");
-assert.equal(BROADCAST_PLAYGROUND_APP_VERSION, "20260831-official-field-timer-responsive-display-recovery-001-v1");
+assert.equal(BROADCAST_PLAYGROUND_APP_VERSION, "20260831-firebase-functions-node22-runtime-migration-001-v1");
 assert.equal(Object.keys(PLAYGROUND_COMPETITIONS).length, 5);
 assert.equal(Object.keys(PLAYGROUND_GRAPHIC_DEFINITIONS).length, 8);
 assert.equal(PLAYGROUND_OUTPUT_DEFINITIONS.length, 5);
@@ -278,6 +278,7 @@ assert.equal(validatePlaygroundModel(reloaded).valid, true);
 
 const html = await readFile(new URL("../broadcast-playground.html", import.meta.url), "utf8");
 const source = await readFile(new URL("../js/broadcast/broadcastPlayground.js", import.meta.url), "utf8");
+const sourceWithoutBuildQueries = source.replace(/\?v=[A-Za-z0-9._-]+/g, "");
 for (const id of [
   "broadcast-playground",
   "playground-preview-stage",
@@ -288,7 +289,7 @@ for (const id of [
   assert.ok(html.includes(`id="${id}"`), `HTML missing ${id}`);
 }
 assert.equal(source.includes("localStorage"), false);
-assert.equal(source.includes("firebase"), false);
+assert.equal(sourceWithoutBuildQueries.includes("firebase"), false);
 assert.equal(source.includes("../core/state.js"), false);
 assert.equal(source.includes("innerHTML"), false);
 

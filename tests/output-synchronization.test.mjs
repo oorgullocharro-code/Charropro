@@ -1,28 +1,28 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/outputSynchronization.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import * as api from "../js/broadcast/outputSynchronization.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine
-} from "../js/broadcast/outputRouting.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   createProgramEngine,
   getProgramSnapshot,
   prepareProgram,
   takeProgram
-} from "../js/broadcast/programEngine.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/programEngine.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   buildProgramMainOutputSnapshot,
   configureProgramMainOutput,
   createProgramMainOutput,
   mountProgramMainOutput
-} from "../js/broadcast/programMainOutput.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   configureAnnouncerMonitor,
   createAnnouncerMonitor,
   getAnnouncerSnapshot,
   mountAnnouncerMonitor
-} from "../js/broadcast/announcerMonitor.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/announcerMonitor.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";
@@ -505,8 +505,9 @@ for (const operation of [
 }
 
 const moduleSource = await readFile(new URL("../js/broadcast/outputSynchronization.js", import.meta.url), "utf8");
+const moduleSourceWithoutBuildQueries = moduleSource.replace(/\?v=[A-Za-z0-9._-]+/g, "");
 assert.doesNotMatch(moduleSource, /WebSocket|BroadcastChannel|EventSource|ServiceWorker|setInterval|setTimeout|localStorage|sessionStorage|indexedDB|postMessage|fetch\s*\(/);
 assert.doesNotMatch(moduleSource, /eval\s*\(|new Function|innerHTML|cssText/);
-assert.doesNotMatch(moduleSource, /firebase/i);
+assert.doesNotMatch(moduleSourceWithoutBuildQueries, /firebase/i);
 
 console.log("output-synchronization.test.mjs: ok");

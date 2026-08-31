@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1");
+const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1");
 
 const delays = [0, 100, 500, 1500];
 const results = await Promise.all(delays.map(runLateAssignment));

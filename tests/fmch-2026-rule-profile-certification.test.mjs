@@ -4,10 +4,10 @@ import {
   FMCH_2026_LIBRE_PROFILE,
   resolveEffectiveRules,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { buildEffectiveRulesFingerprint } from "../js/core/scoringAttempt.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { buildEffectiveRulesFingerprint } from "../js/core/scoringAttempt.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 const recordUrl = new URL(
   "../CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001/CERTIFICATION_RECORD.json",

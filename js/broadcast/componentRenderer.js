@@ -1,7 +1,7 @@
 import {
   COMPONENT_VISIBILITY,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "./componentLibrary.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 export const COMPONENT_RENDERER_VERSION = "1.0.0";
 

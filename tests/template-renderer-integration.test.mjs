@@ -20,23 +20,23 @@ import {
   updateTemplateRender,
   validateTemplateRenderSnapshot,
   validateTemplateRendererIntegrationTarget
-} from "../js/broadcast/templateRendererIntegration.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/templateRendererIntegration.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   createComponentRenderer,
   destroyComponentRenderer,
   listRenderedComponents,
   renderBroadcastComponent
-} from "../js/broadcast/componentRenderer.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../js/broadcast/componentLibrary.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../fixtures/templateEngineFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
-import { buildComponentRendererFixture } from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+} from "../fixtures/templateEngineFixtures.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { buildComponentRendererFixture } from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {
@@ -701,11 +701,12 @@ for (const operation of [
 
 // The module remains a pure integration layer without forbidden state, output or transport paths.
 const source = await readFile(new URL("../js/broadcast/templateRendererIntegration.js", import.meta.url), "utf8");
+const sourceWithoutBuildQueries = source.replace(/\?v=[A-Za-z0-9._-]+/g, "");
 for (const forbidden of [
   "innerHTML", "insertAdjacentHTML", "document.write", "eval(", "new Function", "setInterval",
   "requestAnimationFrame", "addEventListener", "WebSocket", "EventSource", "live/current",
   "publicTournaments", "../core/state.js", "firebase", ".program =", ".preview =", ".outputs ="
-]) assert.equal(source.includes(forbidden), false, forbidden);
+]) assert.equal(sourceWithoutBuildQueries.includes(forbidden), false, forbidden);
 assert.equal(source.includes("instantiateBroadcastTemplate"), true);
 assert.equal(source.includes("renderBroadcastComponent"), true);
 assert.equal(source.includes("updateBroadcastComponentRender"), true);

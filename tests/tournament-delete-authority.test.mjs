@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
 
 const {
   TournamentDeletionError,
