@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

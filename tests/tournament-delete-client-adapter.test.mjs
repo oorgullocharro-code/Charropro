@@ -18,10 +18,14 @@ assert.match(deletionUi, /operation: "preflight"/);
 assert.match(deletionUi, /data-revision=/);
 assert.match(deletionUi, /idempotencyKey: `tournament-delete:/);
 assert.match(deletionUi, /Torneo eliminado correctamente/);
+assert.match(deletionUi, /Torneo de prueba — eliminacion definitiva permitida/);
+assert.match(deletionUi, /solo archivarse|Congelar\/Archivar/);
 assert.doesNotMatch(deletionUi, /Despliega las reglas nuevas/);
 
 assert.match(functionSource, /exports\.deleteCharroProTournament = onCall/);
 assert.match(functionSource, /backupRuntime\.executeBackup/);
 assert.match(functionSource, /buildTournamentDeletionPlan/);
 assert.match(functionSource, /tournament-delete-stale-revision/);
+assert.match(functionSource, /readGlobalReleaseAuthority/);
+assert.match(functionSource, /bucketName: FIREBASE_CLIENT_CONFIG\.storageBucket/);
 console.log("tournament delete client adapter tests passed");

@@ -1,5 +1,5 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
-import { loadState, state } from "../core/state.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { loadState, state } from "../core/state.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import {
   getFirebaseRuntimeDiagnostics,
   signInFirebaseUser,
@@ -7,9 +7,9 @@ import {
   subscribeFirebaseAuthSession,
   subscribeFirebaseTournamentIndex,
   subscribeFirebaseTournamentState
-} from "../core/firebaseSync.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
-import { getTournamentIdFromUrl } from "../core/tournamentContext.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../core/firebaseSync.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { getTournamentIdFromUrl } from "../core/tournamentContext.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const root = document.getElementById("jueces-root");
 let accessSession = {

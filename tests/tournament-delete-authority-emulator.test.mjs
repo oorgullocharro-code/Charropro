@@ -28,6 +28,7 @@ try {
   await ownerWrite(`charropro/projectionOutbox/${tournamentId}`, { projection_a: { state: { status: "PENDING" } } });
   await ownerWrite(`charropro/judges/assignments/${tournamentId}`, { charreada_a: { [judge.localId]: true } });
   await ownerWrite("charropro/judges/events", { [`event-${suffix}`]: { tournamentId, type: "ASSIGNED" } });
+  await ownerWrite(`charropro/judges/sessions/judge-session-${suffix}`, { tournamentId, active: true });
   await ownerWrite(`charropro/broadcastStudio/sessions/session-${suffix}`, { context: { tournamentId } });
   await ownerWrite(`charropro/tournaments/${untouchedTournamentId}`, tournament(untouchedTournamentId, 2));
   await ownerWrite(`charropro/tournaments/${invalidRevisionTournamentId}`, tournament(invalidRevisionTournamentId, "NaN"));
@@ -37,6 +38,8 @@ try {
   assert.equal(preflight.body.result.preflight.revision, 4);
   assert.equal(preflight.body.result.preflight.userAccessCount, 1);
   assert.equal(preflight.body.result.preflight.broadcastRefsCount, 1);
+  assert.equal(preflight.body.result.preflight.releaseStatus, "precommercial");
+  assert.equal(preflight.body.result.preflight.dataClassification, "TEST");
 
   const denied = await call(judge.idToken, { operation: "preflight", tournamentId });
   assert.equal(denied.ok, false);
@@ -61,6 +64,7 @@ try {
   assert.equal(await ownerRead(`charropro/tournaments/${tournamentId}`), null);
   assert.equal(await ownerRead(`charropro/live/${tournamentId}`), null);
   assert.equal(await ownerRead(`charropro/judges/events/event-${suffix}`), null);
+  assert.equal(await ownerRead(`charropro/judges/sessions/judge-session-${suffix}`), null);
   assert.equal(await ownerRead(`charropro/broadcastStudio/sessions/session-${suffix}`), null);
   assert.equal(await ownerRead(`charropro/userTournamentAccess/${judge.localId}/${tournamentId}`), null);
 
@@ -69,19 +73,25 @@ try {
   assert.equal(replay.body.result.idempotentReplay, true);
   assert.deepEqual(replay.body.result.affectedPaths, deleted.body.result.affectedPaths);
 
-  await ownerWrite(`charropro/tournaments/${historyTournamentId}`, { ...tournament(historyTournamentId, 0), publishedScores: { official_a: { id: "official_a" } } });
+  await ownerWrite(`charropro/tournaments/${historyTournamentId}`, {
+    ...tournament(historyTournamentId, 0),
+    publishedScores: { official_a: { id: "official_a" } },
+    officialScoreLedger: { attempt_a: { revision: 1 } }
+  });
+  await ownerWrite(`charropro/audit/publishedScores/${historyTournamentId}`, { official_a: { id: "official_a" } });
   const historical = await call(supervisor.idToken, { operation: "preflight", tournamentId: historyTournamentId });
   assert.equal(historical.ok, true);
-  assert.deepEqual(historical.body.result.preflight.blockingReasons, ["tournament-has-official-history"]);
-  const blocked = await call(supervisor.idToken, {
+  assert.deepEqual(historical.body.result.preflight.blockingReasons, []);
+  const historicalDeleted = await call(supervisor.idToken, {
     operation: "delete",
     tournamentId: historyTournamentId,
     expectedRevision: 0,
     idempotencyKey: `delete:${historyTournamentId}:request-0001`
   });
-  assert.equal(blocked.ok, true);
-  assert.equal(blocked.body.result.code, "tournament-has-official-history");
-  assert.notEqual(await ownerRead(`charropro/tournaments/${historyTournamentId}`), null);
+  assert.equal(historicalDeleted.ok, true, JSON.stringify(historicalDeleted.body));
+  assert.equal(historicalDeleted.body.result.deleted, true);
+  assert.equal(await ownerRead(`charropro/tournaments/${historyTournamentId}`), null);
+  assert.equal(await ownerRead(`charropro/audit/publishedScores/${historyTournamentId}`), null);
   const invalidRevision = await call(supervisor.idToken, { operation: "preflight", tournamentId: invalidRevisionTournamentId });
   assert.equal(invalidRevision.ok, true);
   assert.equal(invalidRevision.body.result.preflight.revision, null);
@@ -107,6 +117,8 @@ try {
   await ownerDelete(`charropro/users/${operator.localId}`);
   await ownerDelete(`charropro/users/${platformAdmin.localId}`);
   await ownerDelete(`charropro/judges/events/event-${suffix}`);
+  await ownerDelete(`charropro/judges/sessions/judge-session-${suffix}`);
+  await ownerDelete(`charropro/audit/publishedScores/${historyTournamentId}`);
   try { await deleteUser(supervisor.idToken); } catch {}
   try { await deleteUser(judge.idToken); } catch {}
   try { await deleteUser(operator.idToken); } catch {}

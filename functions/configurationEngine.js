@@ -5,6 +5,7 @@ const CONFIGURATION_SCHEMA_VERSION = "charropro-configuration/1";
 const CONFIGURATION_SCOPES = Object.freeze(["system", "organization", "tournament", "user", "session"]);
 const CONFIGURATION_HIERARCHY = Object.freeze([...CONFIGURATION_SCOPES]);
 const CONFIGURATION_STATUSES = Object.freeze(["draft", "published", "deprecated", "archived"]);
+const RELEASE_STATUSES = Object.freeze(["precommercial", "commercial_approved"]);
 const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const DEFAULT_LIMITS = Object.freeze({
   maxDepth: 12,
@@ -198,6 +199,7 @@ function validateRuntimeConfigurationBaseline(input = {}) {
   const requiredStrings = [
     "system.appVersion",
     "system.environment",
+    "system.releaseStatus",
     "firebase.sdkVersion",
     "firebase.functionsRegion",
     "firebase.client.apiKey",
@@ -236,6 +238,9 @@ function validateRuntimeConfigurationBaseline(input = {}) {
     "firebase.paths.restoreFoundation"
   ]) {
     if (!getConfigurationValue(configuration, path, "")) errors.push(`configuration-baseline-required:${path}`);
+  }
+  if (!RELEASE_STATUSES.includes(getConfigurationValue(configuration, "system.releaseStatus", ""))) {
+    errors.push("configuration-baseline-release-status-invalid");
   }
   for (const path of [
     "application.timeouts.callableSeconds",
@@ -281,6 +286,18 @@ function createConfigurationVersion(definition = {}, actor = {}, options = {}) {
   const values = definition.mode === "merge" && previous
     ? mergeConfigurationValues(previous.values, definition.values || {})
     : safeClone(definition.values || {});
+  const previousReleaseStatus = getConfigurationValue(previous, "system.releaseStatus", "");
+  const nextReleaseStatus = getConfigurationValue({ values }, "system.releaseStatus", "");
+  if (scope.type === "system") {
+    if (!RELEASE_STATUSES.includes(nextReleaseStatus)) {
+      throw new ConfigurationEngineError("configuration-release-status-invalid");
+    }
+    if (previousReleaseStatus === "commercial_approved" && nextReleaseStatus !== previousReleaseStatus) {
+      throw new ConfigurationEngineError("configuration-release-status-regression-denied");
+    }
+  } else if (Object.hasOwn(values?.system || {}, "releaseStatus")) {
+    throw new ConfigurationEngineError("configuration-release-status-scope-denied");
+  }
   return normalizeConfigurationRecord({
     configurationId,
     scope,

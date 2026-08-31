@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/core/scoring.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

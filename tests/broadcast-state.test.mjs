@@ -22,7 +22,7 @@ import {
   setPreviewState,
   setProgramState,
   validateBroadcastState
-} from "../js/broadcast/broadcastState.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:01.000Z";

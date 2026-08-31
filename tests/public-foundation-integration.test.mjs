@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import {
   applyPublicPortalConnection,
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const qa = {
   tournament: {

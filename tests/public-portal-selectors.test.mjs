@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

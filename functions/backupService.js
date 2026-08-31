@@ -529,9 +529,10 @@ function fingerprintBackupSource(source, request) {
   return sha256(stableStringify(cloneBackupValue(selectBackupSource(source, request))));
 }
 
-function createFirebaseBackupAdapter(admin) {
+function createFirebaseBackupAdapter(admin, options = {}) {
   const database = admin.database();
-  const getBucket = () => admin.storage().bucket();
+  const bucketName = String(options.bucketName || "").trim();
+  const getBucket = () => admin.storage().bucket(bucketName || undefined);
   return {
     now: () => Date.now(),
     async read(path) {

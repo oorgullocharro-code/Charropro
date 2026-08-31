@@ -1,8 +1,12 @@
 "use strict";
 
 const crypto = require("node:crypto");
+const {
+  canHardDeleteTournament,
+  resolveTournamentDataClassification
+} = require("./releasePolicy");
 
-const DELETION_AUTHORITY_VERSION = "1.0.0";
+const DELETION_AUTHORITY_VERSION = "1.1.0";
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,180}$/;
 const IDEMPOTENCY_PATTERN = /^[A-Za-z0-9._:@/-]{12,180}$/;
 const DELETION_AUDIT_ROOT = "audit/tournamentDeletions";
@@ -36,7 +40,7 @@ function prepareTournamentDeletionRequest(input = {}) {
   };
 }
 
-function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "") {
+function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "", releaseAuthority = {}) {
   const tournamentId = normalizeId(tournamentIdInput);
   const tournament = plainRecord(source.tournament);
   const audit = plainRecord(source.audit);
@@ -46,6 +50,7 @@ function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "") {
   const historicalRecords = plainRecord(source.historyStatistics);
   const judgeAssignments = plainRecord(source.judgeAssignments);
   const judgeEvents = plainRecord(source.judgeEvents);
+  const judgeSessions = plainRecord(source.judgeSessions);
   const broadcastSessions = plainRecord(source.broadcastSessions);
   const userTournamentAccess = plainRecord(source.userTournamentAccess);
   const users = plainRecord(source.users);
@@ -56,7 +61,9 @@ function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "") {
   const hasLedger = Object.keys(ledger).length > 0;
   const hasAudit = Object.keys(auditRecords).length > 0;
   const hasHistory = Object.keys(historicalRecords).length > 0;
+  const hasOfficialHistory = hasOfficialScores || hasLedger || hasAudit || hasHistory;
   const revision = tournamentRevision(tournament);
+  const classification = resolveTournamentDataClassification(tournament, releaseAuthority);
   const userAccessIds = new Set([
     ...Object.entries(userTournamentAccess)
       .filter(([, entries]) => plainRecord(entries)[tournamentId] === true)
@@ -74,14 +81,25 @@ function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "") {
   const broadcastSessionIds = Object.entries(broadcastSessions)
     .filter(([, session]) => String(session?.context?.tournamentId || "") === tournamentId)
     .map(([sessionId]) => sessionId);
+  const judgeSessionIds = Object.entries(judgeSessions)
+    .filter(([, session]) => String(session?.tournamentId || session?.context?.tournamentId || "") === tournamentId)
+    .map(([sessionId]) => sessionId)
+    .sort();
+  const hardDeleteAllowed = canHardDeleteTournament(releaseAuthority, classification.classification, hasOfficialHistory);
   const blockingReasons = [];
   if (!tournamentId || !tournament.info?.id) blockingReasons.push("tournament-not-found");
   if (tournament.info?.id && revision === null) blockingReasons.push("tournament-delete-revision-invalid");
-  if (hasOfficialScores || hasLedger || hasAudit || hasHistory) blockingReasons.push("tournament-has-official-history");
+  if (!hardDeleteAllowed) blockingReasons.push("tournament-has-official-history");
   return {
     tournamentId,
     name: String(tournament.info?.name || tournament.name || ""),
     revision,
+    releaseStatus: releaseAuthority.status,
+    releasePolicyVersion: releaseAuthority.policyVersion,
+    releaseSourceVersion: releaseAuthority.sourceVersion,
+    dataClassification: classification.classification,
+    classificationSource: classification.source,
+    hardDeleteAllowed,
     hasOfficialScores,
     hasLedger,
     hasAudit,
@@ -93,6 +111,7 @@ function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "") {
     userAccessIds: [...userAccessIds].sort(),
     judgeRefsCount,
     judgeEventIds,
+    judgeSessionIds,
     broadcastRefsCount: broadcastSessionIds.length,
     broadcastSessionIds: broadcastSessionIds.sort(),
     blockingReasons
@@ -111,6 +130,7 @@ function buildTournamentDeletionPlan(source = {}, preflight = {}, request = {}, 
     [`publicTournaments/${tournamentId}`]: null,
     [`projectionOutbox/${tournamentId}`]: null,
     [`history/statistics/${tournamentId}`]: null,
+    [`audit/publishedScores/${tournamentId}`]: null,
     [`judges/assignments/${tournamentId}`]: null
   };
   for (const uid of preflight.userAccessIds || []) {
@@ -122,6 +142,9 @@ function buildTournamentDeletionPlan(source = {}, preflight = {}, request = {}, 
   for (const eventId of preflight.judgeEventIds || []) {
     updates[`judges/events/${eventId}`] = null;
   }
+  for (const sessionId of preflight.judgeSessionIds || []) {
+    updates[`judges/sessions/${sessionId}`] = null;
+  }
   for (const sessionId of preflight.broadcastSessionIds || []) {
     updates[`broadcastStudio/sessions/${sessionId}`] = null;
   }
@@ -132,6 +155,9 @@ function buildTournamentDeletionPlan(source = {}, preflight = {}, request = {}, 
     idempotencyKey: request.idempotencyKey,
     tournamentId,
     name: preflight.name,
+    releaseStatus: preflight.releaseStatus,
+    dataClassification: preflight.dataClassification,
+    classificationSource: preflight.classificationSource,
     expectedRevision: request.expectedRevision,
     deleted: true,
     deletedAt,

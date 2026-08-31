@@ -4,8 +4,8 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "./publicProjectionSchema.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

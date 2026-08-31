@@ -28,8 +28,9 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1",
+      "appVersion": "20260830-precommercial-tournament-test-mode-deletion-001-v1",
       "environment": "production",
+      "releaseStatus": "precommercial",
       "production": true,
       "development": false,
       "testing": false
@@ -127,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "f26a4fd608b703713213e3765da8290189f02dfae489090dae42f4e3407814cb",
-  "fingerprint": "f26a4fd608b703713213e3765da8290189f02dfae489090dae42f4e3407814cb"
+  "checksum": "42777673bc1a2371a1b2c06fd8757a5897d0c0469d360a96f14bc7cd9970255c",
+  "fingerprint": "42777673bc1a2371a1b2c06fd8757a5897d0c0469d360a96f14bc7cd9970255c"
 }

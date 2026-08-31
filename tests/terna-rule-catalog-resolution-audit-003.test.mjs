@@ -4,19 +4,19 @@ import {
   applyLocalFmch2026RuleProfileDefault,
   buildLocalFmch2026RuleProfileAssignment,
   hasExplicitRuleProfileSelection
-} from "../js/core/localRuleProfileDefaults.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/core/localRuleProfileDefaults.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
-import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { resolveTournamentRules, SUERTES } from "../js/data/suertes.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import {
   buildFmch2026TernaOpportunityDraft,
   commitFmch2026TernaOpportunity,
   createFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import { createLocalRuntimeSeedFixture } from "../tools/development/localRuntimeSeed.mjs";
 
 const productFingerprint = JSON.stringify(SUERTES);
@@ -107,8 +107,8 @@ assert.equal(seededTournament.ruleProfileVersion, "0.6.0");
 assert.equal(seededTournament.ruleProfile.status, "active");
 
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
-assert.match(appSource, /const tournament = applyProductiveRuleProfilePolicy\(applyLocalFmch2026RuleProfileDefault\(\{/,
-  "new tournaments preserve the local fixture default before applying productive policy");
+assert.match(appSource, /const tournament = applyReleaseClassificationToNewTournament\(applyProductiveRuleProfilePolicy\(applyLocalFmch2026RuleProfileDefault\(\{/,
+  "new tournaments preserve the local fixture default and productive policy before applying release classification");
 assert.match(appSource, /state\.tournaments\.push\(tournament\)/,
   "the policy-resolved tournament is the record inserted into local state");
 assert.match(appSource, /if \(!liveConfigured\) \{[\s\S]*?return;[\s\S]*?assignRuleProfileToTournament\(tournament, \{[\s\S]*?source: "productive-default"/,

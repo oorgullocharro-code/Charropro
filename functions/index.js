@@ -46,6 +46,7 @@ const {
   buildTournamentDeletionPreflight,
   prepareTournamentDeletionRequest
 } = require("./tournamentDeletionAuthority");
+const { resolveGlobalReleaseAuthority } = require("./releasePolicy");
 const {
   createFirebaseRuleProfileLifecycleAdapter,
   createRuleProfileLifecycleRuntime
@@ -61,6 +62,7 @@ if (!baselineValidation.valid) {
 const baselineConfiguration = baselineValidation.configuration;
 const FIREBASE_PATHS = getConfigurationValue(baselineConfiguration, "firebase.paths", {});
 const FUNCTIONS_CONFIG = getConfigurationValue(baselineConfiguration, "firebase.functions", {});
+const FIREBASE_CLIENT_CONFIG = getConfigurationValue(baselineConfiguration, "firebase.client", {});
 const APPLICATION_CONFIG = getConfigurationValue(baselineConfiguration, "application", {});
 const FUNCTIONS_REGION = getConfigurationValue(baselineConfiguration, "firebase.functionsRegion", "");
 const CONFIGURATION_ROOT_PATH = FIREBASE_PATHS.configurationManagement;
@@ -69,7 +71,9 @@ const CHARROPRO_ROOT_PATH = FIREBASE_PATHS.root;
 if (!FUNCTIONS_REGION || !CONFIGURATION_ROOT_PATH || !RULE_PROFILE_LIFECYCLE_ROOT_PATH || !CHARROPRO_ROOT_PATH) {
   throw new ConfigurationEngineError("configuration-bootstrap-required");
 }
-const backupRuntime = createBackupRuntime(createFirebaseBackupAdapter(admin), {
+const backupRuntime = createBackupRuntime(createFirebaseBackupAdapter(admin, {
+  bucketName: FIREBASE_CLIENT_CONFIG.storageBucket
+}), {
   appVersion: FUNCTIONS_CONFIG.backupCompatibilityAppVersion
 });
 const restoreRuntime = createRestoreRuntime(createFirebaseRestoreAdapter(admin));
@@ -343,7 +347,11 @@ exports.getCharroProConfiguration = onCall({
   if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para consultar configuracion.");
   try {
     const actor = await requireConfigurationActor(callerUid, request.data || {}, "read");
-    return await configurationRuntime.readConfiguration(request.data || {}, actor);
+    const [configuration, globalReleaseAuthority] = await Promise.all([
+      configurationRuntime.readConfiguration(request.data || {}, actor),
+      readGlobalReleaseAuthority()
+    ]);
+    return { ...configuration, globalReleaseAuthority };
   } catch (error) {
     throw toConfigurationHttpsError(error);
   }
@@ -459,7 +467,8 @@ exports.deleteCharroProTournament = onCall({
     }
     const source = await readTournamentDeletionSource(tournamentId);
     assertDeletionActor(actor, source.tournament);
-    const preflight = buildTournamentDeletionPreflight(source, tournamentId);
+    const releaseAuthority = await readGlobalReleaseAuthority();
+    const preflight = buildTournamentDeletionPreflight(source, tournamentId, releaseAuthority);
     if (operation === "preflight") return { ok: true, operation, preflight };
 
     const prepared = prepareTournamentDeletionRequest(input);
@@ -497,7 +506,8 @@ exports.deleteCharroProTournament = onCall({
       }
 
       const finalSource = await readTournamentDeletionSource(tournamentId);
-      const finalPreflight = buildTournamentDeletionPreflight(finalSource, tournamentId);
+      const finalReleaseAuthority = await readGlobalReleaseAuthority();
+      const finalPreflight = buildTournamentDeletionPreflight(finalSource, tournamentId, finalReleaseAuthority);
       if (String(finalSource.tournament?.deletionAuthority?.requestId || "") !== deletionRequest.requestId) {
         throw new TournamentDeletionError("tournament-delete-lock-lost");
       }
@@ -579,7 +589,7 @@ async function requireTournamentDeletionActor(uid, tournamentId) {
 async function readTournamentDeletionSource(tournamentId) {
   const root = CHARROPRO_ROOT_PATH;
   const database = admin.database();
-  const [tournament, auditPublishedScores, historyStatistics, live, publicTournament, projectionOutbox, judgeAssignments, judgeEvents, userTournamentAccess, users, broadcastSessions] = await Promise.all([
+  const [tournament, auditPublishedScores, historyStatistics, live, publicTournament, projectionOutbox, judgeAssignments, judgeEvents, judgeSessions, userTournamentAccess, users, broadcastSessions] = await Promise.all([
     database.ref(`${TOURNAMENTS_PATH}/${tournamentId}`).get(),
     database.ref(`${AUDIT_PUBLISHED_SCORES_PATH}/${tournamentId}`).get(),
     database.ref(`${root}/history/statistics/${tournamentId}`).get(),
@@ -588,6 +598,7 @@ async function readTournamentDeletionSource(tournamentId) {
     database.ref(`${PROJECTION_OUTBOX_PATH}/${tournamentId}`).get(),
     database.ref(`${root}/judges/assignments/${tournamentId}`).get(),
     database.ref(`${root}/judges/events`).get(),
+    database.ref(`${FIREBASE_PATHS.judgeSessions}`).get(),
     database.ref(USER_TOURNAMENT_ACCESS_PATH).get(),
     database.ref(USERS_PATH).get(),
     database.ref(`${FIREBASE_PATHS.broadcastStudioSessions}`).get()
@@ -601,10 +612,22 @@ async function readTournamentDeletionSource(tournamentId) {
     projectionOutbox: projectionOutbox.val() || {},
     judgeAssignments: judgeAssignments.val() || {},
     judgeEvents: judgeEvents.val() || {},
+    judgeSessions: judgeSessions.val() || {},
     userTournamentAccess: userTournamentAccess.val() || {},
     users: users.val() || {},
     broadcastSessions: broadcastSessions.val() || {}
   };
+}
+
+async function readGlobalReleaseAuthority() {
+  const resolved = await configurationRuntime.readConfiguration({}, {
+    uid: "system:tournament-deletion-authority",
+    name: "Tournament Deletion Authority",
+    role: "supervisor",
+    active: true,
+    platformAdmin: true
+  });
+  return resolveGlobalReleaseAuthority(resolved);
 }
 
 async function reserveTournamentDeletion(tournamentId, deletionRequest, actor) {

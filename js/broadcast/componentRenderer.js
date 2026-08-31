@@ -1,7 +1,7 @@
 import {
   COMPONENT_VISIBILITY,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "./componentLibrary.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 export const COMPONENT_RENDERER_VERSION = "1.0.0";
 

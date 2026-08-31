@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "./programEngine.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

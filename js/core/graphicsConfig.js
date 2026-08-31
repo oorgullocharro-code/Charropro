@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

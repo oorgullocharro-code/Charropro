@@ -4,7 +4,7 @@ import {
   applyOfficialTimerCommand,
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/core/timerRules.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
@@ -13,7 +13,7 @@ import {
   partitionOfficialTimerHistory,
   resolveOfficialCurrentTimerContext,
   resolvePreviousPialesOpportunity
-} from "../js/core/officialTimerOrchestration.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "../js/core/officialTimerOrchestration.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const T0 = Date.parse("2026-08-27T15:00:00.000Z");
 const tournament = {

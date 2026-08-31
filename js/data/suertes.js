@@ -5,12 +5,12 @@ import {
   CALA_INFR_RULES,
   CALA_TEAM_PENALTY_RULES,
   normalizeCalaRuleOverrideCatalog
-} from "./calaRules.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "./calaRules.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import {
   RULE_PROFILE_CONTRACT_VERSION,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "./ruleProfiles.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+} from "./ruleProfiles.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 export const SUERTES = [
   {

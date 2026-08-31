@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",
@@ -38,7 +38,7 @@ const malformedPreflight = deletionAuthority.buildTournamentDeletionPreflight({
     info: { id: "tournament-nan-regression", name: "Revision no finita" },
     meta: { version: "NaN" }
   }
-}, "tournament-nan-regression");
+}, "tournament-nan-regression", { status: "precommercial", policyVersion: "1.0.0", sourceVersion: 1 });
 assert.equal(malformedPreflight.revision, null);
 assert.deepEqual(malformedPreflight.blockingReasons, ["tournament-delete-revision-invalid"]);
 assert.doesNotThrow(() => assertCallableSerializable(malformedPreflight));

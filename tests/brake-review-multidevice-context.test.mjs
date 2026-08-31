@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
 import { command, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const deviceA = command(freshReview(), BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, {

@@ -59,12 +59,16 @@ async function validateAndFreezeBootstrap(source) {
     "firebase.functionsRegion",
     "firebase.client.projectId",
     "firebase.client.databaseURL",
+    "system.releaseStatus",
     "firebase.paths.tournaments",
     "firebase.paths.configurationManagement"
   ]) {
     if (!getBootstrapConfigurationValue(configuration, path, "")) {
       throw new Error(`configuration-bootstrap-required:${path}`);
     }
+  }
+  if (!["precommercial", "commercial_approved"].includes(getBootstrapConfigurationValue(configuration, "system.releaseStatus", ""))) {
+    throw new Error("configuration-bootstrap-release-status-invalid");
   }
   if (!/^\d+\.\d+\.\d+$/.test(getBootstrapConfigurationValue(configuration, "firebase.sdkVersion", ""))) {
     throw new Error("configuration-bootstrap-sdk-version-invalid");
