@@ -4085,7 +4085,9 @@ th.num {
 
 .timer-display-panel {
   width: min(1780px, 100%);
+  min-width: 0;
   min-height: min(78dvh, 820px);
+  box-sizing: border-box;
   border: 3px solid rgba(244, 183, 64, .55);
   border-radius: 42px;
   padding: clamp(28px, 5vw, 76px);
@@ -4101,6 +4103,7 @@ th.num {
   align-content: center;
   gap: clamp(18px, 3vw, 36px);
   text-align: center;
+  container-type: inline-size;
 }
 
 .timer-display-panel.running {
@@ -4138,18 +4141,30 @@ th.num {
 }
 
 .timer-display-panel strong {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   color: #fff7dc;
-  font-size: clamp(118px, 22vw, 420px);
+  font-size: clamp(40px, 16cqw, 360px);
   font-weight: 950;
-  line-height: .82;
+  line-height: .9;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: visible;
   text-shadow:
     0 8px 0 rgba(0, 0, 0, .45),
     0 0 42px rgba(244, 183, 64, .2);
 }
 
+.timer-display-panel strong[data-timer-format="seconds"] {
+  font-size: clamp(62px, 24cqw, 420px);
+}
+
 .timer-display-panel p {
+  width: 100%;
+  min-width: 0;
   max-width: 1480px;
   margin: 0;
   overflow: hidden;

@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./state.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

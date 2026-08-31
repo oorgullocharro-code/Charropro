@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
   buildTournamentTeamStandings,
   calculateAttemptTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { scoreKey, state } from "./state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./scoring.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { scoreKey, state } from "./state.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 export function buildCharroProStatsCenter(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

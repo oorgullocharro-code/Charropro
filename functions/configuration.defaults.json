@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1",
+      "appVersion": "20260831-official-field-timer-responsive-display-recovery-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "a0114545792151c5c4b97238926308b0bf6cba0c5a89a18ef1f73f2f64414fec",
-  "fingerprint": "a0114545792151c5c4b97238926308b0bf6cba0c5a89a18ef1f73f2f64414fec"
+  "checksum": "5bd5ebec7991ed544045176bbcb6fc364bc6a112b255958e765a03ba50e04664",
+  "fingerprint": "5bd5ebec7991ed544045176bbcb6fc364bc6a112b255958e765a03ba50e04664"
 }

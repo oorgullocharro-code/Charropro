@@ -1,13 +1,17 @@
-import { escapeHTML, html } from "../core/dom.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { escapeHTML, html } from "../core/dom.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { LIVE_TIMER_KEY, loadState, state } from "../core/state.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { getLiveChannelFromUrl, subscribeFirebaseLive } from "../core/firebaseSync.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import {
+  formatOfficialFieldTimerMs,
+  getOfficialFieldTimerFormat
+} from "../core/officialFieldTimerDisplay.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const root = document.getElementById("timer-display-root");
 const liveChannel = getLiveChannelFromUrl();
@@ -81,7 +85,10 @@ function updateScreen(now = Date.now()) {
   }
   const view = getDisplayTimerView(now);
   if (stateLabel) stateLabel.textContent = view.stateLabel;
-  if (display) display.textContent = view.formatted;
+  if (display) {
+    display.textContent = view.formatted;
+    display.dataset.timerFormat = view.fieldFormat;
+  }
   if (context) context.textContent = getLiveContextText();
   liveTickerSubscription.setActive(view.running);
 }
@@ -106,7 +113,7 @@ function getTimerSource() {
 }
 
 function getDisplayTimerView(now = Date.now()) {
-  if (!timer.official) return getTimerView(timer, getTimerSource());
+  if (!timer.official) return withOfficialFieldTimerFormat(getTimerView(timer, getTimerSource()));
   const view = deriveOfficialTimerLiveDisplay({
     ...timer,
     status: timer.officialStatus || String(timer.status || "READY").toUpperCase(),
@@ -116,9 +123,17 @@ function getDisplayTimerView(now = Date.now()) {
     wallStartedAt: timer.startedAt || null,
     wallFinishedAt: timer.stoppedAt || null
   }, now);
-  return {
+  return withOfficialFieldTimerFormat({
     ...view,
     stateLabel: timer.stateLabel || getOfficialStateLabel(view.status)
+  });
+}
+
+function withOfficialFieldTimerFormat(view = {}) {
+  return {
+    ...view,
+    formatted: formatOfficialFieldTimerMs(view.displayMs),
+    fieldFormat: getOfficialFieldTimerFormat(view.displayMs)
   };
 }
 

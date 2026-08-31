@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./officialTimerLiveDisplay.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

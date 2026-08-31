@@ -7,7 +7,7 @@ import {
   renderPreview,
   updatePreviewLiveData,
   updatePreview
-} from "../js/broadcast/previewEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/previewEngine.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   autoProgram,
   createProgramEngine,
@@ -17,26 +17,26 @@ import {
   prepareProgram,
   takeProgram,
   updateProgramLiveData
-} from "../js/broadcast/programEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/programEngine.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine,
   routeProgramToOutput
-} from "../js/broadcast/outputRouting.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/outputRouting.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   buildThemeTemplateSnapshot,
   buildThemedTemplatePreparation,
   createThemeTemplateIntegration,
   destroyThemeTemplateIntegration,
   getThemedTemplateRender
-} from "../js/broadcast/themeTemplateIntegration.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/themeTemplateIntegration.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   createTemplateRendererIntegration,
   destroyTemplateRendererIntegration,
   prepareTemplateRender
-} from "../js/broadcast/templateRendererIntegration.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { createProductionConsoleModel } from "../js/broadcast/productionConsole.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { buildTemplateEngineFixture } from "../fixtures/templateEngineFixtures.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/templateRendererIntegration.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { createProductionConsoleModel } from "../js/broadcast/productionConsole.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { buildTemplateEngineFixture } from "../fixtures/templateEngineFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const T0 = "2026-07-15T20:00:00.000Z";
 const T1 = "2026-07-15T20:00:01.000Z";

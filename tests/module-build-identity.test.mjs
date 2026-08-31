@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 
-const BUILD = "20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+const BUILD = "20260831-official-field-timer-responsive-display-recovery-001-v1";
 const files = await collect(new URL("../js/", import.meta.url));
 const identities = new Map();
 const violations = [];

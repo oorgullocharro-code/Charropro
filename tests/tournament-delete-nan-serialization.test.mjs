@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",

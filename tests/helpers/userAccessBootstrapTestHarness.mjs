@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

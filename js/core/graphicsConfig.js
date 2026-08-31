@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

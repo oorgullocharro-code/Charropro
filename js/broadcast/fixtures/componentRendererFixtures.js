@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../componentLibrary.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

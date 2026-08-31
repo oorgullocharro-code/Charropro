@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../css/styles.css">
+  <title>Official Field Timer Responsive Fixture</title>
+</head>
+<body class="timer-display-body">
+  <div id="timer-display-root">
+    <main class="timer-display-page">
+      <section class="timer-display-panel" id="timer-display-panel">
+        <span id="timer-display-state">Listo para iniciar</span>
+        <strong id="timer-display-clock">0.0</strong>
+        <p>Charreada de prueba / Equipo de prueba / Cala de Caballo</p>
+      </section>
+    </main>
+  </div>
+  <script type="module">
+    import {
+      formatOfficialFieldTimerMs,
+      getOfficialFieldTimerFormat
+    } from "../../js/core/officialFieldTimerDisplay.js";
+
+    const query = new URLSearchParams(location.search);
+    const value = Number(query.get("value") || 0);
+    const status = String(query.get("status") || "READY").toUpperCase();
+    const clock = document.getElementById("timer-display-clock");
+    const panel = document.getElementById("timer-display-panel");
+    const state = document.getElementById("timer-display-state");
+    const labels = { READY: "Listo para iniciar", RUNNING: "Tiempo en curso", PAUSED: "Tiempo pausado", FINISHED: "Tiempo finalizado" };
+    clock.textContent = formatOfficialFieldTimerMs(value);
+    clock.dataset.timerFormat = getOfficialFieldTimerFormat(value);
+    panel.classList.toggle("running", status === "RUNNING");
+    panel.classList.toggle("paused", status !== "RUNNING");
+    panel.classList.toggle("expired", value < 0);
+    state.textContent = labels[status] || labels.READY;
+    document.documentElement.dataset.fixtureReady = "true";
+  </script>
+</body>
+</html>

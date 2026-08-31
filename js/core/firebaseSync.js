@@ -6,21 +6,21 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./firebaseRuntime.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../data/competitionTypes.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./userAccessBootstrap.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -28,20 +28,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../public/publicProjection.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../public/publicProjectionSchema.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -57,11 +57,11 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./publicProjectionOutbox.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./pendingScoreReview.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
@@ -69,14 +69,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./timerRules.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer,
   isBrakeReviewProfile
-} from "./brakeReviewPhase.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "./brakeReviewPhase.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({

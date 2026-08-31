@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/core/scoring.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

@@ -3,8 +3,8 @@ import fs from "node:fs";
 import {
   FMCH_2026_LIBRE_PROFILE_0_6_0,
   FMCH_2026_LIBRE_PROFILE_0_6_1
-} from "../js/data/ruleProfiles.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/data/ruleProfiles.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const snapshot = fs.readFileSync(new URL("../js/core/officialFormatSnapshot.js", import.meta.url), "utf8");
 const xlsx = fs.readFileSync(new URL("../js/core/officialFormat.js", import.meta.url), "utf8");

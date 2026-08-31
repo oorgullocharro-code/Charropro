@@ -9,7 +9,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/core/firebaseRuntime.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

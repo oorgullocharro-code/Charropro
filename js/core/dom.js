@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { logCharroProVersion } from "./version.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 logCharroProVersion("runtime");
 

@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

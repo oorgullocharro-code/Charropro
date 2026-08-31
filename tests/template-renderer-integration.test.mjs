@@ -20,23 +20,23 @@ import {
   updateTemplateRender,
   validateTemplateRenderSnapshot,
   validateTemplateRendererIntegrationTarget
-} from "../js/broadcast/templateRendererIntegration.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/templateRendererIntegration.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   createComponentRenderer,
   destroyComponentRenderer,
   listRenderedComponents,
   renderBroadcastComponent
-} from "../js/broadcast/componentRenderer.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../js/broadcast/componentLibrary.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../fixtures/templateEngineFixtures.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
-import { buildComponentRendererFixture } from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+} from "../fixtures/templateEngineFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
+import { buildComponentRendererFixture } from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260831-official-field-timer-responsive-display-recovery-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {
