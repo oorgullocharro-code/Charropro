@@ -3,19 +3,19 @@ import {
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../public/publicPortalClient.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
-} from "./portalRouter.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./portalRouter.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./portalRender.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export const PUBLIC_PORTAL_CORE_VERSION = "2.0.0";
 

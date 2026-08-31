@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

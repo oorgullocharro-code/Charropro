@@ -1,13 +1,13 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./state.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;

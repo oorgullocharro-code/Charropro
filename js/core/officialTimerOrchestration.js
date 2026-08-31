@@ -1,10 +1,10 @@
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./timerRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export const OFFICIAL_CURRENT_TIMER_CONTEXT_VERSION = "1.0.0";
 export const TORO_TO_TERNA_HANDOFF = "TORO_TO_TERNA_READY";

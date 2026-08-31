@@ -7171,6 +7171,11 @@ html.graphic-page #graphic-root {
   place-items: center;
 }
 
+html.graphic-page #graphic-root[data-view="timer"] {
+  display: block;
+  position: relative;
+}
+
 .graphic-stage {
   width: var(--graphic-design-width, 1920px);
   height: var(--graphic-design-height, 1080px);
@@ -7296,9 +7301,13 @@ html.graphic-page #graphic-root {
 }
 
 .graphic-timer {
-  width: min(320px, calc(100vw - 24px));
+  --graphic-timer-inset: clamp(8px, 2vw, 20px);
+  position: absolute;
+  top: var(--graphic-timer-inset);
+  left: var(--graphic-timer-inset);
+  width: min(360px, calc(100vw - (var(--graphic-timer-inset) * 2)));
   min-width: 0;
-  min-height: 108px;
+  min-height: 142px;
   container-type: inline-size;
   box-sizing: border-box;
   overflow: hidden;
@@ -7310,10 +7319,20 @@ html.graphic-page #graphic-root {
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, .06),
     inset 0 -34px 70px rgba(0, 0, 0, .24);
-  padding: 16px 18px;
-  text-align: right;
-  transform: scale(var(--graphic-timer-scale, 1));
+  padding: 16px 18px 14px;
+  text-align: left;
+  transform: none;
   backdrop-filter: blur(10px);
+}
+
+.graphic-timer-stage {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  display: block;
+  overflow: visible;
+  transform: none;
+  transform-origin: top left;
 }
 
 .graphic-timer::before {
@@ -7346,10 +7365,27 @@ html.graphic-page #graphic-root {
   margin-top: 10px;
   color: var(--graphic-text, #fff7dc);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: clamp(28px, 15cqw, 46px);
+  font-size: clamp(24px, 14cqw, 46px);
   line-height: .95;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.graphic-timer em {
+  position: relative;
+  z-index: 1;
+  display: block;
+  min-width: 0;
+  margin-top: 10px;
+  overflow: hidden;
+  color: var(--graphic-text, #fff7dc);
+  font-size: clamp(11px, 5cqw, 14px);
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.15;
+  text-overflow: clip;
   white-space: nowrap;
 }
 
@@ -7359,6 +7395,10 @@ html.graphic-page #graphic-root {
     inset 0 0 0 1px rgba(255, 255, 255, .06),
     0 0 26px rgba(255, 92, 92, .22),
     inset 0 -34px 70px rgba(0, 0, 0, .24);
+}
+
+.graphic-timer.overtime strong {
+  color: #ff8b8b;
 }
 
 .graphic-turn {

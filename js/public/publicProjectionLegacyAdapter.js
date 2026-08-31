@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

@@ -4,13 +4,13 @@ import {
   applyOfficialTimerCommand,
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../js/core/timerRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "../js/core/scorerOfficialTimerConsumer.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../js/core/scorerOfficialTimerConsumer.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 const T0 = Date.parse("2026-08-27T20:00:00.000Z");
 const actor = { id: "judge_live", uid: "judge_live", role: "juez" };

@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

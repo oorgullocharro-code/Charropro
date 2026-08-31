@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import { createBootstrapHarness, executeBootstrap, profile, TOURNAMENT_A, TOURNAMENT_B, tournamentIndex, tournamentRecord } from "./helpers/userAccessBootstrapTestHarness.mjs";
 
 const { result, reads } = await executeBootstrap(

@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./themeTemplateIntegration.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./liveBindings.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

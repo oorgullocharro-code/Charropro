@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

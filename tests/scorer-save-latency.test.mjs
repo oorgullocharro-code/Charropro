@@ -5,7 +5,7 @@ import {
   SCORER_SAVE_STAGES,
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "../js/core/scorerSaveLatency.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../js/core/scorerSaveLatency.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 assert.equal(SCORER_SAVE_LATENCY_VERSION, "1.0.0");
 assert.deepEqual(SCORER_SAVE_STAGES, ["T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"]);

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1",
+      "appVersion": "20260830-grafico-cronometro-obs-responsive-layout-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "f682b5eed1a8808bd4140e27e7a98dc8bc2aa7cc950758cb7e859fb6b3a1cfe7",
-  "fingerprint": "f682b5eed1a8808bd4140e27e7a98dc8bc2aa7cc950758cb7e859fb6b3a1cfe7"
+  "checksum": "ff97852cc38e3caebfe6b7cd94f2c94749ba16273351c7516bc63a59e8dc124e",
+  "fingerprint": "ff97852cc38e3caebfe6b7cd94f2c94749ba16273351c7516bc63a59e8dc124e"
 }

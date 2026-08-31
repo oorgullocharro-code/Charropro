@@ -5,12 +5,12 @@ import {
   CALA_INFR_RULES,
   CALA_TEAM_PENALTY_RULES,
   normalizeCalaRuleOverrideCatalog
-} from "./calaRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./calaRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   RULE_PROFILE_CONTRACT_VERSION,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "./ruleProfiles.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "./ruleProfiles.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 export const SUERTES = [
   {

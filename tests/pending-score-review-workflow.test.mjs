@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",

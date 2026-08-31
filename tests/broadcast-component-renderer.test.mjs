@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

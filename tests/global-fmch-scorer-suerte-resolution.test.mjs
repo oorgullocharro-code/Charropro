@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1");
+const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1");
 
 const tournament = assignedTournament("global-team");
 const charreada = { id: "charreada-team", tournamentId: tournament.id, competitionType: "Competencia por equipos", teamIds: ["team-a"] };

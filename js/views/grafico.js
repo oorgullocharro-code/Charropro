@@ -1,20 +1,25 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260830-negative-timing-attempt-v2-official-publication-recovery-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import {
+  buildGraphicTimerPresentation,
+  readGraphicTimerPresentationOptions
+} from "./graficoTimerPresentation.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";
 const liveChannel = getLiveChannelFromUrl();
 const graphicLayout = getGraphicLayout();
+const graphicTimerPresentationOptions = readGraphicTimerPresentationOptions(window.location.search);
 const hasInitialLocalState = hasStoredLocalState();
 let remoteSyncUrl = "";
 let remotePayload = null;
@@ -52,7 +57,7 @@ function render() {
   applyGraphicsConfig(config);
 
   if (view === "timer") {
-    root.innerHTML = renderTimerGraphic(payload.timer);
+    root.innerHTML = renderTimerGraphic(payload.timer, payload);
     updateTimerGraphicDisplay();
     return;
   }
@@ -238,13 +243,16 @@ function buildScoreboardTeamRows(payload, turn) {
   return sortRowsByProgramOrder(buildTeamRows(payload, turn), payload);
 }
 
-function renderTimerGraphic(timer) {
+function renderTimerGraphic(timer, payload) {
   const safeTimer = timer || {};
+  const live = deriveOfficialTimerLiveDisplay(safeTimer);
+  const presentation = buildGraphicTimerPresentation(safeTimer, live, payload, graphicTimerPresentationOptions);
   return html`
-    <main class="graphic-stage">
-      <aside class="graphic-timer graphic-widget ${safeTimer.running ? "running" : "paused"} ${safeTimer.expired ? "expired" : ""}" id="graphic-timer-panel">
-        <span id="graphic-timer-state">${escapeHTML(safeTimer.stateLabel || (safeTimer.running ? "Cronometro" : "Cronometro pausado"))}</span>
-        <strong id="graphic-timer-value">${escapeHTML(safeTimer.formatted || "00:00.0")}</strong>
+    <main class="graphic-stage graphic-timer-stage">
+      <aside class="graphic-timer graphic-widget ${live.running ? "running" : "paused"} ${presentation.overtime ? "overtime expired" : ""}" id="graphic-timer-panel">
+        <span id="graphic-timer-state">${escapeHTML(presentation.stateLabel)}</span>
+        <strong id="graphic-timer-value">${escapeHTML(presentation.formattedTime)}</strong>
+        <em id="graphic-timer-suerte">${escapeHTML(presentation.suerteLabel)}</em>
       </aside>
     </main>
   `;
@@ -260,13 +268,17 @@ function updateTimerGraphicDisplay(now = Date.now()) {
   const panel = document.getElementById("graphic-timer-panel");
   const state = document.getElementById("graphic-timer-state");
   const value = document.getElementById("graphic-timer-value");
+  const suerte = document.getElementById("graphic-timer-suerte");
+  const presentation = buildGraphicTimerPresentation(timer, live, getRenderPayload(), graphicTimerPresentationOptions);
   if (panel) {
     panel.classList.toggle("running", live.running);
     panel.classList.toggle("paused", !live.running);
-    panel.classList.toggle("expired", live.expired);
+    panel.classList.toggle("expired", presentation.overtime);
+    panel.classList.toggle("overtime", presentation.overtime);
   }
-  if (state) state.textContent = timer.stateLabel || live.stateLabel;
-  if (value) value.textContent = live.formatted;
+  if (state) state.textContent = presentation.stateLabel;
+  if (value) value.textContent = presentation.formattedTime;
+  if (suerte) suerte.textContent = presentation.suerteLabel;
   liveTickerSubscription.setActive(live.running);
 }
 
