@@ -18,16 +18,16 @@ import {
   resolveFmch2026YeguaDismountTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "../js/data/fmch2026JineteosRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules, validateRuleProfile } from "../js/data/ruleProfiles.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { SUERTES, resolveTournamentRules } from "../js/data/suertes.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/data/fmch2026JineteosRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules, validateRuleProfile } from "../js/data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { SUERTES, resolveTournamentRules } from "../js/data/suertes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { emptyAttempt } from "../js/core/state.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const productToro = SUERTES.find((suerte) => suerte.id === "toro");
 const productYegua = SUERTES.find((suerte) => suerte.id === "yegua");

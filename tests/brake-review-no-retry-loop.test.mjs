@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const guard = createBrakeReviewAutomaticCommandGuard();
 const key = "timer-a:review-0:minute-1";

@@ -400,6 +400,7 @@ function appendAuditEvent(tournament, request, detail) {
 function validateTournamentContext(tournament, request) {
   const info = plainRecord(tournament.info);
   if (!info.id || info.id !== request.tournamentId) return "official-score-tournament-not-found";
+  if (tournament.deletionAuthority?.requestId) return "official-score-tournament-deletion-pending";
   if (BLOCKED_TOURNAMENT_STATUSES.has(String(info.status || ""))) return "official-score-tournament-closed";
   const tournamentTenantId = normalizeText(info.tenantId || tournament.meta?.tenantId, 128);
   const tournamentOrganizationId = normalizeText(info.organizationId || tournament.meta?.organizationId, 128);

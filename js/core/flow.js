@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./state.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

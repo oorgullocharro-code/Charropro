@@ -16,7 +16,7 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
-} from "../js/core/publicProjectionOutbox.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/core/publicProjectionOutbox.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const T0 = Date.parse("2026-07-29T12:00:00.000Z");
 const base = {

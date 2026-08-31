@@ -7,7 +7,7 @@
     "node": "20"
   },
   "scripts": {
-    "deploy": "firebase deploy --only functions:upsertCharroProUser,functions:publishCharroProOfficialScore,functions:deliverCharroProOfficialScoreFanout,functions:requestCharroProBackup,functions:cancelCharroProBackup,functions:executeCharroProBackup,functions:scheduleCharroProBackups,functions:validateCharroProRestore,functions:requestCharroProRestore,functions:cancelCharroProRestore,functions:executeCharroProRestore,functions:getCharroProConfiguration,functions:publishCharroProConfiguration,functions:transitionCharroProRuleProfileLifecycle,functions:getCharroProRuleProfileLifecycle,functions:assignCharroProTournamentRuleProfile"
+    "deploy": "firebase deploy --only functions:upsertCharroProUser,functions:publishCharroProOfficialScore,functions:deliverCharroProOfficialScoreFanout,functions:requestCharroProBackup,functions:cancelCharroProBackup,functions:executeCharroProBackup,functions:scheduleCharroProBackups,functions:validateCharroProRestore,functions:requestCharroProRestore,functions:cancelCharroProRestore,functions:executeCharroProRestore,functions:getCharroProConfiguration,functions:publishCharroProConfiguration,functions:transitionCharroProRuleProfileLifecycle,functions:getCharroProRuleProfileLifecycle,functions:assignCharroProTournamentRuleProfile,functions:deleteCharroProTournament"
   },
   "dependencies": {
     "firebase-admin": "latest",

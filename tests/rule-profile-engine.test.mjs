@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/data/suertes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

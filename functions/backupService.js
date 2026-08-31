@@ -429,9 +429,7 @@ function createBackupRuntime(adapter, options = {}) {
     };
     const entries = await Promise.all(Object.entries(paths).map(async ([key, path]) => [key, await adapter.read(`${CHARROPRO_ROOT}/${path}`)]));
     const values = Object.fromEntries(entries);
-    values.judgeEvents = typeof adapter.readByChild === "function"
-      ? await adapter.readByChild(`${CHARROPRO_ROOT}/judges/events`, "tournamentId", tournamentId)
-      : await adapter.read(`${CHARROPRO_ROOT}/judges/events`);
+    values.judgeEvents = await readJudgeEventsForTournament(tournamentId);
     return {
       tournaments: { [tournamentId]: values.tournament },
       tournamentIndex: { [tournamentId]: values.tournamentIndex },
@@ -442,6 +440,23 @@ function createBackupRuntime(adapter, options = {}) {
       judges: { assignments: { [tournamentId]: values.judgeAssignments }, events: values.judgeEvents || {} },
       settings: values.settings
     };
+  }
+
+  async function readJudgeEventsForTournament(tournamentId) {
+    const path = `${CHARROPRO_ROOT}/judges/events`;
+    if (typeof adapter.readByChild === "function") {
+      try {
+        return await adapter.readByChild(path, "tournamentId", tournamentId);
+      } catch (error) {
+        // The backup remains available when a legacy RTDB path lacks an index.
+        const allEvents = await adapter.read(path) || {};
+        return Object.fromEntries(Object.entries(allEvents)
+          .filter(([, event]) => String(event?.tournamentId || "") === tournamentId));
+      }
+    }
+    const allEvents = await adapter.read(path) || {};
+    return Object.fromEntries(Object.entries(allEvents)
+      .filter(([, event]) => String(event?.tournamentId || "") === tournamentId));
   }
 
   async function getJob(scopeKey, backupId) {
@@ -531,12 +546,13 @@ function createFirebaseBackupAdapter(admin) {
       return snapshot.val();
     },
     async updateRoot(updates) {
-      await database.ref(CHARROPRO_ROOT).update(updates);
+      await database.ref(CHARROPRO_ROOT).update(JSON.parse(JSON.stringify(updates)));
     },
     async transaction(path, updater) {
       let outcomeValue = null;
       const result = await database.ref(path).transaction((current) => {
-        outcomeValue = updater(current);
+        // Firebase Admin rejects null-prototype objects returned by the safe backup clone.
+        outcomeValue = JSON.parse(JSON.stringify(updater(current)));
         return outcomeValue;
       }, undefined, false);
       return { committed: result.committed, value: result.snapshot.val() };

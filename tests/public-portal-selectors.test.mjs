@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

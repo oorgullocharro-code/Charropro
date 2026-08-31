@@ -5,8 +5,8 @@ import {
   openPendingScoreReview,
   reconcilePendingScoreReviewRegistries,
   updatePendingScoreReviewDraft
-} from "../js/core/pendingScoreReview.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { buildGlobalColeaderoLeader } from "../js/core/scoring.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { buildGlobalColeaderoLeader } from "../js/core/scoring.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   FMCH_2026_LAZO_BASE_RULES,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -17,8 +17,8 @@ import {
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaAttemptCompletion,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { adaptLegacyAttemptToV2 } from "../js/core/scoringAttempt.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { adaptLegacyAttemptToV2 } from "../js/core/scoringAttempt.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const actorA = { uid: "judge-a", clientId: "client-a", tabSessionId: "tab-a" };
 const actorB = { uid: "judge-b", clientId: "client-b", tabSessionId: "tab-b" };

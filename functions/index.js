@@ -38,6 +38,15 @@ const {
   applyTournamentRuleProfileAssignment
 } = require("./ruleProfileAssignmentEngine");
 const {
+  DELETION_AUDIT_ROOT,
+  TournamentDeletionError,
+  assertDeletionActor,
+  buildDeletionSuccess,
+  buildTournamentDeletionPlan,
+  buildTournamentDeletionPreflight,
+  prepareTournamentDeletionRequest
+} = require("./tournamentDeletionAuthority");
+const {
   createFirebaseRuleProfileLifecycleAdapter,
   createRuleProfileLifecycleRuntime
 } = require("./ruleProfileLifecycleService");
@@ -434,6 +443,84 @@ exports.assignCharroProTournamentRuleProfile = onCall({
   }
 });
 
+exports.deleteCharroProTournament = onCall({
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
+}, async (request) => {
+  const callerUid = request.auth && request.auth.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para eliminar un torneo.");
+  const input = request.data || {};
+  const tournamentId = normalizeKey(input.tournamentId);
+  try {
+    const actor = await requireTournamentDeletionActor(callerUid, tournamentId);
+    const operation = String(input.operation || "delete").trim().toLowerCase();
+    if (!new Set(["preflight", "delete"]).has(operation)) {
+      throw new TournamentDeletionError("tournament-delete-operation-invalid");
+    }
+    const source = await readTournamentDeletionSource(tournamentId);
+    assertDeletionActor(actor, source.tournament);
+    const preflight = buildTournamentDeletionPreflight(source, tournamentId);
+    if (operation === "preflight") return { ok: true, operation, preflight };
+
+    const prepared = prepareTournamentDeletionRequest(input);
+    if (!prepared.valid) throw new TournamentDeletionError(prepared.errors[0], { errors: prepared.errors });
+    const deletionRequest = prepared.request;
+    const auditRef = admin.database().ref(`${CHARROPRO_ROOT_PATH}/${DELETION_AUDIT_ROOT}/${deletionRequest.requestId}`);
+    const existingAudit = (await auditRef.get()).val();
+    if (existingAudit?.deleted === true && existingAudit.tournamentId === tournamentId) {
+      return buildDeletionSuccess(existingAudit, true);
+    }
+    if (preflight.blockingReasons.length) {
+      return { ok: false, code: preflight.blockingReasons[0], preflight, blockingReasons: preflight.blockingReasons };
+    }
+    if (preflight.revision !== deletionRequest.expectedRevision) {
+      return { ok: false, code: "tournament-delete-stale-revision", preflight, expectedRevision: deletionRequest.expectedRevision, revision: preflight.revision };
+    }
+
+    const lock = await reserveTournamentDeletion(tournamentId, deletionRequest, actor);
+    if (!lock.ok) return { ok: false, code: lock.code, ...lock };
+    let backup = null;
+    let deleted = false;
+    try {
+      const backupRequest = await backupRuntime.requestBackup({
+        mode: "manual",
+        backupType: "full",
+        scopeType: "tournament",
+        tournamentId,
+        organizationId: actor.organizationId,
+        idempotencyKey: `tournament-delete-backup:${deletionRequest.requestId}`,
+        reason: "tournament-delete-authority"
+      }, actor, { tournament: lock.tournament, hasTournamentAccess: true });
+      backup = await waitForTournamentDeletionBackup(backupRequest.scopeKey, backupRequest.backupId);
+      if (!backup.ok || backup.status !== "COMPLETED") {
+        throw new TournamentDeletionError("tournament-delete-backup-failed", { backup });
+      }
+
+      const finalSource = await readTournamentDeletionSource(tournamentId);
+      const finalPreflight = buildTournamentDeletionPreflight(finalSource, tournamentId);
+      if (String(finalSource.tournament?.deletionAuthority?.requestId || "") !== deletionRequest.requestId) {
+        throw new TournamentDeletionError("tournament-delete-lock-lost");
+      }
+      if (finalPreflight.blockingReasons.length) {
+        return { ok: false, code: finalPreflight.blockingReasons[0], preflight: finalPreflight, blockingReasons: finalPreflight.blockingReasons };
+      }
+      if (finalPreflight.revision !== deletionRequest.expectedRevision) {
+        return { ok: false, code: "tournament-delete-stale-revision", preflight: finalPreflight, expectedRevision: deletionRequest.expectedRevision, revision: finalPreflight.revision };
+      }
+      const updates = buildTournamentDeletionPlan(finalSource, finalPreflight, deletionRequest, actor, Date.now(), backup);
+      await admin.database().ref(CHARROPRO_ROOT_PATH).update(updates);
+      deleted = true;
+      return buildDeletionSuccess(updates[`${DELETION_AUDIT_ROOT}/${deletionRequest.requestId}`]);
+    } finally {
+      if (!deleted) {
+        await releaseTournamentDeletionLock(tournamentId, deletionRequest.requestId);
+      }
+    }
+  } catch (error) {
+    throw toTournamentDeletionHttpsError(error);
+  }
+});
+
 async function requireOfficialScoreActor(uid, tournamentId) {
   const cleanTournamentId = normalizeKey(tournamentId);
   const [profileSnapshot, selectedAccessSnapshot] = await Promise.all([
@@ -473,6 +560,115 @@ async function requireOfficialScoreActor(uid, tournamentId) {
     tenantId: String(profile.tenantId || "").slice(0, 128),
     organizationId: String(profile.organizationId || "").slice(0, 128)
   };
+}
+
+async function requireTournamentDeletionActor(uid, tournamentId) {
+  const profileSnapshot = await admin.database().ref(`${USERS_PATH}/${uid}`).get();
+  const profile = profileSnapshot.val() || {};
+  return {
+    uid,
+    name: String(profile.name || profile.email || "").slice(0, 160),
+    role: String(profile.role || "").toLowerCase(),
+    active: profile.active === true,
+    platformAdmin: profile.platformAdmin === true,
+    tenantId: String(profile.tenantId || "").slice(0, 180),
+    organizationId: String(profile.organizationId || "").slice(0, 180)
+  };
+}
+
+async function readTournamentDeletionSource(tournamentId) {
+  const root = CHARROPRO_ROOT_PATH;
+  const database = admin.database();
+  const [tournament, auditPublishedScores, historyStatistics, live, publicTournament, projectionOutbox, judgeAssignments, judgeEvents, userTournamentAccess, users, broadcastSessions] = await Promise.all([
+    database.ref(`${TOURNAMENTS_PATH}/${tournamentId}`).get(),
+    database.ref(`${AUDIT_PUBLISHED_SCORES_PATH}/${tournamentId}`).get(),
+    database.ref(`${root}/history/statistics/${tournamentId}`).get(),
+    database.ref(`${FIREBASE_PATHS.live}/${tournamentId}`).get(),
+    database.ref(`${FIREBASE_PATHS.publicTournaments}/${tournamentId}`).get(),
+    database.ref(`${PROJECTION_OUTBOX_PATH}/${tournamentId}`).get(),
+    database.ref(`${root}/judges/assignments/${tournamentId}`).get(),
+    database.ref(`${root}/judges/events`).get(),
+    database.ref(USER_TOURNAMENT_ACCESS_PATH).get(),
+    database.ref(USERS_PATH).get(),
+    database.ref(`${FIREBASE_PATHS.broadcastStudioSessions}`).get()
+  ]);
+  return {
+    tournament: tournament.val() || {},
+    audit: { publishedScores: auditPublishedScores.val() || {} },
+    historyStatistics: historyStatistics.val() || {},
+    live: live.val(),
+    publicTournament: publicTournament.val(),
+    projectionOutbox: projectionOutbox.val() || {},
+    judgeAssignments: judgeAssignments.val() || {},
+    judgeEvents: judgeEvents.val() || {},
+    userTournamentAccess: userTournamentAccess.val() || {},
+    users: users.val() || {},
+    broadcastSessions: broadcastSessions.val() || {}
+  };
+}
+
+async function reserveTournamentDeletion(tournamentId, deletionRequest, actor) {
+  let outcome = null;
+  const result = await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}`).transaction((current) => {
+    const tournament = current || {};
+    if (!tournament.info?.id) {
+      outcome = { ok: false, code: "tournament-not-found" };
+      return current;
+    }
+    const currentRevision = Number(tournament.meta?.version ?? tournament.version ?? 0) || 0;
+    if (currentRevision !== deletionRequest.expectedRevision) {
+      outcome = { ok: false, code: "tournament-delete-stale-revision", revision: currentRevision };
+      return current;
+    }
+    const pending = tournament.deletionAuthority || {};
+    if (pending.requestId && pending.requestId !== deletionRequest.requestId) {
+      outcome = { ok: false, code: "tournament-delete-in-progress" };
+      return current;
+    }
+    outcome = { ok: true, tournament };
+    return {
+      ...tournament,
+      deletionAuthority: {
+        requestId: deletionRequest.requestId,
+        idempotencyKey: deletionRequest.idempotencyKey,
+        requestedAt: new Date().toISOString(),
+        requestedBy: { uid: actor.uid, role: actor.role }
+      }
+    };
+  }, undefined, false);
+  if (!result.committed || !outcome?.ok) return outcome || { ok: false, code: "tournament-delete-lock-aborted" };
+  return { ok: true, tournament: result.snapshot.val() || outcome.tournament };
+}
+
+async function releaseTournamentDeletionLock(tournamentId, requestId) {
+  await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}`).transaction((current) => {
+    if (!current || current.deletionAuthority?.requestId !== requestId) return current;
+    const next = { ...current };
+    delete next.deletionAuthority;
+    return next;
+  }, undefined, false);
+}
+
+async function waitForTournamentDeletionBackup(scopeKey, backupId) {
+  const deadline = Date.now() + Math.max(5000, APPLICATION_CONFIG.timeouts.callableSeconds * 1000 - 4000);
+  const path = `${FIREBASE_PATHS.backupFoundation}/control/${scopeKey}/jobs/${backupId}`;
+  while (Date.now() < deadline) {
+    const job = (await admin.database().ref(path).get()).val() || {};
+    if (job.status === "COMPLETED") {
+      return {
+        ok: true,
+        status: job.status,
+        backupId,
+        scopeKey,
+        archiveChecksum: job.archiveChecksum || ""
+      };
+    }
+    if (["FAILED", "CANCELLED", "EXPIRED"].includes(job.status)) {
+      return { ok: false, status: job.status, backupId, scopeKey, reason: job.lastError || job.reason || "backup-failed" };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return { ok: false, status: "TIMEOUT", backupId, scopeKey, reason: "tournament-delete-backup-timeout" };
 }
 
 async function requireBackupActor(uid, data = {}, options = {}) {
@@ -712,6 +908,19 @@ function toRuleProfileAssignmentHttpsError(error) {
   return new HttpsError(code, "No se pudo asignar el perfil reglamentario.", {
     reason,
     details: error instanceof RuleProfileAssignmentError ? error.details : undefined
+  });
+}
+
+function toTournamentDeletionHttpsError(error) {
+  if (error instanceof HttpsError) return error;
+  const reason = String(error?.code || error?.message || "tournament-delete-error").slice(0, 180);
+  const denied = reason.includes("auth") || reason.includes("inactive") || reason.includes("role-denied")
+    || reason.includes("tenant-mismatch") || reason.includes("organization-mismatch");
+  const conflict = reason.includes("stale") || reason.includes("in-progress") || reason.includes("lock");
+  const invalid = reason.includes("invalid") || reason.includes("not-found") || reason.includes("history");
+  return new HttpsError(denied ? "permission-denied" : conflict ? "aborted" : invalid ? "failed-precondition" : "internal", "No se pudo eliminar el torneo.", {
+    reason,
+    details: error instanceof TournamentDeletionError ? error.details : undefined
   });
 }
 

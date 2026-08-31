@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

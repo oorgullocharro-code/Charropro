@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

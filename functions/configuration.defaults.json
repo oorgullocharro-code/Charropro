@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260830-grafico-cronometro-obs-responsive-layout-001-v1",
+      "appVersion": "20260830-supervisor-tournament-deletion-authority-recovery-001-v1",
       "environment": "production",
       "production": true,
       "development": false,
@@ -127,6 +127,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "ff97852cc38e3caebfe6b7cd94f2c94749ba16273351c7516bc63a59e8dc124e",
-  "fingerprint": "ff97852cc38e3caebfe6b7cd94f2c94749ba16273351c7516bc63a59e8dc124e"
+  "checksum": "f5f24a78185a027cc03a74accf0deda7656973c284fdfc8b0652425bd5fb39d8",
+  "fingerprint": "f5f24a78185a027cc03a74accf0deda7656973c284fdfc8b0652425bd5fb39d8"
 }

@@ -6,20 +6,20 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./firebaseRuntime.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../data/competitionTypes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./userAccessBootstrap.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -27,20 +27,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../public/publicProjection.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../public/publicProjectionSchema.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -56,11 +56,11 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./publicProjectionOutbox.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./pendingScoreReview.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
@@ -68,14 +68,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./timerRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer,
   isBrakeReviewProfile
-} from "./brakeReviewPhase.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./brakeReviewPhase.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -2068,114 +2068,25 @@ export async function deleteFirebaseTournament(tournamentId, actor = {}) {
   const cleanTournamentId = normalizeLiveChannel(tournamentId);
   if (!cleanTournamentId) return buildDeleteTournamentError("missing-tournament", { tournamentId, actor });
   if (!isFirebaseLiveConfigured()) return buildDeleteTournamentError("missing-firebase", { tournamentId: cleanTournamentId, actor });
-
-  const authUser = getFirebaseAuth().currentUser;
-  if (!authUser?.uid) {
-    return buildDeleteTournamentError("not-authenticated", { tournamentId: cleanTournamentId, actor });
-  }
-
-  let profile = null;
   try {
-    const profilePath = `${USERS_PATH}/${authUser.uid}`;
-    const profileSnapshot = await readFirebasePreparationPath(profilePath);
-    if (!profileSnapshot.exists()) {
-      return buildDeleteTournamentError("missing-profile", { tournamentId: cleanTournamentId, uid: authUser.uid, email: authUser.email || "", actor });
-    }
-    profile = profileSnapshot.val() || {};
-  } catch (error) {
-    return buildDeleteTournamentError(normalizeFirebaseFailureReason(error), {
-      phase: "read-profile",
+    const callable = httpsCallable(getFirebaseFunctions(), "deleteCharroProTournament");
+    const response = await callable({
+      operation: String(actor.operation || "delete").trim().toLowerCase(),
       tournamentId: cleanTournamentId,
-      uid: authUser.uid,
-      email: authUser.email || "",
-      actor,
-      error
+      expectedRevision: Number(actor.expectedRevision),
+      idempotencyKey: String(actor.idempotencyKey || "").trim()
     });
-  }
-
-  if (profile.active !== true) {
-    return buildDeleteTournamentError("inactive-user", { tournamentId: cleanTournamentId, uid: authUser.uid, profile, actor });
-  }
-
-  if (normalizeRole(profile.role) !== "supervisor") {
-    return buildDeleteTournamentError("not-supervisor", { tournamentId: cleanTournamentId, uid: authUser.uid, profile, actor });
-  }
-
-  const backupResult = await createFirebaseTournamentBackup(cleanTournamentId, {
-    ...actor,
-    uid: authUser.uid,
-    email: profile.email || authUser.email || "",
-    name: profile.name || actor.name || "",
-    role: profile.role || actor.role || ""
-  });
-  if (!backupResult.ok && backupResult.reason !== "missing-tournament-data") {
-    return buildDeleteTournamentError("backup-failed", {
-      phase: "backup-before-delete",
-      tournamentId: cleanTournamentId,
-      uid: authUser.uid,
-      profile,
-      backupReason: backupResult.reason,
-      backupDetail: backupResult.detail || null
-    });
-  }
-
-  const deleteUpdates = {
-    [`tournamentIndex/${cleanTournamentId}`]: null,
-    [`tournaments/${cleanTournamentId}`]: null,
-    [`live/${cleanTournamentId}`]: null,
-    [`history/statistics/${cleanTournamentId}`]: null,
-    [`audit/publishedScores/${cleanTournamentId}`]: null
-  };
-
-  try {
-    await update(ref(getFirebaseDatabase(), "charropro"), cleanUndefined(deleteUpdates));
-  } catch (error) {
-    return buildDeleteTournamentError(normalizeFirebaseFailureReason(error), {
-      phase: "delete-tournament-data",
-      tournamentId: cleanTournamentId,
-      uid: authUser.uid,
-      profile,
-      updates: Object.keys(deleteUpdates),
-      error
-    });
-  }
-
-  const cleanupUpdates = {};
-  try {
-    const usersSnapshot = await get(ref(getFirebaseDatabase(), USERS_PATH));
-    Object.entries(usersSnapshot.val() || {}).forEach(([uid, userProfile]) => {
-      const ids = getProfileTournamentIds(userProfile).filter((id) => normalizeLiveChannel(id) !== cleanTournamentId);
-      cleanupUpdates[`users/${uid}/tournamentIds`] = ids;
-      cleanupUpdates[`userTournamentAccess/${uid}/${cleanTournamentId}`] = null;
-    });
-
-    if (Object.keys(cleanupUpdates).length) {
-      await update(ref(getFirebaseDatabase(), "charropro"), cleanUndefined(cleanupUpdates));
-    }
+    const result = response?.data || {};
     return {
-      ok: true,
-      reason: "deleted",
-      cleanupOk: true,
-      deletedTournamentId: cleanTournamentId
+      ok: result.ok === true,
+      reason: result.code || result.reason || "",
+      ...result
     };
   } catch (error) {
-    const cleanupReason = normalizeFirebaseFailureReason(error);
-    console.error("[CharroPro] deleteFirebaseTournament cleanup failed", {
-      reason: cleanupReason,
-      phase: "cleanup-user-access",
-      tournamentId: cleanTournamentId,
-      uid: authUser.uid,
-      profile,
-      updates: Object.keys(cleanupUpdates),
-      error
+    return buildDeleteTournamentError(error?.details?.reason || error?.code || normalizeFirebaseFailureReason(error), {
+      phase: "delete-authority",
+      tournamentId: cleanTournamentId
     });
-    return {
-      ok: true,
-      reason: "cleanup-failed",
-      cleanupOk: false,
-      cleanupReason,
-      deletedTournamentId: cleanTournamentId
-    };
   }
 }
 

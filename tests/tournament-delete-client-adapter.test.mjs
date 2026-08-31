@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const [syncSource, appSource, functionSource] = await Promise.all([
+  readFile(new URL("../js/core/firebaseSync.js", import.meta.url), "utf8"),
+  readFile(new URL("../js/app.js", import.meta.url), "utf8"),
+  readFile(new URL("../functions/index.js", import.meta.url), "utf8")
+]);
+
+const adapter = syncSource.slice(syncSource.indexOf("export async function deleteFirebaseTournament"), syncSource.indexOf("export async function publishFirebaseTurn"));
+assert.match(adapter, /httpsCallable\(getFirebaseFunctions\(\), "deleteCharroProTournament"\)/);
+assert.match(adapter, /operation: String\(actor\.operation \|\| "delete"\)/);
+assert.doesNotMatch(adapter, /update\(ref\(getFirebaseDatabase\(\), "charropro"\)/, "client must not delete RTDB paths directly");
+
+const deletionUi = appSource.slice(appSource.indexOf("async function confirmDeleteTournament"), appSource.indexOf("async function freezeTournament"));
+assert.match(deletionUi, /operation: "preflight"/);
+assert.match(deletionUi, /data-revision=/);
+assert.match(deletionUi, /idempotencyKey: `tournament-delete:/);
+assert.match(deletionUi, /Torneo eliminado correctamente/);
+assert.doesNotMatch(deletionUi, /Despliega las reglas nuevas/);
+
+assert.match(functionSource, /exports\.deleteCharroProTournament = onCall/);
+assert.match(functionSource, /backupRuntime\.executeBackup/);
+assert.match(functionSource, /buildTournamentDeletionPlan/);
+assert.match(functionSource, /tournament-delete-stale-revision/);
+console.log("tournament delete client adapter tests passed");

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(59_999), []);
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(60_000), []);

@@ -1,4 +1,4 @@
-import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 export function createScorerOfficialTimerConsumer(options = {}) {
   const readState = typeof options.readState === "function" ? options.readState : () => ({});

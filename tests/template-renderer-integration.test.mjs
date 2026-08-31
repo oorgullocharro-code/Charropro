@@ -20,23 +20,23 @@ import {
   updateTemplateRender,
   validateTemplateRenderSnapshot,
   validateTemplateRendererIntegrationTarget
-} from "../js/broadcast/templateRendererIntegration.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/broadcast/templateRendererIntegration.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   createComponentRenderer,
   destroyComponentRenderer,
   listRenderedComponents,
   renderBroadcastComponent
-} from "../js/broadcast/componentRenderer.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../js/broadcast/componentLibrary.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../fixtures/templateEngineFixtures.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { buildComponentRendererFixture } from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../fixtures/templateEngineFixtures.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { buildComponentRendererFixture } from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

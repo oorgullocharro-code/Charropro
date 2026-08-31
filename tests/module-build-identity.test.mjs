@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 
-const BUILD = "20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+const BUILD = "20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 const files = await collect(new URL("../js/", import.meta.url));
 const identities = new Map();
 const violations = [];

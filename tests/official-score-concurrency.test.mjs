@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const {
   OFFICIAL_SCORE_LEDGER_VERSION,
@@ -311,6 +311,16 @@ assert.match(functionSource, /tournamentAccess/);
 assert.match(functionSource, /transaction\(/);
 assert.match(functionSource, /deliverCharroProOfficialScoreFanout/);
 assert.doesNotMatch(functionSource, /publishedScore\.total\s*=|calculateAttemptTotal|ranking/i, "server authority does not recalculate sports data");
+
+const deletionLockedTournament = buildTournament();
+deletionLockedTournament.deletionAuthority = { requestId: "delete_lock_test" };
+const deletionBlocked = applyOfficialScoreTransaction(deletionLockedTournament, prepare({
+  idempotencyKey: "score:deletion-lock-request-0001",
+  expectedRevision: 0,
+  total: 25
+}));
+assert.equal(deletionBlocked.outcome.ok, false);
+assert.equal(deletionBlocked.outcome.reason, "official-score-tournament-deletion-pending");
 
 console.log("official-score-concurrency.test.mjs: ok");
 

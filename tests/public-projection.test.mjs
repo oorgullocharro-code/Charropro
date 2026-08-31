@@ -3,15 +3,15 @@ import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../js/public/publicProjection.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/public/publicProjection.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "../js/public/publicProjectionSchema.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/public/publicProjectionSchema.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const baseSource = buildSource();
 const candidate = buildPublicProjection(baseSource, {

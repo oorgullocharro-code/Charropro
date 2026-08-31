@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/programMainOutput.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import * as api from "../js/broadcast/programMainOutput.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   BroadcastProgramMainOutputError,
   PROGRAM_MAIN_OUTPUT_DISPLAY_MODES,
@@ -28,7 +28,7 @@ import {
   validateProgramMainOutputConfig,
   validateProgramMainOutputSnapshot,
   validateProgramMainProjection
-} from "../js/broadcast/programMainOutput.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "../js/broadcast/programMainOutput.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 class MockStyle {
   constructor() {

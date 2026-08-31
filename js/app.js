@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -15,7 +15,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./data/calaRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -28,7 +28,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -38,7 +38,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -55,7 +55,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -75,30 +75,30 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/scorerContextResolution.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   getTernaParticipantName,
   isCanonicalTernaParticipant
-} from "./core/ternaParticipantIdentity.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/ternaParticipantIdentity.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -106,23 +106,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/timerRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/officialTimerOrchestration.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -136,9 +136,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/brakeReviewPhase.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -151,27 +151,27 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/scoring.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/scoringAttempt.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/scorerComponents.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -181,7 +181,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/sync.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -223,7 +223,7 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/firebaseSync.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -236,15 +236,15 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/pendingScoreReview.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/tournamentContext.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -254,8 +254,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/supervisorNavigation.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -289,7 +289,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260830-grafico-cronometro-obs-responsive-layout-001-v1";
+} from "./core/state.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -847,6 +847,7 @@ let firebaseTournamentStateId = "";
 const firebaseTournamentContextReadiness = new Map();
 const ruleProfileAssignmentRuntime = new Map();
 let tournamentCreationInProgress = false;
+let tournamentDeletionInProgress = false;
 let firebaseScoresUnsubscribe = null;
 let firebaseScoresTournamentId = "";
 let firebasePendingReviewsUnsubscribe = null;
@@ -2247,7 +2248,12 @@ function formatDeleteTournamentError(result = {}) {
     "inactive-user": "Tu usuario esta inactivo. Activalo antes de borrar torneos.",
     "not-supervisor": "Solo un usuario con rol Supervisor puede eliminar torneos definitivamente.",
     "missing-supervisor": "Solo un usuario con rol Supervisor puede eliminar torneos definitivamente.",
-    "permission-denied": "Firebase rechazo el borrado. Despliega las reglas nuevas y confirma que eres Supervisor.",
+    "tournament-delete-role-denied": "Solo un Supervisor autorizado puede eliminar torneos definitivamente.",
+    "tournament-delete-stale-revision": "El torneo cambio mientras confirmabas. Abre de nuevo la eliminacion.",
+    "tournament-delete-in-progress": "Este torneo ya tiene una eliminacion en curso.",
+    "tournament-delete-backup-failed": "No se pudo crear el respaldo validado. El torneo no se elimino.",
+    "tournament-has-official-history": "Este torneo contiene historial oficial y no puede eliminarse definitivamente.",
+    "permission-denied": "No tienes autorizacion para eliminar este torneo.",
     "missing-tournament": "No se encontro el ID del torneo a eliminar.",
     "missing-firebase": "Firebase no esta configurado para esta version."
   };
@@ -11987,7 +11993,7 @@ function handleAction(action, target) {
     "confirm-freeze-tournament": () => confirmFreezeTournament(target.dataset.id),
     "freeze-tournament": () => freezeTournament(target.dataset.id),
     "confirm-delete-tournament": () => confirmDeleteTournament(target.dataset.id),
-    "delete-tournament-permanent": () => deleteTournamentPermanent(target.dataset.id),
+    "delete-tournament-permanent": () => deleteTournamentPermanent(target.dataset.id, target.dataset.revision),
     "new-team": () => showTeamModal(),
     "select-teams-tab": () => selectTeamsTab(target.dataset.tab),
 	    "select-results-phase": () => selectResultsPhase(target.dataset.id),
@@ -12513,49 +12519,68 @@ function canDeleteTournamentPermanently() {
   return isActiveAccessSession(firebaseAccess) && firebaseAccess.role === ROLES.SUPERVISOR;
 }
 
-function confirmDeleteTournament(tournamentId) {
+async function confirmDeleteTournament(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);
   if (!tournament) return;
+  if (tournamentDeletionInProgress) return;
+  tournamentDeletionInProgress = true;
+  const preflightResult = await deleteFirebaseTournament(tournamentId, { operation: "preflight" });
+  tournamentDeletionInProgress = false;
+  if (!preflightResult.ok) {
+    setLastFirebaseError(preflightResult.reason || "tournament-delete-preflight-failed", "");
+    showToast(formatDeleteTournamentError(preflightResult));
+    return;
+  }
+  const preflight = preflightResult.preflight || {};
+  if (Array.isArray(preflight.blockingReasons) && preflight.blockingReasons.length) {
+    showModal({
+      title: "Eliminacion bloqueada",
+      body: html`<p>Este torneo tiene historial oficial y no puede eliminarse definitivamente.</p>`,
+      actions: html`<button class="button" data-action="close-modal">Cerrar</button>`
+    });
+    return;
+  }
 
   showModal({
     title: "Eliminar torneo definitivamente",
     body: html`
       <p>Se eliminara <strong>${escapeHTML(tournament.name)}</strong> de CharroPro y Firebase.</p>
-      <p class="card-subtitle">Tambien se borraran sus equipos, charreadas, calificaciones, graficos en vivo, historial estadistico y asignaciones de usuarios. Esta accion no se puede deshacer.</p>
+      <p class="card-subtitle">Se creara un respaldo validado y se limpiaran las referencias operativas de este torneo. Esta accion no se puede deshacer.</p>
     `,
     actions: html`
       <button class="button" data-action="close-modal">Cancelar</button>
-      <button class="button red" data-action="delete-tournament-permanent" data-id="${tournament.id}">Eliminar definitivamente</button>
+      <button class="button red" data-action="delete-tournament-permanent" data-id="${tournament.id}" data-revision="${Number(preflight.revision || 0)}">Eliminar definitivamente</button>
     `
   });
 }
 
-async function deleteTournamentPermanent(tournamentId) {
+async function deleteTournamentPermanent(tournamentId, expectedRevision = 0) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);
   if (!tournament) return;
+  if (tournamentDeletionInProgress) return;
   if (!canDeleteTournamentPermanently()) {
     showToast("Solo supervisor puede eliminar torneos definitivamente.");
     return;
   }
 
-  const result = await deleteFirebaseTournament(tournamentId, getAccessActor());
+  tournamentDeletionInProgress = true;
+  const result = await deleteFirebaseTournament(tournamentId, {
+    ...getAccessActor(),
+    expectedRevision: Number(expectedRevision),
+    idempotencyKey: `tournament-delete:${tournamentId}:${Number(expectedRevision)}:${Date.now().toString(36)}`
+  });
+  tournamentDeletionInProgress = false;
   if (!result.ok) {
-    setLastFirebaseError(result.reason || "delete-failed", result.detail?.error?.message || result.detail?.phase || "");
+    setLastFirebaseError(result.reason || "delete-failed", "");
     showToast(formatDeleteTournamentError(result));
     return;
   }
 
-  if (result.cleanupOk === false) {
-    setLastFirebaseError(result.cleanupReason || "cleanup-failed", "El torneo se borro, pero no se limpiaron todas las asignaciones de usuarios.");
-  } else {
-    setLastFirebaseError("");
-  }
+  setLastFirebaseError("");
   removeLocalTournamentData(tournamentId);
   closeModal();
   saveState();
-  showToast(result.cleanupOk === false
-    ? "Torneo eliminado. Revisa Usuarios: no se limpiaron todas las asignaciones."
-    : "Torneo eliminado definitivamente.");
+  showToast("Torneo eliminado correctamente.");
   render();
 }
 
