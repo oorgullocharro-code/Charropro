@@ -9,25 +9,25 @@ import {
   FMCH_2026_CALA_TEAM_PENALTY_RULES,
   applyFmch2026CalaPartideroTiming,
   calculatePuntaBreakdown
-} from "../js/data/calaRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../js/data/calaRules.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import {
   applyPuntaCalculation,
   calculateAttemptPointSummary,
   calculateAttemptTotal
-} from "../js/core/scoring.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../js/core/scoring.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
-const RELEASE_ID = "20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+const RELEASE_ID = "20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 const publishedAt = "2026-08-08T18:00:00.000Z";
 
 assert.equal(FMCH_2026_CALA_RULEBOOK_VERSION, "fmch_2026_cala_0.2.0");

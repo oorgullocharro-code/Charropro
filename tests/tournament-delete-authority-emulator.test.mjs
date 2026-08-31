@@ -8,6 +8,8 @@ const namespace = projectId;
 const suffix = `delete-${Date.now().toString(36)}`;
 const tournamentId = `tournament-${suffix}`;
 const historyTournamentId = `history-${suffix}`;
+const invalidRevisionTournamentId = `invalid-revision-${suffix}`;
+const untouchedTournamentId = `untouched-${suffix}`;
 const supervisor = await createUser(`supervisor-${suffix}@example.test`, "supervisor");
 const judge = await createUser(`judge-${suffix}@example.test`, "juez");
 const operator = await createUser(`operator-${suffix}@example.test`, "operador");
@@ -27,6 +29,8 @@ try {
   await ownerWrite(`charropro/judges/assignments/${tournamentId}`, { charreada_a: { [judge.localId]: true } });
   await ownerWrite("charropro/judges/events", { [`event-${suffix}`]: { tournamentId, type: "ASSIGNED" } });
   await ownerWrite(`charropro/broadcastStudio/sessions/session-${suffix}`, { context: { tournamentId } });
+  await ownerWrite(`charropro/tournaments/${untouchedTournamentId}`, tournament(untouchedTournamentId, 2));
+  await ownerWrite(`charropro/tournaments/${invalidRevisionTournamentId}`, tournament(invalidRevisionTournamentId, "NaN"));
 
   const preflight = await call(supervisor.idToken, { operation: "preflight", tournamentId });
   assert.equal(preflight.ok, true, JSON.stringify(preflight.body));
@@ -78,10 +82,19 @@ try {
   assert.equal(blocked.ok, true);
   assert.equal(blocked.body.result.code, "tournament-has-official-history");
   assert.notEqual(await ownerRead(`charropro/tournaments/${historyTournamentId}`), null);
+  const invalidRevision = await call(supervisor.idToken, { operation: "preflight", tournamentId: invalidRevisionTournamentId });
+  assert.equal(invalidRevision.ok, true);
+  assert.equal(invalidRevision.body.result.preflight.revision, null);
+  assert.deepEqual(invalidRevision.body.result.preflight.blockingReasons, ["tournament-delete-revision-invalid"]);
+  assertNoNonFiniteNumber(invalidRevision.body);
+  assert.notEqual(await ownerRead(`charropro/tournaments/${invalidRevisionTournamentId}`), null);
+  assert.notEqual(await ownerRead(`charropro/tournaments/${untouchedTournamentId}`), null);
   console.log("tournament deletion authority emulator tests passed");
 } finally {
   await ownerDelete(`charropro/tournaments/${tournamentId}`);
   await ownerDelete(`charropro/tournaments/${historyTournamentId}`);
+  await ownerDelete(`charropro/tournaments/${invalidRevisionTournamentId}`);
+  await ownerDelete(`charropro/tournaments/${untouchedTournamentId}`);
   await ownerDelete(`charropro/tournamentIndex/${tournamentId}`);
   await ownerDelete(`charropro/live/${tournamentId}`);
   await ownerDelete(`charropro/publicTournaments/${tournamentId}`);
@@ -110,6 +123,15 @@ function tournament(id, version) {
 
 function request(expectedRevision) {
   return { operation: "delete", tournamentId, expectedRevision, idempotencyKey: `delete:${tournamentId}:request-0001` };
+}
+
+function assertNoNonFiniteNumber(value) {
+  if (typeof value === "number") {
+    assert.equal(Number.isFinite(value), true);
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  Object.values(value).forEach(assertNoNonFiniteNumber);
 }
 
 async function createUser(email, role) {

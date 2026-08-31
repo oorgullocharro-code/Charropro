@@ -8,15 +8,15 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "./publicProjectionSchema.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "./publicLiveFeed.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../data/competitionTypes.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 export const PUBLIC_PROJECTION_VERSION = "2.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 let nextId = 0;
 const pending = new Map();

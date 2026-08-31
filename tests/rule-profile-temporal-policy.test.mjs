@@ -13,11 +13,11 @@ import {
   transitionRuleProfileState,
   validateRuleProfileTemporalRegistry,
   validateRuleProfileTemporalState
-} from "../js/data/ruleProfileTemporalPolicy.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../js/data/ruleProfileTemporalPolicy.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 const T0 = "2026-01-01T00:00:00.000Z";
 const T1 = "2026-01-02T00:00:00.000Z";

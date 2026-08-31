@@ -1,7 +1,7 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
-import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
-import { renderOfficialFormatSheetHtml } from "../core/officialFormatHtml.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
-import { loadState, subscribeToLiveUpdates } from "../core/state.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { buildOfficialPackage, downloadOfficialFormatXlsx } from "../core/officialFormat.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { renderOfficialFormatSheetHtml } from "../core/officialFormatHtml.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { loadState, subscribeToLiveUpdates } from "../core/state.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 const root = document.getElementById("official-format-root");
 const pageParams = new URLSearchParams(window.location.search);

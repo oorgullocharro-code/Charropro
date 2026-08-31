@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 const {
   TournamentDeletionError,
@@ -64,6 +64,11 @@ assert.deepEqual(buildTournamentDeletionPreflight(auditSource, tournamentId).blo
 const ledgerSource = source();
 ledgerSource.tournament.officialScoreLedger = { attempt_a: { revision: 1 } };
 assert.deepEqual(buildTournamentDeletionPreflight(ledgerSource, tournamentId).blockingReasons, ["tournament-has-official-history"]);
+const invalidRevisionSource = source();
+invalidRevisionSource.tournament.meta.version = "Infinity";
+const invalidRevisionPreflight = buildTournamentDeletionPreflight(invalidRevisionSource, tournamentId);
+assert.equal(invalidRevisionPreflight.revision, null);
+assert.deepEqual(invalidRevisionPreflight.blockingReasons, ["tournament-delete-revision-invalid"]);
 
 assert.throws(() => assertDeletionActor({ ...actor(), role: "juez" }, cleanSource.tournament), (error) => error instanceof TournamentDeletionError && error.code === "tournament-delete-role-denied");
 assert.throws(() => assertDeletionActor({ ...actor(), tenantId: "tenant-other" }, cleanSource.tournament), (error) => error.code === "tournament-delete-tenant-mismatch");

@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

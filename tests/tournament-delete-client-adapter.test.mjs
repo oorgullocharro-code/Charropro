@@ -9,7 +9,8 @@ const [syncSource, appSource, functionSource] = await Promise.all([
 
 const adapter = syncSource.slice(syncSource.indexOf("export async function deleteFirebaseTournament"), syncSource.indexOf("export async function publishFirebaseTurn"));
 assert.match(adapter, /httpsCallable\(getFirebaseFunctions\(\), "deleteCharroProTournament"\)/);
-assert.match(adapter, /operation: String\(actor\.operation \|\| "delete"\)/);
+assert.match(adapter, /buildTournamentDeletionCallablePayload\(cleanTournamentId, actor\)/);
+assert.doesNotMatch(adapter, /expectedRevision: Number\(actor\.expectedRevision\)/);
 assert.doesNotMatch(adapter, /update\(ref\(getFirebaseDatabase\(\), "charropro"\)/, "client must not delete RTDB paths directly");
 
 const deletionUi = appSource.slice(appSource.indexOf("async function confirmDeleteTournament"), appSource.indexOf("async function freezeTournament"));

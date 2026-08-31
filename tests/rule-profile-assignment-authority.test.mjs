@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 const {
   RULE_PROFILE_ASSIGNMENT_AUTHORITY_VERSION,

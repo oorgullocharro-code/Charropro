@@ -56,6 +56,7 @@ function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "") {
   const hasLedger = Object.keys(ledger).length > 0;
   const hasAudit = Object.keys(auditRecords).length > 0;
   const hasHistory = Object.keys(historicalRecords).length > 0;
+  const revision = tournamentRevision(tournament);
   const userAccessIds = new Set([
     ...Object.entries(userTournamentAccess)
       .filter(([, entries]) => plainRecord(entries)[tournamentId] === true)
@@ -75,11 +76,12 @@ function buildTournamentDeletionPreflight(source = {}, tournamentIdInput = "") {
     .map(([sessionId]) => sessionId);
   const blockingReasons = [];
   if (!tournamentId || !tournament.info?.id) blockingReasons.push("tournament-not-found");
+  if (tournament.info?.id && revision === null) blockingReasons.push("tournament-delete-revision-invalid");
   if (hasOfficialScores || hasLedger || hasAudit || hasHistory) blockingReasons.push("tournament-has-official-history");
   return {
     tournamentId,
     name: String(tournament.info?.name || tournament.name || ""),
-    revision: tournamentRevision(tournament),
+    revision,
     hasOfficialScores,
     hasLedger,
     hasAudit,
@@ -176,7 +178,8 @@ function assertDeletionActor(actor = {}, tournament = {}) {
 }
 
 function tournamentRevision(tournament = {}) {
-  return Number(tournament?.meta?.version ?? tournament?.version ?? 0) || 0;
+  const revision = Number(tournament?.meta?.version ?? tournament?.version ?? 0);
+  return Number.isSafeInteger(revision) && revision >= 0 ? revision : null;
 }
 
 function tournamentIdsForProfile(profile = {}) {

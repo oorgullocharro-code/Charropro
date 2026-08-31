@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { BRAKE_REVIEW_ACTIONS, canOperateBrakeReview } from "../js/core/brakeReviewPhase.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { BRAKE_REVIEW_ACTIONS, canOperateBrakeReview } from "../js/core/brakeReviewPhase.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 for (const role of ["juez", "supervisor", "operador"]) {

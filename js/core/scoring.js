@@ -1,13 +1,13 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260830-supervisor-tournament-deletion-authority-recovery-001-v1";
+} from "./state.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260830-supervisor-tournament-deletion-nan-serialization-recovery-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;
