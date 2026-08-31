@@ -142,6 +142,16 @@ assert.match(projectionJobRules.state[".write"], /SUPERSEDED/);
 assert.match(projectionJobRules.state[".write"], /CANCELLED/);
 assert.match(projectionJobRules.state[".validate"], /targetFingerprint/);
 assert.match(projectionJobRules.state[".validate"], /lastErrorMessage/);
+assert.match(
+  projectionJobRules.state[".validate"],
+  /data\.child\('retriedBy'\)\.child\('uid'\)\.val\(\) === null.*data\.child\('retriedBy'\)\.child\('uid'\)\.val\(\) === ''.*newData\.child\('retriedBy'\)\.val\(\) === data\.child\('retriedBy'\)\.val\(\)/,
+  "a persisted retry actor is immutable"
+);
+assert.match(
+  projectionJobRules.state[".validate"],
+  /data\.child\('cancelledBy'\)\.child\('uid'\)\.val\(\) === null.*data\.child\('cancelledBy'\)\.child\('uid'\)\.val\(\) === ''.*newData\.child\('cancelledBy'\)\.val\(\) === data\.child\('cancelledBy'\)\.val\(\)/,
+  "a persisted cancellation actor is immutable"
+);
 assert.equal(projectionJobRules.$other[".validate"], false);
 
 // Static policy mirror. Automated tests do not use the production RTDB.
@@ -508,6 +518,7 @@ console.log("firebase-public-rules.test.mjs: ok");
 
 async function runProjectionActorRulesAgainstEmulator() {
   const projectId = String(process.env.FIREBASE_PROJECT_ID || "").trim();
+  const namespace = `${projectId}-default-rtdb`;
   const authHost = String(process.env.FIREBASE_AUTH_EMULATOR_HOST || "").trim();
   const databaseHost = String(process.env.FIREBASE_DATABASE_EMULATOR_HOST || "").trim();
   assert.equal(projectId, "demo-charropro-local", "Rules tests only run against the isolated local project");
@@ -522,7 +533,7 @@ async function runProjectionActorRulesAgainstEmulator() {
   const { getDatabase } = requireFromFunctions("firebase-admin/database");
   const app = initializeApp({
     projectId,
-    databaseURL: `http://${databaseHost}?ns=${projectId}`
+    databaseURL: `http://${databaseHost}?ns=${namespace}`
   }, `public-rules-hardening-${Date.now()}`);
   const auth = getAuth(app);
   const database = getDatabase(app);
@@ -559,7 +570,16 @@ async function runProjectionActorRulesAgainstEmulator() {
       retriedByUid: "",
       cancelledByUid: ""
     });
-    await expectRulesWriteAllowed(databaseHost, projectId, tournamentId, "initial-empty", supervisor.token, initialProcessing);
+    await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, "initial-empty", supervisor.token, initialProcessing);
+
+    await seedProjectionJob(database, tournamentId, "initial-retry-actor");
+    await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, "initial-retry-actor", supervisor.token,
+      buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+        attempts: 1,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid,
+        retriedByUid: supervisor.uid
+      }));
 
     await seedProjectionJob(database, tournamentId, "retry-actor-history", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
       attempts: 1,
@@ -567,7 +587,12 @@ async function runProjectionActorRulesAgainstEmulator() {
       lastAttemptByUid: supervisor.uid,
       retriedByUid: supervisor.uid
     }));
-    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "retry-actor-history", supervisor.token,
+    assert.equal(
+      (await readProjectionState(databaseHost, namespace, tournamentId, "retry-actor-history", supervisor.token)).retriedBy.uid,
+      supervisor.uid,
+      "the authenticated client reads the persisted retry actor before mutation"
+    );
+    await expectRulesWriteDenied(databaseHost, namespace, tournamentId, "retry-actor-history", supervisor.token,
       buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
         attempts: 2,
         claimedByUid: supervisor.uid,
@@ -575,13 +600,64 @@ async function runProjectionActorRulesAgainstEmulator() {
         retriedByUid: ""
       }));
 
+    await seedProjectionJob(database, tournamentId, "retry-actor-null", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      retriedByUid: supervisor.uid
+    }));
+    await expectRulesWriteDenied(databaseHost, namespace, tournamentId, "retry-actor-null", supervisor.token, {
+      ...buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+        attempts: 2,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid
+      }),
+      retriedBy: null
+    });
+
+    await seedProjectionJob(database, tournamentId, "retry-actor-reassigned", buildEmulatorProjectionState("RETRY_WAIT", judge.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      retriedByUid: judge.uid
+    }));
+    await expectRulesWriteDenied(databaseHost, namespace, tournamentId, "retry-actor-reassigned", supervisor.token,
+      buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+        attempts: 2,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid,
+        retriedByUid: supervisor.uid
+      }));
+
+    const erasedRetryActorState = buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+      attempts: 2,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      retriedByUid: ""
+    });
+    await seedProjectionJob(database, tournamentId, "retry-actor-parent", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      retriedByUid: supervisor.uid
+    }));
+    await expectProjectionParentPatchDenied(databaseHost, namespace, tournamentId, "retry-actor-parent", supervisor.token, erasedRetryActorState);
+
+    await seedProjectionJob(database, tournamentId, "retry-actor-multipath", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
+      attempts: 1,
+      claimedByUid: supervisor.uid,
+      lastAttemptByUid: supervisor.uid,
+      retriedByUid: supervisor.uid
+    }));
+    await expectProjectionMultipathPatchDenied(databaseHost, namespace, tournamentId, "retry-actor-multipath", supervisor.token, erasedRetryActorState);
+
     await seedProjectionJob(database, tournamentId, "cancel-actor-history", buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
       attempts: 1,
       claimedByUid: supervisor.uid,
       lastAttemptByUid: supervisor.uid,
       cancelledByUid: supervisor.uid
     }));
-    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "cancel-actor-history", supervisor.token,
+    await expectRulesWriteDenied(databaseHost, namespace, tournamentId, "cancel-actor-history", supervisor.token,
       buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
         attempts: 2,
         claimedByUid: supervisor.uid,
@@ -594,7 +670,7 @@ async function runProjectionActorRulesAgainstEmulator() {
       claimedByUid: supervisor.uid,
       lastAttemptByUid: supervisor.uid
     }));
-    await expectRulesWriteAllowed(databaseHost, projectId, tournamentId, "legitimate-retry", supervisor.token,
+    await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, "legitimate-retry", supervisor.token,
       buildEmulatorProjectionState("PENDING", supervisor.uid, {
         attempts: 1,
         claimedByUid: supervisor.uid,
@@ -603,7 +679,7 @@ async function runProjectionActorRulesAgainstEmulator() {
       }));
 
     await seedProjectionJob(database, tournamentId, "supervisor-cancel", buildEmulatorProjectionState("PENDING", supervisor.uid));
-    await expectRulesWriteAllowed(databaseHost, projectId, tournamentId, "supervisor-cancel", supervisor.token,
+    await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, "supervisor-cancel", supervisor.token,
       buildEmulatorProjectionState("CANCELLED", supervisor.uid, {
         cancelledByUid: supervisor.uid,
         cancelledReason: "operator-request",
@@ -613,7 +689,7 @@ async function runProjectionActorRulesAgainstEmulator() {
     for (const user of [judge, operator]) {
       const projectionId = `${user.role}-cancel-denied`;
       await seedProjectionJob(database, tournamentId, projectionId, buildEmulatorProjectionState("PENDING", supervisor.uid));
-      await expectRulesWriteDenied(databaseHost, projectId, tournamentId, projectionId, user.token,
+      await expectRulesWriteDenied(databaseHost, namespace, tournamentId, projectionId, user.token,
         buildEmulatorProjectionState("CANCELLED", user.uid, {
           cancelledByUid: user.uid,
           cancelledReason: "unauthorized-cancel",
@@ -622,7 +698,7 @@ async function runProjectionActorRulesAgainstEmulator() {
     }
 
     await seedProjectionJob(database, tournamentId, "verified-denied", initialProcessing);
-    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "verified-denied", supervisor.token,
+    await expectRulesWriteDenied(databaseHost, namespace, tournamentId, "verified-denied", supervisor.token,
       buildEmulatorProjectionState("VERIFIED", supervisor.uid, {
         attempts: 1,
         claimedByUid: supervisor.uid,
@@ -633,7 +709,7 @@ async function runProjectionActorRulesAgainstEmulator() {
       }));
 
     await seedProjectionJob(database, tournamentId, "other-uid-denied", buildEmulatorProjectionState("PENDING", supervisor.uid));
-    await expectRulesWriteDenied(databaseHost, projectId, tournamentId, "other-uid-denied", judge.token,
+    await expectRulesWriteDenied(databaseHost, namespace, tournamentId, "other-uid-denied", judge.token,
       buildEmulatorProjectionState("PROCESSING", judge.uid, {
         attempts: 1,
         claimedByUid: supervisor.uid,
@@ -717,6 +793,42 @@ async function writeProjectionState(databaseHost, projectId, tournamentId, proje
     body: JSON.stringify(state)
   });
   return { ok: response.ok, status: response.status, body: await response.text() };
+}
+
+async function readProjectionState(databaseHost, projectId, tournamentId, projectionId, token) {
+  const path = ["charropro", "projectionOutbox", tournamentId, projectionId, "state"]
+    .map(encodeURIComponent)
+    .join("/");
+  const response = await fetch(`http://${databaseHost}/${path}.json?ns=${encodeURIComponent(projectId)}&auth=${encodeURIComponent(token)}`);
+  const body = await response.text();
+  assert.equal(response.ok, true, `Rules unexpectedly denied state read: ${response.status} ${body}`);
+  return JSON.parse(body);
+}
+
+async function expectProjectionParentPatchDenied(databaseHost, projectId, tournamentId, projectionId, token, state) {
+  const path = ["charropro", "projectionOutbox", tournamentId, projectionId]
+    .map(encodeURIComponent)
+    .join("/");
+  const response = await fetch(`http://${databaseHost}/${path}.json?ns=${encodeURIComponent(projectId)}&auth=${encodeURIComponent(token)}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ state })
+  });
+  assert.equal(response.ok, false, `Rules unexpectedly allowed parent patch for ${projectionId}`);
+  assert.ok([401, 403].includes(response.status));
+}
+
+async function expectProjectionMultipathPatchDenied(databaseHost, projectId, tournamentId, projectionId, token, state) {
+  const path = ["charropro", "projectionOutbox", tournamentId]
+    .map(encodeURIComponent)
+    .join("/");
+  const response = await fetch(`http://${databaseHost}/${path}.json?ns=${encodeURIComponent(projectId)}&auth=${encodeURIComponent(token)}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ [`${projectionId}/state`]: state })
+  });
+  assert.equal(response.ok, false, `Rules unexpectedly allowed multipath patch for ${projectionId}`);
+  assert.ok([401, 403].includes(response.status));
 }
 
 async function expectRulesWriteAllowed(databaseHost, projectId, tournamentId, projectionId, token, state) {
