@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { makeAccessSession } from "../js/core/roles.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { makeAccessSession } from "../js/core/roles.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const user = Object.freeze({ uid: "user-1", email: "user@example.test", displayName: "User" });
 

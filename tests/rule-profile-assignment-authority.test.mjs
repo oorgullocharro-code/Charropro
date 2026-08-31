@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const {
   RULE_PROFILE_ASSIGNMENT_AUTHORITY_VERSION,

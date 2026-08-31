@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import backupService from "../functions/backupService.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import backupService from "../functions/backupService.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const {
   BACKUP_FOUNDATION_VERSION,
   BACKUP_SCHEMA_VERSION,
   BACKUP_STATUSES,
+  BackupFoundationError,
   applyBackupClaim,
   authorizeBackupRequest,
   buildBackupArchive,
@@ -239,6 +240,37 @@ setPath(failureAdapter.state, "charropro/tournaments/tournament-a", null);
 const failed = await failureRuntime.executeBackup(failureAccepted.scopeKey, failureAccepted.backupId);
 assert.equal(failed.status, BACKUP_STATUSES.FAILED);
 assert.equal(failed.reason, "backup-tournament-not-found");
+
+const storageWriteFailureAdapter = createMemoryAdapter(source, T0);
+storageWriteFailureAdapter.saveArchive = async (objectPath) => {
+  throw new BackupFoundationError("backup-storage-bucket-not-found", "backup-storage-bucket-not-found", {
+    backupStage: "OBJECT_WRITE",
+    storageCode: "404",
+    bucket: "charropro-e8a68.firebasestorage.app",
+    objectPath
+  });
+};
+const storageWriteFailureRuntime = createBackupRuntime(storageWriteFailureAdapter);
+const storageWriteFailureAccepted = await storageWriteFailureRuntime.requestBackup({
+  ...requestInput,
+  idempotencyKey: "manual:tournament-a:missing-storage-bucket-0001"
+}, actor, { tournament: source.charropro.tournaments["tournament-a"], hasTournamentAccess: true });
+const storageWriteFailed = await storageWriteFailureRuntime.executeBackup(
+  storageWriteFailureAccepted.scopeKey,
+  storageWriteFailureAccepted.backupId
+);
+assert.equal(storageWriteFailed.status, BACKUP_STATUSES.FAILED);
+assert.equal(storageWriteFailed.reason, "backup-storage-bucket-not-found");
+assert.equal(storageWriteFailed.failureStage, "OBJECT_WRITE");
+assert.equal(storageWriteFailed.failureCode, "404");
+assert.equal(storageWriteFailed.diagnosticId, storageWriteFailureAccepted.backupId);
+const storageWriteFailedJob = getPath(
+  storageWriteFailureAdapter.state,
+  `charropro/backupFoundation/control/${storageWriteFailureAccepted.scopeKey}/jobs/${storageWriteFailureAccepted.backupId}`
+);
+assert.equal(storageWriteFailedJob.attempts, 1, "missing bucket is terminal and must not retry");
+assert.equal(storageWriteFailedJob.failureStage, "OBJECT_WRITE");
+assert.equal(storageWriteFailureAdapter.storage.size, 0);
 
 const corruptAdapter = createMemoryAdapter(source, T0);
 const readStoredArchive = corruptAdapter.readArchive.bind(corruptAdapter);

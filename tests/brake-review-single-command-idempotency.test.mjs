@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import { actor, catalog, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const commandId = "brake-review:single-logical-attempt";

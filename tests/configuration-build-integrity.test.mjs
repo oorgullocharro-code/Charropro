@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import { loadConfigurationBootstrap } from "../js/core/configurationBootstrap.js";
-import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
-const BUILD = "20260830-precommercial-tournament-test-mode-deletion-001-v1";
+const BUILD = "20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const normalized = configurationEngine.normalizeConfigurationRecord(configuration);
 assert.equal(normalized.checksum, configuration.checksum);

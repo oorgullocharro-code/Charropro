@@ -5,7 +5,7 @@ import {
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "../js/core/tournamentContext.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/core/tournamentContext.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 assert.equal(getTournamentIdFromUrl("?id=torneo_a"), "torneo_a");
 assert.equal(getTournamentIdFromUrl("?tournamentId=torneo_b"), "torneo_b");

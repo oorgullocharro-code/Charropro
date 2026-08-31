@@ -4,7 +4,7 @@ import {
   buildGraphicTimerPresentation,
   formatGraphicTimerMs,
   readGraphicTimerPresentationOptions
-} from "../js/views/graficoTimerPresentation.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/views/graficoTimerPresentation.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 assert.equal(formatGraphicTimerMs(12_100, { showMinutes: false }), "12.1");
 assert.equal(formatGraphicTimerMs(-12_100, { showMinutes: false }), "-12.1");

@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { getTeam, state } from "./state.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { getTeam, state } from "./state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);

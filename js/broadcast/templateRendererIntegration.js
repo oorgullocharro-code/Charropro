@@ -1,7 +1,7 @@
 import {
   instantiateBroadcastTemplate,
   cloneTemplateResult
-} from "./templateEngine.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./templateEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   RENDERABLE_COMPONENT_TYPES,
   cloneComponentRenderResult,
@@ -12,11 +12,11 @@ import {
   renderBroadcastComponent,
   updateBroadcastComponentRender,
   validateComponentRenderTarget
-} from "./componentRenderer.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./componentRenderer.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   cloneComponentInstance,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./componentLibrary.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 export const TEMPLATE_RENDERER_INTEGRATION_VERSION = "1.0.0";
 

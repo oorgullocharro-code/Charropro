@@ -11,12 +11,12 @@ import {
   getOfficialTimerControlView,
   normalizeOfficialTimerContext,
   validateOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/core/timerRules.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine,
   routeTimerDisplay
-} from "../js/broadcast/outputRouting.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const T0 = Date.parse("2026-08-11T12:00:00.000Z");
 const definition = {

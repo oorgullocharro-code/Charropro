@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

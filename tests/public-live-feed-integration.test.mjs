@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -47,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260830-precommercial-tournament-test-mode-deletion-001-v1"],
+  ["20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1"],
   "all browser entrypoints use the canonical firebaseSync module identity"
 );
 

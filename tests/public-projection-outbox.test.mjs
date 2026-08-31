@@ -16,7 +16,7 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
-} from "../js/core/publicProjectionOutbox.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/core/publicProjectionOutbox.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const T0 = Date.parse("2026-07-29T12:00:00.000Z");
 const base = {

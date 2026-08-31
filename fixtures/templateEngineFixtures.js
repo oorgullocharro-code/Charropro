@@ -1,8 +1,8 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../js/broadcast/componentLibrary.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 export const TEMPLATE_ENGINE_FIXTURE_TYPES = Object.freeze([
   "lower_third", "scoreboard", "ranking", "timer", "sponsor", "qr", "roster",

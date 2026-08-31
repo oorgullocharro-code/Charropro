@@ -1,12 +1,12 @@
-import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { loadState, state } from "../core/state.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { loadState, state } from "../core/state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   signInAuditUser,
   signOutAuditUser,
   subscribeAuditAuth,
   subscribeFirebaseAuditScores
-} from "../core/firebaseSync.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../core/firebaseSync.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const root = document.getElementById("supervision-root");
 

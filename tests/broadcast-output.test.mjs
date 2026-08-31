@@ -25,14 +25,14 @@ import {
   updateBroadcastOutputHeartbeat,
   validateBroadcastOutput,
   validateOutputProjection
-} from "../js/broadcast/broadcastOutput.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   createInitialBroadcastState,
   setGraphicState,
   setPreviewState,
   setProgramState
-} from "../js/broadcast/broadcastState.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:05.000Z";

@@ -3,7 +3,7 @@ import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "../js/core/officialTimerLiveDisplay.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/core/officialTimerLiveDisplay.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const T0 = Date.parse("2026-08-25T12:00:00.000Z");
 const base = { timerId: "timer-1", durationMs: 60000, officialElapsedMs: 10000, sourceRevision: 1 };

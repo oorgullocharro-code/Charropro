@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

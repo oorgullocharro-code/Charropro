@@ -14,13 +14,13 @@ const {
   getCharreadaScoringSuertes,
   getCurrentContext,
   state
-} = await import("../js/core/state.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1");
-const { advanceScoringPointer } = await import("../js/core/flow.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1");
+} = await import("../js/core/state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1");
+const { advanceScoringPointer } = await import("../js/core/flow.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1");
 const {
   createPendingScoreReview,
   listPendingScoreReviews,
   putPendingScoreReview
-} = await import("../js/core/pendingScoreReview.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1");
+} = await import("../js/core/pendingScoreReview.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1");
 
 const tournamentId = "demo-local-fmch-2026";
 const charreadaId = "demo-local-fmch-jornada-1";

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260830-precommercial-tournament-test-mode-deletion-001-v1",
+      "appVersion": "20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "42777673bc1a2371a1b2c06fd8757a5897d0c0469d360a96f14bc7cd9970255c",
-  "fingerprint": "42777673bc1a2371a1b2c06fd8757a5897d0c0469d360a96f14bc7cd9970255c"
+  "checksum": "a0114545792151c5c4b97238926308b0bf6cba0c5a89a18ef1f73f2f64414fec",
+  "fingerprint": "a0114545792151c5c4b97238926308b0bf6cba0c5a89a18ef1f73f2f64414fec"
 }

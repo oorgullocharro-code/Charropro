@@ -284,10 +284,12 @@ function createBackupRuntime(adapter, options = {}) {
       const attempts = Number(currentJob?.attempts || job?.attempts || 1);
       const retryable = isRetryableBackupError(error) && attempts < MAX_WORKER_ATTEMPTS;
       if (retryable) {
+        const diagnostic = normalizeBackupDiagnostic(error, backupId);
         await transitionJob(scopeKey, backupId, currentJob.status || BACKUP_STATUSES.CAPTURING, {
           result: "RETRY",
           reason: "backup-retry-scheduled",
-          lastError: normalizeErrorCode(error)
+          lastError: normalizeErrorCode(error),
+          ...diagnostic
         });
         await writeAudit(request, BACKUP_AUDIT_OPERATIONS.FAILED, {
           result: "RETRY",
@@ -298,10 +300,12 @@ function createBackupRuntime(adapter, options = {}) {
         }, `retry:${attempts}`);
         throw error;
       }
+      const diagnostic = normalizeBackupDiagnostic(error, backupId);
       const failedJob = await transitionJob(scopeKey, backupId, BACKUP_STATUSES.FAILED, {
         result: "FAILED",
         reason: normalizeErrorCode(error),
-        lastError: normalizeErrorCode(error)
+        lastError: normalizeErrorCode(error),
+        ...diagnostic
       }, { allowFailureFromAnyState: true });
       await writeAudit(request, BACKUP_AUDIT_OPERATIONS.FAILED, {
         result: "FAILED",
@@ -311,7 +315,15 @@ function createBackupRuntime(adapter, options = {}) {
         reason: normalizeErrorCode(error),
         error
       }, `failed:${failedJob.revision}`);
-      return { ok: false, terminal: true, status: failedJob.status, backupId, scopeKey, reason: normalizeErrorCode(error) };
+      return {
+        ok: false,
+        terminal: true,
+        status: failedJob.status,
+        backupId,
+        scopeKey,
+        reason: normalizeErrorCode(error),
+        ...diagnostic
+      };
     }
   }
 
@@ -575,10 +587,17 @@ function createFirebaseBackupAdapter(admin, options = {}) {
           preconditionOpts: { ifGenerationMatch: 0 }
         });
       } catch (error) {
-        if (Number(error?.code) !== 412) throw error;
+        if (Number(error?.code) !== 412) {
+          throw createBackupStorageError("OBJECT_WRITE", error, bucket, objectPath);
+        }
         existing = true;
       }
-      const [storedMetadata] = await file.getMetadata();
+      let storedMetadata;
+      try {
+        [storedMetadata] = await file.getMetadata();
+      } catch (error) {
+        throw createBackupStorageError("OBJECT_METADATA", error, bucket, objectPath);
+      }
       return {
         existing,
         storageRef: `gs://${bucket.name}/${objectPath}`,
@@ -590,8 +609,12 @@ function createFirebaseBackupAdapter(admin, options = {}) {
     },
     async readArchive(objectPath) {
       const bucket = getBucket();
-      const [buffer] = await bucket.file(objectPath).download();
-      return buffer.toString("utf8");
+      try {
+        const [buffer] = await bucket.file(objectPath).download();
+        return buffer.toString("utf8");
+      } catch (error) {
+        throw createBackupStorageError("OBJECT_READ", error, bucket, objectPath);
+      }
     },
     async deleteArchive(objectPath) {
       if (!objectPath) return;
@@ -661,12 +684,54 @@ function catalogToRequest(catalog = {}) {
 
 function isRetryableBackupError(error) {
   const code = normalizeErrorCode(error).toLowerCase();
-  if (["backup-archive-invalid", "backup-value-not-serializable", "backup-dangerous-key", "backup-archive-too-large"].includes(code)) return false;
+  if ([
+    "backup-archive-invalid",
+    "backup-value-not-serializable",
+    "backup-dangerous-key",
+    "backup-archive-too-large",
+    "backup-storage-bucket-not-found",
+    "backup-storage-object-not-found"
+  ].includes(code)) return false;
   return ["timeout", "network", "unavailable", "disconnected", "aborted", "storage", "source-unstable", "econn"].some((token) => code.includes(token));
 }
 
 function normalizeErrorCode(error) {
   return String(error?.code || error?.message || "backup-error").replace(/^functions\//, "").slice(0, 160);
+}
+
+function createBackupStorageError(stage, error, bucket, objectPath) {
+  const storageCode = String(error?.code || "storage-error").slice(0, 80);
+  const bucketName = String(bucket?.name || "").slice(0, 180);
+  const safeObjectPath = normalizeStorageObjectPath(objectPath);
+  const code = storageCode === "404" && stage === "OBJECT_WRITE"
+    ? "backup-storage-bucket-not-found"
+    : storageCode === "404"
+      ? "backup-storage-object-not-found"
+      : `backup-storage-${String(stage || "operation").toLowerCase().replace(/_/g, "-")}-failed`;
+  return new BackupFoundationError(code, code, {
+    backupStage: stage,
+    storageCode,
+    bucket: bucketName,
+    objectPath: safeObjectPath
+  });
+}
+
+function normalizeBackupDiagnostic(error, backupId = "") {
+  const details = error instanceof BackupFoundationError && error.details && typeof error.details === "object"
+    ? error.details
+    : {};
+  return {
+    failureStage: String(details.backupStage || "BACKUP_RUNTIME").slice(0, 80),
+    failureCode: String(details.storageCode || normalizeErrorCode(error)).slice(0, 160),
+    failureBucket: String(details.bucket || "").slice(0, 180),
+    failureObjectPath: normalizeStorageObjectPath(details.objectPath),
+    diagnosticId: String(backupId || "").slice(0, 80)
+  };
+}
+
+function normalizeStorageObjectPath(value) {
+  const clean = String(value || "").replace(/^\/+/, "").slice(0, 500);
+  return /^[A-Za-z0-9._/-]*$/.test(clean) ? clean : "";
 }
 
 function getControlPath(scopeKey) {

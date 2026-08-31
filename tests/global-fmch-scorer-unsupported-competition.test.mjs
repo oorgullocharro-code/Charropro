@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 
 const storage = new Map();
 globalThis.localStorage = { getItem: (key) => storage.get(String(key)) ?? null, setItem: (key, value) => storage.set(String(key), String(value)), removeItem: (key) => storage.delete(String(key)) };
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1");
 
 const tournament = { id: "unsupported-tournament", type: "completo" };
 const charreada = { id: "unsupported-charreada", tournamentId: tournament.id, competitionType: "unsupported_remote_mode" };

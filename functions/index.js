@@ -502,7 +502,11 @@ exports.deleteCharroProTournament = onCall({
       }, actor, { tournament: lock.tournament, hasTournamentAccess: true });
       backup = await waitForTournamentDeletionBackup(backupRequest.scopeKey, backupRequest.backupId);
       if (!backup.ok || backup.status !== "COMPLETED") {
-        throw new TournamentDeletionError("tournament-delete-backup-failed", { backup });
+        const backupCode = backup.failureStage === "OBJECT_READ" || backup.failureStage === "OBJECT_METADATA"
+          || String(backup.reason || "").includes("validation")
+          ? "tournament-delete-backup-validation-failed"
+          : "tournament-delete-backup-create-failed";
+        throw new TournamentDeletionError(backupCode, { backup });
       }
 
       const finalSource = await readTournamentDeletionSource(tournamentId);
@@ -687,7 +691,18 @@ async function waitForTournamentDeletionBackup(scopeKey, backupId) {
       };
     }
     if (["FAILED", "CANCELLED", "EXPIRED"].includes(job.status)) {
-      return { ok: false, status: job.status, backupId, scopeKey, reason: job.lastError || job.reason || "backup-failed" };
+      return {
+        ok: false,
+        status: job.status,
+        backupId,
+        scopeKey,
+        reason: job.lastError || job.reason || "backup-failed",
+        failureStage: job.failureStage || "BACKUP_RUNTIME",
+        failureCode: job.failureCode || job.lastError || "backup-failed",
+        failureBucket: job.failureBucket || "",
+        failureObjectPath: job.failureObjectPath || "",
+        diagnosticId: job.diagnosticId || backupId
+      };
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }

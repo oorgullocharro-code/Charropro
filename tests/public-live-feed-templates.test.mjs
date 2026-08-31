@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   buildPublicLiveFeedModel,
   sanitizePublicLiveFeedFilter
-} from "../js/publicPortal/liveFeedModel.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/publicPortal/liveFeedModel.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const labels = {
   teamName: "Rancho Norte",

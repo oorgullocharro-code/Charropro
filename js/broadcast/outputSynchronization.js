@@ -2,22 +2,22 @@ import {
   getOutputRoute,
   routeAnnouncerMonitor,
   routeProgramToOutput
-} from "./outputRouting.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { getProgramSnapshot } from "./programEngine.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./outputRouting.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { getProgramSnapshot } from "./programEngine.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   applyProgramMainProjection,
   buildProgramMainOutputSnapshot,
   clearProgramMainOutput,
   getProgramMainOutputStatus,
   validateProgramMainProjection
-} from "./programMainOutput.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./programMainOutput.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   clearAnnouncerMonitor,
   getAnnouncerSnapshot,
   getAnnouncerStatus,
   updateAnnouncerMonitor,
   validateAnnouncerProjection
-} from "./announcerMonitor.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./announcerMonitor.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 export const OUTPUT_SYNCHRONIZATION_VERSION = "1.0.0";
 

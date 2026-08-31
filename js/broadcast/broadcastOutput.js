@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./broadcastState.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "./dataContract.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

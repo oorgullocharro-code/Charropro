@@ -758,7 +758,12 @@ function sanitizeTransitionPatch(patch = {}) {
     "archiveSizeBytes",
     "payloadFingerprint",
     "counts",
-    "validation"
+    "validation",
+    "failureStage",
+    "failureCode",
+    "failureBucket",
+    "failureObjectPath",
+    "diagnosticId"
   ]);
   return Object.fromEntries(Object.entries(plainObject(patch)).filter(([key]) => allowed.has(key)).map(([key, value]) => [key, cloneBackupValue(value)]));
 }

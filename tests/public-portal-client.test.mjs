@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260830-precommercial-tournament-test-mode-deletion-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260831-precommercial-tournament-delete-production-backup-validation-recovery-002-v1";
 
 const candidate = buildPublicProjection({
   tournament: {
