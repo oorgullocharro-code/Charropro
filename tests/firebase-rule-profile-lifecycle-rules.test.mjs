@@ -10,6 +10,7 @@ const serviceSource = await readFile(new URL("../functions/ruleProfileLifecycleS
 const casSource = await readFile(new URL("../functions/firebaseRestCas.js", import.meta.url), "utf8");
 const firebaseSyncSource = await readFile(new URL("../js/core/firebaseSync.js", import.meta.url), "utf8");
 const packageJson = JSON.parse(await readFile(new URL("../functions/package.json", import.meta.url), "utf8"));
+const functionsAllowlist = JSON.parse(await readFile(new URL("../tools/release/productionFunctionsAllowlist.json", import.meta.url), "utf8"));
 const defaults = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 
 assert.ok(rules.ruleProfileLifecycle, "the dedicated lifecycle namespace exists");
@@ -34,9 +35,12 @@ assert.match(casSource, /"if-match"/);
 assert.match(casSource, /writeResponse\.status === 412/);
 assert.match(serviceSource, /async readProfile\(profileId\)/);
 assert.match(casSource, /firebase-rest-cas-retry-exhausted/);
-assert.match(packageJson.scripts.deploy, /functions:transitionCharroProRuleProfileLifecycle/);
-assert.match(packageJson.scripts.deploy, /functions:getCharroProRuleProfileLifecycle/);
-assert.match(packageJson.scripts.deploy, /functions:assignCharroProTournamentRuleProfile/);
+assert.match(packageJson.scripts.deploy, /productionFunctionsDeploy\.mjs deploy/);
+assert.deepEqual(functionsAllowlist.authorizedFunctions.filter((name) => name.includes("RuleProfile")), [
+  "assignCharroProTournamentRuleProfile",
+  "getCharroProRuleProfileLifecycle",
+  "transitionCharroProRuleProfileLifecycle"
+]);
 for (const protectedField of [
   "ruleProfileId",
   "ruleProfileVersion",

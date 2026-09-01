@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "charropro-production-functions-allowlist/1",
+  "projectId": "charropro-e8a68",
+  "codebase": "default",
+  "authorizedFunctions": [
+    "assignCharroProTournamentRuleProfile",
+    "deleteCharroProTournament",
+    "deliverCharroProOfficialScoreFanout",
+    "executeCharroProBackup",
+    "getCharroProConfiguration",
+    "getCharroProRuleProfileLifecycle",
+    "publishCharroProConfiguration",
+    "publishCharroProOfficialScore",
+    "transitionCharroProRuleProfileLifecycle",
+    "upsertCharroProUser"
+  ],
+  "excludedRepositoryExports": [
+    "cancelCharroProBackup",
+    "cancelCharroProRestore",
+    "executeCharroProRestore",
+    "requestCharroProBackup",
+    "requestCharroProRestore",
+    "scheduleCharroProBackups",
+    "validateCharroProRestore"
+  ],
+  "expectedProduction": {
+    "count": 10,
+    "generation": "gcfv2",
+    "region": "us-central1",
+    "runtime": "nodejs22",
+    "status": "ACTIVE"
+  }
+}

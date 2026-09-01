@@ -342,18 +342,22 @@ tests/
 
 Las funciones se despliegan con Firebase CLI desde la terminal, no desde Hostinger.
 
-Desde la carpeta del proyecto:
+Desde la carpeta `functions/`, el deploy productivo debe pasar por el preflight y la allowlist canónica:
 
 ```bash
-cd "/Users/orgullocharro/Documents/Codex/2026-05-23/files-mentioned-by-the-user-index/charropro-organizado"
-firebase deploy --only functions --project charropro-e8a68
+npm run deploy:preflight
+npm run deploy
 ```
 
-Si solo quieres desplegar la funcion de usuarios:
+No usar en Producción:
 
 ```bash
-firebase deploy --only functions:upsertCharroProUser --project charropro-e8a68
+firebase deploy
+firebase deploy --only functions
+firebase deploy --only functions:...
 ```
+
+El wrapper solo construye los targets aprobados en `tools/release/productionFunctionsAllowlist.json`. Consulta `PRODUCTION_FUNCTIONS_DEPLOY.md` antes de agregar o retirar una Function.
 
 ## 3. Reglas de Realtime Database
 
@@ -376,11 +380,10 @@ cd "/Users/orgullocharro/Documents/Codex/2026-05-23/files-mentioned-by-the-user-
 npm install
 ```
 
-Despues regresa a la carpeta principal para desplegar:
+Despues ejecuta el preflight desde `functions/`:
 
 ```bash
-cd ..
-firebase deploy --only functions --project charropro-e8a68
+npm run deploy:preflight
 ```
 
 ## 5. Actualizar cache de navegador

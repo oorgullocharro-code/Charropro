@@ -66,8 +66,11 @@ npm install
 cd ..
 firebase login
 firebase use charropro-e8a68
-firebase deploy --only functions:upsertCharroProUser
+npm --prefix functions run deploy:preflight
+npm --prefix functions run deploy
 ```
+
+El deploy productivo está protegido por una allowlist de Functions autorizadas. No ejecutar `firebase deploy --only functions:upsertCharroProUser` de forma directa; consulta `PRODUCTION_FUNCTIONS_DEPLOY.md`.
 
 La funcion se llama:
 
