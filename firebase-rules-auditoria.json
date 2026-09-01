@@ -424,7 +424,24 @@
             }
           },
           "rankings": {
-            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 0 && newData.child('status').val() === 'unavailable'",
+            ".validate": "newData.hasChildren(['revision', 'status']) && newData.child('revision').isNumber() && newData.child('revision').val() >= 1 && (newData.child('status').val() === 'ready' || newData.child('status').val() === 'empty')",
+            "items": {
+              "$itemId": {
+                "resultIds": {
+                  "$resultId": {
+                    ".validate": "newData.isString() && newData.val().length <= 180"
+                  }
+                },
+                "charreadaIds": {
+                  "$charreadaId": {
+                    ".validate": "newData.isString() && newData.val().length <= 180"
+                  }
+                },
+                "$other": {
+                  ".validate": "$other === 'rankingId' || $other === 'scopeType' || $other === 'competitionId' || $other === 'competitionType' || $other === 'participantScope' || $other === 'categoryId' || $other === 'categoryName' || $other === 'phaseId' || $other === 'phaseName' || $other === 'charreadaId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName' || $other === 'resultIds' || $other === 'charreadaIds' || $other === 'total' || $other === 'average' || $other === 'charreadasCount' || $other === 'negativePoints' || $other === 'bestResult' || $other === 'position' || $other === 'positionStatus' || $other === 'totalStatus' || $other === 'sourceRevision' || $other === 'updatedAt' || $other === 'displayOrder'"
+                }
+              }
+            },
             "$other": {
               ".validate": "$other === 'revision' || $other === 'status' || $other === 'items'"
             }

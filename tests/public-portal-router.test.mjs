@@ -6,7 +6,7 @@ import {
   sanitizePortalDay,
   sanitizePortalId,
   sanitizePortalView
-} from "../js/publicPortal/portalRouter.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/publicPortal/portalRouter.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const initial = parsePublicPortalRoute(
   "https://example.test/torneo-publico.html?tournamentId=torneo_1&view=resultados&competitionId=charro-libre&charreadaId=final-1"

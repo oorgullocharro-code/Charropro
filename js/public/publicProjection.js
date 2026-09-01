@@ -8,15 +8,16 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "./publicProjectionSchema.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "./publicLiveFeed.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../data/competitionTypes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 export const PUBLIC_PROJECTION_VERSION = "2.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({
@@ -59,6 +60,7 @@ export function buildPublicProjection(source = {}, options = {}) {
     teams
   });
   const results = buildResults(published, charreadas);
+  const rankingItems = buildOfficialRankingItems(results.items);
   const competitions = buildCompetitions(charreadas, results.items, tournament);
   const sourceUpdatedAt = resolveSourceUpdatedAt(tournament, liveCurrent, published, charreadas);
   const status = resolveProjectionStatus(tournament, active);
@@ -67,7 +69,7 @@ export function buildPublicProjection(source = {}, options = {}) {
     active,
     results: results.items
   }));
-  const liveStandings = buildLiveStandings(results.items, active, turn);
+  const liveStandings = buildLiveStandings(rankingItems, active, turn);
 
   const candidate = {
     schemaVersion: PUBLIC_PROJECTION_SCHEMA_VERSION,
@@ -133,7 +135,11 @@ export function buildPublicProjection(source = {}, options = {}) {
       items: competitions
     },
     results,
-    rankings: unavailableSection(),
+    rankings: {
+      revision: 0,
+      status: rankingItems.length ? "ready" : "empty",
+      items: rankingItems
+    },
     statistics: unavailableSection(),
     search: unavailableSection()
   };
@@ -682,19 +688,19 @@ function normalizeCurrentResult(value, published) {
   };
 }
 
-function buildLiveStandings(rows, active, turn) {
-  return rows
+function buildLiveStandings(rankings, active, turn) {
+  return rankings
+    .filter((row) => row.scopeType === "competition")
     .filter((row) => !active.competitionId || row.competitionId === active.competitionId)
-    .filter((row) => !active.charreadaId || row.charreadaId === active.charreadaId)
     .map((row) => ({
-      resultId: row.resultId,
+      resultId: row.rankingId,
       teamId: row.teamId,
       teamName: row.teamName,
       participantId: row.participantId,
       participantName: row.participantName,
-      total: row.officialTotal ?? row.subtotal,
-      officialPosition: row.officialPosition,
-      provisionalPosition: row.provisionalPosition,
+      total: row.total,
+      officialPosition: row.positionStatus === "official" ? row.position : null,
+      provisionalPosition: row.positionStatus === "provisional" ? row.position : null,
       positionStatus: row.positionStatus,
       totalStatus: row.totalStatus,
       active: Boolean(

@@ -55,6 +55,12 @@ assert.equal(publicRules.program.items.$itemId.participants.$participantId.$othe
 assert.equal(publicRules.competitions.items.$itemId.$other[".validate"].includes("ownerEmail"), false);
 assert.equal(publicRules.results.items.$itemId.$other[".validate"].includes("judge"), false);
 assert.equal(publicRules.results.scopes.$scopeId.$other[".validate"].includes("private"), false);
+assert.match(publicRules.rankings[".validate"], /ready/);
+assert.match(publicRules.rankings[".validate"], /empty/);
+assert.doesNotMatch(publicRules.rankings[".validate"], /status'\)\.val\(\) === 'unavailable'/);
+assert.equal(publicRules.rankings.items.$itemId.$other[".validate"].includes("rankingId"), true);
+assert.equal(publicRules.rankings.items.$itemId.$other[".validate"].includes("position"), true);
+assert.equal(publicRules.rankings.items.$itemId.$other[".validate"].includes("operatorId"), false);
 assert.equal(publicRules.live.turn.$other[".validate"].includes("pendingNote"), false);
 assert.equal(publicRules.live.currentResult.$other[".validate"].includes("notes"), false);
 assert.equal(publicRules.live.standings.$itemId.$other[".validate"].includes("operatorId"), false);

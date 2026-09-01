@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([
@@ -190,6 +190,37 @@ const RESULT_SCOPE_FIELDS = new Set([
   "participantScope",
   "resultIds"
 ]);
+const RANKING_ITEM_FIELDS = new Set([
+  "rankingId",
+  "scopeType",
+  "competitionId",
+  "competitionType",
+  "participantScope",
+  "categoryId",
+  "categoryName",
+  "phaseId",
+  "phaseName",
+  "charreadaId",
+  "teamId",
+  "teamName",
+  "participantId",
+  "participantName",
+  "horseId",
+  "horseName",
+  "resultIds",
+  "charreadaIds",
+  "total",
+  "average",
+  "charreadasCount",
+  "negativePoints",
+  "bestResult",
+  "position",
+  "positionStatus",
+  "totalStatus",
+  "sourceRevision",
+  "updatedAt",
+  "displayOrder"
+]);
 const TURN_FIELDS = new Set(["status", "team", "participant", "horse", "suerteId", "suerteName"]);
 const TURN_ENTITY_FIELDS = new Set(["id", "name", "association", "category"]);
 const TIMER_FIELDS = new Set(["status", "timeMs", "timeText", "running"]);
@@ -320,6 +351,7 @@ export function validatePublicProjection(projection) {
   }
   validateItemArray(projection.competitions?.items, COMPETITION_ITEM_FIELDS, "competitions.items", errors);
   validateItemArray(projection.results?.items, RESULT_ITEM_FIELDS, "results.items", errors);
+  validateItemArray(projection.rankings?.items, RANKING_ITEM_FIELDS, "rankings.items", errors);
   for (const [scopeKey, scope] of Object.entries(projection.results?.scopes || {})) {
     if (!isPlainObject(scope)) {
       errors.push(`results.scopes.${scopeKey}-invalid`);
@@ -345,7 +377,8 @@ export function validatePublicProjection(projection) {
   validateItemArray(projection.live?.standings, STANDING_FIELDS, "live.standings", errors);
   const liveFeedValidation = validatePublicLiveFeed(projection.liveFeed);
   if (!liveFeedValidation.valid) errors.push(...liveFeedValidation.errors);
-  for (const sectionName of ["rankings", "statistics", "search"]) {
+  if (!["ready", "empty"].includes(projection.rankings?.status)) errors.push("rankings-status-invalid");
+  for (const sectionName of ["statistics", "search"]) {
     if (projection[sectionName]?.status !== "unavailable") errors.push(`${sectionName}-must-be-unavailable`);
     if (!Array.isArray(projection[sectionName]?.items) || projection[sectionName].items.length) {
       errors.push(`${sectionName}-items-must-be-empty`);

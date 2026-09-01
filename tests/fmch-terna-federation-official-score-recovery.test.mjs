@@ -1,27 +1,27 @@
 import assert from "node:assert/strict";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   buildOfficialTeamSheet,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/core/officialFormat.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   isCanonicalTernaParticipant
-} from "../js/core/ternaParticipantIdentity.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/core/ternaParticipantIdentity.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const {
   applyOfficialScoreTransaction,

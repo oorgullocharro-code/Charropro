@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import { actor, catalog, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const commandId = "brake-review:single-logical-attempt";

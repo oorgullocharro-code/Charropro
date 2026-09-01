@@ -1,20 +1,21 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { buildCharreadaLeaderboard, buildTournamentStandingColumns, buildTournamentTeamStandings, calculateAttemptTotal } from "./scoring.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildTournamentStandingColumns, calculateAttemptTotal } from "./scoring.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildPublicProjection } from "../public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   buildOfficialTimerProjectionFromCurrentContext,
   resolveOfficialCurrentTimerContext,
   resolvePreviousPialesOpportunity
-} from "./officialTimerOrchestration.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "./officialTimerOrchestration.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -34,7 +35,8 @@ export function buildLivePayload(options = {}) {
   const charreada = getActiveCharreada();
   const tournament = context?.tournament || getActiveTournament();
   const tournamentPayload = tournament ? { ...tournament, globalRuleOverrides: state.settings.globalRuleOverrides || {} } : null;
-  const leaderboard = charreada ? buildCharreadaLeaderboard(charreada.id) : [];
+  const officialRanking = buildOfficialOutputRanking(tournament, charreada);
+  const leaderboard = officialRanking.leaderboard;
   const timerBundle = buildCurrentTimerPayload({ sourceRevision: contractRevision });
   const timer = timerBundle.timer;
   const published = state.lastPublishedScore || null;
@@ -93,20 +95,12 @@ export function buildLivePayload(options = {}) {
       legacyProjectionRevision: 0
     }
   });
-  const tournamentColumns = tournament ? buildTournamentStandingColumns(tournament.id) : [];
   const individualTournament = isIndividualTournament(tournament);
   const teamStandings = tournament
     ? {
         title: individualTournament ? "Tabla general por participantes" : "Tabla general por equipos",
-        charreadas: tournamentColumns.map((item, index) => ({
-          id: item.id,
-          name: item.name || `Fase ${index + 1}`,
-          date: item.date || "",
-          startTime: item.startTime || "",
-          status: item.status || "",
-          charreadaIds: item.charreadaIds || []
-        })),
-        rows: buildTournamentTeamStandings(tournament.id)
+        charreadas: officialRanking.columns,
+        rows: officialRanking.rows
       }
     : null;
 
@@ -154,6 +148,104 @@ export function buildLivePayload(options = {}) {
     detalles: buildFederationDetails(charreada),
     details: buildDetails(charreada),
     formatoFederacion: buildOfficialPackage(charreada?.id)
+  };
+}
+
+function buildOfficialOutputRanking(tournament, activeCharreada) {
+  if (!tournament?.id) return { leaderboard: [], columns: [], rows: [] };
+  const tournamentId = tournament.id;
+  const teams = (state.teams || []).filter((team) => team.tournamentId === tournamentId);
+  const charreadas = (state.charreadas || []).filter((charreada) => charreada.tournamentId === tournamentId);
+  const publishedScores = (state.publishedScores || []).filter((score) => (
+    (score?.tournament?.id || score?.tournamentId || tournamentId) === tournamentId
+  ));
+  const projection = buildPublicProjection({
+    tournament: {
+      ...tournament,
+      info: { ...(tournament.info || {}), id: tournamentId, name: tournament.name || tournament.info?.name || "" },
+      meta: { ...(tournament.meta || {}), tournamentId, activeCharreadaId: activeCharreada?.id || "" },
+      teams,
+      charreadas,
+      publishedScores
+    },
+    liveCurrent: {
+      tournament: { id: tournamentId },
+      activeCharreadaId: activeCharreada?.id || "",
+      competitionId: activeCharreada?.competitionId || ""
+    }
+  }, { tournamentId });
+  const competitionId = activeCharreada?.competitionId || projection.competitions?.items?.[0]?.competitionId || "";
+  const categoryId = activeCharreada?.categoryId || "";
+  const competitionRows = (projection.rankings?.items || [])
+    .filter((item) => item.scopeType === "competition")
+    .filter((item) => !competitionId || item.competitionId === competitionId)
+    .filter((item) => !categoryId || !item.categoryId || item.categoryId === categoryId)
+    .sort((left, right) => left.position - right.position);
+  const charreadaRows = (projection.rankings?.items || [])
+    .filter((item) => item.scopeType === "charreada" && item.charreadaId === activeCharreada?.id)
+    .sort((left, right) => left.position - right.position);
+  const resultById = new Map((projection.results?.items || []).map((item) => [item.resultId, item]));
+  const columns = buildTournamentStandingColumns(tournamentId).map((item, index) => ({
+    id: item.id,
+    name: item.name || `Fase ${index + 1}`,
+    date: item.date || "",
+    startTime: item.startTime || "",
+    status: item.status || "",
+    charreadaIds: item.charreadaIds || []
+  }));
+
+  return {
+    leaderboard: charreadaRows.map((item) => ({
+      team: officialRankingEntity(item),
+      total: item.total,
+      infr: item.negativePoints,
+      negativePoints: item.negativePoints,
+      position: item.position
+    })),
+    columns,
+    rows: competitionRows.map((item) => ({
+      team: officialRankingEntity(item),
+      results: columns.map((column) => {
+        const results = item.resultIds
+          .map((resultId) => resultById.get(resultId))
+          .filter((result) => result && column.charreadaIds.includes(result.charreadaId));
+        return {
+          charreada: { id: column.id, name: column.name },
+          participated: results.length > 0,
+          total: results.length ? results.reduce((sum, result) => sum + Number(result.officialTotal ?? result.accumulatedTotal ?? result.subtotal ?? 0), 0) : null,
+          infr: results.reduce((sum, result) => sum + Math.abs(Number(result.teamPenaltyTotal || 0)), 0)
+        };
+      }),
+      total: item.total,
+      average: item.average,
+      charreadasCount: item.charreadasCount,
+      infr: item.negativePoints,
+      negativePoints: item.negativePoints,
+      bestResult: item.bestResult,
+      position: item.position,
+      positionStatus: item.positionStatus,
+      totalStatus: item.totalStatus
+    }))
+  };
+}
+
+function officialRankingEntity(item = {}) {
+  if (item.participantScope === "individual") {
+    return {
+      id: item.participantId || "",
+      name: item.participantName || "Participante",
+      participantId: item.participantId || "",
+      participantName: item.participantName || "",
+      horseId: item.horseId || "",
+      horseName: item.horseName || "",
+      category: item.categoryName || "",
+      isIndividualParticipant: true
+    };
+  }
+  return {
+    id: item.teamId || "",
+    name: item.teamName || "Equipo",
+    category: item.categoryName || ""
   };
 }
 

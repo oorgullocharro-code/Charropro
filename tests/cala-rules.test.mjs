@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/data/calaRules.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

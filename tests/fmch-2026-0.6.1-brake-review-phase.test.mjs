@@ -3,8 +3,8 @@ import {
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   getRuleProfileRulesByPhase,
   resolveEffectiveRules
-} from "../js/data/ruleProfiles.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { getSuerteById } from "../js/data/suertes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getSuerteById } from "../js/data/suertes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const phaseRules = getRuleProfileRulesByPhase(FMCH_2026_LIBRE_PROFILE_0_6_1, "freno_review");
 const phaseRuleIds = new Set(phaseRules.map((rule) => rule.ruleId));

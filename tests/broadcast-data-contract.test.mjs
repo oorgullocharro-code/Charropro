@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

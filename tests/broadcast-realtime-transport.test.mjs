@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

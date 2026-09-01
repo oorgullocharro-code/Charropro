@@ -1,5 +1,6 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },
@@ -115,11 +116,11 @@ export function buildProgramFilters(program = [], requested = {}) {
 
 export function getPortalViewDependencies(view) {
   const dependencies = {
-    inicio: ["metadata", "overview", "live", "program", "competitions", "results"],
+    inicio: ["metadata", "overview", "live", "program", "competitions", "results", "rankings"],
     "en-vivo": ["overview", "live", "liveFeed"],
     programa: ["overview", "program", "competitions"],
-    competencias: ["overview", "program", "competitions", "results"],
-    resultados: ["overview", "competitions", "results"],
+    competencias: ["overview", "program", "competitions", "results", "rankings"],
+    resultados: ["overview", "competitions", "results", "rankings"],
     sabana: ["overview", "competitions", "results"]
   };
   return dependencies[view] || dependencies.inicio;
@@ -128,6 +129,7 @@ export function getPortalViewDependencies(view) {
 function buildV2PortalModel(snapshot, options) {
   const normalizedProgram = normalizeProgramItems(snapshot.program?.items);
   const rawResults = asArray(snapshot.results?.items).map(normalizeResultItem);
+  const rawRankings = asArray(snapshot.rankings?.items).map(normalizeRankingItem);
   const activeCharreadaId = text(snapshot.overview?.activeCharreadaId);
   const programAll = enrichProgramAvailability(normalizedProgram, rawResults, activeCharreadaId);
   const competitions = enrichCompetitions(
@@ -148,6 +150,7 @@ function buildV2PortalModel(snapshot, options) {
     charreadaId: String(options.charreadaId || "")
   };
   const results = selectPortalResults(rawResults, filters);
+  const rankings = selectOfficialRanking(rawRankings, filters);
   const programFilters = buildProgramFilters(programAll, {
     day: text(options.programDay),
     phaseId: text(options.programPhaseId)
@@ -168,7 +171,7 @@ function buildV2PortalModel(snapshot, options) {
     nowMs: options.nowMs
   });
   const sheet = buildPortalSheet(results, selectedCompetition);
-  const rankedResults = rankPortalResults(results);
+  const rankedResults = rankings.length ? rankings : rankPortalResults(results);
   const resultFilters = buildResultFilters(rawResults, selectedCompetitionId);
   return {
     schemaVersion: 2,
@@ -211,8 +214,10 @@ function buildV2PortalModel(snapshot, options) {
     selectedCompetition,
     selectedCompetitionId,
     results,
+    rankings,
     rankedResults,
     allResults: rawResults,
+    allRankings: rawRankings,
     resultFilters,
     activeFilters: filters,
     sheet,
@@ -347,8 +352,10 @@ function buildLegacyPortalModel(snapshot, options) {
     selectedCompetition,
     selectedCompetitionId,
     results,
+    rankings: [],
     rankedResults: rankPortalResults(results),
     allResults: rawResults,
+    allRankings: [],
     resultFilters: buildResultFilters(rawResults, selectedCompetitionId),
     activeFilters: filters,
     sheet: buildPortalSheet(results, selectedCompetition),
@@ -402,8 +409,10 @@ function buildEmptyPortalModel(options) {
     selectedCompetition: null,
     selectedCompetitionId: "",
     results: [],
+    rankings: [],
     rankedResults: [],
     allResults: [],
+    allRankings: [],
     resultFilters: { categories: [], phases: [], charreadas: [] },
     activeFilters: { competitionId: "", categoryId: "", phaseId: "", charreadaId: "" },
     sheet: buildPortalSheet(),
@@ -578,6 +587,58 @@ function normalizeResultItem(item = {}, index = 0) {
     positionStatus: text(item.positionStatus) || "unavailable",
     resultStatus: text(item.resultStatus) || "published",
     publishedAt: text(item.publishedAt),
+    sourceRevision: integer(item.sourceRevision, 0),
+    displayOrder: integer(item.displayOrder, index + 1)
+  };
+}
+
+function normalizeRankingItem(item = {}, index = 0) {
+  const participantScope = item.participantScope === "individual" ? "individual" : "team";
+  const total = scoreOrNull(item.total) ?? 0;
+  const position = officialPosition(item.position);
+  const positionStatus = text(item.positionStatus) || "provisional";
+  const totalStatus = text(item.totalStatus) || "partial";
+  return {
+    rankingId: text(item.rankingId || `ranking_${index + 1}`),
+    resultId: text(item.rankingId || `ranking_${index + 1}`),
+    scopeType: text(item.scopeType),
+    competitionId: text(item.competitionId),
+    competitionType: text(item.competitionType),
+    participantScope,
+    categoryId: text(item.categoryId),
+    categoryName: text(item.categoryName),
+    phaseId: text(item.phaseId),
+    phaseName: text(item.phaseName),
+    charreadaId: text(item.charreadaId),
+    teamId: participantScope === "team" ? text(item.teamId) : "",
+    teamName: participantScope === "team" ? text(item.teamName) : "",
+    participantId: participantScope === "individual" ? text(item.participantId) : "",
+    participantName: participantScope === "individual" ? text(item.participantName) : "",
+    horseId: participantScope === "individual" ? text(item.horseId) : "",
+    horseName: participantScope === "individual" ? text(item.horseName) : "",
+    displayName: participantScope === "individual"
+      ? text(item.participantName) || "Participante no registrado"
+      : text(item.teamName) || "Equipo no registrado",
+    resultIds: asArray(item.resultIds).map(text).filter(Boolean),
+    charreadaIds: asArray(item.charreadaIds).map(text).filter(Boolean),
+    scores: {},
+    subtotal: total,
+    accumulatedTotal: total,
+    officialTotal: totalStatus === "final" ? total : null,
+    displayTotal: total,
+    total,
+    average: scoreOrNull(item.average) ?? 0,
+    charreadasCount: integer(item.charreadasCount, 0),
+    negativePoints: scoreOrNull(item.negativePoints) ?? 0,
+    bestResult: scoreOrNull(item.bestResult) ?? 0,
+    totalStatus,
+    officialPosition: positionStatus === "official" ? position : null,
+    provisionalPosition: positionStatus === "provisional" ? position : null,
+    displayPosition: position,
+    position,
+    positionStatus,
+    resultStatus: "published",
+    publishedAt: text(item.updatedAt),
     sourceRevision: integer(item.sourceRevision, 0),
     displayOrder: integer(item.displayOrder, index + 1)
   };

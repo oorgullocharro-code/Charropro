@@ -1,13 +1,14 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "./state.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { compareOfficialRankingRows } from "./officialRanking.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;
@@ -248,11 +249,7 @@ export function buildTournamentTeamStandings(tournamentId) {
 }
 
 function compareTournamentStandingRows(a, b) {
-  return b.average - a.average ||
-    b.total - a.total ||
-    Number(a.negativePoints ?? a.infr ?? 0) - Number(b.negativePoints ?? b.infr ?? 0) ||
-    Number(b.bestResult || 0) - Number(a.bestResult || 0) ||
-    String(a.team?.name || "").localeCompare(String(b.team?.name || ""), "es");
+  return compareOfficialRankingRows(a, b);
 }
 
 function compareLeaderboardRows(a, b) {

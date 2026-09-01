@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,
@@ -246,7 +246,24 @@ export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
       })
     ]
   },
-  rankings: { revision: 0, status: "unavailable", items: [] },
+  rankings: {
+    revision: 2,
+    status: "ready",
+    items: [
+      fixtureRanking("resultado-1", "rancho-norte", "Rancho Norte", 1, 278),
+      fixtureRanking("resultado-2", "hacienda-real", "Hacienda Real", 2, 274),
+      fixtureRanking("resultado-3", "charros-del-sol", "Charros del Sol", 3, 269),
+      fixtureRanking("resultado-4", "rancho-grande", "Rancho Grande", 4, 260),
+      fixtureRanking("resultado-5", "hacienda-larga", "Hacienda de Nuestra Señora del Camino Real de los Altos", 5, 256),
+      fixtureRanking("resultado-6", "charros-bajio", "Charros Unidos del Bajío", 6, 252),
+      fixtureRanking("resultado-7", "rancho-estrella", "Rancho La Estrella", 7, 248),
+      fixtureRanking("resultado-8", "asociados-centro", "Equipo del Centro", 8, 244),
+      fixtureRanking("resultado-9", "tres-potillos", "Tres Potrillos", 9, 239),
+      fixtureRanking("resultado-10", "hacienda-sur", "Hacienda del Sur", 10, 235),
+      fixtureRanking("resultado-11", "charros-valle", "Charros del Valle", 11, 229),
+      fixtureRanking("resultado-12", "rancho-sierra", "Rancho de la Sierra", 12, 224, { totalStatus: "partial", positionStatus: "provisional" })
+    ]
+  },
   statistics: { revision: 0, status: "unavailable", items: [] },
   search: { revision: 0, status: "unavailable", items: [] }
 });
@@ -332,6 +349,17 @@ function buildFixtureScenario(scenario = "live") {
       { resultId: "partial-a", teamId: "equipo-a", teamName: "Charros Demo del Norte", total: 38, provisionalPosition: 1, positionStatus: "provisional" },
       { resultId: "partial-b", teamId: "equipo-b", teamName: "Rancheros de Ensayo", total: 26, provisionalPosition: 2, positionStatus: "provisional" }
     ];
+    snapshot.rankings.items = [
+      fixtureRanking("partial-a", "equipo-a", "Charros Demo del Norte", 1, 38, { totalStatus: "partial", positionStatus: "provisional" }),
+      fixtureRanking("partial-b", "equipo-b", "Rancheros de Ensayo", 2, 26, { totalStatus: "partial", positionStatus: "provisional" })
+    ];
+  }
+  if (scenario === "empty-ranking") {
+    snapshot.results.status = "empty";
+    snapshot.results.items = [];
+    snapshot.rankings.status = "empty";
+    snapshot.rankings.items = [];
+    snapshot.live.standings = [];
   }
   if (scenario === "long-content") {
     snapshot.metadata.name = "Gran Campeonato Nacional de Charrería y Tradición Deportiva de México";
@@ -405,6 +433,41 @@ function fixtureResult(resultId, teamId, teamName, officialPosition, officialTot
     publishedAt: "2026-07-27T17:59:50.000Z",
     sourceRevision: 1,
     displayOrder: officialPosition,
+    ...overrides
+  };
+}
+
+function fixtureRanking(resultId, teamId, teamName, position, total, overrides = {}) {
+  return {
+    rankingId: `ranking-${teamId}`,
+    scopeType: "competition",
+    competitionId: "equipos",
+    competitionType: "equipos_completo",
+    participantScope: "team",
+    categoryId: "aaa",
+    categoryName: "AAA",
+    phaseId: "",
+    phaseName: "",
+    charreadaId: "",
+    teamId,
+    teamName,
+    participantId: "",
+    participantName: "",
+    horseId: "",
+    horseName: "",
+    resultIds: [resultId],
+    charreadaIds: ["charreada-3"],
+    total,
+    average: total,
+    charreadasCount: 1,
+    negativePoints: 0,
+    bestResult: total,
+    position,
+    positionStatus: "official",
+    totalStatus: "final",
+    sourceRevision: 1,
+    updatedAt: "2026-07-27T17:59:50.000Z",
+    displayOrder: position,
     ...overrides
   };
 }

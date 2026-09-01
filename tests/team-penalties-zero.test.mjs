@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/core/scoring.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../componentLibrary.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

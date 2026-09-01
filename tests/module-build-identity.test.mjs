@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 
-const BUILD = "20260831-firebase-functions-node22-runtime-migration-001-v1";
+const BUILD = "20260831-official-ranking-authority-public-parity-001-v1";
 const files = await collect(new URL("../js/", import.meta.url));
 const identities = new Map();
 const violations = [];

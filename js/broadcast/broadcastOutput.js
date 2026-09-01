@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "./broadcastState.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "./dataContract.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

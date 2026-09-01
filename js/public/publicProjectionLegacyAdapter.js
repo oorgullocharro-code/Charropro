@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 
@@ -89,6 +89,27 @@ export function adaptPublicProjectionToLegacy(snapshot) {
     total: item.officialTotal ?? item.subtotal,
     updatedAt: item.publishedAt
   }));
+  const rankingRows = (snapshot.rankings?.items || [])
+    .filter((item) => item.scopeType === "competition")
+    .map((item) => ({
+      position: item.position,
+      positionStatus: item.positionStatus,
+      teamId: item.teamId,
+      teamName: item.teamName,
+      participantId: item.participantId,
+      participantName: item.participantName,
+      categoryId: item.categoryId,
+      categoryName: item.categoryName,
+      competitionId: item.competitionId,
+      competitionType: item.competitionType,
+      competitionScope: item.participantScope,
+      total: item.total,
+      average: item.average,
+      charreadasCount: item.charreadasCount,
+      negativePoints: item.negativePoints,
+      bestResult: item.bestResult,
+      updatedAt: item.updatedAt
+    }));
   const standings = (snapshot.live?.standings || []).map((row) => ({
     position: row.officialPosition,
     positionStatus: row.positionStatus,
@@ -138,7 +159,7 @@ export function adaptPublicProjectionToLegacy(snapshot) {
     },
     activeCharreada,
     currentScoreboard: standings,
-    generalRanking: rows,
+    generalRanking: rankingRows,
     scoresheet: rows,
     scoresheetColumns: scoreSheetColumns,
     leaders: {},
@@ -152,7 +173,7 @@ export function adaptPublicProjectionToLegacy(snapshot) {
       charreadaId: snapshot.live.charreadaId,
       competitionId: snapshot.live.competitionId
     }] : [],
-    teams: rows,
+    teams: rankingRows,
     competitions,
     stats: {
       publicEntries: rows.length,

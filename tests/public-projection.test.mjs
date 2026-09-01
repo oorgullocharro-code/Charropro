@@ -3,15 +3,15 @@ import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../js/public/publicProjection.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "../js/public/publicProjectionSchema.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260831-firebase-functions-node22-runtime-migration-001-v1";
+} from "../js/public/publicProjectionSchema.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260831-official-ranking-authority-public-parity-001-v1";
 
 const baseSource = buildSource();
 const candidate = buildPublicProjection(baseSource, {
@@ -76,8 +76,9 @@ const legacyCompetitionIds = legacyView.competitions.map((row) => row.competitio
 assert.ok(legacyCompetitionIds.includes("competition-charro-libre"));
 assert.ok(legacyCompetitionIds.includes("competition-charro-juvenil"));
 assert.equal(new Set(legacyCompetitionIds).size, legacyCompetitionIds.length);
-assert.equal(initial.projection.rankings.status, "unavailable");
-assert.deepEqual(initial.projection.rankings.items, []);
+assert.equal(initial.projection.rankings.status, "ready");
+assert.ok(initial.projection.rankings.items.length > 0);
+assert.equal(initial.projection.rankings.items.every((row) => row.scopeType), true);
 assert.equal(initial.projection.statistics.status, "unavailable");
 assert.equal(initial.projection.search.status, "unavailable");
 
