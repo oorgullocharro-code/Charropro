@@ -1,13 +1,14 @@
 # Recommended Follow-up
 
-## CHARROPRO-PRECOMMERCIAL-PHYSICAL-DEVICE-AND-OUTPUT-CERTIFICATION-001
+## CHARROPRO-PRECOMMERCIAL-PHYSICAL-DEVICE-CERTIFICATION-001
 
 Priority: P1 validation gate.
 
-Use only a DEMO / LOCAL / NO OFICIAL fixture. Before testing, configure a local
-Program composition and announcer projection. Validate the public Portal,
-Scorer, Program Main, Announcer Monitor, field timer, and transmission timer
-simultaneously on desktop, iPad landscape, iPad portrait, and phone.
+Use only a DEMO / LOCAL / NO OFICIAL fixture. Validate the public Portal,
+Scorer, Field/Judges Timer, and Transmission Timer on desktop, iPad landscape,
+iPad portrait, and phone. Program Main and Announcer Monitor are superseded
+Broadcast outputs, not Commercial 1.0 requirements; do not create a Program
+composition or Announcer projection for this validation.
 
 Record a trained judge completing the remaining representative suertes. Do not
 change product behavior during this certification; classify any demonstrated

@@ -32,27 +32,33 @@ production profile, FieldIDs, Rules, Functions, or production data.
 - Field timer and transmission timer: PASS for loading the same local current
   timer context in READY state without console errors.
 - Supervisor navigation: PASS for tournament dashboard, teams, and program.
-- Program Main and Announcer Monitor: PENDING_CONFIGURATION. The fixture has
-  no active Program composition or announcer projection to consume; neither
-  page emitted a console error.
+- Program Main: SUPERSEDED / NOT A COMMERCIAL 1.0 REQUIREMENT. It belongs to
+  the Broadcast line that will be replaced by Graphics Editor, Graphics
+  Control, and universal HTML Output; it is not a pending commercial gate.
+- Announcer Monitor: SUPERSEDED / NOT A COMMERCIAL 1.0 REQUIREMENT. It belongs
+  to the same superseded Broadcast line and is not a pending commercial gate.
+- `cronometro-pantalla.html` remains the independent Field/Judges Timer, and
+  `grafico-cronometro.html` remains the current Transmission Timer until their
+  future Graphics System integration or replacement.
 - Tablet/mobile responsive: INCONCLUSIVE. The available browser viewport
   override remained at the host's 1600px layout metrics, so it is not evidence
   for a real tablet or phone layout. Physical devices remain required.
 
 ## Current Dictamen
 
-`PRECOMMERCIAL_PHYSICAL_VALIDATION_PARTIAL_PASS_PENDING_OUTPUTS_AND_HARDWARE`
+`PRECOMMERCIAL_PHYSICAL_VALIDATION_PARTIAL_PASS_PENDING_HARDWARE`
 
 The local fixture is ready for further physical validation. This is not a
-commercial-readiness approval and does not claim PASS for the outputs or device
-breakpoints that lacked an active local Program session or real-device proof.
+commercial-readiness approval and does not claim responsive PASS without
+real-device proof.
 
 ## Classification
 
 - Cases with local physical PASS: Portal, representative Scorer flow, field
   timer, transmission timer, and scoped Supervisor navigation.
-- Cases pending: Program Main/Announcer active composition and real
-  tablet/mobile/iPad validation.
+- Cases pending: real tablet/mobile/iPad validation, plus the remaining
+  representative sporting flow through the current product's suertes with a
+  trained judge.
 - New P0 findings: `0`.
 - New P1 findings: `0`.
 - Historical P1 physical gates remain pending until direct evidence exists; no

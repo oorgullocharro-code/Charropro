@@ -27,14 +27,17 @@ viewport override to this local app session.
 **Status:** INCONCLUSIVE, not a product defect. Test on actual tablet/iPad and
 phone hardware before granting responsive PASS.
 
-## ENV-003 - Program Composition Is Not Configured In The Demo Fixture
+## ENV-003 - Superseded Broadcast Outputs
 
-**Actual:** Program Main is empty and Announcer Monitor displays unavailable
-context while the independent timer outputs render the active local timer.
+**Classification:** Program Main and Announcer Monitor are
+`SUPERSEDED / NOT A COMMERCIAL 1.0 REQUIREMENT`.
 
-**First loss:** fixture configuration. No Program session/composition or
-announcer projection was created for the tournament.
+**Reason:** these outputs belong to the Broadcast line that will be replaced
+by Graphics Editor, Graphics Control, and universal HTML Output. They are not
+part of the current Commercial 1.0 validation boundary.
 
-**Status:** PENDING_CONFIGURATION. This is not evidence of an output consumer
-failure. Configure a clearly local Program composition before repeating the
-multisurface output test.
+**Status:** SUPERSEDED. Do not configure a Program composition or Announcer
+projection solely to close this validation. Preserve the current independent
+outputs: `cronometro-pantalla.html` for Field/Judges and
+`grafico-cronometro.html` for Transmission until a future Graphics System
+replacement is approved.

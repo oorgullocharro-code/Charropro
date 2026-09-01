@@ -60,5 +60,11 @@ The following passed after the seed fix:
 
 - `cronometro-pantalla.html`: local context, team, Cala, READY, `02:00.0`.
 - `grafico-cronometro.html`: local Cala context, READY, `02:00.0`.
-- Program Main and Announcer Monitor did not receive a Program composition;
-  both have no console errors but cannot certify active composition delivery.
+- Program Main: `SUPERSEDED / NOT A COMMERCIAL 1.0 REQUIREMENT`.
+- Announcer Monitor: `SUPERSEDED / NOT A COMMERCIAL 1.0 REQUIREMENT`.
+- Reason: both belong to the Broadcast line planned for replacement by
+  Graphics Editor, Graphics Control, and universal HTML Output. No local
+  Program composition or Announcer projection is required for this physical
+  validation or for Commercial 1.0 readiness.
+- The two timer pages above remain separate current outputs: Field/Judges and
+  Transmission respectively.
