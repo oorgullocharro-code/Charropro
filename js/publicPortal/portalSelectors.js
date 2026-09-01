@@ -1,6 +1,6 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-official-ranking-authority-public-parity-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260831-official-ranking-authority-public-parity-001-v1";
-import { selectOfficialRanking } from "../core/officialRanking.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },
@@ -171,7 +171,8 @@ function buildV2PortalModel(snapshot, options) {
     nowMs: options.nowMs
   });
   const sheet = buildPortalSheet(results, selectedCompetition);
-  const rankedResults = rankings.length ? rankings : rankPortalResults(results);
+  const rankingStatus = text(snapshot.rankings?.status) || "unavailable";
+  const rankedResults = rankings;
   const resultFilters = buildResultFilters(rawResults, selectedCompetitionId);
   return {
     schemaVersion: 2,
@@ -215,6 +216,7 @@ function buildV2PortalModel(snapshot, options) {
     selectedCompetitionId,
     results,
     rankings,
+    rankingStatus,
     rankedResults,
     allResults: rawResults,
     allRankings: rawRankings,

@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

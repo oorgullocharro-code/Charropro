@@ -31,6 +31,17 @@ ranking contiene tres identidades unicas.
 - Post-build gates: 18/18 PASS.
 - `git diff --check`: PASS.
 
+## Compatibilidad productiva legacy
+
+- `unavailable` aceptado solo para lectura: PASS.
+- `unavailable` rechazado por validacion de escritura actual: PASS.
+- `ready` y `empty`: PASS.
+- estado desconocido: DENIED.
+- resultados publicos preservados con ranking legacy: PASS.
+- ranking agregado inventado o duplicado desde resultados: NO.
+- Directed compatibility/Portal/Rules: 10/10 PASS.
+- Post-build/cache/configuration gates: 11/11 PASS.
+
 ## Visual
 
 Fixture real del Portal validado en desktop, tablet y mobile. Resultado:

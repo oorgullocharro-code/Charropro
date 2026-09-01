@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "./state.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

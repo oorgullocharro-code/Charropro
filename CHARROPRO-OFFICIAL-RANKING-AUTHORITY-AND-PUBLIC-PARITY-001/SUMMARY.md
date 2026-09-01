@@ -27,6 +27,15 @@ ningun desempate deportivo.
 - `FMCH_2026_LIBRE 0.6.1` sin cambios.
 - Sporting values, RuleIDs, FieldIDs, Timer y politica temporal sin cambios.
 - Attempt V2 y Functions sin cambios.
-- Firebase Production Writes: 0.
-- No deploy ejecutado: el cambio de esquema requiere autorizacion expresa para
-  desplegar RTDB Rules junto con el cliente.
+- Rules certificadas preservan escrituras nuevas exclusivamente en `ready|empty`.
+- `unavailable` se acepta solo en la frontera de lectura de snapshots legacy.
+- Un ranking legacy no convierte resultados por charreada en ranking agregado.
+- Firebase Production data writes: 0.
+
+## Recuperacion de compatibilidad
+
+El primer deploy revelo snapshots productivos anteriores con
+`rankings.status = unavailable`. El cliente los rechazaba completos. La lectura
+ahora acepta ese unico estado legacy y conserva resultados/documentos publicos,
+mostrando `Ranking no disponible` sin inventar posiciones. El productor y el
+validador de escritura siguen generando/exigiendo solo `ready|empty`.

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",
@@ -763,8 +763,10 @@ function renderCompetitionsView(model) {
     fragment.append(ranking);
   } else {
     fragment.append(emptyState(
-      "Ranking pendiente",
-      "La competencia seleccionada todavía no tiene puntuaciones oficiales publicadas.",
+      model.rankingStatus === "unavailable" ? "Ranking no disponible" : "Ranking pendiente",
+      model.rankingStatus === "unavailable"
+        ? "Los resultados publicados continúan disponibles mientras se actualiza el ranking oficial."
+        : "La competencia seleccionada todavía no tiene puntuaciones oficiales publicadas.",
       "trophy"
     ));
   }

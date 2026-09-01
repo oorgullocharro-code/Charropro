@@ -3,9 +3,9 @@ import {
   normalizePublicProjectionCollections,
   sanitizePublicProjectionValue,
   stablePublicStringify,
-  validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260831-official-ranking-authority-public-parity-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+  validatePublicProjectionForRead
+} from "./publicProjectionSchema.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([
@@ -78,7 +78,7 @@ export function applyPublicPortalSnapshot(state, input, options = {}) {
       changedSections: []
     };
   }
-  const validation = validatePublicProjection(normalizedInput);
+  const validation = validatePublicProjectionForRead(normalizedInput);
   if (!validation.valid) {
     return {
       state: { ...current, connection: "error", error: "public-snapshot-invalid" },

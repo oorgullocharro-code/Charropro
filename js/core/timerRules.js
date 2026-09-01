@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

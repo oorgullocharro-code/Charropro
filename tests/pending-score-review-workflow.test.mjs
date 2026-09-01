@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",

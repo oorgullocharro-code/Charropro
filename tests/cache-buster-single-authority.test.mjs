@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const ROOT = new URL("../", import.meta.url);
-const BUILD = "20260831-official-ranking-authority-public-parity-001-v1";
+const BUILD = "20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 assert.equal(configuration.values.system.appVersion, BUILD, "configuration is the canonical build authority");
 

@@ -20,6 +20,9 @@
 ## Build
 
 `functions/configuration.defaults.json` contiene el build
-`20260831-official-ranking-authority-public-parity-001-v1` y checksum derivado.
+`20260831-official-ranking-authority-public-parity-compatibility-001-v1` y
+checksum derivado. El correctivo agrega cambios funcionales acotados en
+`publicProjectionSchema`, `publicPortalClient`, `portalSelectors` y
+`portalRender`, mas su prueba dirigida.
 Los cambios restantes son propagacion mecanica por
 `tools/release/applyClientBuildVersion.mjs`; la segunda ejecucion cambio 0 archivos.

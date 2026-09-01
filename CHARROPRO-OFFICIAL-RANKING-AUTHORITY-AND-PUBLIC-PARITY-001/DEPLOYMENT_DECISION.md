@@ -11,9 +11,8 @@ La regla productiva vigente exige `rankings.status = unavailable`. Publicar el
 cliente sin la nueva validacion haria fallar la escritura completa de la
 proyeccion V2. Por ello cliente y RTDB Rules forman una sola unidad de release.
 
-## Estado
+## Recuperacion de compatibilidad
 
-El commit, push y paquete inmutable pueden prepararse. El deploy debe detenerse
-hasta recibir autorizacion expresa para el target exacto `database`; despues se
-desplegara el cliente mediante Terminal. No se usara `firebase deploy` general y
-no se desplegara ninguna Function.
+Las Rules certificadas ya estan desplegadas y no requieren cambio. El correctivo
+de lectura legacy es client-only: nuevo build, paquete inmutable y deploy por
+Terminal. No se repetira deploy de Rules ni se desplegara ninguna Function.

@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([
@@ -309,7 +309,7 @@ export function sanitizePublicBoolean(value, fallback = false) {
   return typeof value === "boolean" ? value : fallback;
 }
 
-export function validatePublicProjection(projection) {
+export function validatePublicProjection(projection, options = {}) {
   projection = normalizePublicProjectionCollections(projection);
   const errors = [];
   const warnings = [];
@@ -377,7 +377,10 @@ export function validatePublicProjection(projection) {
   validateItemArray(projection.live?.standings, STANDING_FIELDS, "live.standings", errors);
   const liveFeedValidation = validatePublicLiveFeed(projection.liveFeed);
   if (!liveFeedValidation.valid) errors.push(...liveFeedValidation.errors);
-  if (!["ready", "empty"].includes(projection.rankings?.status)) errors.push("rankings-status-invalid");
+  const rankingStatuses = options.allowLegacyUnavailableRanking
+    ? ["ready", "empty", "unavailable"]
+    : ["ready", "empty"];
+  if (!rankingStatuses.includes(projection.rankings?.status)) errors.push("rankings-status-invalid");
   for (const sectionName of ["statistics", "search"]) {
     if (projection[sectionName]?.status !== "unavailable") errors.push(`${sectionName}-must-be-unavailable`);
     if (!Array.isArray(projection[sectionName]?.items) || projection[sectionName].items.length) {
@@ -397,6 +400,10 @@ export function validatePublicProjection(projection) {
     warnings: [...new Set(warnings)],
     schemaVersion: projection.schemaVersion ?? null
   };
+}
+
+export function validatePublicProjectionForRead(projection) {
+  return validatePublicProjection(projection, { allowLegacyUnavailableRanking: true });
 }
 
 export function normalizePublicProjectionCollections(projection) {

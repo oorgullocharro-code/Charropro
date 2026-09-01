@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260831-official-ranking-authority-public-parity-001-v1",
+      "appVersion": "20260831-official-ranking-authority-public-parity-compatibility-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "afbc7703f768c5686a0348f7b74fc7ae005e71842862869f3beea463732d9bf5",
-  "fingerprint": "afbc7703f768c5686a0348f7b74fc7ae005e71842862869f3beea463732d9bf5"
+  "checksum": "c3a60462bbb60a678e27bd6aeb6002ba4eb87b263b800492b594ec3a27a58fed",
+  "fingerprint": "c3a60462bbb60a678e27bd6aeb6002ba4eb87b263b800492b594ec3a27a58fed"
 }

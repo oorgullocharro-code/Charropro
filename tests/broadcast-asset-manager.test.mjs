@@ -31,7 +31,7 @@ import {
   validateBroadcastAsset,
   validateBroadcastAssetManifest,
   validateBroadcastAssetVariant
-} from "../js/broadcast/assetManager.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "../js/broadcast/assetManager.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:01:00.000Z";

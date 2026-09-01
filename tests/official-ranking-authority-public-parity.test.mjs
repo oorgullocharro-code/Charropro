@@ -3,17 +3,21 @@ import { readFileSync } from "node:fs";
 import {
   buildPublicProjection,
   reconcilePublicProjection
-} from "../js/public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-001-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260831-official-ranking-authority-public-parity-001-v1";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "../js/public/publicProjection.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import {
+  validatePublicProjection,
+  validatePublicProjectionForRead
+} from "../js/public/publicProjectionSchema.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { applyPublicPortalSnapshot } from "../js/public/publicPortalClient.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 import {
   buildPublicPortalModel,
   getPortalViewDependencies
-} from "../js/publicPortal/portalSelectors.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 import {
   buildOfficialRankingItems,
   compareOfficialRankingRows
-} from "../js/core/officialRanking.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "../js/core/officialRanking.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 const NOW = Date.parse("2026-08-31T18:00:00.000Z");
 
@@ -143,14 +147,36 @@ assert.deepEqual(competitionRanking(individual, "caladero-libre").map((row) => r
 assert.deepEqual(competitionRanking(individual, "coleadero-libre").map((row) => row.participantId), ["p3", "p4"]);
 
 assert.deepEqual(validatePublicProjection(projection).errors, []);
+const legacyUnavailable = structuredClone(projection);
+legacyUnavailable.rankings = { revision: 0, status: "unavailable", items: [] };
+assert.equal(validatePublicProjection(legacyUnavailable).valid, false, "current writes remain strict");
+assert.equal(validatePublicProjectionForRead(legacyUnavailable).valid, true, "legacy unavailable is accepted for reads");
+const legacyRead = applyPublicPortalSnapshot({}, legacyUnavailable, { nowMs: NOW });
+assert.equal(legacyRead.accepted, true);
+const legacyPortal = buildPublicPortalModel(legacyRead.state.snapshot, { competitionId: "competition-team" });
+assert.equal(legacyPortal.rankingStatus, "unavailable");
+assert.deepEqual(legacyPortal.rankedResults, [], "legacy result rows never become an invented aggregate ranking");
+assert.equal(legacyPortal.results.length, 6, "valid public results remain available");
+for (const status of ["ready", "empty"]) {
+  const current = structuredClone(projection);
+  current.rankings.status = status;
+  if (status === "empty") current.rankings.items = [];
+  assert.equal(validatePublicProjectionForRead(current).valid, true, `${status} remains readable`);
+  assert.equal(validatePublicProjection(current).valid, true, `${status} remains writable`);
+}
+const unknownRankingStatus = structuredClone(projection);
+unknownRankingStatus.rankings.status = "future-unknown";
+assert.equal(validatePublicProjectionForRead(unknownRankingStatus).valid, false, "unknown ranking status is denied");
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 const scoringSource = readFileSync(new URL("../js/core/scoring.js", import.meta.url), "utf8");
 const syncSource = readFileSync(new URL("../js/core/sync.js", import.meta.url), "utf8");
+const portalRenderSource = readFileSync(new URL("../js/publicPortal/portalRender.js", import.meta.url), "utf8");
 assert.match(appSource, /compareOfficialRankingRows/);
 assert.match(scoringSource, /compareOfficialRankingRows/);
 assert.match(syncSource, /buildOfficialOutputRanking/);
 assert.match(syncSource, /publishedScores/);
 assert.doesNotMatch(syncSource, /buildCharreadaLeaderboard/);
+assert.match(portalRenderSource, /Ranking no disponible/);
 
 const rebuilt = buildOfficialRankingItems(projection.results.items);
 assert.deepEqual(

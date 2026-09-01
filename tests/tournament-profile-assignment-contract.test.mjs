@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260831-official-ranking-authority-public-parity-001-v1");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260831-official-ranking-authority-public-parity-001-v1");
-const { getCharreadaScoringSuertes, getCharreadaCompetitionContext } = await import("../js/core/state.js?v=20260831-official-ranking-authority-public-parity-001-v1");
+const { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1");
+const { getCharreadaScoringSuertes, getCharreadaCompetitionContext } = await import("../js/core/state.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1");
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 const tournament = applyProductiveRuleProfilePolicy({ id: "assignment-contract", category: "Libre", type: "completo" });

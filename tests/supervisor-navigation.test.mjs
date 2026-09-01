@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260831-official-ranking-authority-public-parity-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,
