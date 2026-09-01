@@ -42,7 +42,8 @@ const localTournament = applyLocalFmch2026RuleProfileDefault(denverBefore, { env
 assert.notEqual(localTournament, denverBefore);
 assert.equal(denverBefore.ruleProfileId, undefined, "local default never mutates the source tournament");
 assert.equal(localTournament.ruleProfileId, "FMCH_2026_LIBRE");
-assert.equal(localTournament.ruleProfileVersion, "0.6.0");
+assert.equal(localTournament.ruleProfileVersion, "0.6.1");
+assert.equal(localTournament.ruleProfileContentFingerprint, "rptp_10e596046446e850");
 assert.equal(localTournament.ruleProfile.status, "active");
 assert.equal(localTournament.ruleProfile.metadata.fixtureOnly, true);
 assert.equal(localTournament.ruleProfile.metadata.activationReady, false);
@@ -51,7 +52,7 @@ assert.equal(localTournament.ruleProfile.metadata.environment, "local-emulator")
 const afterResolution = resolveTournamentRules(localTournament);
 const afterLazo = afterResolution.suertes.find((suerte) => suerte.id === "lazo");
 assert.equal(afterResolution.profile.profileId, "FMCH_2026_LIBRE");
-assert.equal(afterResolution.profile.profileVersion, "0.6.0");
+assert.equal(afterResolution.profile.profileVersion, "0.6.1");
 assert.equal(afterResolution.profile.status, "active");
 assert.equal(afterResolution.profile.fallbackUsed, false);
 assert.deepEqual(afterLazo.ruleResolution.layers, ["PRODUCT_BASE", "RULE_PROFILE"]);
@@ -103,7 +104,8 @@ assert.equal(JSON.stringify(FMCH_2026_LIBRE_PROFILE), profileFingerprint, "FMCH 
 const seed = createLocalRuntimeSeedFixture();
 const seededTournament = seed.database["charropro/tournaments"][seed.tournamentId].info;
 assert.equal(seededTournament.ruleProfileId, "FMCH_2026_LIBRE");
-assert.equal(seededTournament.ruleProfileVersion, "0.6.0");
+assert.equal(seededTournament.ruleProfileVersion, "0.6.1");
+assert.equal(seededTournament.ruleProfileContentFingerprint, "rptp_10e596046446e850");
 assert.equal(seededTournament.ruleProfile.status, "active");
 
 const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");

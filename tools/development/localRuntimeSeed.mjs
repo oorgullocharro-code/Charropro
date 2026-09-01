@@ -179,6 +179,38 @@ export function buildLocalRuntimeSeedPlan(options = {}) {
   });
 }
 
+export function buildLocalRuntimeFirebaseWriteFixture(options = {}) {
+  const fixture = createLocalRuntimeSeedFixture(options.now);
+  const compactTournamentIndex = (tournament = {}) => {
+    const { ruleProfile, ...reference } = tournament;
+    return reference;
+  };
+  const compactFixtureProfile = (profile = {}) => {
+    if (Array.isArray(profile)) return profile.map(compactFixtureProfile);
+    if (!profile || typeof profile !== "object") return profile;
+    return Object.fromEntries(Object.entries(profile)
+      // FieldID maps belong to the immutable catalog. RTDB tournament records
+      // retain the profile identity but never persist FieldIDs as object keys.
+      .filter(([key]) => key !== "fieldIdMappings")
+      .map(([key, value]) => [key, compactFixtureProfile(value)]));
+  };
+  const tournaments = Object.fromEntries(Object.entries(fixture.database["charropro/tournaments"])
+    .map(([tournamentId, record]) => [tournamentId, {
+      ...record,
+      info: {
+        ...record.info,
+        ruleProfile: compactFixtureProfile(record.info.ruleProfile)
+      }
+    }]));
+  const tournamentIndex = Object.fromEntries(Object.entries(fixture.database["charropro/tournamentIndex"])
+    .map(([tournamentId, record]) => [tournamentId, compactTournamentIndex(record)]));
+  return {
+    ...fixture.database,
+    "charropro/tournaments": tournaments,
+    "charropro/tournamentIndex": tournamentIndex
+  };
+}
+
 async function loadLocalAdmin() {
   const runtime = assertLocalRuntimeSeedEnvironment();
   process.env.FIREBASE_PROJECT_ID = runtime.projectId;
@@ -206,6 +238,7 @@ async function ensureSyntheticUser(auth, user) {
 
 async function seedLocalRuntime(options = {}) {
   const plan = buildLocalRuntimeSeedPlan(options);
+  const databaseFixture = buildLocalRuntimeFirebaseWriteFixture(options);
   const { runtime, app, deleteApp, auth, database } = await loadLocalAdmin();
   try {
     if (options.reset) {
@@ -215,7 +248,7 @@ async function seedLocalRuntime(options = {}) {
       }));
     }
     await Promise.all(plan.fixture.authUsers.map((user) => ensureSyntheticUser(auth, user)));
-    await Promise.all(Object.entries(plan.fixture.database).map(([path, value]) => database.ref(path).set(value)));
+    await Promise.all(Object.entries(databaseFixture).map(([path, value]) => database.ref(path).set(value)));
     return { projectId: runtime.projectId, marker: plan.fixture.marker, tournamentId: plan.fixture.tournamentId, charreadaId: plan.fixture.charreadaId, users: plan.users, reset: Boolean(options.reset) };
   } finally {
     await deleteApp(app);
