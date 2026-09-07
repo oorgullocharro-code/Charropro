@@ -5,10 +5,12 @@ import { spawn, spawnSync } from "node:child_process";
 import {
   DEFAULT_LOCAL_PROJECT_ID,
   buildEmulatorSmokePlan,
+  buildLanEmulatorConfiguration,
   buildEmulatorStartPlan,
   buildEnvironmentDescriptor,
   buildToolingReport,
   parseEnvironmentText,
+  isLocalLanBindHost,
   validateEnvironmentDescriptor,
   validateFirebaseEmulatorConfiguration
 } from "./environmentFoundation.mjs";
@@ -18,6 +20,7 @@ const DEFAULT_ENVIRONMENT_FILE = ".env.local";
 const DEFAULT_DATA_DIRECTORY = ".local/firebase-emulator-data";
 const PID_FILE = resolve(ROOT_DIRECTORY, ".local/charropro-emulators.pid");
 const LOG_FILE = resolve(ROOT_DIRECTORY, ".local/charropro-emulators.log");
+const LAN_FIREBASE_CONFIGURATION = resolve(ROOT_DIRECTORY, ".local/firebase.lan.json");
 
 function usage() {
   return [
@@ -26,13 +29,13 @@ function usage() {
     "Commands:",
     "  validate [--env-file <path>]    Validate the selected profile and Firebase emulator config.",
     "  versions                         Report Node, npm, Java, Firebase CLI, Git, and gcloud versions.",
-    "  emulators:start [--background]   Start the isolated local Emulator Suite.",
+    "  emulators:start [--background] [--lan-host <host>] Start the isolated local Emulator Suite.",
     "  emulators:stop                   Stop a suite previously started with --background.",
     "  emulators:clear --confirm         Clear only ignored local emulator export data.",
     "  emulators:smoke [--env-file <p>] Start a fresh suite and verify all four emulator endpoints.",
     "  local:seed                        Seed only synthetic users and DEMO / LOCAL / NO OFICIAL data.",
     "  local:reset --confirm             Remove and recreate only synthetic Emulator data.",
-    "  web:start [--port <port>]         Serve this repository on loopback with no-store responses.",
+    "  web:start [--port <port>] [--host <host>] Serve this repository with no-store responses.",
     "",
     `Local project is fixed to ${DEFAULT_LOCAL_PROJECT_ID}; production is never a default.`
   ].join("\n");
@@ -67,6 +70,19 @@ function loadEnvironment(argv) {
 function loadFirebaseConfiguration() {
   const filePath = resolve(ROOT_DIRECTORY, "firebase.json");
   return JSON.parse(readFileSync(filePath, "utf8"));
+}
+
+function buildTemporaryLanFirebaseConfiguration(lanHost) {
+  const configuration = buildLanEmulatorConfiguration(loadFirebaseConfiguration(), lanHost);
+  if (typeof configuration.database?.rules === "string") configuration.database.rules = resolve(ROOT_DIRECTORY, configuration.database.rules);
+  if (typeof configuration.storage?.rules === "string") configuration.storage.rules = resolve(ROOT_DIRECTORY, configuration.storage.rules);
+  if (Array.isArray(configuration.functions)) {
+    configuration.functions = configuration.functions.map((entry) => ({
+      ...entry,
+      source: typeof entry?.source === "string" ? resolve(ROOT_DIRECTORY, entry.source) : entry?.source
+    }));
+  }
+  return configuration;
 }
 
 function validateCommand(argv) {
@@ -117,6 +133,16 @@ function emulatorStartCommand(argv) {
     firebaseCommand: process.env.FIREBASE_BIN || "firebase",
     importDirectory: DEFAULT_DATA_DIRECTORY
   });
+  const lanHost = readOption(argv, "--lan-host");
+  if (lanHost && !isLocalLanBindHost(lanHost)) {
+    process.stderr.write("LAN emulator host must be 0.0.0.0 or a private IPv4 address.\n");
+    return 1;
+  }
+  if (lanHost) {
+    mkdirSync(dirname(LAN_FIREBASE_CONFIGURATION), { recursive: true });
+    writeFileSync(LAN_FIREBASE_CONFIGURATION, `${JSON.stringify(buildTemporaryLanFirebaseConfiguration(lanHost), null, 2)}\n`, "utf8");
+    plan.args.unshift("--config", LAN_FIREBASE_CONFIGURATION);
+  }
   if (!hasOption(argv, "--background")) {
     const child = spawnFirebase(plan.command, plan.args);
     child.on("exit", (code) => process.exitCode = code || 0);
@@ -210,12 +236,17 @@ function localSeedCommand(argv, options = {}) {
 
 function webStartCommand(argv) {
   const requestedPort = readOption(argv, "--port");
+  const requestedHost = readOption(argv, "--host");
   if (requestedPort && (!/^\d+$/.test(requestedPort) || Number(requestedPort) < 1024 || Number(requestedPort) > 65535)) {
     process.stderr.write("Local web port must be an integer between 1024 and 65535.\n");
     return 1;
   }
+  if (requestedHost && requestedHost !== "127.0.0.1" && requestedHost !== "localhost" && !isLocalLanBindHost(requestedHost)) {
+    process.stderr.write("Local web host must be loopback, 0.0.0.0, or a private IPv4 address.\n");
+    return 1;
+  }
   const webServer = resolve(ROOT_DIRECTORY, "tools/development/localWebServer.mjs");
-  const child = spawn(process.execPath, [webServer, requestedPort || "8765"], {
+  const child = spawn(process.execPath, [webServer, requestedPort || "8765", requestedHost || "127.0.0.1"], {
     cwd: ROOT_DIRECTORY,
     env: { ...process.env, CHARROPRO_ENV: "local", FIREBASE_PROJECT_ID: DEFAULT_LOCAL_PROJECT_ID },
     stdio: "inherit"

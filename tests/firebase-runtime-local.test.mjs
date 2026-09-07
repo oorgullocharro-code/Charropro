@@ -6,6 +6,7 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   createLocalFirebaseRuntime,
   getFirebaseRuntimePublicDiagnostics,
+  isPrivateLanIpv4Host,
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
@@ -23,7 +24,13 @@ const bootstrap = {
 const localLocation = { hostname: "127.0.0.1", search: "" };
 assert.equal(isLocalFirebaseRuntimeLocation(localLocation), true);
 assert.equal(isLocalFirebaseRuntimeLocation({ hostname: "portal.charropro.test" }), false);
+const lanHost = "192.168.10.25";
+assert.equal(isPrivateLanIpv4Host(lanHost), true);
+assert.equal(isPrivateLanIpv4Host("172.20.8.4"), true);
+assert.equal(isPrivateLanIpv4Host("8.8.8.8"), false);
 assert.equal(resolveFirebaseRuntimeEnvironment(localLocation), "local");
+assert.equal(resolveFirebaseRuntimeEnvironment({ hostname: lanHost, search: "?charroproEnv=local" }), "local");
+assert.throws(() => resolveFirebaseRuntimeEnvironment({ hostname: lanHost, search: "" }), (error) => error instanceof FirebaseRuntimeError && error.code === "firebase-runtime-local-lan-explicit-required");
 assert.throws(() => resolveFirebaseRuntimeEnvironment({ hostname: "portal.charropro.test", search: "?charroproEnv=local" }), (error) => error instanceof FirebaseRuntimeError && error.code === "firebase-runtime-local-host-required");
 assert.throws(() => resolveFirebaseRuntimeEnvironment({ hostname: "127.0.0.1", search: "?charroproEnv=production" }), (error) => error instanceof FirebaseRuntimeError && error.code === "firebase-runtime-environment-selection-blocked");
 
@@ -54,6 +61,23 @@ assert.deepEqual(getFirebaseRuntimePublicDiagnostics(runtime, { connected: true 
   },
   connected: true
 });
+
+const lanRuntime = resolveFirebaseRuntime({
+  location: { hostname: lanHost, search: "?charroproEnv=local" },
+  bootstrap
+});
+assert.equal(lanRuntime.projectId, LOCAL_FIREBASE_PROJECT_ID);
+assert.equal(lanRuntime.firebaseConfig.databaseURL, `http://${lanHost}:9000?ns=demo-charropro-local`);
+assert.deepEqual(buildFirebaseEmulatorConnectionPlan(lanRuntime), {
+  auth: { url: `http://${lanHost}:9099` },
+  database: { host: lanHost, port: 9000 },
+  functions: { host: lanHost, port: 5001 },
+  storage: { host: lanHost, port: 9199 }
+});
+assert.throws(() => resolveFirebaseRuntime({
+  location: { hostname: "8.8.8.8", search: "?charroproEnv=local" },
+  bootstrap
+}), (error) => error instanceof FirebaseRuntimeError && error.code === "firebase-runtime-local-host-required");
 
 assert.throws(() => assertLocalFirebaseRuntime({ ...runtime, projectId: "charropro-e8a68" }), (error) => error instanceof FirebaseRuntimeError && error.code === "firebase-runtime-production-blocked");
 assert.throws(() => assertLocalFirebaseRuntime({

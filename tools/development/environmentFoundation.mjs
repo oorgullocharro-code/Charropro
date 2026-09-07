@@ -27,6 +27,29 @@ function asNonEmptyString(value, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
+export function isPrivateLanIpv4Host(value = "") {
+  const octets = asNonEmptyString(value).split(".");
+  if (octets.length !== 4 || octets.some((octet) => !/^\d{1,3}$/.test(octet))) return false;
+  const [first, second] = octets.map((octet) => Number(octet));
+  if (octets.some((octet) => Number(octet) > 255)) return false;
+  return first === 10 || first === 192 && second === 168 || first === 172 && second >= 16 && second <= 31;
+}
+
+export function isLocalLanBindHost(value = "") {
+  return asNonEmptyString(value) === "0.0.0.0" || isPrivateLanIpv4Host(value);
+}
+
+export function buildLanEmulatorConfiguration(firebaseConfiguration, lanHost = "") {
+  if (!isLocalLanBindHost(lanHost)) throw new Error("local-lan-host-invalid");
+  const configuration = safeClone(firebaseConfiguration);
+  if (!isPlainObject(configuration?.emulators)) throw new Error("firebase-emulators-configuration-missing");
+  for (const service of EMULATOR_SERVICES) {
+    if (!isPlainObject(configuration.emulators[service])) throw new Error(`firebase-emulator-configuration-missing:${service}`);
+    configuration.emulators[service].host = lanHost;
+  }
+  return configuration;
+}
+
 function hasPlaceholder(value) {
   return /^REPLACE_WITH_/i.test(asNonEmptyString(value));
 }

@@ -6,10 +6,13 @@ import {
   DEVELOPMENT_INFRASTRUCTURE_VERSION,
   buildEmulatorSmokePlan,
   buildEmulatorStartPlan,
+  buildLanEmulatorConfiguration,
   buildEnvironmentDescriptor,
   buildToolingReport,
   parseEnvironmentText,
   safeClone,
+  isLocalLanBindHost,
+  isPrivateLanIpv4Host,
   validateEnvironmentDescriptor,
   validateFirebaseEmulatorConfiguration
 } from "../tools/development/environmentFoundation.mjs";
@@ -59,6 +62,17 @@ assert.deepEqual(Object.keys(firebaseConfiguration.emulators).filter((key) => ["
 assert.equal(firebaseConfiguration.storage.rules, "storage.rules");
 assert.equal(firebaseAliases.projects.default, undefined);
 assert.equal(firebaseAliases.projects.production, "charropro-e8a68");
+assert.equal(isPrivateLanIpv4Host("192.168.10.25"), true);
+assert.equal(isPrivateLanIpv4Host("203.0.113.1"), false);
+assert.equal(isLocalLanBindHost("0.0.0.0"), true);
+assert.equal(isLocalLanBindHost("192.168.10.25"), true);
+assert.equal(isLocalLanBindHost("127.0.0.1"), false);
+const lanConfiguration = buildLanEmulatorConfiguration(firebaseConfiguration, "0.0.0.0");
+for (const service of ["auth", "database", "functions", "storage"]) {
+  assert.equal(lanConfiguration.emulators[service].host, "0.0.0.0");
+  assert.equal(firebaseConfiguration.emulators[service].host, undefined);
+}
+assert.throws(() => buildLanEmulatorConfiguration(firebaseConfiguration, "8.8.8.8"), /local-lan-host-invalid/);
 
 const startPlan = buildEmulatorStartPlan(localEnvironment);
 assert.equal(startPlan.projectId, DEFAULT_LOCAL_PROJECT_ID);

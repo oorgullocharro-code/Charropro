@@ -5,8 +5,8 @@ import { dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT_DIRECTORY = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const host = "127.0.0.1";
 const port = Number(process.env.CHARROPRO_LOCAL_WEB_PORT || process.argv[2] || 8765);
+const host = String(process.env.CHARROPRO_LOCAL_WEB_HOST || process.argv[3] || "127.0.0.1").trim();
 const CONTENT_TYPES = Object.freeze({
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -17,6 +17,7 @@ const CONTENT_TYPES = Object.freeze({
 });
 
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("local-web-server-port-invalid");
+if (!host) throw new Error("local-web-server-host-invalid");
 
 const server = http.createServer((request, response) => {
   const pathname = decodeURIComponent(new URL(request.url || "/", `http://${host}:${port}`).pathname);

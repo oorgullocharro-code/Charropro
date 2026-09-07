@@ -40,14 +40,21 @@ export function clearTournamentContext() {
   };
 }
 
-export function buildTournamentUrl(fileName, tournamentId, extraParams = {}) {
+export function buildTournamentUrl(fileName, tournamentId, extraParams = {}, sourceSearch = getCurrentSearch()) {
   const params = new URLSearchParams();
   params.set("tournamentId", normalizeTournamentId(tournamentId));
   Object.entries(extraParams || {}).forEach(([key, value]) => {
     if (value === null || value === undefined || value === "") return;
     params.set(key, String(value));
   });
+  if (new URLSearchParams(sourceSearch || "").get("charroproEnv") === "local") {
+    params.set("charroproEnv", "local");
+  }
   return `./${fileName}?${params.toString()}`;
+}
+
+function getCurrentSearch() {
+  return typeof window === "undefined" ? "" : window.location.search;
 }
 
 function normalizeTournamentId(value) {

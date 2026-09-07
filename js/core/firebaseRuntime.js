@@ -32,8 +32,25 @@ export function isLocalFirebaseRuntimeLocation(locationLike = globalThis.locatio
   return LOCAL_HOSTS.has(hostname);
 }
 
+export function isPrivateLanIpv4Host(value = "") {
+  const octets = String(value || "").trim().split(".");
+  if (octets.length !== 4 || octets.some((octet) => !/^\d{1,3}$/.test(octet))) return false;
+  const [first, second] = octets.map((octet) => Number(octet));
+  if (octets.some((octet) => Number(octet) > 255)) return false;
+  return first === 10 || first === 192 && second === 168 || first === 172 && second >= 16 && second <= 31;
+}
+
+function getRuntimeHostname(locationLike = globalThis.location) {
+  return String(locationLike?.hostname || "").trim().toLowerCase();
+}
+
+function isExplicitLocalLanRuntime(locationLike = globalThis.location, requested = "") {
+  return requested === "local" && isPrivateLanIpv4Host(getRuntimeHostname(locationLike));
+}
+
 export function resolveFirebaseRuntimeEnvironment(locationLike = globalThis.location) {
   const isLocal = isLocalFirebaseRuntimeLocation(locationLike);
+  const isPrivateLan = isPrivateLanIpv4Host(getRuntimeHostname(locationLike));
   const rawSearch = String(locationLike?.search || "");
   const params = new URLSearchParams(rawSearch.startsWith("?") ? rawSearch.slice(1) : rawSearch);
   const requested = String(params.get("charroproEnv") || "").trim().toLowerCase();
@@ -41,17 +58,23 @@ export function resolveFirebaseRuntimeEnvironment(locationLike = globalThis.loca
   if (requested && requested !== "local") {
     throw new FirebaseRuntimeError("firebase-runtime-environment-selection-blocked", { requested });
   }
-  if (requested === "local" && !isLocal) {
+  if (isPrivateLan && requested !== "local") {
+    throw new FirebaseRuntimeError("firebase-runtime-local-lan-explicit-required", {
+      hostname: String(locationLike?.hostname || "")
+    });
+  }
+  if (requested === "local" && !isLocal && !isExplicitLocalLanRuntime(locationLike, requested)) {
     throw new FirebaseRuntimeError("firebase-runtime-local-host-required", {
       hostname: String(locationLike?.hostname || "")
     });
   }
-  return isLocal ? "local" : "production";
+  return isLocal || isExplicitLocalLanRuntime(locationLike, requested) ? "local" : "production";
 }
 
 export function createLocalFirebaseRuntime(base = {}) {
   const sdkVersion = String(base.sdkVersion || "").trim();
   const functionsRegion = String(base.functionsRegion || "us-central1").trim();
+  const emulatorHost = String(base.emulatorHost || "127.0.0.1").trim().toLowerCase();
   if (!/^\d+\.\d+\.\d+$/.test(sdkVersion)) {
     throw new FirebaseRuntimeError("firebase-runtime-sdk-version-invalid");
   }
@@ -59,6 +82,13 @@ export function createLocalFirebaseRuntime(base = {}) {
     throw new FirebaseRuntimeError("firebase-runtime-functions-region-invalid");
   }
 
+  if (!LOCAL_HOSTS.has(emulatorHost) && !isPrivateLanIpv4Host(emulatorHost)) {
+    throw new FirebaseRuntimeError("firebase-runtime-emulator-host-invalid", { emulatorHost });
+  }
+  const emulatorHosts = Object.freeze(Object.fromEntries(Object.entries(LOCAL_FIREBASE_EMULATOR_HOSTS).map(([service, endpoint]) => [
+    service,
+    Object.freeze({ host: emulatorHost, port: endpoint.port })
+  ])));
   const runtime = {
     version: FIREBASE_RUNTIME_VERSION,
     environment: "local",
@@ -69,14 +99,14 @@ export function createLocalFirebaseRuntime(base = {}) {
     functionsRegion,
     firebaseConfig: {
       apiKey: "local-emulator-api-key",
-      authDomain: "127.0.0.1",
-      databaseURL: `http://127.0.0.1:${LOCAL_FIREBASE_EMULATOR_HOSTS.database.port}?ns=${LOCAL_FIREBASE_PROJECT_ID}`,
+      authDomain: emulatorHost,
+      databaseURL: `http://${emulatorHost}:${LOCAL_FIREBASE_EMULATOR_HOSTS.database.port}?ns=${LOCAL_FIREBASE_PROJECT_ID}`,
       projectId: LOCAL_FIREBASE_PROJECT_ID,
       storageBucket: `${LOCAL_FIREBASE_PROJECT_ID}.appspot.com`,
       messagingSenderId: "local-emulator",
       appId: "local:charropro:emulator"
     },
-    emulatorHosts: LOCAL_FIREBASE_EMULATOR_HOSTS
+    emulatorHosts
   };
   assertLocalFirebaseRuntime(runtime);
   return deepFreeze(runtime);
@@ -88,7 +118,11 @@ export function resolveFirebaseRuntime({ location = globalThis.location, bootstr
   const functionsRegion = String(bootstrap.functionsRegion || "").trim();
 
   if (environment === "local") {
-    return createLocalFirebaseRuntime({ sdkVersion, functionsRegion });
+    return createLocalFirebaseRuntime({
+      sdkVersion,
+      functionsRegion,
+      emulatorHost: getRuntimeHostname(location)
+    });
   }
 
   const firebaseConfig = clonePlainValue(bootstrap.client || {});
@@ -123,13 +157,17 @@ export function assertLocalFirebaseRuntime(runtime = {}) {
 
   const databaseUrl = parseUrl(runtime.firebaseConfig?.databaseURL, "databaseURL");
   const expectedNamespace = LOCAL_FIREBASE_PROJECT_ID;
-  if (databaseUrl.protocol !== "http:" || databaseUrl.hostname !== "127.0.0.1" || Number(databaseUrl.port) !== LOCAL_FIREBASE_EMULATOR_HOSTS.database.port || databaseUrl.searchParams.get("ns") !== expectedNamespace) {
+  const emulatorHost = String(runtime.emulatorHosts?.database?.host || "").trim().toLowerCase();
+  if (!LOCAL_HOSTS.has(emulatorHost) && !isPrivateLanIpv4Host(emulatorHost)) {
+    throw new FirebaseRuntimeError("firebase-runtime-emulator-host-invalid", { service: "database" });
+  }
+  if (databaseUrl.protocol !== "http:" || databaseUrl.hostname !== emulatorHost || Number(databaseUrl.port) !== LOCAL_FIREBASE_EMULATOR_HOSTS.database.port || databaseUrl.searchParams.get("ns") !== expectedNamespace) {
     throw new FirebaseRuntimeError("firebase-runtime-database-emulator-invalid");
   }
 
   for (const [service, endpoint] of Object.entries(LOCAL_FIREBASE_EMULATOR_HOSTS)) {
     const configured = runtime.emulatorHosts?.[service];
-    if (configured?.host !== endpoint.host || Number(configured?.port) !== endpoint.port || !LOCAL_HOSTS.has(configured.host)) {
+    if (configured?.host !== emulatorHost || Number(configured?.port) !== endpoint.port || !LOCAL_HOSTS.has(configured.host) && !isPrivateLanIpv4Host(configured.host)) {
       throw new FirebaseRuntimeError("firebase-runtime-emulator-host-invalid", { service });
     }
   }
