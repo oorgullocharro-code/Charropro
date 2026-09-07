@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 const {
   RULE_PROFILE_ASSIGNMENT_AUTHORITY_VERSION,

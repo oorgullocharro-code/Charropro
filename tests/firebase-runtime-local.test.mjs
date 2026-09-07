@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

@@ -1,20 +1,21 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "../data/fmch2026TernaRules.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { getCanonicalTernaRoster } from "./ternaParticipantIdentity.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "./timerRules.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { getCanonicalTernaRoster } from "./ternaParticipantIdentity.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { getCanonicalSportingOpportunityKey } from "./canonicalOfficialResults.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -27,7 +28,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "./localCache.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());
@@ -111,6 +112,7 @@ const createInitialState = () => ({
   scores: {},
   pendingScoreReviews: {},
   publishedScores: [],
+  officialScoreLedgers: {},
   statHistorySnapshots: [],
   migrationLog: [],
   settings: {
@@ -328,6 +330,9 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
     const ids = getPublishedScoreIds(record);
     return ids.tournamentId === cleanTournamentId;
   });
+  const officialScoreLedgers = source.officialScoreLedgers?.[cleanTournamentId]
+    ? { [cleanTournamentId]: source.officialScoreLedgers[cleanTournamentId] }
+    : {};
   const pendingScoreReviews = Object.fromEntries(
     Object.entries(normalizePendingScoreReviewRegistry(source.pendingScoreReviews))
       .filter(([, record]) => record.tournamentId === cleanTournamentId)
@@ -357,6 +362,7 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
     scores,
     pendingScoreReviews,
     publishedScores,
+    officialScoreLedgers,
     statHistorySnapshots,
     ternaSessions,
     currentTimerContext,
@@ -504,10 +510,12 @@ function normalizePublishedScores(records = [], lastPublishedScore = null) {
 
 function normalizePublishedScore(record = {}) {
   const attemptKey = record.attemptKey || getPublishedAttemptKey(record);
+  const sportingOpportunityKey = record.sportingOpportunityKey || getCanonicalSportingOpportunityKey(record);
   return {
     ...record,
     id: String(record.id || uid("publicado")),
     attemptKey,
+    sportingOpportunityKey,
     publishedAt: record.publishedAt || new Date().toISOString(),
     revision: Math.max(1, Number(record.revision || 1)),
     correction: Boolean(record.correction),
@@ -1172,11 +1180,15 @@ export function resetAllData() {
 export function recordPublishedScore(score = {}) {
   const attemptKey = getPublishedAttemptKey(score);
   if (!attemptKey) return null;
+  const sportingOpportunityKey = getCanonicalSportingOpportunityKey({ ...score, attemptKey });
+  if (!sportingOpportunityKey) return null;
 
   const now = score.publishedAt || new Date().toISOString();
   if (!Array.isArray(state.publishedScores)) state.publishedScores = [];
 
-  const previousRecords = state.publishedScores.filter((record) => record.attemptKey === attemptKey);
+  const previousRecords = state.publishedScores.filter((record) => (
+    getCanonicalSportingOpportunityKey(record) === sportingOpportunityKey
+  ));
   const activePrevious = [...previousRecords].reverse().find((record) => !record.superseded) || null;
   const previousRevision = previousRecords.reduce(
     (maximum, record) => Math.max(maximum, Number(record.revision || 0)),
@@ -1186,6 +1198,7 @@ export function recordPublishedScore(score = {}) {
     ...score,
     id: score.id || uid("publicado"),
     attemptKey,
+    sportingOpportunityKey,
     publishedAt: now,
     revision: previousRevision + 1,
     correction: Boolean(activePrevious),
@@ -1197,7 +1210,7 @@ export function recordPublishedScore(score = {}) {
   });
 
   state.publishedScores.forEach((item) => {
-    if (item.attemptKey !== attemptKey || item.superseded) return;
+    if (getCanonicalSportingOpportunityKey(item) !== sportingOpportunityKey || item.superseded) return;
     item.superseded = true;
     item.supersededBy = record.id;
     item.supersededAt = record.publishedAt;

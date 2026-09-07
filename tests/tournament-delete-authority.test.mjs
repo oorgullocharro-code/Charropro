@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 const {
   TournamentDeletionError,

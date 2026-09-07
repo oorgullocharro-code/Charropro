@@ -1,9 +1,10 @@
-import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 import {
   DOCUMENTED_CALA_BAD_POINT_CODES,
   buildCalaDocumentAbbreviationMatrix
-} from "./officialFormatDocumentModel.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "./officialFormatDocumentModel.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 export const OFFICIAL_FORMAT_SNAPSHOT_VERSION = "1.2.0";
 
@@ -431,30 +432,14 @@ function selectOfficialRecords(records, ledgerRegistry, options, errors, warning
     return selected;
   }
 
-  const ledgerActiveIds = new Set(objectValues(ledgerRegistry).map((ledger) => cleanId(ledger?.activeRecordId)).filter(Boolean));
-  const grouped = new Map();
-  for (const record of records) {
-    const attemptKey = text(record.attemptKey) || deriveAttemptKey(record);
-    if (!attemptKey) {
-      warnings.push(`official-format-record-attempt-key-missing:${text(record.id)}`);
-      continue;
-    }
-    if (!grouped.has(attemptKey)) grouped.set(attemptKey, []);
-    grouped.get(attemptKey).push(record);
+  const canonical = buildCanonicalOfficialResults({
+    officialScores: records,
+    officialScoreLedger: ledgerRegistry
+  });
+  if (canonical.duplicateHeadsResolved > 0) {
+    warnings.push(`official-format-canonical-duplicate-heads-resolved:${canonical.duplicateHeadsResolved}`);
   }
-
-  const selected = [];
-  for (const [attemptKey, candidates] of grouped) {
-    const ledgerCandidates = candidates.filter((record) => ledgerActiveIds.has(record.id));
-    const activeCandidates = candidates.filter(isActiveOfficialRecord);
-    const pool = ledgerCandidates.length ? ledgerCandidates : activeCandidates;
-    if (pool.length !== 1) {
-      errors.push(pool.length ? `official-format-multiple-active-records:${attemptKey}` : `official-format-active-record-missing:${attemptKey}`);
-      continue;
-    }
-    selected.push(pool[0]);
-  }
-  return selected;
+  return canonical.currentRecords;
 }
 
 function buildSnapshotAttempt(record, scope, errors, warnings) {

@@ -35,7 +35,9 @@ function prepareOfficialScoreRequest(input = {}, actor = {}, options = {}) {
 
   const attemptKey = published?.attemptKey || "";
   const expectedAttemptKey = published ? buildAttemptKey(published) : "";
+  const sportingOpportunityKey = published ? buildSportingOpportunityKey(published) : "";
   if (!attemptKey || attemptKey !== expectedAttemptKey) errors.push("official-score-attempt-key-mismatch");
+  if (!sportingOpportunityKey) errors.push("official-score-sporting-opportunity-invalid");
   if (published?.tournament?.id !== tournamentId) errors.push("official-score-tournament-mismatch");
   if (published && scoreId !== buildScoreId(published)) errors.push("official-score-node-mismatch");
 
@@ -47,7 +49,7 @@ function prepareOfficialScoreRequest(input = {}, actor = {}, options = {}) {
     published: publishedFingerprintPayload(published),
     scorePayload
   }));
-  const attemptId = `attempt_${sha256(attemptKey).slice(0, 32)}`;
+  const attemptId = `attempt_${sha256(sportingOpportunityKey).slice(0, 32)}`;
   const requestId = `request_${sha256(idempotencyKey).slice(0, 32)}`;
   const recordId = `official_${sha256(`${attemptKey}|${idempotencyKey}`).slice(0, 32)}`;
 
@@ -59,6 +61,7 @@ function prepareOfficialScoreRequest(input = {}, actor = {}, options = {}) {
       tournamentId,
       scoreId,
       attemptKey,
+      sportingOpportunityKey,
       attemptId,
       requestId,
       recordId,
@@ -174,10 +177,14 @@ function applyOfficialScoreTransaction(currentTournament = {}, request = {}) {
   tournament.officialScoreLedger[request.attemptId] = ledger;
 
   tournament.scores = plainRecord(tournament.scores);
-  tournament.scores[request.scoreId] = request.scorePayload;
+  tournament.scores[request.scoreId] = mergeOfficialScoreCollection(
+    tournament.scores[request.scoreId],
+    request.scorePayload,
+    request.published
+  );
   tournament.publishedScores = normalizePublishedMap(tournament.publishedScores);
   for (const [key, value] of Object.entries(tournament.publishedScores)) {
-    if (!value || value.attemptKey !== request.attemptKey || value.superseded) continue;
+    if (!value || buildSportingOpportunityKey(value) !== request.sportingOpportunityKey || value.superseded) continue;
     tournament.publishedScores[key] = {
       ...value,
       superseded: true,
@@ -275,6 +282,7 @@ function buildOfficialRecord(request, revision, previousRecord) {
     ...published,
     id: request.recordId,
     attemptKey: request.attemptKey,
+    sportingOpportunityKey: request.sportingOpportunityKey,
     ledgerVersion: OFFICIAL_SCORE_LEDGER_VERSION,
     version: OFFICIAL_SCORE_RECORD_VERSION,
     revision,
@@ -428,12 +436,13 @@ function normalizeLedger(previous = {}, request = {}, legacyPublishedScores = {}
   const legacyRecords = hasLedger
     ? []
     : Object.values(normalizePublishedMap(legacyPublishedScores))
-      .filter((record) => record?.attemptKey === request.attemptKey)
-      .sort(compareLegacyOfficialRecords);
+      .filter((record) => buildSportingOpportunityKey(record) === request.sportingOpportunityKey)
+      .sort(compareOfficialChronology);
   const records = hasLedger
     ? previousRecords
     : Object.fromEntries(legacyRecords.map((record) => [record.id, normalizeLegacyOfficialRecord(record)]));
-  const activeLegacy = legacyRecords[0] || null;
+  const activeLegacyCandidates = legacyRecords.filter((record) => !record.superseded);
+  const activeLegacy = activeLegacyCandidates[activeLegacyCandidates.length - 1] || legacyRecords[legacyRecords.length - 1] || null;
   const sortedRecords = Object.values(records).sort(compareLegacyOfficialRecords);
   const declaredActiveRecordId = normalizePathId(previous.activeRecordId);
   const activeRecordId = records[declaredActiveRecordId]
@@ -458,6 +467,7 @@ function normalizeLedger(previous = {}, request = {}, legacyPublishedScores = {}
     ledgerVersion: OFFICIAL_SCORE_LEDGER_VERSION,
     attemptId: request.attemptId,
     attemptKey: request.attemptKey,
+    sportingOpportunityKey: request.sportingOpportunityKey,
     tournamentId: request.tournamentId,
     charreadaId: request.published.charreada.id,
     competitionId: request.published.competition?.id || request.published.charreada.competitionId || "",
@@ -482,7 +492,7 @@ function normalizeLedger(previous = {}, request = {}, legacyPublishedScores = {}
 function applyCanonicalLedgerStatus(publishedScores = {}, ledger = {}) {
   const records = normalizePublishedMap(publishedScores);
   for (const [recordId, record] of Object.entries(records)) {
-    if (record?.attemptKey !== ledger.attemptKey) continue;
+    if (buildSportingOpportunityKey(record) !== ledger.sportingOpportunityKey) continue;
     const active = recordId === ledger.activeRecordId;
     records[recordId] = {
       ...record,
@@ -550,6 +560,88 @@ function publishedFingerprintPayload(published) {
     total: published.total,
     breakdown: published.breakdown || null
   };
+}
+
+function buildSportingOpportunityKey(published = {}) {
+  const identity = published.breakdown?.attemptV2?.identity || {};
+  const opportunity = published.breakdown?.attemptV2?.sportState?.opportunity || {};
+  const tournamentId = normalizePathId(published.tournament?.id || published.tournamentId || identity.tournamentId);
+  const charreadaId = normalizePathId(published.charreada?.id || published.charreadaId || identity.charreadaId);
+  const teamId = normalizePathId(published.team?.id || published.teamId || identity.teamId);
+  const participantId = normalizePathId(published.participant?.id || published.participantId || identity.participantId);
+  const suerteId = normalizePathId(published.suerte?.id || published.suerteId || identity.suerteId);
+  if (!tournamentId || !charreadaId || (!teamId && !participantId) || !suerteId) return "";
+
+  const competitionId = normalizePathId(
+    published.competition?.id || published.competitionId || published.charreada?.competitionId || identity.competitionId
+  ) || "competition";
+  const individual = published.competition?.scope === "individual" || published.participantScope === "individual";
+  const entityId = individual ? participantId || teamId : teamId;
+  const sharedOpportunityId = normalizeText(
+    published.sharedOpportunityId || published.attempt?.sharedOpportunityId || opportunity.sharedOpportunityId,
+    500
+  );
+  const opportunityNumber = Math.max(1, nonNegativeInteger(
+    opportunity.sharedSequenceNumber || opportunity.number || identity.opportunityNumber || published.sharedSequenceNumber,
+    nonNegativeInteger(published.attemptIndex, 0) + 1
+  ));
+  const parts = [tournamentId, competitionId, charreadaId, entityId, suerteId];
+
+  if (sharedOpportunityId) {
+    parts.push(`shared:${sharedOpportunityId}`);
+  } else {
+    parts.push(`op:${opportunityNumber}`);
+    if (suerteId === "colas" || published.suerte?.type === "coleadero") {
+      const participantSlot = firstNonNegativeInteger([
+        identity.participantSlot,
+        published.participantSlot,
+        published.coleadorIndex
+      ], 0);
+      parts.push(`participant:${participantId || participantSlot}`);
+    }
+  }
+  return parts.join("__");
+}
+
+function mergeOfficialScoreCollection(currentCollection, proposedCollection, published = {}) {
+  if (!Array.isArray(proposedCollection)) return proposedCollection;
+  if (!Array.isArray(currentCollection)) return proposedCollection;
+  const attemptIndex = nonNegativeInteger(published.attemptIndex, 0);
+  const coleadorIndex = nonNegativeInteger(published.coleadorIndex, 0);
+  const coleadero = published.suerte?.type === "coleadero" || published.suerte?.id === "colas";
+  const merged = sanitizeValue(currentCollection, { maxDepth: 14, maxArray: 300, maxKeys: 500 });
+
+  if (coleadero) {
+    if (!Array.isArray(proposedCollection[coleadorIndex])) return proposedCollection;
+    if (!Array.isArray(merged[coleadorIndex])) merged[coleadorIndex] = [];
+    merged[coleadorIndex][attemptIndex] = proposedCollection[coleadorIndex][attemptIndex];
+    return merged;
+  }
+
+  merged[attemptIndex] = proposedCollection[attemptIndex];
+  return merged;
+}
+
+function firstNonNegativeInteger(candidates, fallback) {
+  for (const candidate of candidates) {
+    if (candidate === null || candidate === undefined || candidate === "") continue;
+    const parsed = Number(candidate);
+    if (Number.isSafeInteger(parsed) && parsed >= 0) return parsed;
+  }
+  return fallback;
+}
+
+function compareOfficialChronology(left = {}, right = {}) {
+  return officialTimestamp(left) - officialTimestamp(right)
+    || nonNegativeInteger(left.revision, 0) - nonNegativeInteger(right.revision, 0)
+    || String(left.id || "").localeCompare(String(right.id || ""));
+}
+
+function officialTimestamp(record = {}) {
+  const numeric = Number(record.timestampMs || record.updatedAtMs || record.createdAtMs || 0);
+  if (Number.isFinite(numeric) && numeric > 0) return numeric;
+  const parsed = Date.parse(record.publishedAt || record.updatedAt || record.timestamp || record.createdAt || "");
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function buildAttemptKey(published) {

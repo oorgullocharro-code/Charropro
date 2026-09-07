@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { sha256, sha256Fallback } from "../js/core/configurationBootstrap.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import { sha256, sha256Fallback } from "../js/core/configurationBootstrap.js";
 
 assert.equal(sha256Fallback("abc"), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
 assert.equal(sha256Fallback("CharroPro LAN local"), await sha256("CharroPro LAN local"));

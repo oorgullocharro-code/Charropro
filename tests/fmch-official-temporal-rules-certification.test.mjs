@@ -7,9 +7,9 @@ import {
   getFmchOfficialTemporalPolicy,
   resolveFmchOfficialTemporalContracts,
   validateFmchOfficialTemporalPolicy
-} from "../js/core/timerRules.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "../js/core/timerRules.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 const PROFILE_CONTEXT = Object.freeze({
   profileId: "FMCH_2026_LIBRE",

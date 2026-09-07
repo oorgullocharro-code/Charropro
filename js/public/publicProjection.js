@@ -8,16 +8,20 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "./publicProjectionSchema.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "./publicLiveFeed.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
-import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+} from "../data/competitionTypes.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import {
+  buildCanonicalOfficialResults,
+  getCanonicalOfficialTeamTotals
+} from "../core/canonicalOfficialResults.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 export const PUBLIC_PROJECTION_VERSION = "2.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({
@@ -54,12 +58,17 @@ export function buildPublicProjection(source = {}, options = {}) {
     .slice(0, MAX_PROGRAM_ITEMS)
     .map((charreada, index) => normalizeCharreada(charreada, tournament, teams, index));
   const active = resolveActiveContext(tournament, liveCurrent, charreadas);
-  const published = normalizePublishedScores(tournament.publishedScores, {
+  const canonicalOfficialResults = buildCanonicalOfficialResults({
+    publishedScores: tournament.publishedScores,
+    officialScoreLedger: tournament.officialScoreLedger,
+    tournamentId
+  });
+  const published = normalizePublishedScores(canonicalOfficialResults.currentRecords, {
     tournamentId,
     charreadas,
     teams
   });
-  const results = buildResults(published, charreadas);
+  const results = buildResults(published, charreadas, canonicalOfficialResults.currentRecords, tournament.charreadas);
   const rankingItems = buildOfficialRankingItems(results.items);
   const competitions = buildCompetitions(charreadas, results.items, tournament);
   const sourceUpdatedAt = resolveSourceUpdatedAt(tournament, liveCurrent, published, charreadas);
@@ -442,7 +451,7 @@ function normalizePublishedScore(record, sourceKey, context) {
   };
 }
 
-function buildResults(published, charreadas) {
+function buildResults(published, charreadas, currentRecords = [], sourceCharreadas = []) {
   const rows = new Map();
   for (const score of published) {
     const charreada = charreadas.find((item) => item.charreadaId === score.charreadaId) || null;
@@ -494,12 +503,18 @@ function buildResults(published, charreadas) {
     if (score.publishedAt > row.publishedAt) row.publishedAt = score.publishedAt;
     row.sourceRevision = Math.max(row.sourceRevision, score.sourceRevision);
   }
-  const items = [...rows.values()].slice(0, MAX_RESULT_ROWS).map((row) => ({
-    ...row,
-    accumulatedTotal: row.subtotal,
-    totalStatus: row.officialTotal === null ? "partial" : "final",
-    provisionalPosition: null
-  }));
+  const items = [...rows.values()].slice(0, MAX_RESULT_ROWS).map((row) => {
+    const canonicalTotals = getCanonicalOfficialTeamTotals({ currentRecords, charreadas: sourceCharreadas }, {
+      charreadaId: row.charreadaId,
+      teamId: row.participantScope === "individual" ? row.participantId : row.teamId
+    });
+    return {
+      ...row,
+      accumulatedTotal: canonicalTotals.total,
+      totalStatus: row.officialTotal === null ? "partial" : "final",
+      provisionalPosition: null
+    };
+  });
   const scopes = {};
   for (const row of items) {
     const key = [

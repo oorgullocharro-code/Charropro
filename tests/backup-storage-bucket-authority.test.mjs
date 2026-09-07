@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import backupService from "../functions/backupService.js?v=20260831-official-ranking-authority-public-parity-compatibility-001-v1";
+import backupService from "../functions/backupService.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
 
 const bucketNames = [];
 const files = new Map();
