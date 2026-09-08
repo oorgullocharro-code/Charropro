@@ -15,6 +15,7 @@ const functionsConfigs = Array.isArray(firebaseConfig.functions)
 assert.equal(functionsConfigs.some((entry) => entry?.runtime), false);
 
 const expectedExports = [
+  "reconcileCharroProHistoricalResults",
   "upsertCharroProUser",
   "publishCharroProOfficialScore",
   "deliverCharroProOfficialScoreFanout",

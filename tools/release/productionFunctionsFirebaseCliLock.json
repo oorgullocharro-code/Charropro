@@ -1,0 +1,8 @@
+{
+  "firebaseToolsVersion": "15.20.0",
+  "files": {
+    "lib/deploy/functions/release/planner.js": "d5dfdb9a278f64dfcc568afb9086675760bb5de42b5f2f93d40848f30917b06e",
+    "lib/deploy/functions/release/index.js": "b9ae7881a2d32255d226de8df91a5d429243d8e8507ccf966f5f7a4dc67b05fb",
+    "lib/deploy/functions/release/fabricator.js": "f65985ce60ce8e97b9a50d4c59ce132a3b0683841ffbb9f49a8499db53f23544"
+  }
+}

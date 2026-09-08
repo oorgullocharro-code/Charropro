@@ -11,6 +11,7 @@
     "getCharroProRuleProfileLifecycle",
     "publishCharroProConfiguration",
     "publishCharroProOfficialScore",
+    "reconcileCharroProHistoricalResults",
     "transitionCharroProRuleProfileLifecycle",
     "upsertCharroProUser"
   ],
@@ -24,10 +25,13 @@
     "validateCharroProRestore"
   ],
   "expectedProduction": {
-    "count": 10,
+    "count": 11,
     "generation": "gcfv2",
     "region": "us-central1",
     "runtime": "nodejs22",
     "status": "ACTIVE"
-  }
+  },
+  "allowedInitialCreates": [
+    "reconcileCharroProHistoricalResults"
+  ]
 }

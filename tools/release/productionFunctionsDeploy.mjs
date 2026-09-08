@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { inspectFirebaseCli } from "./productionFunctionsFirebaseGuard.mjs";
 
 const MODULE_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_MANIFEST_PATH = path.join(MODULE_DIRECTORY, "productionFunctionsAllowlist.json");
@@ -23,28 +24,31 @@ export function loadProductionFunctionsAllowlist(manifestPath = DEFAULT_MANIFEST
   } catch (error) {
     throw new ProductionFunctionsDeployError("allowlist-read-failed", { manifestPath, cause: error.message });
   }
+  return validateAllowlist(value);
+}
+
+export function validateAllowlist(value) {
   if (!isPlainObject(value) || value.schemaVersion !== "charropro-production-functions-allowlist/1") {
     throw new ProductionFunctionsDeployError("allowlist-schema-invalid");
   }
-  const authorizedFunctions = normalizedUniqueNames(value.authorizedFunctions, "allowlist-authorized-functions-invalid");
-  const excludedRepositoryExports = normalizedUniqueNames(value.excludedRepositoryExports, "allowlist-excluded-exports-invalid");
-  if (!authorizedFunctions.length) throw new ProductionFunctionsDeployError("allowlist-empty");
-  const overlap = authorizedFunctions.filter((name) => excludedRepositoryExports.includes(name));
-  if (overlap.length) throw new ProductionFunctionsDeployError("allowlist-overlap", { overlap });
-  const expectedProduction = value.expectedProduction;
-  if (!isPlainObject(expectedProduction) || expectedProduction.count !== authorizedFunctions.length) {
-    throw new ProductionFunctionsDeployError("allowlist-production-count-invalid");
+  const authorized = normalizedUniqueNames(value.authorizedFunctions, "allowlist-authorized-functions-invalid");
+  const excluded = normalizedUniqueNames(value.excludedRepositoryExports, "allowlist-excluded-exports-invalid");
+  const creates = normalizedUniqueNames(value.allowedInitialCreates, "allowlist-initial-creates-invalid");
+  if (!authorized.length || authorized.some(name => excluded.includes(name)) || creates.some(name => !authorized.includes(name))) {
+    throw new ProductionFunctionsDeployError("allowlist-membership-invalid");
   }
-  for (const key of ["generation", "region", "runtime", "status"]) {
-    normalizedString(expectedProduction[key], "allowlist-production-contract-invalid");
+  const expected = value.expectedProduction;
+  if (!isPlainObject(expected) || expected.count !== authorized.length ||
+      expected.generation !== "gcfv2" || expected.region !== "us-central1" ||
+      expected.runtime !== "nodejs22" || expected.status !== "ACTIVE" ||
+      value.projectId !== DEFAULT_PROJECT_ID || value.codebase !== "default") {
+    throw new ProductionFunctionsDeployError("allowlist-production-contract-invalid");
   }
-  return Object.freeze({
-    schemaVersion: value.schemaVersion,
-    projectId: normalizedProjectId(value.projectId),
-    codebase: normalizedString(value.codebase, "allowlist-codebase-invalid"),
-    authorizedFunctions: Object.freeze([...authorizedFunctions].sort()),
-    excludedRepositoryExports: Object.freeze([...excludedRepositoryExports].sort()),
-    expectedProduction: Object.freeze({ ...expectedProduction })
+  return Object.freeze({ ...value,
+    authorizedFunctions: Object.freeze([...authorized].sort()),
+    excludedRepositoryExports: Object.freeze([...excluded].sort()),
+    allowedInitialCreates: Object.freeze([...creates].sort()),
+    expectedProduction: Object.freeze({ ...expected })
   });
 }
 
@@ -60,63 +64,35 @@ export function buildProductionFunctionTargets(authorizedFunctions) {
   return Object.freeze([...names].sort().map((name) => `functions:${name}`));
 }
 
-export function validateProductionFunctionsContract({ repositoryExports, manifest, productionFunctions = null }) {
+export function validateProductionFunctionsContract({ repositoryExports, manifest, productionFunctions = null,
+  requestedTargets, expectedCreates = [], phase = "before" }) {
+  manifest = validateAllowlist(manifest);
   const exported = normalizedUniqueNames(repositoryExports, "repository-exports-invalid").sort();
-  const allowlist = manifest?.authorizedFunctions;
-  const exclusions = manifest?.excludedRepositoryExports;
-  const authorized = normalizedUniqueNames(allowlist, "allowlist-authorized-functions-invalid").sort();
-  const excluded = normalizedUniqueNames(exclusions, "allowlist-excluded-exports-invalid").sort();
-  if (!authorized.length) throw new ProductionFunctionsDeployError("allowlist-empty");
-  if (authorized.length + excluded.length !== exported.length) {
-    throw new ProductionFunctionsDeployError("repository-export-contract-drift", {
-      exported,
-      authorized,
-      excluded
-    });
+  const authorized = manifest.authorizedFunctions;
+  const excluded = manifest.excludedRepositoryExports;
+  if (exported.length !== authorized.length + excluded.length ||
+      exported.some(name => !authorized.includes(name) && !excluded.includes(name)) ||
+      [...authorized, ...excluded].some(name => !exported.includes(name))) {
+    throw new ProductionFunctionsDeployError("repository-export-contract-drift");
   }
-  const unknownExports = exported.filter((name) => !authorized.includes(name) && !excluded.includes(name));
-  const missingAuthorizedExports = authorized.filter((name) => !exported.includes(name));
-  const missingExcludedExports = excluded.filter((name) => !exported.includes(name));
-  if (unknownExports.length || missingAuthorizedExports.length || missingExcludedExports.length) {
-    throw new ProductionFunctionsDeployError("repository-export-contract-drift", {
-      unknownExports,
-      missingAuthorizedExports,
-      missingExcludedExports
-    });
+  const requested = parseRequestedTargets(requestedTargets, authorized);
+  const creates = normalizedUniqueNames(expectedCreates, "expected-creates-invalid").sort();
+  if (creates.some(name => !manifest.allowedInitialCreates.includes(name) || !requested.includes(name))) {
+    throw new ProductionFunctionsDeployError("unexpected-create-requested");
   }
-  const targets = buildProductionFunctionTargets(authorized);
-  const result = {
-    exported,
-    authorized,
-    excluded,
-    targets,
-    production: null
-  };
+  if (!["before", "after"].includes(phase)) throw new ProductionFunctionsDeployError("invalid-inventory-phase");
+  const result = { exported, authorized, excluded, requested, targets: buildProductionFunctionTargets(requested),
+    expectedCreates: creates, expectedDeletes: [], production: null, phase };
   if (productionFunctions !== null) {
     const production = normalizeProductionInventory(productionFunctions);
     const expected = manifest.expectedProduction;
-    const productionNames = production.map((item) => item.id).sort();
-    const unexpectedDeployed = productionNames.filter((name) => !authorized.includes(name));
-    const missingAuthorizedDeployed = authorized.filter((name) => !productionNames.includes(name));
-    const contractViolations = production.filter((item) => (
-      item.platform !== expected.generation ||
-      item.region !== expected.region ||
-      item.runtime !== expected.runtime ||
-      item.state !== expected.status
-    ));
-    if (production.length !== expected.count || unexpectedDeployed.length || missingAuthorizedDeployed.length || contractViolations.length) {
+    const expectedNames = authorized.filter(name => phase === "after" || !creates.includes(name));
+    const names = production.map(item => item.id).sort();
+    const violations = production.filter(item => item.platform !== expected.generation || item.region !== expected.region ||
+      item.runtime !== expected.runtime || item.state !== expected.status);
+    if (JSON.stringify(names) !== JSON.stringify(expectedNames) || violations.length) {
       throw new ProductionFunctionsDeployError("production-function-inventory-drift", {
-        expectedCount: expected.count,
-        actualCount: production.length,
-        unexpectedDeployed,
-        missingAuthorizedDeployed,
-        contractViolations: contractViolations.map((item) => ({
-          id: item.id,
-          platform: item.platform,
-          region: item.region,
-          runtime: item.runtime,
-          state: item.state
-        }))
+        expectedNames, actualNames: names, contractViolations: violations
       });
     }
     result.production = Object.freeze(production);
@@ -129,26 +105,27 @@ export function parseRequestedTargets(targets, authorizedFunctions) {
   const authorized = normalizedUniqueNames(authorizedFunctions, "allowlist-authorized-functions-invalid");
   const invalid = requested.filter((target) => !authorized.includes(target));
   if (invalid.length) throw new ProductionFunctionsDeployError("unauthorized-target-requested", { invalid });
-  if (requested.length !== authorized.length || requested.some((target) => !authorized.includes(target))) {
-    throw new ProductionFunctionsDeployError("authorized-target-set-incomplete", { requested, authorized });
-  }
+  if (!requested.length) throw new ProductionFunctionsDeployError("empty-target-set");
   return Object.freeze([...requested].sort());
 }
 
-export function firebaseDeployArguments({ projectId, targets }) {
+export function firebaseDeployArguments({ projectId, targets, manifest }) {
+  manifest = validateAllowlist(manifest);
+  targets = parseRequestedTargets(targets, manifest.authorizedFunctions);
+  if (projectId !== manifest.projectId) throw new ProductionFunctionsDeployError("project-not-authorized");
   const project = normalizedProjectId(projectId);
   const normalizedTargets = buildProductionFunctionTargets(targets);
-  return Object.freeze(["deploy", "--only", normalizedTargets.join(","), "--project", project]);
+  return Object.freeze(["deploy", "--only", normalizedTargets.join(","), "--project", project, "--non-interactive"]);
 }
 
 function readRepositoryExports(root) {
   return discoverRepositoryFunctionExports(readFileSync(path.join(root, "functions/index.js"), "utf8"));
 }
 
-function readProductionInventory(projectId) {
+export function readProductionInventory(projectId, cli) {
   let output = "";
   try {
-    output = execFileSync("firebase", ["functions:list", "--project", projectId, "--json"], {
+    output = execFileSync(process.execPath, [cli, "functions:list", "--project", projectId, "--json"], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"]
     });
@@ -212,58 +189,75 @@ function extractJsonObject(value, start) {
 }
 
 function printPreflight(result) {
-  console.log(`EXPORTED_COUNT=${result.exported.length}`);
-  console.log(`AUTHORIZED_COUNT=${result.authorized.length}`);
-  console.log(`UNAUTHORIZED_EXPORTED_COUNT=${result.excluded.length}`);
-  console.log(`AUTHORIZED_TARGET_COUNT=${result.targets.length}`);
-  console.log("UNAUTHORIZED_TARGET_COUNT=0");
-  console.log("CREATE_UNAUTHORIZED=0");
-  console.log("DELETE_UNAUTHORIZED=0");
-  console.log(`AUTHORIZED_TARGETS=${result.targets.join(",")}`);
-  console.log(`EXCLUDED_REPOSITORY_EXPORTS=${result.excluded.join(",")}`);
+  console.log(`AUTHORIZED_FUNCTIONS_COUNT=${result.authorized.length}`);
+  console.log(`AUTHORIZED_FUNCTIONS=${result.authorized.join(",")}`);
+  console.log(`REQUESTED_TARGETS=${result.targets.join(",")}`);
+  console.log("UNAUTHORIZED_TARGETS=0");
+  console.log(`OTHER_AUTHORIZED_FUNCTIONS_TARGETED=${result.authorized.filter(name => !result.requested.includes(name)).filter(name => result.targets.includes(`functions:${name}`)).length}`);
+  console.log("EXCLUDED_EXPORTS_TARGETED=0");
+  console.log(`CREATE_EXPECTED=${result.expectedCreates.join(",") || "NONE"}`);
+  console.log("DELETE_EXPECTED=NONE");
   if (result.production) console.log(`PRODUCTION_DEPLOYED_COUNT=${result.production.length}`);
-  console.log("PREFLIGHT=PASS");
+  console.log(result.production ? "PREFLIGHT=PASS" : "LOCAL_CONTRACT=PASS; PRODUCTION_INVENTORY=NOT_CHECKED");
 }
 
-function parseCliArguments(argv) {
+export function parseCliArguments(argv) {
   const [command = "preflight", ...rest] = argv;
-  const options = { command, projectId: "", execute: false };
+  const options = { command, projectId: "", execute: false, requestedTargets: [], expectedCreates: [] };
+  const seen = new Set();
   while (rest.length) {
     const value = rest.shift();
+    if (seen.has(value)) throw new ProductionFunctionsDeployError("duplicate-cli-argument", { value });
+    seen.add(value);
     if (value === "--project") options.projectId = rest.shift() || "";
+    else if (value === "--targets") options.requestedTargets = (rest.shift() || "").split(",");
+    else if (value === "--expect-create") options.expectedCreates = (rest.shift() || "").split(",");
     else if (value === "--execute") options.execute = true;
     else throw new ProductionFunctionsDeployError("unknown-cli-argument", { value });
   }
-  if (!["preflight", "dry-run", "deploy"].includes(options.command)) {
-    throw new ProductionFunctionsDeployError("unknown-command", { command: options.command });
-  }
-  if (options.command === "deploy" && !options.execute) {
-    throw new ProductionFunctionsDeployError("deploy-requires-explicit-execute");
-  }
+  if (!["preflight", "postflight", "dry-run", "deploy"].includes(command)) throw new ProductionFunctionsDeployError("unknown-command");
+  if (command === "deploy" && !options.execute) throw new ProductionFunctionsDeployError("deploy-requires-explicit-execute");
+  if (command !== "deploy" && options.execute) throw new ProductionFunctionsDeployError("unexpected-execute");
+  if (!options.requestedTargets.length) throw new ProductionFunctionsDeployError("empty-target-set");
   return options;
+}
+
+export function validateFirebaseConfiguration(root) {
+  const config = JSON.parse(readFileSync(path.join(root, "firebase.json"), "utf8"));
+  if (!Array.isArray(config.functions) || config.functions.length !== 1 ||
+      config.functions[0].codebase !== "default" || config.functions[0].source !== "functions" ||
+      config.functions[0].predeploy || config.functions[0].postdeploy || config.functions[0].runtime || config.extensions) {
+    throw new ProductionFunctionsDeployError("firebase-deployment-config-drift");
+  }
+  const pkg = JSON.parse(readFileSync(path.join(root, "functions/package.json"), "utf8"));
+  if (pkg.engines?.node !== "22") throw new ProductionFunctionsDeployError("firebase-runtime-drift");
 }
 
 function main(argv) {
   const options = parseCliArguments(argv);
   const root = path.resolve(MODULE_DIRECTORY, "../..");
   const manifest = loadProductionFunctionsAllowlist();
-  const projectId = options.projectId ? normalizedProjectId(options.projectId) : manifest.projectId;
-  if (projectId !== manifest.projectId) throw new ProductionFunctionsDeployError("project-not-authorized", { projectId });
-  const production = options.command === "dry-run" ? null : readProductionInventory(projectId);
-  const result = validateProductionFunctionsContract({
-    repositoryExports: readRepositoryExports(root),
-    manifest,
-    productionFunctions: production
-  });
+  const projectId = options.projectId || manifest.projectId;
+  if (projectId !== manifest.projectId) throw new ProductionFunctionsDeployError("project-not-authorized");
+  validateFirebaseConfiguration(root);
+  const request = { repositoryExports: readRepositoryExports(root), manifest,
+    requestedTargets: options.requestedTargets, expectedCreates: options.expectedCreates,
+    phase: options.command === "postflight" ? "after" : "before" };
+  // Reject invalid local input before any network request.
+  let result = validateProductionFunctionsContract(request);
+  if (options.command === "dry-run") { printPreflight(result); return; }
+  const cli = inspectFirebaseCli();
+  result = validateProductionFunctionsContract({ ...request, productionFunctions: readProductionInventory(projectId, cli) });
   printPreflight(result);
-  if (options.command === "dry-run") {
-    console.log("DRY_RUN=PASS");
-    return;
-  }
   if (options.command === "deploy") {
-    const args = firebaseDeployArguments({ projectId, targets: result.authorized });
+    const args = firebaseDeployArguments({ projectId, targets: result.requested, manifest });
     console.log(`FIREBASE_COMMAND=firebase ${args.join(" ")}`);
-    execFileSync("firebase", args, { stdio: "inherit" });
+    // The child checks the actual Firebase planner AND Fabricator plan before function mutations.
+    execFileSync(process.execPath, [path.join(MODULE_DIRECTORY, "productionFunctionsFirebaseGuard.mjs"),
+      JSON.stringify({ cli, request: { requestedTargets: result.requested, expectedCreates: result.expectedCreates }, args })],
+      { cwd: root, stdio: "inherit" });
+    validateProductionFunctionsContract({ ...request, phase: "after", productionFunctions: readProductionInventory(projectId, cli) });
+    console.log("POSTFLIGHT=PASS");
   }
 }
 

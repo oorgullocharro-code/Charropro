@@ -1,0 +1,8 @@
+{
+  "public/publicProjection.js": "25b08b2689734dd4073e0c36560d032253cdb7704ac749f625f92ee15ecb79d0",
+  "public/publicProjectionSchema.js": "80959a5b236b3667920a90e8bd34baaf709779181d4a751c5a9f8874f0e51507",
+  "public/publicLiveFeed.js": "1367f4c8b6be1e85ddf2b9ba7402b926196772c8f3c795bbb340f8f21c9da7cd",
+  "data/competitionTypes.js": "4c6bc7df76ef2821d4284accbc86ffb7cdeb65ec080a1740ccc128ca4668103b",
+  "core/officialRanking.js": "2c456de9d2f073264ebb5a3ce6a5af3eef4e43cc2410ffce06fcb557d4350951",
+  "core/canonicalOfficialResults.js": "2f0f6c5b8f62575c2dc88815e811ededdbe3f1bd23fe41106d96b996b1591184"
+}

@@ -55,6 +55,45 @@ const { createFirebaseRestCas } = require("./firebaseRestCas");
 
 admin.initializeApp();
 
+// Administrative recovery API. NOT authorized for production deployment yet.
+exports.reconcileCharroProHistoricalResults = onCall({ region: "us-central1", timeoutSeconds: 540, memory: "1GiB" }, async (request) => {
+  if (!request.auth?.uid) throw new HttpsError("unauthenticated", "Autenticacion requerida.");
+  const user = await admin.auth().getUser(request.auth.uid);
+  if (user.disabled) throw new HttpsError("permission-denied", "Usuario inactivo.");
+  const { createReconciliationService, databaseSignature } = await import("./historicalReconciliation.mjs");
+  const cas = createFirebaseRestCas(admin);
+  const bucket = admin.storage().bucket();
+  const service = createReconciliationService({
+    now: () => Date.now(),
+    // Use the same endpoint/namespace for read-only plans and conditional commits.
+    readRoot: async () => (await cas.compareAndSwap("charropro", root => ({ outcome: { ok: false, root: root || {} } }))).root,
+    readBackup: async (objectPath) => {
+      const file = bucket.file(objectPath);
+      if (!(await file.exists())[0]) return null;
+      return JSON.parse((await file.download())[0].toString("utf8"));
+    },
+    createBackup: async (objectPath, backup) => bucket.file(objectPath).save(JSON.stringify(backup), {
+      resumable: false, contentType: "application/json", preconditionOpts: { ifGenerationMatch: 0 }
+    }),
+    atomic: async (apply) => {
+      // RTDB has no atomic multi-location conditional patch. Root ETag CAS preserves
+      // all siblings byte-for-byte; the engine rejects any delta outside its explicit scope.
+      const outcome = await cas.compareAndSwap("charropro", (root) => {
+        const applied = apply(root || {});
+        return { state: applied.root, outcome: { ok: databaseSignature(root) !== databaseSignature(applied.root), result: applied.result } };
+      });
+      if (!outcome.result) throw new Error(outcome.reason || "reconciliation-cas-failed");
+      return outcome.result;
+    }
+  });
+  try { return await service(request.data || {}, request.auth.uid); }
+  catch (error) {
+    const reason = error.code || "reconciliation-failed";
+    const denied = /auth|required|denied/.test(reason) && /auth|supervisor|access/.test(reason);
+    throw new HttpsError(denied ? "permission-denied" : /conflict/.test(reason) ? "aborted" : "failed-precondition", reason);
+  }
+});
+
 const baselineValidation = validateRuntimeConfigurationBaseline(configurationDefaults);
 if (!baselineValidation.valid) {
   throw new ConfigurationEngineError("configuration-baseline-invalid", { errors: baselineValidation.errors });
