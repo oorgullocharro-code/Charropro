@@ -5,8 +5,8 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

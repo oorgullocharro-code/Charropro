@@ -1,6 +1,6 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import { selectOfficialRanking } from "../core/officialRanking.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

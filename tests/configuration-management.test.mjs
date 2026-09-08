@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import configurationService from "../functions/configurationService.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import configurationService from "../functions/configurationService.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import { getTeam, state } from "./state.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { getTeam, state } from "./state.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);

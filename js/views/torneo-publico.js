@@ -1,3 +1,3 @@
-import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 bootstrapPublicPortal();

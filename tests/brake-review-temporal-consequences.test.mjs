@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(59_999), []);
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(60_000), []);

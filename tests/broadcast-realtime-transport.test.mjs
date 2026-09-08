@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

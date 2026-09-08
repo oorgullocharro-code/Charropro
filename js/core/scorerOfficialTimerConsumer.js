@@ -1,4 +1,4 @@
-import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export function createScorerOfficialTimerConsumer(options = {}) {
   const readState = typeof options.readState === "function" ? options.readState : () => ({});

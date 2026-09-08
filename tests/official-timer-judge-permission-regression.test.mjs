@@ -3,12 +3,12 @@ import { readFile } from "node:fs/promises";
 import {
   applyOfficialTimerCommand,
   createOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../js/core/timerRules.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer
-} from "../js/core/brakeReviewPhase.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const rawRules = await readFile(new URL("../firebase-rules-auditoria.json", import.meta.url), "utf8");
 const timerRule = JSON.stringify(JSON.parse(rawRules).rules.charropro.tournaments.$tournamentId.officialTimers.$timerKey);

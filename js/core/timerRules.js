@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

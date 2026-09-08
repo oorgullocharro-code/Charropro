@@ -1,4 +1,4 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

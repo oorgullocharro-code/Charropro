@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "./state.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

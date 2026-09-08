@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const guard = createBrakeReviewAutomaticCommandGuard();
 const key = "timer-a:review-0:minute-1";

@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "./componentLibrary.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

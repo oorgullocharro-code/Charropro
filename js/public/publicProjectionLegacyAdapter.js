@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

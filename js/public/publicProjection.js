@@ -8,20 +8,20 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "./publicProjectionSchema.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "./publicLiveFeed.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../data/competitionTypes.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals
-} from "../core/canonicalOfficialResults.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../core/canonicalOfficialResults.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const PUBLIC_PROJECTION_VERSION = "2.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({

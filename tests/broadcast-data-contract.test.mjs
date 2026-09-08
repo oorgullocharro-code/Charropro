@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260907-canonical-official-results-public-projection-parity-001-v1",
+      "appVersion": "20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "3c9387b6c78e2942484214b5d5170b71b8191b24f4bf1d251f8cb432d365d508",
-  "fingerprint": "3c9387b6c78e2942484214b5d5170b71b8191b24f4bf1d251f8cb432d365d508"
+  "checksum": "98792e7b8a6f303b1aafa05111999db605ce36baba42f1ddb138d2815a6b8558",
+  "fingerprint": "98792e7b8a6f303b1aafa05111999db605ce36baba42f1ddb138d2815a6b8558"
 }
