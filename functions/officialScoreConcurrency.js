@@ -152,6 +152,7 @@ function applyOfficialScoreTransaction(currentTournament = {}, request = {}) {
     ledger.records[ledger.activeRecordId] = {
       ...previousRecord,
       status: "historical",
+      officialStatus: "historical",
       superseded: true,
       supersededBy: request.recordId,
       supersededAt: request.timestamp
@@ -190,6 +191,7 @@ function applyOfficialScoreTransaction(currentTournament = {}, request = {}) {
       superseded: true,
       supersededBy: request.recordId,
       supersededAt: request.timestamp,
+      status: "historical",
       officialStatus: "historical"
     };
   }

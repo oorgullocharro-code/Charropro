@@ -2,8 +2,9 @@ import { createHash } from 'node:crypto';
 import foundation from './backupFoundation.js';
 import { buildCanonicalOfficialResults, getCanonicalSportingOpportunityKey, getCanonicalOfficialTeamTotals, getOfficialRecordValue } from './reconciliationShared/core/canonicalOfficialResults.js';
 import { buildPublicProjection, reconcilePublicProjection } from './reconciliationShared/public/publicProjection.js';
+import { compareLegacyLedgerRecordRepresentations, LEGACY_LEDGER_COMPATIBILITY_RESULT } from './legacyLedgerRecordCompatibility.mjs';
 
-export const RECONCILIATION_BUILD = '20260907-canonical-historical-reconciliation-tooling-001-v1';
+export const RECONCILIATION_BUILD = '20260908-legacy-ledger-record-state-compatibility-adapter-001-v1';
 export const REASON = 'PRE_CANONICAL_SHARED_OPPORTUNITY_DUPLICATE';
 const clone = v => structuredClone(v);
 export const signature = v => createHash('sha256').update(foundation.stableStringify(v)).digest('hex');
@@ -87,6 +88,7 @@ export function dryRun(root, input, uid) {
   const allTargetIds = new Set(target.map(r => r.id));
   const ledgerEntries = Object.entries(t.officialScoreLedger).filter(([, l]) => objects(l.records).some(r => allTargetIds.has(r.id)));
   requireThat(ledgerEntries.length > 0, 'ledger-incompatible');
+  const legacyCompatibleRecordIds = [];
   for (const r of target) {
     requireThat(id(r.id) && t.publishedScores[r.id]?.id === r.id, 'record-id-incompatible');
     const identity = r.breakdown?.attemptV2?.identity;
@@ -94,8 +96,22 @@ export function dryRun(root, input, uid) {
     requireThat(r.attemptKey === `${tid}__${input.charreadaId}__${input.teamId}__${r.suerte.id}__${r.attemptIndex}__${r.coleadorIndex}`, 'attempt-key-incompatible');
     requireThat(Number.isSafeInteger(r.revision) && r.revision >= 1 && Number(r.timestampMs) > 0, 'chronology-required');
     requireThat(Number.isFinite(r.total) && r.total === getOfficialRecordValue(r), 'sporting-values-incompatible');
-    const copies = ledgerEntries.flatMap(([, l]) => objects(l.records).filter(x => x.id === r.id));
-    requireThat(copies.length === 1 && signature(copies[0]) === signature(r), 'ledger-record-incompatible');
+    const copies = ledgerEntries.flatMap(([ledgerId, ledger]) => objects(ledger.records)
+      .filter(x => x.id === r.id).map(record => ({ ledgerId, ledger, record })));
+    requireThat(copies.length === 1, 'ledger-record-incompatible');
+    const copy = copies[0];
+    const successorId = r.supersededBy || copy.record.supersededBy || '';
+    const compatibility = compareLegacyLedgerRecordRepresentations({
+      publishedRecord: r,
+      ledgerRecord: copy.record,
+      successorPublishedRecord: successorId ? t.publishedScores[successorId] : null,
+      successorLedgerRecord: successorId ? copy.ledger.records?.[successorId] : null,
+      authoritativeActiveRecordIds: [copy.ledger.activeRecordId]
+    });
+    requireThat(compatibility.compatible, `ledger-record-incompatible:${compatibility.reason}`);
+    if (compatibility.result === LEGACY_LEDGER_COMPATIBILITY_RESULT.LEGACY_STATE_ASYMMETRY_COMPATIBLE) {
+      legacyCompatibleRecordIds.push(r.id);
+    }
   }
   const requestMap = {};
   for (const [lid, ledger] of ledgerEntries) {
@@ -123,6 +139,11 @@ export function dryRun(root, input, uid) {
     currentRecordId: current.id, supersededRecordIds: active.filter(r => r.id !== current.id).map(r => r.id).sort(),
     targetRecordIds: [...allTargetIds].sort(), legacyLedgerIds: ledgerEntries.map(([lid]) => lid).sort(), attemptId,
     canonicalValue: getOfficialRecordValue(current), totals: getCanonicalOfficialTeamTotals(t, { tournamentId: tid, charreadaId: input.charreadaId, teamId: input.teamId }),
+    legacyCompatibilityApplied: legacyCompatibleRecordIds.length > 0,
+    legacyCompatibleRecordIds: legacyCompatibleRecordIds.sort(),
+    compatibilityReason: legacyCompatibleRecordIds.length > 0
+      ? LEGACY_LEDGER_COMPATIBILITY_RESULT.LEGACY_STATE_ASYMMETRY_COMPATIBLE
+      : LEGACY_LEDGER_COMPATIBILITY_RESULT.EXACT_MATCH,
     beforeSignature, requestKey: requestKey(input, uid), sourceRevision: t.meta?.updatedAtMs || t.meta?.updatedAt || null,
     writeScope: [...active.filter(r => r.id !== current.id).map(r => `tournaments/${tid}/publishedScores/${r.id}`),
       ...[...new Set([...ledgerEntries.map(([lid]) => lid), attemptId])].map(lid => `tournaments/${tid}/officialScoreLedger/${lid}`)]

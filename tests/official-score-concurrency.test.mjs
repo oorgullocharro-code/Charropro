@@ -90,9 +90,27 @@ assert.equal(activeRecords(retryStore.read(), attemptKey).length, 1);
 assert.equal(activeRecords(retryStore.read(), attemptKey)[0].total, 35);
 const ledgerAfterCorrection = ledgerFor(retryStore.read());
 assert.equal(ledgerAfterCorrection.records[firstOutcome.recordId].status, "historical");
+assert.equal(ledgerAfterCorrection.records[firstOutcome.recordId].officialStatus, "historical");
 assert.equal(ledgerAfterCorrection.records[firstOutcome.recordId].superseded, true);
 assert.equal(ledgerAfterCorrection.records[firstOutcome.recordId].supersededBy, corrected.outcome.recordId);
+assert.equal(retryStore.read().publishedScores[firstOutcome.recordId].status, "historical");
+assert.equal(retryStore.read().publishedScores[firstOutcome.recordId].officialStatus, "historical");
 assert.equal(Object.keys(ledgerAfterCorrection.records).length, 2, "correction preserves complete history");
+
+const symmetryStore = createTransactionalStore(seed);
+const symmetryFirst = await symmetryStore.transact(prepare({ idempotencyKey: "score:symmetry-first-0001", expectedRevision: 0, total: 10 }));
+const symmetrySecond = await symmetryStore.transact(prepare({ idempotencyKey: "score:symmetry-second-0001", expectedRevision: 1, total: 15 }));
+const symmetryThird = await symmetryStore.transact(prepare({ idempotencyKey: "score:symmetry-third-0001", expectedRevision: 2, total: 21 }));
+assert.equal(symmetryFirst.outcome.ok && symmetrySecond.outcome.ok && symmetryThird.outcome.ok, true);
+for (const recordId of [symmetryFirst.outcome.recordId, symmetrySecond.outcome.recordId]) {
+  const publishedHistorical = symmetryStore.read().publishedScores[recordId];
+  const ledgerHistorical = ledgerFor(symmetryStore.read()).records[recordId];
+  for (const historical of [publishedHistorical, ledgerHistorical]) {
+    assert.equal(historical.status, "historical");
+    assert.equal(historical.officialStatus, "historical");
+    assert.equal(historical.superseded, true);
+  }
+}
 
 const staleRetry = await retryStore.transact(retryRequest);
 assert.equal(staleRetry.outcome.ok, false);

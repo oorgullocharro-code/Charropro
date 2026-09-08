@@ -5,6 +5,8 @@ export const cid = 'charreada-fixture';
 export const teamId = 'casa-1';
 export const uid = 'supervisor-fixture';
 export const input = { tournamentId: tid, charreadaId: cid, teamId, sharedOpportunityId: `terna:${tid}:equipos_completo:${cid}:${teamId}:op:4`, reconciliationId: 'reconciliation-fixture-001' };
+export const legacyRecordId = 'official_c4ffdb24f29947e0f9078f179da831e4';
+export const legacySuccessorId = 'official_ce5218c3b97fe099458e821edc6b2cb4';
 export function fixture(count = 3) {
   const t = { info: { id: tid, name: 'TEST fixture', type: 'completo' },
     teams: [{ id: teamId, name: 'casa 1', tournamentId: tid }],
@@ -38,4 +40,41 @@ export function fixture(count = 3) {
     publicTournaments: { [tid]: publicTournament, control: { revision: 9 } },
     projectionOutbox: { [tid]: { old: { intent: { tournamentId: tid, targetPath: `charropro/publicTournaments/${tid}` }, status: 'DELIVERED' } } },
     audit: { publishedScores: { [tid]: structuredClone(t.publishedScores) } } };
+}
+
+export function withLegacyStateAsymmetry(root = fixture()) {
+  const tournament = root.tournaments[tid];
+  const ledger = Object.values(tournament.officialScoreLedger)
+    .find(value => value.activeRecordId === legacySuccessorId);
+  const successor = tournament.publishedScores[legacySuccessorId];
+  successor.revision = 2;
+  ledger.revision = 2;
+  ledger.records[legacySuccessorId] = structuredClone(successor);
+
+  const historical = structuredClone(successor);
+  historical.id = legacyRecordId;
+  historical.total = 15;
+  historical.revision = 1;
+  historical.timestampMs = 150;
+  historical.publishedAt = new Date(150).toISOString();
+  historical.breakdown.total = 15;
+  historical.breakdown.attemptV2.scoring.goodPoints = 15;
+  historical.breakdown.attemptV2.scoring.teamAdjustedPoints = 15;
+  historical.superseded = true;
+  historical.supersededBy = legacySuccessorId;
+  historical.supersededAt = successor.publishedAt;
+  historical.status = 'active';
+  historical.officialStatus = 'historical';
+  tournament.publishedScores[legacyRecordId] = historical;
+
+  ledger.records[legacyRecordId] = {
+    ...structuredClone(historical),
+    status: 'historical',
+    officialStatus: 'active'
+  };
+  const projection = reconcilePublicProjection(null, buildPublicProjection(tournament, { nowMs: 1000 }), { nowMs: 1000 }).projection;
+  for (const row of projection.results.items) { row.scores.PR = 63; row.accumulatedTotal = 235; }
+  for (const row of projection.rankings.items) row.total = 235;
+  root.publicTournaments[tid] = projection;
+  return root;
 }

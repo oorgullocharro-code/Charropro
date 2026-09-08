@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture, input, tid, cid, teamId, uid } from './fixtures/historicalReconciliationFixture.mjs';
+import { fixture, withLegacyStateAsymmetry, legacyRecordId, input, tid, cid, teamId, uid } from './fixtures/historicalReconciliationFixture.mjs';
 import { dryRun, makeBackup, verifyBackup, applyReconciliation, createReconciliationService, signature, assertWriteScope } from '../functions/historicalReconciliation.mjs';
 import { buildCanonicalOfficialResults, getCanonicalOfficialTeamTotals } from '../js/core/canonicalOfficialResults.js';
 import scoreAuthority from '../functions/officialScoreConcurrency.js';
@@ -67,6 +67,25 @@ test('already historical values and original audit stay preserved',()=>{
   const plan=dryRun(root,input,uid),backup=makeBackup(root,plan,2000);
   const after=applyReconciliation(root,{...input,mode:'EXECUTE',planToken:plan.planToken,expectedBeforeSignature:plan.beforeSignature},uid,backup,3000);
   assert.deepEqual(after.root.tournaments[tid].publishedScores[old.id],old);
+});
+test('demonstrated legacy ledger state asymmetry is exposed and preserved by the plan',()=>{
+  const root=withLegacyStateAsymmetry();
+  const plan=dryRun(root,input,uid);
+  assert.equal(plan.legacyCompatibilityApplied,true);
+  assert.deepEqual(plan.legacyCompatibleRecordIds,[legacyRecordId]);
+  assert.equal(plan.compatibilityReason,'LEGACY_STATE_ASYMMETRY_COMPATIBLE');
+  assert.notEqual(plan.currentRecordId,legacyRecordId);
+  assert.ok(plan.targetRecordIds.includes(plan.currentRecordId));
+  assert.equal(plan.canonicalValue,21);
+  assert.equal(plan.totals.suerteTotals.pial_ruedo,21);
+  assert.equal(plan.totals.total,193);
+  const backup=makeBackup(root,plan,2000);
+  const result=applyReconciliation(root,{...input,mode:'EXECUTE',planToken:plan.planToken,expectedBeforeSignature:plan.beforeSignature},uid,backup,3000);
+  const historical=result.root.tournaments[tid].publishedScores[legacyRecordId];
+  assert.equal(historical.superseded,true);
+  assert.equal(historical.status,'active');
+  assert.equal(historical.officialStatus,'historical');
+  assert.equal(getCanonicalOfficialTeamTotals(result.root.tournaments[tid],scope).total,193);
 });
 for(const role of ['juez','operador','lectura']) test(`${role} denied`,()=>{const r=fixture();r.users[uid].role=role;assert.throws(()=>dryRun(r,input,uid),/supervisor-required/)});
 test('inactive, unauthenticated and unassigned supervisor denied',()=>{
