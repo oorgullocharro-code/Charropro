@@ -3284,7 +3284,7 @@ function verifyPublicProjectionConfirmation(expected, actual, tournamentId) {
       targetFingerprint: ""
     };
   }
-  if (String(actual.metadata?.tournamentId || "") !== String(tournamentId || "")) {
+  if (String(actual.tournamentId || actual.metadata?.tournamentId || "") !== String(tournamentId || "")) {
     return {
       ok: false,
       reason: "projection-source-mismatch",
@@ -3296,8 +3296,8 @@ function verifyPublicProjectionConfirmation(expected, actual, tournamentId) {
   const targetFingerprint = getPublicProjectionSignature(actual);
   const expectedRevision = Number(expected?.projectionRevision || 0);
   const targetRevision = Number(actual?.projectionRevision || 0);
-  const expectedSourceMs = Date.parse(expected?.sourceUpdatedAt || "") || 0;
-  const targetSourceMs = Date.parse(actual?.sourceUpdatedAt || "") || 0;
+  const expectedSourceMs = Date.parse(expected?.generatedAt || expected?.sourceUpdatedAt || "") || 0;
+  const targetSourceMs = Date.parse(actual?.generatedAt || actual?.sourceUpdatedAt || "") || 0;
   const exact = expectedFingerprint === targetFingerprint && targetRevision >= expectedRevision;
   const newer = targetRevision > expectedRevision && targetSourceMs >= expectedSourceMs;
   return {

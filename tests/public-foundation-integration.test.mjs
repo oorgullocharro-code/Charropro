@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import {
   applyPublicPortalConnection,
   applyPublicPortalSnapshot,
@@ -61,11 +62,11 @@ const publish = (nowMs) => {
 
 const first = publish(Date.parse("2026-07-27T10:00:02.000Z"));
 assert.equal(first.ok, true);
-assert.equal(stored.schemaVersion, 2);
+assert.equal(stored.schemaVersion, 3);
 assert.equal(stored.projectionRevision, 1);
 assert.equal(writes, 1);
-assert.deepEqual(stored.results.items, []);
-assert.equal(stored.live.turn.team.id, "team-b");
+assert.deepEqual(stored.results.teams, []);
+assert.equal(stored.live.currentTeam, "Equipo B");
 
 qa.tournament.publishedScores.a = {
   id: "published-a",
@@ -83,8 +84,8 @@ qa.tournament.meta.updatedAt = "2026-07-27T10:00:03.000Z";
 const scorePublished = publish(Date.parse("2026-07-27T10:00:04.000Z"));
 assert.equal(scorePublished.ok, true);
 assert.equal(stored.projectionRevision, 2);
-assert.equal(stored.results.items[0].subtotal, 12);
-assert.equal(stored.live.turn.team.id, "team-b", "official turn remains B when A receives a score");
+assert.equal(stored.results.teams[0].subtotal, 12);
+assert.equal(stored.live.currentTeam, "Equipo B", "official turn remains B when A receives a score");
 assert.equal(JSON.stringify(stored).includes("private score"), false);
 
 qa.tournament.publishedScores.a.superseded = true;
@@ -101,8 +102,8 @@ qa.tournament.publishedScores.a2 = {
 qa.tournament.meta.updatedAt = "2026-07-27T10:00:05.000Z";
 publish(Date.parse("2026-07-27T10:00:06.000Z"));
 assert.equal(stored.projectionRevision, 3);
-assert.equal(stored.results.items.length, 1);
-assert.equal(stored.results.items[0].subtotal, 18);
+assert.equal(stored.results.teams.length, 1);
+assert.equal(stored.results.teams[0].subtotal, 18);
 
 qa.liveCurrent.charreada = { id: "individual-round", name: "Caladero" };
 qa.liveCurrent.competitionId = "caladero-libre";
@@ -110,8 +111,7 @@ qa.liveCurrent.turn = { participant: { id: "rider-a", name: "Jinete A" }, suerte
 qa.liveCurrent.timestamp = "2026-07-27T10:00:07.000Z";
 publish(Date.parse("2026-07-27T10:00:08.000Z"));
 assert.equal(stored.projectionRevision, 4);
-assert.equal(stored.overview.activeCompetitionId, "caladero-libre");
-assert.equal(stored.overview.activeCharreadaId, "individual-round");
+assert.equal(stored.live.currentCharreada, "individual-round");
 
 const unchanged = publish(Date.parse("2026-07-27T10:00:09.000Z"));
 assert.equal(unchanged.changed, false);
@@ -128,12 +128,11 @@ assert.equal(client.connection, "offline");
 assert.ok(getPublicPortalViewSnapshot(client));
 client = applyPublicPortalConnection(client, true);
 assert.equal(client.connection, "reconnecting");
-const reconnected = applyPublicPortalSnapshot(client, {
+const reconnected = applyPublicPortalSnapshot(client, createCanonicalPublicTournamentData({
   ...stored,
   projectionRevision: stored.projectionRevision + 1,
-  generatedAt: "2026-07-27T10:00:12.000Z",
-  generatedAtMs: Date.parse("2026-07-27T10:00:12.000Z")
-});
+  generatedAt: "2026-07-27T10:00:12.000Z"
+}));
 assert.equal(reconnected.accepted, true);
 assert.equal(reconnected.state.connection, "online");
 assert.equal(JSON.stringify(stored).includes("operational"), false);

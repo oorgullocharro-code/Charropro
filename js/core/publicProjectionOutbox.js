@@ -1,6 +1,8 @@
 export const PUBLIC_PROJECTION_OUTBOX_VERSION = "1.0.0";
 export const PUBLIC_PROJECTION_PAYLOAD_VERSION = 1;
-export const PUBLIC_PROJECTION_TYPE = "public_tournament_v2";
+// New publications carry the canonical V3 snapshot contract end-to-end.
+// Existing V2 records remain historical data; this writer never creates them.
+export const PUBLIC_PROJECTION_TYPE = "public_tournament_v3";
 export const PUBLIC_PROJECTION_MAX_ATTEMPTS = 5;
 export const PUBLIC_PROJECTION_LEASE_MS = 30000;
 

@@ -150,8 +150,8 @@ export function dryRun(root, input, uid) {
   };
   plan.writeScope.push(`publicTournaments/${tid}`, `historicalReconciliations/${tid}/${input.reconciliationId}`);
   const publicPreview = buildPublicProjection({ tournament: t, liveCurrent: snapshot.live?.current || {} }, { tournamentId: tid, nowMs: 1 });
-  const rowsForTarget = projection => objects(projection?.results?.items).filter(row => row.teamId === input.teamId && row.charreadaId === input.charreadaId)
-    .map(row => ({ resultId: row.resultId, scores: row.scores, accumulatedTotal: row.accumulatedTotal }));
+  const rowsForTarget = projection => objects(projection?.results?.teams).filter(row => row.teamId === input.teamId && row.charreadaId === input.charreadaId)
+    .map(row => ({ resultId: row.resultId, columns: row.columns, total: row.total }));
   plan.publicImpact = { before: rowsForTarget(snapshot.publicTournament), after: rowsForTarget(publicPreview) };
   plan.planToken = signature(plan);
   return plan;
@@ -196,7 +196,7 @@ function project(root, tid, nowMs) {
     return next;
   }
   const result = reconcilePublicProjection(hydrate(root.publicTournaments?.[tid], candidate), candidate, { nowMs });
-  requireThat(result.ok && result.projection?.metadata?.tournamentId === tid, `projection-invalid:${result.reason}:${(result.errors || []).join(',')}`);
+  requireThat(result.ok && (result.projection?.tournamentId || result.projection?.metadata?.tournamentId) === tid, `projection-invalid:${result.reason}:${(result.errors || []).join(',')}`);
   root.publicTournaments ||= {}; root.publicTournaments[tid] = result.projection;
 }
 export function applyReconciliation(root, input, uid, backup, nowMs) {

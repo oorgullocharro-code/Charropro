@@ -33,8 +33,8 @@ export function fixture(count = 3) {
   for (let i=0;i<count;i++) add(ids[i], 'pial_ruedo',21,200+i,i,input.sharedOpportunityId);
   const publicTournament = reconcilePublicProjection(null, buildPublicProjection(t, { nowMs: 1000 }), { nowMs: 1000 }).projection;
   // Frozen legacy public projection: deliberately incorrect historical input only.
-  for (const row of publicTournament.results.items) { row.scores.PR = count * 21; row.accumulatedTotal = 172 + count * 21; }
-  for (const row of publicTournament.rankings.items) row.total = 172 + count * 21;
+  for (const row of publicTournament.results.teams) { row.columns.pial_ruedo = count * 21; row.total = 172 + count * 21; }
+  for (const row of publicTournament.standings.items) row.total = 172 + count * 21;
   return { users: { [uid]: { name: 'Supervisor fixture', role: 'supervisor', active: true, tournamentAccess: 'selected', tournamentIds: [tid] } },
     tournaments: { [tid]: t, control: { info: { id: 'control' }, revision: 9, untouched: true } },
     publicTournaments: { [tid]: publicTournament, control: { revision: 9 } },
@@ -73,8 +73,8 @@ export function withLegacyStateAsymmetry(root = fixture()) {
     officialStatus: 'active'
   };
   const projection = reconcilePublicProjection(null, buildPublicProjection(tournament, { nowMs: 1000 }), { nowMs: 1000 }).projection;
-  for (const row of projection.results.items) { row.scores.PR = 63; row.accumulatedTotal = 235; }
-  for (const row of projection.rankings.items) row.total = 235;
+  for (const row of projection.results.teams) { row.columns.pial_ruedo = 63; row.total = 235; }
+  for (const row of projection.standings.items) row.total = 235;
   root.publicTournaments[tid] = projection;
   return root;
 }

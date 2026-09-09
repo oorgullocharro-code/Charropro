@@ -25,50 +25,33 @@ assert.match(publicRules[".write"], /supervisor/);
 assert.match(publicRules[".write"], /operador/);
 assert.match(publicRules[".write"], /juez/);
 assert.match(publicRules[".write"], /schemaVersion/);
+assert.match(publicRules[".write"], /=== 3/);
+assert.match(publicRules[".write"], /projectionVersion/);
+assert.match(publicRules[".write"], /tournamentId/);
 assert.match(publicRules[".write"], /projectionRevision/);
 assert.match(publicRules[".write"], /> data\.child\('projectionRevision'\)/);
-assert.match(publicRules[".write"], /liveFeed\/revision/);
-assert.match(publicRules[".write"], />= data\.child\('liveFeed\/revision'\)/);
 assert.match(publicRules[".write"], /tournamentAccess/);
-assert.match(publicRules[".validate"], /metadata/);
-assert.match(publicRules[".validate"], /overview/);
-assert.match(publicRules[".validate"], /program/);
+assert.match(publicRules[".validate"], /projectionVersion/);
+assert.match(publicRules[".validate"], /tournamentId/);
+assert.match(publicRules[".validate"], /sourceRevision/);
+assert.match(publicRules[".validate"], /contentHash/);
+assert.match(publicRules[".validate"], /lifecycle/);
+assert.match(publicRules[".validate"], /tournament/);
 assert.match(publicRules[".validate"], /live/);
-assert.match(publicRules[".validate"], /liveFeed/);
-assert.match(publicRules[".validate"], /competitions/);
-assert.match(publicRules[".validate"], /results/);
-assert.match(publicRules[".validate"], /rankings/);
 assert.match(publicRules[".validate"], /statistics/);
-assert.match(publicRules[".validate"], /search/);
+for (const section of ["branding", "modules", "sponsors", "program", "results", "standings", "sheet", "timeline"]) {
+  assert.ok(publicRules[section], `optional RTDB-empty section ${section} remains strictly allowlisted when present`);
+}
 assert.equal(publicRules.$other[".validate"], false, "unknown top-level fields are rejected");
-assert.equal(publicRules.metadata.$other[".validate"].includes("ownerEmail"), false);
-assert.equal(publicRules.live.$other[".validate"].includes("notes"), false);
+assert.equal(publicRules.metadata[".validate"], false, "V2 metadata is rejected");
+assert.equal(publicRules.liveFeed[".validate"], false, "V2 live feed is rejected");
+assert.equal(publicRules.results.items[".validate"], false, "V2 result items are rejected");
+assert.equal(publicRules.rankings[".validate"], false, "V2 rankings are rejected");
+assert.equal(publicRules.tournament.$other[".validate"].includes("ownerEmail"), false);
 assert.equal(publicRules.live.$other[".validate"].includes("pendingNote"), false);
-assert.equal(publicRules.live.$other[".validate"].includes("broadcastState"), false);
-assert.equal(publicRules.program.items.$itemId.$other[".validate"].includes("notes"), false);
-assert.equal(publicRules.program.items.$itemId.$other[".validate"].includes("publicNotes"), true);
-assert.equal(publicRules.program.items.$itemId.$other[".validate"].includes("venueName"), true);
-assert.equal(publicRules.program.items.$itemId.$other[".validate"].includes("liveAvailable"), true);
-assert.equal(publicRules.program.items.$itemId.$other[".validate"].includes("internalNotes"), false);
-assert.equal(publicRules.program.items.$itemId.participants.$participantId.$other[".validate"].includes("phone"), false);
-assert.equal(publicRules.program.items.$itemId.participants.$participantId.$other[".validate"].includes("email"), false);
-assert.equal(publicRules.competitions.items.$itemId.$other[".validate"].includes("ownerEmail"), false);
-assert.equal(publicRules.results.items.$itemId.$other[".validate"].includes("judge"), false);
-assert.equal(publicRules.results.scopes.$scopeId.$other[".validate"].includes("private"), false);
-assert.match(publicRules.rankings[".validate"], /ready/);
-assert.match(publicRules.rankings[".validate"], /empty/);
-assert.doesNotMatch(publicRules.rankings[".validate"], /status'\)\.val\(\) === 'unavailable'/);
-assert.equal(publicRules.rankings.items.$itemId.$other[".validate"].includes("rankingId"), true);
-assert.equal(publicRules.rankings.items.$itemId.$other[".validate"].includes("position"), true);
-assert.equal(publicRules.rankings.items.$itemId.$other[".validate"].includes("operatorId"), false);
-assert.equal(publicRules.live.turn.$other[".validate"].includes("pendingNote"), false);
-assert.equal(publicRules.live.currentResult.$other[".validate"].includes("notes"), false);
-assert.equal(publicRules.live.standings.$itemId.$other[".validate"].includes("operatorId"), false);
-assert.match(publicRules.liveFeed.items.$eventId[".validate"], /score_published/);
-assert.match(publicRules.liveFeed.items.$eventId[".validate"], /sequence/);
-assert.match(publicRules.liveFeed.items.$eventId[".validate"], /revision/);
-assert.equal(publicRules.liveFeed.items.$eventId.$other[".validate"].includes("judge"), false);
-assert.equal(publicRules.liveFeed.items.$eventId.$other[".validate"].includes("html"), false);
+assert.equal(publicRules.results.teams.$other.$other[".validate"].includes("audit"), false);
+assert.equal(publicRules.standings.items.$other.$other[".validate"].includes("operatorId"), false);
+assert.equal(publicRules.timeline.items.$other.$other[".validate"].includes("html"), false);
 
 assert.equal(liveRules[".read"], true, "operational live read remains unchanged from deployed rules");
 
@@ -85,7 +68,8 @@ assert.match(projectionJobRules.intent[".write"], /projectionId/);
 assert.match(projectionJobRules.intent[".write"], /tournamentId/);
 assert.match(projectionJobRules.intent[".write"], /createdBy\/uid/);
 assert.match(projectionJobRules.intent[".write"], /auth\.uid/);
-assert.match(projectionJobRules.intent[".validate"], /public_tournament_v2/);
+assert.match(projectionJobRules.intent[".validate"], /public_tournament_v3/);
+assert.doesNotMatch(projectionJobRules.intent[".validate"], /public_tournament_v2/);
 assert.match(projectionJobRules.intent[".validate"], /published_score/);
 assert.match(projectionJobRules.intent[".validate"], /sourceRevision/);
 assert.match(projectionJobRules.intent[".validate"], /targetPath/);
@@ -166,18 +150,19 @@ const canWriteProjection = (profile, currentRevision, next) => Boolean(
   profile?.authenticated &&
   profile?.active &&
   ["supervisor", "operador", "juez"].includes(profile.role) &&
-  profile.tournaments.includes(next.metadata.tournamentId) &&
-  next.schemaVersion === 2 &&
+  profile.tournaments.includes(next.tournamentId) &&
+  next.schemaVersion === 3 &&
+  next.projectionVersion === "3.0.0" &&
   Number.isSafeInteger(next.projectionRevision) &&
   next.projectionRevision > currentRevision &&
-  Number.isSafeInteger(next.liveFeed.revision) &&
-  next.liveFeed.revision >= profile.currentLiveFeedRevision
+  typeof next.contentHash === "string" && next.contentHash.length > 0
 );
 const validProjection = {
-  schemaVersion: 2,
+  schemaVersion: 3,
+  projectionVersion: "3.0.0",
   projectionRevision: 2,
-  metadata: { tournamentId: "tournament-a" },
-  liveFeed: { revision: 2 }
+  tournamentId: "tournament-a",
+  contentHash: "cpub_test"
 };
 const supervisor = {
   authenticated: true,
@@ -192,11 +177,11 @@ assert.equal(canWriteProjection(supervisor, 1, validProjection), true);
 assert.equal(canWriteProjection({ ...supervisor, role: "locutor" }, 1, validProjection), false);
 assert.equal(canWriteProjection(supervisor, 2, validProjection), false, "equal revision is rejected");
 assert.equal(canWriteProjection(supervisor, 3, validProjection), false, "regressive revision is rejected");
-assert.equal(canWriteProjection(supervisor, 1, { ...validProjection, schemaVersion: 3 }), false);
+assert.equal(canWriteProjection(supervisor, 1, { ...validProjection, schemaVersion: 2 }), false, "V2 write is rejected");
 assert.equal(
-  canWriteProjection(supervisor, 1, { ...validProjection, liveFeed: { revision: 0 } }),
+  canWriteProjection(supervisor, 1, { ...validProjection, contentHash: "" }),
   false,
-  "regressive live feed revision is rejected"
+  "missing V3 content hash is rejected"
 );
 
 const outboxTransitions = {

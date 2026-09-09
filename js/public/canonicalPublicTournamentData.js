@@ -13,6 +13,11 @@ const PRIVATE_FIELD_NAMES = new Set([
   "publishedscores", "officialscoreledger", "officialscoreaudit", "attemptv2", "idempotencykey",
   "uid", "email", "roles", "permissions", "requests", "cas", "recovery", "token", "tokens"
 ]);
+const PUBLIC_TOP_LEVEL_FIELDS = new Set([
+  "schemaVersion", "projectionVersion", "tournamentId", "sourceRevision", "projectionRevision",
+  "generatedAt", "contentHash", "lifecycle", "tournament", "branding", "modules", "sponsors",
+  "program", "live", "results", "standings", "sheet", "timeline", "statistics"
+]);
 const PUBLIC_SPONSOR_TIERS = new Set(["principal", "presentador", "oro", "plata", "colaborador"]);
 const PUBLIC_SPONSOR_PLACEMENTS = new Set(["hero", "header", "results", "timeline", "footer"]);
 const COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
@@ -65,6 +70,7 @@ export function validateCanonicalPublicTournamentData(value = {}) {
   if (!iso(value.generatedAt)) errors.push("generated-at-invalid");
   if (!PUBLIC_TOURNAMENT_LIFECYCLE_STATUSES.includes(value.lifecycle?.status)) errors.push("lifecycle-status-invalid");
   if (containsPrivateField(value)) errors.push("private-field-exposed");
+  if (containsUnexpectedTopLevelField(value)) errors.push("public-field-not-allowlisted");
   if (value.contentHash !== buildCanonicalPublicTournamentDataHash(value)) errors.push("content-hash-invalid");
   validateResolvedResults(value, errors);
   validateModules(value.modules, errors);
@@ -74,27 +80,47 @@ export function validateCanonicalPublicTournamentData(value = {}) {
 }
 
 export function buildCanonicalPublicTournamentDataHash(value = {}) {
-  const significant = structuredClone(value || {});
+  const significant = normalizeRtdbEmptySections(value);
   delete significant.contentHash;
   delete significant.generatedAt;
   delete significant.projectionRevision;
   return `cpub_${stableHash(stableStringify(significant))}`;
 }
 
+function normalizeRtdbEmptySections(value) {
+  const normalized = structuredClone(value || {});
+  if (plain(normalized.branding) && Object.keys(normalized.branding).length === 0) delete normalized.branding;
+  if (Array.isArray(normalized.modules) && normalized.modules.length === 0) delete normalized.modules;
+  if (Array.isArray(normalized.sponsors) && normalized.sponsors.length === 0) delete normalized.sponsors;
+  for (const [section, collectionKey] of [
+    ["program", "items"],
+    ["results", "teams"],
+    ["standings", "items"],
+    ["sheet", "competitions"],
+    ["timeline", "items"]
+  ]) {
+    if (plain(normalized[section]) && Array.isArray(normalized[section][collectionKey]) && normalized[section][collectionKey].length === 0) {
+      delete normalized[section];
+    }
+  }
+  return normalized;
+}
+
 function validateResolvedResults(value, errors) {
   const results = collection(value.results?.teams);
   const byId = new Map();
   for (const result of results) {
-    if (!id(result.resultId) || !id(result.teamId) || !id(result.charreadaId) || !id(result.competitionId)) errors.push("result-identity-invalid");
+    if (!id(result.resultId) || !(id(result.teamId) || id(result.participantId)) || !id(result.charreadaId) || !id(result.competitionId)) errors.push("result-identity-invalid");
     if (!finite(result.subtotal) || !finite(result.total) || !finite(result.penalties)) errors.push("result-resolved-values-invalid");
     if (!plain(result.columns)) errors.push("result-columns-invalid");
     if (!result.status) errors.push("result-status-invalid");
     byId.set(result.resultId, result);
   }
   for (const standing of collection(value.standings?.items)) {
-    const result = byId.get(standing.resultId);
-    if (!result) errors.push("standing-result-reference-invalid");
-    else if (standing.total !== result.total) errors.push("standing-total-diverges-from-result");
+    const resultIds = collection(standing.resultIds);
+    const references = resultIds.length ? resultIds : [standing.resultId];
+    if (!references.length || references.some((resultId) => !byId.has(resultId))) errors.push("standing-result-reference-invalid");
+    if (references.length === 1 && standing.total !== byId.get(references[0]).total) errors.push("standing-total-diverges-from-result");
     if (!Number.isSafeInteger(standing.position) || standing.position < 1) errors.push("standing-position-unresolved");
   }
   for (const competition of collection(value.sheet?.competitions)) {
@@ -122,9 +148,12 @@ function validateSponsors(sponsors, errors) {
 }
 
 function validatePublicShape(value, errors) {
-  if (!plain(value.branding) || !plain(value.tournament) || !plain(value.live)) errors.push("public-section-invalid");
+  const branding = plain(value.branding) ? value.branding : {};
+  // RTDB omits empty maps and lists, so missing optional sections represent
+  // their canonical empty value after a round trip through the public path.
+  if (!plain(value.tournament) || !plain(value.live)) errors.push("public-section-invalid");
   for (const color of ["primaryColor", "secondaryColor", "accentColor", "backgroundColor", "textColor"]) {
-    if (value.branding[color] && !COLOR_PATTERN.test(value.branding[color])) errors.push(`branding-${color}-invalid`);
+    if (branding[color] && !COLOR_PATTERN.test(branding[color])) errors.push(`branding-${color}-invalid`);
   }
   for (const item of collection(value.timeline?.items)) {
     if (!id(item.eventId) || !Number.isSafeInteger(item.sequence) || !iso(item.occurredAt) || !item.type) errors.push("timeline-item-invalid");
@@ -163,20 +192,20 @@ function normalizeLive(value = {}) {
 }
 
 function normalizeResult(value = {}) {
-  const result = pick(value, ["resultId", "teamId", "teamName", "charreadaId", "competitionId", "phase", "columns", "penalties", "subtotal", "total", "status", "position"]);
+  const result = pick(value, ["resultId", "teamId", "teamName", "participantScope", "participantId", "participantName", "charreadaId", "competitionId", "phase", "columns", "penalties", "subtotal", "total", "status", "position"]);
   result.columns = plain(value.columns) ? finiteRecord(value.columns) : {};
   return result.resultId ? result : null;
 }
 
 function normalizeStanding(value = {}) {
-  const item = pick(value, ["rankingId", "resultId", "position", "teamId", "teamName", "total", "classification", "status", "phase", "tieBreakLabel"]);
-  return item.resultId ? item : null;
+  const item = pick(value, ["rankingId", "resultId", "resultIds", "position", "scopeType", "competitionId", "charreadaId", "participantScope", "teamId", "teamName", "participantId", "participantName", "total", "classification", "status", "phase", "tieBreakLabel"]);
+  return item.resultId || item.resultIds?.length ? item : null;
 }
 
 function normalizeSheetCompetition(value = {}) {
   const competition = pick(value, ["competitionId", "name"]);
   competition.rows = collection(value.rows).map((row) => ({
-    ...pick(row, ["resultId", "teamId", "teamName", "total"]),
+    ...pick(row, ["resultId", "teamId", "teamName", "participantId", "participantName", "total"]),
     columns: plain(row.columns) ? finiteRecord(row.columns) : {}
   })).filter((row) => row.resultId);
   return competition.competitionId ? competition : null;
@@ -212,6 +241,10 @@ function containsPrivateField(value, seen = new WeakSet()) {
   if (!value || typeof value !== "object" || seen.has(value)) return false;
   seen.add(value);
   return Object.entries(value).some(([key, entry]) => PRIVATE_FIELD_NAMES.has(String(key).toLowerCase()) || containsPrivateField(entry, seen));
+}
+
+function containsUnexpectedTopLevelField(value) {
+  return !plain(value) || Object.keys(value).some((key) => !PUBLIC_TOP_LEVEL_FIELDS.has(key));
 }
 
 function collection(value) { return Array.isArray(value) ? value : []; }

@@ -48,7 +48,7 @@ test('Auth + Storage + RTDB + callable: backup/verify/execute/reload/reproject/i
   const pial=Object.values(after.tournaments[tid].publishedScores).filter(r=>r.suerte.id==='pial_ruedo');
   assert.equal(pial.filter(r=>!r.superseded).length,1);assert.equal(pial.filter(r=>r.superseded).length,3);
   const totals=getCanonicalOfficialTeamTotals(after.tournaments[tid],{tournamentId:tid,charreadaId:cid,teamId});assert.equal(totals.total,193);assert.equal(totals.suerteTotals.pial_ruedo,21);
-  assert.equal(after.publicTournaments[tid].results.items[0].scores.PR,21);assert.equal(after.publicTournaments[tid].results.items[0].accumulatedTotal,193);
+  assert.equal(after.publicTournaments[tid].results.teams[0].columns.pial_ruedo,21);assert.equal(after.publicTournaments[tid].results.teams[0].total,193);
   for(const mode of ['EXECUTE','REPROJECT','REPROJECT']) { const r=await call({...req,mode});assert.equal(r.status,200,JSON.stringify(r));assert.equal(r.result.idempotent,true);assert.equal(signature(await read()),signature(after),'readback/reload/rebuild stable'); }
   console.log('EMULATOR_CERTIFICATION=PASS CURRENT_HEADS=1 DUPLICATE_HEADS_TO_HISTORICAL=2 LEGACY_HISTORICAL_PRESERVED=1 CANONICAL_PR=21 INTERNAL_PR=21 PUBLIC_PR=21 TOTAL=193');
 });

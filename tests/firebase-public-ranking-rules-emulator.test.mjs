@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-public-projection-v3-cutover";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -52,9 +53,9 @@ async function runPublicRankingRulesEmulator() {
     const authorized = await writeProjection(databaseHost, databaseNamespace, tournamentId, projection, token);
     assert.equal(authorized.ok, true, authorized.body);
     const stored = (await database.ref(`charropro/publicTournaments/${tournamentId}`).get()).val();
-    assert.equal(stored.rankings.status, "ready");
+    assert.equal(validateCanonicalPublicTournamentData(stored).valid, true, "RTDB-empty sections round-trip as canonical V3 data");
     assert.deepEqual(
-      stored.rankings.items
+      stored.standings.items
         .filter((item) => item.scopeType === "competition")
         .map((item) => item.teamId),
       ["team-a", "team-b"]
@@ -62,8 +63,7 @@ async function runPublicRankingRulesEmulator() {
 
     const invalid = structuredClone(projection);
     invalid.projectionRevision += 1;
-    invalid.rankings.revision += 1;
-    invalid.rankings.items[0].operatorId = "private";
+    invalid.standings.items[0].operatorId = "private";
     const rejected = await writeProjection(databaseHost, databaseNamespace, tournamentId, invalid, token);
     assert.equal(rejected.ok, false);
     assert.equal((await database.ref(`charropro/publicTournaments/${tournamentId}/projectionRevision`).get()).val(), 1);

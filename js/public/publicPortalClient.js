@@ -6,6 +6,7 @@ import {
   validatePublicProjectionForRead
 } from "./publicProjectionSchema.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([
@@ -48,6 +49,34 @@ export function applyPublicPortalSnapshot(state, input, options = {}) {
     };
   }
   const isV2 = Number(input.schemaVersion) === PUBLIC_PROJECTION_SCHEMA_VERSION;
+  const isV3 = Number(input.schemaVersion) === 3 && input.projectionVersion === "3.0.0";
+  if (isV3) {
+    const revision = Number(input.projectionRevision || 0);
+    if (revision < current.projectionRevision) return { state: current, accepted: false, duplicate: false, reason: "projection-revision-regression", changedSections: [] };
+    const validation = validateCanonicalPublicTournamentData(input);
+    if (!validation.valid) {
+      return { state: { ...current, connection: "error", error: "public-snapshot-invalid" }, accepted: false, duplicate: false, errors: validation.errors, changedSections: [] };
+    }
+    if (revision === current.projectionRevision && current.snapshot) {
+      const same = input.contentHash === current.snapshot.contentHash;
+      return {
+        state: same ? current : { ...current, connection: "error", error: "projection-revision-inconsistent" },
+        accepted: false,
+        duplicate: same,
+        reason: same ? "projection-revision-duplicate" : "projection-revision-inconsistent",
+        changedSections: []
+      };
+    }
+    const snapshot = structuredClone(input);
+    const legacySnapshot = adaptPublicProjectionToLegacy(snapshot);
+    return {
+      state: { ...current, connection: current.connected === false ? "offline" : "online", snapshot, legacySnapshot, projectionRevision: revision, sectionRevisions: { snapshot: revision }, receivedAtMs: nowMs, sourceUpdatedAtMs: timestamp(snapshot.generatedAt) || nowMs, error: null },
+      accepted: true,
+      duplicate: false,
+      legacy: false,
+      changedSections: ["snapshot"]
+    };
+  }
   if (!isV2) {
     const legacySnapshot = sanitizePublicProjectionValue(input);
     return {

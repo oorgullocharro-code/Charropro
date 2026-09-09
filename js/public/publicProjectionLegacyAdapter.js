@@ -3,6 +3,7 @@ import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260908-superviso
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 
 export function adaptPublicProjectionToLegacy(snapshot) {
+  if (Number(snapshot?.schemaVersion) === 3) return adaptCanonicalPublicV3ToLegacyPresentation(snapshot);
   if (Number(snapshot?.schemaVersion) !== 2) return snapshot || null;
   const competitions = (snapshot.competitions?.items || []).map((competition) => ({
     id: competition.competitionId,
@@ -73,6 +74,9 @@ export function adaptPublicProjectionToLegacy(snapshot) {
     positionStatus: item.positionStatus,
     teamId: item.teamId,
     teamName: item.teamName,
+    participantScope: item.participantScope,
+    participantId: item.participantId,
+    participantName: item.participantName,
     participantId: item.participantId,
     participantName: item.participantName,
     categoryId: item.categoryId,
@@ -96,6 +100,8 @@ export function adaptPublicProjectionToLegacy(snapshot) {
       positionStatus: item.positionStatus,
       teamId: item.teamId,
       teamName: item.teamName,
+      participantId: item.participantId,
+      participantName: item.participantName,
       participantId: item.participantId,
       participantName: item.participantName,
       categoryId: item.categoryId,
@@ -190,7 +196,99 @@ export function adaptPublicProjectionToLegacy(snapshot) {
   };
 }
 
+// TEMPORARY_PRESENTATION_ADAPTER: maps already-resolved V3 values for the
+// legacy Portal. It deliberately does not select, add, rank, or tie-break.
+export function adaptCanonicalPublicV3ToLegacyPresentation(snapshot = {}) {
+  const results = (snapshot.results?.teams || []).map((item) => ({
+    resultId: item.resultId,
+    teamId: item.teamId,
+    teamName: item.teamName,
+    charreadaId: item.charreadaId,
+    competitionId: item.competitionId,
+    phaseId: item.phase || "",
+    scores: legacyColumns(item.columns),
+    teamPenaltyTotal: item.penalties,
+    officialTotal: item.total,
+    total: item.total,
+    position: item.position || null,
+    status: item.status,
+    updatedAt: snapshot.generatedAt
+  }));
+  const positionByResult = new Map((snapshot.standings?.items || []).map((item) => [item.resultId, item.position]));
+  for (const row of results) row.position = positionByResult.get(row.resultId) || row.position || null;
+  const competitions = (snapshot.sheet?.competitions || []).map((item) => ({
+    id: item.competitionId,
+    competitionId: item.competitionId,
+    type: item.competitionId,
+    competitionType: item.competitionId,
+    competitionScope: "team",
+    label: item.name || item.competitionId,
+    suerteIds: uniqueSuerteIds(item.rows)
+  }));
+  return {
+    legacyAdapter: "TEMPORARY_PRESENTATION_ADAPTER",
+    info: {
+      id: snapshot.tournamentId,
+      nombre: snapshot.tournament?.name,
+      sede: snapshot.tournament?.venue,
+      fechaInicio: snapshot.tournament?.startDate,
+      fechaFin: snapshot.tournament?.endDate,
+      estado: snapshot.lifecycle?.status
+    },
+    activeCharreada: {
+      charreadaId: snapshot.live?.currentCharreada || "",
+      competitionId: "",
+      currentTeam: { teamName: snapshot.live?.currentTeam || "" },
+      currentParticipant: { participantName: snapshot.live?.currentParticipant || "" },
+      currentSuerte: { id: snapshot.live?.currentSuerte || "", name: snapshot.live?.currentSuerte || "" }
+    },
+    scoresheet: results,
+    generalRanking: (snapshot.standings?.items || []).filter((item) => item.scopeType === "competition").map((item) => ({
+      position: item.position,
+      teamId: item.teamId,
+      teamName: item.teamName,
+      total: item.total,
+      competitionId: item.competitionId || results.find((row) => row.resultId === item.resultId)?.competitionId || "",
+      charreadaId: item.charreadaId || results.find((row) => row.resultId === item.resultId)?.charreadaId || "",
+      scopeType: item.scopeType || "charreada",
+      participantScope: item.participantScope || "team"
+    })),
+    schedule: (snapshot.program?.items || []).map((item) => ({
+      id: item.id || item.charreadaId,
+      charreadaId: item.charreadaId,
+      nombre: item.name,
+      fecha: item.scheduledDate,
+      hora: item.scheduledTime,
+      competitionId: item.competitionId,
+      order: item.order,
+      status: item.status
+    })),
+    competitions,
+    rankingStatus: snapshot.standings?.items?.length ? "ready" : "empty",
+    generatedAt: snapshot.generatedAt,
+    projectionRevision: snapshot.projectionRevision,
+    schemaVersion: 1
+  };
+}
+
 export function adaptPublicProjectionToLegacyLive(snapshot, tournamentId = "") {
+  if (Number(snapshot?.schemaVersion) === 3) {
+    const legacy = adaptCanonicalPublicV3ToLegacyPresentation(snapshot);
+    return {
+      liveChannel: tournamentId || snapshot.tournamentId || "",
+      tournament: { id: snapshot.tournamentId || tournamentId || "", name: snapshot.tournament?.name || "" },
+      charreada: { id: legacy.activeCharreada?.charreadaId || "", name: "" },
+      competitionId: "",
+      turn: { team: { id: "", name: snapshot.live?.currentTeam || "" }, participant: { id: "", name: snapshot.live?.currentParticipant || "" }, horse: { id: "", name: "" }, suerteId: snapshot.live?.currentSuerte || "", suerte: { id: snapshot.live?.currentSuerte || "", name: snapshot.live?.currentSuerte || "" } },
+      timer: null,
+      teamStandings: legacy.generalRanking,
+      published: null,
+      timestamp: snapshot.generatedAt || "",
+      projectionRevision: snapshot.projectionRevision,
+      schemaVersion: snapshot.schemaVersion,
+      publicProjection: true
+    };
+  }
   if (Number(snapshot?.schemaVersion) !== 2) return null;
   const turn = snapshot.live?.turn || {};
   return {
@@ -232,6 +330,22 @@ export function adaptPublicProjectionToLegacyLive(snapshot, tournamentId = "") {
     schemaVersion: snapshot.schemaVersion,
     publicProjection: true
   };
+}
+
+function legacyColumns(columns = {}) {
+  return {
+    CC: columns.cala ?? null, P: columns.piales ?? null, C: columns.colas ?? null,
+    JT: columns.toro ?? null, LC: columns.lazo ?? columns.terna ?? null,
+    PR: columns.pial_ruedo ?? null, JY: columns.yegua ?? null,
+    MP: columns.manganas_pie ?? null, MC: columns.manganas_caballo ?? null,
+    PM: columns.paso ?? null
+  };
+}
+
+function uniqueSuerteIds(rows = []) {
+  const ids = new Set(rows.flatMap((row) => Object.keys(row.columns || {})));
+  if (ids.has("lazo") || ids.has("pial_ruedo")) ids.add("terna");
+  return [...ids];
 }
 
 function columnsForCompetition(competition) {

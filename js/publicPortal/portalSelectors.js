@@ -1,6 +1,7 @@
 import { getCompetitionType } from "../data/competitionTypes.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import { selectOfficialRanking } from "../core/officialRanking.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },
@@ -32,6 +33,9 @@ const SCORE_ALIASES = Object.freeze({
 export function buildPublicPortalModel(snapshot, options = {}) {
   if (!snapshot || typeof snapshot !== "object") {
     return buildEmptyPortalModel(options);
+  }
+  if (Number(snapshot.schemaVersion) === 3) {
+    return buildLegacyPortalModel(adaptCanonicalPublicV3ToLegacyPresentation(snapshot), options);
   }
   if (Number(snapshot.schemaVersion) === 2) {
     return buildV2PortalModel(snapshot, options);
@@ -299,6 +303,17 @@ function buildLegacyPortalModel(snapshot, options) {
     charreadaId: String(options.charreadaId || "")
   };
   const results = selectPortalResults(rawResults, filters);
+  const rawRankings = asArray(snapshot.generalRanking).map((item, index) => normalizeRankingItem({
+    ...item,
+    rankingId: item.rankingId || item.resultId || `legacy_ranking_${index + 1}`,
+    participantScope: item.participantScope || (item.participantId ? "individual" : "team"),
+    competitionId: item.competitionId || item.competitionType || "equipos_completo",
+    competitionType: item.competitionType || "equipos_completo",
+    officialPosition: item.officialPosition ?? item.position,
+    total: item.total ?? item.officialTotal,
+    positionStatus: item.positionStatus || "official"
+  }));
+  const rankings = selectOfficialRanking(rawRankings, filters);
   const programFilters = buildProgramFilters(programAll, {
     day: text(options.programDay),
     phaseId: text(options.programPhaseId)
@@ -354,10 +369,10 @@ function buildLegacyPortalModel(snapshot, options) {
     selectedCompetition,
     selectedCompetitionId,
     results,
-    rankings: [],
-    rankedResults: rankPortalResults(results),
+    rankings,
+    rankedResults: rankings.length ? rankings : rankPortalResults(results),
     allResults: rawResults,
-    allRankings: [],
+    allRankings: rawRankings,
     resultFilters: buildResultFilters(rawResults, selectedCompetitionId),
     activeFilters: filters,
     sheet: buildPortalSheet(results, selectedCompetition),

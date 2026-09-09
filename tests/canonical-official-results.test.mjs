@@ -6,6 +6,7 @@ import {
   getCanonicalSportingOpportunityKey
 } from "../js/core/canonicalOfficialResults.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const tournamentId = "tournament-canonical";
 const charreadaId = "charreada-canonical";
@@ -35,9 +36,10 @@ test("2. public projection uses one value for the runtime incident", () => {
     official({ id: "pr-2", total: 21, shared: "terna:op:4", coleadorIndex: 2, timestampMs: 80 })
   ];
   const projection = buildPublicProjection(tournament({ publishedScores }), { nowMs: 1000 });
-  assert.equal(projection.results.items[0].scores.PR, 21);
-  assert.equal(projection.results.items[0].accumulatedTotal, 193);
-  assert.equal(projection.rankings.items[0].total, 193);
+  const presentation = adaptCanonicalPublicV3ToLegacyPresentation(projection);
+  assert.equal(projection.results.teams[0].columns.pial_ruedo, 21);
+  assert.equal(projection.results.teams[0].total, 193);
+  assert.equal(presentation.generalRanking[0].total, 193);
 });
 
 test("3. correction on the same publication key selects the newest record", () => {

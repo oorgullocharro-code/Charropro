@@ -22,8 +22,13 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals
 } from "../core/canonicalOfficialResults.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import {
+  buildCanonicalPublicProjectionV3,
+  getCanonicalPublicProjectionSignature,
+  reconcileCanonicalPublicProjectionV3
+} from "./canonicalPublicProjectionV3.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
-export const PUBLIC_PROJECTION_VERSION = "2.0.0";
+export const PUBLIC_PROJECTION_VERSION = "3.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({
   cala: ["CC"],
   piales: ["P"],
@@ -43,6 +48,20 @@ const MAX_RESULT_ROWS = 1500;
 const MAX_PROGRAM_ITEMS = 500;
 
 export function buildPublicProjection(source = {}, options = {}) {
+  return buildCanonicalPublicProjectionV3(source, options);
+}
+
+export function reconcilePublicProjection(previous, candidate, options = {}) {
+  return reconcileCanonicalPublicProjectionV3(previous, candidate, options);
+}
+
+export function getPublicProjectionSignature(projection) {
+  return getCanonicalPublicProjectionSignature(projection);
+}
+
+// Kept temporarily only to document the retired V2 materialization path.
+// No public write path invokes these functions after the V3 cutover.
+export function buildLegacyPublicProjectionV2(source = {}, options = {}) {
   const tournament = isRecord(source.tournament) ? source.tournament : source;
   const liveCurrent = isRecord(source.liveCurrent) ? source.liveCurrent : {};
   const nowMs = finiteTimestamp(options.nowMs) || Date.now();
@@ -156,7 +175,7 @@ export function buildPublicProjection(source = {}, options = {}) {
   return sanitizePublicProjectionValue(candidate);
 }
 
-export function reconcilePublicProjection(previous, candidate, options = {}) {
+export function reconcileLegacyPublicProjectionV2(previous, candidate, options = {}) {
   const previousIsV2 = Number(previous?.schemaVersion) === PUBLIC_PROJECTION_SCHEMA_VERSION;
   const mergedCandidate = previousIsV2
     ? {
@@ -181,7 +200,7 @@ export function reconcilePublicProjection(previous, candidate, options = {}) {
     previousIsV2 &&
     finiteTimestamp(previous.sourceUpdatedAt) === finiteTimestamp(cleanCandidate.sourceUpdatedAt) &&
     Number(previous.generatedAtMs || 0) > Number(cleanCandidate.generatedAtMs || 0) &&
-    getPublicProjectionSignature(previous) !== getPublicProjectionSignature(cleanCandidate)
+    getLegacyPublicProjectionSignature(previous) !== getLegacyPublicProjectionSignature(cleanCandidate)
   ) {
     return {
       ok: false,
@@ -245,7 +264,7 @@ export function reconcilePublicProjection(previous, candidate, options = {}) {
   return { ok: true, changed: true, reason: "updated", projection, changedSections };
 }
 
-export function getPublicProjectionSignature(projection) {
+export function getLegacyPublicProjectionSignature(projection) {
   const clean = sanitizePublicProjectionValue(projection);
   const stable = { ...clean };
   delete stable.projectionRevision;

@@ -50,12 +50,11 @@ assert.match(css, /public-portal-program-participant-list/);
 assert.match(css, /min-height: 44px/);
 assert.match(responsiveFixture, /id="mobile-program-390"/);
 assert.match(responsiveFixture, /id="mobile-program-320"/);
-assert.match(publicRules[".validate"], /liveFeed/);
-assert.match(publicRules.program.items.$itemId.$other[".validate"], /venueName/);
-assert.match(publicRules.program.items.$itemId.$other[".validate"], /publicNotes/);
+assert.match(publicRules[".validate"], /projectionVersion/);
+assert.match(publicRules.program.items.$itemId.$other[".validate"], /competitionId/);
+assert.equal(publicRules.program.items.$itemId.$other[".validate"].includes("venueName"), false);
 assert.equal(publicRules[".read"], true);
-assert.equal(publicRules.liveFeed.items.$eventId[".validate"].includes("score_published"), true);
-assert.equal(publicRules.liveFeed.items.$eventId.$other[".validate"].includes("operator"), false);
+assert.equal(publicRules.liveFeed[".validate"], false);
 
 console.log("public-portal-ux.test.mjs: ok");
 

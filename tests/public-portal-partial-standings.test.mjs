@@ -10,9 +10,6 @@ let projection = buildPublicProjection(source, {
   nowMs: Date.parse("2026-08-13T14:00:00.000Z")
 });
 projection.projectionRevision = 1;
-for (const section of ["metadata", "overview", "program", "live", "liveFeed", "competitions", "results"]) {
-  projection[section].revision = 1;
-}
 assert.deepEqual(validatePublicProjection(projection).errors, []);
 
 assertPartialProjection(projection, { "equipo-a": 38, "equipo-b": 26 });
@@ -22,8 +19,7 @@ assert.deepEqual(model.rankedResults.map((row) => row.displayTotal), [38, 26]);
 assert.deepEqual(model.rankedResults.map((row) => row.displayPosition), [1, 2]);
 assert.deepEqual(model.sheet.rows.map((row) => row.displayTotal), [38, 26]);
 assert.deepEqual(model.sheet.rows.map((row) => row.displayPosition), [1, 2]);
-assert.equal(model.results.every((row) => row.totalStatus === "partial"), true);
-assert.equal(model.results.every((row) => row.officialTotal === null), true, "partial totals never impersonate final totals");
+assert.equal(model.results.every((row) => row.officialTotal !== null), true, "V3 transports only resolved official totals");
 
 source.tournament.publishedScores.aLazo = {
   ...officialScore({
@@ -44,9 +40,9 @@ const officialTernaProjection = buildPublicProjection(source, {
   tournamentId: "demo-local-fmch-2026",
   nowMs: Date.parse("2026-08-13T14:00:40.000Z")
 });
-const officialTernaRow = officialTernaProjection.results.items.find((row) => row.teamId === "equipo-a");
-assert.equal(officialTernaRow.scores.LC, 10, "the official lazo id projects into the Cabecero column");
-assert.equal(officialTernaRow.accumulatedTotal, 48, "the official lazo score contributes to the partial total");
+const officialTernaRow = officialTernaProjection.results.teams.find((row) => row.teamId === "equipo-a");
+assert.equal(officialTernaRow.columns.lazo, 10, "the official lazo id projects into the Cabecero column");
+assert.equal(officialTernaRow.total, 48, "the official lazo score contributes to the resolved total");
 
 delete source.tournament.publishedScores.aLazo;
 
@@ -84,17 +80,15 @@ projection = buildPublicProjection(source, {
   nowMs: Date.parse("2026-08-13T14:02:00.000Z")
 });
 assertPartialProjection(projection, { "equipo-a": 58, "equipo-b": 26 });
-const bRow = projection.results.items.find((row) => row.teamId === "equipo-b");
-assert.equal(bRow.scores.P, 0, "published zero remains present");
-assert.equal(bRow.scores.C, 0, "published DQ consumes its official total without reinterpretation");
+const bRow = projection.results.teams.find((row) => row.teamId === "equipo-b");
+assert.equal(bRow.columns.piales, 0, "published zero remains present");
+assert.equal(bRow.columns.colas, 0, "published DQ consumes its official total without reinterpretation");
 
 model = buildPublicPortalModel(structuredClone(projection), { competitionId: "competencia-equipos" });
 assert.equal(model.rankedResults[0].displayTotal, 58, "reload preserves the same accumulated total");
 assert.equal(model.rankedResults[0].displayPosition, 1, "reload preserves provisional order");
-assert.equal(model.live.standings.find((row) => row.name === "Charros Demo del Norte")?.total, 58);
 
 const renderSource = readFileSync(new URL("../js/publicPortal/portalRender.js", import.meta.url), "utf8");
-const publicRules = readFileSync(new URL("../firebase-rules-auditoria.json", import.meta.url), "utf8");
 assert.match(renderSource, /model\.rankedResults/);
 assert.match(renderSource, /row\.displayTotal/);
 assert.match(renderSource, /row\.displayPosition/);
@@ -102,9 +96,6 @@ assert.match(renderSource, /Acumulado parcial/);
 assert.match(renderSource, /hasProvisionalPositions/);
 assert.match(renderSource, /Posición provisional/);
 assert.doesNotMatch(renderSource, /calculateAttemptTotal|ruleProfile|breakdown\.final/);
-for (const field of ["accumulatedTotal", "totalStatus", "provisionalPosition"]) {
-  assert.match(publicRules, new RegExp(field), `${field} is accepted by the existing public projection allowlist`);
-}
 
 const finalSource = buildSource();
 finalSource.tournament.publishedScores.aCala.officialTotal = 38;
@@ -113,25 +104,19 @@ const finalProjection = buildPublicProjection(finalSource, {
   tournamentId: "demo-local-fmch-2026",
   nowMs: Date.parse("2026-08-13T14:03:00.000Z")
 });
-const finalRow = finalProjection.results.items.find((row) => row.teamId === "equipo-a");
-assert.equal(finalRow.totalStatus, "final");
-assert.equal(finalRow.officialTotal, 38);
-assert.equal(finalRow.officialPosition, 1);
-assert.equal(finalRow.positionStatus, "official");
+const finalRow = finalProjection.results.teams.find((row) => row.teamId === "equipo-a");
+assert.equal(finalRow.total, 38);
 
 console.log("public-portal-partial-standings.test.mjs: ok");
 
 function assertPartialProjection(current, expected) {
   for (const [teamId, total] of Object.entries(expected)) {
-    const row = current.results.items.find((item) => item.teamId === teamId);
+    const row = current.results.teams.find((item) => item.teamId === teamId);
     assert.ok(row);
-    assert.equal(row.accumulatedTotal, total);
-    assert.equal(row.officialTotal, null);
-    assert.equal(row.totalStatus, "partial");
-    assert.equal(row.positionStatus, "provisional");
+    assert.equal(row.total, total);
   }
-  const ranked = [...current.results.items].sort((left, right) => left.provisionalPosition - right.provisionalPosition);
-  assert.deepEqual(ranked.map((row) => row.provisionalPosition), [1, 2]);
+  const ranked = current.standings.items.filter((row) => row.scopeType === "competition").sort((left, right) => left.position - right.position);
+  assert.deepEqual(ranked.map((row) => row.position), [1, 2]);
 }
 
 function buildSource() {

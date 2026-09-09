@@ -7,6 +7,7 @@ import {
   getPublicPortalViewSnapshot
 } from "../js/public/publicPortalClient.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {
@@ -32,8 +33,8 @@ assert.equal(accepted.accepted, true);
 assert.equal(accepted.duplicate, false);
 assert.equal(accepted.state.connection, "online");
 assert.equal(accepted.state.projectionRevision, 1);
-assert.ok(accepted.changedSections.includes("metadata"));
-assert.equal(getPublicPortalViewSnapshot(accepted.state).schemaVersion, 2);
+assert.deepEqual(accepted.changedSections, ["snapshot"]);
+assert.equal(getPublicPortalViewSnapshot(accepted.state).schemaVersion, 1);
 state = accepted.state;
 
 const duplicate = applyPublicPortalSnapshot(state, structuredClone(projection), {
@@ -43,8 +44,10 @@ assert.equal(duplicate.accepted, false);
 assert.equal(duplicate.duplicate, true);
 assert.equal(duplicate.state.snapshot, state.snapshot);
 
-const inconsistentProjection = structuredClone(projection);
-inconsistentProjection.metadata.name = "Different content";
+const inconsistentProjection = createCanonicalPublicTournamentData({
+  ...projection,
+  tournament: { ...projection.tournament, name: "Different content" }
+});
 const inconsistent = applyPublicPortalSnapshot(state, inconsistentProjection);
 assert.equal(inconsistent.accepted, false);
 assert.equal(inconsistent.duplicate, false);
@@ -63,11 +66,14 @@ assert.equal(offline.connection, "offline");
 assert.ok(offline.snapshot, "last valid snapshot remains available offline");
 const reconnecting = applyPublicPortalConnection(offline, true);
 assert.equal(reconnecting.connection, "reconnecting");
-const recovered = applyPublicPortalSnapshot(reconnecting, {
+const recoveredProjection = createCanonicalPublicTournamentData({
   ...projection,
   projectionRevision: 2,
   generatedAt: "2026-07-27T12:01:00.000Z",
-  generatedAtMs: Date.parse("2026-07-27T12:01:00.000Z")
+  live: { ...projection.live, status: "LIVE" }
+});
+const recovered = applyPublicPortalSnapshot(reconnecting, recoveredProjection, {
+  nowMs: Date.parse("2026-07-27T12:01:00.000Z")
 }, { nowMs: Date.parse("2026-07-27T12:01:00.000Z") });
 assert.equal(recovered.accepted, true);
 assert.equal(recovered.state.connection, "online");
@@ -94,15 +100,12 @@ assert.equal(getPublicPortalViewSnapshot(legacy.state).info.id, "legacy");
 
 const rtdbEmptyRoundTrip = structuredClone(projection);
 delete rtdbEmptyRoundTrip.program.items;
-delete rtdbEmptyRoundTrip.competitions.items;
-delete rtdbEmptyRoundTrip.results.items;
-delete rtdbEmptyRoundTrip.results.scopes;
-delete rtdbEmptyRoundTrip.live.standings;
-delete rtdbEmptyRoundTrip.rankings.items;
+delete rtdbEmptyRoundTrip.results.teams;
+delete rtdbEmptyRoundTrip.standings.items;
+delete rtdbEmptyRoundTrip.sheet.competitions;
+delete rtdbEmptyRoundTrip.timeline.items;
 delete rtdbEmptyRoundTrip.statistics.items;
-delete rtdbEmptyRoundTrip.search.items;
 const emptyRoundTrip = applyPublicPortalSnapshot(createPublicPortalClientState(), rtdbEmptyRoundTrip);
-assert.equal(emptyRoundTrip.accepted, true, "RTDB empty collections are restored before validation");
-assert.deepEqual(emptyRoundTrip.state.snapshot.results.items, []);
+assert.equal(emptyRoundTrip.accepted, false, "a partial V3 snapshot is never accepted as a mixed revision");
 
 console.log("public-portal-client.test.mjs: ok");

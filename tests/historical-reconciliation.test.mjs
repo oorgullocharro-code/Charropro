@@ -27,9 +27,9 @@ for (const count of [2,3]) test(`${count} duplicates: atomic reconciliation, his
   for(const r of target) for(const k of ['id','revision','total','timestampMs','publishedAt','actor','idempotencyKey','breakdown']) assert.deepEqual(r[k],before.tournaments[tid].publishedScores[r.id][k]);
   const totals=getCanonicalOfficialTeamTotals(t,scope);
   assert.equal(totals.suerteTotals.pial_ruedo,21); assert.equal(totals.total,193);
-  assert.equal(after.root.publicTournaments[tid].results.items[0].scores.PR,21);
-  assert.equal(after.root.publicTournaments[tid].results.items[0].accumulatedTotal,193);
-  assert.equal(after.root.publicTournaments[tid].rankings.items[0].total,193);
+  assert.equal(after.root.publicTournaments[tid].results.teams[0].columns.pial_ruedo,21);
+  assert.equal(after.root.publicTournaments[tid].results.teams[0].total,193);
+  assert.equal(after.root.publicTournaments[tid].standings.items[0].total,193);
   const portal=buildPublicPortalModel(after.root.publicTournaments[tid],{competitionId:'equipos_completo'});
   assert.equal(portal.rankedResults[0].displayTotal,193);
   assert.equal(portal.sheet.rows[0].scores.PR,21);
@@ -63,7 +63,6 @@ test('already historical values and original audit stay preserved',()=>{
   const old=structuredClone(ledger.records[ledger.activeRecordId]);old.id='old-history';old.total=15;old.breakdown.total=15;old.breakdown.attemptV2.scoring.teamAdjustedPoints=15;old.superseded=true;old.status='historical';old.officialStatus='historical';old.timestampMs=50;
   old.publishedAt=new Date(50).toISOString();
   root.tournaments[tid].publishedScores[old.id]=old;ledger.records[old.id]=structuredClone(old);
-  root.publicTournaments[tid].liveFeed = reconcilePublicProjection(null, buildPublicProjection(root.tournaments[tid], {nowMs:1000}), {nowMs:1000}).projection.liveFeed;
   const plan=dryRun(root,input,uid),backup=makeBackup(root,plan,2000);
   const after=applyReconciliation(root,{...input,mode:'EXECUTE',planToken:plan.planToken,expectedBeforeSignature:plan.beforeSignature},uid,backup,3000);
   assert.deepEqual(after.root.tournaments[tid].publishedScores[old.id],old);

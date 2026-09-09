@@ -347,11 +347,11 @@ const projection = buildPublicProjection({ tournament: storedTournament }, {
   tournamentId: TOURNAMENT_ID,
   nowMs: Date.parse("2026-08-28T15:06:00.000Z")
 });
-const result = projection.results.items.find((item) => item.teamId === TEAM_ID);
+const result = projection.results.teams.find((item) => item.teamId === TEAM_ID);
 assert.ok(result, "the official result row is projected");
-assert.equal(result.scores.LC, 26);
-assert.equal(result.scores.PR, 20);
-assert.equal(result.accumulatedTotal, 46);
+assert.equal(result.columns.lazo, 26);
+assert.equal(result.columns.pial_ruedo, 20);
+assert.equal(result.total, 46);
 
 console.log("fmch-terna-federation-official-score-recovery.test.mjs: ok");
 

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import {
-  buildPublicProjection,
-  getPublicProjectionSignature,
-  reconcilePublicProjection
+  buildLegacyPublicProjectionV2 as buildPublicProjection,
+  getLegacyPublicProjectionSignature as getPublicProjectionSignature,
+  reconcileLegacyPublicProjectionV2 as reconcilePublicProjection
 } from "../js/public/publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,

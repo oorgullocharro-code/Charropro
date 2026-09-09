@@ -66,7 +66,8 @@ export function validateCanonicalTournamentResults(value = {}) {
   const results = collection(value.results?.items);
   const byId = new Map();
   for (const row of results) {
-    if (!id(row.resultId) || !id(row.charreadaId) || !id(row.competitionId) || !id(row.teamId)) errors.push("result-identity-invalid");
+    if (!id(row.resultId) || !id(row.charreadaId) || !id(row.competitionId)
+      || (row.participantScope === "individual" ? !id(row.participantId) : !id(row.teamId))) errors.push("result-identity-invalid");
     if (!finite(row.total) || !finite(row.subtotal) || !finite(row.penalties)) errors.push("result-total-invalid");
     if (!plain(row.suertes)) errors.push("result-suertes-invalid");
     if (!row.status) errors.push("result-status-invalid");
@@ -106,6 +107,9 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
     resultId: row.resultId,
     teamId: row.teamId,
     teamName: row.teamName,
+    participantScope: row.participantScope,
+    participantId: row.participantId,
+    participantName: row.participantName,
     charreadaId: row.charreadaId,
     competitionId: row.competitionId,
     phase: row.phaseId || "",
@@ -117,19 +121,26 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
     position: null
   }));
   const standings = collection(results.standings?.items)
-    .filter((item) => item.scopeType === "charreada" && collection(item.resultIds).length === 1)
     .map((item) => ({
       rankingId: item.rankingId,
-      resultId: item.resultIds[0],
+      resultId: collection(item.resultIds).length === 1 ? item.resultIds[0] : "",
+      resultIds: collection(item.resultIds),
       position: item.position,
+      scopeType: item.scopeType,
+      competitionId: item.competitionId,
+      charreadaId: item.charreadaId || "",
+      participantScope: item.participantScope,
       teamId: item.teamId,
       teamName: item.teamName,
+      participantId: item.participantId,
+      participantName: item.participantName,
       total: item.total,
       classification: item.totalStatus,
       status: item.positionStatus,
       phase: item.phaseId || "",
       tieBreakLabel: ""
-    }));
+    }))
+    .filter((item) => item.resultIds.length > 0);
   return {
     tournamentId: results.tournamentId,
     sourceRevision: results.sourceRevision,
@@ -172,9 +183,9 @@ function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, s
   const rows = new Map();
   for (const item of records) {
     const identity = recordIdentity(item, tournamentId);
-    if (!identity.tournamentId || identity.tournamentId !== tournamentId || !identity.charreadaId || !identity.teamId || !identity.suerteId) continue;
+    if (!identity.tournamentId || identity.tournamentId !== tournamentId || !identity.charreadaId || !identity.entityId || !identity.suerteId) continue;
     const charreada = charreadas.find((entry) => entry.charreadaId === identity.charreadaId) || {};
-    const key = [identity.competitionId || charreada.competitionId || "competition", identity.phaseId || charreada.phaseId || "single", identity.charreadaId, identity.teamId].join("|");
+    const key = [identity.competitionId || charreada.competitionId || "competition", identity.phaseId || charreada.phaseId || "single", identity.charreadaId, identity.participantScope, identity.entityId].join("|");
     if (!rows.has(key)) rows.set(key, createResultRow(identity, charreada, teams));
     const row = rows.get(key);
     const sport = row.suertes[identity.suerteId] || createSportResult(identity.suerteId);
@@ -195,7 +206,7 @@ function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, s
 function createResultRow(identity, charreada, teams) {
   const team = teams.find((item) => item.teamId === identity.teamId) || {};
   return {
-    resultId: stableId("result", [identity.competitionId, identity.phaseId, identity.charreadaId, identity.teamId]),
+    resultId: stableId("result", [identity.competitionId, identity.phaseId, identity.charreadaId, identity.participantScope, identity.entityId]),
     tournamentId: identity.tournamentId,
     competitionId: identity.competitionId || charreada.competitionId || "competition",
     competitionName: charreada.competitionName || "",
@@ -204,6 +215,9 @@ function createResultRow(identity, charreada, teams) {
     charreadaId: identity.charreadaId,
     teamId: identity.teamId,
     teamName: identity.teamName || team.teamName || "",
+    participantScope: identity.participantScope,
+    participantId: identity.participantId,
+    participantName: identity.participantName,
     suertes: {},
     subtotal: 0,
     penalties: 0,
@@ -223,12 +237,16 @@ function finalizeResultRow(row, currentRecords, source) {
   row.suertes = Object.fromEntries(Object.entries(row.suertes).sort(([left], [right]) => left.localeCompare(right)));
   row.subtotal = Object.values(row.suertes).reduce((sum, sport) => sum + sport.total, 0);
   row.penalties = Object.values(row.suertes).reduce((sum, sport) => sum + sport.penalties, 0);
-  const totals = getCanonicalOfficialTeamTotals({ currentRecords, charreadas: source.charreadas }, {
-    tournamentId: row.tournamentId,
-    charreadaId: row.charreadaId,
-    teamId: row.teamId
-  });
-  const canonicalTotal = totals.hasOfficialRecords ? totals.total : row.subtotal + resolveAdjustment(source.charreadas, row.charreadaId, row.teamId);
+  const totals = row.participantScope === "team"
+    ? getCanonicalOfficialTeamTotals({ currentRecords, charreadas: source.charreadas }, {
+      tournamentId: row.tournamentId,
+      charreadaId: row.charreadaId,
+      teamId: row.teamId
+    })
+    : { hasOfficialRecords: false, total: row.subtotal };
+  const canonicalTotal = totals.hasOfficialRecords
+    ? totals.total
+    : row.subtotal + (row.participantScope === "team" ? resolveAdjustment(source.charreadas, row.charreadaId, row.teamId) : 0);
   row.adjustment = canonicalTotal - row.subtotal;
   row.total = canonicalTotal;
   row.status = row.recordIds.length ? "OFFICIAL" : "NOT_STARTED";
@@ -240,11 +258,13 @@ function buildStandings(resultRows) {
     resultId: row.resultId,
     teamId: row.teamId,
     teamName: row.teamName,
+    participantId: row.participantId,
+    participantName: row.participantName,
     competitionId: row.competitionId,
     phaseId: row.phaseId || null,
     phaseName: row.phaseName,
     charreadaId: row.charreadaId,
-    participantScope: "team",
+    participantScope: row.participantScope,
     officialTotal: row.total,
     totalStatus: row.status === "FINAL" ? "final" : "partial",
     resultStatus: row.status === "NOT_STARTED" ? "draft" : "published",
@@ -258,7 +278,7 @@ function buildSheet(resultRows) {
   const groups = new Map();
   for (const row of resultRows) {
     if (!groups.has(row.competitionId)) groups.set(row.competitionId, { competitionId: row.competitionId, name: row.competitionName, rows: [] });
-    groups.get(row.competitionId).rows.push({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, total: row.total, columns: toSheetColumns(row.suertes) });
+    groups.get(row.competitionId).rows.push({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantId: row.participantId, participantName: row.participantName, total: row.total, columns: toSheetColumns(row.suertes) });
   }
   return { status: groups.size ? "READY" : "EMPTY", competitions: [...groups.values()].map((entry) => ({ ...entry, rows: entry.rows.sort(compareResultRows) })).sort((a, b) => a.competitionId.localeCompare(b.competitionId)) };
 }
@@ -266,6 +286,7 @@ function buildSheet(resultRows) {
 function buildTournamentTeams(resultRows, teams) {
   const byId = new Map(teams.map((team) => [team.teamId, { ...team, resultIds: [], total: 0, status: "NOT_STARTED" }]));
   for (const row of resultRows) {
+    if (row.participantScope !== "team") continue;
     if (!byId.has(row.teamId)) byId.set(row.teamId, { teamId: row.teamId, teamName: row.teamName, resultIds: [], total: 0, status: "NOT_STARTED" });
     const team = byId.get(row.teamId);
     team.resultIds.push(row.resultId);
@@ -312,13 +333,21 @@ function normalizeTeams(value, tournamentId) {
 
 function recordIdentity(item, fallbackTournamentId) {
   const attempt = record(item.breakdown?.attemptV2?.identity);
+  const participantId = id(item.participant?.id || item.participantId || attempt.participantId);
+  const teamId = id(item.team?.id || item.teamId || attempt.teamId);
+  const declaredScope = text(item.participantScope || item.competition?.scope || item.competition?.participantScope || attempt.participantScope).toLowerCase();
+  const participantScope = declaredScope === "individual" || (!teamId && participantId) ? "individual" : "team";
   return {
     tournamentId: id(item.tournament?.id || item.tournamentId || attempt.tournamentId || fallbackTournamentId),
     competitionId: id(item.competition?.id || item.competitionId || item.charreada?.competitionId || attempt.competitionId),
     phaseId: id(item.phase?.id || item.phaseId || attempt.phaseId),
     charreadaId: id(item.charreada?.id || item.charreadaId || attempt.charreadaId),
-    teamId: id(item.team?.id || item.teamId || attempt.teamId),
+    participantScope,
+    entityId: participantScope === "individual" ? participantId : teamId,
+    teamId,
     teamName: text(item.team?.name || item.teamName),
+    participantId,
+    participantName: text(item.participant?.name || item.participantName),
     suerteId: id(item.suerte?.id || item.suerteId || attempt.suerteId)
   };
 }
@@ -336,8 +365,8 @@ function resolveAdjustment(charreadas, charreadaId, teamId) {
 
 function toSheetColumns(suertes) { return Object.fromEntries(Object.entries(record(suertes)).map(([suerteId, sport]) => [suerteId, finiteNumber(sport.total)]).sort(([a], [b]) => a.localeCompare(b))); }
 function maxRevision(records) { return collection(records).reduce((max, item) => Math.max(max, integer(item.revision)), 0); }
-function compareRecordIdentity(left, right) { const a = recordIdentity(left); const b = recordIdentity(right); return [a.charreadaId, a.teamId, a.suerteId, id(left.id)].join("|").localeCompare([b.charreadaId, b.teamId, b.suerteId, id(right.id)].join("|")); }
-function compareResultRows(left, right) { return `${left.competitionId}|${left.phaseId}|${left.charreadaId}|${left.teamId}`.localeCompare(`${right.competitionId}|${right.phaseId}|${right.charreadaId}|${right.teamId}`); }
+function compareRecordIdentity(left, right) { const a = recordIdentity(left); const b = recordIdentity(right); return [a.charreadaId, a.participantScope, a.entityId, a.suerteId, id(left.id)].join("|").localeCompare([b.charreadaId, b.participantScope, b.entityId, b.suerteId, id(right.id)].join("|")); }
+function compareResultRows(left, right) { return `${left.competitionId}|${left.phaseId}|${left.charreadaId}|${left.participantScope}|${left.teamId || left.participantId}`.localeCompare(`${right.competitionId}|${right.phaseId}|${right.charreadaId}|${right.participantScope}|${right.teamId || right.participantId}`); }
 function stableId(prefix, parts) { return `${prefix}_${stableHash(parts.join("|"))}`; }
 function stableStringify(value) { if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`; if (plain(value)) return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(",")}}`; return JSON.stringify(value); }
 function stableHash(value) { let hash = 2166136261; for (const character of String(value)) { hash ^= character.charCodeAt(0); hash = Math.imul(hash, 16777619); } return (hash >>> 0).toString(16).padStart(8, "0"); }

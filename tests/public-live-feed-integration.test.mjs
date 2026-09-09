@@ -148,23 +148,10 @@ assert.equal(
 const publicPath = `charropro/publicTournaments/${tournamentId}`;
 const firstProjection = firebase.read(publicPath);
 assertFirebaseSdkSerializable(firstProjection);
-assert.equal(firstProjection.schemaVersion, 2);
+assert.equal(firstProjection.schemaVersion, 3);
 assert.equal(firstProjection.projectionRevision, 1);
-assert.equal(firstProjection.liveFeed.revision, 1);
-assert.equal(firstProjection.liveFeed.status, "live");
-assert.equal(validatePublicLiveFeed(firstProjection.liveFeed).valid, true);
-const firstEvents = listPublicLiveFeedEvents(firstProjection.liveFeed);
-assert.equal(firstEvents.length, 1);
-assert.ok(firstEvents[0].eventId);
-assert.equal(firstEvents[0].eventType, "score_published");
-assert.ok(Number.isSafeInteger(firstEvents[0].sequence) && firstEvents[0].sequence > 0);
-assert.equal(firstEvents[0].revision, 1);
-assert.equal(firstEvents[0].occurredAt, Date.parse("2026-07-28T10:01:00.000Z"));
-assert.equal(firstEvents[0].publishedAt, Date.parse("2026-07-28T10:01:00.000Z"));
-assert.equal(firstEvents[0].score, 10);
-assert.equal(firstEvents[0].teamId, teamId);
-assert.equal(firstEvents[0].suerteId, "cala");
-assert.equal(firstEvents[0].status, "official");
+assert.equal("liveFeed" in firstProjection, false, "V3 does not calculate a narrative event feed from scores");
+assert.equal(firstProjection.results.teams[0].columns.cala, 10);
 
 const second = await publishOfficial({
   publishedId: "published-integration-2",
@@ -180,8 +167,7 @@ assert.equal(second.publicSnapshot.ok, true);
 assert.equal(firebase.privateWriteCount, 2);
 const secondProjection = firebase.read(publicPath);
 assert.equal(secondProjection.projectionRevision, 2);
-assert.equal(secondProjection.liveFeed.revision, 2);
-assert.equal(listPublicLiveFeedEvents(secondProjection.liveFeed).length, 2);
+assert.equal(secondProjection.results.teams[0].columns.piales, 25);
 
 firebase.failPublicTransactions = true;
 const beforePartialProjection = firebase.read(publicPath);
@@ -237,7 +223,7 @@ assert.equal(recovered.ok, true, "a new module instance recovers the durable job
 assert.equal(recovered.jobs.find((job) => job.projectionId === partial.projectionId)?.status, "CLIENT_CONFIRMED");
 assert.equal(firebase.read(`${partialOutboxPath}/state`).status, "CLIENT_CONFIRMED");
 assert.equal(firebase.read(publicPath).projectionRevision, 3);
-assert.equal(listPublicLiveFeedEvents(firebase.read(publicPath).liveFeed).length, 3);
+assert.equal(firebase.read(publicPath).results.teams[0].columns.colas, 33);
 
 const outboxBeforeDuplicate = firebase.read(`charropro/projectionOutbox/${tournamentId}`);
 const duplicate = await publishOfficial({

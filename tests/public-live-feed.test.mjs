@@ -183,11 +183,9 @@ const initial = reconcilePublicProjection(
   buildPublicProjection(projectedSource, { tournamentId: "feed-tournament", nowMs: Date.parse("2026-07-27T12:00:00.000Z") })
 );
 assert.equal(initial.ok, true);
-const projectedScore = listPublicLiveFeedEvents(initial.projection.liveFeed).find((item) => item.eventType === "score_published");
-assert.equal(projectedScore.score, 35, "feed uses official attempt precedence and never exposes anomalous Cala 280");
-const previousV2 = structuredClone(initial.projection);
-delete previousV2.liveFeed;
-assert.equal(validatePublicProjection(previousV2).valid, true, "previous schema v2 without liveFeed remains readable");
+assert.equal(initial.projection.schemaVersion, 3);
+assert.equal("liveFeed" in initial.projection, false, "V3 does not regenerate sporting events into a public feed");
+assert.equal(validatePublicProjection(initial.projection).valid, true);
 
 console.log("public-live-feed.test.mjs: ok");
 

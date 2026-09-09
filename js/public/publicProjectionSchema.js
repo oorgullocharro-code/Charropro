@@ -1,4 +1,5 @@
 import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([
@@ -310,6 +311,7 @@ export function sanitizePublicBoolean(value, fallback = false) {
 }
 
 export function validatePublicProjection(projection, options = {}) {
+  if (Number(projection?.schemaVersion) === 3) return validateCanonicalPublicTournamentData(projection);
   projection = normalizePublicProjectionCollections(projection);
   const errors = [];
   const warnings = [];
@@ -403,6 +405,7 @@ export function validatePublicProjection(projection, options = {}) {
 }
 
 export function validatePublicProjectionForRead(projection) {
+  if (Number(projection?.schemaVersion) === 3) return validateCanonicalPublicTournamentData(projection);
   return validatePublicProjection(projection, { allowLegacyUnavailableRanking: true });
 }
 

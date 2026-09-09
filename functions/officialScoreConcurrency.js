@@ -343,7 +343,7 @@ function buildFanoutJob(request, record) {
 
 function buildProjectionIntent(request, record) {
   const canonicalKey = stableStringify({
-    projectionType: "public_tournament_v2",
+    projectionType: "public_tournament_v3",
     tournamentId: request.tournamentId,
     attemptKey: request.attemptKey,
     sourceId: record.id,
@@ -363,7 +363,7 @@ function buildProjectionIntent(request, record) {
     payloadVersion: 1,
     projectionId: `projection_${digest}_${record.revision}`,
     idempotencyKey: `projection:${digest}:${record.revision}`,
-    projectionType: "public_tournament_v2",
+    projectionType: "public_tournament_v3",
     tournamentId: request.tournamentId,
     charreadaId: record.charreada?.id || "",
     competitionId: record.competition?.id || record.charreada?.competitionId || "",
