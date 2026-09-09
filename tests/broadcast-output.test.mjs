@@ -25,14 +25,14 @@ import {
   updateBroadcastOutputHeartbeat,
   validateBroadcastOutput,
   validateOutputProjection
-} from "../js/broadcast/broadcastOutput.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 import {
   createInitialBroadcastState,
   setGraphicState,
   setPreviewState,
   setProgramState
-} from "../js/broadcast/broadcastState.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
-import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:05.000Z";

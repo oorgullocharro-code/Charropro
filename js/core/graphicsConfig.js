@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
-import { validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-public-projection-v3-cutover";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

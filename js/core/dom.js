@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 logCharroProVersion("runtime");
 

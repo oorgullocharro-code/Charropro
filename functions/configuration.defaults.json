@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1",
+      "appVersion": "20260909-public-projection-v3-release-cache-coherence-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "98792e7b8a6f303b1aafa05111999db605ce36baba42f1ddb138d2815a6b8558",
-  "fingerprint": "98792e7b8a6f303b1aafa05111999db605ce36baba42f1ddb138d2815a6b8558"
+  "checksum": "700cf6258ba4418e3fc954bbb03c6e213590bc178d29d89136b3bf3864300191",
+  "fingerprint": "700cf6258ba4418e3fc954bbb03c6e213590bc178d29d89136b3bf3864300191"
 }

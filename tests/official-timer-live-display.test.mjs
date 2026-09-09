@@ -3,7 +3,7 @@ import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "../js/core/officialTimerLiveDisplay.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "../js/core/officialTimerLiveDisplay.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const T0 = Date.parse("2026-08-25T12:00:00.000Z");
 const base = { timerId: "timer-1", durationMs: 60000, officialElapsedMs: 10000, sourceRevision: 1 };

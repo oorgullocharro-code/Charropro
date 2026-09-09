@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "./programEngine.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

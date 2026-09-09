@@ -1,7 +1,7 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
-import { selectOfficialRanking } from "../core/officialRanking.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

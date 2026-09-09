@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

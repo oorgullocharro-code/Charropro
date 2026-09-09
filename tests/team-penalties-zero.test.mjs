@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "../js/core/scoring.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

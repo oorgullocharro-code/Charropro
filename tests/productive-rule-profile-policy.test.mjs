@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

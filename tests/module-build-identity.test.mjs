@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 
-const BUILD = "20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+const BUILD = "20260909-public-projection-v3-release-cache-coherence-001-v1";
 const files = await collect(new URL("../js/", import.meta.url));
 const identities = new Map();
 const violations = [];

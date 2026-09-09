@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   formatOfficialFieldTimerMs,
   getOfficialFieldTimerFormat
-} from "../js/core/officialFieldTimerDisplay.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "../js/core/officialFieldTimerDisplay.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const cases = new Map([
   [14_400, "14.4"],

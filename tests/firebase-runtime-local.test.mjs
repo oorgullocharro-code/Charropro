@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260908-supervisor-historical-reconciliation-dryrun-ui-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",
