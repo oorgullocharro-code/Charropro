@@ -38,8 +38,11 @@ verify_output="$("${SCRIPT_DIR}/verify-package.sh" "${verify_args[@]}")"
 printf '%s\n' "$verify_output"
 
 package_checksum="$(printf '%s\n' "$verify_output" | awk -F= '$1=="PACKAGE_CHECKSUM"{print $2}')"
-package_files="$(printf '%s\n' "$verify_output" | awk -F= '$1=="PACKAGE_FILES"{print $2}')"
+package_file_count="$(printf '%s\n' "$verify_output" | awk -F= '$1=="ZIP_FILE_COUNT"{print $2}')"
+package_file_inventory_sha256="$(printf '%s\n' "$verify_output" | awk -F= '$1=="ZIP_FILE_INVENTORY_SHA256"{print $2}')"
 short_sha="$(printf '%s\n' "$verify_output" | awk -F= '$1=="PACKAGE_SHORT_SHA"{print $2}')"
+[[ "$package_file_count" =~ ^[1-9][0-9]*$ ]] || die "package-file-count-missing"
+[[ "$package_file_inventory_sha256" =~ ^[a-f0-9]{64}$ ]] || die "package-file-inventory-missing"
 timestamp="$(date -u +%Y%m%d-%H%M%S)"
 remote_parent="$(dirname "$HOSTINGER_REMOTE_DIR")"
 backup_path="${remote_parent}/charropro-backup-${timestamp}-pre-${short_sha}.zip"
@@ -121,7 +124,7 @@ ssh "${HOSTINGER_SSH_ARGS[@]}" "$HOSTINGER_TARGET" "mkdir -p '${remote_root}/upl
 scp "${HOSTINGER_SCP_ARGS[@]}" "$package" "${HOSTINGER_TARGET}:${remote_package}"
 
 remote_metadata="$(ssh "${HOSTINGER_SSH_ARGS[@]}" "$HOSTINGER_TARGET" bash -s -- \
-  "$remote_package" "$remote_release" "$HOSTINGER_REMOTE_DIR" "$expected_sha256" "$expected_build" "$package_checksum" "$package_files" <<'REMOTE'
+  "$remote_package" "$remote_release" "$HOSTINGER_REMOTE_DIR" "$expected_sha256" "$expected_build" "$package_checksum" "$package_file_count" "$package_file_inventory_sha256" <<'REMOTE'
 set -euo pipefail
 remote_package="$1"
 release="$2"
@@ -129,15 +132,19 @@ remote_dir="$3"
 expected_sha="$4"
 expected_build="$5"
 expected_checksum="$6"
-expected_files="$7"
+expected_file_count="$7"
+expected_inventory_sha256="$8"
 actual_sha="$(sha256sum "$remote_package" | awk '{print $1}')"
 [[ "$actual_sha" == "$expected_sha" ]] || { echo 'ERROR=remote-package-sha-mismatch' >&2; exit 1; }
 [[ ! -e "$release" ]] || { echo 'ERROR=remote-release-already-exists' >&2; exit 1; }
 mkdir -p "$release"
 unzip -q "$remote_package" -d "$release"
 [[ -f "$release/index.html" && -f "$release/functions/configuration.defaults.json" && -d "$release/assets" && -d "$release/js" ]] || { echo 'ERROR=remote-release-invalid' >&2; exit 1; }
-actual_files="$(find "$release" -type f | wc -l)"
-[[ "$actual_files" == "$expected_files" ]] || { echo 'ERROR=remote-release-file-count-mismatch' >&2; exit 1; }
+[[ -z "$(find "$release" -type l -print -quit)" ]] || { echo 'ERROR=remote-release-symlink-forbidden' >&2; exit 1; }
+actual_file_count="$(find "$release" -type f | wc -l | tr -d '[:space:]')"
+[[ "$actual_file_count" == "$expected_file_count" ]] || { echo 'ERROR=remote-release-file-count-mismatch' >&2; exit 1; }
+actual_inventory_sha256="$(find "$release" -type f -printf '%P\n' | LC_ALL=C sort | sha256sum | awk '{print $1}')"
+[[ "$actual_inventory_sha256" == "$expected_inventory_sha256" ]] || { echo 'ERROR=remote-release-file-inventory-mismatch' >&2; exit 1; }
 config_values="$(python3 - "$release/functions/configuration.defaults.json" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as handle:
@@ -159,7 +166,7 @@ PY
 deployed_build="${deployed_values%% *}"
 deployed_checksum="${deployed_values##* }"
 [[ "$deployed_build" == "$expected_build" && "$deployed_checksum" == "$expected_checksum" ]] || { echo 'ERROR=remote-deployed-config-mismatch' >&2; exit 1; }
-printf 'REMOTE_PACKAGE_SHA=%s\nREMOTE_TEMP_PATH=%s\nREMOTE_RELEASE_PATH=%s\nREMOTE_BUILD=%s\nREMOTE_CHECKSUM=%s\n' "$actual_sha" "$remote_package" "$release" "$deployed_build" "$deployed_checksum"
+printf 'REMOTE_PACKAGE_SHA=%s\nREMOTE_TEMP_PATH=%s\nREMOTE_RELEASE_PATH=%s\nREMOTE_BUILD=%s\nREMOTE_CHECKSUM=%s\nREMOTE_FILE_COUNT=%s\nREMOTE_FILE_INVENTORY_SHA256=%s\n' "$actual_sha" "$remote_package" "$release" "$deployed_build" "$deployed_checksum" "$actual_file_count" "$actual_inventory_sha256"
 REMOTE
 )"
 deployed=true
