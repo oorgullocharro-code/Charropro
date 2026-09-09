@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",

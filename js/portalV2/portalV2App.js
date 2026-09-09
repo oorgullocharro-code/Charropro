@@ -1,0 +1,123 @@
+import {
+  applyPublicPortalConnection,
+  createPublicPortalClientState,
+  evaluatePublicPortalStale
+} from "../public/publicPortalClient.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { createPortalV2Model } from "./portalV2Model.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { applyPortalV2Snapshot } from "./portalV2ProjectionState.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "./portalV2Router.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { createPortalV2Shell, renderPortalV2 } from "./portalV2Render.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+
+export const PORTAL_V2_FOUNDATION_VERSION = "1.0.0";
+
+let activePortal = null;
+
+export function bootstrapPortalV2(options = {}) {
+  activePortal?.dispose();
+  activePortal = createPortalV2App(options);
+  activePortal.initialize();
+  return activePortal;
+}
+
+export function createPortalV2App(options = {}) {
+  const environment = options.window || window;
+  const documentRef = options.document || document;
+  const root = options.root || documentRef.getElementById("portal-v2-root");
+  const subscribe = options.subscribe || subscribePublicTournamentSnapshot;
+  if (!root) throw new Error("portal-v2-root-required");
+
+  const runtime = {
+    disposed: false,
+    initialized: false,
+    route: parsePortalV2Route(environment.location.href),
+    client: createPublicPortalClientState(),
+    availability: "loading",
+    shell: null,
+    unsubscribe: null,
+    staleTimer: null,
+    listenerCount: 0,
+    renderCount: 0
+  };
+
+  function initialize() {
+    if (runtime.initialized || runtime.disposed) return;
+    runtime.initialized = true;
+    runtime.shell = createPortalV2Shell(root);
+    root.addEventListener("click", handleClick);
+    environment.addEventListener("popstate", handlePopState);
+    render();
+    if (!runtime.route.tournamentId) {
+      runtime.availability = "missing-tournament";
+      render();
+      return;
+    }
+    runtime.unsubscribe = subscribe(runtime.route.tournamentId, handleSnapshot);
+    runtime.listenerCount = 1;
+    runtime.staleTimer = environment.setInterval(checkStale, 15000);
+  }
+
+  function handleSnapshot(snapshot, status = {}) {
+    if (runtime.disposed) return;
+    if (status.event === "connection") {
+      runtime.client = applyPublicPortalConnection(runtime.client, status.connected, { error: status.connection === "error" });
+      render();
+      return;
+    }
+    const result = applyPortalV2Snapshot(runtime.client, snapshot);
+    runtime.client = result.state;
+    if (result.accepted) runtime.availability = "ready";
+    else if (!runtime.client.snapshot) runtime.availability = status.exists === false ? "not-found" : result.reason === "portal-v2-schema-required" ? "unsupported" : "error";
+    render({ changed: result.accepted });
+  }
+
+  function handleClick(event) {
+    const button = event.target.closest("button[data-portal-v2-view]");
+    if (!button || !root.contains(button)) return;
+    const url = buildPortalV2Url(environment.location.href, { view: button.dataset.portalV2View });
+    environment.history.pushState({ portalV2: true }, "", url);
+    runtime.route = parsePortalV2Route(environment.location.href, { tournamentId: runtime.route.tournamentId });
+    render();
+  }
+
+  function handlePopState() {
+    runtime.route = parsePortalV2Route(environment.location.href, { tournamentId: runtime.route.tournamentId });
+    render();
+  }
+
+  function checkStale() {
+    const next = evaluatePublicPortalStale(runtime.client);
+    if (next.connection !== runtime.client.connection) {
+      runtime.client = next;
+      render();
+    }
+  }
+
+  function render(options = {}) {
+    runtime.renderCount += 1;
+    renderPortalV2(runtime.shell, createPortalV2Model(runtime.client.snapshot, {
+      availability: runtime.availability,
+      connection: runtime.client.connection,
+      view: runtime.route.view
+    }), options);
+  }
+
+  function dispose() {
+    if (runtime.disposed) return;
+    runtime.disposed = true;
+    runtime.unsubscribe?.();
+    if (runtime.staleTimer) environment.clearInterval(runtime.staleTimer);
+    root.removeEventListener("click", handleClick);
+    environment.removeEventListener("popstate", handlePopState);
+  }
+
+  return Object.freeze({
+    initialize,
+    dispose,
+    getState: () => Object.freeze({
+      route: { ...runtime.route }, availability: runtime.availability,
+      projectionRevision: runtime.client.projectionRevision, listenerCount: runtime.listenerCount,
+      renderCount: runtime.renderCount
+    })
+  });
+}

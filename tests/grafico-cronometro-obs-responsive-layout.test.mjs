@@ -4,7 +4,7 @@ import {
   buildGraphicTimerPresentation,
   formatGraphicTimerMs,
   readGraphicTimerPresentationOptions
-} from "../js/views/graficoTimerPresentation.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+} from "../js/views/graficoTimerPresentation.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 
 assert.equal(formatGraphicTimerMs(12_100, { showMinutes: false }), "12.1");
 assert.equal(formatGraphicTimerMs(-12_100, { showMinutes: false }), "-12.1");

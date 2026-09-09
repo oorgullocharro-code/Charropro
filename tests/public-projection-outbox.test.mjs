@@ -16,7 +16,7 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
-} from "../js/core/publicProjectionOutbox.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+} from "../js/core/publicProjectionOutbox.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 
 const T0 = Date.parse("2026-07-29T12:00:00.000Z");
 const base = {

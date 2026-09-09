@@ -1,5 +1,5 @@
-import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
-import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 
 export const PUBLIC_LIVE_FEED_FILTERS = Object.freeze(["all", "score", "turn", "penalty", "timer"]);
 export const PUBLIC_LIVE_FEED_RENDER_LIMIT = 50;

@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

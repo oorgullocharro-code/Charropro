@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260909-public-projection-v3-release-cache-coherence-001-v1",
+      "appVersion": "20260909-portal-v2-foundation-and-lifecycle-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "700cf6258ba4418e3fc954bbb03c6e213590bc178d29d89136b3bf3864300191",
-  "fingerprint": "700cf6258ba4418e3fc954bbb03c6e213590bc178d29d89136b3bf3864300191"
+  "checksum": "8e742900a262f6e85b898d0df911c41a712ec5525a4279ddf1d80b1335c94976",
+  "fingerprint": "8e742900a262f6e85b898d0df911c41a712ec5525a4279ddf1d80b1335c94976"
 }

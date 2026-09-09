@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

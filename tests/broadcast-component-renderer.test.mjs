@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

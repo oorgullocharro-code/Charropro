@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
-import configurationService from "../functions/configurationService.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import configurationService from "../functions/configurationService.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

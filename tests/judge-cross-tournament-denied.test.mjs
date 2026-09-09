@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260909-public-projection-v3-release-cache-coherence-001-v1";
+import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
 import { createBootstrapHarness, executeBootstrap, profile, TOURNAMENT_A, TOURNAMENT_B, tournamentIndex, tournamentRecord } from "./helpers/userAccessBootstrapTestHarness.mjs";
 
 const { result, reads } = await executeBootstrap(
