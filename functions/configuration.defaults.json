@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260909-portal-v2-results-standings-sheet-001-v1",
+      "appVersion": "20260909-portal-v2-live-timeline-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "094230d4314b64149b7a2a701b8c9e1ae16a9916bfc5d421592e1bce0f374d8e",
-  "fingerprint": "094230d4314b64149b7a2a701b8c9e1ae16a9916bfc5d421592e1bce0f374d8e"
+  "checksum": "eaf766036c5c67ac216d719b4c3894f4b15f05f3cefdc639b25c1a37a5e37408",
+  "fingerprint": "eaf766036c5c67ac216d719b4c3894f4b15f05f3cefdc639b25c1a37a5e37408"
 }

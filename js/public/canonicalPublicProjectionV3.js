@@ -1,11 +1,11 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260909-portal-v2-live-timeline-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260909-portal-v2-live-timeline-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 

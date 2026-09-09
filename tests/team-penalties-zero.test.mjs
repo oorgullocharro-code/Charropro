@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+} from "../js/core/scoring.js?v=20260909-portal-v2-live-timeline-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260909-portal-v2-live-timeline-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

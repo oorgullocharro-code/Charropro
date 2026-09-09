@@ -1,4 +1,4 @@
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-portal-v2-live-timeline-001-v1";
 
 const TOURNAMENT_ID = "portal-v2-local-preview";
 
@@ -38,14 +38,16 @@ function baseSnapshot(lifecycle, hasResults) {
     branding: { primaryColor: "#17324d", secondaryColor: "#f0e6d2", accentColor: "#b5252a", backgroundColor: "#f6f7f5", textColor: "#17212b" },
     modules: [
       { type: "live", enabled: true, order: 10 },
+      { type: "timeline", enabled: true, order: 15 },
       { type: "results", enabled: true, order: 20 },
       { type: "standings", enabled: true, order: 30 },
       { type: "sheet", enabled: true, order: 40 }
     ],
-    live: lifecycle === "LIVE" ? { status: "LIVE", currentCharreada: "Charreada local", currentTeam: "Rancho Los Laureles", currentSuerte: "Pial de ruedo", currentScore: 21, updatedAt: "2026-09-09T20:00:00.000Z" } : { status: lifecycle, updatedAt: "2026-09-09T20:00:00.000Z" },
+    live: lifecycle === "LIVE" ? { status: "LIVE", currentCharreada: "charreada-local", currentTeam: "Rancho Los Laureles", currentParticipant: "Juan Pérez", currentSuerte: "Pial de ruedo", currentScore: 21, updatedAt: "2026-09-09T20:00:00.000Z" } : { status: lifecycle, updatedAt: "2026-09-09T20:00:00.000Z" },
     results: { teams: results },
     standings: { items: hasResults ? standings() : [] },
-    sheet: { competitions: hasResults ? [sheet()] : [] }
+    sheet: { competitions: hasResults ? [sheet()] : [] },
+    timeline: { items: hasResults ? timeline() : [] }
   };
 }
 
@@ -82,11 +84,37 @@ function standings() {
     teamId: item.teamId,
     teamName: item.teamName,
     total: item.total,
+    charreadaId: item.charreadaId,
     classification: "provisional",
     status: item.status,
     phase: item.phase,
     tieBreakLabel: ""
   }));
+}
+
+function timeline() {
+  return [
+    event("timeline-start", 1, "START", "La charreada inició", {}),
+    event("timeline-team-laureles", 2, "TEAM_CHANGE", "Rancho Los Laureles entra al ruedo", {}),
+    event("timeline-cala", 3, "SCORE", "Cala de caballo publicada", { score: 31 }),
+    event("timeline-piales", 4, "SCORE", "Piales publicados", { score: 38 }),
+    event("timeline-pr-initial", 5, "SCORE", "Pial de ruedo publicado", { score: 15 }),
+    event("timeline-pr-correction", 6, "CORRECTION", "Pial de ruedo corregido oficialmente", { previousScore: 15, score: 21, status: "CORREGIDO" }),
+    event("timeline-results", 7, "STATUS", "Resultados provisionales actualizados", { status: "PARCIAL" }),
+    event("timeline-current", 8, "INFORMATION", "Pial de ruedo en curso", { score: 21 })
+  ];
+}
+
+function event(eventId, sequence, type, label, values) {
+  return {
+    eventId,
+    sequence,
+    occurredAt: `2026-09-09T20:${String(sequence).padStart(2, "0")}:00.000Z`,
+    type,
+    charreadaId: "charreada-local",
+    label,
+    ...values
+  };
 }
 
 function sheet() {

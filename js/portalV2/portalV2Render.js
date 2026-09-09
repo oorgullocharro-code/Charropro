@@ -109,7 +109,7 @@ function renderView(model) {
     return section;
   }
   if (model.view === "en-vivo") {
-    section.append(renderLiveContext(model), renderResolvedHighlight(model));
+    section.append(renderLiveExperience(model));
     return section;
   }
   if (model.view === "resultados") {
@@ -129,6 +129,156 @@ function renderView(model) {
   section.append(copy);
   if (["resultados", "posiciones", "sabana"].includes(model.view)) section.append(renderResolvedHighlight(model));
   return section;
+}
+
+function renderLiveExperience(model) {
+  const experience = element("div", "portal-v2-live-experience");
+  const main = element("div", "portal-v2-live-experience__main");
+  main.append(renderLiveCenter(model), renderTimeline(model));
+  const aside = element("aside", "portal-v2-live-experience__aside");
+  aside.setAttribute("aria-label", "Resumen publicado en vivo");
+  aside.append(renderLiveResults(model), renderLiveStandings(model));
+  experience.append(main, aside);
+  return experience;
+}
+
+function renderLiveCenter(model) {
+  const live = model.liveTimeline.live;
+  const panel = element("section", "portal-v2-live-center");
+  const label = element("p", "portal-v2-eyebrow");
+  label.textContent = live.isLive ? "En vivo" : model.lifecycle.label;
+  const status = element("span", `portal-v2-live-indicator${live.isLive ? " portal-v2-live-indicator--active" : ""}`);
+  status.textContent = live.isLive ? "En vivo" : model.lifecycle.label;
+  const header = element("header", "portal-v2-live-center__header");
+  header.append(label, status);
+  const title = element("h3");
+  title.textContent = (live.currentSuerte || live.hasCurrentAction) ? live.currentSuerte || "Acción en curso" : "Sin acción pública activa";
+  panel.append(header, title);
+  if (live.hasCurrentAction) {
+    const context = element("dl", "portal-v2-live-center__context");
+    appendDefinitionIfPresent(context, "Charreada", live.currentCharreada);
+    appendDefinitionIfPresent(context, "Equipo", live.currentTeam);
+    appendDefinitionIfPresent(context, "Participante", live.currentParticipant);
+    panel.append(context);
+  }
+  if (live.currentScore !== null) {
+    const score = element("strong", "portal-v2-live-center__score");
+    score.textContent = `${formatNumber(live.currentScore)} pts`;
+    score.setAttribute("aria-label", `Puntuación actual ${formatNumber(live.currentScore)} puntos`);
+    panel.append(score);
+  }
+  if (live.updatedAt) {
+    const updated = element("time", "portal-v2-live-center__updated");
+    updated.dateTime = live.updatedAt;
+    updated.textContent = `Actualizado ${formatPublicTime(live.updatedAt)}`;
+    panel.append(updated);
+  }
+  return panel;
+}
+
+function renderLiveResults(model) {
+  const section = element("section", "portal-v2-live-summary");
+  const title = element("h3", "portal-v2-group-title");
+  title.textContent = "Resultados publicados";
+  section.append(title);
+  if (!model.liveTimeline.currentResults.length) {
+    const detail = element("p", "portal-v2-group-detail");
+    detail.textContent = "Los resultados de esta charreada aún no están disponibles.";
+    section.append(detail);
+    return section;
+  }
+  const list = element("ul", "portal-v2-live-summary__list");
+  for (const result of model.liveTimeline.currentResults) {
+    const item = element("li");
+    const team = element("span");
+    team.textContent = result.teamName;
+    const total = element("strong");
+    total.textContent = `${formatNumber(result.total)} pts`;
+    item.append(team, total);
+    list.append(item);
+  }
+  section.append(list);
+  return section;
+}
+
+function renderLiveStandings(model) {
+  const section = element("section", "portal-v2-live-summary");
+  const title = element("h3", "portal-v2-group-title");
+  title.textContent = "Posiciones publicadas";
+  section.append(title);
+  if (!model.liveTimeline.currentStandings.length) {
+    const detail = element("p", "portal-v2-group-detail");
+    detail.textContent = "Las posiciones de esta charreada aún no están disponibles.";
+    section.append(detail);
+    return section;
+  }
+  const list = element("ol", "portal-v2-live-summary__list");
+  for (const standing of model.liveTimeline.currentStandings) {
+    const item = element("li");
+    const team = element("span");
+    team.textContent = `${standing.position}° ${standing.teamName}`;
+    const total = element("strong");
+    total.textContent = `${formatNumber(standing.total)} pts`;
+    item.append(team, total);
+    list.append(item);
+  }
+  section.append(list);
+  return section;
+}
+
+function renderTimeline(model) {
+  const section = element("section", "portal-v2-timeline");
+  const header = element("header", "portal-v2-timeline__header");
+  const title = element("h3");
+  title.textContent = "Minuto a minuto";
+  header.append(title);
+  if (model.liveTimeline.timelineState === "timeline-stale") {
+    const stale = element("span", "portal-v2-timeline__state");
+    stale.textContent = "Actualizando información";
+    header.append(stale);
+  }
+  section.append(header);
+  if (!model.liveTimeline.timeline.length) {
+    const empty = element("p", "portal-v2-group-detail");
+    empty.textContent = "Aún no hay eventos públicos para esta charreada.";
+    section.append(empty);
+    return section;
+  }
+  const list = element("ol", "portal-v2-timeline__list");
+  list.setAttribute("aria-label", "Eventos públicos, más recientes primero");
+  for (const event of model.liveTimeline.timeline) list.append(renderTimelineEvent(event));
+  section.append(list);
+  return section;
+}
+
+function renderTimelineEvent(event) {
+  const item = element("li", "portal-v2-timeline__event");
+  const type = element("span", `portal-v2-timeline__type portal-v2-timeline__type--${event.tone}`);
+  type.textContent = event.typeLabel;
+  const label = element("p", "portal-v2-timeline__label");
+  label.textContent = event.label;
+  item.append(type, label);
+  if (event.correction) {
+    const correction = element("strong", "portal-v2-timeline__correction");
+    correction.textContent = `${formatNumber(event.correction.previousScore)} → ${formatNumber(event.correction.score)} pts`;
+    item.append(correction);
+  } else if (event.score !== null) {
+    const score = element("strong", "portal-v2-timeline__score");
+    score.textContent = `${formatNumber(event.score)} pts`;
+    item.append(score);
+  }
+  if (event.status) {
+    const status = element("span", "portal-v2-timeline__status");
+    status.textContent = event.status;
+    item.append(status);
+  }
+  if (event.occurredAt) {
+    const timestamp = element("time", "portal-v2-timeline__time");
+    timestamp.dateTime = event.occurredAt;
+    timestamp.textContent = formatPublicTime(event.occurredAt);
+    item.append(timestamp);
+  }
+  return item;
 }
 
 function renderResults(model) {
@@ -334,6 +484,11 @@ function appendDefinition(list, label, value) {
   list.append(term, definition);
 }
 
+function appendDefinitionIfPresent(list, label, value) {
+  if (!value) return;
+  appendDefinition(list, label, value);
+}
+
 function renderLiveContext(model) {
   const panel = element("section", "portal-v2-live-context");
   const label = element("p", "portal-v2-eyebrow");
@@ -454,6 +609,12 @@ function announcement(model, options) {
 
 function formatNumber(value) {
   return new Intl.NumberFormat("es-MX", { maximumFractionDigits: 2 }).format(value);
+}
+
+function formatPublicTime(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
 function element(tagName, className = "") {

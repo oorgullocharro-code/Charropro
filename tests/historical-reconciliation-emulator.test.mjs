@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { withLegacyStateAsymmetry, tid, input as template, uid, cid, teamId, legacyRecordId } from './fixtures/historicalReconciliationFixture.mjs';
 import { signature, databaseSignature } from '../functions/historicalReconciliation.mjs';
-import { getCanonicalOfficialTeamTotals } from '../js/core/canonicalOfficialResults.js?v=20260909-portal-v2-results-standings-sheet-001-v1';
+import { getCanonicalOfficialTeamTotals } from '../js/core/canonicalOfficialResults.js?v=20260909-portal-v2-live-timeline-001-v1';
 
 test('Auth + Storage + RTDB + callable: backup/verify/execute/reload/reproject/idempotency/isolation', {skip: process.env.CHARROPRO_RUN_RECONCILIATION_EMULATOR !== '1'}, async()=>{
   assert.equal(process.env.FIREBASE_PROJECT_ID,'demo-charropro-local');
