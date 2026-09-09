@@ -1,11 +1,11 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
@@ -32,7 +32,7 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     branding: publicBranding(tournament),
     modules: publicModules(tournament),
     sponsors: publicSponsors(tournament),
-    program: { items: publicProgram(tournament.charreadas) },
+    program: { items: publicProgram(tournament.charreadas, tournament.teams) },
     live: publicLive(source.liveCurrent),
     timeline: { items: publicTimeline(source.publicTimeline) },
     statistics: canonicalResults.statistics
@@ -108,19 +108,28 @@ function publicSponsors(tournament) {
     .filter((item) => item.id && item.name);
 }
 
-function publicProgram(charreadas) {
+function publicProgram(charreadas, teams) {
+  const teamNames = new Map(collection(teams).map((team) => [id(team.id || team.teamId), text(team.name || team.teamName)]));
   return collection(charreadas).map((item, index) => {
     const teamIds = collection(item.teamIds).map(id).filter(Boolean);
+    const resolvedTeamNames = collection(item.teamNames).map(text).filter(Boolean);
+    const publicTeamNames = resolvedTeamNames.length ? resolvedTeamNames : teamIds.map((teamId) => teamNames.get(teamId)).filter(Boolean);
+    const participantNames = collection(item.participantNames).map(text).filter(Boolean);
     return {
     id: id(item.id || item.charreadaId),
     charreadaId: id(item.id || item.charreadaId),
     competitionId: id(item.competitionId),
+    competitionName: text(item.competitionName || item.competition),
+    phase: id(item.phaseId),
+    phaseName: text(item.phaseName || item.phase),
     name: text(item.name || item.nombre),
     scheduledDate: text(item.date || item.fecha),
     scheduledTime: text(item.startTime || item.hora),
-    status: text(item.status || item.estado),
+      status: text(item.status || item.estado),
       order: integer(item.order ?? index + 1),
-      ...(teamIds.length ? { teamIds } : {})
+      ...(teamIds.length ? { teamIds } : {}),
+      ...(publicTeamNames.length ? { teamNames: publicTeamNames } : {}),
+      ...(participantNames.length ? { participantNames } : {})
     };
   }).filter((item) => item.id || item.charreadaId);
 }

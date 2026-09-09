@@ -3,17 +3,18 @@ import {
   CANONICAL_PUBLIC_TOURNAMENT_DATA_SCHEMA_VERSION,
   PUBLIC_TOURNAMENT_LIFECYCLE_STATUSES,
   validateCanonicalPublicTournamentData
-} from "../public/canonicalPublicTournamentData.js?v=20260909-portal-v2-live-timeline-001-v1";
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260909-portal-v2-live-timeline-001-v1";
-import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 export const PORTAL_V2_NAVIGATION = Object.freeze([
+  { view: "inicio", module: "", label: "Inicio" },
   { view: "en-vivo", module: "live", label: "En vivo" },
   { view: "programa", module: "program", label: "Programa" },
   { view: "resultados", module: "results", label: "Resultados" },
   { view: "posiciones", module: "standings", label: "Posiciones" },
-  { view: "sabana", module: "sheet", label: "Sábana" },
-  { view: "estadisticas", module: "statistics", label: "Estadísticas" }
+  { view: "sabana", module: "sheet", label: "Sábana" }
 ]);
 
 const SAFE_COLORS = Object.freeze({
@@ -31,14 +32,13 @@ export function createPortalV2Model(snapshot, options = {}) {
 
   const lifecycle = lifecycleModel(snapshot.lifecycle.status);
   const modules = visibleModules(snapshot.modules);
-  const navigation = modules
-    .map((module) => PORTAL_V2_NAVIGATION.find((item) => item.module === module.type))
-    .filter(Boolean);
-  const routeView = navigation.some((item) => item.view === options.view) ? options.view : navigation[0]?.view || "en-vivo";
+  const navigation = Object.freeze(PORTAL_V2_NAVIGATION.filter((item) => !item.module || modules.some((module) => module.type === item.module)));
+  const routeView = navigation.some((item) => item.view === options.view) ? options.view : "inicio";
   const primaryResult = snapshot.results?.teams?.[0] || null;
   const leader = snapshot.standings?.items?.find((item) => item.position === 1) || null;
   const live = snapshot.live || {};
   const publicData = createPortalV2ResultsModel(snapshot, lifecycle.status);
+  const context = createPortalV2ContextModel(snapshot, lifecycle.status, options.route || options);
   const connection = text(options.connection || "connecting");
   const liveTimeline = createPortalV2LiveTimelineModel(snapshot, {
     lifecycleStatus: lifecycle.status,
@@ -58,6 +58,7 @@ export function createPortalV2Model(snapshot, options = {}) {
     modules,
     navigation,
     view: routeView,
+    context,
     live: Object.freeze({
       status: text(live.status),
       currentCharreada: text(live.currentCharreada),
@@ -167,7 +168,14 @@ function unavailableModel(availability) {
     branding: safeBranding(),
     modules: Object.freeze([]),
     navigation: Object.freeze([]),
-    view: "en-vivo",
+    view: "inicio",
+    context: Object.freeze({
+      program: Object.freeze([]), programState: "no-program-yet", competitions: Object.freeze([]), phases: Object.freeze([]),
+      selectedCompetitionId: "", selectedPhaseId: "", selectedCompetition: null, selectedPhase: null,
+      hasInvalidSelection: false, phaseContextAvailable: false, currentPhase: null,
+      results: Object.freeze([]), resultGroups: Object.freeze([]), standings: Object.freeze([]), standingGroups: Object.freeze([]), sheet: Object.freeze([]),
+      champion: null, resultState: "no-results-yet", standingsState: "no-standings-yet", sheetState: "no-sheet-yet"
+    }),
     live: Object.freeze({}),
     primaryResult: null,
     leader: null,

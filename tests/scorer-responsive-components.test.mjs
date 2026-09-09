@@ -9,12 +9,12 @@ import {
   buildScorerRemateHistory,
   SCORER_COMPONENT_SYSTEM_VERSION,
   SCORER_RESPONSIVE_BREAKPOINTS
-} from "../js/core/scorerComponents.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "../js/core/scorerComponents.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 import {
   normalizeScoringAttemptV2,
   setScoringAttemptDq,
   updateScoringAttemptClassification
-} from "../js/core/scoringAttempt.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 const RELEASE_ID = "20260909-public-projection-v3-release-cache-coherence-001-v1";
 

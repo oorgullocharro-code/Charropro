@@ -1,5 +1,5 @@
 export const PORTAL_V2_VIEWS = Object.freeze([
-  "en-vivo", "programa", "resultados", "posiciones", "sabana", "estadisticas"
+  "inicio", "en-vivo", "programa", "resultados", "posiciones", "sabana"
 ]);
 
 const VIEW_SET = new Set(PORTAL_V2_VIEWS);
@@ -14,7 +14,9 @@ export function parsePortalV2Route(input, fallback = {}) {
   const params = url.searchParams;
   return {
     tournamentId: firstTournamentId(params) || sanitizePortalV2Id(fallback.tournamentId),
-    view: sanitizePortalV2View(params.get("view")) || sanitizePortalV2View(fallback.view) || "en-vivo"
+    view: sanitizePortalV2View(params.get("view")) || sanitizePortalV2View(fallback.view) || "inicio",
+    competitionId: sanitizePortalV2Id(params.get("competition")) || sanitizePortalV2Id(fallback.competitionId),
+    phaseId: sanitizePortalV2Id(params.get("phase")) || sanitizePortalV2Id(fallback.phaseId)
   };
 }
 
@@ -25,10 +27,18 @@ export function buildPortalV2Url(input, patch = {}) {
     ? sanitizePortalV2Id(patch.tournamentId)
     : current.tournamentId;
   const view = Object.prototype.hasOwnProperty.call(patch, "view")
-    ? sanitizePortalV2View(patch.view) || "en-vivo"
+    ? sanitizePortalV2View(patch.view) || "inicio"
     : current.view;
+  const competitionId = Object.prototype.hasOwnProperty.call(patch, "competitionId")
+    ? sanitizePortalV2Id(patch.competitionId)
+    : current.competitionId;
+  const phaseId = Object.prototype.hasOwnProperty.call(patch, "phaseId")
+    ? sanitizePortalV2Id(patch.phaseId)
+    : current.phaseId;
   setParam(url.searchParams, "tournamentId", tournamentId);
-  setParam(url.searchParams, "view", view === "en-vivo" ? "" : view);
+  setParam(url.searchParams, "view", view === "inicio" ? "" : view);
+  setParam(url.searchParams, "competition", competitionId);
+  setParam(url.searchParams, "phase", phaseId);
   for (const alias of TOURNAMENT_ALIASES) {
     if (alias !== "tournamentId") url.searchParams.delete(alias);
   }

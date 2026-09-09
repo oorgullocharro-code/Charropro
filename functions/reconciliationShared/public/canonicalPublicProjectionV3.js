@@ -6,7 +6,7 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
   const tournamentId = id(options.tournamentId || tournament.info?.id || tournament.id);
   const generatedAt = new Date(Number(options.nowMs) || Date.now()).toISOString();
   const results = buildCanonicalTournamentResults({ tournament: tournament.info || tournament, teams: tournament.teams, charreadas: tournament.charreadas, publishedScores: tournament.publishedScores, officialScoreLedger: tournament.officialScoreLedger, sourceRevision: options.sourceRevision || maxRevision(tournament), generatedAt }, { tournamentId, generatedAt });
-  const rows = results.results.items.map((row) => ({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantScope: row.participantScope, participantId: row.participantId, participantName: row.participantName, charreadaId: row.charreadaId, competitionId: row.competitionId, phase: row.phaseId || "", columns: Object.fromEntries(Object.entries(row.suertes).map(([key, sport]) => [key, sport.total])), penalties: row.penalties, subtotal: row.subtotal, total: row.total, status: row.status }));
+  const rows = results.results.items.map((row) => ({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantScope: row.participantScope, participantId: row.participantId, participantName: row.participantName, charreadaId: row.charreadaId, ...(row.charreadaName !== undefined ? { charreadaName: row.charreadaName } : {}), competitionId: row.competitionId, ...(row.competitionName !== undefined ? { competitionName: row.competitionName } : {}), phase: row.phaseId || "", ...(row.phaseName !== undefined ? { phaseName: row.phaseName } : {}), columns: Object.fromEntries(Object.entries(row.suertes).map(([key, sport]) => [key, sport.total])), penalties: row.penalties, subtotal: row.subtotal, total: row.total, status: row.status }));
   const standings = results.standings.items.map((item) => ({
     rankingId: item.rankingId,
     resultId: item.resultIds.length === 1 ? item.resultIds[0] : "",
@@ -14,6 +14,7 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     position: item.position,
     scopeType: item.scopeType,
     competitionId: item.competitionId,
+    ...(item.competitionName !== undefined ? { competitionName: item.competitionName } : {}),
     charreadaId: item.charreadaId || "",
     participantScope: item.participantScope,
     teamId: item.teamId,
@@ -24,9 +25,19 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     classification: item.totalStatus,
     status: item.positionStatus,
     phase: item.phaseId || "",
+    ...(item.phaseName !== undefined ? { phaseName: item.phaseName } : {}),
     tieBreakLabel: ""
   })).filter((item) => item.resultIds.length > 0);
-  return createCanonicalPublicTournamentData({ schemaVersion: 3, projectionVersion: "3.0.0", tournamentId, sourceRevision: results.sourceRevision, projectionRevision: 1, generatedAt, lifecycle: { status: lifecycle(tournament, source.liveCurrent) }, tournament: tournamentInfo(tournament, tournamentId), branding: {}, modules: [], sponsors: [], program: { items: program(tournament.charreadas) }, live: publicLive(source.liveCurrent), results: { teams: rows }, standings: { items: standings }, sheet: { competitions: results.sheet.competitions }, timeline: { items: [] }, statistics: results.statistics });
+  const sheet = results.sheet.competitions.map((competition) => ({
+    competitionId: competition.competitionId,
+    name: competition.name,
+    ...(competition.charreadaId !== undefined ? { charreadaId: competition.charreadaId } : {}),
+    ...(competition.charreadaName !== undefined ? { charreadaName: competition.charreadaName } : {}),
+    ...(competition.phaseId !== undefined ? { phase: competition.phaseId } : {}),
+    ...(competition.phaseName !== undefined ? { phaseName: competition.phaseName } : {}),
+    rows: competition.rows
+  }));
+  return createCanonicalPublicTournamentData({ schemaVersion: 3, projectionVersion: "3.0.0", tournamentId, sourceRevision: results.sourceRevision, projectionRevision: 1, generatedAt, lifecycle: { status: lifecycle(tournament, source.liveCurrent) }, tournament: tournamentInfo(tournament, tournamentId), branding: {}, modules: [], sponsors: [], program: { items: program(tournament.charreadas, tournament.teams) }, live: publicLive(source.liveCurrent), results: { teams: rows }, standings: { items: standings }, sheet: { competitions: sheet }, timeline: { items: [] }, statistics: results.statistics });
 }
 
 export function reconcileCanonicalPublicProjectionV3(previous, candidate, options = {}) {
@@ -61,19 +72,28 @@ function tournamentInfo(tournament, tournamentId) {
     competitionType: text(info.type || info.competitionType)
   };
 }
-function program(value) {
+function program(value, teams) {
+  const teamNames = new Map(collection(teams).map((team) => [id(team.id || team.teamId), text(team.name || team.teamName)]));
   return collection(value).map((item, index) => {
     const teamIds = collection(item.teamIds).map(id).filter(Boolean);
+    const explicitTeamNames = collection(item.teamNames).map(text).filter(Boolean);
+    const publicTeamNames = explicitTeamNames.length ? explicitTeamNames : teamIds.map((teamId) => teamNames.get(teamId)).filter(Boolean);
+    const participantNames = collection(item.participantNames).map(text).filter(Boolean);
     return {
       id: id(item.id || item.charreadaId),
       charreadaId: id(item.id || item.charreadaId),
       competitionId: id(item.competitionId),
+      competitionName: text(item.competitionName || item.competition),
+      phase: id(item.phaseId),
+      phaseName: text(item.phaseName || item.phase),
       name: text(item.name || item.nombre),
       scheduledDate: text(item.date || item.fecha),
       scheduledTime: text(item.startTime || item.hora),
       status: text(item.status || item.estado),
       order: Number.isSafeInteger(item.order) ? item.order : index + 1,
-      ...(teamIds.length ? { teamIds } : {})
+      ...(teamIds.length ? { teamIds } : {}),
+      ...(publicTeamNames.length ? { teamNames: publicTeamNames } : {}),
+      ...(participantNames.length ? { participantNames } : {})
     };
   }).filter((item) => item.id);
 }

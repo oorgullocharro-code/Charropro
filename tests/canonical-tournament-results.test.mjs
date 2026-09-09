@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260909-portal-v2-live-timeline-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-portal-v2-live-timeline-001-v1";
+import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults,
   buildCanonicalTournamentResultsHash,
   validateCanonicalTournamentResults
-} from "../js/core/canonicalTournamentResults.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "../js/core/canonicalTournamentResults.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 const TOURNAMENT_ID = "tournament-results";
 const CHARREADA_ID = "charreada-results";

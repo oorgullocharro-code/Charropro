@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260909-portal-v2-live-timeline-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 const {
   applyOfficialScoreTransaction,

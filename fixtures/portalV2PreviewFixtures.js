@@ -1,4 +1,4 @@
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-portal-v2-live-timeline-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 const TOURNAMENT_ID = "portal-v2-local-preview";
 
@@ -39,11 +39,26 @@ function baseSnapshot(lifecycle, hasResults) {
     modules: [
       { type: "live", enabled: true, order: 10 },
       { type: "timeline", enabled: true, order: 15 },
+      { type: "program", enabled: true, order: 18 },
       { type: "results", enabled: true, order: 20 },
       { type: "standings", enabled: true, order: 30 },
       { type: "sheet", enabled: true, order: 40 }
     ],
     live: lifecycle === "LIVE" ? { status: "LIVE", currentCharreada: "charreada-local", currentTeam: "Rancho Los Laureles", currentParticipant: "Juan Pérez", currentSuerte: "Pial de ruedo", currentScore: 21, updatedAt: "2026-09-09T20:00:00.000Z" } : { status: lifecycle, updatedAt: "2026-09-09T20:00:00.000Z" },
+    program: { items: [{
+      id: "charreada-local",
+      charreadaId: "charreada-local",
+      competitionId: "equipos-local",
+      competitionName: "Equipos",
+      phase: "fase-unica",
+      phaseName: "Ronda única",
+      name: "Charreada Portal V2",
+      scheduledDate: "2026-09-09",
+      scheduledTime: "11:00",
+      status: lifecycle === "LIVE" ? "En curso" : "Programada",
+      order: 1,
+      teamNames: ["Rancho Los Laureles", "Hacienda San Miguel", "Charros de Jalisco"]
+    }] },
     results: { teams: results },
     standings: { items: hasResults ? standings() : [] },
     sheet: { competitions: hasResults ? [sheet()] : [] },
@@ -66,7 +81,9 @@ function result(resultId, teamId, teamName, position, columns, total, status) {
     teamName,
     charreadaId: "charreada-local",
     competitionId: "equipos-local",
-    phase: "Ronda única",
+    competitionName: "Equipos",
+    phase: "fase-unica",
+    phaseName: "Ronda única",
     columns,
     penalties: 0,
     subtotal: total,
@@ -88,6 +105,8 @@ function standings() {
     classification: "provisional",
     status: item.status,
     phase: item.phase,
+    phaseName: item.phaseName,
+    competitionName: item.competitionName,
     tieBreakLabel: ""
   }));
 }
@@ -121,6 +140,10 @@ function sheet() {
   return {
     competitionId: "equipos-local",
     name: "Equipos",
+    charreadaId: "charreada-local",
+    charreadaName: "Charreada Portal V2",
+    phase: "fase-unica",
+    phaseName: "Ronda única",
     rows: resolvedResults().map((item) => ({
       resultId: item.resultId,
       teamId: item.teamId,

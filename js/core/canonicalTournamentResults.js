@@ -2,8 +2,8 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260909-portal-v2-live-timeline-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "./canonicalOfficialResults.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 
@@ -112,7 +112,10 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
     participantName: row.participantName,
     charreadaId: row.charreadaId,
     competitionId: row.competitionId,
+    competitionName: row.competitionName,
     phase: row.phaseId || "",
+    phaseName: row.phaseName,
+    charreadaName: row.charreadaName,
     columns: toSheetColumns(row.suertes),
     penalties: row.penalties,
     subtotal: row.subtotal,
@@ -128,6 +131,7 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
       position: item.position,
       scopeType: item.scopeType,
       competitionId: item.competitionId,
+      competitionName: item.competitionName,
       charreadaId: item.charreadaId || "",
       participantScope: item.participantScope,
       teamId: item.teamId,
@@ -138,6 +142,7 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
       classification: item.totalStatus,
       status: item.positionStatus,
       phase: item.phaseId || "",
+      phaseName: item.phaseName,
       tieBreakLabel: ""
     }))
     .filter((item) => item.resultIds.length > 0);
@@ -158,6 +163,10 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
     sheet: { competitions: collection(results.sheet?.competitions).map((competition) => ({
       competitionId: competition.competitionId,
       name: competition.name,
+      charreadaId: competition.charreadaId,
+      charreadaName: competition.charreadaName,
+      phase: competition.phaseId,
+      phaseName: competition.phaseName,
       rows: competition.rows
     })) },
     timeline: { items: collection(input.timeline?.items) },
@@ -213,6 +222,7 @@ function createResultRow(identity, charreada, teams) {
     phaseId: identity.phaseId || charreada.phaseId || "",
     phaseName: charreada.phaseName || "",
     charreadaId: identity.charreadaId,
+    charreadaName: charreada.name || "",
     teamId: identity.teamId,
     teamName: identity.teamName || team.teamName || "",
     participantScope: identity.participantScope,
@@ -277,10 +287,19 @@ function buildStandings(resultRows) {
 function buildSheet(resultRows) {
   const groups = new Map();
   for (const row of resultRows) {
-    if (!groups.has(row.competitionId)) groups.set(row.competitionId, { competitionId: row.competitionId, name: row.competitionName, rows: [] });
-    groups.get(row.competitionId).rows.push({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantId: row.participantId, participantName: row.participantName, total: row.total, columns: toSheetColumns(row.suertes) });
+    const key = [row.competitionId, row.phaseId, row.charreadaId].join("|");
+    if (!groups.has(key)) groups.set(key, {
+      competitionId: row.competitionId,
+      name: row.competitionName,
+      charreadaId: row.charreadaId,
+      charreadaName: row.charreadaName || "",
+      phaseId: row.phaseId || "",
+      phaseName: row.phaseName || "",
+      rows: []
+    });
+    groups.get(key).rows.push({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantId: row.participantId, participantName: row.participantName, total: row.total, columns: toSheetColumns(row.suertes) });
   }
-  return { status: groups.size ? "READY" : "EMPTY", competitions: [...groups.values()].map((entry) => ({ ...entry, rows: entry.rows.sort(compareResultRows) })).sort((a, b) => a.competitionId.localeCompare(b.competitionId)) };
+  return { status: groups.size ? "READY" : "EMPTY", competitions: [...groups.values()].map((entry) => ({ ...entry, rows: entry.rows.sort(compareResultRows) })).sort((a, b) => `${a.competitionId}|${a.phaseId}|${a.charreadaId}`.localeCompare(`${b.competitionId}|${b.phaseId}|${b.charreadaId}`)) };
 }
 
 function buildTournamentTeams(resultRows, teams) {

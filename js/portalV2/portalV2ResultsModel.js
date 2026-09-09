@@ -51,10 +51,12 @@ function displayResult(result, competitionNames) {
   return Object.freeze({
     resultId: text(result.resultId),
     competitionId: text(result.competitionId),
-    competitionName: competitionNames.get(result.competitionId) || "",
+    competitionName: text(result.competitionName) || competitionNames.get(result.competitionId) || "",
     charreadaId: text(result.charreadaId),
+    charreadaName: text(result.charreadaName),
     teamName: text(result.teamName) || text(result.participantName) || "Participante",
-    phase: text(result.phase),
+    phaseId: text(result.phase),
+    phaseName: text(result.phaseName),
     status: resultStatus(result.status),
     position: finite(result.position) ? result.position : null,
     subtotal: directNumber(result.subtotal),
@@ -72,10 +74,12 @@ function displayStanding(standing, competitionNames) {
     rankingId: text(standing.rankingId),
     resultIds: Object.freeze(references),
     competitionId: text(standing.competitionId),
-    competitionName: competitionNames.get(standing.competitionId) || "",
+    competitionName: text(standing.competitionName) || competitionNames.get(standing.competitionId) || "",
     charreadaId: text(standing.charreadaId),
+    charreadaName: text(standing.charreadaName),
     teamName: text(standing.teamName) || text(standing.participantName) || "Participante",
-    phase: text(standing.phase),
+    phaseId: text(standing.phase),
+    phaseName: text(standing.phaseName),
     position: directNumber(standing.position),
     total: directNumber(standing.total),
     classification: text(standing.classification),
@@ -103,6 +107,10 @@ function displaySheetCompetition(competition) {
   return Object.freeze({
     competitionId: text(competition.competitionId),
     name: text(competition.name) || "Sábana de competencia",
+    charreadaId: text(competition.charreadaId),
+    charreadaName: text(competition.charreadaName),
+    phaseId: text(competition.phase),
+    phaseName: text(competition.phaseName),
     columns: Object.freeze(columns),
     rows
   });
@@ -117,17 +125,17 @@ function displayColumns(columns) {
 }
 
 function groupResults(results) {
-  return Object.freeze(groupBy(results, (result) => `${result.competitionId}\u0000${result.charreadaId}\u0000${result.phase}`, (items) => Object.freeze({
-    title: items[0].competitionName || items[0].phase || "Resultados publicados",
-    phase: items[0].phase,
+  return Object.freeze(groupBy(results, (result) => `${result.competitionId}\u0000${result.phaseId}\u0000${result.charreadaId}`, (items) => Object.freeze({
+    title: items[0].charreadaName || items[0].competitionName || "Resultados publicados",
+    detail: [items[0].phaseName, items[0].competitionName].filter(Boolean).join(" · "),
     items: Object.freeze(items)
   })));
 }
 
 function groupStandings(standings) {
-  return Object.freeze(groupBy(standings, (standing) => `${standing.competitionId}\u0000${standing.charreadaId}\u0000${standing.phase}`, (items) => Object.freeze({
-    title: items[0].competitionName || items[0].phase || "Posiciones oficiales",
-    phase: items[0].phase,
+  return Object.freeze(groupBy(standings, (standing) => `${standing.competitionId}\u0000${standing.phaseId}\u0000${standing.charreadaId}`, (items) => Object.freeze({
+    title: items[0].charreadaName || items[0].competitionName || "Posiciones oficiales",
+    detail: [items[0].phaseName, items[0].competitionName].filter(Boolean).join(" · "),
     podium: Object.freeze(items.filter((item) => item.position <= 3)),
     items: Object.freeze(items)
   })));

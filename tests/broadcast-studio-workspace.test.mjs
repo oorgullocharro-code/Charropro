@@ -8,7 +8,7 @@ import {
   createBroadcastStudioContextBridge,
   createBroadcastStudioController,
   filterBroadcastStudioGraphics
-} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260909-portal-v2-live-timeline-001-v1";
+} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
 
 assert.equal(BROADCAST_STUDIO_WORKSPACE_VERSION, "1.0.0");
 assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260909-public-projection-v3-release-cache-coherence-001-v1");
