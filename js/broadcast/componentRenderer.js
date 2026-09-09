@@ -1,7 +1,7 @@
 import {
   COMPONENT_VISIBILITY,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+} from "./componentLibrary.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 export const COMPONENT_RENDERER_VERSION = "1.0.0";
 

@@ -104,8 +104,24 @@ function renderContent(model) {
 
 function renderView(model) {
   const section = element("section", "portal-v2-view");
+  if (model.publicData.status !== "ready" && ["resultados", "posiciones", "sabana"].includes(model.view)) {
+    section.append(renderDataState("inconsistent-snapshot"));
+    return section;
+  }
   if (model.view === "en-vivo") {
     section.append(renderLiveContext(model), renderResolvedHighlight(model));
+    return section;
+  }
+  if (model.view === "resultados") {
+    section.append(renderResults(model));
+    return section;
+  }
+  if (model.view === "posiciones") {
+    section.append(renderStandings(model));
+    return section;
+  }
+  if (model.view === "sabana") {
+    section.append(renderSheet(model));
     return section;
   }
   const copy = element("p", "portal-v2-view__copy");
@@ -113,6 +129,209 @@ function renderView(model) {
   section.append(copy);
   if (["resultados", "posiciones", "sabana"].includes(model.view)) section.append(renderResolvedHighlight(model));
   return section;
+}
+
+function renderResults(model) {
+  if (model.publicData.resultState !== "ready") return renderDataState(model.publicData.resultState);
+  const container = element("div", "portal-v2-results");
+  for (const group of model.publicData.resultGroups) {
+    const section = element("section", "portal-v2-result-group");
+    const title = element("h3", "portal-v2-group-title");
+    title.textContent = group.title;
+    section.append(title);
+    if (group.phase && group.phase !== group.title) {
+      const phase = element("p", "portal-v2-group-detail");
+      phase.textContent = group.phase;
+      section.append(phase);
+    }
+    const grid = element("div", "portal-v2-results-grid");
+    for (const result of group.items) grid.append(renderResultCard(result));
+    section.append(grid);
+    container.append(section);
+  }
+  return container;
+}
+
+function renderResultCard(result) {
+  const article = element("article", "portal-v2-result-card");
+  const header = element("header", "portal-v2-result-card__header");
+  const team = element("h4");
+  team.textContent = result.teamName;
+  const status = element("span", "portal-v2-status");
+  status.textContent = result.status.label;
+  header.append(team, status);
+  const total = element("strong", "portal-v2-result-card__total");
+  total.textContent = `${formatNumber(result.total)} pts`;
+  total.setAttribute("aria-label", `Total ${formatNumber(result.total)} puntos`);
+  article.append(header, total);
+  if (result.position !== null) {
+    const position = element("p", "portal-v2-result-card__position");
+    position.textContent = `Posición publicada: ${result.position}°`;
+    article.append(position);
+  }
+  const summary = element("dl", "portal-v2-result-card__summary");
+  appendDefinition(summary, "Subtotal", formatNumber(result.subtotal));
+  appendDefinition(summary, "Penalizaciones", formatNumber(result.penalties));
+  article.append(summary, renderColumns(result.columns));
+  return article;
+}
+
+function renderColumns(columns) {
+  const list = element("dl", "portal-v2-columns");
+  for (const column of columns) appendDefinition(list, column.label, formatNumber(column.value));
+  return list;
+}
+
+function renderStandings(model) {
+  if (model.publicData.standingsState !== "ready") return renderDataState(model.publicData.standingsState);
+  const container = element("div", "portal-v2-standings");
+  if (model.publicData.champion) {
+    const champion = element("section", "portal-v2-champion");
+    const label = element("p", "portal-v2-eyebrow");
+    label.textContent = "Campeón publicado";
+    const name = element("h3");
+    name.textContent = model.publicData.champion.teamName;
+    const total = element("strong");
+    total.textContent = `${formatNumber(model.publicData.champion.total)} pts`;
+    champion.append(label, name, total);
+    container.append(champion);
+  }
+  for (const group of model.publicData.standingGroups) {
+    const section = element("section", "portal-v2-standing-group");
+    const title = element("h3", "portal-v2-group-title");
+    title.textContent = group.title;
+    section.append(title);
+    if (group.podium.length) section.append(renderPodium(group.podium));
+    section.append(renderStandingsTable(group.items, group.title));
+    container.append(section);
+  }
+  return container;
+}
+
+function renderPodium(items) {
+  const list = element("ol", "portal-v2-podium");
+  list.setAttribute("aria-label", "Podio publicado");
+  for (const item of items) {
+    const entry = element("li", "portal-v2-podium__item");
+    const position = element("strong");
+    position.textContent = `${item.position}°`;
+    const team = element("span");
+    team.textContent = item.teamName;
+    const total = element("span");
+    total.textContent = `${formatNumber(item.total)} pts`;
+    entry.append(position, team, total);
+    list.append(entry);
+  }
+  return list;
+}
+
+function renderStandingsTable(items, title) {
+  const wrapper = element("div", "portal-v2-table-scroll");
+  const table = element("table", "portal-v2-table");
+  const caption = element("caption", "portal-v2-table__caption");
+  caption.textContent = `${title}: posiciones publicadas`;
+  const head = element("thead");
+  const headRow = element("tr");
+  for (const label of ["Pos.", "Equipo", "Total", "Estado"]) {
+    const cell = element("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headRow.append(cell);
+  }
+  head.append(headRow);
+  const body = element("tbody");
+  for (const item of items) {
+    const row = element("tr");
+    const position = element("th");
+    position.scope = "row";
+    position.textContent = `${item.position}°`;
+    const team = element("td");
+    team.textContent = item.teamName;
+    const total = element("td");
+    total.textContent = `${formatNumber(item.total)} pts`;
+    const state = element("td");
+    state.textContent = [item.classification, item.status.label, item.tieBreakLabel].filter(Boolean).join(" · ") || "Publicado";
+    row.append(position, team, total, state);
+    body.append(row);
+  }
+  table.append(caption, head, body);
+  wrapper.append(table);
+  return wrapper;
+}
+
+function renderSheet(model) {
+  if (model.publicData.sheetState !== "ready") return renderDataState(model.publicData.sheetState);
+  const container = element("div", "portal-v2-sheet");
+  for (const competition of model.publicData.sheet) {
+    if (!competition.rows.length) continue;
+    const section = element("section", "portal-v2-sheet__competition");
+    const title = element("h3", "portal-v2-group-title");
+    title.textContent = competition.name;
+    section.append(title, renderSheetTable(competition));
+    container.append(section);
+  }
+  return container;
+}
+
+function renderSheetTable(competition) {
+  const wrapper = element("div", "portal-v2-table-scroll");
+  const table = element("table", "portal-v2-table portal-v2-sheet-table");
+  const caption = element("caption", "portal-v2-table__caption");
+  caption.textContent = `${competition.name}: puntuaciones publicadas por equipo`;
+  const head = element("thead");
+  const headRow = element("tr");
+  for (const label of ["Equipo", ...competition.columns.map((column) => column.label), "Total"]) {
+    const cell = element("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headRow.append(cell);
+  }
+  head.append(headRow);
+  const body = element("tbody");
+  for (const item of competition.rows) {
+    const row = element("tr");
+    const team = element("th");
+    team.scope = "row";
+    team.textContent = item.teamName;
+    row.append(team);
+    const values = new Map(item.columns.map((column) => [column.key, column.value]));
+    for (const column of competition.columns) {
+      const cell = element("td");
+      cell.textContent = values.has(column.key) ? formatNumber(values.get(column.key)) : "—";
+      row.append(cell);
+    }
+    const total = element("td");
+    total.textContent = formatNumber(item.total);
+    row.append(total);
+    body.append(row);
+  }
+  table.append(caption, head, body);
+  wrapper.append(table);
+  return wrapper;
+}
+
+function renderDataState(state) {
+  const section = element("section", "portal-v2-data-state");
+  section.setAttribute("role", state === "inconsistent-snapshot" ? "alert" : "status");
+  const title = element("h3");
+  const detail = element("p");
+  const messages = {
+    "no-results-yet": ["Resultados aún no disponibles", "Los resultados publicados aparecerán cuando exista información pública del torneo."],
+    "no-standings-yet": ["Posiciones aún no disponibles", "Las posiciones oficiales aparecerán cuando la publicación las incluya."],
+    "no-sheet-yet": ["Sábana aún no disponible", "La sábana pública aparecerá cuando exista una publicación válida."],
+    "inconsistent-snapshot": ["Datos temporalmente no disponibles", "La publicación recibida no permite mostrar una paridad segura entre resultados, posiciones y sábana."]
+  };
+  [title.textContent, detail.textContent] = messages[state] || messages["inconsistent-snapshot"];
+  section.append(title, detail);
+  return section;
+}
+
+function appendDefinition(list, label, value) {
+  const term = element("dt");
+  term.textContent = label;
+  const definition = element("dd");
+  definition.textContent = value;
+  list.append(term, definition);
 }
 
 function renderLiveContext(model) {

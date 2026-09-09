@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260909-portal-v2-foundation-and-lifecycle-001-v1",
+      "appVersion": "20260909-portal-v2-results-standings-sheet-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "8e742900a262f6e85b898d0df911c41a712ec5525a4279ddf1d80b1335c94976",
-  "fingerprint": "8e742900a262f6e85b898d0df911c41a712ec5525a4279ddf1d80b1335c94976"
+  "checksum": "094230d4314b64149b7a2a701b8c9e1ae16a9916bfc5d421592e1bce0f374d8e",
+  "fingerprint": "094230d4314b64149b7a2a701b8c9e1ae16a9916bfc5d421592e1bce0f374d8e"
 }

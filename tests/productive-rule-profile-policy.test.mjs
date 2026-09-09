@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

@@ -3,7 +3,8 @@ import {
   CANONICAL_PUBLIC_TOURNAMENT_DATA_SCHEMA_VERSION,
   PUBLIC_TOURNAMENT_LIFECYCLE_STATUSES,
   validateCanonicalPublicTournamentData
-} from "../public/canonicalPublicTournamentData.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 export const PORTAL_V2_NAVIGATION = Object.freeze([
   { view: "en-vivo", module: "live", label: "En vivo" },
@@ -36,6 +37,7 @@ export function createPortalV2Model(snapshot, options = {}) {
   const primaryResult = snapshot.results?.teams?.[0] || null;
   const leader = snapshot.standings?.items?.find((item) => item.position === 1) || null;
   const live = snapshot.live || {};
+  const publicData = createPortalV2ResultsModel(snapshot, lifecycle.status);
   return Object.freeze({
     availability,
     schemaVersion: snapshot.schemaVersion,
@@ -69,6 +71,7 @@ export function createPortalV2Model(snapshot, options = {}) {
       total: directValue(leader.total),
       classification: text(leader.classification)
     }) : null,
+    publicData,
     sponsors: modules.some((module) => module.type === "sponsors") ? visibleSponsors(snapshot.sponsors) : Object.freeze([]),
     connection: text(options.connection || "connecting")
   });
@@ -159,6 +162,11 @@ function unavailableModel(availability) {
     live: Object.freeze({}),
     primaryResult: null,
     leader: null,
+    publicData: Object.freeze({
+      status: "incomplete-snapshot", consistency: Object.freeze({ valid: false, reason: "snapshot-unavailable" }),
+      results: Object.freeze([]), resultGroups: Object.freeze([]), standings: Object.freeze([]), standingGroups: Object.freeze([]), sheet: Object.freeze([]),
+      champion: null, resultState: "no-results-yet", standingsState: "no-standings-yet", sheetState: "no-sheet-yet"
+    }),
     sponsors: Object.freeze([]),
     connection: "connecting"
   });

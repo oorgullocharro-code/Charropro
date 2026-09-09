@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 const {
   TournamentDeletionError,

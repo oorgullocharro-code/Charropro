@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 
-const BUILD = "20260909-portal-v2-foundation-and-lifecycle-001-v1";
+const BUILD = "20260909-portal-v2-results-standings-sheet-001-v1";
 const files = await collect(new URL("../js/", import.meta.url));
 const identities = new Map();
 const violations = [];

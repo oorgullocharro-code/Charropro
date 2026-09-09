@@ -2,12 +2,13 @@ import {
   applyPublicPortalConnection,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
-import { createPortalV2Model } from "./portalV2Model.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
-import { applyPortalV2Snapshot } from "./portalV2ProjectionState.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
-import { buildPortalV2Url, parsePortalV2Route } from "./portalV2Router.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
-import { createPortalV2Shell, renderPortalV2 } from "./portalV2Render.js?v=20260909-portal-v2-foundation-and-lifecycle-001-v1";
+} from "../public/publicPortalClient.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { createPortalV2Model } from "./portalV2Model.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { applyPortalV2Snapshot } from "./portalV2ProjectionState.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "./portalV2Router.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { createPortalV2Shell, renderPortalV2 } from "./portalV2Render.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
+import { getPortalV2PreviewSnapshot } from "../../fixtures/portalV2PreviewFixtures.js?v=20260909-portal-v2-results-standings-sheet-001-v1";
 
 export const PORTAL_V2_FOUNDATION_VERSION = "1.0.0";
 
@@ -50,6 +51,11 @@ export function createPortalV2App(options = {}) {
     if (!runtime.route.tournamentId) {
       runtime.availability = "missing-tournament";
       render();
+      return;
+    }
+    const localPreview = resolveLocalPreview(environment.location.href);
+    if (localPreview) {
+      handleSnapshot(localPreview, { event: "projection", exists: true, localPreview: true });
       return;
     }
     runtime.unsubscribe = subscribe(runtime.route.tournamentId, handleSnapshot);
@@ -120,4 +126,14 @@ export function createPortalV2App(options = {}) {
       renderCount: runtime.renderCount
     })
   });
+}
+
+function resolveLocalPreview(href) {
+  try {
+    const url = new URL(href);
+    if (url.searchParams.get("charroproEnv") !== "local") return null;
+    return getPortalV2PreviewSnapshot(url.searchParams.get("portalV2Fixture"));
+  } catch {
+    return null;
+  }
 }
