@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 logCharroProVersion("runtime");
 

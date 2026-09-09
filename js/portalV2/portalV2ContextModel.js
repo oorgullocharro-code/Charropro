@@ -1,4 +1,4 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.

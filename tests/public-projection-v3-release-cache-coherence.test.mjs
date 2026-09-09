@@ -6,7 +6,7 @@ const configuration = JSON.parse(await readFile(new URL("../functions/configurat
 const BUILD = configuration.values.system.appVersion;
 
 assert.notEqual(BUILD, OLD_BUILD, "the V3 candidate has a distinct cache identity");
-assert.equal(BUILD, "20260909-portal-v2-navigation-program-phases-001-v1");
+assert.equal(BUILD, "20260909-live-lifecycle-canonical-source-001-v1");
 
 for (const modulePath of [
   "../js/public/canonicalPublicProjectionV3.js",

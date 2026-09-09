@@ -1,11 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
@@ -24,16 +25,17 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     sourceRevision: options.sourceRevision || source.sourceRevision || maxSourceRevision(tournament),
     generatedAt
   }, { tournamentId, generatedAt, sourceRevision: options.sourceRevision });
+  const lifecycle = resolveCanonicalTournamentLifecycle({ tournament, liveCurrent: source.liveCurrent });
   const input = adaptCanonicalTournamentResultsToPublicV3(canonicalResults, {
     projectionRevision: 1,
     generatedAt,
-    lifecycle: { status: lifecycleStatus(tournament, source.liveCurrent) },
+    lifecycle: { status: lifecycle.status },
     tournament: publicTournament(tournament, tournamentId),
     branding: publicBranding(tournament),
     modules: publicModules(tournament),
     sponsors: publicSponsors(tournament),
     program: { items: publicProgram(tournament.charreadas, tournament.teams) },
-    live: publicLive(source.liveCurrent),
+    live: publicLive(source.liveCurrent, lifecycle.status),
     timeline: { items: publicTimeline(source.publicTimeline) },
     statistics: canonicalResults.statistics
   });
@@ -134,11 +136,11 @@ function publicProgram(charreadas, teams) {
   }).filter((item) => item.id || item.charreadaId);
 }
 
-function publicLive(value) {
+function publicLive(value, lifecycleStatus = "PRE_EVENT") {
   const live = object(value);
   const turn = object(live.turn);
   const publicValue = pick({
-    status: live.status || turn.status,
+    status: lifecycleStatus,
     currentCharreada: id(live.charreadaId || live.activeCharreadaId || live.charreada?.id || turn.charreadaId),
     currentTeam: text(turn.team?.name || live.teamName),
     currentParticipant: text(turn.participant?.name || live.participantName),
@@ -152,15 +154,6 @@ function publicLive(value) {
 // Narrative events are accepted only from an already-sanitized public source.
 function publicTimeline(value) {
   return collection(value).map((item, index) => pick({ ...item, sequence: integer(item.sequence ?? index + 1) }, ["eventId", "sequence", "occurredAt", "type", "charreadaId", "teamId", "participantId", "suerteId", "label", "score", "previousScore", "status"])).filter((item) => item.eventId);
-}
-
-function lifecycleStatus(tournament, live) {
-  const status = text(live?.status || tournament.info?.status || tournament.status).toUpperCase();
-  if (["LIVE", "RUNNING", "EN_VIVO"].includes(status)) return "LIVE";
-  if (["PAUSED", "PAUSA"].includes(status)) return "PAUSED";
-  if (["FINAL", "FINALIZED", "COMPLETED", "CLOSED"].includes(status)) return "FINALIZED";
-  if (["ARCHIVED", "ARCHIVADO"].includes(status)) return "ARCHIVED";
-  return "PRE_EVENT";
 }
 
 function maxSourceRevision(tournament) { return collection(tournament.publishedScores).reduce((max, item) => Math.max(max, integer(item.revision)), 1); }

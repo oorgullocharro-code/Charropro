@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260909-portal-v2-navigation-program-phases-001-v1",
+      "appVersion": "20260909-live-lifecycle-canonical-source-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "342169fe42cf7d0c0416092799cc0802a3cc2cb3749f0f9d4a1eaea60c27d001",
-  "fingerprint": "342169fe42cf7d0c0416092799cc0802a3cc2cb3749f0f9d4a1eaea60c27d001"
+  "checksum": "c7b3a964a56a5a526a7a2f58a759b9320407a98d122b71ef069210d8d3bcf261",
+  "fingerprint": "c7b3a964a56a5a526a7a2f58a759b9320407a98d122b71ef069210d8d3bcf261"
 }

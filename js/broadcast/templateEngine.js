@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+} from "./componentLibrary.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

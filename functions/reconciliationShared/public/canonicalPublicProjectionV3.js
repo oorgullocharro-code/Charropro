@@ -1,5 +1,6 @@
 import { buildCanonicalTournamentResults } from "../core/canonicalTournamentResults.js";
 import { createCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js";
 
 export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
   const tournament = object(source.tournament || source);
@@ -37,7 +38,8 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     ...(competition.phaseName !== undefined ? { phaseName: competition.phaseName } : {}),
     rows: competition.rows
   }));
-  return createCanonicalPublicTournamentData({ schemaVersion: 3, projectionVersion: "3.0.0", tournamentId, sourceRevision: results.sourceRevision, projectionRevision: 1, generatedAt, lifecycle: { status: lifecycle(tournament, source.liveCurrent) }, tournament: tournamentInfo(tournament, tournamentId), branding: {}, modules: [], sponsors: [], program: { items: program(tournament.charreadas, tournament.teams) }, live: publicLive(source.liveCurrent), results: { teams: rows }, standings: { items: standings }, sheet: { competitions: sheet }, timeline: { items: [] }, statistics: results.statistics });
+  const lifecycleState = resolveCanonicalTournamentLifecycle({ tournament, liveCurrent: source.liveCurrent });
+  return createCanonicalPublicTournamentData({ schemaVersion: 3, projectionVersion: "3.0.0", tournamentId, sourceRevision: results.sourceRevision, projectionRevision: 1, generatedAt, lifecycle: { status: lifecycleState.status }, tournament: tournamentInfo(tournament, tournamentId), branding: {}, modules: [], sponsors: [], program: { items: program(tournament.charreadas, tournament.teams) }, live: publicLive(source.liveCurrent, lifecycleState.status), results: { teams: rows }, standings: { items: standings }, sheet: { competitions: sheet }, timeline: { items: [] }, statistics: results.statistics });
 }
 
 export function reconcileCanonicalPublicProjectionV3(previous, candidate, options = {}) {
@@ -97,8 +99,7 @@ function program(value, teams) {
     };
   }).filter((item) => item.id);
 }
-function lifecycle(tournament, live) { const status = text(live?.status || tournament.info?.status || tournament.status).toUpperCase(); return ["LIVE", "RUNNING"].includes(status) ? "LIVE" : ["PAUSED"].includes(status) ? "PAUSED" : ["FINAL", "FINALIZED", "COMPLETED"].includes(status) ? "FINALIZED" : ["ARCHIVED"].includes(status) ? "ARCHIVED" : "PRE_EVENT"; }
-function publicLive(value) { const live = object(value); const turn = object(live.turn); const output = { status: text(live.status || turn.status), currentCharreada: id(live.charreadaId || live.activeCharreadaId || live.charreada?.id || turn.charreadaId), currentTeam: text(turn.team?.name || live.teamName), currentParticipant: text(turn.participant?.name || live.participantName), currentSuerte: text(turn.suerteName || turn.suerteId || live.suerteId), currentScore: Number.isFinite(Number(live.currentScore)) ? Number(live.currentScore) : undefined, updatedAt: text(live.updatedAt || live.timestamp) }; const publicValue = Object.fromEntries(Object.entries(output).filter(([, entry]) => entry !== "" && entry !== undefined)); return Object.keys(publicValue).length ? publicValue : { status: "PRE_EVENT" }; }
+function publicLive(value, lifecycleStatus = "PRE_EVENT") { const live = object(value); const turn = object(live.turn); const output = { status: lifecycleStatus, currentCharreada: id(live.charreadaId || live.activeCharreadaId || live.charreada?.id || turn.charreadaId), currentTeam: text(turn.team?.name || live.teamName), currentParticipant: text(turn.participant?.name || live.participantName), currentSuerte: text(turn.suerteName || turn.suerteId || live.suerteId), currentScore: Number.isFinite(Number(live.currentScore)) ? Number(live.currentScore) : undefined, updatedAt: text(live.updatedAt || live.timestamp) }; const publicValue = Object.fromEntries(Object.entries(output).filter(([, entry]) => entry !== "" && entry !== undefined)); return Object.keys(publicValue).length ? publicValue : { status: "PRE_EVENT" }; }
 function maxRevision(tournament) { return collection(tournament.publishedScores).reduce((max, item) => Math.max(max, Number(item.revision || 0)), 1); }
 function object(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
 function collection(value) { return Array.isArray(value) ? value.filter(Boolean) : value && typeof value === "object" ? Object.values(value).filter(Boolean) : []; }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 import { command, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = command(freshReview(), BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, {

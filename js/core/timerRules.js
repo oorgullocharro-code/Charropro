@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

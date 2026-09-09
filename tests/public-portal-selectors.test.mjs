@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+} from "./state.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

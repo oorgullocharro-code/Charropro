@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260909-portal-v2-navigation-program-phases-001-v1";
+} from "../js/core/timerRules.js?v=20260909-live-lifecycle-canonical-source-001-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",
