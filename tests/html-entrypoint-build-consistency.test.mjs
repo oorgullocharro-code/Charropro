@@ -9,6 +9,12 @@ const htmlFiles = (await readdir(root, { withFileTypes: true }))
 assert.equal(htmlFiles.length, 27, "all productive root HTML entrypoints are audited");
 for (const file of htmlFiles) {
   const source = await readFile(new URL(file, root), "utf8");
+  if (file === "torneo-publico.html") {
+    assert.match(source, /data-charropro-compatibility="portal-v2-redirect"/);
+    assert.match(source, /src="\.\/js\/portalV2\/legacyPortalRedirect\.js"/);
+    assert.doesNotMatch(source, /clientBootstrap\.js|data-charropro-entry|\?v=/);
+    continue;
+  }
   assert.equal((source.match(/src="\.\/js\/core\/clientBootstrap\.js"/g) || []).length, 1, `${file} has one stable bootstrap`);
   assert.equal((source.match(/data-charropro-entry="\.\/js\/[^"]+\.js"/g) || []).length, 1, `${file} declares one derived entrypoint`);
   assert.doesNotMatch(source, /\?v=/, `${file} has no hardcoded cache-buster`);

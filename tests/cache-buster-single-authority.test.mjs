@@ -3,9 +3,9 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const ROOT = new URL("../", import.meta.url);
-const BUILD = "20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
-assert.equal(configuration.values.system.appVersion, BUILD, "configuration is the canonical build authority");
+const BUILD = String(configuration.values.system.appVersion || "");
+assert.match(BUILD, /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/, "configuration is the canonical build authority");
 
 const runtimeFiles = await collectRuntimeFiles(new URL("../js/", import.meta.url));
 runtimeFiles.push(...(await readdir(ROOT, { withFileTypes: true }))
@@ -25,7 +25,17 @@ for (const file of runtimeFiles) {
         importViolations.push(`${file.pathname} -> ${specifier}`);
       }
     }
-  } else {
+    } else if (file.pathname.endsWith("/torneo-publico.html")) {
+      if (!source.includes('data-charropro-compatibility="portal-v2-redirect"')) {
+        violations.push(`${file.pathname} -> missing Portal V2 compatibility marker`);
+      }
+      if (!source.includes('src="./js/portalV2/legacyPortalRedirect.js"')) {
+        violations.push(`${file.pathname} -> missing Portal V2 compatibility redirect`);
+      }
+      if (source.includes("clientBootstrap.js")) {
+        violations.push(`${file.pathname} -> legacy redirect must not bootstrap the retired portal`);
+      }
+    } else {
     if (/\?v=/.test(source)) importViolations.push(`${file.pathname} -> hardcoded HTML query`);
     if (!source.includes('src="./js/core/clientBootstrap.js"')) {
       importViolations.push(`${file.pathname} -> missing stable bootstrap`);

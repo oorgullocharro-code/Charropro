@@ -45,6 +45,22 @@ export function buildPortalV2Url(input, patch = {}) {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+// Public sharing starts from a clean URL; it never inherits operator or build parameters.
+export function buildPortalV2PublicPath(tournamentId, options = {}) {
+  const params = new URLSearchParams();
+  const normalizedTournamentId = sanitizePortalV2Id(tournamentId);
+  const competitionId = sanitizePortalV2Id(options.competitionId);
+  const phaseId = sanitizePortalV2Id(options.phaseId);
+  if (normalizedTournamentId) params.set("tournamentId", normalizedTournamentId);
+  if (competitionId) params.set("competition", competitionId);
+  if (phaseId) params.set("phase", phaseId);
+  return `./portal-v2.html${params.size ? `?${params.toString()}` : ""}`;
+}
+
+export function buildPortalV2PublicUrl(tournamentId, baseUrl, options = {}) {
+  return new URL(buildPortalV2PublicPath(tournamentId, options), baseUrl || "https://charropro.local/").href;
+}
+
 export function sanitizePortalV2View(value) {
   const normalized = String(value || "").trim().toLowerCase();
   return VIEW_SET.has(normalized) ? normalized : "";

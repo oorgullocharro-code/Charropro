@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/announcerMonitor.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import * as api from "../js/broadcast/announcerMonitor.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   ANNOUNCER_MONITOR_DISPLAY_MODES,
   ANNOUNCER_MONITOR_ERROR_CODES,
@@ -26,7 +26,7 @@ import {
   validateAnnouncerMonitorConfig,
   validateAnnouncerProjection,
   validateAnnouncerSnapshot
-} from "../js/broadcast/announcerMonitor.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/announcerMonitor.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 class MockStyle {
   constructor() { this.properties = new Map(); }

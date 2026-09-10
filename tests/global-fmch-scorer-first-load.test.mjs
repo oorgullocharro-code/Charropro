@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 
 const storage = new Map();
 globalThis.localStorage = { getItem: (key) => storage.get(String(key)) ?? null, setItem: (key, value) => storage.set(String(key), String(value)), removeItem: (key) => storage.delete(String(key)) };
-const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1");
-const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1");
+const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1");
+const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1");
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 const tournament = {

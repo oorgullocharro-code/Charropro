@@ -3,9 +3,12 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const RELEASE_ID = "20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const TARGET = path.join(ROOT, "js/core/firebaseSync.js");
+const configuration = JSON.parse(await readFile(path.join(ROOT, "functions/configuration.defaults.json"), "utf8"));
+const RELEASE_ID = String(configuration?.values?.system?.appVersion || "");
+
+assert.match(RELEASE_ID, /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/);
 
 const files = await listRuntimeFiles(ROOT);
 const fileSet = new Set(files);
@@ -41,7 +44,6 @@ for (const requiredSurface of [
   "index.html",
   "torneo.html",
   "supervision.html",
-  "torneo-publico.html",
   "broadcast-studio.html",
   "production-console.html",
   "program-main-output.html",
@@ -52,6 +54,10 @@ for (const requiredSurface of [
 ]) {
   assert.equal(ancestors.has(path.join(ROOT, requiredSurface)), true, `${requiredSurface} is covered`);
 }
+
+const legacyPortal = await readFile(path.join(ROOT, "torneo-publico.html"), "utf8");
+assert.match(legacyPortal, /data-charropro-compatibility="portal-v2-redirect"/);
+assert.doesNotMatch(legacyPortal, /clientBootstrap\.js|torneo-publico\.js|public-portal\.css/);
 
 const firebaseIdentities = new Set(
   edges

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import service from "../functions/ruleProfileLifecycleService.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import service from "../functions/ruleProfileLifecycleService.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const {
   RuleProfileLifecycleError,

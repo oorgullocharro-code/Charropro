@@ -56,7 +56,7 @@ if [[ "$dry_run" == true ]]; then
   print_connection_summary
   printf 'PACKAGE=%s\nPACKAGE_SHA256=%s\nPACKAGE_BUILD=%s\n' "$package" "$expected_sha256" "$expected_build"
   printf 'BACKUP_PATH=%s\nREMOTE_TEMP_PATH=%s\nREMOTE_RELEASE_PATH=%s\n' "$backup_path" "$remote_package" "$remote_release"
-  printf 'SMOKE_URLS=%s/index.html,%s/formato-federacion.html,%s/torneo-publico.html,%s/broadcast-studio.html,%s/cronometro.html\n' "$base_url" "$base_url" "$base_url" "$base_url" "$base_url"
+  printf 'SMOKE_URLS=%s/index.html,%s/formato-federacion.html,%s/portal-v2.html,%s/torneo-publico.html,%s/broadcast-studio.html,%s/cronometro.html\n' "$base_url" "$base_url" "$base_url" "$base_url" "$base_url" "$base_url"
   exit 0
 fi
 

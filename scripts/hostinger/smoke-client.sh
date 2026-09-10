@@ -38,7 +38,7 @@ read -r http_build http_checksum < <(
 pages=(
   'index.html:INDEX_HTTP'
   'formato-federacion.html:FORMATO_FEDERACION_HTTP'
-  'torneo-publico.html:PORTAL_HTTP'
+  'portal-v2.html:PORTAL_V2_HTTP'
   'broadcast-studio.html:BROADCAST_HTTP'
   'cronometro.html:CRONOMETRO_HTTP'
 )
@@ -51,6 +51,12 @@ for item in "${pages[@]}"; do
   if printf '%s' "$body" | grep -Fq '?v='; then die "smoke-historical-query-found:${page}"; fi
   printf '%s=PASS\n' "$label"
 done
+
+legacy_body="$(curl -fsS -H 'Cache-Control: no-cache' "${base_url}/torneo-publico.html?deploy=${cache_key}")"
+printf '%s' "$legacy_body" | grep -Fq 'data-charropro-compatibility="portal-v2-redirect"' || die 'smoke-legacy-portal-compatibility-missing'
+printf '%s' "$legacy_body" | grep -Fq 'src="./js/portalV2/legacyPortalRedirect.js"' || die 'smoke-legacy-portal-redirect-missing'
+if printf '%s' "$legacy_body" | grep -Fq 'clientBootstrap.js'; then die 'smoke-legacy-portal-bootstrap-found'; fi
+printf 'PORTAL_LEGACY_COMPAT_HTTP=PASS\n'
 
 printf 'CONFIG_HTTP=PASS\n'
 printf 'HTTP_BUILD=%s\n' "$http_build"

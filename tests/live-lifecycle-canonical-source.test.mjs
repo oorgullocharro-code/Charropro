@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { resolveCanonicalTournamentLifecycle } from "../js/core/canonicalTournamentLifecycle.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../js/core/canonicalTournamentLifecycle.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const tournamentId = "lifecycle-fixture";
 const nowMs = Date.parse("2026-09-09T20:00:00.000Z");

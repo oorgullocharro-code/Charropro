@@ -8,10 +8,12 @@ import {
   createBroadcastStudioContextBridge,
   createBroadcastStudioController,
   filterBroadcastStudioGraphics
-} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
+const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
+const BUILD = String(configuration?.values?.system?.appVersion || "");
 assert.equal(BROADCAST_STUDIO_WORKSPACE_VERSION, "1.0.0");
-assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1");
+assert.equal(BROADCAST_STUDIO_APP_VERSION, BUILD);
 assert.equal(BROADCAST_STUDIO_GRAPHICS.length, 15);
 assert.equal(new Set(BROADCAST_STUDIO_GRAPHICS.map((entry) => entry.id)).size, 15);
 assert.deepEqual(BROADCAST_STUDIO_FILTERS.map((entry) => entry.label), [

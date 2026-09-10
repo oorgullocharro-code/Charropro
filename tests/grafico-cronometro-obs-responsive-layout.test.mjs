@@ -4,7 +4,7 @@ import {
   buildGraphicTimerPresentation,
   formatGraphicTimerMs,
   readGraphicTimerPresentationOptions
-} from "../js/views/graficoTimerPresentation.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/views/graficoTimerPresentation.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 assert.equal(formatGraphicTimerMs(12_100, { showMinutes: false }), "12.1");
 assert.equal(formatGraphicTimerMs(-12_100, { showMinutes: false }), "-12.1");

@@ -11,12 +11,12 @@ import {
   getOfficialTimerControlView,
   normalizeOfficialTimerContext,
   validateOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/core/timerRules.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine,
   routeTimerDisplay
-} from "../js/broadcast/outputRouting.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const T0 = Date.parse("2026-08-11T12:00:00.000Z");
 const definition = {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const tournamentId = "public-v3-function-parity";
 const nowMs = Date.parse("2026-09-09T12:00:00.000Z");

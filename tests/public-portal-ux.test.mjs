@@ -12,6 +12,9 @@ const responsiveFixture = read("tests/fixtures/public-portal-ux-responsive.html"
 const rules = JSON.parse(read("firebase-rules-auditoria.json"));
 const publicRules = rules.rules.charropro.publicTournaments.$tournamentId;
 
+assert.match(html, /data-charropro-compatibility="portal-v2-redirect"/);
+assert.doesNotMatch(html, /public-portal-root|clientBootstrap\.js/);
+
 assert.match(render, /Ahora/);
 assert.match(render, /Minuto a minuto/);
 assert.match(render, /actualizaciones nuevas/);

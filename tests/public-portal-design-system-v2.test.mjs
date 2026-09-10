@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const render = read("js/publicPortal/portalRender.js");
 const app = read("js/publicPortal/portalApp.js");
@@ -67,7 +67,8 @@ assert.equal(fixture.includes("Asociacion"), false);
 assert.equal(css.includes("!important"), false);
 assert.equal(css.includes("linear-gradient"), false);
 assert.equal(css.includes("radial-gradient"), false);
-assert.match(html, /data-charropro-build-href="\.\/css\/public-portal\.css"/);
+assert.match(html, /data-charropro-compatibility="portal-v2-redirect"/);
+assert.doesNotMatch(html, /public-portal\.css|torneo-publico\.js/);
 for (const viewport of [320, 360, 390, 768, 1024, 1280, 1440, 1920]) {
   assert.match(responsiveFixture, new RegExp(`width: ${viewport}px`));
 }

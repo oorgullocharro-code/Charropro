@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { createPortalV2Model, isCanonicalPublicV3 } from "../js/portalV2/portalV2Model.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { createPublicPortalClientState, evaluatePublicPortalStale } from "../js/public/publicPortalClient.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { createPortalV2Model, isCanonicalPublicV3 } from "../js/portalV2/portalV2Model.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { createPublicPortalClientState, evaluatePublicPortalStale } from "../js/public/publicPortalClient.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 function fixture(overrides = {}) {
   return createCanonicalPublicTournamentData({

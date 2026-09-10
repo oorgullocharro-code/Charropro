@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/core/scoring.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

@@ -4,9 +4,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "../js/core/canonicalOfficialResults.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/core/canonicalOfficialResults.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const tournamentId = "tournament-canonical";
 const charreadaId = "charreada-canonical";

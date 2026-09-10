@@ -6,7 +6,7 @@ const configuration = JSON.parse(await readFile(new URL("../functions/configurat
 const BUILD = configuration.values.system.appVersion;
 
 assert.notEqual(BUILD, OLD_BUILD, "the V3 candidate has a distinct cache identity");
-assert.equal(BUILD, "20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1");
+assert.match(BUILD, /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/);
 
 for (const modulePath of [
   "../js/public/canonicalPublicProjectionV3.js",

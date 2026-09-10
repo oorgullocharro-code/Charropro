@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -41,13 +41,15 @@ registerHooks({
 const firebaseSync = await import(`../js/core/firebaseSync.js?public-feed-integration=${Date.now()}`);
 const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
 const firebaseSyncImportVersions = await collectFirebaseSyncImportVersions(new URL("../js/", import.meta.url));
+const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
+const BUILD = String(configuration?.values?.system?.appVersion || "");
 const tournamentId = "tournament-feed-integration";
 const charreadaId = "charreada-feed-integration";
 const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1"],
+  [BUILD],
   "all browser entrypoints use the canonical firebaseSync module identity"
 );
 

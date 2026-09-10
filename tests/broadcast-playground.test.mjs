@@ -20,36 +20,38 @@ import {
   setPlaygroundVisibility,
   takePlaygroundToProgram,
   validatePlaygroundModel
-} from "../js/broadcast/broadcastPlayground.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/broadcastPlayground.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   PLAYGROUND_ASSET_DEFINITIONS,
   PLAYGROUND_COMPETITIONS,
   PLAYGROUND_GRAPHIC_DEFINITIONS,
   PLAYGROUND_OUTPUT_DEFINITIONS,
   buildPlaygroundFixture
-} from "../js/broadcast/fixtures/broadcastPlaygroundFixtures.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/fixtures/broadcastPlaygroundFixtures.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   buildBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   getBroadcastOutput,
   validateBroadcastOutput
-} from "../js/broadcast/broadcastOutput.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   listBroadcastAssets,
   validateBroadcastAsset
-} from "../js/broadcast/assetManager.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/assetManager.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const T0 = "2026-07-13T18:30:00.000Z";
 const T1 = "2026-07-13T18:30:01.000Z";
 const T2 = "2026-07-13T18:30:02.000Z";
 const T3 = "2026-07-13T18:30:03.000Z";
 const T4 = "2026-07-13T18:30:04.000Z";
+const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
+const BUILD = String(configuration?.values?.system?.appVersion || "");
 
 assert.equal(BROADCAST_PLAYGROUND_VERSION, "1.0.0");
-assert.equal(BROADCAST_PLAYGROUND_APP_VERSION, "20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1");
+assert.equal(BROADCAST_PLAYGROUND_APP_VERSION, BUILD);
 assert.equal(Object.keys(PLAYGROUND_COMPETITIONS).length, 5);
 assert.equal(Object.keys(PLAYGROUND_GRAPHIC_DEFINITIONS).length, 8);
 assert.equal(PLAYGROUND_OUTPUT_DEFINITIONS.length, 5);

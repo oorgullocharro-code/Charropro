@@ -4,19 +4,19 @@ import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { buildCanonicalTernaRoster, getTernaParticipantName } from "../js/core/ternaParticipantIdentity.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/core/officialFormat.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { buildCanonicalTernaRoster, getTernaParticipantName } from "../js/core/ternaParticipantIdentity.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const TOURNAMENT_ID = "semantic-fmch-2024-2028";
 const CHARREADA_ID = "semantic-charreada-1";

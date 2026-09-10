@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "./componentLibrary.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

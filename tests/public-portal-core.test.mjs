@@ -2,18 +2,15 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const html = read("torneo-publico.html");
-const entry = read("js/views/torneo-publico.js");
 const app = read("js/publicPortal/portalApp.js");
 const router = read("js/publicPortal/portalRouter.js");
 const selectors = read("js/publicPortal/portalSelectors.js");
 const render = read("js/publicPortal/portalRender.js");
 const css = read("css/public-portal.css");
 
-assert.match(html, /id="public-portal-root"/);
-assert.match(html, /data-charropro-build-href="\.\/css\/public-portal\.css"/);
-assert.match(html, /data-charropro-entry="\.\/js\/views\/torneo-publico\.js"/);
-assert.match(entry, /bootstrapPublicPortal/);
-assert.ok(entry.split("\n").length <= 5, "legacy view entrypoint remains thin");
+assert.match(html, /data-charropro-compatibility="portal-v2-redirect"/);
+assert.match(html, /src="\.\/js\/portalV2\/legacyPortalRedirect\.js"/);
+assert.doesNotMatch(html, /public-portal-root|public-portal\.css|clientBootstrap\.js|torneo-publico\.js/);
 
 assert.equal(count(app, "subscribePublicTournamentSnapshot("), 1, "one public projection subscription");
 assert.equal(count(app, "addEventListener(\"popstate\""), 1, "one History API listener");
@@ -44,7 +41,7 @@ assert.match(render, /Orden de participación/);
 assert.equal(render.includes("Asociación"), false);
 assert.equal(render.includes("innerHTML"), false, "public data is never inserted through innerHTML");
 
-const publicModules = [app, router, selectors, render, entry].join("\n");
+const publicModules = [app, router, selectors, render].join("\n");
 for (const forbidden of [
   "live/current",
   "publishedScores",

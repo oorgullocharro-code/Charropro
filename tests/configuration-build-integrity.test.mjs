@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import { loadConfigurationBootstrap } from "../js/core/configurationBootstrap.js";
-import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
-const BUILD = "20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
+const BUILD = String(configuration.values.system.appVersion || "");
 const normalized = configurationEngine.normalizeConfigurationRecord(configuration);
 assert.equal(normalized.checksum, configuration.checksum);
 assert.equal(configuration.fingerprint, configuration.checksum);
-assert.equal(configuration.values.system.appVersion, BUILD);
+assert.match(BUILD, /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/);
 assert.equal((await loadConfigurationBootstrap({ source: configuration })).values.system.appVersion, BUILD);
 assert.equal(buildVersionedUrl("./js/app.js", "https://example.test/index.html", BUILD), `https://example.test/js/app.js?v=${BUILD}`);
 

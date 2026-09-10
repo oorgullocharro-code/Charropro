@@ -6,20 +6,16 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CharroPro | Portal Público</title>
+  <title>CharroPro | Portal Público V2</title>
   <link rel="icon" type="image/png" href="./assets/obs/logo-och-original.png">
-  <link rel="stylesheet" data-charropro-build-href="./css/styles.css">
-  <link rel="stylesheet" data-charropro-build-href="./css/public-portal.css">
 </head>
-<body class="public-portal-body">
-  <div id="public-portal-root">
-    <main class="public-portal-initial-state">
-      <p>Cargando información pública del torneo…</p>
-    </main>
-  </div>
+<body data-charropro-compatibility="portal-v2-redirect">
+  <main>
+    <p>Redirigiendo al Portal Público…</p>
+  </main>
   <noscript>
-    <p class="public-portal-noscript">Activa JavaScript para consultar el Portal Público.</p>
+    <p>Activa JavaScript para consultar el Portal Público V2.</p>
   </noscript>
-  <script type="module" src="./js/core/clientBootstrap.js" data-charropro-entry="./js/views/torneo-publico.js"></script>
+  <script type="module" src="./js/portalV2/legacyPortalRedirect.js"></script>
 </body>
 </html>

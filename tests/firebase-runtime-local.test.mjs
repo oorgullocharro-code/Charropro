@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

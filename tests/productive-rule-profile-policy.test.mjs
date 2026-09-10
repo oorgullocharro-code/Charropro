@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

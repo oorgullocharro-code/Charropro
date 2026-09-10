@@ -17,7 +17,7 @@ import {
   updatePreview,
   updatePreviewLiveData,
   validatePreview
-} from "../js/broadcast/previewEngine.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+} from "../js/broadcast/previewEngine.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 
 const T0 = "2026-07-15T12:00:00.000Z";
 const T1 = "2026-07-15T12:01:00.000Z";
