@@ -6,7 +6,7 @@ import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult,
   prepareHistoricalReconciliationDryRunRequest
-} from "../js/core/historicalReconciliationDryRun.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+} from "../js/core/historicalReconciliationDryRun.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 const input = Object.freeze({
   tournamentId: "torneo_mtj3fikk_2llw7v",

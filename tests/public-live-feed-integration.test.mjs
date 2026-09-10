@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -46,6 +46,10 @@ const BUILD = String(configuration?.values?.system?.appVersion || "");
 const tournamentId = "tournament-feed-integration";
 const charreadaId = "charreada-feed-integration";
 const teamId = "team-feed-integration";
+const individualTournamentId = "tournament-individual-feed-integration";
+const individualCharreadaId = "charreada-individual-feed-integration";
+const individualParticipantId = "participant-gustavo-feed-integration";
+const individualHorseId = "horse-moro-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
@@ -84,6 +88,42 @@ firebase.seed({
             competitionType: "equipos_completo",
             teamIds: [teamId],
             suerteIds: ["cala", "piales"]
+          }
+        },
+        scores: {},
+        publishedScores: {}
+      },
+      [individualTournamentId]: {
+        info: {
+          id: individualTournamentId,
+          nombre: "Coleadero Individual Integration",
+          type: "coleadero"
+        },
+        meta: {
+          activeCharreadaId: individualCharreadaId,
+          updatedAt: "2026-07-28T10:00:00.000Z"
+        },
+        teams: {},
+        participants: {
+          [individualParticipantId]: {
+            id: individualParticipantId,
+            participantName: "Gustavo Mares",
+            horseId: individualHorseId
+          }
+        },
+        horses: {
+          [individualHorseId]: { id: individualHorseId, displayName: "Moro" }
+        },
+        charreadas: {
+          [individualCharreadaId]: {
+            id: individualCharreadaId,
+            name: "Coleadero Integration",
+            status: "en_vivo",
+            competitionId: "coleadero",
+            competitionType: "coleadero",
+            competitionScope: "individual",
+            participantIds: [individualParticipantId],
+            suerteIds: ["colas"]
           }
         },
         scores: {},
@@ -155,6 +195,26 @@ assert.equal(firstProjection.projectionRevision, 1);
 assert.equal("liveFeed" in firstProjection, false, "V3 does not calculate a narrative event feed from scores");
 assert.equal(firstProjection.results.teams[0].columns.cala, 10);
 
+const individualPublication = await publishIndividualOfficial();
+assert.equal(individualPublication.ok, true);
+assert.equal(individualPublication.complete, true, "individual publication reaches its terminal state without Recovery");
+assert.equal(individualPublication.partialFailure, false);
+assert.equal(individualPublication.publicSnapshot.ok, true);
+assert.equal(individualPublication.projectionJob.status, "CLIENT_CONFIRMED");
+const individualOutboxState = firebase.read(`${individualPublication.projectionOutboxPath}/state`);
+assert.equal(individualOutboxState.status, "CLIENT_CONFIRMED");
+assert.equal(individualOutboxState.attempts, 1);
+const individualProjection = firebase.read(`charropro/publicTournaments/${individualTournamentId}`);
+const individualResult = individualProjection.results.teams[0];
+assert.equal(individualResult.participantScope, "individual");
+assert.equal(individualResult.participantId, individualParticipantId);
+assert.equal(individualResult.participantName, "Gustavo Mares");
+assert.equal(individualResult.horseId, individualHorseId);
+assert.equal(individualResult.horseName, "Moro");
+assert.equal(individualResult.total, 15);
+assert.equal(individualProjection.standings.items[0].horseId, individualHorseId);
+assert.equal(individualProjection.sheet.competitions[0].rows[0].horseId, individualHorseId);
+
 const second = await publishOfficial({
   publishedId: "published-integration-2",
   scoreId: "score-integration-2",
@@ -166,7 +226,7 @@ assert.equal(second.ok, true);
 assert.equal(second.complete, true);
 assert.equal(second.partialFailure, false);
 assert.equal(second.publicSnapshot.ok, true);
-assert.equal(firebase.privateWriteCount, 2);
+assert.equal(firebase.privateWriteCount, 3);
 const secondProjection = firebase.read(publicPath);
 assert.equal(secondProjection.projectionRevision, 2);
 assert.equal(secondProjection.results.teams[0].columns.piales, 25);
@@ -187,7 +247,7 @@ assert.equal(partial.privateWrite.ok, true);
 assert.equal(partial.publicSnapshot.ok, false);
 assert.equal(partial.publicSnapshot.reason, "permission-denied");
 assert.equal(partial.publicSnapshot.errorMessage, "No se pudo actualizar la proyección pública.");
-assert.equal(firebase.privateWriteCount, 3, "partial failure never repeats the private write");
+assert.equal(firebase.privateWriteCount, 4, "partial failure never repeats the private write");
 assert.equal(
   Object.keys(firebase.read(`charropro/tournaments/${tournamentId}/publishedScores`)).length,
   3,
@@ -983,6 +1043,71 @@ async function publishOfficial({
         }
       },
       ...runtimeOptions
+    }
+  );
+}
+
+async function publishIndividualOfficial() {
+  const publishedAt = "2026-07-28T10:01:30.000Z";
+  const published = {
+    id: "published-individual-integration-1",
+    attemptKey: `${individualTournamentId}__${individualCharreadaId}__${individualParticipantId}__colas__0__0`,
+    publishedAt,
+    revision: 1,
+    tournament: { id: individualTournamentId, name: "Coleadero Individual Integration" },
+    charreada: {
+      id: individualCharreadaId,
+      name: "Coleadero Integration",
+      competitionId: "coleadero",
+      competitionType: "coleadero"
+    },
+    competition: {
+      id: "coleadero",
+      type: "coleadero",
+      competitionScope: "individual"
+    },
+    // The official authority persists this legacy envelope, while Attempt V2
+    // remains the canonical individual identity source.
+    team: { id: individualParticipantId, name: "Gustavo Mares / Moro", horseName: "Moro" },
+    participant: { id: individualParticipantId, name: "Gustavo Mares" },
+    suerte: { id: "colas", name: "Colas", type: "coleadero", attempts: 1 },
+    attempt: { total: 15 },
+    breakdown: {
+      attemptV2: {
+        identity: {
+          tournamentId: individualTournamentId,
+          charreadaId: individualCharreadaId,
+          competitionId: "coleadero",
+          participantId: individualParticipantId,
+          participantSlot: 1,
+          suerteId: "colas",
+          opportunityNumber: 1
+        },
+        sportState: { opportunity: { number: 1 } },
+        scoring: { teamAdjustedPoints: 15, individualBadPoints: 0, teamBadPoints: 0 }
+      }
+    },
+    total: 15
+  };
+  return firebaseSync.publishFirebaseOfficialScoreAtomic(
+    individualTournamentId,
+    `${individualCharreadaId}__${individualParticipantId}__colas`,
+    [[{ total: 15 }]],
+    published,
+    { uid: "test-user", role: "supervisor" },
+    {
+      nowMs: Date.parse(publishedAt),
+      jitter: false,
+      livePayload: {
+        tournament: { id: individualTournamentId, name: "Coleadero Individual Integration" },
+        charreada: { id: individualCharreadaId, name: "Coleadero Integration" },
+        competitionId: "coleadero",
+        turn: {
+          participant: { id: individualParticipantId, name: "Gustavo Mares" },
+          horse: { id: individualHorseId, name: "Moro" },
+          suerte: { id: "colas", name: "Colas" }
+        }
+      }
     }
   );
 }

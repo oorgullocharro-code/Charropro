@@ -5,9 +5,9 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

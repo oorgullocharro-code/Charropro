@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260910-teams-participants-horses-canonical-separation-001-v1",
+      "appVersion": "20260910-individual-v3-scope-horse-rules-parity-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "158f8769f693a90a2c329028cd770e8386fdfc3c9bc5469f964cb05c6d83d917",
-  "fingerprint": "158f8769f693a90a2c329028cd770e8386fdfc3c9bc5469f964cb05c6d83d917"
+  "checksum": "703fe74faf7f710128f36e2bf7c0ab86eadda55376916524779420ef9c77c1ce",
+  "fingerprint": "703fe74faf7f710128f36e2bf7c0ab86eadda55376916524779420ef9c77c1ce"
 }

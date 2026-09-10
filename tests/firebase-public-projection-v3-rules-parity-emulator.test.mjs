@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -61,6 +61,28 @@ async function runProjectionV3RulesParityEmulator() {
     assert.equal(roundTripped.sheet.competitions.length, 1);
     assert.equal(roundTripped.timeline.items.length, 3);
 
+    const individualVariants = [
+      ["individual-base", {}],
+      ["individual-program-horses", { program: true }],
+      ["individual-result-horses", { results: true }],
+      ["individual-standing-horses", { standings: true }],
+      ["individual-sheet-horses", { sheet: true }],
+      ["individual-full", { program: true, results: true, standings: true, sheet: true }]
+    ];
+    for (const [label, fields] of individualVariants) {
+      const projection = buildIndividualCandidate(`${tournamentId}-${label}`, fields);
+      assert.equal(validateCanonicalPublicTournamentData(projection).valid, true, `${label} is a valid V3 projection`);
+      await assertAllowed(label, projection, token);
+    }
+    const individual = buildIndividualCandidate(tournamentId, { program: true, results: true, standings: true, sheet: true });
+    assert.equal(individual.results.teams[0].participantScope, "individual");
+    assert.equal(individual.results.teams[0].participantId, "participant-gustavo");
+    assert.equal(individual.results.teams[0].horseId, "horse-moro");
+    assert.equal(individual.results.teams[0].horseName, "Moro");
+    const noAccessId = `${tournamentId}-no-access`;
+    const noAccess = await writeProjection(databaseHost, databaseNamespace, noAccessId, buildIndividualCandidate(noAccessId, { program: true, results: true, standings: true, sheet: true }), token);
+    assert.equal(noAccess.ok, false, "a judge without selected tournament access remains denied");
+
     await assertRejected("schema-v2", candidate, token, (projection) => {
       projection.schemaVersion = 2;
       projection.projectionVersion = "2.0.0";
@@ -82,6 +104,9 @@ async function runProjectionV3RulesParityEmulator() {
     await assertRejected("sheet-malformed", candidate, token, (projection) => {
       projection.sheet.competitions[0].phase = 7;
     });
+    await assertRejected("individual-extra-field", individual, token, (projection) => {
+      projection.results.teams[0].unapprovedHorseMetadata = "not-allowlisted";
+    });
     await assertRejected("timeline-malformed", candidate, token, (projection) => {
       projection.timeline.items[0].publishedAt = 7;
     });
@@ -97,8 +122,20 @@ async function runProjectionV3RulesParityEmulator() {
     const projection = structuredClone(source);
     projection.projectionRevision += 1;
     mutate(projection);
-    const response = await writeProjection(databaseHost, databaseNamespace, `${tournamentId}-${label}`, projection, token);
+    const response = await writeProjection(databaseHost, databaseNamespace, tournamentId, projection, token);
     assert.equal(response.ok, false, `${label}: ${response.body}`);
+  }
+
+  async function assertAllowed(label, projection, token) {
+    const projectionId = `${tournamentId}-${label}`;
+    await database.ref(`charropro/userTournamentAccess/${uid}/${projectionId}`).set(true);
+    try {
+      const response = await writeProjection(databaseHost, databaseNamespace, projectionId, projection, token);
+      assert.equal(response.ok, true, `${label}: ${response.body}`);
+    } finally {
+      await database.ref(`charropro/userTournamentAccess/${uid}/${projectionId}`).remove();
+      await database.ref(`charropro/publicTournaments/${projectionId}`).remove();
+    }
   }
 }
 
@@ -214,6 +251,92 @@ function buildCandidate(tournamentId) {
         previousScore: 0
       }))
     },
+    statistics: { status: "ready", items: [] }
+  });
+}
+
+function buildIndividualCandidate(tournamentId, fields = {}) {
+  const include = {
+    program: fields.program === true,
+    results: fields.results === true,
+    standings: fields.standings === true,
+    sheet: fields.sheet === true
+  };
+  const result = {
+    resultId: "result-gustavo",
+    participantScope: "individual",
+    participantId: "participant-gustavo",
+    participantName: "Gustavo Mares",
+    charreadaId: "lote-coleadero",
+    charreadaName: "Coleadero",
+    competitionId: "coleadero",
+    competitionName: "Coleadero",
+    phase: "clasificatoria",
+    phaseName: "Clasificatoria",
+    columns: { colas: 15 },
+    penalties: 0,
+    subtotal: 15,
+    total: 15,
+    status: "official"
+  };
+  if (include.results) Object.assign(result, { horseId: "horse-moro", horseName: "Moro" });
+  const standing = {
+    rankingId: "competition-result-gustavo",
+    resultId: result.resultId,
+    resultIds: [result.resultId],
+    position: 1,
+    scopeType: "competition",
+    competitionId: result.competitionId,
+    competitionName: result.competitionName,
+    charreadaId: result.charreadaId,
+    participantScope: "individual",
+    participantId: result.participantId,
+    participantName: result.participantName,
+    total: result.total,
+    classification: "partial",
+    status: "provisional",
+    phase: result.phase,
+    phaseName: result.phaseName,
+    tieBreakLabel: ""
+  };
+  if (include.standings) Object.assign(standing, { horseId: "horse-moro", horseName: "Moro" });
+  const sheetRow = {
+    resultId: result.resultId,
+    participantId: result.participantId,
+    participantName: result.participantName,
+    total: result.total,
+    columns: result.columns
+  };
+  if (include.sheet) Object.assign(sheetRow, { horseId: "horse-moro", horseName: "Moro" });
+  const programItem = {
+    id: "lote-coleadero",
+    charreadaId: "lote-coleadero",
+    competitionId: "coleadero",
+    competitionName: "Coleadero",
+    phase: "clasificatoria",
+    phaseName: "Clasificatoria",
+    name: "Coleadero",
+    scheduledDate: "2026-09-10",
+    scheduledTime: "10:00",
+    status: "live",
+    order: 1,
+    participantIds: ["participant-gustavo"],
+    participantNames: ["Gustavo Mares"]
+  };
+  if (include.program) Object.assign(programItem, { horseIds: ["horse-moro"], horseNames: ["Moro"] });
+  return createCanonicalPublicTournamentData({
+    tournamentId,
+    sourceRevision: 1,
+    projectionRevision: 1,
+    generatedAt: "2026-09-10T00:01:00.000Z",
+    lifecycle: { status: "LIVE" },
+    tournament: { id: tournamentId, name: "Projection V3 Individual QA", status: "live" },
+    program: { items: [programItem] },
+    live: { status: "LIVE", currentCharreada: "Coleadero", currentParticipant: "Gustavo Mares", updatedAt: "2026-09-10T00:01:00.000Z" },
+    results: { teams: [result] },
+    standings: { items: [standing] },
+    sheet: { competitions: [{ competitionId: "coleadero", name: "Coleadero", charreadaId: "lote-coleadero", charreadaName: "Coleadero", phase: "clasificatoria", phaseName: "Clasificatoria", rows: [sheetRow] }] },
+    timeline: { items: [{ eventId: "event-gustavo", sequence: 1, occurredAt: "2026-09-10T00:00:00.000Z", publishedAt: "2026-09-10T00:01:00.000Z", type: "score_published", status: "official", competitionId: "coleadero", competitionName: "Coleadero", phaseId: "clasificatoria", phaseName: "Clasificatoria", charreadaId: "lote-coleadero", charreadaName: "Coleadero", participantId: "participant-gustavo", participantName: "Gustavo Mares", suerteId: "colas", suerteName: "Colas", label: "Colas Gustavo Mares", score: 15, previousScore: 0 }] },
     statistics: { status: "ready", items: [] }
   });
 }

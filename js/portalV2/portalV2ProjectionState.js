@@ -1,5 +1,5 @@
-import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
-import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 export function applyPortalV2Snapshot(state, snapshot, options = {}) {
   if (!isCanonicalPublicV3(snapshot)) {

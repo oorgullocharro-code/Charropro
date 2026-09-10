@@ -361,6 +361,8 @@
                 "teamNames": { "$itemId": { ".validate": "newData.isString() && newData.val().length <= 4000" } },
                 "participantIds": { "$itemId": { ".validate": "newData.isString() && newData.val().length <= 180" } },
                 "participantNames": { "$itemId": { ".validate": "newData.isString() && newData.val().length <= 4000" } },
+                "horseIds": { "$itemId": { ".validate": "newData.isString() && newData.val().length <= 180" } },
+                "horseNames": { "$itemId": { ".validate": "newData.isString() && newData.val().length <= 4000" } },
                 "$other": {
                   ".validate": "($other === 'id' || $other === 'charreadaId' || $other === 'competitionId' || $other === 'competitionName' || $other === 'phase' || $other === 'phaseName' || $other === 'name' || $other === 'scheduledDate' || $other === 'scheduledTime' || $other === 'status') && newData.isString() || ($other === 'order' && newData.isNumber())"
                 }
@@ -461,7 +463,7 @@
               "$other": {
                 ".validate": "newData.hasChildren(['resultId', 'charreadaId', 'competitionId', 'columns', 'penalties', 'subtotal', 'total', 'status']) && newData.child('resultId').isString() && (newData.child('teamId').isString() || newData.child('participantId').isString()) && newData.child('charreadaId').isString() && newData.child('competitionId').isString() && newData.child('penalties').isNumber() && newData.child('subtotal').isNumber() && newData.child('total').isNumber() && newData.child('status').isString()",
                 "columns": { "$other": { ".validate": "newData.isNumber()" } },
-                "$other": { ".validate": "($other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantScope' || $other === 'participantId' || $other === 'participantName' || $other === 'charreadaId' || $other === 'charreadaName' || $other === 'competitionId' || $other === 'competitionName' || $other === 'phase' || $other === 'phaseName' || $other === 'status') && newData.isString() || (($other === 'penalties' || $other === 'subtotal' || $other === 'total' || $other === 'position') && newData.isNumber()) || $other === 'columns'" }
+                "$other": { ".validate": "($other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantScope' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName' || $other === 'charreadaId' || $other === 'charreadaName' || $other === 'competitionId' || $other === 'competitionName' || $other === 'phase' || $other === 'phaseName' || $other === 'status') && newData.isString() || (($other === 'penalties' || $other === 'subtotal' || $other === 'total' || $other === 'position') && newData.isNumber()) || $other === 'columns'" }
               }
             }
           },
@@ -471,7 +473,7 @@
               "$other": {
                 ".validate": "newData.hasChildren(['rankingId', 'resultId', 'position', 'total', 'status']) && newData.child('rankingId').isString() && newData.child('resultId').isString() && newData.child('position').isNumber() && (newData.child('teamId').isString() || newData.child('participantId').isString()) && newData.child('total').isNumber() && newData.child('status').isString()",
                 "resultIds": { "$other": { ".validate": "newData.isString()" } },
-                "$other": { ".validate": "($other === 'rankingId' || $other === 'resultId' || $other === 'scopeType' || $other === 'competitionId' || $other === 'competitionName' || $other === 'charreadaId' || $other === 'participantScope' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'classification' || $other === 'status' || $other === 'phase' || $other === 'phaseName' || $other === 'tieBreakLabel') && newData.isString() || (($other === 'position' || $other === 'total') && newData.isNumber()) || $other === 'resultIds'" }
+                "$other": { ".validate": "($other === 'rankingId' || $other === 'resultId' || $other === 'scopeType' || $other === 'competitionId' || $other === 'competitionName' || $other === 'charreadaId' || $other === 'participantScope' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName' || $other === 'classification' || $other === 'status' || $other === 'phase' || $other === 'phaseName' || $other === 'tieBreakLabel') && newData.isString() || (($other === 'position' || $other === 'total') && newData.isNumber()) || $other === 'resultIds'" }
               }
             },
             "$other": { ".validate": "$other === 'items'" }
@@ -485,7 +487,7 @@
                   "$other": {
                     ".validate": "newData.hasChildren(['resultId', 'total', 'columns']) && newData.child('resultId').isString() && (newData.child('teamId').isString() || newData.child('participantId').isString()) && newData.child('total').isNumber()",
                     "columns": { "$other": { ".validate": "newData.isNumber()" } },
-                    "$other": { ".validate": "($other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName') && newData.isString() || ($other === 'total' && newData.isNumber()) || $other === 'columns'" }
+                    "$other": { ".validate": "($other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName') && newData.isString() || ($other === 'total' && newData.isNumber()) || $other === 'columns'" }
                   }
                 },
                 "$other": { ".validate": "($other === 'competitionId' || $other === 'name' || $other === 'charreadaId' || $other === 'charreadaName' || $other === 'phase' || $other === 'phaseName') && newData.isString() || $other === 'rows'" }

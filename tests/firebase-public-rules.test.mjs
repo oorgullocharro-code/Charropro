@@ -52,6 +52,14 @@ assert.equal(publicRules.live.$other[".validate"].includes("pendingNote"), false
 assert.equal(publicRules.results.teams.$other.$other[".validate"].includes("audit"), false);
 assert.equal(publicRules.standings.items.$other.$other[".validate"].includes("operatorId"), false);
 assert.equal(publicRules.timeline.items.$other.$other[".validate"].includes("html"), false);
+assert.match(publicRules.program.items.$itemId.horseIds.$itemId[".validate"], /newData\.isString/);
+assert.match(publicRules.program.items.$itemId.horseNames.$itemId[".validate"], /newData\.isString/);
+assert.match(publicRules.results.teams.$other.$other[".validate"], /horseId/);
+assert.match(publicRules.results.teams.$other.$other[".validate"], /horseName/);
+assert.match(publicRules.standings.items.$other.$other[".validate"], /horseId/);
+assert.match(publicRules.standings.items.$other.$other[".validate"], /horseName/);
+assert.match(publicRules.sheet.competitions.$other.rows.$other.$other[".validate"], /horseId/);
+assert.match(publicRules.sheet.competitions.$other.rows.$other.$other[".validate"], /horseName/);
 
 assert.equal(liveRules[".read"], true, "operational live read remains unchanged from deployed rules");
 

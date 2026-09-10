@@ -4,9 +4,9 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjectionForRead
-} from "./publicProjectionSchema.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+} from "./publicProjectionSchema.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

@@ -2,8 +2,8 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+} from "./canonicalOfficialResults.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 
@@ -231,7 +231,7 @@ function createResultRow(identity, charreada, teams, participants, horses) {
     phaseName: charreada.phaseName || "",
     charreadaId: identity.charreadaId,
     charreadaName: charreada.name || "",
-    teamId: identity.teamId,
+    teamId: identity.participantScope === "team" ? identity.teamId : "",
     teamName: identity.participantScope === "team" ? identity.teamName || team.teamName || "" : "",
     participantScope: identity.participantScope,
     participantId: identity.participantId,
@@ -374,7 +374,9 @@ function recordIdentity(item, fallbackTournamentId) {
   const attempt = record(item.breakdown?.attemptV2?.identity);
   const participantId = id(item.participant?.id || item.participantId || attempt.participantId);
   const teamId = id(item.team?.id || item.teamId || attempt.teamId);
-  const declaredScope = text(item.participantScope || item.competition?.scope || item.competition?.participantScope || attempt.participantScope).toLowerCase();
+  // Preserve the existing explicit-scope precedence and recognize the durable
+  // ledger field emitted by individual competition publication.
+  const declaredScope = text(item.participantScope || item.competition?.scope || item.competition?.participantScope || item.competition?.competitionScope || attempt.participantScope).toLowerCase();
   const participantScope = declaredScope === "individual" || (!teamId && participantId) ? "individual" : "team";
   return {
     tournamentId: id(item.tournament?.id || item.tournamentId || attempt.tournamentId || fallbackTournamentId),

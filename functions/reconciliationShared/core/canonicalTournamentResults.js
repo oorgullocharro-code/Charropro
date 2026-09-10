@@ -231,7 +231,7 @@ function createResultRow(identity, charreada, teams, participants, horses) {
     phaseName: charreada.phaseName || "",
     charreadaId: identity.charreadaId,
     charreadaName: charreada.name || "",
-    teamId: identity.teamId,
+    teamId: identity.participantScope === "team" ? identity.teamId : "",
     teamName: identity.participantScope === "team" ? identity.teamName || team.teamName || "" : "",
     participantScope: identity.participantScope,
     participantId: identity.participantId,
@@ -374,7 +374,8 @@ function recordIdentity(item, fallbackTournamentId) {
   const attempt = record(item.breakdown?.attemptV2?.identity);
   const participantId = id(item.participant?.id || item.participantId || attempt.participantId);
   const teamId = id(item.team?.id || item.teamId || attempt.teamId);
-  const declaredScope = text(item.participantScope || item.competition?.scope || item.competition?.participantScope || attempt.participantScope).toLowerCase();
+  // Keep this mirror aligned with the browser's canonical scope precedence.
+  const declaredScope = text(item.participantScope || item.competition?.scope || item.competition?.participantScope || item.competition?.competitionScope || attempt.participantScope).toLowerCase();
   const participantScope = declaredScope === "individual" || (!teamId && participantId) ? "individual" : "team";
   return {
     tournamentId: id(item.tournament?.id || item.tournamentId || attempt.tournamentId || fallbackTournamentId),

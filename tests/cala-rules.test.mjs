@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+} from "../js/data/calaRules.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

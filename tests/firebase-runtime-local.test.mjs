@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",
