@@ -108,6 +108,8 @@ const createInitialState = () => ({
   lastPublishedScore: null,
   tournaments: [],
   teams: [],
+  participants: [],
+  horses: [],
   charreadas: [],
   scores: {},
   pendingScoreReviews: {},
@@ -172,6 +174,8 @@ export function loadState(tournamentId = "") {
       ...parsed,
       tournaments: (parsed.tournaments || []).map(normalizeTournament),
       teams: (parsed.teams || []).map(normalizeTeam),
+      participants: (parsed.participants || []).map(normalizeParticipant),
+      horses: (parsed.horses || []).map(normalizeHorse),
       charreadas: (parsed.charreadas || []).map(normalizeCharreada),
       pendingScoreReviews: normalizePendingScoreReviewRegistry(parsed.pendingScoreReviews),
       publishedScores: normalizePublishedScores(parsed.publishedScores, parsed.lastPublishedScore),
@@ -317,13 +321,15 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
   const cleanTournamentId = normalizeTournamentCacheId(tournamentId);
   const tournament = (source.tournaments || []).find((item) => item?.id === cleanTournamentId) || null;
   const teams = (source.teams || []).filter((team) => team?.tournamentId === cleanTournamentId);
+  const participants = (source.participants || []).filter((participant) => participant?.tournamentId === cleanTournamentId);
+  const horses = (source.horses || []).filter((horse) => horse?.tournamentId === cleanTournamentId);
   const charreadas = (source.charreadas || []).filter((charreada) => charreada?.tournamentId === cleanTournamentId);
-  const teamIds = new Set(teams.map((team) => team.id));
+  const entryIds = new Set([...teams, ...participants].map((entry) => entry.id));
   const charreadaIds = new Set(charreadas.map((charreada) => charreada.id));
   const scores = Object.fromEntries(
     Object.entries(source.scores || {}).filter(([key]) => {
-      const [charreadaId, teamId] = key.split("__");
-      return charreadaIds.has(charreadaId) && teamIds.has(teamId);
+      const [charreadaId, entryId] = key.split("__");
+      return charreadaIds.has(charreadaId) && entryIds.has(entryId);
     })
   );
   const publishedScores = (source.publishedScores || []).filter((record) => {
@@ -358,6 +364,8 @@ function scopeStateForTournament(source = {}, tournamentId = "") {
     activeCharreadaId,
     tournaments: tournament ? [tournament] : [],
     teams,
+    participants,
+    horses,
     charreadas,
     scores,
     pendingScoreReviews,
@@ -439,43 +447,55 @@ function flattenScoreCollection(collection) {
 }
 
 function normalizeTeam(team = {}) {
-  const roster = team.roster && typeof team.roster === "object" ? { ...team.roster } : {};
-  const terna = getCanonicalTernaRoster({ ...team, roster });
+  const { participantName: _participantName, horseName: _horseName, horseId: _horseId, ...teamRecord } = team;
+  const roster = teamRecord.roster && typeof teamRecord.roster === "object" ? { ...teamRecord.roster } : {};
+  const terna = getCanonicalTernaRoster({ ...teamRecord, roster });
   roster.terna = terna;
   roster.lazo = terna[0]?.participantName || roster.lazo || "";
   roster.pial_ruedo = terna[1]?.participantName || roster.pial_ruedo || "";
   roster.terna_auxiliar = terna[2]?.participantName || roster.terna_auxiliar || "";
   return {
-    ...team,
+    ...teamRecord,
     roster,
-    participantName: String(team.participantName || "").trim(),
-    horseName: String(team.horseName || "").trim(),
     category: cleanCategory(team.category)
   };
 }
 
-function normalizeIndividualParticipant(participant = {}, index = 0) {
+function normalizeParticipant(participant = {}) {
   const id = String(participant.id || uid("participante")).trim();
-  const name = String(participant.name || participant.participantName || participant.nombre || "").trim();
-  const horseName = String(participant.horseName || participant.caballo || participant.horse || "").trim();
-  const order = Math.max(1, Math.round(Number(participant.order || index + 1) || index + 1));
   return {
+    ...participant,
     id,
-    name,
+    participantName: String(participant.participantName || participant.name || participant.nombre || "").trim(),
+    horseId: String(participant.horseId || "").trim(),
+    charroId: String(participant.charroId || "").trim(),
     association: String(participant.association || participant.asociacion || "").trim(),
     category: cleanCategory(participant.category || participant.categoria),
-    horseName,
-    order
+    active: participant.active !== false
   };
 }
 
-function normalizeIndividualParticipants(participants = []) {
-  return (Array.isArray(participants) ? participants : [])
-    .map(normalizeIndividualParticipant)
-    .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
+function normalizeHorse(horse = {}) {
+  const registryType = String(horse.registryType || "").trim().toUpperCase();
+  return {
+    ...horse,
+    id: String(horse.id || uid("caballo")).trim(),
+    displayName: String(horse.displayName || horse.name || horse.nombre || "").trim(),
+    registryType: registryType || null,
+    registryNumber: String(horse.registryNumber || "").trim() || null,
+    registryVerified: horse.registryVerified === true
+  };
+}
+
+function normalizeParticipantIds(participantIds = []) {
+  const seen = new Set();
+  return (Array.isArray(participantIds) ? participantIds : [])
+    .map((participantId) => String(participantId || "").trim())
+    .filter((participantId) => participantId && !seen.has(participantId) && seen.add(participantId));
 }
 
 function normalizeCharreada(charreada = {}) {
+  const { individualParticipants: _legacyIndividualParticipants, ...canonicalCharreada } = charreada;
   const phase = String(charreada.phase || charreada.fase || "").trim();
   if (phase) console.info("[program-fase-001] phase restored", { charreadaId: charreada.id || "", phase });
   const selectedCompetitionType = String(charreada.competitionType || charreada.competitionId || "").trim();
@@ -484,13 +504,13 @@ function normalizeCharreada(charreada = {}) {
   const competitionScope = charreada.competitionScope || competition?.scope || "";
   const competitionId = charreada.competitionId || competitionType;
   return {
-    ...charreada,
+    ...canonicalCharreada,
     phase,
     competitionType,
     competitionScope,
     competitionId,
     suerteIds: Array.isArray(charreada.suerteIds) ? charreada.suerteIds.map(String).filter(Boolean) : [...(competition?.suerteIds || [])],
-    individualParticipants: normalizeIndividualParticipants(charreada.individualParticipants),
+    participantIds: normalizeParticipantIds(charreada.participantIds),
     status: normalizeCharreadaStatus(charreada.status)
   };
 }
@@ -762,6 +782,8 @@ export function setActiveTournament(tournamentId) {
         ...parsed,
         tournaments: mergeTournamentLists(previousTournaments, (parsed.tournaments || []).map(normalizeTournament)),
         teams: (parsed.teams || []).map(normalizeTeam),
+        participants: (parsed.participants || []).map(normalizeParticipant),
+        horses: (parsed.horses || []).map(normalizeHorse),
         charreadas: (parsed.charreadas || []).map(normalizeCharreada),
         pendingScoreReviews: normalizePendingScoreReviewRegistry(parsed.pendingScoreReviews),
         publishedScores: normalizePublishedScores(parsed.publishedScores, parsed.lastPublishedScore),
@@ -823,6 +845,29 @@ export function getTeam(teamId) {
 
 export function getTournamentTeams(tournamentId = state.activeTournamentId) {
   return state.teams.filter((team) => team.tournamentId === tournamentId);
+}
+
+export function getParticipant(participantId) {
+  return state.participants.find((participant) => participant.id === participantId) || null;
+}
+
+export function getHorse(horseId) {
+  return state.horses.find((horse) => horse.id === horseId) || null;
+}
+
+function isActiveTournamentParticipant(participant = {}) {
+  const status = String(participant.status || participant.participantStatus || "").trim().toLowerCase();
+  return participant.active !== false && !["inactive", "inactivo", "deleted", "eliminado", "retired", "retirado"].includes(status);
+}
+
+export function getTournamentParticipants(tournamentId = state.activeTournamentId) {
+  return state.participants
+    .filter((participant) => participant.tournamentId === tournamentId)
+    .filter(isActiveTournamentParticipant);
+}
+
+export function getTournamentHorses(tournamentId = state.activeTournamentId) {
+  return state.horses.filter((horse) => horse.tournamentId === tournamentId);
 }
 
 export function getTournamentCharreadas(tournamentId = state.activeTournamentId) {
@@ -931,9 +976,10 @@ function buildScoringSuertesCacheSignature(charreada = {}, tournament = {}) {
 }
 
 function buildIndividualParticipantEntry(participant = {}, index = 0, charreada = {}) {
-  const normalized = normalizeIndividualParticipant(participant, index);
-  const participantName = normalized.name || `Participante ${index + 1}`;
-  const displayName = [participantName, normalized.horseName].filter(Boolean).join(" / ");
+  const participantName = participant.participantName || `Participante ${index + 1}`;
+  const horse = getHorse(participant.horseId);
+  const horseName = horse?.displayName || "";
+  const displayName = [participantName, horseName].filter(Boolean).join(" / ");
   const roster = createRoster("");
   Object.keys(roster).forEach((key) => {
     if (Array.isArray(roster[key])) return;
@@ -942,19 +988,34 @@ function buildIndividualParticipantEntry(participant = {}, index = 0, charreada 
   roster.colas = [participantName, "", ""];
   roster.terna = [participantName, participantName, participantName];
   return {
-    id: normalized.id,
+    id: participant.id,
     name: displayName || participantName,
     participantName,
-    horseName: normalized.horseName,
-    association: normalized.association,
-    category: normalized.category,
+    horseId: participant.horseId || "",
+    horseName,
+    association: participant.association || "",
+    category: participant.category || "",
     roster,
     tournamentId: charreada.tournamentId || state.activeTournamentId || "",
-    source: "individualParticipants",
+    source: "participantRegistry",
     competitionParticipant: true,
     isIndividualParticipant: true,
-    order: normalized.order
+    order: index + 1
   };
+}
+
+export function getCharreadaParticipants(charreada = getActiveCharreada()) {
+  if (!charreada) return [];
+  const tournament = state.tournaments.find((item) => item.id === charreada.tournamentId) || getActiveTournament();
+  const registry = getTournamentParticipants(tournament?.id);
+  const byId = new Map(registry.map((participant) => [participant.id, participant]));
+  const participantIds = normalizeParticipantIds(charreada.participantIds);
+  return participantIds
+    .map((participantId, index) => {
+      const participant = byId.get(participantId);
+      return participant ? { ...participant, order: index + 1 } : null;
+    })
+    .filter(Boolean);
 }
 
 export function getCharreadaScoringEntries(charreada = getActiveCharreada()) {
@@ -962,27 +1023,8 @@ export function getCharreadaScoringEntries(charreada = getActiveCharreada()) {
   const tournament = state.tournaments.find((item) => item.id === charreada.tournamentId) || getActiveTournament();
   const competitionContext = getCharreadaCompetitionContext(charreada, tournament);
   if (competitionContext.isIndividualCompetition) {
-    const participants = normalizeIndividualParticipants(charreada.individualParticipants);
-    if (participants.length) {
-      return participants.map((participant, index) =>
-        buildIndividualParticipantEntry(participant, index, charreada)
-      );
-    }
-    if (["caladero", "coleadero", "pialadero"].includes(tournament?.type) && Array.isArray(charreada.teamIds) && charreada.teamIds.length) {
-      return charreada.teamIds
-        .map((teamId, index) => {
-          const team = getTeam(teamId);
-          return team ? {
-            ...team,
-            source: "legacyTeamParticipants",
-            competitionParticipant: true,
-            isIndividualParticipant: true,
-            order: index + 1
-          } : null;
-        })
-        .filter(Boolean);
-    }
-    return [];
+    return getCharreadaParticipants(charreada)
+      .map((participant, index) => buildIndividualParticipantEntry(participant, index, charreada));
   }
   return (charreada.teamIds || [])
     .map((teamId, index) => getTeam(teamId) || {

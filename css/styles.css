@@ -2660,6 +2660,17 @@ th.num {
   font-weight: 900;
 }
 
+.individual-participant-candidate span {
+  display: grid;
+  gap: 2px;
+}
+
+.individual-participant-candidate span small {
+  color: var(--muted);
+  font-size: .74rem;
+  font-weight: 700;
+}
+
 .team-order-input {
   text-align: center;
 }

@@ -183,7 +183,7 @@ function normalizeSponsor(value = {}) {
 }
 
 function normalizeProgramItem(value = {}) {
-  const item = pick(value, ["id", "charreadaId", "competitionId", "competitionName", "phase", "phaseName", "name", "scheduledDate", "scheduledTime", "status", "order", "teamIds", "teamNames", "participantIds", "participantNames"]);
+  const item = pick(value, ["id", "charreadaId", "competitionId", "competitionName", "phase", "phaseName", "name", "scheduledDate", "scheduledTime", "status", "order", "teamIds", "teamNames", "participantIds", "participantNames", "horseIds", "horseNames"]);
   return item.id || item.charreadaId ? item : null;
 }
 
@@ -192,20 +192,20 @@ function normalizeLive(value = {}) {
 }
 
 function normalizeResult(value = {}) {
-  const result = pick(value, ["resultId", "teamId", "teamName", "participantScope", "participantId", "participantName", "charreadaId", "charreadaName", "competitionId", "competitionName", "phase", "phaseName", "columns", "penalties", "subtotal", "total", "status", "position"]);
+  const result = pick(value, ["resultId", "teamId", "teamName", "participantScope", "participantId", "participantName", "horseId", "horseName", "charreadaId", "charreadaName", "competitionId", "competitionName", "phase", "phaseName", "columns", "penalties", "subtotal", "total", "status", "position"]);
   result.columns = plain(value.columns) ? finiteRecord(value.columns) : {};
   return result.resultId ? result : null;
 }
 
 function normalizeStanding(value = {}) {
-  const item = pick(value, ["rankingId", "resultId", "resultIds", "position", "scopeType", "competitionId", "competitionName", "charreadaId", "participantScope", "teamId", "teamName", "participantId", "participantName", "total", "classification", "status", "phase", "phaseName", "tieBreakLabel"]);
+  const item = pick(value, ["rankingId", "resultId", "resultIds", "position", "scopeType", "competitionId", "competitionName", "charreadaId", "participantScope", "teamId", "teamName", "participantId", "participantName", "horseId", "horseName", "total", "classification", "status", "phase", "phaseName", "tieBreakLabel"]);
   return item.resultId || item.resultIds?.length ? item : null;
 }
 
 function normalizeSheetCompetition(value = {}) {
   const competition = pick(value, ["competitionId", "name", "charreadaId", "charreadaName", "phase", "phaseName"]);
   competition.rows = collection(value.rows).map((row) => ({
-    ...pick(row, ["resultId", "teamId", "teamName", "participantId", "participantName", "total"]),
+    ...pick(row, ["resultId", "teamId", "teamName", "participantId", "participantName", "horseId", "horseName", "total"]),
     columns: plain(row.columns) ? finiteRecord(row.columns) : {}
   })).filter((row) => row.resultId);
   return competition.competitionId ? competition : null;

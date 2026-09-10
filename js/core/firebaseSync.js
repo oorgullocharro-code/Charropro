@@ -5939,6 +5939,8 @@ function compactTournamentRecord(tournamentId, appState = {}) {
   const settings = appState.settings || {};
   const tournament = (appState.tournaments || []).find((item) => item.id === cleanTournamentId) || { id: cleanTournamentId };
   const teams = (appState.teams || []).filter((team) => team.tournamentId === cleanTournamentId);
+  const participants = (appState.participants || []).filter((participant) => participant.tournamentId === cleanTournamentId);
+  const horses = (appState.horses || []).filter((horse) => horse.tournamentId === cleanTournamentId);
   const charreadas = (appState.charreadas || []).filter((charreada) => charreada.tournamentId === cleanTournamentId);
   const charreadaIds = new Set(charreadas.map((charreada) => charreada.id).filter(Boolean));
   const scores = Object.fromEntries(
@@ -5956,6 +5958,8 @@ function compactTournamentRecord(tournamentId, appState = {}) {
   return cleanUndefined({
     info: compactStoredTournament(tournament),
     teams: teams.map(compactStoredTeam),
+    participants: participants.map(compactStoredParticipant),
+    horses: horses.map(compactStoredHorse),
     charreadas: charreadas.map(compactStoredCharreada),
     scores,
     pendingScoreReviews,
@@ -6011,6 +6015,8 @@ function inflateTournamentStatePayload(tournamentId, record = {}) {
     ruleEditorSuerteId: meta.ruleEditorSuerteId || "cala",
     tournament: compactStoredTournament(record.info || { id: cleanTournamentId }),
     teams: arrayFromRecord(record.teams).map(compactStoredTeam),
+    participants: arrayFromRecord(record.participants).map(compactStoredParticipant),
+    horses: arrayFromRecord(record.horses).map(compactStoredHorse),
     charreadas: arrayFromRecord(record.charreadas).map(compactStoredCharreada),
     scores: record.scores || {},
     pendingScoreReviews: record.pendingScoreReviews || {},
@@ -6065,12 +6071,37 @@ function compactStoredTournament(tournament = {}) {
 }
 
 function compactStoredTeam(team = {}) {
+  const { participantName: _participantName, horseName: _horseName, horseId: _horseId, ...teamRecord } = team;
   return {
-    ...team,
-    id: team.id || "",
-    name: team.name || "",
-    category: team.category || "Libre",
-    roster: team.roster || {}
+    ...teamRecord,
+    id: teamRecord.id || "",
+    name: teamRecord.name || "",
+    category: teamRecord.category || "Libre",
+    roster: teamRecord.roster || {}
+  };
+}
+
+function compactStoredParticipant(participant = {}) {
+  return {
+    ...participant,
+    id: participant.id || "",
+    participantName: participant.participantName || "",
+    horseId: participant.horseId || "",
+    charroId: participant.charroId || "",
+    category: participant.category || "Libre",
+    association: participant.association || "",
+    active: participant.active !== false
+  };
+}
+
+function compactStoredHorse(horse = {}) {
+  return {
+    ...horse,
+    id: horse.id || "",
+    displayName: horse.displayName || "",
+    registryType: horse.registryType || null,
+    registryNumber: horse.registryNumber || null,
+    registryVerified: horse.registryVerified === true
   };
 }
 
@@ -6083,7 +6114,8 @@ function compactStoredCharreada(charreada = {}) {
     name: charreada.name || "",
     phase,
     status: charreada.status || "programada",
-    teamIds: charreada.teamIds || []
+    teamIds: charreada.teamIds || [],
+    participantIds: charreada.participantIds || []
   };
 }
 
@@ -6127,6 +6159,7 @@ function compactCharreada(charreada) {
     name: charreada.name || "",
     date: charreada.date || "",
     startTime: charreada.startTime || "",
+    participantIds: Array.isArray(charreada.participantIds) ? charreada.participantIds : [],
     phase: publicReadString(charreada.phase, charreada.fase),
     category: charreada.category || "",
     competitionType: charreada.competitionType || "",
@@ -6170,6 +6203,7 @@ function compactTeam(team) {
     id: team.id || "",
     name: team.name || "",
     participantName: team.participantName || "",
+    horseId: team.horseId || "",
     horseName: team.horseName || "",
     logo: team.logo || team.logoUrl || "",
     category: team.category || "Libre",

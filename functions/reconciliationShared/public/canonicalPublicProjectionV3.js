@@ -19,6 +19,8 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
   const canonicalResults = source.canonicalTournamentResults || buildCanonicalTournamentResults({
     tournament: tournament.info || tournament,
     teams: tournament.teams,
+    participants: tournament.participants,
+    horses: tournament.horses,
     charreadas: tournament.charreadas,
     publishedScores: tournament.publishedScores,
     officialScoreLedger: tournament.officialScoreLedger,
@@ -34,7 +36,7 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     branding: publicBranding(tournament),
     modules: publicModules(tournament),
     sponsors: publicSponsors(tournament),
-    program: { items: publicProgram(tournament.charreadas, tournament.teams) },
+    program: { items: publicProgram(tournament.charreadas, tournament.teams, tournament.participants, tournament.horses) },
     live: publicLive(source.liveCurrent, lifecycle.status),
     timeline: { items: publicTimeline(timelineSource(source, tournament)) },
     statistics: canonicalResults.statistics
@@ -110,13 +112,35 @@ function publicSponsors(tournament) {
     .filter((item) => item.id && item.name);
 }
 
-function publicProgram(charreadas, teams) {
-  const teamNames = new Map(collection(teams).map((team) => [id(team.id || team.teamId), text(team.name || team.teamName)]));
+function publicProgram(charreadas, teams, participants, horses) {
+  const teamEntries = new Map(collection(teams).map((team) => [
+    id(team.id || team.teamId),
+    {
+      teamName: text(team.name || team.teamName)
+    }
+  ]));
+  const horseEntries = new Map(collection(horses).map((horse) => [
+    id(horse.id || horse.horseId),
+    text(horse.displayName || horse.name)
+  ]));
+  const participantEntries = new Map(collection(participants).map((participant) => [
+    id(participant.id || participant.participantId),
+    {
+      participantName: text(participant.participantName || participant.name),
+      horseId: id(participant.horseId)
+    }
+  ]));
   return collection(charreadas).map((item, index) => {
     const teamIds = collection(item.teamIds).map(id).filter(Boolean);
     const resolvedTeamNames = collection(item.teamNames).map(text).filter(Boolean);
-    const publicTeamNames = resolvedTeamNames.length ? resolvedTeamNames : teamIds.map((teamId) => teamNames.get(teamId)).filter(Boolean);
-    const participantNames = collection(item.participantNames).map(text).filter(Boolean);
+    const publicTeamNames = resolvedTeamNames.length ? resolvedTeamNames : teamIds.map((teamId) => teamEntries.get(teamId)?.teamName).filter(Boolean);
+    const participantIds = collection(item.participantIds).map(id).filter(Boolean);
+    const explicitParticipantNames = collection(item.participantNames).map(text).filter(Boolean);
+    const participantNames = explicitParticipantNames.length
+      ? explicitParticipantNames
+      : participantIds.map((participantId) => participantEntries.get(participantId)?.participantName).filter(Boolean);
+    const horseIds = participantIds.map((participantId) => participantEntries.get(participantId)?.horseId).filter(Boolean);
+    const horseNames = horseIds.map((horseId) => horseEntries.get(horseId)).filter(Boolean);
     return {
     id: id(item.id || item.charreadaId),
     charreadaId: id(item.id || item.charreadaId),
@@ -131,7 +155,10 @@ function publicProgram(charreadas, teams) {
       order: integer(item.order ?? index + 1),
       ...(teamIds.length ? { teamIds } : {}),
       ...(publicTeamNames.length ? { teamNames: publicTeamNames } : {}),
-      ...(participantNames.length ? { participantNames } : {})
+      ...(participantIds.length ? { participantIds } : {}),
+      ...(participantNames.length ? { participantNames } : {}),
+      ...(horseIds.length ? { horseIds } : {}),
+      ...(horseNames.length ? { horseNames } : {})
     };
   }).filter((item) => item.id || item.charreadaId);
 }

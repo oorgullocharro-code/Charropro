@@ -15,8 +15,10 @@ export function buildCanonicalTournamentResults(source = {}, options = {}) {
   const canonical = resolveCanonicalOfficialResults(source, tournamentId);
   const charreadas = normalizeCharreadas(source.charreadas, tournamentId);
   const teams = normalizeTeams(source.teams, tournamentId);
+  const participants = normalizeParticipants(source.participants, tournamentId);
+  const horses = normalizeHorses(source.horses, tournamentId);
   const records = canonical.currentRecords.slice().sort(compareRecordIdentity);
-  const results = buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, source });
+  const results = buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, participants, horses, source });
   const standings = buildStandings(results.items);
   const sheet = buildSheet(results.items);
   const sourceRevision = Math.max(1, integer(source.sourceRevision || options.sourceRevision || maxRevision(records)));
@@ -110,6 +112,8 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
     participantScope: row.participantScope,
     participantId: row.participantId,
     participantName: row.participantName,
+    horseId: row.horseId,
+    horseName: row.horseName,
     charreadaId: row.charreadaId,
     competitionId: row.competitionId,
     competitionName: row.competitionName,
@@ -138,6 +142,8 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
       teamName: item.teamName,
       participantId: item.participantId,
       participantName: item.participantName,
+      horseId: item.horseId,
+      horseName: item.horseName,
       total: item.total,
       classification: item.totalStatus,
       status: item.positionStatus,
@@ -188,14 +194,14 @@ function resolveCanonicalOfficialResults(source, tournamentId) {
   });
 }
 
-function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, source }) {
+function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, participants, horses, source }) {
   const rows = new Map();
   for (const item of records) {
     const identity = recordIdentity(item, tournamentId);
     if (!identity.tournamentId || identity.tournamentId !== tournamentId || !identity.charreadaId || !identity.entityId || !identity.suerteId) continue;
     const charreada = charreadas.find((entry) => entry.charreadaId === identity.charreadaId) || {};
     const key = [identity.competitionId || charreada.competitionId || "competition", identity.phaseId || charreada.phaseId || "single", identity.charreadaId, identity.participantScope, identity.entityId].join("|");
-    if (!rows.has(key)) rows.set(key, createResultRow(identity, charreada, teams));
+    if (!rows.has(key)) rows.set(key, createResultRow(identity, charreada, teams, participants, horses));
     const row = rows.get(key);
     const sport = row.suertes[identity.suerteId] || createSportResult(identity.suerteId);
     const officialValue = getOfficialRecordValue(item);
@@ -212,8 +218,10 @@ function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, s
   return { status: items.length ? "READY" : "EMPTY", items };
 }
 
-function createResultRow(identity, charreada, teams) {
+function createResultRow(identity, charreada, teams, participants, horses) {
   const team = teams.find((item) => item.teamId === identity.teamId) || {};
+  const participant = participants.find((item) => item.participantId === identity.participantId) || {};
+  const horse = horses.find((item) => item.horseId === participant.horseId) || {};
   return {
     resultId: stableId("result", [identity.competitionId, identity.phaseId, identity.charreadaId, identity.participantScope, identity.entityId]),
     tournamentId: identity.tournamentId,
@@ -224,10 +232,12 @@ function createResultRow(identity, charreada, teams) {
     charreadaId: identity.charreadaId,
     charreadaName: charreada.name || "",
     teamId: identity.teamId,
-    teamName: identity.teamName || team.teamName || "",
+    teamName: identity.participantScope === "team" ? identity.teamName || team.teamName || "" : "",
     participantScope: identity.participantScope,
     participantId: identity.participantId,
-    participantName: identity.participantName,
+    participantName: participant.participantName || identity.participantName || "",
+    horseId: identity.participantScope === "individual" ? participant.horseId || "" : "",
+    horseName: identity.participantScope === "individual" ? horse.horseName || "" : "",
     suertes: {},
     subtotal: 0,
     penalties: 0,
@@ -270,6 +280,8 @@ function buildStandings(resultRows) {
     teamName: row.teamName,
     participantId: row.participantId,
     participantName: row.participantName,
+    horseId: row.horseId,
+    horseName: row.horseName,
     competitionId: row.competitionId,
     phaseId: row.phaseId || null,
     phaseName: row.phaseName,
@@ -297,7 +309,7 @@ function buildSheet(resultRows) {
       phaseName: row.phaseName || "",
       rows: []
     });
-    groups.get(key).rows.push({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantId: row.participantId, participantName: row.participantName, total: row.total, columns: toSheetColumns(row.suertes) });
+    groups.get(key).rows.push({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantId: row.participantId, participantName: row.participantName, horseId: row.horseId, horseName: row.horseName, total: row.total, columns: toSheetColumns(row.suertes) });
   }
   return { status: groups.size ? "READY" : "EMPTY", competitions: [...groups.values()].map((entry) => ({ ...entry, rows: entry.rows.sort(compareResultRows) })).sort((a, b) => `${a.competitionId}|${a.phaseId}|${a.charreadaId}`.localeCompare(`${b.competitionId}|${b.phaseId}|${b.charreadaId}`)) };
 }
@@ -348,6 +360,14 @@ function normalizeCharreadas(value, tournamentId) {
 
 function normalizeTeams(value, tournamentId) {
   return collection(value).map((entry) => ({ teamId: id(entry.id || entry.teamId), teamName: text(entry.name || entry.teamName), tournamentId: id(entry.tournamentId || tournamentId) })).filter((entry) => entry.teamId).sort((a, b) => a.teamId.localeCompare(b.teamId));
+}
+
+function normalizeParticipants(value, tournamentId) {
+  return collection(value).map((entry) => ({ participantId: id(entry.id || entry.participantId), participantName: text(entry.participantName || entry.name), horseId: id(entry.horseId), tournamentId: id(entry.tournamentId || tournamentId) })).filter((entry) => entry.participantId).sort((a, b) => a.participantId.localeCompare(b.participantId));
+}
+
+function normalizeHorses(value, tournamentId) {
+  return collection(value).map((entry) => ({ horseId: id(entry.id || entry.horseId), horseName: text(entry.displayName || entry.name), tournamentId: id(entry.tournamentId || tournamentId) })).filter((entry) => entry.horseId).sort((a, b) => a.horseId.localeCompare(b.horseId));
 }
 
 function recordIdentity(item, fallbackTournamentId) {

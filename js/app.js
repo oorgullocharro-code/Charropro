@@ -1,5 +1,5 @@
 import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { COMPETITION_TYPES, getCompetitionType } from "./data/competitionTypes.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
@@ -281,6 +281,7 @@ import {
   getActiveCharreada,
   getActiveTournament,
   getCharreadaCompetitionContext,
+  getCharreadaParticipants,
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getCurrentContext,
@@ -288,7 +289,11 @@ import {
   getOrCreateTernaSession,
   getLatestStatHistorySnapshot,
   getTeam,
+  getParticipant,
+  getHorse,
   getTournamentCharreadas,
+  getTournamentParticipants,
+  getTournamentHorses,
   getTournamentTeams,
   getScopedLocalStorageKey,
   loadState,
@@ -787,23 +792,12 @@ function getScoringEntityLabels(context = {}) {
 }
 
 function getEntryDisplayName(team = {}) {
-  const participantName = String(team.participantName || "").trim();
-  const horseName = String(team.horseName || "").trim();
-  if (participantName || horseName) return [participantName, horseName].filter(Boolean).join(" / ");
   return team?.name || "";
 }
 
-function getParticipantHorseParts(team = {}) {
-  const participantName = String(team.participantName || "").trim();
-  const horseName = String(team.horseName || "").trim();
-  if (participantName || horseName) return { participantName, horseName };
-
-  const [participant = "", horse = ""] = String(team.name || "").split("/").map((part) => part.trim());
-  return { participantName: participant, horseName: horse };
-}
-
-function buildIndividualEntryName(participantName, horseName) {
-  return [participantName, horseName].map((value) => String(value || "").trim()).filter(Boolean).join(" / ");
+function getParticipantDisplayName(participant = {}) {
+  const horse = getHorse(participant.horseId);
+  return [participant.participantName, horse?.displayName].filter(Boolean).join(" / ");
 }
 
 function parseParticipantLine(line) {
@@ -812,21 +806,6 @@ function parseParticipantLine(line) {
     participantName: parts[0] || "",
     horseName: parts.slice(1).join(" ") || ""
   };
-}
-
-function makeIndividualRoster(participantName) {
-  const roster = createBlankRoster();
-  Object.keys(roster).forEach((key) => {
-    if (Array.isArray(roster[key])) return;
-    roster[key] = participantName;
-  });
-  roster.colas = [participantName, "", ""];
-  roster.terna = [participantName, participantName, participantName];
-  return roster;
-}
-
-function getIndividualEntryKey(participantName, horseName) {
-  return `${normalizeNameForCompare(participantName)}__${normalizeNameForCompare(horseName)}`;
 }
 
 let timerRunning = false;
@@ -2849,6 +2828,8 @@ function applyPreparationSnapshot(snapshot = {}) {
       activeCharreadaId: remoteActiveCharreadaId || remoteState.tournament?.activeCharreadaId || ""
     });
     replaceTournamentItems("teams", tournamentId, remoteState.teams || []);
+    replaceTournamentItems("participants", tournamentId, remoteState.participants || []);
+    replaceTournamentItems("horses", tournamentId, remoteState.horses || []);
     replaceTournamentItems("charreadas", tournamentId, remoteState.charreadas || []);
     replaceTournamentScores(tournamentId, remoteState.scores || {});
     replaceTournamentPublishedScores(tournamentId, remoteState.publishedScores || []);
@@ -3499,6 +3480,8 @@ function applyRemoteTournamentState(payload = {}) {
     activeCharreadaId: remoteActiveCharreadaId || remoteState.tournament?.activeCharreadaId || ""
   });
   replaceTournamentItems("teams", tournamentId, remoteState.teams || []);
+  replaceTournamentItems("participants", tournamentId, remoteState.participants || []);
+  replaceTournamentItems("horses", tournamentId, remoteState.horses || []);
   replaceTournamentItems("charreadas", tournamentId, remoteState.charreadas || []);
   replaceTournamentScores(tournamentId, remoteState.scores || {});
   state.pendingScoreReviews = normalizePendingScoreReviewRegistry(remoteState.pendingScoreReviews || state.pendingScoreReviews);
@@ -3650,6 +3633,8 @@ function scoreKeyBelongsToTournament(key, charreadaIds) {
 
 function clearPortalTournamentDetailCache(remoteIds = new Set()) {
   state.teams = (state.teams || []).filter((team) => remoteIds.has(team.tournamentId));
+  state.participants = (state.participants || []).filter((participant) => remoteIds.has(participant.tournamentId));
+  state.horses = (state.horses || []).filter((horse) => remoteIds.has(horse.tournamentId));
   state.charreadas = (state.charreadas || []).filter((charreada) => remoteIds.has(charreada.tournamentId));
   state.publishedScores = (state.publishedScores || []).filter((score) => remoteIds.has(score.tournament?.id || score.tournamentId || ""));
   state.officialScoreLedgers = Object.fromEntries(
@@ -3668,6 +3653,8 @@ function removeLocalTournamentData(tournamentId) {
   const charreadaIds = new Set(state.charreadas.filter((charreada) => charreada.tournamentId === tournamentId).map((charreada) => charreada.id));
   state.tournaments = state.tournaments.filter((tournament) => tournament.id !== tournamentId);
   state.teams = state.teams.filter((team) => team.tournamentId !== tournamentId);
+  state.participants = state.participants.filter((participant) => participant.tournamentId !== tournamentId);
+  state.horses = state.horses.filter((horse) => horse.tournamentId !== tournamentId);
   state.charreadas = state.charreadas.filter((charreada) => charreada.tournamentId !== tournamentId);
   Object.keys(state.scores || {}).forEach((key) => {
     if (scoreKeyBelongsToTournament(key, charreadaIds)) delete state.scores[key];
@@ -4537,7 +4524,7 @@ function renderLeaderboardMini(leaderboard, labels = getEntityLabels()) {
 }
 
 function renderTeams() {
-  const teams = getTournamentTeams();
+  const teams = isIndividualTournament() ? getTournamentParticipants() : getTournamentTeams();
   const labels = getEntityLabels();
   const locked = isActiveTournamentLocked();
 
@@ -4648,22 +4635,22 @@ function renderTeamCard(team) {
   `;
 }
 
-function renderParticipantCard(team) {
-  const { participantName, horseName } = getParticipantHorseParts(team);
+function renderParticipantCard(participant) {
+  const horse = getHorse(participant.horseId);
   const locked = isActiveTournamentLocked();
   return html`
     <article class="card">
       <div class="card-header">
         <div>
-          <h2 class="card-title">${escapeHTML(participantName || team.name || "Participante")}</h2>
-          <p class="card-subtitle">Caballo: ${escapeHTML(horseName || "Sin registrar")}</p>
+          <h2 class="card-title">${escapeHTML(participant.participantName || "Participante")}</h2>
+          <p class="card-subtitle">Caballo: ${escapeHTML(horse?.displayName || "Sin registrar")}</p>
         </div>
-        <button class="button small" data-action="edit-team" data-id="${team.id}" ${locked ? "disabled" : ""}>Editar</button>
+        <button class="button small" data-action="edit-team" data-id="${participant.id}" ${locked ? "disabled" : ""}>Editar</button>
       </div>
       <div class="card-body grid">
-        <span class="pill blue">Categoria: ${escapeHTML(getTeamCategory(team))}</span>
-        <span class="pill green">Participacion: ${escapeHTML(getEntryDisplayName(team))}</span>
-        <span class="pill">Asociacion: ${escapeHTML(team.association || "Sin asociacion")}</span>
+        <span class="pill blue">Categoria: ${escapeHTML(getTeamCategory(participant))}</span>
+        <span class="pill green">Participacion: ${escapeHTML(getParticipantDisplayName(participant))}</span>
+        <span class="pill">Asociacion: ${escapeHTML(participant.association || "Sin asociacion")}</span>
       </div>
     </article>
   `;
@@ -4671,7 +4658,7 @@ function renderParticipantCard(team) {
 
 function renderProgram() {
   const tournament = getActiveTournament();
-  const teams = getTournamentTeams();
+  const teams = isIndividualTournament() ? getTournamentParticipants() : getTournamentTeams();
   const charreadas = getTournamentCharreadas();
   const activeCharreadaResolution = resolveActiveScoringCharreada(charreadas, tournament);
   const activeCharreada = activeCharreadaResolution.charreada || getActiveCharreada();
@@ -5213,31 +5200,12 @@ function isIndividualCompetition(charreadaOrCompetition = {}) {
   return getCharreadaCompetition(charreadaOrCompetition).scope === "individual";
 }
 
-function normalizeIndividualParticipants(participants = []) {
-  const rows = Array.isArray(participants) ? participants : Object.values(participants || {});
-  return rows
-    .map((participant, index) => ({
-      id: String(participant?.id || uid("participante")),
-      name: String(participant?.name || participant?.nombre || "").trim(),
-      association: String(participant?.association || participant?.asociacion || "").trim(),
-      category: String(participant?.category || participant?.categoria || "").trim(),
-      horseName: String(participant?.horseName || participant?.caballo || "").trim(),
-      order: normalizeParticipantOrder(participant?.order, index)
-    }))
-    .sort((a, b) => a.order - b.order);
-}
-
-function normalizeParticipantOrder(value, fallbackIndex = 0) {
-  const order = Number(value);
-  return Number.isFinite(order) && order > 0 ? order : fallbackIndex + 1;
-}
-
 function getCharreadaParticipantEntries(charreada = {}) {
   if (isIndividualCompetition(charreada)) {
-    return normalizeIndividualParticipants(charreada.individualParticipants).map((participant) => ({
+    return getCharreadaParticipants(charreada).map((participant) => ({
       id: participant.id,
-      name: participant.name || "Participante sin nombre",
-      meta: [participant.category, participant.association, participant.horseName ? `Caballo: ${participant.horseName}` : ""].filter(Boolean).join(" / "),
+      name: participant.participantName || "Participante sin nombre",
+      meta: [participant.category, participant.association, getHorse(participant.horseId)?.displayName ? `Caballo: ${getHorse(participant.horseId).displayName}` : ""].filter(Boolean).join(" / "),
       order: participant.order,
       kind: "individual"
     }));
@@ -5275,57 +5243,32 @@ function normalizeCharreadaPhaseInput(value, customValue) {
   return selected;
 }
 
-function renderIndividualParticipantsSection(participants = [], visible = false) {
-  const rows = participants.length ? participants : [];
+function renderIndividualParticipantsSection(candidates = [], selectedParticipantIds = [], visible = false) {
+  const selected = new Set(selectedParticipantIds);
   return html`
     <div class="individual-participants-section" data-competition-section="individual" ${visible ? "" : "hidden"}>
       <div class="individual-participants-head">
         <div>
-          <label>Participantes</label>
-          <p class="card-subtitle">Participantes individuales de esta competencia. Estos datos son temporales y no crean Master Data.</p>
-        </div>
-        <div class="topbar-actions compact-actions">
-          <button class="button small" data-action="add-individual-participant" type="button">Agregar participante</button>
-          <button class="button small" data-action="renumber-individual-participants" type="button">Renumerar orden</button>
+          <label>Participantes registrados</label>
+          <p class="card-subtitle">Selecciona identidades ya registradas en el torneo. El lote guarda solo sus referencias y el orden de participación.</p>
         </div>
       </div>
-      <div class="individual-participants-warning" data-individual-participants-warning ${rows.length ? "hidden" : ""}>
-        Esta competencia requiere participantes individuales antes de poder calificarse.
+      <div class="individual-participants-warning" data-individual-participants-warning ${candidates.length ? "hidden" : ""}>
+        Primero registra participantes en el torneo antes de crear este lote.
       </div>
-      <div class="individual-participants-list">
-        ${rows.map((participant, index) => renderIndividualParticipantRow(participant, index)).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderIndividualParticipantRow(participant = {}, index = 0) {
-  const normalized = normalizeIndividualParticipants([{ ...participant, order: participant.order || index + 1 }])[0];
-  return html`
-    <div class="individual-participant-row">
-      <input type="hidden" name="individualParticipantId" value="${escapeHTML(normalized.id)}">
-      <div>
-        <label>Nombre</label>
-        <input name="individualParticipantName" value="${escapeHTML(normalized.name)}" placeholder="Nombre del participante">
-      </div>
-      <div>
-        <label>Asociacion</label>
-        <input name="individualParticipantAssociation" value="${escapeHTML(normalized.association)}" placeholder="Asociacion o municipio">
-      </div>
-      <div>
-        <label>Categoria</label>
-        <input name="individualParticipantCategory" value="${escapeHTML(normalized.category)}" placeholder="Libre, AA, Juvenil...">
-      </div>
-      <div>
-        <label>Caballo</label>
-        <input name="individualParticipantHorseName" value="${escapeHTML(normalized.horseName)}" placeholder="Nombre del caballo">
-      </div>
-      <div>
-        <label>Orden</label>
-        <input class="individual-participant-order" type="number" name="individualParticipantOrder" min="1" value="${normalized.order}">
-      </div>
-      <div class="individual-participant-actions">
-        <button class="button red small" data-action="remove-individual-participant" type="button">Eliminar</button>
+      <div class="individual-participants-list team-order-list">
+        ${candidates.map((participant, index) => {
+          const isSelected = selected.has(participant.id);
+          const displayName = getParticipantDisplayName(participant) || "Participante sin nombre";
+          const meta = [participant.category, participant.association].filter(Boolean).join(" / ");
+          return html`
+            <label class="team-order-row individual-participant-candidate ${isSelected ? "selected" : ""}" data-participant-id="${escapeHTML(participant.id)}">
+              <input type="checkbox" name="participantIds" value="${escapeHTML(participant.id)}" ${isSelected ? "checked" : ""}>
+              <span>${escapeHTML(displayName)}${meta ? html`<small>${escapeHTML(meta)}</small>` : ""}</span>
+              <input class="team-order-input" data-participant-order type="number" min="1" value="${isSelected ? selectedParticipantIds.indexOf(participant.id) + 1 : ""}" ${isSelected ? "" : "disabled"} aria-label="Orden de ${escapeHTML(displayName)}" placeholder="${index + 1}">
+            </label>
+          `;
+        }).join("")}
       </div>
     </div>
   `;
@@ -10351,7 +10294,7 @@ function getScoringButtonLayoutForSuerte(suerteId) {
 }
 
 function renderScoringContextBar(charreada, context, charroName, attemptView) {
-  const horseName = context.team?.horseName || getParticipantHorseParts(context.team).horseName || "";
+  const horseName = context.participant ? getHorse(context.participant.horseId)?.displayName || "" : "";
   const labels = getScoringEntityLabels(context);
 
   return html`
@@ -11026,7 +10969,7 @@ function renderCpIcon(name) {
 function renderScoringHeader(charreada, context, charroName, attemptView) {
   const labels = getScoringEntityLabels(context);
   const scoringEntries = getCharreadaScoringEntries(charreada);
-  const horseName = context.team?.horseName || getParticipantHorseParts(context.team).horseName || "";
+  const horseName = context.participant ? getHorse(context.participant.horseId)?.displayName || "" : "";
   const opportunity = attemptView.opportunity;
 
   return html`
@@ -11728,29 +11671,50 @@ function renderRosterFields(team = { roster: createRoster("") }) {
   `;
 }
 
-function renderParticipantFields(team = {}) {
+function renderParticipantFields(participant = {}) {
   const labels = getEntityLabels();
-  const { participantName, horseName } = getParticipantHorseParts(team);
+  const selectedHorseId = String(participant.horseId || "");
+  const selectedHorse = getHorse(selectedHorseId);
+  const horses = getTournamentHorses();
   return html`
     <div class="form-grid">
       <div class="wide">
         <label>${escapeHTML(labels.nameLabel)}</label>
-        <input name="participantName" value="${escapeHTML(participantName)}" required placeholder="${escapeHTML(labels.namePlaceholder)}">
+        <input name="participantName" value="${escapeHTML(participant.participantName || "")}" required placeholder="${escapeHTML(labels.namePlaceholder)}">
       </div>
       <div class="wide">
-        <label>${escapeHTML(labels.horseLabel)}</label>
-        <input name="horseName" value="${escapeHTML(horseName)}" required placeholder="${escapeHTML(labels.horsePlaceholder)}">
+        <label>Caballo existente</label>
+        <select name="horseId">
+          <option value="">Crear caballo nuevo</option>
+          ${horses.map((horse) => html`<option value="${escapeHTML(horse.id)}" ${horse.id === selectedHorseId ? "selected" : ""}>${escapeHTML(horse.displayName)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="wide">
+        <label>${escapeHTML(labels.horseLabel)} nuevo</label>
+        <input name="horseDisplayName" value="${escapeHTML(selectedHorse ? "" : "")}" placeholder="${escapeHTML(labels.horsePlaceholder)}">
+      </div>
+      <div>
+        <label>Registro del caballo</label>
+        <select name="horseRegistryType">
+          <option value="">Sin registro formal</option>
+          <option value="AQHA">AQHA</option>
+          <option value="OTHER">Otro</option>
+        </select>
+      </div>
+      <div>
+        <label>Número de registro</label>
+        <input name="horseRegistryNumber" placeholder="Opcional">
       </div>
       <div class="wide">
         <label>Categoria</label>
-        <input name="category" list="team-category-options" value="${escapeHTML(getTeamCategory(team))}" placeholder="Libre">
+        <input name="category" list="team-category-options" value="${escapeHTML(getTeamCategory(participant))}" placeholder="Libre">
         <datalist id="team-category-options">
           ${TEAM_CATEGORIES.map((category) => html`<option value="${escapeHTML(category)}"></option>`).join("")}
         </datalist>
       </div>
       <div class="wide">
         <label>Asociacion</label>
-        <input name="association" value="${escapeHTML(team.association || "")}" placeholder="Asociacion o municipio">
+        <input name="association" value="${escapeHTML(participant.association || "")}" placeholder="Asociacion o municipio">
       </div>
     </div>
   `;
@@ -11815,7 +11779,7 @@ function showTournamentModal() {
 
 function showTeamModal(teamId = null) {
   if (!guardUnlockedTournament()) return;
-  const team = teamId ? getTeam(teamId) : null;
+  const team = teamId ? (isIndividualTournament() ? getParticipant(teamId) : getTeam(teamId)) : null;
   const labels = getEntityLabels();
   showModal({
     title: team ? labels.formTitleEdit : labels.formTitleNew,
@@ -11829,6 +11793,7 @@ function showTeamModal(teamId = null) {
 
 function showCharreadaModal(charreadaId = null) {
   if (!guardUnlockedTournament()) return;
+  const tournament = getActiveTournament();
   const teams = getTournamentTeams();
   const charreada = charreadaId ? state.charreadas.find((item) => item.id === charreadaId) : null;
   if (charreada && !guardUnlockedCharreada(charreada)) return;
@@ -11836,8 +11801,13 @@ function showCharreadaModal(charreadaId = null) {
   const labels = getEntityLabels();
   const phaseState = getCharreadaPhaseFormState(charreada);
   const operationalStatus = getCharreadaOperationalStatus(charreada || {});
-  const selectedCompetition = getCharreadaCompetition(charreada || {});
-  const individualParticipants = normalizeIndividualParticipants(charreada?.individualParticipants || []);
+  const selectedCompetition = getCharreadaCompetition(charreada || {
+    competitionType: getCompetitionTypeFromTournamentType(tournament?.type)
+  });
+  const individualCandidates = getTournamentParticipants(tournament?.id);
+  const selectedParticipantIds = Array.isArray(charreada?.participantIds)
+    ? charreada.participantIds
+    : (!charreada && selectedCompetition.scope === "individual" ? individualCandidates.map((participant) => participant.id) : []);
   const individualMode = selectedCompetition.scope === "individual";
   const orderedTeams = teams
     .map((team, index) => ({
@@ -11966,7 +11936,7 @@ function showCharreadaModal(charreadaId = null) {
           <div class="team-order-empty" id="charreada-filter-empty" hidden>Sin coincidencias.</div>
 	          <p class="card-subtitle">${escapeHTML(labels.orderHelp)}</p>
         </div>
-        ${renderIndividualParticipantsSection(individualParticipants, individualMode)}
+        ${renderIndividualParticipantsSection(individualCandidates, selectedParticipantIds, individualMode)}
       </form>
     `,
     actions: html`
@@ -12119,6 +12089,10 @@ function wireGlobalEvents() {
       refreshCharreadaTeamOrderRows();
     }
 
+    if (target.closest("#charreada-form") && target.getAttribute("name") === "participantIds") {
+      refreshCharreadaParticipantOrderRows();
+    }
+
     if (target.closest("#charreada-form") && target.getAttribute("name") === "competitionType") {
       refreshCharreadaCompetitionSections();
     }
@@ -12192,9 +12166,6 @@ function handleAction(action, target) {
     "charreada-select-all": selectAllCharreadaTeams,
     "charreada-clear-teams": clearCharreadaTeams,
     "charreada-compact-order": compactCharreadaTeamOrder,
-    "add-individual-participant": addIndividualParticipantRow,
-    "remove-individual-participant": () => removeIndividualParticipantRow(target),
-    "renumber-individual-participants": renumberIndividualParticipants,
     "delete-charreada": () => confirmDeleteCharreada(target.dataset.id),
     "set-active-charreada": () => activateCharreada(target.dataset.id),
     "start-scoring": () => startScoring(target.dataset.id),
@@ -13109,21 +13080,41 @@ function saveTeam() {
 
   if (isIndividualTournament()) {
     const participantName = String(data.get("participantName") || "").trim();
-    const horseName = String(data.get("horseName") || "").trim();
+    const existingParticipant = form.dataset.id ? getParticipant(form.dataset.id) : null;
+    const selectedHorseId = String(data.get("horseId") || "").trim();
+    const existingHorse = selectedHorseId ? getHorse(selectedHorseId) : null;
+    const horseDisplayName = String(data.get("horseDisplayName") || "").trim();
+    if (selectedHorseId && (!existingHorse || existingHorse.tournamentId !== state.activeTournamentId)) {
+      showToast("Selecciona un caballo válido del torneo.");
+      return;
+    }
+    if (!selectedHorseId && !horseDisplayName) {
+      showToast("Indica un caballo nuevo o selecciona uno existente.");
+      return;
+    }
+    const horseId = existingHorse?.id || uid("caballo");
+    if (!existingHorse) {
+      state.horses.push({
+        id: horseId,
+        tournamentId: state.activeTournamentId,
+        displayName: horseDisplayName,
+        registryType: String(data.get("horseRegistryType") || "").trim() || null,
+        registryNumber: String(data.get("horseRegistryNumber") || "").trim() || null,
+        registryVerified: false
+      });
+    }
     const payload = {
-      id,
+      id: existingParticipant?.id || uid("participante"),
       tournamentId: state.activeTournamentId,
-      name: buildIndividualEntryName(participantName, horseName),
       participantName,
-      horseName,
+      horseId,
       category: normalizeTeamCategory(data.get("category")),
       association: String(data.get("association") || "").trim(),
-      captain: "",
-      roster: makeIndividualRoster(participantName)
+      active: true
     };
 
-    if (existing) Object.assign(existing, payload);
-    else state.teams.push(payload);
+    if (existingParticipant) Object.assign(existingParticipant, payload);
+    else state.participants.push(payload);
 
     closeModal();
     saveState();
@@ -13148,8 +13139,6 @@ function saveTeam() {
 	    id,
 	    tournamentId: state.activeTournamentId,
 	    name: data.get("name").trim(),
-	    participantName: "",
-	    horseName: "",
 	    category: normalizeTeamCategory(data.get("category")),
     association: data.get("association").trim(),
     captain: data.get("captain").trim(),
@@ -13231,43 +13220,34 @@ function saveQuickTeams() {
 }
 
 function saveQuickParticipants(form, data, lines) {
-  const existingKeys = new Set(
-    getTournamentTeams()
-      .map((team) => {
-        const { participantName, horseName } = getParticipantHorseParts(team);
-        return getIndividualEntryKey(participantName, horseName);
-      })
-      .filter((key) => key !== "__")
-  );
   const category = normalizeTeamCategory(data.get("category"));
   const association = String(data.get("association") || "").trim();
   let added = 0;
-  let skipped = 0;
   let incomplete = 0;
 
   lines.forEach((line) => {
     const { participantName, horseName } = parseParticipantLine(line);
-    const key = getIndividualEntryKey(participantName, horseName);
     if (!participantName || !horseName) {
       incomplete += 1;
       return;
     }
-    if (existingKeys.has(key)) {
-      skipped += 1;
-      return;
-    }
-
-    existingKeys.add(key);
-    state.teams.push({
-      id: uid("equipo"),
+    const horseId = uid("caballo");
+    state.horses.push({
+      id: horseId,
       tournamentId: state.activeTournamentId,
-      name: buildIndividualEntryName(participantName, horseName),
+      displayName: horseName,
+      registryType: null,
+      registryNumber: null,
+      registryVerified: false
+    });
+    state.participants.push({
+      id: uid("participante"),
+      tournamentId: state.activeTournamentId,
       participantName,
-      horseName,
+      horseId,
       category,
       association,
-      captain: "",
-      roster: makeIndividualRoster(participantName)
+      active: true
     });
     added += 1;
   });
@@ -13283,7 +13263,7 @@ function saveQuickParticipants(form, data, lines) {
   saveState();
   scheduleFirebaseSync(100);
   render();
-  showToast(`${added} participante${added === 1 ? "" : "s"} agregado${added === 1 ? "" : "s"}${skipped ? `, ${skipped} repetido${skipped === 1 ? "" : "s"}` : ""}${incomplete ? `, ${incomplete} incompleto${incomplete === 1 ? "" : "s"}` : ""}.`);
+  showToast(`${added} participante${added === 1 ? "" : "s"} agregado${added === 1 ? "" : "s"}${incomplete ? `, ${incomplete} incompleto${incomplete === 1 ? "" : "s"}` : ""}.`);
 }
 
 function normalizeNameForCompare(value) {
@@ -13326,6 +13306,20 @@ function normalizeTeamCategory(category) {
 
 function deleteTeam(teamId) {
   if (!guardUnlockedTournament("El torneo esta congelado; no se pueden eliminar equipos.")) return;
+  if (isIndividualTournament()) {
+    state.participants = state.participants.filter((participant) => participant.id !== teamId);
+    state.charreadas.forEach((charreada) => {
+      charreada.participantIds = (charreada.participantIds || []).filter((id) => id !== teamId);
+    });
+    Object.keys(state.scores).forEach((key) => {
+      if (key.includes(`__${teamId}__`)) delete state.scores[key];
+    });
+    removePublishedScoresFor({ participantId: teamId });
+    closeModal();
+    saveState();
+    render();
+    return;
+  }
   state.teams = state.teams.filter((team) => team.id !== teamId);
   state.charreadas.forEach((charreada) => {
     charreada.teamIds = charreada.teamIds.filter((id) => id !== teamId);
@@ -13457,29 +13451,17 @@ function refreshCharreadaCompetitionSections() {
   updateIndividualParticipantsWarning();
 }
 
-function addIndividualParticipantRow() {
-  const form = document.getElementById("charreada-form");
-  const list = form?.querySelector(".individual-participants-list");
-  if (!form || !list) return;
-  const nextOrder = list.querySelectorAll(".individual-participant-row").length + 1;
-  list.insertAdjacentHTML("beforeend", renderIndividualParticipantRow({ id: uid("participante"), order: nextOrder }, nextOrder - 1));
-  updateIndividualParticipantsWarning();
-}
-
-function removeIndividualParticipantRow(target) {
-  const row = target.closest(".individual-participant-row");
-  if (!row) return;
-  row.remove();
-  renumberIndividualParticipants();
-  updateIndividualParticipantsWarning();
-}
-
-function renumberIndividualParticipants() {
+function refreshCharreadaParticipantOrderRows() {
   const form = document.getElementById("charreada-form");
   if (!form) return;
-  [...form.querySelectorAll(".individual-participant-row")].forEach((row, index) => {
-    const order = row.querySelector('[name="individualParticipantOrder"]');
-    if (order) order.value = index + 1;
+  let order = 1;
+  [...form.querySelectorAll(".individual-participant-candidate")].forEach((row) => {
+    const selected = row.querySelector('[name="participantIds"]')?.checked === true;
+    const input = row.querySelector("[data-participant-order]");
+    row.classList.toggle("selected", selected);
+    if (!input) return;
+    input.disabled = !selected;
+    input.value = selected ? order++ : "";
   });
   updateIndividualParticipantsWarning();
 }
@@ -13488,7 +13470,7 @@ function updateIndividualParticipantsWarning() {
   const form = document.getElementById("charreada-form");
   if (!form) return;
   const warning = form.querySelector("[data-individual-participants-warning]");
-  const rows = form.querySelectorAll(".individual-participant-row");
+  const rows = form.querySelectorAll(".individual-participant-candidate");
   if (warning) warning.hidden = rows.length > 0;
 }
 
@@ -13500,19 +13482,20 @@ function saveCharreada() {
   const teamIds = getOrderedCharreadaTeamIds(data);
   const competitionFields = buildCharreadaCompetitionFields(data.get("competitionType"));
   const individualMode = competitionFields.competitionScope === "individual";
-  const individualParticipants = getIndividualParticipantsFromCharreadaForm(form);
+  const participantIds = getOrderedCharreadaParticipantIds(form);
+  const existingId = form.dataset.id || "";
+  const existing = existingId ? state.charreadas.find((item) => item.id === existingId) : null;
 
   if (!individualMode && !teamIds.length) {
     showToast(`Selecciona al menos un ${getEntityLabels().singular}.`);
     return;
   }
 
-  if (individualMode && !individualParticipants.length) {
+  if (individualMode && !participantIds.length) {
     showToast("Esta competencia requiere participantes individuales antes de poder calificarse.");
+    return;
   }
 
-  const existingId = form.dataset.id || "";
-  const existing = existingId ? state.charreadas.find((item) => item.id === existingId) : null;
   if (existing && !guardUnlockedCharreada(existing, "Esta charreada esta congelada; no se puede modificar.")) return;
   if (!existing) ensureLocalRuleProfileForNewCharreada();
   const id = existing?.id || uid("charreada");
@@ -13536,7 +13519,7 @@ function saveCharreada() {
     operationalStatus: String(data.get("operationalStatus") || "").trim(),
     internalNotes: String(data.get("internalNotes") || "").trim(),
     teamIds: individualMode ? [] : teamIds,
-    individualParticipants: individualMode ? individualParticipants : []
+    participantIds: individualMode ? participantIds : []
   };
   console.info("[program-fase-001] phase saved", { charreadaId: id, phase: phase || "Sin fase" });
   console.info("[program-003] competition saved", {
@@ -13544,13 +13527,19 @@ function saveCharreada() {
     competitionType: payload.competitionType,
     competitionScope: payload.competitionScope,
     suerteIds: payload.suerteIds,
-    individualParticipants: payload.individualParticipants.length
+    participantIds: payload.participantIds.length,
+    participantIds: payload.participantIds.length
   });
 
   if (existing) {
-    const existingTeamIds = Array.isArray(existing.teamIds) ? existing.teamIds : [];
-    const removedTeamIds = existingTeamIds.filter((teamId) => !payload.teamIds.includes(teamId));
-    removedTeamIds.forEach((teamId) => deleteScoresForCharreadaTeam(existing.id, teamId));
+    if (!individualMode) {
+      const existingTeamIds = Array.isArray(existing.teamIds) ? existing.teamIds : [];
+      const removedTeamIds = existingTeamIds.filter((teamId) => !payload.teamIds.includes(teamId));
+      removedTeamIds.forEach((teamId) => deleteScoresForCharreadaTeam(existing.id, teamId));
+    }
+    const existingParticipantIds = Array.isArray(existing.participantIds) ? existing.participantIds : [];
+    const removedParticipantIds = existingParticipantIds.filter((participantId) => !payload.participantIds.includes(participantId));
+    removedParticipantIds.forEach((participantId) => deleteScoresForCharreadaTeam(existing.id, participantId));
     Object.assign(existing, payload);
   } else {
     state.charreadas.push(payload);
@@ -13594,34 +13583,19 @@ function getOrderedCharreadaTeamIds(data) {
     .map((item) => item.teamId);
 }
 
-function getIndividualParticipantsFromCharreadaForm(form) {
+function getOrderedCharreadaParticipantIds(form) {
   if (!form) return [];
-  const rows = [...form.querySelectorAll(".individual-participant-row")];
-  const participants = rows
-    .map((row, index) => {
-      const id = row.querySelector('[name="individualParticipantId"]')?.value || uid("participante");
-      const name = row.querySelector('[name="individualParticipantName"]')?.value || "";
-      const association = row.querySelector('[name="individualParticipantAssociation"]')?.value || "";
-      const category = row.querySelector('[name="individualParticipantCategory"]')?.value || "";
-      const horseName = row.querySelector('[name="individualParticipantHorseName"]')?.value || "";
-      const order = row.querySelector('[name="individualParticipantOrder"]')?.value || index + 1;
-      return {
-        id: String(id).trim() || uid("participante"),
-        name: String(name).trim(),
-        association: String(association).trim(),
-        category: String(category).trim(),
-        horseName: String(horseName).trim(),
-        order: normalizeParticipantOrder(order, index)
-      };
+  const seen = new Set();
+  return [...form.querySelectorAll('[name="participantIds"]:checked')]
+    .map((input, index) => {
+      const row = input.closest(".individual-participant-candidate");
+      const participantId = String(input.value || "").trim();
+      const order = Number(row?.querySelector("[data-participant-order]")?.value || index + 1);
+      return { participantId, order: Number.isFinite(order) && order > 0 ? order : index + 1, index };
     })
-    .filter((participant) => (
-      participant.name ||
-      participant.association ||
-      participant.category ||
-      participant.horseName
-    ));
-
-  return normalizeIndividualParticipants(participants);
+    .filter(({ participantId }) => participantId && !seen.has(participantId) && seen.add(participantId))
+    .sort((left, right) => left.order - right.order || left.index - right.index)
+    .map(({ participantId }) => participantId);
 }
 
 function confirmDeleteCharreada(charreadaId) {
