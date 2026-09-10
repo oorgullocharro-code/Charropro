@@ -134,13 +134,23 @@ assert.match(projectionJobRules.state[".validate"], /targetFingerprint/);
 assert.match(projectionJobRules.state[".validate"], /lastErrorMessage/);
 assert.match(
   projectionJobRules.state[".validate"],
-  /data\.child\('retriedBy'\)\.child\('uid'\)\.val\(\) === null.*data\.child\('retriedBy'\)\.child\('uid'\)\.val\(\) === ''.*newData\.child\('retriedBy'\)\.val\(\) === data\.child\('retriedBy'\)\.val\(\)/,
-  "a persisted retry actor is immutable"
+  /newData\.child\('retriedBy'\)\.hasChildren\(\['uid', 'name', 'role', 'clientId'\]\).*newData\.child\('retriedBy\/uid'\)\.val\(\) === data\.child\('retriedBy\/uid'\)\.val\(\).*newData\.child\('retriedBy\/name'\)\.val\(\) === data\.child\('retriedBy\/name'\)\.val\(\).*newData\.child\('retriedBy\/role'\)\.val\(\) === data\.child\('retriedBy\/role'\)\.val\(\).*newData\.child\('retriedBy\/clientId'\)\.val\(\) === data\.child\('retriedBy\/clientId'\)\.val\(\)/,
+  "a persisted retry actor is immutable by its four canonical leaves"
 );
 assert.match(
   projectionJobRules.state[".validate"],
-  /data\.child\('cancelledBy'\)\.child\('uid'\)\.val\(\) === null.*data\.child\('cancelledBy'\)\.child\('uid'\)\.val\(\) === ''.*newData\.child\('cancelledBy'\)\.val\(\) === data\.child\('cancelledBy'\)\.val\(\)/,
-  "a persisted cancellation actor is immutable"
+  /newData\.child\('cancelledBy'\)\.hasChildren\(\['uid', 'name', 'role', 'clientId'\]\).*newData\.child\('cancelledBy\/uid'\)\.val\(\) === data\.child\('cancelledBy\/uid'\)\.val\(\).*newData\.child\('cancelledBy\/name'\)\.val\(\) === data\.child\('cancelledBy\/name'\)\.val\(\).*newData\.child\('cancelledBy\/role'\)\.val\(\) === data\.child\('cancelledBy\/role'\)\.val\(\).*newData\.child\('cancelledBy\/clientId'\)\.val\(\) === data\.child\('cancelledBy\/clientId'\)\.val\(\)/,
+  "a persisted cancellation actor is immutable by its four canonical leaves"
+);
+assert.doesNotMatch(
+  projectionJobRules.state[".validate"],
+  /newData\.child\('retriedBy'\)\.val\(\) === data\.child\('retriedBy'\)\.val\(\)/,
+  "retry actor immutability does not compare a rematerialized map"
+);
+assert.doesNotMatch(
+  projectionJobRules.state[".validate"],
+  /newData\.child\('cancelledBy'\)\.val\(\) === data\.child\('cancelledBy'\)\.val\(\)/,
+  "cancellation actor immutability does not compare a rematerialized map"
 );
 assert.equal(projectionJobRules.$other[".validate"], false);
 
@@ -669,6 +679,125 @@ async function runProjectionActorRulesAgainstEmulator() {
         retriedByUid: supervisor.uid
       }));
 
+    const persistedRetryActor = {
+      uid: supervisor.uid,
+      name: "Recovery Supervisor",
+      role: "supervisor",
+      clientId: "recovery-client"
+    };
+    const rematerializedRetryActor = {
+      clientId: "recovery-client",
+      role: "supervisor",
+      name: "Recovery Supervisor",
+      uid: supervisor.uid
+    };
+    const exactRecoveryProjectionId = "projection-f873b7ce55c9f798-1";
+    await seedProjectionJob(database, tournamentId, exactRecoveryProjectionId,
+      buildEmulatorProjectionState("DEAD_LETTER", judge.uid, {
+        attempts: 5,
+        claimedByUid: judge.uid,
+        lastAttemptByUid: judge.uid,
+        retriedBy: persistedRetryActor
+      }));
+    await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, exactRecoveryProjectionId, supervisor.token,
+      buildEmulatorProjectionState("PENDING", supervisor.uid, {
+        attempts: 5,
+        claimedByUid: judge.uid,
+        lastAttemptByUid: judge.uid,
+        retriedBy: rematerializedRetryActor
+      }));
+    await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, exactRecoveryProjectionId, supervisor.token,
+      buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+        attempts: 6,
+        claimedByUid: supervisor.uid,
+        lastAttemptByUid: supervisor.uid,
+        retriedBy: persistedRetryActor
+      }));
+    const exactRecoveryState = await readProjectionState(
+      databaseHost,
+      namespace,
+      tournamentId,
+      exactRecoveryProjectionId,
+      supervisor.token
+    );
+    assert.equal(exactRecoveryState.status, "PROCESSING");
+    assert.equal(exactRecoveryState.attempts, 6);
+    assert.ok(exactRecoveryState.leaseOwner);
+    assert.ok(exactRecoveryState.leaseExpiresAtMs > exactRecoveryState.updatedAtMs);
+    assert.deepEqual(exactRecoveryState.retriedBy, persistedRetryActor);
+
+    for (const [field, value] of [
+      ["uid", judge.uid],
+      ["name", "Different Supervisor"],
+      ["role", "juez"],
+      ["clientId", "different-client"]
+    ]) {
+      const projectionId = `retry-actor-${field}-immutable`;
+      await seedProjectionJob(database, tournamentId, projectionId,
+        buildEmulatorProjectionState("RETRY_WAIT", supervisor.uid, {
+          attempts: 1,
+          claimedByUid: supervisor.uid,
+          lastAttemptByUid: supervisor.uid,
+          retriedBy: persistedRetryActor
+        }));
+      await expectRulesWriteDenied(databaseHost, namespace, tournamentId, projectionId, supervisor.token,
+        buildEmulatorProjectionState("PROCESSING", supervisor.uid, {
+          attempts: 2,
+          claimedByUid: supervisor.uid,
+          lastAttemptByUid: supervisor.uid,
+          retriedBy: { ...persistedRetryActor, [field]: value }
+        }));
+    }
+
+    const persistedCancelledActor = {
+      uid: supervisor.uid,
+      name: "Cancellation Supervisor",
+      role: "supervisor",
+      clientId: "cancellation-client"
+    };
+    const rematerializedCancelledActor = {
+      clientId: "cancellation-client",
+      role: "supervisor",
+      name: "Cancellation Supervisor",
+      uid: supervisor.uid
+    };
+    await seedProjectionJob(database, tournamentId, "cancel-actor-rematerialized",
+      buildEmulatorProjectionState("CANCELLED", supervisor.uid, {
+        attempts: 1,
+        cancelledBy: persistedCancelledActor,
+        cancelledReason: "operator-request",
+        cancelledAt: "2026-08-20T12:00:01.000Z"
+      }));
+    await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, "cancel-actor-rematerialized", supervisor.token,
+      buildEmulatorProjectionState("CANCELLED", supervisor.uid, {
+        attempts: 1,
+        cancelledBy: rematerializedCancelledActor,
+        cancelledReason: "operator-request",
+        cancelledAt: "2026-08-20T12:00:01.000Z"
+      }));
+    for (const [field, value] of [
+      ["uid", judge.uid],
+      ["name", "Different Supervisor"],
+      ["role", "juez"],
+      ["clientId", "different-client"]
+    ]) {
+      const projectionId = `cancel-actor-${field}-immutable`;
+      await seedProjectionJob(database, tournamentId, projectionId,
+        buildEmulatorProjectionState("CANCELLED", supervisor.uid, {
+          attempts: 1,
+          cancelledBy: persistedCancelledActor,
+          cancelledReason: "operator-request",
+          cancelledAt: "2026-08-20T12:00:01.000Z"
+        }));
+      await expectRulesWriteDenied(databaseHost, namespace, tournamentId, projectionId, supervisor.token,
+        buildEmulatorProjectionState("CANCELLED", supervisor.uid, {
+          attempts: 1,
+          cancelledBy: { ...persistedCancelledActor, [field]: value },
+          cancelledReason: "operator-request",
+          cancelledAt: "2026-08-20T12:00:01.000Z"
+        }));
+    }
+
     await seedProjectionJob(database, tournamentId, "supervisor-cancel", buildEmulatorProjectionState("PENDING", supervisor.uid));
     await expectRulesWriteAllowed(databaseHost, namespace, tournamentId, "supervisor-cancel", supervisor.token,
       buildEmulatorProjectionState("CANCELLED", supervisor.uid, {
@@ -730,7 +859,15 @@ async function seedProjectionJob(database, tournamentId, projectionId, state = n
 
 function buildEmulatorProjectionState(status, actorUid, options = {}) {
   const updatedAtMs = Number(options.updatedAtMs || Date.parse("2026-08-20T12:00:00.000Z"));
-  const actor = (uid) => ({ uid: String(uid ?? "") });
+  const actor = (uid, override = {}) => {
+    const cleanUid = String(override.uid ?? uid ?? "");
+    return {
+      uid: cleanUid,
+      name: String(override.name ?? (cleanUid ? `Actor ${cleanUid}` : "")),
+      role: String(override.role ?? (cleanUid ? "supervisor" : "")),
+      clientId: String(override.clientId ?? (cleanUid ? `client-${cleanUid}` : ""))
+    };
+  };
   return {
     status,
     attempts: Number(options.attempts || 0),
@@ -756,8 +893,8 @@ function buildEmulatorProjectionState(status, actorUid, options = {}) {
     updatedBy: actor(actorUid),
     lastAttemptBy: actor(options.lastAttemptByUid ?? ""),
     claimedBy: actor(options.claimedByUid ?? ""),
-    retriedBy: actor(options.retriedByUid ?? ""),
-    cancelledBy: actor(options.cancelledByUid ?? ""),
+    retriedBy: actor(options.retriedByUid ?? "", options.retriedBy || {}),
+    cancelledBy: actor(options.cancelledByUid ?? "", options.cancelledBy || {}),
     sourceRevision: 1
   };
 }
