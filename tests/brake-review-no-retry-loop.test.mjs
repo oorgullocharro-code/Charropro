@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const guard = createBrakeReviewAutomaticCommandGuard();
 const key = "timer-a:review-0:minute-1";

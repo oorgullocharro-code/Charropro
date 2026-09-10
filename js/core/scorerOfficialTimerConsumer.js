@@ -1,4 +1,4 @@
-import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { reconcileOfficialTimerConsumerState } from "./officialTimerOrchestration.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 export function createScorerOfficialTimerConsumer(options = {}) {
   const readState = typeof options.readState === "function" ? options.readState : () => ({});

@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/data/suertes.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

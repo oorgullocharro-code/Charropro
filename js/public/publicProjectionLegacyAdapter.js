@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

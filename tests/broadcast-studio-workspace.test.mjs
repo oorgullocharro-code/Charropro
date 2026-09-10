@@ -8,10 +8,10 @@ import {
   createBroadcastStudioContextBridge,
   createBroadcastStudioController,
   filterBroadcastStudioGraphics
-} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 assert.equal(BROADCAST_STUDIO_WORKSPACE_VERSION, "1.0.0");
-assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260909-public-timeline-canonical-event-producer-001-v1");
+assert.equal(BROADCAST_STUDIO_APP_VERSION, "20260910-recovery-skip-redundant-pending-reset-001-v1");
 assert.equal(BROADCAST_STUDIO_GRAPHICS.length, 15);
 assert.equal(new Set(BROADCAST_STUDIO_GRAPHICS.map((entry) => entry.id)).size, 15);
 assert.deepEqual(BROADCAST_STUDIO_FILTERS.map((entry) => entry.label), [

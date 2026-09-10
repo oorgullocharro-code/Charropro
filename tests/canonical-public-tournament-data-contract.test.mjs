@@ -7,7 +7,7 @@ import {
   createCanonicalPublicTournamentData,
   normalizeCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "../js/public/canonicalPublicTournamentData.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/public/canonicalPublicTournamentData.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const tournamentId = "test-reconciliation-fixture";
 const resultId = "result-casa-1";

@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

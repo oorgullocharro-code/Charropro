@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

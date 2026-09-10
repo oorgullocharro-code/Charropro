@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./broadcastState.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./dataContract.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

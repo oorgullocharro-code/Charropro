@@ -6,22 +6,22 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./firebaseRuntime.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../data/competitionTypes.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./userAccessBootstrap.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -29,20 +29,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../public/publicProjection.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../public/publicProjectionSchema.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -58,11 +58,11 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./publicProjectionOutbox.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./pendingScoreReview.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
@@ -70,14 +70,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./timerRules.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer,
   isBrakeReviewProfile
-} from "./brakeReviewPhase.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./brakeReviewPhase.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -1410,15 +1410,19 @@ export async function retryFirebasePublicProjectionJob(tournamentId = "", projec
   if (!path) return { ok: false, reason: "invalid-projection-job" };
   const statePath = `${path}/state`;
   let resetState = null;
+  let resetSkippedForPending = false;
   try {
     const transaction = await runTransaction(ref(getFirebaseDatabase(), statePath), (current) => {
       const state = normalizePublicProjectionState(current || {});
+      if (state.status === PUBLIC_PROJECTION_STATUSES.PENDING) {
+        resetSkippedForPending = true;
+        return undefined;
+      }
       if ([
-        PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
-        PUBLIC_PROJECTION_STATUSES.VERIFIED,
-        PUBLIC_PROJECTION_STATUSES.SUPERSEDED,
-        PUBLIC_PROJECTION_STATUSES.CANCELLED
-      ].includes(state.status)) {
+        PUBLIC_PROJECTION_STATUSES.DEAD_LETTER,
+        PUBLIC_PROJECTION_STATUSES.FAILED,
+        PUBLIC_PROJECTION_STATUSES.RETRY_WAIT
+      ].includes(state.status) === false) {
         return undefined;
       }
       resetState = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PENDING, state, {
@@ -1432,7 +1436,7 @@ export async function retryFirebasePublicProjectionJob(tournamentId = "", projec
       }, { nowMs: options.nowMs, force: true });
       return resetState || undefined;
     }, { applyLocally: false });
-    if (!transaction.committed || !resetState) {
+    if (!resetSkippedForPending && (!transaction.committed || !resetState)) {
       return { ok: false, reason: "projection-retry-not-allowed", projectionId };
     }
     return reconcileFirebasePublicProjectionOutbox(tournamentId, actorRecord, {
@@ -1469,8 +1473,20 @@ export async function retryAllFirebasePublicProjectionJobs(tournamentId = "", ac
   for (const job of retryable) {
     const path = `${getFirebasePublicProjectionOutboxJobPath(tournamentId, job.projectionId)}/state`;
     let nextState = null;
+    let resetSkippedForPending = false;
     const transaction = await runTransaction(ref(getFirebaseDatabase(), path), (current) => {
       const state = normalizePublicProjectionState(current || {}, job.intent);
+      if (state.status === PUBLIC_PROJECTION_STATUSES.PENDING) {
+        resetSkippedForPending = true;
+        return undefined;
+      }
+      if ([
+        PUBLIC_PROJECTION_STATUSES.DEAD_LETTER,
+        PUBLIC_PROJECTION_STATUSES.FAILED,
+        PUBLIC_PROJECTION_STATUSES.RETRY_WAIT
+      ].includes(state.status) === false) {
+        return undefined;
+      }
       nextState = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PENDING, state, {
         nextRetryAt: "",
         nextRetryAtMs: 0,
@@ -1482,7 +1498,11 @@ export async function retryAllFirebasePublicProjectionJobs(tournamentId = "", ac
       }, { nowMs: options.nowMs, force: true });
       return nextState || undefined;
     }, { applyLocally: false });
-    resetResults.push({ projectionId: job.projectionId, reset: transaction.committed });
+    resetResults.push({
+      projectionId: job.projectionId,
+      reset: transaction.committed,
+      skipped: resetSkippedForPending ? "already-pending" : ""
+    });
   }
   const reconciliation = await reconcileFirebasePublicProjectionOutbox(tournamentId, actorRecord, {
     ...options,

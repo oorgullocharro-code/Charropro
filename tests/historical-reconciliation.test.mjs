@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fixture, withLegacyStateAsymmetry, legacyRecordId, input, tid, cid, teamId, uid } from './fixtures/historicalReconciliationFixture.mjs';
 import { dryRun, makeBackup, verifyBackup, applyReconciliation, createReconciliationService, signature, assertWriteScope } from '../functions/historicalReconciliation.mjs';
-import { buildCanonicalOfficialResults, getCanonicalOfficialTeamTotals } from '../js/core/canonicalOfficialResults.js?v=20260909-public-timeline-canonical-event-producer-001-v1';
-import scoreAuthority from '../functions/officialScoreConcurrency.js?v=20260909-public-timeline-canonical-event-producer-001-v1';
-import { buildPublicPortalModel } from '../js/publicPortal/portalSelectors.js?v=20260909-public-timeline-canonical-event-producer-001-v1';
-import { createOfficialFormatSnapshot } from '../js/core/officialFormatSnapshot.js?v=20260909-public-timeline-canonical-event-producer-001-v1';
-import { buildPublicProjection, reconcilePublicProjection } from '../js/public/publicProjection.js?v=20260909-public-timeline-canonical-event-producer-001-v1';
+import { buildCanonicalOfficialResults, getCanonicalOfficialTeamTotals } from '../js/core/canonicalOfficialResults.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1';
+import scoreAuthority from '../functions/officialScoreConcurrency.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1';
+import { buildPublicPortalModel } from '../js/publicPortal/portalSelectors.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1';
+import { createOfficialFormatSnapshot } from '../js/core/officialFormatSnapshot.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1';
+import { buildPublicProjection, reconcilePublicProjection } from '../js/public/publicProjection.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1';
 const scope = { tournamentId: tid, charreadaId: cid, teamId };
 function prepared(count=3) {
   const root=fixture(count), plan=dryRun(root,input,uid), backup=makeBackup(root,plan,2000);

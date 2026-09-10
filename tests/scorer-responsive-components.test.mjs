@@ -9,14 +9,14 @@ import {
   buildScorerRemateHistory,
   SCORER_COMPONENT_SYSTEM_VERSION,
   SCORER_RESPONSIVE_BREAKPOINTS
-} from "../js/core/scorerComponents.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/core/scorerComponents.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 import {
   normalizeScoringAttemptV2,
   setScoringAttemptDq,
   updateScoringAttemptClassification
-} from "../js/core/scoringAttempt.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
-const RELEASE_ID = "20260909-public-timeline-canonical-event-producer-001-v1";
+const RELEASE_ID = "20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 function attemptFixture(overrides = {}) {
   return normalizeScoringAttemptV2({

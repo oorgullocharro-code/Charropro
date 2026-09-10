@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const {
   TournamentDeletionError,

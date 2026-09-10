@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -47,7 +47,7 @@ const teamId = "team-feed-integration";
 
 assert.deepEqual(
   [...firebaseSyncImportVersions],
-  ["20260909-public-timeline-canonical-event-producer-001-v1"],
+  ["20260910-recovery-skip-redundant-pending-reset-001-v1"],
   "all browser entrypoints use the canonical firebaseSync module identity"
 );
 
@@ -355,6 +355,7 @@ assert.equal(unauthorizedRetry.ok, false);
 assert.equal(unauthorizedRetry.reason, "projection-recovery-not-authorized");
 
 firebase.write(missingSourcePath, missingSourceRecord);
+firebase.outboxStateTransitions = [];
 const repaired = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
   tournamentId,
   missingSource.projectionId,
@@ -366,6 +367,172 @@ const repaired = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
 );
 assert.equal(repaired.ok, true, "authorized manual repair converges after the source is restored");
 assert.equal(firebase.read(`${missingSource.projectionOutboxPath}/state`).status, "CLIENT_CONFIRMED");
+assert.deepEqual(
+  firebase.outboxStateTransitions,
+  ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
+  "DEAD_LETTER recovery rearms once before the canonical claim"
+);
+
+firebase.failPublicTransactions = true;
+const pendingManualRetry = await publishOfficial({
+  publishedId: "published-pending-manual-retry",
+  scoreId: "score-pending-manual-retry",
+  suerteId: "coleadero",
+  total: 18,
+  publishedAt: "2026-07-28T10:10:30.000Z"
+});
+firebase.failPublicTransactions = false;
+const pendingManualStatePath = `${pendingManualRetry.projectionOutboxPath}/state`;
+const pendingManualDeadLetter = firebase.read(pendingManualStatePath);
+assert.equal(pendingManualDeadLetter.status, "RETRY_WAIT");
+const pendingRetryActor = structuredClone(pendingManualDeadLetter.updatedBy);
+firebase.outboxStateTransitions = [];
+const retryWaitRecovered = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  pendingManualRetry.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:40.000Z"),
+    jitter: false
+  }
+);
+assert.equal(retryWaitRecovered.ok, true, "RETRY_WAIT recovery still rearms before claiming");
+assert.deepEqual(
+  firebase.outboxStateTransitions,
+  ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
+  "RETRY_WAIT recovery preserves its required reset"
+);
+firebase.write(pendingManualStatePath, {
+  ...firebase.read(pendingManualStatePath),
+  status: "FAILED",
+  attempts: 4,
+  clientConfirmedAt: "",
+  projectedAt: "",
+  targetRevision: 0,
+  targetFingerprint: "",
+  nextRetryAt: "",
+  nextRetryAtMs: 0,
+  lastErrorCode: "projection-failed",
+  lastErrorMessage: "Recoverable projection failure.",
+  deadLetterReason: "",
+  leaseOwner: "",
+  leaseExpiresAtMs: 0,
+  retriedBy: pendingRetryActor,
+  updatedBy: pendingRetryActor
+});
+firebase.outboxStateTransitions = [];
+const failedRecovered = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  pendingManualRetry.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:42.000Z"),
+    jitter: false
+  }
+);
+assert.equal(failedRecovered.ok, true, "FAILED recovery still rearms before claiming");
+assert.deepEqual(
+  firebase.outboxStateTransitions,
+  ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
+  "FAILED recovery preserves its required reset"
+);
+firebase.write(pendingManualStatePath, {
+  ...firebase.read(pendingManualStatePath),
+  status: "PENDING",
+  attempts: 5,
+  nextRetryAt: "",
+  nextRetryAtMs: 0,
+  lastErrorCode: "",
+  lastErrorMessage: "",
+  deadLetterReason: "",
+  leaseOwner: "",
+  leaseExpiresAtMs: 0,
+  retriedBy: pendingRetryActor,
+  updatedBy: pendingRetryActor
+});
+firebase.outboxStateTransitions = [];
+firebase.outboxStateWrites = [];
+const pendingManualRecovered = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  pendingManualRetry.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:45.000Z"),
+    jitter: false
+  }
+);
+assert.equal(pendingManualRecovered.ok, true, "a PENDING manual retry claims directly without a redundant reset");
+assert.deepEqual(
+  firebase.outboxStateTransitions,
+  ["PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
+  "PENDING manual retry never writes a PENDING reset"
+);
+const pendingClaim = firebase.outboxStateWrites.find((entry) => entry.status === "PROCESSING");
+assert.equal(pendingClaim.attempts, 6, "the direct claim increments attempts exactly once");
+assert.ok(pendingClaim.leaseOwner, "the direct claim creates the lease");
+assert.ok(pendingClaim.leaseExpiresAtMs > pendingClaim.updatedAtMs, "the lease remains future-dated at claim");
+const pendingManualFinalState = firebase.read(pendingManualStatePath);
+assert.deepEqual(pendingManualFinalState.retriedBy, pendingRetryActor, "the existing recovery actor remains immutable");
+assert.equal(pendingManualFinalState.attempts, 6);
+
+firebase.write(pendingManualStatePath, {
+  ...pendingManualFinalState,
+  status: "PENDING",
+  attempts: 5,
+  clientConfirmedAt: "",
+  projectedAt: "",
+  targetRevision: 0,
+  targetFingerprint: "",
+  leaseOwner: "",
+  leaseExpiresAtMs: 0
+});
+firebase.outboxStateTransitions = [];
+firebase.outboxStateWrites = [];
+const retryAllRecovered = await restartedFirebaseSync.retryAllFirebasePublicProjectionJobs(
+  tournamentId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:50.000Z"),
+    jitter: false,
+    limit: 10
+  }
+);
+const pendingRetryAllReset = retryAllRecovered.resetResults.find((entry) => (
+  entry.projectionId === pendingManualRetry.projectionId
+));
+assert.deepEqual(
+  pendingRetryAllReset,
+  { projectionId: pendingManualRetry.projectionId, reset: false, skipped: "already-pending" },
+  "retry-all skips the redundant PENDING reset"
+);
+assert.deepEqual(
+  firebase.outboxStateTransitions,
+  ["PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
+  "retry-all claims PENDING directly without a second PENDING write"
+);
+
+for (const status of ["PROCESSING", "PROJECTED", "VERIFIED", "CANCELLED", "SUPERSEDED"]) {
+  const protectedState = {
+    ...firebase.read(pendingManualStatePath),
+    status,
+    attempts: 6,
+    leaseOwner: status === "PROCESSING" ? "existing-lease" : "",
+    leaseExpiresAtMs: status === "PROCESSING" ? Date.parse("2026-07-28T10:11:59.000Z") : 0
+  };
+  firebase.write(pendingManualStatePath, protectedState);
+  firebase.outboxStateTransitions = [];
+  const blockedRetry = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+    tournamentId,
+    pendingManualRetry.projectionId,
+    { uid: "recovery-user", role: "supervisor" },
+    { nowMs: Date.parse("2026-07-28T10:11:00.000Z"), jitter: false }
+  );
+  assert.equal(blockedRetry.ok, false, `${status} cannot be reset by manual recovery`);
+  assert.equal(blockedRetry.reason, "projection-retry-not-allowed");
+  assert.deepEqual(firebase.read(pendingManualStatePath), protectedState, `${status} remains untouched`);
+  assert.deepEqual(firebase.outboxStateTransitions, [], `${status} creates no recovery transition`);
+}
+
 const verifiedAgain = await restartedFirebaseSync.verifyFirebasePublicProjectionJob(
   tournamentId,
   missingSource.projectionId,
@@ -932,6 +1099,7 @@ function createFirebaseTestAdapter() {
     privateWriteCount: 0,
     freshOutboxStateReads: 0,
     outboxStateTransitions: [],
+    outboxStateWrites: [],
     requireFreshOutboxTransition: false,
     failPublicTransactions: false,
     failAfterPublicCommitOnce: false,
@@ -944,6 +1112,7 @@ function createFirebaseTestAdapter() {
       this.privateWriteCount = 0;
       this.freshOutboxStateReads = 0;
       this.outboxStateTransitions = [];
+      this.outboxStateWrites = [];
       this.requireFreshOutboxTransition = false;
       this.failPublicTransactions = false;
       this.failAfterPublicCommitOnce = false;
@@ -1070,6 +1239,13 @@ function createFirebaseTestAdapter() {
       assertFirebaseSdkSerializable(next, target.path || "snapshot");
       if (target.path.includes("/projectionOutbox/") && target.path.endsWith("/state")) {
         this.outboxStateTransitions.push(next.status);
+        this.outboxStateWrites.push({
+          status: next.status,
+          attempts: next.attempts,
+          leaseOwner: next.leaseOwner,
+          leaseExpiresAtMs: next.leaseExpiresAtMs,
+          updatedAtMs: next.updatedAtMs
+        });
       }
       writePath(data, target.path, structuredClone(next));
       if (this.failAfterPublicCommitOnce && target.path.includes("/publicTournaments/")) {
