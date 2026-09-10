@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

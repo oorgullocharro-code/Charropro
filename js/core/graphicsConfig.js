@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

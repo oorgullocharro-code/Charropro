@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "./state.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

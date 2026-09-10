@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import backupService from "../functions/backupService.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import backupService from "../functions/backupService.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 const bucketNames = [];
 const files = new Map();

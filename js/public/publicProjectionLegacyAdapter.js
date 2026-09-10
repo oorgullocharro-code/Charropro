@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

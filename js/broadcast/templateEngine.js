@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "./componentLibrary.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

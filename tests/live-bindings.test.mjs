@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

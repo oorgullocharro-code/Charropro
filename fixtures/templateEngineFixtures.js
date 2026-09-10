@@ -1,8 +1,8 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../js/broadcast/componentLibrary.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
-import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { createBroadcastTemplate } from "../js/broadcast/templateEngine.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 export const TEMPLATE_ENGINE_FIXTURE_TYPES = Object.freeze([
   "lower_third", "scoreboard", "ranking", "timer", "sponsor", "qr", "roster",

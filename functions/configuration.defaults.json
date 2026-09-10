@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260910-recovery-skip-redundant-pending-reset-001-v1",
+      "appVersion": "20260910-public-portal-default-modules-and-tournament-creation-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -98,6 +98,16 @@
       "overlays": {}
     },
     "publicPortal": {
+      "defaultModules": {
+        "policyVersion": "1.0.0",
+        "modules": [
+          { "type": "live", "enabled": true, "order": 10 },
+          { "type": "program", "enabled": true, "order": 20 },
+          { "type": "results", "enabled": true, "order": 30 },
+          { "type": "standings", "enabled": true, "order": 40 },
+          { "type": "sheet", "enabled": true, "order": 50 }
+        ]
+      },
       "branding": {},
       "urls": {},
       "domains": [],
@@ -128,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "503608462a7f4ee2157f6f16b70cff6330240fac27a63d7e90dc87c5c7c9f4cd",
-  "fingerprint": "503608462a7f4ee2157f6f16b70cff6330240fac27a63d7e90dc87c5c7c9f4cd"
+  "checksum": "c28c9c9d2e610f7e9e038c3c5232aeaf7b698cb3762117f4d3a43e86ba71e09f",
+  "fingerprint": "c28c9c9d2e610f7e9e038c3c5232aeaf7b698cb3762117f4d3a43e86ba71e09f"
 }

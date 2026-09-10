@@ -2,13 +2,13 @@ import {
   applyPublicPortalConnection,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
-import { createPortalV2Model } from "./portalV2Model.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
-import { applyPortalV2Snapshot } from "./portalV2ProjectionState.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
-import { buildPortalV2Url, parsePortalV2Route } from "./portalV2Router.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
-import { createPortalV2Shell, renderPortalV2 } from "./portalV2Render.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
-import { getPortalV2PreviewSnapshot } from "../../fixtures/portalV2PreviewFixtures.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "../public/publicPortalClient.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { createPortalV2Model } from "./portalV2Model.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { applyPortalV2Snapshot } from "./portalV2ProjectionState.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "./portalV2Router.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { createPortalV2Shell, renderPortalV2 } from "./portalV2Render.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { getPortalV2PreviewSnapshot } from "../../fixtures/portalV2PreviewFixtures.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 export const PORTAL_V2_FOUNDATION_VERSION = "1.0.0";
 

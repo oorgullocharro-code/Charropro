@@ -16,7 +16,7 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
-} from "../js/core/publicProjectionOutbox.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "../js/core/publicProjectionOutbox.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 const T0 = Date.parse("2026-07-29T12:00:00.000Z");
 const base = {

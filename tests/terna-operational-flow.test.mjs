@@ -10,7 +10,7 @@ import {
   normalizeFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 const identity = {
   tournamentId: "demo-local-fmch-2026",

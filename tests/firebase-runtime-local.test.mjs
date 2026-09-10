@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",
