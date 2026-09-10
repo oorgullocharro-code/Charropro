@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { makeAccessSession } from "../js/core/roles.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+import { makeAccessSession } from "../js/core/roles.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 const user = Object.freeze({ uid: "user-1", email: "user@example.test", displayName: "User" });
 

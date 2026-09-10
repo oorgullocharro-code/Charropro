@@ -1,6 +1,11 @@
 "use strict";
 
 const { createHash } = require("node:crypto");
+const {
+  buildCanonicalPublicTimelineEvent,
+  normalizeCanonicalPublicTimelineEvent,
+  publicTimelinePath
+} = require("./canonicalPublicTimelineEvent.js");
 
 const OFFICIAL_SCORE_LEDGER_VERSION = "1.0.0";
 const OFFICIAL_SCORE_RECORD_VERSION = 1;
@@ -198,7 +203,7 @@ function applyOfficialScoreTransaction(currentTournament = {}, request = {}) {
   tournament.publishedScores[request.recordId] = record;
 
   tournament.officialScoreFanout = plainRecord(tournament.officialScoreFanout);
-  tournament.officialScoreFanout[request.recordId] = buildFanoutJob(request, record);
+  tournament.officialScoreFanout[request.recordId] = buildFanoutJob(request, record, tournament);
   tournament.meta = plainRecord(tournament.meta);
   tournament.meta.updatedAt = request.timestamp;
   tournament.meta.updatedAtMs = request.timestampMs;
@@ -238,6 +243,11 @@ function buildOfficialScoreFanoutUpdates(tournamentId, job = {}) {
     [`audit/publishedScores/${tournamentId}/${record.id}`]: record,
     [`projectionOutbox/${tournamentId}/${intent.projectionId}/intent`]: intent
   };
+  // Only jobs created after the canonical producer was introduced carry this
+  // event. Old pending jobs therefore never become an implicit backfill.
+  const timelineEvent = normalizeCanonicalPublicTimelineEvent(job.publicTimelineEvent);
+  const timelinePath = publicTimelinePath(tournamentId, timelineEvent);
+  if (timelinePath) updates[timelinePath] = timelineEvent;
   if (job.livePayload) updates[`live/${tournamentId}/current`] = job.livePayload;
   return updates;
 }
@@ -316,7 +326,7 @@ function buildOfficialRecord(request, revision, previousRecord) {
   };
 }
 
-function buildFanoutJob(request, record) {
+function buildFanoutJob(request, record, tournament) {
   const projectionIntent = buildProjectionIntent(request, record);
   const livePayload = request.livePayload
     ? {
@@ -336,6 +346,7 @@ function buildFanoutJob(request, record) {
     createdAt: request.timestamp,
     createdAtMs: request.timestampMs,
     record,
+    publicTimelineEvent: buildCanonicalPublicTimelineEvent(record, tournament),
     projectionIntent,
     livePayload
   };

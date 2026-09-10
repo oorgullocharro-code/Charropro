@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260909-live-lifecycle-canonical-source-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/core/scoring.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

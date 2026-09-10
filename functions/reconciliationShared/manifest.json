@@ -1,8 +1,12 @@
 {
-  "public/publicProjection.js": "25b08b2689734dd4073e0c36560d032253cdb7704ac749f625f92ee15ecb79d0",
-  "public/publicProjectionSchema.js": "80959a5b236b3667920a90e8bd34baaf709779181d4a751c5a9f8874f0e51507",
+  "public/publicProjection.js": "0cf8f1bac9797766b526a484d75aebc0af2fff41b4a2e8c3d90bdf7d9eed1db8",
+  "public/publicProjectionSchema.js": "7241090edf0092c058b9d6b73ebf117b7af8d0f1a3c6b494419cf711ad6a27bc",
   "public/publicLiveFeed.js": "1367f4c8b6be1e85ddf2b9ba7402b926196772c8f3c795bbb340f8f21c9da7cd",
+  "public/canonicalPublicTournamentData.js": "6de83735e87b097ede72f2f91f7df5b2f7e6926ad8870c45b4133da490e6a8da",
   "data/competitionTypes.js": "4c6bc7df76ef2821d4284accbc86ffb7cdeb65ec080a1740ccc128ca4668103b",
   "core/officialRanking.js": "2c456de9d2f073264ebb5a3ce6a5af3eef4e43cc2410ffce06fcb557d4350951",
-  "core/canonicalOfficialResults.js": "2f0f6c5b8f62575c2dc88815e811ededdbe3f1bd23fe41106d96b996b1591184"
+  "core/canonicalOfficialResults.js": "2f0f6c5b8f62575c2dc88815e811ededdbe3f1bd23fe41106d96b996b1591184",
+  "public/canonicalPublicProjectionV3.js": "8aecd2b1c422a12dbdd896146406f3b8c6bd7e16dacdacd9c5a596b1cc437636",
+  "core/canonicalTournamentResults.js": "85f80e2d25c1dbb257d40c38d40e2e9351329c446fc1a8e9bd78dc89a0528857",
+  "core/canonicalTournamentLifecycle.js": "ab9298494cf1bbac25eac942c3faf6c08ac2c126ef0957559e95d35b2c69e088"
 }

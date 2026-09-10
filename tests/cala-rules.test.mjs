@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/data/calaRules.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

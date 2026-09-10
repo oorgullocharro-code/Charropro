@@ -8,25 +8,25 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "./publicProjectionSchema.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "./publicLiveFeed.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
-import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../data/competitionTypes.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals
-} from "../core/canonicalOfficialResults.js?v=20260907-canonical-official-results-public-projection-parity-001-v1";
+} from "../core/canonicalOfficialResults.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   buildCanonicalPublicProjectionV3,
   getCanonicalPublicProjectionSignature,
   reconcileCanonicalPublicProjectionV3
-} from "./canonicalPublicProjectionV3.js";
+} from "./canonicalPublicProjectionV3.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 export const PUBLIC_PROJECTION_VERSION = "3.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({
@@ -59,7 +59,9 @@ export function getPublicProjectionSignature(projection) {
   return getCanonicalPublicProjectionSignature(projection);
 }
 
-function buildLegacyPublicProjectionV2(source = {}, options = {}) {
+// Kept temporarily only to document the retired V2 materialization path.
+// No public write path invokes these functions after the V3 cutover.
+export function buildLegacyPublicProjectionV2(source = {}, options = {}) {
   const tournament = isRecord(source.tournament) ? source.tournament : source;
   const liveCurrent = isRecord(source.liveCurrent) ? source.liveCurrent : {};
   const nowMs = finiteTimestamp(options.nowMs) || Date.now();
@@ -173,7 +175,7 @@ function buildLegacyPublicProjectionV2(source = {}, options = {}) {
   return sanitizePublicProjectionValue(candidate);
 }
 
-function reconcileLegacyPublicProjectionV2(previous, candidate, options = {}) {
+export function reconcileLegacyPublicProjectionV2(previous, candidate, options = {}) {
   const previousIsV2 = Number(previous?.schemaVersion) === PUBLIC_PROJECTION_SCHEMA_VERSION;
   const mergedCandidate = previousIsV2
     ? {
@@ -262,7 +264,7 @@ function reconcileLegacyPublicProjectionV2(previous, candidate, options = {}) {
   return { ok: true, changed: true, reason: "updated", projection, changedSections };
 }
 
-function getLegacyPublicProjectionSignature(projection) {
+export function getLegacyPublicProjectionSignature(projection) {
   const clean = sanitizePublicProjectionValue(projection);
   const stable = { ...clean };
   delete stable.projectionRevision;

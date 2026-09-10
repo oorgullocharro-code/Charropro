@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260909-live-lifecycle-canonical-source-001-v1",
+      "appVersion": "20260909-public-timeline-canonical-event-producer-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -128,6 +128,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "c7b3a964a56a5a526a7a2f58a759b9320407a98d122b71ef069210d8d3bcf261",
-  "fingerprint": "c7b3a964a56a5a526a7a2f58a759b9320407a98d122b71ef069210d8d3bcf261"
+  "checksum": "232de1168831d2bff862789453c7b58a530ffe3fa70a247c13137b56c191fb53",
+  "fingerprint": "232de1168831d2bff862789453c7b58a530ffe3fa70a247c13137b56c191fb53"
 }

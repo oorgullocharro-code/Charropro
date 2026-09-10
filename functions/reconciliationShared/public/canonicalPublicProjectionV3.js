@@ -1,61 +1,78 @@
-import { buildCanonicalTournamentResults } from "../core/canonicalTournamentResults.js";
-import { createCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js";
+import {
+  adaptCanonicalTournamentResultsToPublicV3,
+  buildCanonicalTournamentResults
+} from "../core/canonicalTournamentResults.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import {
+  createCanonicalPublicTournamentData,
+  validateCanonicalPublicTournamentData
+} from "./canonicalPublicTournamentData.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
+export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
+
+// The projection is deliberately a transport boundary: all sporting resolution
+// happens in Canonical Tournament Results before this module receives it.
 export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
   const tournament = object(source.tournament || source);
-  const tournamentId = id(options.tournamentId || tournament.info?.id || tournament.id);
-  const generatedAt = new Date(Number(options.nowMs) || Date.now()).toISOString();
-  const results = buildCanonicalTournamentResults({ tournament: tournament.info || tournament, teams: tournament.teams, charreadas: tournament.charreadas, publishedScores: tournament.publishedScores, officialScoreLedger: tournament.officialScoreLedger, sourceRevision: options.sourceRevision || maxRevision(tournament), generatedAt }, { tournamentId, generatedAt });
-  const rows = results.results.items.map((row) => ({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantScope: row.participantScope, participantId: row.participantId, participantName: row.participantName, charreadaId: row.charreadaId, ...(row.charreadaName !== undefined ? { charreadaName: row.charreadaName } : {}), competitionId: row.competitionId, ...(row.competitionName !== undefined ? { competitionName: row.competitionName } : {}), phase: row.phaseId || "", ...(row.phaseName !== undefined ? { phaseName: row.phaseName } : {}), columns: Object.fromEntries(Object.entries(row.suertes).map(([key, sport]) => [key, sport.total])), penalties: row.penalties, subtotal: row.subtotal, total: row.total, status: row.status }));
-  const standings = results.standings.items.map((item) => ({
-    rankingId: item.rankingId,
-    resultId: item.resultIds.length === 1 ? item.resultIds[0] : "",
-    resultIds: item.resultIds,
-    position: item.position,
-    scopeType: item.scopeType,
-    competitionId: item.competitionId,
-    ...(item.competitionName !== undefined ? { competitionName: item.competitionName } : {}),
-    charreadaId: item.charreadaId || "",
-    participantScope: item.participantScope,
-    teamId: item.teamId,
-    teamName: item.teamName,
-    ...(item.participantId ? { participantId: item.participantId } : {}),
-    participantName: item.participantName,
-    total: item.total,
-    classification: item.totalStatus,
-    status: item.positionStatus,
-    phase: item.phaseId || "",
-    ...(item.phaseName !== undefined ? { phaseName: item.phaseName } : {}),
-    tieBreakLabel: ""
-  })).filter((item) => item.resultIds.length > 0);
-  const sheet = results.sheet.competitions.map((competition) => ({
-    competitionId: competition.competitionId,
-    name: competition.name,
-    ...(competition.charreadaId !== undefined ? { charreadaId: competition.charreadaId } : {}),
-    ...(competition.charreadaName !== undefined ? { charreadaName: competition.charreadaName } : {}),
-    ...(competition.phaseId !== undefined ? { phase: competition.phaseId } : {}),
-    ...(competition.phaseName !== undefined ? { phaseName: competition.phaseName } : {}),
-    rows: competition.rows
-  }));
-  const lifecycleState = resolveCanonicalTournamentLifecycle({ tournament, liveCurrent: source.liveCurrent });
-  return createCanonicalPublicTournamentData({ schemaVersion: 3, projectionVersion: "3.0.0", tournamentId, sourceRevision: results.sourceRevision, projectionRevision: 1, generatedAt, lifecycle: { status: lifecycleState.status }, tournament: tournamentInfo(tournament, tournamentId), branding: {}, modules: [], sponsors: [], program: { items: program(tournament.charreadas, tournament.teams) }, live: publicLive(source.liveCurrent, lifecycleState.status), results: { teams: rows }, standings: { items: standings }, sheet: { competitions: sheet }, timeline: { items: [] }, statistics: results.statistics });
+  const tournamentId = id(options.tournamentId || tournament.info?.id || tournament.id || tournament.tournamentId);
+  const generatedAt = iso(options.generatedAt) || new Date(finiteTimestamp(options.nowMs) || Date.now()).toISOString();
+  const canonicalResults = source.canonicalTournamentResults || buildCanonicalTournamentResults({
+    tournament: tournament.info || tournament,
+    teams: tournament.teams,
+    charreadas: tournament.charreadas,
+    publishedScores: tournament.publishedScores,
+    officialScoreLedger: tournament.officialScoreLedger,
+    sourceRevision: options.sourceRevision || source.sourceRevision || maxSourceRevision(tournament),
+    generatedAt
+  }, { tournamentId, generatedAt, sourceRevision: options.sourceRevision });
+  const lifecycle = resolveCanonicalTournamentLifecycle({ tournament, liveCurrent: source.liveCurrent });
+  const input = adaptCanonicalTournamentResultsToPublicV3(canonicalResults, {
+    projectionRevision: 1,
+    generatedAt,
+    lifecycle: { status: lifecycle.status },
+    tournament: publicTournament(tournament, tournamentId),
+    branding: publicBranding(tournament),
+    modules: publicModules(tournament),
+    sponsors: publicSponsors(tournament),
+    program: { items: publicProgram(tournament.charreadas, tournament.teams) },
+    live: publicLive(source.liveCurrent, lifecycle.status),
+    timeline: { items: publicTimeline(timelineSource(source, tournament)) },
+    statistics: canonicalResults.statistics
+  });
+  const projection = createCanonicalPublicTournamentData(input);
+  const validation = validateCanonicalPublicTournamentData(projection);
+  if (!validation.valid) throw new Error(`canonical-public-projection-invalid:${validation.errors.join(",")}`);
+  return projection;
 }
 
 export function reconcileCanonicalPublicProjectionV3(previous, candidate, options = {}) {
   const validation = validateCanonicalPublicTournamentData(candidate);
   if (!validation.valid) return { ok: false, changed: false, reason: "invalid-canonical-public-projection", errors: validation.errors, projection: null };
   const previousValidation = validateCanonicalPublicTournamentData(previous);
-  const previousIsV3 = previous?.schemaVersion === 3
-    && previous?.projectionVersion === "3.0.0"
+  const previousIsV3 = Number(previous?.schemaVersion) === 3
+    && previous?.projectionVersion === CANONICAL_PUBLIC_PROJECTION_VERSION
     && previousValidation.valid;
-  if (previousIsV3 && previous.contentHash === candidate.contentHash) return { ok: true, changed: false, reason: "unchanged", projection: structuredClone(previous), changedSections: [] };
-  const projection = createCanonicalPublicTournamentData({ ...candidate, projectionRevision: previousIsV3 ? Number(previous.projectionRevision || 0) + 1 : 1, generatedAt: new Date(Number(options.nowMs) || Date.now()).toISOString() });
+  if (previousIsV3 && previous.tournamentId !== candidate.tournamentId) {
+    return { ok: false, changed: false, reason: "tournament-identity-mismatch", projection: structuredClone(previous) };
+  }
+  if (previousIsV3 && previous.contentHash === candidate.contentHash) {
+    return { ok: true, changed: false, reason: "unchanged", projection: structuredClone(previous), changedSections: [] };
+  }
+  const now = iso(options.generatedAt) || new Date(finiteTimestamp(options.nowMs) || Date.now()).toISOString();
+  const projection = createCanonicalPublicTournamentData({
+    ...candidate,
+    projectionRevision: previousIsV3 ? integer(previous.projectionRevision) + 1 : 1,
+    generatedAt: now
+  });
   return { ok: true, changed: true, reason: "updated", projection, changedSections: ["snapshot"] };
 }
 
-export function getCanonicalPublicProjectionSignature(value) { return validateCanonicalPublicTournamentData(value).valid ? value.contentHash : ""; }
-function tournamentInfo(tournament, tournamentId) {
+export function getCanonicalPublicProjectionSignature(value = {}) {
+  const validation = validateCanonicalPublicTournamentData(value);
+  return validation.valid ? value.contentHash : "";
+}
+
+function publicTournament(tournament, tournamentId) {
   const info = object(tournament.info || tournament);
   return {
     id: tournamentId,
@@ -74,34 +91,84 @@ function tournamentInfo(tournament, tournamentId) {
     competitionType: text(info.type || info.competitionType)
   };
 }
-function program(value, teams) {
+
+function publicBranding(tournament) {
+  const info = object(tournament.info || tournament);
+  const branding = object(info.publicBranding || tournament.publicBranding);
+  return pick(branding, ["theme", "primaryColor", "secondaryColor", "accentColor", "backgroundColor", "textColor", "logoUrl", "coverImageUrl", "heroImageUrl", "organizerLogoUrl"]);
+}
+
+function publicModules(tournament) {
+  return collection(tournament.publicModules || tournament.info?.publicModules)
+    .map((item) => ({ type: text(item.type).toLowerCase(), enabled: item.enabled === true, order: integer(item.order) }))
+    .filter((item) => item.type);
+}
+
+function publicSponsors(tournament) {
+  return collection(tournament.publicSponsors || tournament.info?.publicSponsors)
+    .map((item) => pick(item, ["id", "name", "logoUrl", "url", "tier", "placement", "order"]))
+    .filter((item) => item.id && item.name);
+}
+
+function publicProgram(charreadas, teams) {
   const teamNames = new Map(collection(teams).map((team) => [id(team.id || team.teamId), text(team.name || team.teamName)]));
-  return collection(value).map((item, index) => {
+  return collection(charreadas).map((item, index) => {
     const teamIds = collection(item.teamIds).map(id).filter(Boolean);
-    const explicitTeamNames = collection(item.teamNames).map(text).filter(Boolean);
-    const publicTeamNames = explicitTeamNames.length ? explicitTeamNames : teamIds.map((teamId) => teamNames.get(teamId)).filter(Boolean);
+    const resolvedTeamNames = collection(item.teamNames).map(text).filter(Boolean);
+    const publicTeamNames = resolvedTeamNames.length ? resolvedTeamNames : teamIds.map((teamId) => teamNames.get(teamId)).filter(Boolean);
     const participantNames = collection(item.participantNames).map(text).filter(Boolean);
     return {
-      id: id(item.id || item.charreadaId),
-      charreadaId: id(item.id || item.charreadaId),
-      competitionId: id(item.competitionId),
-      competitionName: text(item.competitionName || item.competition),
-      phase: id(item.phaseId),
-      phaseName: text(item.phaseName || item.phase),
-      name: text(item.name || item.nombre),
-      scheduledDate: text(item.date || item.fecha),
-      scheduledTime: text(item.startTime || item.hora),
+    id: id(item.id || item.charreadaId),
+    charreadaId: id(item.id || item.charreadaId),
+    competitionId: id(item.competitionId),
+    competitionName: text(item.competitionName || item.competition),
+    phase: id(item.phaseId),
+    phaseName: text(item.phaseName || item.phase),
+    name: text(item.name || item.nombre),
+    scheduledDate: text(item.date || item.fecha),
+    scheduledTime: text(item.startTime || item.hora),
       status: text(item.status || item.estado),
-      order: Number.isSafeInteger(item.order) ? item.order : index + 1,
+      order: integer(item.order ?? index + 1),
       ...(teamIds.length ? { teamIds } : {}),
       ...(publicTeamNames.length ? { teamNames: publicTeamNames } : {}),
       ...(participantNames.length ? { participantNames } : {})
     };
-  }).filter((item) => item.id);
+  }).filter((item) => item.id || item.charreadaId);
 }
-function publicLive(value, lifecycleStatus = "PRE_EVENT") { const live = object(value); const turn = object(live.turn); const output = { status: lifecycleStatus, currentCharreada: id(live.charreadaId || live.activeCharreadaId || live.charreada?.id || turn.charreadaId), currentTeam: text(turn.team?.name || live.teamName), currentParticipant: text(turn.participant?.name || live.participantName), currentSuerte: text(turn.suerteName || turn.suerteId || live.suerteId), currentScore: Number.isFinite(Number(live.currentScore)) ? Number(live.currentScore) : undefined, updatedAt: text(live.updatedAt || live.timestamp) }; const publicValue = Object.fromEntries(Object.entries(output).filter(([, entry]) => entry !== "" && entry !== undefined)); return Object.keys(publicValue).length ? publicValue : { status: "PRE_EVENT" }; }
-function maxRevision(tournament) { return collection(tournament.publishedScores).reduce((max, item) => Math.max(max, Number(item.revision || 0)), 1); }
+
+function publicLive(value, lifecycleStatus = "PRE_EVENT") {
+  const live = object(value);
+  const turn = object(live.turn);
+  const publicValue = pick({
+    status: lifecycleStatus,
+    currentCharreada: id(live.charreadaId || live.activeCharreadaId || live.charreada?.id || turn.charreadaId),
+    currentTeam: text(turn.team?.name || live.teamName),
+    currentParticipant: text(turn.participant?.name || live.participantName),
+    currentSuerte: text(turn.suerteName || turn.suerteId || live.suerteId),
+    currentScore: finite(live.currentScore),
+    updatedAt: text(live.updatedAt || live.timestamp)
+  }, ["status", "currentCharreada", "currentTeam", "currentParticipant", "currentSuerte", "currentScore", "updatedAt"]);
+  return Object.keys(publicValue).length ? publicValue : { status: "PRE_EVENT" };
+}
+
+// Narrative events are accepted only from an already-sanitized public source.
+function publicTimeline(value) {
+  return collection(value).map((item, index) => pick({ ...item, sequence: integer(item.sequence ?? index + 1) }, ["eventId", "sequence", "occurredAt", "publishedAt", "type", "status", "competitionId", "competitionName", "phaseId", "phaseName", "charreadaId", "charreadaName", "teamId", "teamName", "participantId", "participantName", "suerteId", "suerteName", "label", "score", "previousScore"])).filter((item) => item.eventId);
+}
+
+function timelineSource(source, tournament) {
+  return Object.prototype.hasOwnProperty.call(source, "publicTimeline")
+    ? source.publicTimeline
+    : tournament.publicTimeline;
+}
+
+function maxSourceRevision(tournament) { return collection(tournament.publishedScores).reduce((max, item) => Math.max(max, integer(item.revision)), 1); }
 function object(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
 function collection(value) { return Array.isArray(value) ? value.filter(Boolean) : value && typeof value === "object" ? Object.values(value).filter(Boolean) : []; }
-function id(value) { return /^[A-Za-z0-9._:@/-]{1,180}$/.test(String(value || "")) ? String(value) : ""; }
-function text(value) { return value === undefined || value === null ? "" : String(value); }
+function pick(value, keys) { return Object.fromEntries(keys.filter((key) => value[key] !== "" && value[key] !== undefined && value[key] !== null).map((key) => [key, value[key]])); }
+function id(value) { const clean = text(value); return /^[A-Za-z0-9._:@/-]{1,180}$/.test(clean) ? clean : ""; }
+function text(value) { return value === null || value === undefined ? "" : String(value).trim().slice(0, 1000); }
+function integer(value) { const number = Number(value); return Number.isSafeInteger(number) ? number : 0; }
+function finite(value) { const number = Number(value); return Number.isFinite(number) ? number : undefined; }
+function finiteTimestamp(value) { const number = Number(value); return Number.isFinite(number) && number > 0 ? number : 0; }
+function iso(value) { const clean = text(value); return Number.isFinite(Date.parse(clean)) ? clean : ""; }

@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

@@ -212,7 +212,7 @@ function normalizeSheetCompetition(value = {}) {
 }
 
 function normalizeTimelineItem(value = {}) {
-  const item = pick(value, ["eventId", "sequence", "occurredAt", "type", "charreadaId", "teamId", "participantId", "suerteId", "label", "score", "previousScore", "status"]);
+  const item = pick(value, ["eventId", "sequence", "occurredAt", "publishedAt", "type", "status", "competitionId", "competitionName", "phaseId", "phaseName", "charreadaId", "charreadaName", "teamId", "teamName", "participantId", "participantName", "suerteId", "suerteName", "label", "score", "previousScore"]);
   return item.eventId ? item : null;
 }
 

@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260909-live-lifecycle-canonical-source-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
@@ -36,7 +36,7 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     sponsors: publicSponsors(tournament),
     program: { items: publicProgram(tournament.charreadas, tournament.teams) },
     live: publicLive(source.liveCurrent, lifecycle.status),
-    timeline: { items: publicTimeline(source.publicTimeline) },
+    timeline: { items: publicTimeline(timelineSource(source, tournament)) },
     statistics: canonicalResults.statistics
   });
   const projection = createCanonicalPublicTournamentData(input);
@@ -153,7 +153,13 @@ function publicLive(value, lifecycleStatus = "PRE_EVENT") {
 
 // Narrative events are accepted only from an already-sanitized public source.
 function publicTimeline(value) {
-  return collection(value).map((item, index) => pick({ ...item, sequence: integer(item.sequence ?? index + 1) }, ["eventId", "sequence", "occurredAt", "type", "charreadaId", "teamId", "participantId", "suerteId", "label", "score", "previousScore", "status"])).filter((item) => item.eventId);
+  return collection(value).map((item, index) => pick({ ...item, sequence: integer(item.sequence ?? index + 1) }, ["eventId", "sequence", "occurredAt", "publishedAt", "type", "status", "competitionId", "competitionName", "phaseId", "phaseName", "charreadaId", "charreadaName", "teamId", "teamName", "participantId", "participantName", "suerteId", "suerteName", "label", "score", "previousScore"])).filter((item) => item.eventId);
+}
+
+function timelineSource(source, tournament) {
+  return Object.prototype.hasOwnProperty.call(source, "publicTimeline")
+    ? source.publicTimeline
+    : tournament.publicTimeline;
 }
 
 function maxSourceRevision(tournament) { return collection(tournament.publishedScores).reduce((max, item) => Math.max(max, integer(item.revision)), 1); }

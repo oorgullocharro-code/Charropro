@@ -8,16 +8,16 @@ import {
   FMCH_2026_CALA_INFR_RULES,
   FMCH_2026_CALA_TEAM_PENALTY_RULES,
   applyFmch2026CalaPartideroTiming
-} from "../js/data/calaRules.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/data/calaRules.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   validateScoringAttemptV2
-} from "../js/core/scoringAttempt.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   calculateAttemptPointSummary,
   calculateAttemptTotal
-} from "../js/core/scoring.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/core/scoring.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 const require = createRequire(import.meta.url);
 const {

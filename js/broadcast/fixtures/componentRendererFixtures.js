@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../componentLibrary.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

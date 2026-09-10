@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   OFFICIAL_FORMAT_DOCUMENT_PROFILE
-} from "../js/core/officialFormatSnapshot.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 import {
   OFFICIAL_FORMAT_PAPER
-} from "../js/core/officialFormat.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/core/officialFormat.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 const viewSource = readFileSync(new URL("../js/views/formato-federacion.js", import.meta.url), "utf8");
 const htmlRendererSource = readFileSync(new URL("../js/core/officialFormatHtml.js", import.meta.url), "utf8");

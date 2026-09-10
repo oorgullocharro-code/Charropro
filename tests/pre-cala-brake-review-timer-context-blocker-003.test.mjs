@@ -6,9 +6,9 @@ import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260909-live-lifecycle-canonical-source-001-v1";
-import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260909-live-lifecycle-canonical-source-001-v1";
-import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260909-live-lifecycle-canonical-source-001-v1";
+} from "../js/core/timerRules.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
 
 const T0 = Date.parse("2026-08-27T12:00:00.000Z");
 const tournament = {
