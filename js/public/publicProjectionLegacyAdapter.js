@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

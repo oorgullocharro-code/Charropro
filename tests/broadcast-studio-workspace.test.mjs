@@ -8,7 +8,7 @@ import {
   createBroadcastStudioContextBridge,
   createBroadcastStudioController,
   filterBroadcastStudioGraphics
-} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const BUILD = String(configuration?.values?.system?.appVersion || "");

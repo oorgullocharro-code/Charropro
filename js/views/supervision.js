@@ -1,12 +1,12 @@
-import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { loadState, state } from "../core/state.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { loadState, state } from "../core/state.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 import {
   signInAuditUser,
   signOutAuditUser,
   subscribeAuditAuth,
   subscribeFirebaseAuditScores
-} from "../core/firebaseSync.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../core/firebaseSync.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const root = document.getElementById("supervision-root");
 

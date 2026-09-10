@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",

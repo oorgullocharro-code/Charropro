@@ -1,5 +1,5 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

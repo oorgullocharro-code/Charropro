@@ -7,7 +7,7 @@ import {
   createCanonicalPublicTournamentData,
   normalizeCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../js/public/canonicalPublicTournamentData.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const tournamentId = "test-reconciliation-fixture";
 const resultId = "result-casa-1";

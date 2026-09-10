@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
-import releaseEngine from "../tools/release/releaseEngine.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import releaseEngine from "../tools/release/releaseEngine.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const {
   RELEASE_ENGINE_VERSION,

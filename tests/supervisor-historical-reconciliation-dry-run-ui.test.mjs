@@ -6,7 +6,7 @@ import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult,
   prepareHistoricalReconciliationDryRunRequest
-} from "../js/core/historicalReconciliationDryRun.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../js/core/historicalReconciliationDryRun.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const input = Object.freeze({
   tournamentId: "torneo_mtj3fikk_2llw7v",

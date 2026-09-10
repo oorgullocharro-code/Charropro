@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../componentLibrary.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

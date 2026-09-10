@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

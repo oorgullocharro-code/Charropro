@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "../js/data/suertes.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

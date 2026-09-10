@@ -1,14 +1,14 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { compareOfficialRankingRows } from "./officialRanking.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+} from "./state.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { compareOfficialRankingRows } from "./officialRanking.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;

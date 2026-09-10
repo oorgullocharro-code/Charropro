@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1",
+      "appVersion": "20260910-teams-participants-horses-canonical-separation-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "f0f055f3cf714888187f0e6bc58c3dfc4c20944f8b0f106b924ac4904fb68107",
-  "fingerprint": "f0f055f3cf714888187f0e6bc58c3dfc4c20944f8b0f106b924ac4904fb68107"
+  "checksum": "158f8769f693a90a2c329028cd770e8386fdfc3c9bc5469f964cb05c6d83d917",
+  "fingerprint": "158f8769f693a90a2c329028cd770e8386fdfc3c9bc5469f964cb05c6d83d917"
 }

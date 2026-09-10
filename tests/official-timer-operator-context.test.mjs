@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
-import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
+import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 function context(suerteId, extra = {}) {
   return {

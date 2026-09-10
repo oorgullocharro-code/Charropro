@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260910-portal-v2-public-access-and-legacy-portal-retirement-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260910-teams-participants-horses-canonical-separation-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 
