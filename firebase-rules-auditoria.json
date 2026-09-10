@@ -36,6 +36,24 @@
           "teams": {
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador')"
           },
+          "participants": {
+            ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador')",
+            "$participantKey": {
+              ".validate": "newData.hasChildren(['id', 'tournamentId', 'participantName', 'horseId', 'charroId', 'category', 'association', 'active']) && newData.child('id').isString() && newData.child('id').val().length > 0 && newData.child('tournamentId').val() === $tournamentId && newData.child('participantName').isString() && newData.child('participantName').val().length > 0 && newData.child('horseId').isString() && newData.child('charroId').isString() && newData.child('category').isString() && newData.child('association').isString() && newData.child('active').isBoolean()",
+              "$field": {
+                ".validate": "($field === 'id' || $field === 'tournamentId' || $field === 'participantName' || $field === 'horseId' || $field === 'charroId' || $field === 'category' || $field === 'association') && newData.isString() || $field === 'active' && newData.isBoolean()"
+              }
+            }
+          },
+          "horses": {
+            ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador')",
+            "$horseKey": {
+              ".validate": "newData.hasChildren(['id', 'tournamentId', 'displayName', 'registryVerified']) && newData.child('id').isString() && newData.child('id').val().length > 0 && newData.child('tournamentId').val() === $tournamentId && newData.child('displayName').isString() && newData.child('displayName').val().length > 0 && newData.child('registryVerified').isBoolean() && (!newData.child('registryType').exists() || newData.child('registryType').isString()) && (!newData.child('registryNumber').exists() || newData.child('registryNumber').isString())",
+              "$field": {
+                ".validate": "($field === 'id' || $field === 'tournamentId' || $field === 'displayName' || $field === 'registryType' || $field === 'registryNumber') && newData.isString() || $field === 'registryVerified' && newData.isBoolean()"
+              }
+            }
+          },
           "charreadas": {
             ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador')"
           },
