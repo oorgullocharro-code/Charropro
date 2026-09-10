@@ -14,7 +14,7 @@ globalThis.document = {
 };
 globalThis.window = { setTimeout(callback) { scheduled.push(callback); return scheduled.length; } };
 
-const { showToast } = await import("../js/core/dom.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1");
+const { showToast } = await import("../js/core/dom.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1");
 const message = "No se pudo registrar la decision de Revision de Freno.";
 const first = showToast(message);
 const duplicate = showToast(message);

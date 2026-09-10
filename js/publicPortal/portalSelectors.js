@@ -1,7 +1,7 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { selectOfficialRanking } from "../core/officialRanking.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

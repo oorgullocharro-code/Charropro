@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

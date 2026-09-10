@@ -73,6 +73,8 @@ function displayStanding(standing, competitionNames) {
   return Object.freeze({
     rankingId: text(standing.rankingId),
     resultIds: Object.freeze(references),
+    scopeType: text(standing.scopeType),
+    teamId: text(standing.teamId),
     competitionId: text(standing.competitionId),
     competitionName: text(standing.competitionName) || competitionNames.get(standing.competitionId) || "",
     charreadaId: text(standing.charreadaId),

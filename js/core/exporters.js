@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { getTeam, state } from "./state.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { getTeam, state } from "./state.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);

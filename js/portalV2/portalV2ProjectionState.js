@@ -1,5 +1,5 @@
-import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export function applyPortalV2Snapshot(state, snapshot, options = {}) {
   if (!isCanonicalPublicV3(snapshot)) {

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import { command, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const deviceA = command(freshReview(), BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, {

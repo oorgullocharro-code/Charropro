@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { PUBLIC_PORTAL_UX_FIXTURE } from "./fixtures/publicPortalUxFixture.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const render = read("js/publicPortal/portalRender.js");
 const app = read("js/publicPortal/portalApp.js");

@@ -7,8 +7,12 @@
   background: var(--portal-v2-background-color);
   color: var(--portal-v2-text-color);
   min-width: 320px;
+  min-block-size: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
+#portal-v2-root { min-block-size: 100dvh; }
 .portal-v2-shell { min-height: 100vh; }
 .portal-v2-announcer { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .portal-v2-initial-state, .portal-v2-noscript { margin: 3rem auto; max-width: 68rem; padding: 1.25rem; }

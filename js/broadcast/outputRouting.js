@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "./programEngine.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

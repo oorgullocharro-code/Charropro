@@ -3,8 +3,8 @@ import {
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   getRuleProfileRulesByPhase,
   resolveEffectiveRules
-} from "../js/data/ruleProfiles.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { getSuerteById } from "../js/data/suertes.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { getSuerteById } from "../js/data/suertes.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const phaseRules = getRuleProfileRulesByPhase(FMCH_2026_LIBRE_PROFILE_0_6_1, "freno_review");
 const phaseRuleIds = new Set(phaseRules.map((rule) => rule.ruleId));

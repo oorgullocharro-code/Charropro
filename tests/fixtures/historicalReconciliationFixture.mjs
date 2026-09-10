@@ -1,4 +1,4 @@
-import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1';
+import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1';
 
 export const tid = 'test-reconciliation-fixture';
 export const cid = 'charreada-fixture';

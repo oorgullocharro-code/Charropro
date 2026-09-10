@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260910-public-portal-default-modules-and-tournament-creation-001-v1",
+      "appVersion": "20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "c28c9c9d2e610f7e9e038c3c5232aeaf7b698cb3762117f4d3a43e86ba71e09f",
-  "fingerprint": "c28c9c9d2e610f7e9e038c3c5232aeaf7b698cb3762117f4d3a43e86ba71e09f"
+  "checksum": "2a8b266c2e0fa348144b858ccf044ec80bd141cf0644b385ce1b5eaaafcca914",
+  "fingerprint": "2a8b266c2e0fa348144b858ccf044ec80bd141cf0644b385ce1b5eaaafcca914"
 }

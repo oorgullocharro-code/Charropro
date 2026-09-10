@@ -1,10 +1,10 @@
 import {
   PREVIEW_ENGINE_VERSION,
   validatePreview
-} from "./previewEngine.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "./previewEngine.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   applyLiveBindingsToProjection
-} from "./liveBindings.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "./liveBindings.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 

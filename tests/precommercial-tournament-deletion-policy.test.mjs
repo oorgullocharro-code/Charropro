@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import releasePolicy from "../functions/releasePolicy.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import releasePolicy from "../functions/releasePolicy.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   applyReleaseClassificationToNewTournament,
   resolveClientReleaseStatus
-} from "../js/core/releasePolicy.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/releasePolicy.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const baseline = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const precommercialResolved = {

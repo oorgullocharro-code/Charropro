@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const { applyOfficialScoreTransaction, prepareOfficialScoreRequest } = officialScoreConcurrency;
 const tournamentId = "tournament-write-merge";

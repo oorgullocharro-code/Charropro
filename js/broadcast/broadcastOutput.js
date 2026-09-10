@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "./broadcastState.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "./dataContract.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

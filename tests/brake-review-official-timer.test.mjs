@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const definitions = buildOfficialTimerDefinitionsFromContext({
   tournament: {

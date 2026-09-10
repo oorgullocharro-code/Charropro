@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   formatOfficialFieldTimerMs,
   getOfficialFieldTimerFormat
-} from "../js/core/officialFieldTimerDisplay.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/officialFieldTimerDisplay.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const cases = new Map([
   [14_400, "14.4"],

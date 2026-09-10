@@ -7,21 +7,21 @@ import {
   applyBrakeReviewCommand,
   buildBrakeReviewBatchState,
   createBrakeReviewState
-} from "../js/core/brakeReviewPhase.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   applyOfficialTimerCommand,
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/timerRules.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   buildOfficialCurrentTimerContext,
   reconcileOfficialTimerConsumerState
-} from "../js/core/officialTimerOrchestration.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/officialTimerOrchestration.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   createOfficialTimerTicker,
   deriveOfficialTimerLiveDisplay,
   updateOfficialTimerDomDisplays
-} from "../js/core/officialTimerLiveDisplay.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/officialTimerLiveDisplay.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const T0 = Date.parse("2026-08-27T18:00:00.000Z");
 const actor = { id: "judge_a", uid: "judge_a", role: "juez" };

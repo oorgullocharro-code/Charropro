@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 test("Portal V2 exposes the approved navigation and keeps Timeline inside En Vivo", () => {
   const model = createPortalV2Model(getPortalV2PreviewSnapshot("live"), { availability: "ready", view: "inicio" });
@@ -88,7 +88,7 @@ function multiContextFixture() {
     columns: { cala: 120 }, penalties: 0, subtotal: 120, total: 120, status: "OFFICIAL", position: 1
   });
   snapshot.standings.items.push({
-    rankingId: "standing-final", resultId: "result-final", position: 1, scopeType: "charreada", teamId: "team-final", teamName: "Hacienda Finalista",
+    rankingId: "standing-final", resultId: "result-final", position: 1, scopeType: "phase", teamId: "team-final", teamName: "Hacienda Finalista",
     charreadaId: "charreada-final", competitionId: "equipos-local", competitionName: "Equipos", phase: "fase-final", phaseName: "Final",
     total: 120, classification: "provisional", status: "OFFICIAL", tieBreakLabel: ""
   });

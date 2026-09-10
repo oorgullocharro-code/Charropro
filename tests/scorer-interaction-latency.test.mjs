@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

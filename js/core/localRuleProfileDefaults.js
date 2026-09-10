@@ -1,5 +1,5 @@
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../data/ruleProfiles.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
-import { buildRuleProfileContentFingerprint } from "../data/ruleProfileTemporalPolicy.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../data/ruleProfiles.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
+import { buildRuleProfileContentFingerprint } from "../data/ruleProfileTemporalPolicy.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

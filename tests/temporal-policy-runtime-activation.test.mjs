@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/core/timerRules.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",

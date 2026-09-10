@@ -26,18 +26,18 @@ import {
   requiresBroadcastActionConfirmation,
   validateBroadcastAction,
   validateBroadcastActionContext
-} from "../js/broadcast/actionEngine.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/broadcast/actionEngine.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   createInitialBroadcastState,
   getBroadcastQueue,
   setPreviewState,
   validateBroadcastState
-} from "../js/broadcast/broadcastState.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 import {
   getBroadcastOutput,
   registerBroadcastOutput,
   removeBroadcastOutput
-} from "../js/broadcast/broadcastOutput.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:00:01.000Z";

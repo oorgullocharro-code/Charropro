@@ -1,4 +1,4 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.
@@ -16,7 +16,10 @@ export function createPortalV2ContextModel(snapshot, lifecycleStatus, route = {}
   const matches = (item) => (!selectedCompetitionId || item.competitionId === selectedCompetitionId)
     && (!selectedPhaseId || item.phaseId === selectedPhaseId);
   const results = Object.freeze(publicData.results.filter(matches));
-  const standings = Object.freeze(publicData.standings.filter(matches));
+  const standingScope = selectedPhaseId ? "phase" : "competition";
+  const standings = Object.freeze(publicData.standings
+    .filter(matches)
+    .filter((item) => item.scopeType === standingScope));
   const sheet = Object.freeze(publicData.sheet.filter(matches));
   const filtered = createPresentationResultsModel(results, standings, sheet, lifecycleStatus, publicData.consistency);
 

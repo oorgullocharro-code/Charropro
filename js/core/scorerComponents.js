@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260910-public-portal-default-modules-and-tournament-creation-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260910-portal-v2-standings-duplication-and-page-scroll-fix-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 
