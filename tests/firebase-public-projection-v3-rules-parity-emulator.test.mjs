@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -64,6 +64,7 @@ async function runProjectionV3RulesParityEmulator() {
     const individualVariants = [
       ["individual-base", {}],
       ["individual-program-horses", { program: true }],
+      ["individual-program-scope-and-live-horse", { program: true, live: true }],
       ["individual-result-horses", { results: true }],
       ["individual-standing-horses", { standings: true }],
       ["individual-sheet-horses", { sheet: true }],
@@ -74,13 +75,17 @@ async function runProjectionV3RulesParityEmulator() {
       assert.equal(validateCanonicalPublicTournamentData(projection).valid, true, `${label} is a valid V3 projection`);
       await assertAllowed(label, projection, token);
     }
-    const individual = buildIndividualCandidate(tournamentId, { program: true, results: true, standings: true, sheet: true });
+    const individual = buildIndividualCandidate(tournamentId, { program: true, live: true, results: true, standings: true, sheet: true });
     assert.equal(individual.results.teams[0].participantScope, "individual");
     assert.equal(individual.results.teams[0].participantId, "participant-gustavo");
     assert.equal(individual.results.teams[0].horseId, "horse-moro");
     assert.equal(individual.results.teams[0].horseName, "Moro");
+    assert.equal(individual.program.items[0].participantScope, "individual");
+    assert.equal(individual.live.participantScope, "individual");
+    assert.equal(individual.live.currentHorseId, "horse-moro");
+    assert.equal(individual.live.currentHorseName, "Moro");
     const noAccessId = `${tournamentId}-no-access`;
-    const noAccess = await writeProjection(databaseHost, databaseNamespace, noAccessId, buildIndividualCandidate(noAccessId, { program: true, results: true, standings: true, sheet: true }), token);
+    const noAccess = await writeProjection(databaseHost, databaseNamespace, noAccessId, buildIndividualCandidate(noAccessId, { program: true, live: true, results: true, standings: true, sheet: true }), token);
     assert.equal(noAccess.ok, false, "a judge without selected tournament access remains denied");
 
     await assertRejected("schema-v2", candidate, token, (projection) => {
@@ -94,6 +99,18 @@ async function runProjectionV3RulesParityEmulator() {
     }
     await assertRejected("program-malformed", candidate, token, (projection) => {
       projection.program.items[0].competitionName = 7;
+    });
+    await assertRejected("program-participant-scope-invalid", individual, token, (projection) => {
+      projection.program.items[0].participantScope = "legacy";
+    });
+    await assertRejected("live-participant-scope-invalid", individual, token, (projection) => {
+      projection.live.participantScope = "legacy";
+    });
+    await assertRejected("live-horse-id-malformed", individual, token, (projection) => {
+      projection.live.currentHorseId = 7;
+    });
+    await assertRejected("live-extra-field", individual, token, (projection) => {
+      projection.live.unapprovedHorseMetadata = "not-allowlisted";
     });
     await assertRejected("result-malformed", candidate, token, (projection) => {
       projection.results.teams[0].total = "invalid";
@@ -260,7 +277,8 @@ function buildIndividualCandidate(tournamentId, fields = {}) {
     program: fields.program === true,
     results: fields.results === true,
     standings: fields.standings === true,
-    sheet: fields.sheet === true
+    sheet: fields.sheet === true,
+    live: fields.live === true
   };
   const result = {
     resultId: "result-gustavo",
@@ -323,7 +341,7 @@ function buildIndividualCandidate(tournamentId, fields = {}) {
     participantIds: ["participant-gustavo"],
     participantNames: ["Gustavo Mares"]
   };
-  if (include.program) Object.assign(programItem, { horseIds: ["horse-moro"], horseNames: ["Moro"] });
+  if (include.program) Object.assign(programItem, { participantScope: "individual", horseIds: ["horse-moro"], horseNames: ["Moro"] });
   return createCanonicalPublicTournamentData({
     tournamentId,
     sourceRevision: 1,
@@ -332,7 +350,10 @@ function buildIndividualCandidate(tournamentId, fields = {}) {
     lifecycle: { status: "LIVE" },
     tournament: { id: tournamentId, name: "Projection V3 Individual QA", status: "live" },
     program: { items: [programItem] },
-    live: { status: "LIVE", currentCharreada: "Coleadero", currentParticipant: "Gustavo Mares", updatedAt: "2026-09-10T00:01:00.000Z" },
+    live: {
+      status: "LIVE", currentCharreada: "Coleadero", currentParticipant: "Gustavo Mares", updatedAt: "2026-09-10T00:01:00.000Z",
+      ...(include.live ? { participantScope: "individual", currentHorseId: "horse-moro", currentHorseName: "Moro" } : {})
+    },
     results: { teams: [result] },
     standings: { items: [standing] },
     sheet: { competitions: [{ competitionId: "coleadero", name: "Coleadero", charreadaId: "lote-coleadero", charreadaName: "Coleadero", phase: "clasificatoria", phaseName: "Clasificatoria", rows: [sheetRow] }] },

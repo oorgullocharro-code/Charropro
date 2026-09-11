@@ -183,12 +183,12 @@ function normalizeSponsor(value = {}) {
 }
 
 function normalizeProgramItem(value = {}) {
-  const item = pick(value, ["id", "charreadaId", "competitionId", "competitionName", "phase", "phaseName", "name", "scheduledDate", "scheduledTime", "status", "order", "teamIds", "teamNames", "participantIds", "participantNames", "horseIds", "horseNames"]);
+  const item = pick(value, ["id", "charreadaId", "competitionId", "competitionName", "phase", "phaseName", "name", "scheduledDate", "scheduledTime", "status", "order", "participantScope", "teamIds", "teamNames", "participantIds", "participantNames", "horseIds", "horseNames"]);
   return item.id || item.charreadaId ? item : null;
 }
 
 function normalizeLive(value = {}) {
-  return pick(value, ["status", "currentCharreada", "currentTeam", "currentParticipant", "currentSuerte", "currentScore", "updatedAt"]);
+  return pick(value, ["status", "currentCharreada", "participantScope", "currentTeam", "currentParticipant", "currentHorseId", "currentHorseName", "currentSuerte", "currentScore", "updatedAt"]);
 }
 
 function normalizeResult(value = {}) {

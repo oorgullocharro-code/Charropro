@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

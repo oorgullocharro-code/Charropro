@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

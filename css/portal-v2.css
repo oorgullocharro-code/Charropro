@@ -72,6 +72,7 @@
 .portal-v2-live-summary__list li { align-items: baseline; border-top: 1px solid #d9e0e3; display: flex; gap: .75rem; justify-content: space-between; padding-top: .55rem; }
 .portal-v2-live-summary__list span { overflow-wrap: anywhere; }
 .portal-v2-live-summary__list strong { color: var(--portal-v2-primary-color); flex: 0 0 auto; }
+.portal-v2-identity-meta { color: #43515d; font-size: .86rem; overflow-wrap: anywhere; }
 .portal-v2-timeline__header { align-items: baseline; }
 .portal-v2-timeline__state { color: #43515d; font-size: .85rem; font-weight: 700; }
 .portal-v2-timeline__list { display: grid; gap: .75rem; list-style: none; margin: 1rem 0 0; padding: 0; }

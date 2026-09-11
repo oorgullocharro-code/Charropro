@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "./broadcastState.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "./dataContract.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

@@ -34,12 +34,15 @@ function displayLive(value = {}, lifecycleStatus) {
     isLive: lifecycleStatus === "LIVE",
     currentCharreadaId: text(source.currentCharreada),
     currentCharreada: publicContextLabel(source.currentCharreada),
+    participantScope: text(source.participantScope) === "individual" ? "individual" : "team",
     currentTeam: text(source.currentTeam),
     currentParticipant: text(source.currentParticipant),
+    currentHorseId: text(source.currentHorseId),
+    currentHorseName: text(source.currentHorseName),
     currentSuerte: text(source.currentSuerte),
     currentScore: directNumber(source.currentScore),
     updatedAt: text(source.updatedAt),
-    hasCurrentAction: Boolean(text(source.currentTeam) || text(source.currentParticipant) || text(source.currentSuerte) || directNumber(source.currentScore) !== null)
+    hasCurrentAction: Boolean(text(source.currentTeam) || text(source.currentParticipant) || text(source.currentHorseName) || text(source.currentSuerte) || directNumber(source.currentScore) !== null)
   });
 }
 

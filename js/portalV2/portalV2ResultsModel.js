@@ -27,7 +27,8 @@ export function createPortalV2ResultsModel(snapshot, lifecycleStatus) {
   const standings = Object.freeze((snapshot.standings?.items || [])
     .map((standing) => displayStanding(standing, competitionNames))
     .sort((left, right) => left.position - right.position));
-  const sheet = Object.freeze((snapshot.sheet?.competitions || []).map((competition) => displaySheetCompetition(competition)));
+  const resultIdentityById = new Map(results.map((result) => [result.resultId, result]));
+  const sheet = Object.freeze((snapshot.sheet?.competitions || []).map((competition) => displaySheetCompetition(competition, resultIdentityById)));
   const consistency = validateDirectParity(results, standings, sheet);
   const status = consistency.valid ? "ready" : "inconsistent-snapshot";
   return Object.freeze({
@@ -54,7 +55,7 @@ function displayResult(result, competitionNames) {
     competitionName: text(result.competitionName) || competitionNames.get(result.competitionId) || "",
     charreadaId: text(result.charreadaId),
     charreadaName: text(result.charreadaName),
-    teamName: text(result.teamName) || text(result.participantName) || "Participante",
+    ...displayIdentity(result),
     phaseId: text(result.phase),
     phaseName: text(result.phaseName),
     status: resultStatus(result.status),
@@ -74,12 +75,11 @@ function displayStanding(standing, competitionNames) {
     rankingId: text(standing.rankingId),
     resultIds: Object.freeze(references),
     scopeType: text(standing.scopeType),
-    teamId: text(standing.teamId),
     competitionId: text(standing.competitionId),
     competitionName: text(standing.competitionName) || competitionNames.get(standing.competitionId) || "",
     charreadaId: text(standing.charreadaId),
     charreadaName: text(standing.charreadaName),
-    teamName: text(standing.teamName) || text(standing.participantName) || "Participante",
+    ...displayIdentity(standing),
     phaseId: text(standing.phase),
     phaseName: text(standing.phaseName),
     position: directNumber(standing.position),
@@ -90,10 +90,10 @@ function displayStanding(standing, competitionNames) {
   });
 }
 
-function displaySheetCompetition(competition) {
+function displaySheetCompetition(competition, resultIdentityById) {
   const rows = Object.freeze((competition.rows || []).map((row) => Object.freeze({
     resultId: text(row.resultId),
-    teamName: text(row.teamName) || text(row.participantName) || "Participante",
+    ...displayIdentity({ ...row, ...(resultIdentityById.get(text(row.resultId)) || {}) }),
     total: directNumber(row.total),
     columns: displayColumns(row.columns)
   })));
@@ -115,6 +115,28 @@ function displaySheetCompetition(competition) {
     phaseName: text(competition.phaseName),
     columns: Object.freeze(columns),
     rows
+  });
+}
+
+function displayIdentity(value = {}) {
+  const participantScope = text(value.participantScope) === "individual" ? "individual" : "team";
+  const teamId = text(value.teamId);
+  const teamName = text(value.teamName);
+  const participantId = text(value.participantId);
+  const participantName = text(value.participantName);
+  const horseId = text(value.horseId);
+  const horseName = text(value.horseName);
+  return Object.freeze({
+    participantScope,
+    teamId,
+    teamName,
+    participantId,
+    participantName,
+    horseId,
+    horseName,
+    displayName: participantScope === "individual"
+      ? participantName || "Participante"
+      : teamName || "Equipo"
   });
 }
 

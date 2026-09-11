@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import backupService from "../functions/backupService.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import backupService from "../functions/backupService.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const bucketNames = [];
 const files = new Map();

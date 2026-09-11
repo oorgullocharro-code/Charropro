@@ -232,10 +232,12 @@ function renderProgramList(items) {
       detail.append(contextText);
     }
     detail.prepend(title);
-    const participants = [...item.teamNames, ...item.participantNames];
+    const participants = item.participantScope === "individual" ? item.participantNames : item.teamNames;
     if (participants.length) {
       const roster = element("p", "portal-v2-program__participants");
-      roster.textContent = participants.join(" · ");
+      roster.textContent = item.participantScope === "individual"
+        ? participants.map((name, index) => identityLine("Participante", name, item.horseNames[index])).join(" · ")
+        : participants.join(" · ");
       detail.append(roster);
     }
     row.append(time, detail);
@@ -283,8 +285,13 @@ function renderLiveCenter(model) {
   if (live.hasCurrentAction) {
     const context = element("dl", "portal-v2-live-center__context");
     appendDefinitionIfPresent(context, "Charreada", live.currentCharreada);
-    appendDefinitionIfPresent(context, "Equipo", live.currentTeam);
-    appendDefinitionIfPresent(context, "Participante", live.currentParticipant);
+    if (live.participantScope === "individual") {
+      appendDefinitionIfPresent(context, "Participante", live.currentParticipant);
+      appendDefinitionIfPresent(context, "Caballo", live.currentHorseName);
+    } else {
+      appendDefinitionIfPresent(context, "Equipo", live.currentTeam);
+      appendDefinitionIfPresent(context, "Participante", live.currentParticipant);
+    }
     panel.append(context);
   }
   if (live.currentScore !== null) {
@@ -317,10 +324,12 @@ function renderLiveResults(model) {
   for (const result of model.liveTimeline.currentResults) {
     const item = element("li");
     const team = element("span");
-    team.textContent = result.teamName;
+    team.textContent = result.displayName;
     const total = element("strong");
     total.textContent = `${formatNumber(result.total)} pts`;
-    item.append(team, total);
+    item.append(team);
+    appendIdentityMeta(item, result);
+    item.append(total);
     list.append(item);
   }
   section.append(list);
@@ -342,10 +351,12 @@ function renderLiveStandings(model) {
   for (const standing of model.liveTimeline.currentStandings) {
     const item = element("li");
     const team = element("span");
-    team.textContent = `${standing.position}° ${standing.teamName}`;
+    team.textContent = `${standing.position}° ${standing.displayName}`;
     const total = element("strong");
     total.textContent = `${formatNumber(standing.total)} pts`;
-    item.append(team, total);
+    item.append(team);
+    appendIdentityMeta(item, standing);
+    item.append(total);
     list.append(item);
   }
   section.append(list);
@@ -432,7 +443,7 @@ function renderResultCard(result) {
   const article = element("article", "portal-v2-result-card");
   const header = element("header", "portal-v2-result-card__header");
   const team = element("h4");
-  team.textContent = result.teamName;
+  team.textContent = result.displayName;
   const status = element("span", "portal-v2-status");
   status.textContent = result.status.label;
   header.append(team, status);
@@ -446,6 +457,7 @@ function renderResultCard(result) {
     article.append(position);
   }
   const summary = element("dl", "portal-v2-result-card__summary");
+  appendIdentityDefinitions(summary, result);
   appendDefinition(summary, "Subtotal", formatNumber(result.subtotal));
   appendDefinition(summary, "Penalizaciones", formatNumber(result.penalties));
   article.append(summary, renderColumns(result.columns));
@@ -466,7 +478,7 @@ function renderStandings(model) {
     const label = element("p", "portal-v2-eyebrow");
     label.textContent = "Campeón publicado";
     const name = element("h3");
-    name.textContent = model.context.champion.teamName;
+    name.textContent = model.context.champion.displayName;
     const total = element("strong");
     total.textContent = `${formatNumber(model.context.champion.total)} pts`;
     champion.append(label, name, total);
@@ -497,10 +509,12 @@ function renderPodium(items) {
     const position = element("strong");
     position.textContent = `${item.position}°`;
     const team = element("span");
-    team.textContent = item.teamName;
+    team.textContent = item.displayName;
     const total = element("span");
     total.textContent = `${formatNumber(item.total)} pts`;
-    entry.append(position, team, total);
+    entry.append(position, team);
+    appendIdentityMeta(entry, item);
+    entry.append(total);
     list.append(entry);
   }
   return list;
@@ -513,7 +527,9 @@ function renderStandingsTable(items, title) {
   caption.textContent = `${title}: posiciones publicadas`;
   const head = element("thead");
   const headRow = element("tr");
-  for (const label of ["Pos.", "Equipo", "Total", "Estado"]) {
+  const allIndividual = items.length > 0 && items.every((item) => item.participantScope === "individual");
+  const showHorse = items.some((item) => item.participantScope === "individual");
+  for (const label of ["Pos.", allIndividual ? "Participante" : "Equipo", ...(showHorse ? ["Caballo"] : []), "Total", "Estado"]) {
     const cell = element("th");
     cell.scope = "col";
     cell.textContent = label;
@@ -527,12 +543,18 @@ function renderStandingsTable(items, title) {
     position.scope = "row";
     position.textContent = `${item.position}°`;
     const team = element("td");
-    team.textContent = item.teamName;
+    team.textContent = item.displayName;
+    row.append(position, team);
+    if (showHorse) {
+      const horse = element("td");
+      horse.textContent = item.participantScope === "individual" ? item.horseName || "—" : "—";
+      row.append(horse);
+    }
     const total = element("td");
     total.textContent = `${formatNumber(item.total)} pts`;
     const state = element("td");
     state.textContent = [item.classification, item.status.label, item.tieBreakLabel].filter(Boolean).join(" · ") || "Publicado";
-    row.append(position, team, total, state);
+    row.append(total, state);
     body.append(row);
   }
   table.append(caption, head, body);
@@ -558,10 +580,12 @@ function renderSheetTable(competition) {
   const wrapper = element("div", "portal-v2-table-scroll");
   const table = element("table", "portal-v2-table portal-v2-sheet-table");
   const caption = element("caption", "portal-v2-table__caption");
-  caption.textContent = `${competition.name}: puntuaciones publicadas por equipo`;
+  const allIndividual = competition.rows.length > 0 && competition.rows.every((item) => item.participantScope === "individual");
+  const showHorse = competition.rows.some((item) => item.participantScope === "individual");
+  caption.textContent = `${competition.name}: puntuaciones publicadas por ${allIndividual ? "participante" : "equipo"}`;
   const head = element("thead");
   const headRow = element("tr");
-  for (const label of ["Equipo", ...competition.columns.map((column) => column.label), "Total"]) {
+  for (const label of [allIndividual ? "Participante" : "Equipo", ...(showHorse ? ["Caballo"] : []), ...competition.columns.map((column) => column.label), "Total"]) {
     const cell = element("th");
     cell.scope = "col";
     cell.textContent = label;
@@ -573,8 +597,13 @@ function renderSheetTable(competition) {
     const row = element("tr");
     const team = element("th");
     team.scope = "row";
-    team.textContent = item.teamName;
+    team.textContent = item.displayName;
     row.append(team);
+    if (showHorse) {
+      const horse = element("td");
+      horse.textContent = item.participantScope === "individual" ? item.horseName || "—" : "—";
+      row.append(horse);
+    }
     const values = new Map(item.columns.map((column) => [column.key, column.value]));
     for (const column of competition.columns) {
       const cell = element("td");
@@ -620,6 +649,23 @@ function appendDefinitionIfPresent(list, label, value) {
   appendDefinition(list, label, value);
 }
 
+function appendIdentityDefinitions(list, item) {
+  if (item.participantScope !== "individual") return;
+  appendDefinitionIfPresent(list, "Participante", item.participantName);
+  appendDefinitionIfPresent(list, "Caballo", item.horseName);
+}
+
+function appendIdentityMeta(parent, item) {
+  if (item.participantScope !== "individual" || !item.horseName) return;
+  const meta = element("span", "portal-v2-identity-meta");
+  meta.textContent = `Caballo: ${item.horseName}`;
+  parent.append(meta);
+}
+
+function identityLine(label, name, horseName) {
+  return [label, name, horseName ? `Caballo: ${horseName}` : ""].filter(Boolean).join(" · ");
+}
+
 function renderLiveContext(model) {
   const panel = element("section", "portal-v2-live-context");
   const label = element("p", "portal-v2-eyebrow");
@@ -644,10 +690,15 @@ function renderResolvedHighlight(model) {
   const label = element("p", "portal-v2-eyebrow");
   label.textContent = model.leader ? "Posición oficial" : "Resultado publicado";
   const title = element("h3");
-  title.textContent = source?.teamName || "Sin resultado publicado";
+  title.textContent = source?.displayName || "Sin resultado publicado";
   const total = element("strong", "portal-v2-resolved-highlight__total");
   total.textContent = source?.total !== "" && source?.total !== undefined ? `${formatNumber(source.total)} pts` : "—";
   panel.append(label, title, total);
+  if (source?.participantScope === "individual" && source.horseName) {
+    const horse = element("span", "portal-v2-identity-meta");
+    horse.textContent = `Caballo: ${source.horseName}`;
+    panel.append(horse);
+  }
   if (model.primaryResult?.pr !== "") {
     const pr = element("span", "portal-v2-resolved-highlight__detail");
     pr.textContent = `PR ${formatNumber(model.primaryResult.pr)}`;

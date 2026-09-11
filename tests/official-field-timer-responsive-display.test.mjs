@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   formatOfficialFieldTimerMs,
   getOfficialFieldTimerFormat
-} from "../js/core/officialFieldTimerDisplay.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../js/core/officialFieldTimerDisplay.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const cases = new Map([
   [14_400, "14.4"],

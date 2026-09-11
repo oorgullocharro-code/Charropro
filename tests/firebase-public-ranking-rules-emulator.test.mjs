@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

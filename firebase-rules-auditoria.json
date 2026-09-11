@@ -364,7 +364,7 @@
                 "horseIds": { "$itemId": { ".validate": "newData.isString() && newData.val().length <= 180" } },
                 "horseNames": { "$itemId": { ".validate": "newData.isString() && newData.val().length <= 4000" } },
                 "$other": {
-                  ".validate": "($other === 'id' || $other === 'charreadaId' || $other === 'competitionId' || $other === 'competitionName' || $other === 'phase' || $other === 'phaseName' || $other === 'name' || $other === 'scheduledDate' || $other === 'scheduledTime' || $other === 'status') && newData.isString() || ($other === 'order' && newData.isNumber())"
+                  ".validate": "($other === 'id' || $other === 'charreadaId' || $other === 'competitionId' || $other === 'competitionName' || $other === 'phase' || $other === 'phaseName' || $other === 'name' || $other === 'scheduledDate' || $other === 'scheduledTime' || $other === 'status') && newData.isString() || ($other === 'participantScope' && newData.isString() && (newData.val() === 'team' || newData.val() === 'individual')) || ($other === 'order' && newData.isNumber())"
                 }
               }
             },
@@ -416,7 +416,7 @@
               }
             },
             "$other": {
-              ".validate": "$other === 'status' || $other === 'currentCharreada' || $other === 'currentTeam' || $other === 'currentParticipant' || $other === 'currentSuerte' || $other === 'currentScore' || $other === 'updatedAt'"
+                ".validate": "$other === 'status' || $other === 'currentCharreada' || $other === 'currentTeam' || $other === 'currentParticipant' || ($other === 'participantScope' && newData.isString() && (newData.val() === 'team' || newData.val() === 'individual')) || ($other === 'currentHorseId' && newData.isString() && newData.val().length <= 180) || ($other === 'currentHorseName' && newData.isString() && newData.val().length <= 4000) || $other === 'currentSuerte' || $other === 'currentScore' || $other === 'updatedAt'"
             }
           },
           "liveFeed": {

@@ -54,6 +54,11 @@ assert.equal(publicRules.standings.items.$other.$other[".validate"].includes("op
 assert.equal(publicRules.timeline.items.$other.$other[".validate"].includes("html"), false);
 assert.match(publicRules.program.items.$itemId.horseIds.$itemId[".validate"], /newData\.isString/);
 assert.match(publicRules.program.items.$itemId.horseNames.$itemId[".validate"], /newData\.isString/);
+assert.match(publicRules.program.items.$itemId.$other[".validate"], /participantScope/);
+assert.match(publicRules.program.items.$itemId.$other[".validate"], /individual/);
+assert.match(publicRules.live.$other[".validate"], /participantScope/);
+assert.match(publicRules.live.$other[".validate"], /currentHorseId/);
+assert.match(publicRules.live.$other[".validate"], /currentHorseName/);
 assert.match(publicRules.results.teams.$other.$other[".validate"], /horseId/);
 assert.match(publicRules.results.teams.$other.$other[".validate"], /horseName/);
 assert.match(publicRules.standings.items.$other.$other[".validate"], /horseId/);

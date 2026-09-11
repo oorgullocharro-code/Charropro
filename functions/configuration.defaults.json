@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260910-individual-v3-scope-horse-rules-parity-fix-001-v1",
+      "appVersion": "20260910-portal-v2-individual-competition-presentation-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "703fe74faf7f710128f36e2bf7c0ab86eadda55376916524779420ef9c77c1ce",
-  "fingerprint": "703fe74faf7f710128f36e2bf7c0ab86eadda55376916524779420ef9c77c1ce"
+  "checksum": "d0024c5c9082216526d6c0447ae7660720623134a8007ffb8771a5f7df63ae73",
+  "fingerprint": "d0024c5c9082216526d6c0447ae7660720623134a8007ffb8771a5f7df63ae73"
 }

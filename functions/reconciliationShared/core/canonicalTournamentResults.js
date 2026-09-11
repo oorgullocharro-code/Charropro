@@ -2,8 +2,8 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+} from "./canonicalOfficialResults.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 
@@ -374,7 +374,8 @@ function recordIdentity(item, fallbackTournamentId) {
   const attempt = record(item.breakdown?.attemptV2?.identity);
   const participantId = id(item.participant?.id || item.participantId || attempt.participantId);
   const teamId = id(item.team?.id || item.teamId || attempt.teamId);
-  // Keep this mirror aligned with the browser's canonical scope precedence.
+  // Preserve the existing explicit-scope precedence and recognize the durable
+  // ledger field emitted by individual competition publication.
   const declaredScope = text(item.participantScope || item.competition?.scope || item.competition?.participantScope || item.competition?.competitionScope || attempt.participantScope).toLowerCase();
   const participantScope = declaredScope === "individual" || (!teamId && participantId) ? "individual" : "team";
   return {

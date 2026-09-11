@@ -6,7 +6,7 @@ import {
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../js/core/timerRules.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const now = Date.parse("2026-08-25T18:00:00.000Z");
 const context = (suerteId, extra = {}) => ({

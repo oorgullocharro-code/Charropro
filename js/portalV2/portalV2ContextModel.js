@@ -1,4 +1,4 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.
@@ -72,8 +72,10 @@ function displayProgram(items) {
     scheduledTime: text(item.scheduledTime),
     status: text(item.status),
     order: finiteInteger(item.order),
+    participantScope: text(item.participantScope) === "individual" ? "individual" : "team",
     teamNames: Object.freeze(collection(item.teamNames).map(text).filter(Boolean)),
-    participantNames: Object.freeze(collection(item.participantNames).map(text).filter(Boolean))
+    participantNames: Object.freeze(collection(item.participantNames).map(text).filter(Boolean)),
+    horseNames: Object.freeze(collection(item.horseNames).map(text).filter(Boolean))
   })).filter((item) => item.id || item.charreadaId).sort((left, right) => left.order - right.order || left.scheduledDate.localeCompare(right.scheduledDate) || left.scheduledTime.localeCompare(right.scheduledTime) || left.name.localeCompare(right.name)));
 }
 

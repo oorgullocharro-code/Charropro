@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

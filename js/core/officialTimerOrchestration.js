@@ -1,10 +1,10 @@
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "./timerRules.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const OFFICIAL_CURRENT_TIMER_CONTEXT_VERSION = "1.0.0";
 export const TORO_TO_TERNA_HANDOFF = "TORO_TO_TERNA_READY";

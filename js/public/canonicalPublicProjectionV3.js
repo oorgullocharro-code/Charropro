@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
@@ -37,7 +37,7 @@ export function buildCanonicalPublicProjectionV3(source = {}, options = {}) {
     modules: publicModules(tournament),
     sponsors: publicSponsors(tournament),
     program: { items: publicProgram(tournament.charreadas, tournament.teams, tournament.participants, tournament.horses) },
-    live: publicLive(source.liveCurrent, lifecycle.status),
+    live: publicLive(source.liveCurrent, lifecycle.status, tournament.charreadas),
     timeline: { items: publicTimeline(timelineSource(source, tournament)) },
     statistics: canonicalResults.statistics
   });
@@ -131,6 +131,7 @@ function publicProgram(charreadas, teams, participants, horses) {
     }
   ]));
   return collection(charreadas).map((item, index) => {
+    const participantScope = canonicalParticipantScope(item.participantScope, item.competitionScope, item.scope);
     const teamIds = collection(item.teamIds).map(id).filter(Boolean);
     const resolvedTeamNames = collection(item.teamNames).map(text).filter(Boolean);
     const publicTeamNames = resolvedTeamNames.length ? resolvedTeamNames : teamIds.map((teamId) => teamEntries.get(teamId)?.teamName).filter(Boolean);
@@ -153,6 +154,7 @@ function publicProgram(charreadas, teams, participants, horses) {
     scheduledTime: text(item.startTime || item.hora),
       status: text(item.status || item.estado),
       order: integer(item.order ?? index + 1),
+      ...(participantScope ? { participantScope } : {}),
       ...(teamIds.length ? { teamIds } : {}),
       ...(publicTeamNames.length ? { teamNames: publicTeamNames } : {}),
       ...(participantIds.length ? { participantIds } : {}),
@@ -163,18 +165,36 @@ function publicProgram(charreadas, teams, participants, horses) {
   }).filter((item) => item.id || item.charreadaId);
 }
 
-function publicLive(value, lifecycleStatus = "PRE_EVENT") {
+function publicLive(value, lifecycleStatus = "PRE_EVENT", charreadas = []) {
   const live = object(value);
   const turn = object(live.turn);
+  const currentCharreada = id(live.charreadaId || live.activeCharreadaId || live.charreada?.id || turn.charreadaId);
+  const charreada = collection(charreadas).find((item) => id(item.id || item.charreadaId) === currentCharreada) || {};
+  const participantScope = canonicalParticipantScope(
+    live.participantScope,
+    live.competitionScope,
+    turn.participantScope,
+    turn.competitionScope,
+    turn.competition?.participantScope,
+    turn.competition?.competitionScope,
+    turn.competition?.scope,
+    charreada.participantScope,
+    charreada.competitionScope,
+    charreada.scope
+  );
+  const individual = participantScope === "individual";
   const publicValue = pick({
     status: lifecycleStatus,
-    currentCharreada: id(live.charreadaId || live.activeCharreadaId || live.charreada?.id || turn.charreadaId),
-    currentTeam: text(turn.team?.name || live.teamName),
-    currentParticipant: text(turn.participant?.name || live.participantName),
+    currentCharreada,
+    participantScope,
+    currentTeam: individual ? "" : text(turn.team?.name || live.teamName),
+    currentParticipant: text(turn.participant?.name || live.participantName || turn.team?.participantName),
+    currentHorseId: individual ? id(turn.horse?.id || live.horseId || turn.participant?.horseId || live.participant?.horseId || turn.team?.horseId) : "",
+    currentHorseName: individual ? text(turn.horse?.name || live.horseName || turn.participant?.horseName || live.participant?.horseName || turn.team?.horseName) : "",
     currentSuerte: text(turn.suerteName || turn.suerteId || live.suerteId),
     currentScore: finite(live.currentScore),
     updatedAt: text(live.updatedAt || live.timestamp)
-  }, ["status", "currentCharreada", "currentTeam", "currentParticipant", "currentSuerte", "currentScore", "updatedAt"]);
+  }, ["status", "currentCharreada", "participantScope", "currentTeam", "currentParticipant", "currentHorseId", "currentHorseName", "currentSuerte", "currentScore", "updatedAt"]);
   return Object.keys(publicValue).length ? publicValue : { status: "PRE_EVENT" };
 }
 
@@ -193,6 +213,7 @@ function maxSourceRevision(tournament) { return collection(tournament.publishedS
 function object(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
 function collection(value) { return Array.isArray(value) ? value.filter(Boolean) : value && typeof value === "object" ? Object.values(value).filter(Boolean) : []; }
 function pick(value, keys) { return Object.fromEntries(keys.filter((key) => value[key] !== "" && value[key] !== undefined && value[key] !== null).map((key) => [key, value[key]])); }
+function canonicalParticipantScope(...values) { return values.map((value) => text(value).toLowerCase()).find((value) => value === "team" || value === "individual") || ""; }
 function id(value) { const clean = text(value); return /^[A-Za-z0-9._:@/-]{1,180}$/.test(clean) ? clean : ""; }
 function text(value) { return value === null || value === undefined ? "" : String(value).trim().slice(0, 1000); }
 function integer(value) { const number = Number(value); return Number.isSafeInteger(number) ? number : 0; }

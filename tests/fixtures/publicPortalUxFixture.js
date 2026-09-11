@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

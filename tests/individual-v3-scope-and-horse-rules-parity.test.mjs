@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const NOW_MS = Date.parse("2026-09-10T00:00:00.000Z");
 
@@ -18,6 +18,12 @@ assert.equal(individual.browser.standings.items[0].horseId, "horse-moro");
 assert.equal(individual.browser.standings.items[0].horseName, "Moro");
 assert.equal(individual.browser.sheet.competitions[0].rows[0].horseId, "horse-moro");
 assert.equal(individual.browser.sheet.competitions[0].rows[0].horseName, "Moro");
+assert.equal(individual.browser.program.items[0].participantScope, "individual");
+assert.equal(individual.browser.live.participantScope, "individual");
+assert.equal(individual.browser.live.currentTeam, undefined, "individual V3 does not fabricate a team presentation field");
+assert.equal(individual.browser.live.currentParticipant, "Gustavo Mares");
+assert.equal(individual.browser.live.currentHorseId, "horse-moro");
+assert.equal(individual.browser.live.currentHorseName, "Moro");
 
 // Scope precedence is stable: record > competition.scope > competition.participantScope
 // > competition.competitionScope > Attempt V2 identity > legacy identity inference.
@@ -107,7 +113,15 @@ function individualSource() {
       publishedScores: { "official-gustavo": record },
       officialScoreLedger: { gustavo: { activeRecordId: "official-gustavo", records: { "official-gustavo": record } } }
     },
-    liveCurrent: { activeCharreadaId: charreadaId, status: "LIVE" }
+    liveCurrent: {
+      activeCharreadaId: charreadaId,
+      status: "LIVE",
+      turn: {
+        competition: { scope: "individual" },
+        participant: { id: "participant-gustavo", name: "Gustavo Mares", horseId: "horse-moro", horseName: "Moro" },
+        horse: { id: "horse-moro", name: "Moro" }
+      }
+    }
   };
 }
 

@@ -1,5 +1,5 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260909-public-timeline-canonical-event-producer-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

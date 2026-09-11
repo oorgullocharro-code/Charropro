@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import configurationService from "../functions/configurationService.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import configurationService from "../functions/configurationService.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

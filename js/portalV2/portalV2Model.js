@@ -3,10 +3,10 @@ import {
   CANONICAL_PUBLIC_TOURNAMENT_DATA_SCHEMA_VERSION,
   PUBLIC_TOURNAMENT_LIFECYCLE_STATUSES,
   validateCanonicalPublicTournamentData
-} from "../public/canonicalPublicTournamentData.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const PORTAL_V2_NAVIGATION = Object.freeze([
   { view: "inicio", module: "", label: "Inicio" },
@@ -62,21 +62,24 @@ export function createPortalV2Model(snapshot, options = {}) {
     live: Object.freeze({
       status: text(live.status),
       currentCharreada: text(live.currentCharreada),
+      participantScope: text(live.participantScope) === "individual" ? "individual" : "team",
       currentTeam: text(live.currentTeam),
       currentParticipant: text(live.currentParticipant),
+      currentHorseId: text(live.currentHorseId),
+      currentHorseName: text(live.currentHorseName),
       currentSuerte: text(live.currentSuerte),
       currentScore: directValue(live.currentScore),
       updatedAt: text(live.updatedAt)
     }),
     primaryResult: primaryResult ? Object.freeze({
-      teamName: text(primaryResult.teamName),
+      ...displayIdentity(primaryResult),
       total: directValue(primaryResult.total),
       pr: directValue(primaryResult.columns?.PR ?? primaryResult.columns?.pr),
       status: text(primaryResult.status)
     }) : null,
     leader: leader ? Object.freeze({
       position: directValue(leader.position),
-      teamName: text(leader.teamName),
+      ...displayIdentity(leader),
       total: directValue(leader.total),
       classification: text(leader.classification)
     }) : null,
@@ -207,6 +210,19 @@ function safeAssetUrl(value) {
 
 function directValue(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : "";
+}
+
+function displayIdentity(value = {}) {
+  const participantScope = text(value.participantScope) === "individual" ? "individual" : "team";
+  return Object.freeze({
+    participantScope,
+    teamName: text(value.teamName),
+    participantName: text(value.participantName),
+    horseName: text(value.horseName),
+    displayName: participantScope === "individual"
+      ? text(value.participantName) || "Participante"
+      : text(value.teamName) || "Equipo"
+  });
 }
 
 function text(value) {

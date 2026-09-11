@@ -7,9 +7,9 @@ import {
   getFmchOfficialTemporalPolicy,
   resolveFmchOfficialTemporalContracts,
   validateFmchOfficialTemporalPolicy
-} from "../js/core/timerRules.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../js/core/timerRules.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 const PROFILE_CONTEXT = Object.freeze({
   profileId: "FMCH_2026_LIBRE",

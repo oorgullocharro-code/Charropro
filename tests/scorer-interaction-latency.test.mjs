@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

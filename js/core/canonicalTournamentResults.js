@@ -2,8 +2,8 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-individual-v3-scope-horse-rules-parity-fix-001-v1";
+} from "./canonicalOfficialResults.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 
