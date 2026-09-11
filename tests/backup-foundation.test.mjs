@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import backupService from "../functions/backupService.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import backupService from "../functions/backupService.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 
 const {
   BACKUP_FOUNDATION_VERSION,

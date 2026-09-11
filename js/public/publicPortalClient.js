@@ -4,9 +4,9 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjectionForRead
-} from "./publicProjectionSchema.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "./publicProjectionSchema.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

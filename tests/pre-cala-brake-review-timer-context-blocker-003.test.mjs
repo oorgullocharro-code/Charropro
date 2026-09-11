@@ -6,9 +6,9 @@ import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "../js/core/timerRules.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 
 const T0 = Date.parse("2026-08-27T12:00:00.000Z");
 const tournament = {

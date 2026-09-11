@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 
 test("individual Portal V2 presentation uses only the published scope, participant, and horse identity", () => {
   const snapshot = individualSnapshot();

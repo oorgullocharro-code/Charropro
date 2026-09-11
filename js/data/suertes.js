@@ -5,12 +5,12 @@ import {
   CALA_INFR_RULES,
   CALA_TEAM_PENALTY_RULES,
   normalizeCalaRuleOverrideCatalog
-} from "./calaRules.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "./calaRules.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 import {
   RULE_PROFILE_CONTRACT_VERSION,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "./ruleProfiles.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "./ruleProfiles.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 
 export const SUERTES = [
   {

@@ -25,14 +25,14 @@ import {
   updateBroadcastOutputHeartbeat,
   validateBroadcastOutput,
   validateOutputProjection
-} from "../js/broadcast/broadcastOutput.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 import {
   createInitialBroadcastState,
   setGraphicState,
   setPreviewState,
   setProgramState
-} from "../js/broadcast/broadcastState.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "../js/broadcast/broadcastState.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { buildBroadcastDataContract } from "../js/broadcast/dataContract.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:05.000Z";

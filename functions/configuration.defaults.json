@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1",
+      "appVersion": "20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "20ff5a675ee3643d14108d0d2afb7e67dd30997ee8abc5d4f9dde7d664b2a0e7",
-  "fingerprint": "20ff5a675ee3643d14108d0d2afb7e67dd30997ee8abc5d4f9dde7d664b2a0e7"
+  "checksum": "3d779fe707bf40a15715b19299add9dc56ce78b9725bd7905ce5669466945430",
+  "fingerprint": "3d779fe707bf40a15715b19299add9dc56ce78b9725bd7905ce5669466945430"
 }

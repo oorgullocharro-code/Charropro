@@ -4,9 +4,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "../js/core/canonicalOfficialResults.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "../js/core/canonicalOfficialResults.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
 
 const tournamentId = "tournament-canonical";
 const charreadaId = "charreada-canonical";
