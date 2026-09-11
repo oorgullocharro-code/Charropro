@@ -4,9 +4,9 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjectionForRead
-} from "./publicProjectionSchema.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "./publicProjectionSchema.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

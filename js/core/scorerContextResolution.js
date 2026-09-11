@@ -1,5 +1,5 @@
-import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 export const SCORER_CONTEXT_RESOLUTION_VERSION = "1.0.0";
 

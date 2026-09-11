@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 import { loadConfigurationBootstrap } from "../js/core/configurationBootstrap.js";
-import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const BUILD = String(configuration.values.system.appVersion || "");

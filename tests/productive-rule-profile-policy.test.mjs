@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

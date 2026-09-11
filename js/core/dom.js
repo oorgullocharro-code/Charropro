@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 logCharroProVersion("runtime");
 

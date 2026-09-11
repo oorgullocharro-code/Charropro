@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

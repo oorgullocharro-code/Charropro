@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

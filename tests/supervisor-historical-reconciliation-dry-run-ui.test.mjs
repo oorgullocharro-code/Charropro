@@ -6,7 +6,7 @@ import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult,
   prepareHistoricalReconciliationDryRunRequest
-} from "../js/core/historicalReconciliationDryRun.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "../js/core/historicalReconciliationDryRun.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 const input = Object.freeze({
   tournamentId: "torneo_mtj3fikk_2llw7v",

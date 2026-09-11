@@ -11,12 +11,12 @@ import {
   getOfficialTimerControlView,
   normalizeOfficialTimerContext,
   validateOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "../js/core/timerRules.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine,
   routeTimerDisplay
-} from "../js/broadcast/outputRouting.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "../js/broadcast/outputRouting.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 const T0 = Date.parse("2026-08-11T12:00:00.000Z");
 const definition = {

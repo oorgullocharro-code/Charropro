@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-coleadero-live-graphics-five-rider-window-001-v1",
+      "appVersion": "20260911-graphics-access-coleadero-tournament-button-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "7a40ce0aab709f69a208f9826c17bd46a7170b0eb69573a29392f66858ee5c78",
-  "fingerprint": "7a40ce0aab709f69a208f9826c17bd46a7170b0eb69573a29392f66858ee5c78"
+  "checksum": "4d6a3e4f59b5ee8e0ce2f1bed4a929f784ae03b6325b250ce8f2ac8259f2d00e",
+  "fingerprint": "4d6a3e4f59b5ee8e0ce2f1bed4a929f784ae03b6325b250ce8f2ac8259f2d00e"
 }

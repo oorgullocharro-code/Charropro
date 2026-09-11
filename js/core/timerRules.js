@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

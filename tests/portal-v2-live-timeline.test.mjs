@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
-import { createPublicPortalClientState } from "../js/public/publicPortalClient.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { createPublicPortalClientState } from "../js/public/publicPortalClient.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 test("Live Center presents the supplied current action and direct scoped summaries", () => {
   const model = portalModel("live");

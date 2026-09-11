@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

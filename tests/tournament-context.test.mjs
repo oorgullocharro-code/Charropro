@@ -5,7 +5,7 @@ import {
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "../js/core/tournamentContext.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+} from "../js/core/tournamentContext.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
 
 assert.equal(getTournamentIdFromUrl("?id=torneo_a"), "torneo_a");
 assert.equal(getTournamentIdFromUrl("?tournamentId=torneo_b"), "torneo_b");
