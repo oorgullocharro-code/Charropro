@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 import {
   BROWSER_OUTPUT_DISPLAY_MODES,
   BROWSER_OUTPUT_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   validateBrowserOutputConfig,
   validateBrowserOutputProjection,
   validateBrowserOutputSnapshot
-} from "../js/broadcast/browserOutput.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+} from "../js/broadcast/browserOutput.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 class MockStyle {
   constructor() {

@@ -1,4 +1,4 @@
-import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1';
+import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1';
 
 export const tid = 'test-reconciliation-fixture';
 export const cid = 'charreada-fixture';

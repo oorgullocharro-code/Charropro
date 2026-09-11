@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

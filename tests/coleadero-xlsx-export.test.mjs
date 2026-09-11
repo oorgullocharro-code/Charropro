@@ -7,7 +7,7 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+} from "../js/core/coleaderoXlsx.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);
@@ -22,6 +22,9 @@ assert.deepEqual(workbook.sheets[0].rows.slice(1).map((row) => row.map((cell) =>
 
 const blob = createColeaderoXlsxBlob(fixture.input);
 assert.equal(blob.type, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+if (process.env.CHARROPRO_COLEADERO_XLSX_PATH) {
+  writeFileSync(process.env.CHARROPRO_COLEADERO_XLSX_PATH, Buffer.from(await blob.arrayBuffer()));
+}
 const directory = mkdtempSync(join(tmpdir(), "charropro-coleadero-xlsx-"));
 const xlsxPath = join(directory, "colas.xlsx");
 try {
@@ -32,6 +35,11 @@ try {
   assert.equal(parsed.worksheet, true, "OpenXML sheet exists");
   assert.equal(parsed.sheetCount, 1, "independent parser reads exactly one worksheet");
   assert.deepEqual(parsed.sheetNames, ["Colas"]);
+  assert.equal(parsed.relationshipsValid, true, "workbook and worksheet relationships resolve to existing parts");
+  assert.equal(parsed.contentTypesValid, true, "OpenXML content types cover every required part");
+  assert.equal(parsed.cellTypesValid, true, "all cells use valid inline text, numeric, or empty representations");
+  assert.equal(parsed.styleReferencesValid, true, "all worksheet style indices resolve in styles.xml");
+  assert.equal(parsed.hasMergeCells, false, "a flat Colas sheet omits mergeCells instead of emitting an empty invalid container");
   assert.equal(parsed.mergeCount, 0, "flat Colas sheet has no inherited Federation merges");
   assert.deepEqual(parsed.rows, [
     ["Lote", "Turno", "Participante", "Caballo", "1ª", "2ª", "3ª", "Total"],
@@ -160,30 +168,83 @@ from xml.etree import ElementTree as ET
 path = sys.argv[1]
 main = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
 rels = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
+package_rels = '{http://schemas.openxmlformats.org/package/2006/relationships}'
+content_types = '{http://schemas.openxmlformats.org/package/2006/content-types}'
 with zipfile.ZipFile(path) as archive:
   names = set(archive.namelist())
+  root_relationships = ET.fromstring(archive.read('_rels/.rels'))
+  content_type_document = ET.fromstring(archive.read('[Content_Types].xml'))
   workbook = ET.fromstring(archive.read('xl/workbook.xml'))
+  workbook_relationships = ET.fromstring(archive.read('xl/_rels/workbook.xml.rels'))
+  styles = ET.fromstring(archive.read('xl/styles.xml'))
   sheets = workbook.findall(main + 'sheets/' + main + 'sheet')
   worksheet = ET.fromstring(archive.read('xl/worksheets/sheet1.xml'))
+  relationship_targets = {
+    relationship.attrib.get('Id'): relationship.attrib.get('Target')
+    for relationship in workbook_relationships.findall(package_rels + 'Relationship')
+  }
+  workbook_root_target = any(
+    relationship.attrib.get('Type', '').endswith('/officeDocument') and relationship.attrib.get('Target') == 'xl/workbook.xml'
+    for relationship in root_relationships.findall(package_rels + 'Relationship')
+  )
+  worksheet_targets = []
+  for sheet in sheets:
+    relationship_id = sheet.attrib.get(rels + 'id')
+    target = relationship_targets.get(relationship_id, '')
+    worksheet_targets.append(target)
+  relationships_valid = workbook_root_target and worksheet_targets == ['worksheets/sheet1.xml'] and 'xl/worksheets/sheet1.xml' in names
+  overrides = {
+    override.attrib.get('PartName'): override.attrib.get('ContentType')
+    for override in content_type_document.findall(content_types + 'Override')
+  }
+  content_types_valid = (
+    overrides.get('/xl/workbook.xml') == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml' and
+    overrides.get('/xl/styles.xml') == 'application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml' and
+    overrides.get('/xl/worksheets/sheet1.xml') == 'application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml'
+  )
+  cell_xfs = styles.find(main + 'cellXfs')
+  style_count = len(cell_xfs.findall(main + 'xf')) if cell_xfs is not None else 0
+  style_references_valid = style_count > 0
+  cell_types_valid = True
   rows = []
   for row in worksheet.findall(main + 'sheetData/' + main + 'row'):
     values = []
     for cell in row.findall(main + 'c'):
       kind = cell.attrib.get('t')
+      style = cell.attrib.get('s')
+      if style is not None and (not style.isdigit() or int(style) >= style_count):
+        style_references_valid = False
       if kind == 'inlineStr':
         node = cell.find(main + 'is/' + main + 't')
         values.append(node.text if node is not None else '')
-      else:
+        cell_types_valid = cell_types_valid and node is not None
+      elif kind in (None, 'n'):
         node = cell.find(main + 'v')
-        values.append(float(node.text) if node is not None and '.' in node.text else int(node.text) if node is not None else None)
+        if node is None:
+          values.append(None)
+        else:
+          try:
+            values.append(float(node.text) if '.' in node.text else int(node.text))
+          except (TypeError, ValueError):
+            cell_types_valid = False
+            values.append(None)
+      else:
+        cell_types_valid = False
+        values.append(None)
     rows.append(values)
+  merge_cells = worksheet.find(main + 'mergeCells')
   print(json.dumps({
     'contentTypes': '[Content_Types].xml' in names,
     'workbook': 'xl/workbook.xml' in names,
     'worksheet': 'xl/worksheets/sheet1.xml' in names,
     'sheetCount': len(sheets),
     'sheetNames': [sheet.attrib.get('name') for sheet in sheets],
-    'mergeCount': len(worksheet.findall(main + 'mergeCells/' + main + 'mergeCell')),
+    'relationshipsValid': relationships_valid,
+    'contentTypesValid': content_types_valid,
+    'cellTypesValid': cell_types_valid,
+    'styleReferencesValid': style_references_valid,
+    'hasMergeCells': merge_cells is not None,
+    'mergeCount': len(merge_cells.findall(main + 'mergeCell')) if merge_cells is not None else 0,
     'rows': rows
   }))
 `;

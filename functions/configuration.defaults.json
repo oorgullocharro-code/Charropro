@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1",
+      "appVersion": "20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "3d779fe707bf40a15715b19299add9dc56ce78b9725bd7905ce5669466945430",
-  "fingerprint": "3d779fe707bf40a15715b19299add9dc56ce78b9725bd7905ce5669466945430"
+  "checksum": "6fe7d98b691f8cf18ac43e0e8efc0ac36598e1837cf90789b7a9a2e2657d6774",
+  "fingerprint": "6fe7d98b691f8cf18ac43e0e8efc0ac36598e1837cf90789b7a9a2e2657d6774"
 }

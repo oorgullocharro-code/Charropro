@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

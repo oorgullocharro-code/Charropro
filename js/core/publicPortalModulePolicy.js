@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

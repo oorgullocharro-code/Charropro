@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
-import releaseEngine from "../tools/release/releaseEngine.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import releaseEngine from "../tools/release/releaseEngine.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 const {
   RELEASE_ENGINE_VERSION,

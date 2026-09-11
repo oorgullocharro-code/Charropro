@@ -234,6 +234,11 @@ function buildWorksheet(sheet) {
   const maxCols = Math.max(12, ...rows.map((row) => row.length), ...(sheet.widths || []).map((_, index) => index + 1));
   const lastRef = `${colName(maxCols)}${Math.max(rows.length, 1)}`;
   const merges = sheet.merges || [`A1:${colName(Math.min(maxCols, 14))}1`];
+  const mergeCells = merges.length
+    ? `<mergeCells count="${merges.length}">
+    ${merges.map((ref) => `<mergeCell ref="${ref}"/>`).join("\n    ")}
+  </mergeCells>`
+    : "";
   const freezeRows = Math.max(0, Math.floor(finiteNumber(sheet.freezeRows, 5)));
   const margins = sheet.margins || {};
   const pageSetup = buildPageSetup(sheet);
@@ -252,9 +257,7 @@ function buildWorksheet(sheet) {
   <sheetData>
     ${rows.map((row, index) => buildRow(row, index + 1, getRowStyle(row, index), sheet.rowHeights?.[index])).join("\n    ")}
   </sheetData>
-  <mergeCells count="${merges.length}">
-    ${merges.map((ref) => `<mergeCell ref="${ref}"/>`).join("\n    ")}
-  </mergeCells>
+  ${mergeCells}
   <printOptions horizontalCentered="${sheet.horizontalCentered ? 1 : 0}" verticalCentered="0"/>
   <pageMargins left="${finiteNumber(margins.left, 0.25)}" right="${finiteNumber(margins.right, 0.25)}" top="${finiteNumber(margins.top, 0.5)}" bottom="${finiteNumber(margins.bottom, 0.5)}" header="${finiteNumber(margins.header, 0.3)}" footer="${finiteNumber(margins.footer, 0.3)}"/>
   ${pageSetup}

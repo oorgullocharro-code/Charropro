@@ -1,6 +1,6 @@
-import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { state } from "./state.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { state } from "./state.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 const COLEADERO_COMPETITION_ID = "coleadero";
 

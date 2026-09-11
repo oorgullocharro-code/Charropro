@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+} from "../js/core/scoring.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

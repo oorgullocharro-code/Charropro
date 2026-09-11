@@ -1,5 +1,5 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

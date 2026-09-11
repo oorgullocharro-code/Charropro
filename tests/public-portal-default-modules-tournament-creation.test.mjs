@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import {
   applyDefaultPublicPortalModules,
   resolveDefaultPublicPortalModules
-} from "../js/core/publicPortalModulePolicy.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-coleadero-excel-export-valid-xlsx-and-colas-sheet-001-v1";
+} from "../js/core/publicPortalModulePolicy.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
 
 const tournamentId = "public-portal-default-modules-creation";
 const expectedTypes = ["live", "program", "results", "standings", "sheet"];
