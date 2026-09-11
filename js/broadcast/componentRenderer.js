@@ -1,7 +1,7 @@
 import {
   COMPONENT_VISIBILITY,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./componentLibrary.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 export const COMPONENT_RENDERER_VERSION = "1.0.0";
 

@@ -1,19 +1,20 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   buildGraphicTimerPresentation,
   readGraphicTimerPresentationOptions
-} from "./graficoTimerPresentation.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./graficoTimerPresentation.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";
@@ -566,6 +567,7 @@ function renderCalaDetailGraphic(payload, config) {
 
 function renderColeaderoGraphic(payload, config) {
   const data = getColeaderoData(payload);
+  if (data.participantScope === "individual") return renderIndividualColeaderoGraphic(data, config);
   const rows = data.rows.slice(0, 3);
   const teamName = data.team?.name || payload.turn?.team?.name || "Equipo en turno";
   const charreadaName = data.charreada?.name || payload.charreada?.name || "";
@@ -594,6 +596,60 @@ function renderColeaderoGraphic(payload, config) {
       </section>
     </main>
   `;
+}
+
+function renderIndividualColeaderoGraphic(data, config) {
+  const rows = selectColeaderoFiveRiderWindow(data.rows, data.currentParticipantId);
+  const slots = Number(data.opportunitiesPerParticipant || 0);
+  const headers = Array.from({ length: slots }, (_, index) => `${index + 1}a`);
+  const currentTurn = Number(data.currentIndex) >= 0 ? Number(data.currentIndex) + 1 : 0;
+  const subtitle = currentTurn && data.participantCount
+    ? `Turno ${currentTurn} de ${data.participantCount}`
+    : "Coleadero individual";
+
+  return html`
+    <main class="graphic-stage">
+      <section class="graphic-coleadero graphic-coleadero-individual graphic-widget">
+        ${config.showLogo ? html`<div class="graphic-coleadero-logo" aria-hidden="true"></div>` : ""}
+        <header class="graphic-coleadero-header">
+          <div>
+            <span>Resultados al momento</span>
+            <strong>${escapeHTML(data.charreada?.name || "Coleadero")}</strong>
+            <em>${escapeHTML(subtitle)}</em>
+          </div>
+        </header>
+        <div class="graphic-coleadero-columns" style=${`--coleadero-slot-count:${slots}`} aria-hidden="true">
+          <span>#</span>
+          <span>Coleador</span>
+          <span>Caballo</span>
+          ${headers.map((header) => html`<span>${header}</span>`).join("")}
+          <span>Total</span>
+        </div>
+        <div class="graphic-coleadero-grid">
+          ${rows.map((row) => renderIndividualColeaderoRow(row, slots)).join("")}
+        </div>
+      </section>
+    </main>
+  `;
+}
+
+function renderIndividualColeaderoRow(row, slots) {
+  const opportunities = new Map((row.opportunities || []).map((opportunity) => [Number(opportunity.opportunityNumber), opportunity]));
+  return html`
+    <div class="graphic-coleadero-row graphic-coleadero-individual-row ${row.active ? "active" : ""}" style=${`--coleadero-slot-count:${slots}`}>
+      <div class="graphic-coleadero-turn">${Number(row.turn || 0)}</div>
+      <div class="graphic-coleadero-participant"><strong>${escapeHTML(row.participantName || "Participante")}</strong></div>
+      <div class="graphic-coleadero-horse">${escapeHTML(row.horseName || "—")}</div>
+      ${Array.from({ length: slots }, (_, index) => renderIndividualColeaderoOpportunity(opportunities.get(index + 1))).join("")}
+      <div class="graphic-coleadero-total">${moneylessNumber(row.officialTotal)}</div>
+    </div>
+  `;
+}
+
+function renderIndividualColeaderoOpportunity(opportunity) {
+  const hasOfficialValue = Boolean(opportunity && Number.isFinite(Number(opportunity.officialPoints)));
+  const value = hasOfficialValue ? moneylessNumber(opportunity.officialPoints) : "—";
+  return html`<div class="graphic-coleadero-attempt ${hasOfficialValue && Number(opportunity.officialPoints) < 0 ? "negative" : ""}">${escapeHTML(value)}</div>`;
 }
 
 function renderCategoryGraphic(payload, config) {

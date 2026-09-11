@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

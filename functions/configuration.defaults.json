@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-coleadero-excel-federation-colas-layout-001-v1",
+      "appVersion": "20260911-coleadero-live-graphics-five-rider-window-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "9b2e0859454293590c6a89847ac68953693efc1da19ef95ba08e5200ce4aabc7",
-  "fingerprint": "9b2e0859454293590c6a89847ac68953693efc1da19ef95ba08e5200ce4aabc7"
+  "checksum": "7a40ce0aab709f69a208f9826c17bd46a7170b0eb69573a29392f66858ee5c78",
+  "fingerprint": "7a40ce0aab709f69a208f9826c17bd46a7170b0eb69573a29392f66858ee5c78"
 }

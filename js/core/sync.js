@@ -1,22 +1,24 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildTournamentStandingColumns, calculateAttemptTotal } from "./scoring.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildPublicProjection } from "../public/publicProjection.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { getActiveCharreada, getActiveTournament, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildTournamentStandingColumns, calculateAttemptTotal } from "./scoring.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildPublicProjection } from "../public/publicProjection.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { getActiveCharreada, getActiveTournament, getCharreadaScoringEntries, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildIndividualColeaderoLiveData, isIndividualColeaderoLiveContext } from "./coleaderoLiveGraphic.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   buildOfficialTimerProjectionFromCurrentContext,
   resolveOfficialCurrentTimerContext,
   resolvePreviousPialesOpportunity
-} from "./officialTimerOrchestration.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "./canonicalTournamentLifecycle.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./officialTimerOrchestration.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "./canonicalTournamentLifecycle.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -811,6 +813,22 @@ export function getCharroName(context) {
 
 function buildColeaderoGraphicData(charreada, context, options = {}) {
   if (!charreada) return null;
+
+  const tournament = context?.tournament || getActiveTournament();
+  if (isIndividualColeaderoLiveContext(charreada, context)) {
+    const canonicalOfficialResults = buildCanonicalOfficialResults({
+      publishedScores: state.publishedScores,
+      officialScoreLedger: state.officialScoreLedgers?.[tournament?.id] || {},
+      tournamentId: tournament?.id || ""
+    });
+    return buildIndividualColeaderoLiveData({
+      tournament,
+      charreada,
+      entries: getCharreadaScoringEntries(charreada),
+      currentParticipantId: context?.participant?.id || context?.team?.id || "",
+      canonicalOfficialResults
+    });
+  }
 
   const colas = SUERTES.find((suerte) => suerte.id === "colas");
   const isColeaderoTurn = context?.suerte?.id === "colas";

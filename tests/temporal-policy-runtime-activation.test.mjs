@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../js/core/timerRules.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",

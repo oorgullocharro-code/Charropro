@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

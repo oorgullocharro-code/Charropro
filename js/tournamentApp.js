@@ -1,3 +1,3 @@
 window.CHARROPRO_APP_MODE = "tournament";
 
-await import("./app.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1");
+await import("./app.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1");

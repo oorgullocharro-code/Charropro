@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { BRAKE_REVIEW_ACTIONS, getBrakeReviewStateFromTimer } from "../js/core/brakeReviewPhase.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import { command, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const deviceA = command(freshReview(), BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, {

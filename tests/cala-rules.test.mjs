@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../js/data/calaRules.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

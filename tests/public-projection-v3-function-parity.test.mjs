@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const tournamentId = "public-v3-function-parity";
 const nowMs = Date.parse("2026-09-09T12:00:00.000Z");

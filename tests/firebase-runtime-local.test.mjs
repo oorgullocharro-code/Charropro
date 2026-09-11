@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

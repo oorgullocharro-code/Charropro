@@ -6,22 +6,22 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./firebaseRuntime.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../data/competitionTypes.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./userAccessBootstrap.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -29,20 +29,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../public/publicProjection.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../public/publicProjectionSchema.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -58,11 +58,11 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./publicProjectionOutbox.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./pendingScoreReview.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
@@ -70,14 +70,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./timerRules.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer,
   isBrakeReviewProfile
-} from "./brakeReviewPhase.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "./brakeReviewPhase.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -6374,6 +6374,38 @@ function compactLeaderboardItem(item) {
 
 function compactColeadero(coleadero) {
   if (!coleadero) return null;
+  if (coleadero.participantScope === "individual") {
+    return {
+      participantScope: "individual",
+      charreada: {
+        id: coleadero.charreada?.id || "",
+        name: coleadero.charreada?.name || ""
+      },
+      suerte: {
+        id: "colas",
+        name: "Colas",
+        fullName: "Coleadero"
+      },
+      currentParticipantId: coleadero.currentParticipantId || "",
+      currentIndex: Number(coleadero.currentIndex ?? -1),
+      participantCount: Number(coleadero.participantCount || 0),
+      opportunitiesPerParticipant: Number(coleadero.opportunitiesPerParticipant || 0),
+      rows: (coleadero.rows || []).map((row, rowIndex) => ({
+        participantId: row.participantId || "",
+        participantName: row.participantName || "",
+        horseId: row.horseId || "",
+        horseName: row.horseName || "",
+        turn: Number(row.turn || rowIndex + 1),
+        active: Boolean(row.active),
+        opportunities: (row.opportunities || []).map((opportunity) => ({
+          opportunityNumber: Number(opportunity.opportunityNumber || 0),
+          officialPoints: Number(opportunity.officialPoints || 0),
+          status: opportunity.status || ""
+        })),
+        officialTotal: Number(row.officialTotal || 0)
+      }))
+    };
+  }
   return {
     charreada: {
       id: coleadero.charreada?.id || "",

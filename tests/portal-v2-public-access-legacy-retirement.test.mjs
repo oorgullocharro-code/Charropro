@@ -5,8 +5,8 @@ import {
   buildPortalV2PublicPath,
   buildPortalV2PublicUrl,
   buildPortalV2Url
-} from "../js/portalV2/portalV2Router.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
-import { buildLegacyPortalV2RedirectPath } from "../js/portalV2/legacyPortalRedirect.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../js/portalV2/portalV2Router.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
+import { buildLegacyPortalV2RedirectPath } from "../js/portalV2/legacyPortalRedirect.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const tournamentA = "torneo_mtvjrydx_26jzkk";
 const tournamentB = "torneo_mtvjrydx_otro";

@@ -7,7 +7,7 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+} from "../js/core/coleaderoXlsx.js?v=20260911-coleadero-live-graphics-five-rider-window-001-v1";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);
