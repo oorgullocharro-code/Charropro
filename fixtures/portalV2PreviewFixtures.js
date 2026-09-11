@@ -1,4 +1,4 @@
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const TOURNAMENT_ID = "portal-v2-local-preview";
 

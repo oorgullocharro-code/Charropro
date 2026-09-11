@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_RESULTS, BRAKE_REVIEW_STAGES } from "../js/core/brakeReviewPhase.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_RESULTS, BRAKE_REVIEW_STAGES } from "../js/core/brakeReviewPhase.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let result = command(freshReview(), BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, {

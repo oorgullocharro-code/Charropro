@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-graphics-access-coleadero-tournament-button-001-v1",
+      "appVersion": "20260911-coleadero-graphics-access-separation-and-width-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "4d6a3e4f59b5ee8e0ce2f1bed4a929f784ae03b6325b250ce8f2ac8259f2d00e",
-  "fingerprint": "4d6a3e4f59b5ee8e0ce2f1bed4a929f784ae03b6325b250ce8f2ac8259f2d00e"
+  "checksum": "4ea366586ee92a490f4bfb57c6f9545422960352c6b1535fd01a9c5a31bbc90f",
+  "fingerprint": "4ea366586ee92a490f4bfb57c6f9545422960352c6b1535fd01a9c5a31bbc90f"
 }

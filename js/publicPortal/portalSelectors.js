@@ -1,7 +1,7 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { selectOfficialRanking } from "../core/officialRanking.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

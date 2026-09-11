@@ -1,4 +1,4 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.

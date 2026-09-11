@@ -5,8 +5,8 @@ import {
   buildIndividualColeaderoLiveData,
   isIndividualColeaderoLiveContext,
   selectColeaderoFiveRiderWindow
-} from "../js/core/coleaderoLiveGraphic.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/core/coleaderoLiveGraphic.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const tournament = {
   id: "coleadero-live",
@@ -111,7 +111,8 @@ test("individual scope is explicit and team scope remains outside the new branch
   ]);
   assert.match(syncSource, /if \(isIndividualColeaderoLiveContext\(charreada, context\)\) \{/);
   assert.match(syncSource, /const rowCount = team\.participantName \? 1 : 3;/, "team payload builder remains present after individual branch");
-  assert.match(graphicSource, /if \(data\.participantScope === "individual"\) return renderIndividualColeaderoGraphic\(data, config\);/);
+  assert.match(graphicSource, /function renderTraditionalColeaderoGraphic\(payload, config\) \{\s+const data = getColeaderoData\(payload\);\s+const rows = data\.rows\.slice\(0, 3\);/);
+  assert.match(graphicSource, /function renderTournamentColeaderoGraphic\(payload, config\) \{\s+const data = getColeaderoData\(payload\);\s+if \(data\.participantScope !== "individual"\) return renderTournamentColeaderoUnavailableGraphic\(\);\s+return renderIndividualColeaderoGraphic\(data, config\);/);
   assert.match(graphicSource, /const rows = data\.rows\.slice\(0, 3\);/, "team renderer remains the legacy three-row renderer");
 });
 

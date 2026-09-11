@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults,
   buildCanonicalTournamentResultsHash,
   validateCanonicalTournamentResults
-} from "../js/core/canonicalTournamentResults.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/core/canonicalTournamentResults.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const TOURNAMENT_ID = "tournament-results";
 const CHARREADA_ID = "charreada-results";

@@ -7,7 +7,7 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/core/coleaderoXlsx.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);

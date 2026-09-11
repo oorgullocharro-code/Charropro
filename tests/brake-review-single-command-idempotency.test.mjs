@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { BRAKE_REVIEW_ACTIONS, applyBrakeReviewCommand } from "../js/core/brakeReviewPhase.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 import { actor, catalog, context, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const commandId = "brake-review:single-logical-attempt";

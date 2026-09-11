@@ -7980,6 +7980,10 @@ html.graphic-page #graphic-root[data-view="timer"] {
   width: min(1040px, calc(100vw - 24px));
 }
 
+.graphic-coleadero-tournament {
+  width: min(590px, calc(100vw - 24px));
+}
+
 .graphic-coleadero-individual .graphic-coleadero-header {
   padding-right: 156px;
 }
@@ -7988,6 +7992,38 @@ html.graphic-page #graphic-root[data-view="timer"] {
 .graphic-coleadero-individual-row {
   grid-template-columns: 38px minmax(190px, 1.35fr) minmax(140px, 1fr) repeat(var(--coleadero-slot-count), minmax(58px, .45fr)) 88px;
   gap: 6px;
+}
+
+.graphic-coleadero-tournament .graphic-coleadero-header {
+  min-height: 48px;
+  padding-right: 110px;
+}
+
+.graphic-coleadero-tournament .graphic-coleadero-header strong {
+  max-width: 390px;
+  font-size: 22px;
+}
+
+.graphic-coleadero-tournament .graphic-coleadero-columns,
+.graphic-coleadero-tournament .graphic-coleadero-individual-row {
+  grid-template-columns: 30px minmax(118px, 1.25fr) minmax(92px, .9fr) repeat(var(--coleadero-slot-count), minmax(38px, .36fr)) 62px;
+  gap: 4px;
+}
+
+.graphic-coleadero-tournament .graphic-coleadero-logo {
+  width: 100px;
+  height: 46px;
+}
+
+.graphic-coleadero-tournament .graphic-coleadero-individual-row .graphic-coleadero-attempt,
+.graphic-coleadero-tournament .graphic-coleadero-individual-row .graphic-coleadero-total {
+  font-size: 17px;
+}
+
+.graphic-coleadero-tournament .graphic-coleadero-participant,
+.graphic-coleadero-tournament .graphic-coleadero-horse {
+  padding: 0 7px;
+  font-size: 12px;
 }
 
 .graphic-coleadero-individual-row {

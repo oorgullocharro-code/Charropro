@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

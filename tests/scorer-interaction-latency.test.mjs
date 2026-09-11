@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

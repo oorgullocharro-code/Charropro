@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

@@ -1,20 +1,20 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 import {
   buildGraphicTimerPresentation,
   readGraphicTimerPresentationOptions
-} from "./graficoTimerPresentation.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "./graficoTimerPresentation.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";
@@ -85,7 +85,12 @@ function render() {
   }
 
   if (view === "coleadero") {
-    root.innerHTML = renderColeaderoGraphic(payload, config);
+    root.innerHTML = renderTraditionalColeaderoGraphic(payload, config);
+    return;
+  }
+
+  if (view === "coleadero-torneo") {
+    root.innerHTML = renderTournamentColeaderoGraphic(payload, config);
     return;
   }
 
@@ -565,9 +570,8 @@ function renderCalaDetailGraphic(payload, config) {
   `;
 }
 
-function renderColeaderoGraphic(payload, config) {
+function renderTraditionalColeaderoGraphic(payload, config) {
   const data = getColeaderoData(payload);
-  if (data.participantScope === "individual") return renderIndividualColeaderoGraphic(data, config);
   const rows = data.rows.slice(0, 3);
   const teamName = data.team?.name || payload.turn?.team?.name || "Equipo en turno";
   const charreadaName = data.charreada?.name || payload.charreada?.name || "";
@@ -598,6 +602,28 @@ function renderColeaderoGraphic(payload, config) {
   `;
 }
 
+function renderTournamentColeaderoGraphic(payload, config) {
+  const data = getColeaderoData(payload);
+  if (data.participantScope !== "individual") return renderTournamentColeaderoUnavailableGraphic();
+  return renderIndividualColeaderoGraphic(data, config);
+}
+
+function renderTournamentColeaderoUnavailableGraphic() {
+  return html`
+    <main class="graphic-stage">
+      <section class="graphic-coleadero graphic-coleadero-tournament graphic-widget">
+        <header class="graphic-coleadero-header">
+          <div>
+            <span>Coleadero torneo</span>
+            <strong>Esperando competencia individual</strong>
+            <em>Este Browser Source requiere un lote individual de Coleadero.</em>
+          </div>
+        </header>
+      </section>
+    </main>
+  `;
+}
+
 function renderIndividualColeaderoGraphic(data, config) {
   const rows = selectColeaderoFiveRiderWindow(data.rows, data.currentParticipantId);
   const slots = Number(data.opportunitiesPerParticipant || 0);
@@ -609,7 +635,7 @@ function renderIndividualColeaderoGraphic(data, config) {
 
   return html`
     <main class="graphic-stage">
-      <section class="graphic-coleadero graphic-coleadero-individual graphic-widget">
+      <section class="graphic-coleadero graphic-coleadero-individual graphic-coleadero-tournament graphic-widget">
         ${config.showLogo ? html`<div class="graphic-coleadero-logo" aria-hidden="true"></div>` : ""}
         <header class="graphic-coleadero-header">
           <div>

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

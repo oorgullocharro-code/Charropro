@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const {
   RULE_PROFILE_ASSIGNMENT_AUTHORITY_VERSION,

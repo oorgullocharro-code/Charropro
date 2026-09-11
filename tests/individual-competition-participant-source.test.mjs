@@ -7,9 +7,9 @@ import {
   getTournamentParticipants,
   getTournamentTeams,
   state
-} from "../js/core/state.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/core/state.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const previous = structuredClone({
   activeTournamentId: state.activeTournamentId,

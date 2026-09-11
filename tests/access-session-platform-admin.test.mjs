@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { makeAccessSession } from "../js/core/roles.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+import { makeAccessSession } from "../js/core/roles.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const user = Object.freeze({ uid: "user-1", email: "user@example.test", displayName: "User" });
 

@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/data/suertes.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

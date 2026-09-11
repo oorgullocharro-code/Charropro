@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

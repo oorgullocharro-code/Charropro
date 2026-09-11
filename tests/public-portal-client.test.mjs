@@ -5,9 +5,9 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-graphics-access-coleadero-tournament-button-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {
