@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

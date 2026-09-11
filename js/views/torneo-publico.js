@@ -1,3 +1,3 @@
-import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { bootstrapPublicPortal } from "../publicPortal/portalApp.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 bootstrapPublicPortal();

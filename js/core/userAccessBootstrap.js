@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

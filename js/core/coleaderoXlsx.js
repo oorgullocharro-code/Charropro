@@ -1,6 +1,10 @@
-import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
-import { state } from "./state.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import {
+  buildCanonicalOfficialResults,
+  getCanonicalSportingOpportunityKey
+} from "./canonicalOfficialResults.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { state } from "./state.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 const COLEADERO_COMPETITION_ID = "coleadero";
 
@@ -13,6 +17,7 @@ export function isColeaderoXlsxExport({ tournament = {}, charreada = {} } = {}) 
 export function buildColeaderoXlsxWorkbook(input = {}) {
   const source = normalizeSource(input);
   const tournament = source.tournament;
+  const officialOpportunityValues = buildOfficialColeaderoOpportunityValues(source, tournament.id);
   const canonical = input.canonicalTournamentResults || buildCanonicalTournamentResults(source, {
     tournamentId: tournament.id,
     generatedAt: input.generatedAt
@@ -29,8 +34,7 @@ export function buildColeaderoXlsxWorkbook(input = {}) {
   }
   const slots = uniqueSlotCount(competitions);
   if (!slots) throw new Error("coleadero-xlsx-opportunity-slots-missing");
-  const headers = ["Lote", "Turno", "Participante", "Caballo", ...opportunityHeaders(slots), "Total"];
-  const rows = [headers.map((value) => cell(value, "sectionTitle"))];
+  const rows = buildHeaders(slots);
   for (const competition of competitions) {
     for (const row of competition.rows) {
       rows.push([
@@ -38,7 +42,15 @@ export function buildColeaderoXlsxWorkbook(input = {}) {
         cell(row.turn, "number"),
         cell(row.participantName, "normal"),
         cell(row.horseName, "normal"),
-        ...Array.from({ length: slots }, (_, index) => opportunityCell(row.opportunities, index + 1)),
+        ...Array.from({ length: slots }, (_, index) => opportunityCells({
+          tournamentId: tournament.id,
+          competitionId: competition.competitionId,
+          charreadaId: competition.lotId,
+          participantId: row.participantId,
+          opportunities: row.opportunities,
+          opportunityNumber: index + 1,
+          officialOpportunityValues
+        })).flat(),
         cell(row.total, "total")
       ]);
     }
@@ -49,9 +61,9 @@ export function buildColeaderoXlsxWorkbook(input = {}) {
     sheets: [{
       name: "Colas",
       rows,
-      merges: [],
-      widths: [18, 10, 28, 24, ...Array.from({ length: slots }, () => 12), 14],
-      freezeRows: 1,
+      merges: headerMerges(slots),
+      widths: [18, 10, 28, 24, ...Array.from({ length: slots }, () => [10, 10, 10]).flat(), 14],
+      freezeRows: 2,
       orientation: "landscape",
       fitToWidth: 1,
       fitToHeight: 1,
@@ -112,6 +124,7 @@ function buildCompetitionRows(competition, charreada) {
   return {
     lotId: String(charreada?.id || competition.charreadaId || ""),
     lotName: String(charreada?.name || competition.charreadaName || competition.charreadaId || ""),
+    competitionId: String(competition.competitionId || charreada?.competitionId || COLEADERO_COMPETITION_ID),
     lotOrder: programOrder(charreada),
     opportunitiesPerParticipant: positiveInteger(competition.opportunitiesPerParticipant),
     rows
@@ -128,13 +141,117 @@ function uniqueSlotCount(competitions) {
   return values[0];
 }
 
-function opportunityHeaders(slots) {
-  return Array.from({ length: slots }, (_, index) => `${index + 1}ª`);
+function buildHeaders(slots) {
+  const title = [
+    cell("COLEADERO", "groupHeader"), cell("", "groupHeader"), cell("", "groupHeader"), cell("", "groupHeader")
+  ];
+  const columns = [
+    cell("Lote", "compactColumnHeader"),
+    cell("Turno", "compactColumnHeader"),
+    cell("Participante", "compactColumnHeader"),
+    cell("Caballo", "compactColumnHeader")
+  ];
+  for (let index = 1; index <= slots; index += 1) {
+    title.push(cell(opportunityTitle(index), "groupHeader"), cell("", "groupHeader"), cell("", "groupHeader"));
+    columns.push(cell("BUENOS", "compactColumnHeader"), cell("MALOS", "badHeader"), cell("TOTAL", "compactColumnHeader"));
+  }
+  title.push(cell("TOTAL", "groupHeader"));
+  columns.push(cell("", "compactColumnHeader"));
+  return [title, columns];
 }
 
-function opportunityCell(opportunities, opportunityNumber) {
+function headerMerges(slots) {
+  const merges = ["A1:D1"];
+  for (let index = 0; index < slots; index += 1) {
+    const firstColumn = 5 + index * 3;
+    merges.push(`${columnName(firstColumn)}1:${columnName(firstColumn + 2)}1`);
+  }
+  const totalColumn = 5 + slots * 3;
+  merges.push(`${columnName(totalColumn)}1:${columnName(totalColumn)}2`);
+  return merges;
+}
+
+function opportunityTitle(index) {
+  const ordinal = index === 1 ? "1er" : index === 2 ? "2do" : `${index}er`;
+  return `${ordinal} PASADA`;
+}
+
+function opportunityCells({ tournamentId, competitionId, charreadaId, participantId, opportunities, opportunityNumber, officialOpportunityValues }) {
   const opportunity = opportunities.find((item) => positiveInteger(item?.opportunityNumber) === opportunityNumber);
-  return cell(opportunity ? officialNumber(opportunity.officialPoints, "coleadero-xlsx-opportunity-invalid") : "", "number");
+  if (!opportunity) return [cell("", "number"), cell("", "badScoreCell"), cell("", "number")];
+  const canonicalTotal = officialNumber(opportunity.officialPoints, "coleadero-xlsx-opportunity-invalid");
+  const key = coleaderoOpportunityKey({ tournamentId, competitionId, charreadaId, participantId, opportunityNumber });
+  const values = officialOpportunityValues.get(key);
+  if (!values) throw new Error("coleadero-xlsx-official-opportunity-missing");
+  if (values.invalid) throw new Error(values.invalid);
+  if (values.officialPoints !== canonicalTotal) throw new Error("coleadero-xlsx-official-opportunity-mismatch");
+  return [
+    cell(values.goodPoints, "number"),
+    cell(values.individualBadPoints, "badScoreCell"),
+    cell(values.officialPoints, "number")
+  ];
+}
+
+function buildOfficialColeaderoOpportunityValues(source, tournamentId) {
+  const official = buildCanonicalOfficialResults({
+    publishedScores: source.publishedScores,
+    officialScoreLedger: source.officialScoreLedger,
+    tournamentId
+  });
+  const values = new Map();
+  for (const record of official.currentRecords) {
+    const identity = record?.breakdown?.attemptV2?.identity || {};
+    const competitionScope = String(
+      record?.competition?.scope ||
+      record?.competition?.competitionScope ||
+      record?.participantScope ||
+      record?.breakdown?.attemptV2?.context?.competitionScope ||
+      ""
+    ).toLowerCase();
+    const suerteId = String(record?.suerte?.id || record?.suerteId || identity.suerteId || "").toLowerCase();
+    if (competitionScope !== "individual" || suerteId !== "colas") continue;
+    const key = getCanonicalSportingOpportunityKey(record, { tournamentId });
+    if (key) values.set(key, extractFrozenOpportunityValues(record));
+  }
+  return values;
+}
+
+function extractFrozenOpportunityValues(record) {
+  const attemptV2 = record?.breakdown?.attemptV2 || {};
+  const scoring = attemptV2.scoring || {};
+  if (attemptV2.publication?.state !== "OFFICIAL" || attemptV2.publication?.frozen !== true) {
+    return { invalid: "coleadero-xlsx-official-attempt-not-frozen" };
+  }
+  const values = {
+    goodPoints: finiteOfficialNumber(scoring.goodPoints),
+    individualBadPoints: finiteOfficialNumber(scoring.individualBadPoints),
+    officialPoints: finiteOfficialNumber(scoring.teamAdjustedPoints)
+  };
+  return Object.values(values).every((value) => value !== null)
+    ? values
+    : { invalid: "coleadero-xlsx-official-opportunity-values-invalid" };
+}
+
+function coleaderoOpportunityKey({ tournamentId, competitionId, charreadaId, participantId, opportunityNumber }) {
+  return getCanonicalSportingOpportunityKey({
+    tournament: { id: tournamentId },
+    charreada: { id: charreadaId, competitionId },
+    competition: { id: competitionId, scope: "individual" },
+    participant: { id: participantId },
+    participantScope: "individual",
+    suerte: { id: "colas", type: COLEADERO_COMPETITION_ID },
+    breakdown: {
+      attemptV2: {
+        identity: { tournamentId, charreadaId, competitionId, participantId, suerteId: "colas", opportunityNumber },
+        sportState: { opportunity: { number: opportunityNumber } }
+      }
+    }
+  }, { tournamentId });
+}
+
+function finiteOfficialNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
 function cell(value, style) {
@@ -155,6 +272,17 @@ function officialNumber(value, errorCode) {
   const number = Number(value);
   if (!Number.isFinite(number)) throw new Error(errorCode);
   return number;
+}
+
+function columnName(columnNumber) {
+  let name = "";
+  let current = columnNumber;
+  while (current > 0) {
+    const remainder = (current - 1) % 26;
+    name = String.fromCharCode(65 + remainder) + name;
+    current = Math.floor((current - 1) / 26);
+  }
+  return name;
 }
 
 function slug(value) {

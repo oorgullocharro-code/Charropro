@@ -7,18 +7,24 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../js/core/coleaderoXlsx.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);
 assert.equal(workbook.sheets.length, 1, "Coleadero export contains one worksheet");
 assert.equal(workbook.sheets[0].name, "Colas");
-assert.deepEqual(workbook.sheets[0].rows[0].map((cell) => cell.value), ["Lote", "Turno", "Participante", "Caballo", "1ª", "2ª", "3ª", "Total"]);
-assert.deepEqual(workbook.sheets[0].rows.slice(1).map((row) => row.map((cell) => cell.value)), [
-  ["Lote 1", 1, "Gustavo Mares", "Moro", 15, 12, 14, 41],
-  ["Lote 1", 2, "Gustavo Mares", "Canela", 0, "", "", 0],
-  ["Lote 2", 1, "Participante 3", "Relampago", 5, "", "", 5]
-], "rows preserve lot/turn, canonical identity and zero versus absence");
+assert.deepEqual(workbook.sheets[0].merges, ["A1:D1", "E1:G1", "H1:J1", "K1:M1", "N1:N2"], "multilevel headers use exact, non-overlapping merges");
+assert.deepEqual(workbook.sheets[0].rows[0].map((cell) => cell.value), [
+  "COLEADERO", "", "", "", "1er PASADA", "", "", "2do PASADA", "", "", "3er PASADA", "", "", "TOTAL"
+]);
+assert.deepEqual(workbook.sheets[0].rows[1].map((cell) => cell.value), [
+  "Lote", "Turno", "Participante", "Caballo", "BUENOS", "MALOS", "TOTAL", "BUENOS", "MALOS", "TOTAL", "BUENOS", "MALOS", "TOTAL", ""
+]);
+assert.deepEqual(workbook.sheets[0].rows.slice(2).map((row) => row.map((cell) => cell.value)), [
+  ["Lote 1", 1, "Gustavo Mares", "Moro", 17, 2, 15, 18, 1, 12, 16, 2, 14, 41],
+  ["Lote 1", 2, "Gustavo Mares", "Canela", 0, 0, 0, "", "", "", "", "", "", 0],
+  ["Lote 2", 1, "Participante 3", "Relampago", 7, 2, 5, "", "", "", "", "", "", 5]
+], "rows preserve lot/turn, official good and individual bad points, frozen totals, and zero versus absence");
 
 const blob = createColeaderoXlsxBlob(fixture.input);
 assert.equal(blob.type, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -39,13 +45,15 @@ try {
   assert.equal(parsed.contentTypesValid, true, "OpenXML content types cover every required part");
   assert.equal(parsed.cellTypesValid, true, "all cells use valid inline text, numeric, or empty representations");
   assert.equal(parsed.styleReferencesValid, true, "all worksheet style indices resolve in styles.xml");
-  assert.equal(parsed.hasMergeCells, false, "a flat Colas sheet omits mergeCells instead of emitting an empty invalid container");
-  assert.equal(parsed.mergeCount, 0, "flat Colas sheet has no inherited Federation merges");
+  assert.equal(parsed.hasMergeCells, true, "multilevel Colas headers emit a mergeCells container");
+  assert.equal(parsed.mergeCount, 5, "mergeCells count matches the five header ranges");
+  assert.equal(parsed.mergeStructureValid, true, "merge ranges are valid, non-overlapping, and count-consistent");
   assert.deepEqual(parsed.rows, [
-    ["Lote", "Turno", "Participante", "Caballo", "1ª", "2ª", "3ª", "Total"],
-    ["Lote 1", 1, "Gustavo Mares", "Moro", 15, 12, 14, 41],
-    ["Lote 1", 2, "Gustavo Mares", "Canela", 0, null, null, 0],
-    ["Lote 2", 1, "Participante 3", "Relampago", 5, null, null, 5]
+    ["COLEADERO", null, null, null, "1er PASADA", null, null, "2do PASADA", null, null, "3er PASADA", null, null, "TOTAL"],
+    ["Lote", "Turno", "Participante", "Caballo", "BUENOS", "MALOS", "TOTAL", "BUENOS", "MALOS", "TOTAL", "BUENOS", "MALOS", "TOTAL", null],
+    ["Lote 1", 1, "Gustavo Mares", "Moro", 17, 2, 15, 18, 1, 12, 16, 2, 14, 41],
+    ["Lote 1", 2, "Gustavo Mares", "Canela", 0, 0, 0, null, null, null, null, null, null, 0],
+    ["Lote 2", 1, "Participante 3", "Relampago", 7, 2, 5, null, null, null, null, null, null, 5]
   ], "independent OpenXML parser reads official values without workbook repair");
 } finally {
   rmSync(directory, { recursive: true, force: true });
@@ -56,6 +64,10 @@ assert.equal(isColeaderoXlsxExport({
   tournament: { type: "equipos_completo" },
   charreada: { competitionId: "equipos_completo", competitionScope: "team" }
 }), false, "team-charreada export remains on the existing Federation path");
+assert.equal(isColeaderoXlsxExport({
+  tournament: { type: "caladero" },
+  charreada: { competitionId: "caladero", competitionScope: "individual" }
+}), false, "Caladero remains on its existing export path");
 
 const incompleteFixture = buildFixture();
 const incompleteCanonical = {
@@ -80,23 +92,60 @@ assert.throws(
   "an absent official opportunity is never materialized as a sporting zero"
 );
 
+const twoPassWorkbook = buildColeaderoXlsxWorkbook({
+  ...fixture.input,
+  canonicalTournamentResults: {
+    sheet: {
+      competitions: [{
+        charreadaId: "lote-1",
+        competitionId: "coleadero",
+        opportunitiesPerParticipant: 2,
+        rows: [{
+          participantId: "participant-gustavo-moro",
+          participantName: "Gustavo Mares",
+          horseId: "horse-moro",
+          horseName: "Moro",
+          total: 27,
+          opportunities: [
+            { opportunityNumber: 1, officialPoints: 15, status: "VALID" },
+            { opportunityNumber: 2, officialPoints: 12, status: "VALID" }
+          ]
+        }]
+      }]
+    }
+  }
+});
+assert.deepEqual(twoPassWorkbook.sheets[0].merges, ["A1:D1", "E1:G1", "H1:J1", "K1:K2"], "header groups derive from the canonical slot count rather than a hardcoded three");
+assert.deepEqual(twoPassWorkbook.sheets[0].rows[0].map((cell) => cell.value), ["COLEADERO", "", "", "", "1er PASADA", "", "", "2do PASADA", "", "", "TOTAL"]);
+
+const unfrozenFixture = structuredClone(fixture.input);
+for (const record of Object.values(unfrozenFixture.state.publishedScores)) delete record.breakdown.attemptV2.publication;
+for (const ledger of Object.values(unfrozenFixture.state.officialScoreLedger)) {
+  for (const record of Object.values(ledger.records)) delete record.breakdown.attemptV2.publication;
+}
+assert.throws(
+  () => buildColeaderoXlsxWorkbook(unfrozenFixture),
+  /coleadero-xlsx-official-attempt-not-frozen/,
+  "the export refuses a current record that lacks the frozen Official Score snapshot"
+);
+
 console.log("coleadero-xlsx-export.test.mjs: ok");
 
 function buildFixture() {
   const tournamentId = "coleadero-export";
   const charreadaId = "lote-1";
   const records = [
-    record("gustavo-1", "participant-gustavo-moro", 1, 15),
-    record("gustavo-2", "participant-gustavo-moro", 2, 12),
-    record("gustavo-3", "participant-gustavo-moro", 3, 14),
-    record("gustavo-canela-1", "participant-gustavo-canela", 1, 0),
-    record("participant-3-1", "participant-3", 1, 5, "lote-2")
+    record("gustavo-1", "participant-gustavo-moro", 1, { goodPoints: 17, individualBadPoints: 2, teamBadPoints: 0, officialPoints: 15 }),
+    record("gustavo-2", "participant-gustavo-moro", 2, { goodPoints: 18, individualBadPoints: 1, teamBadPoints: 5, officialPoints: 12 }),
+    record("gustavo-3", "participant-gustavo-moro", 3, { goodPoints: 16, individualBadPoints: 2, teamBadPoints: 0, officialPoints: 14 }),
+    record("gustavo-canela-1", "participant-gustavo-canela", 1, { goodPoints: 0, individualBadPoints: 0, teamBadPoints: 0, officialPoints: 0 }),
+    record("participant-3-1", "participant-3", 1, { goodPoints: 7, individualBadPoints: 2, teamBadPoints: 0, officialPoints: 5 }, "lote-2")
   ];
   function record(id, participantId, opportunityNumber, points, recordCharreadaId = charreadaId) {
     return {
       id,
       revision: 1,
-      total: points,
+      total: points.officialPoints,
       tournament: { id: tournamentId },
       charreada: { id: recordCharreadaId, competitionId: "coleadero" },
       competition: { id: "coleadero", competitionScope: "individual", competitionType: "coleadero" },
@@ -105,8 +154,14 @@ function buildFixture() {
       breakdown: {
         attemptV2: {
           identity: { tournamentId, charreadaId: recordCharreadaId, competitionId: "coleadero", participantId, suerteId: "colas", opportunityNumber },
-          sportState: { status: "VALID" },
-          scoring: { teamAdjustedPoints: points, individualBadPoints: 0, teamBadPoints: 0 }
+          sportState: { status: "VALID", opportunity: { number: opportunityNumber } },
+          scoring: {
+            goodPoints: points.goodPoints,
+            individualBadPoints: points.individualBadPoints,
+            teamBadPoints: points.teamBadPoints,
+            teamAdjustedPoints: points.officialPoints
+          },
+          publication: { state: "OFFICIAL", frozen: true }
         }
       }
     };
@@ -163,7 +218,7 @@ function buildFixture() {
 
 function openXmlReader() {
   return String.raw`
-import json, sys, zipfile
+import json, re, sys, zipfile
 from xml.etree import ElementTree as ET
 path = sys.argv[1]
 main = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
@@ -233,6 +288,34 @@ with zipfile.ZipFile(path) as archive:
         values.append(None)
     rows.append(values)
   merge_cells = worksheet.find(main + 'mergeCells')
+  merge_refs = [merge.attrib.get('ref', '') for merge in merge_cells.findall(main + 'mergeCell')] if merge_cells is not None else []
+  def coordinate(value):
+    match = re.fullmatch(r'([A-Z]+)([1-9][0-9]*)', value or '')
+    if not match:
+      return None
+    letters, row = match.groups()
+    column = 0
+    for letter in letters:
+      column = column * 26 + ord(letter) - 64
+    return (column, int(row))
+  merge_ranges = []
+  merge_structure_valid = merge_cells is None
+  if merge_cells is not None:
+    count = merge_cells.attrib.get('count')
+    merge_structure_valid = count is not None and count.isdigit() and int(count) == len(merge_refs)
+    for ref in merge_refs:
+      parts = ref.split(':')
+      start = coordinate(parts[0]) if len(parts) == 2 else None
+      end = coordinate(parts[1]) if len(parts) == 2 else None
+      if not start or not end or start[0] > end[0] or start[1] > end[1] or start == end:
+        merge_structure_valid = False
+        continue
+      merge_ranges.append((start, end))
+    for index, (left_start, left_end) in enumerate(merge_ranges):
+      for right_start, right_end in merge_ranges[index + 1:]:
+        overlap = not (left_end[0] < right_start[0] or right_end[0] < left_start[0] or left_end[1] < right_start[1] or right_end[1] < left_start[1])
+        if overlap:
+          merge_structure_valid = False
   print(json.dumps({
     'contentTypes': '[Content_Types].xml' in names,
     'workbook': 'xl/workbook.xml' in names,
@@ -245,6 +328,7 @@ with zipfile.ZipFile(path) as archive:
     'styleReferencesValid': style_references_valid,
     'hasMergeCells': merge_cells is not None,
     'mergeCount': len(merge_cells.findall(main + 'mergeCell')) if merge_cells is not None else 0,
+    'mergeStructureValid': merge_structure_valid,
     'rows': rows
   }))
 `;

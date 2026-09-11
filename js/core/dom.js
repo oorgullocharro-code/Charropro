@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 logCharroProVersion("runtime");
 

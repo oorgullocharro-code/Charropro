@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1",
+      "appVersion": "20260911-coleadero-excel-federation-colas-layout-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "6fe7d98b691f8cf18ac43e0e8efc0ac36598e1837cf90789b7a9a2e2657d6774",
-  "fingerprint": "6fe7d98b691f8cf18ac43e0e8efc0ac36598e1837cf90789b7a9a2e2657d6774"
+  "checksum": "9b2e0859454293590c6a89847ac68953693efc1da19ef95ba08e5200ce4aabc7",
+  "fingerprint": "9b2e0859454293590c6a89847ac68953693efc1da19ef95ba08e5200ce4aabc7"
 }

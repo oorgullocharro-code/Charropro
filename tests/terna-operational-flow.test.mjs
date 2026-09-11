@@ -10,7 +10,7 @@ import {
   normalizeFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 const identity = {
   tournamentId: "demo-local-fmch-2026",

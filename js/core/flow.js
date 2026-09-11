@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "./state.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

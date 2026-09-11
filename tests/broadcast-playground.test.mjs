@@ -20,27 +20,27 @@ import {
   setPlaygroundVisibility,
   takePlaygroundToProgram,
   validatePlaygroundModel
-} from "../js/broadcast/broadcastPlayground.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../js/broadcast/broadcastPlayground.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 import {
   PLAYGROUND_ASSET_DEFINITIONS,
   PLAYGROUND_COMPETITIONS,
   PLAYGROUND_GRAPHIC_DEFINITIONS,
   PLAYGROUND_OUTPUT_DEFINITIONS,
   buildPlaygroundFixture
-} from "../js/broadcast/fixtures/broadcastPlaygroundFixtures.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../js/broadcast/fixtures/broadcastPlaygroundFixtures.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 import {
   buildBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 import {
   getBroadcastOutput,
   validateBroadcastOutput
-} from "../js/broadcast/broadcastOutput.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
-import { validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../js/broadcast/broadcastOutput.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { validateBroadcastState } from "../js/broadcast/broadcastState.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 import {
   listBroadcastAssets,
   validateBroadcastAsset
-} from "../js/broadcast/assetManager.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../js/broadcast/assetManager.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 const T0 = "2026-07-13T18:30:00.000Z";
 const T1 = "2026-07-13T18:30:01.000Z";

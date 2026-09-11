@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+} from "../componentLibrary.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

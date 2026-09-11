@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
-import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 function context(suerteId, extra = {}) {
   return {

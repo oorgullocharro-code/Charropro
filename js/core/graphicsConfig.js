@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

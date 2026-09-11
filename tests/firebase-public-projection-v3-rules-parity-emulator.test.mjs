@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

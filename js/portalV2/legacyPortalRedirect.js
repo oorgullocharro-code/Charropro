@@ -1,4 +1,4 @@
-import { PORTAL_V2_VIEWS, sanitizePortalV2Id, sanitizePortalV2View } from "./portalV2Router.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { PORTAL_V2_VIEWS, sanitizePortalV2Id, sanitizePortalV2View } from "./portalV2Router.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 const TOURNAMENT_ALIASES = Object.freeze([
   "tournamentId", "canal", "channel", "id", "torneo", "tournament", "evento", "event"

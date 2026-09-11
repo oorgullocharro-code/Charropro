@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { ROLES, roleCan } from "../js/core/roles.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
-import { CHARROPRO_APP_VERSION } from "../js/core/version.js?v=20260911-coleadero-xlsx-microsoft-excel-compatibility-fix-001-v1";
+import { ROLES, roleCan } from "../js/core/roles.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
+import { CHARROPRO_APP_VERSION } from "../js/core/version.js?v=20260911-coleadero-excel-federation-colas-layout-001-v1";
 
 const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
 const cssSource = await readFile(new URL("../css/styles.css", import.meta.url), "utf8");
