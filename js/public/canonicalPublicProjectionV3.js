@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 

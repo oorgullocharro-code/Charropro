@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 
@@ -88,6 +88,13 @@ async function runProjectionV3RulesParityEmulator() {
     const noAccess = await writeProjection(databaseHost, databaseNamespace, noAccessId, buildIndividualCandidate(noAccessId, { program: true, live: true, results: true, standings: true, sheet: true }), token);
     assert.equal(noAccess.ok, false, "a judge without selected tournament access remains denied");
 
+    const individualSlots = buildIndividualCandidate(`${tournamentId}-individual-coleadero-opportunity-slots`, { program: true, live: true, results: true, standings: true, sheet: true, opportunitySlots: true });
+    assert.equal(validateCanonicalPublicTournamentData(individualSlots).valid, true, "Coleadero opportunity slots are a valid V3 projection");
+    await assertAllowed("individual-coleadero-opportunity-slots", individualSlots, token);
+    const individualOpportunities = buildIndividualCandidate(`${tournamentId}-individual-coleadero-opportunities`, { program: true, live: true, results: true, standings: true, sheet: true, opportunities: true });
+    assert.equal(validateCanonicalPublicTournamentData(individualOpportunities).valid, true, "Coleadero opportunity detail is a valid V3 projection");
+    await assertAllowed("individual-coleadero-opportunities", individualOpportunities, token);
+
     await assertRejected("schema-v2", candidate, token, (projection) => {
       projection.schemaVersion = 2;
       projection.projectionVersion = "2.0.0";
@@ -120,6 +127,12 @@ async function runProjectionV3RulesParityEmulator() {
     });
     await assertRejected("sheet-malformed", candidate, token, (projection) => {
       projection.sheet.competitions[0].phase = 7;
+    });
+    await assertRejected("sheet-opportunity-slot-invalid", individualOpportunities, token, (projection) => {
+      projection.sheet.competitions[0].opportunitiesPerParticipant = 0;
+    });
+    await assertRejected("sheet-opportunity-schema-invalid", individualOpportunities, token, (projection) => {
+      projection.sheet.competitions[0].rows[0].opportunities[0].unapproved = "not-allowlisted";
     });
     await assertRejected("individual-extra-field", individual, token, (projection) => {
       projection.results.teams[0].unapprovedHorseMetadata = "not-allowlisted";
@@ -278,7 +291,9 @@ function buildIndividualCandidate(tournamentId, fields = {}) {
     results: fields.results === true,
     standings: fields.standings === true,
     sheet: fields.sheet === true,
-    live: fields.live === true
+    live: fields.live === true,
+    opportunities: fields.opportunities === true,
+    opportunitySlots: fields.opportunitySlots === true || fields.opportunities === true
   };
   const result = {
     resultId: "result-gustavo",
@@ -326,6 +341,9 @@ function buildIndividualCandidate(tournamentId, fields = {}) {
     columns: result.columns
   };
   if (include.sheet) Object.assign(sheetRow, { horseId: "horse-moro", horseName: "Moro" });
+  if (include.opportunities) Object.assign(sheetRow, {
+    opportunities: [{ opportunityNumber: 1, officialPoints: 15, status: "VALID" }]
+  });
   const programItem = {
     id: "lote-coleadero",
     charreadaId: "lote-coleadero",
@@ -356,7 +374,16 @@ function buildIndividualCandidate(tournamentId, fields = {}) {
     },
     results: { teams: [result] },
     standings: { items: [standing] },
-    sheet: { competitions: [{ competitionId: "coleadero", name: "Coleadero", charreadaId: "lote-coleadero", charreadaName: "Coleadero", phase: "clasificatoria", phaseName: "Clasificatoria", rows: [sheetRow] }] },
+    sheet: { competitions: [{
+      competitionId: "coleadero",
+      name: "Coleadero",
+      charreadaId: "lote-coleadero",
+      charreadaName: "Coleadero",
+      phase: "clasificatoria",
+      phaseName: "Clasificatoria",
+      ...(include.opportunitySlots ? { opportunitiesPerParticipant: 3 } : {}),
+      rows: [sheetRow]
+    }] },
     timeline: { items: [{ eventId: "event-gustavo", sequence: 1, occurredAt: "2026-09-10T00:00:00.000Z", publishedAt: "2026-09-10T00:01:00.000Z", type: "score_published", status: "official", competitionId: "coleadero", competitionName: "Coleadero", phaseId: "clasificatoria", phaseName: "Clasificatoria", charreadaId: "lote-coleadero", charreadaName: "Coleadero", participantId: "participant-gustavo", participantName: "Gustavo Mares", suerteId: "colas", suerteName: "Colas", label: "Colas Gustavo Mares", score: 15, previousScore: 0 }] },
     statistics: { status: "ready", items: [] }
   });

@@ -124,10 +124,27 @@ function validateResolvedResults(value, errors) {
     if (!Number.isSafeInteger(standing.position) || standing.position < 1) errors.push("standing-position-unresolved");
   }
   for (const competition of collection(value.sheet?.competitions)) {
+    const opportunitySlots = positiveInteger(competition.opportunitiesPerParticipant);
+    if (competition.opportunitiesPerParticipant !== undefined && !opportunitySlots) errors.push("sheet-opportunity-slots-invalid");
     for (const row of collection(competition.rows)) {
       const result = byId.get(row.resultId);
       if (!result) errors.push("sheet-result-reference-invalid");
       else if (row.total !== result.total || stableStringify(row.columns) !== stableStringify(result.columns)) errors.push("sheet-diverges-from-result");
+      const opportunities = collection(row.opportunities);
+      if (opportunities.length && (!opportunitySlots || competition.competitionId !== "coleadero" || result?.participantScope !== "individual")) {
+        errors.push("sheet-opportunities-context-invalid");
+      }
+      const seenOpportunityNumbers = new Set();
+      for (const opportunity of opportunities) {
+        if (!positiveInteger(opportunity.opportunityNumber)
+          || opportunity.opportunityNumber > opportunitySlots
+          || !finite(opportunity.officialPoints)
+          || !text(opportunity.status)
+          || seenOpportunityNumbers.has(opportunity.opportunityNumber)) {
+          errors.push("sheet-opportunity-invalid");
+        }
+        seenOpportunityNumbers.add(opportunity.opportunityNumber);
+      }
     }
   }
 }
@@ -204,11 +221,22 @@ function normalizeStanding(value = {}) {
 
 function normalizeSheetCompetition(value = {}) {
   const competition = pick(value, ["competitionId", "name", "charreadaId", "charreadaName", "phase", "phaseName"]);
+  if (positiveInteger(value.opportunitiesPerParticipant)) competition.opportunitiesPerParticipant = positiveInteger(value.opportunitiesPerParticipant);
   competition.rows = collection(value.rows).map((row) => ({
     ...pick(row, ["resultId", "teamId", "teamName", "participantId", "participantName", "horseId", "horseName", "total"]),
-    columns: plain(row.columns) ? finiteRecord(row.columns) : {}
+    columns: plain(row.columns) ? finiteRecord(row.columns) : {},
+    ...(collection(row.opportunities).length ? { opportunities: collection(row.opportunities).map(normalizeSheetOpportunity).filter(Boolean) } : {})
   })).filter((row) => row.resultId);
   return competition.competitionId ? competition : null;
+}
+
+function normalizeSheetOpportunity(value = {}) {
+  const opportunityNumber = positiveInteger(value.opportunityNumber);
+  const officialPoints = finite(value.officialPoints) ? Number(value.officialPoints) : null;
+  const statusValue = text(value.status);
+  return opportunityNumber && officialPoints !== null && statusValue
+    ? { opportunityNumber, officialPoints, status: statusValue }
+    : null;
 }
 
 function normalizeTimelineItem(value = {}) {
@@ -235,6 +263,11 @@ function pick(value, keys, required = {}) {
 
 function finiteRecord(value) {
   return Object.fromEntries(Object.entries(value).filter(([key, entry]) => id(key) && finite(entry)).map(([key, entry]) => [key, Number(entry)]));
+}
+
+function positiveInteger(value) {
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number > 0 ? number : 0;
 }
 
 function containsPrivateField(value, seen = new WeakSet()) {

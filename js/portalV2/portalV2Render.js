@@ -577,6 +577,7 @@ function renderSheet(model) {
 }
 
 function renderSheetTable(competition) {
+  if (competition.isColeaderoOpportunitySheet) return renderColeaderoOpportunitySheetTable(competition);
   const wrapper = element("div", "portal-v2-table-scroll");
   const table = element("table", "portal-v2-table portal-v2-sheet-table");
   const caption = element("caption", "portal-v2-table__caption");
@@ -608,6 +609,46 @@ function renderSheetTable(competition) {
     for (const column of competition.columns) {
       const cell = element("td");
       cell.textContent = values.has(column.key) ? formatNumber(values.get(column.key)) : "—";
+      row.append(cell);
+    }
+    const total = element("td");
+    total.textContent = formatNumber(item.total);
+    row.append(total);
+    body.append(row);
+  }
+  table.append(caption, head, body);
+  wrapper.append(table);
+  return wrapper;
+}
+
+function renderColeaderoOpportunitySheetTable(competition) {
+  const wrapper = element("div", "portal-v2-table-scroll");
+  const table = element("table", "portal-v2-table portal-v2-sheet-table portal-v2-sheet-table--coleadero");
+  const caption = element("caption", "portal-v2-table__caption");
+  caption.textContent = `${competition.name}: oportunidades oficiales por participante`;
+  const head = element("thead");
+  const headRow = element("tr");
+  for (const label of ["Participante", "Caballo", ...Array.from({ length: competition.opportunitiesPerParticipant }, (_, index) => `${index + 1}ª`), "Total"]) {
+    const cell = element("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headRow.append(cell);
+  }
+  head.append(headRow);
+  const body = element("tbody");
+  for (const item of competition.rows) {
+    const row = element("tr");
+    const participant = element("th");
+    participant.scope = "row";
+    participant.textContent = item.displayName;
+    const horse = element("td");
+    horse.textContent = item.horseName || "—";
+    row.append(participant, horse);
+    const opportunities = new Map(item.opportunities.map((opportunity) => [opportunity.opportunityNumber, opportunity]));
+    for (let opportunityNumber = 1; opportunityNumber <= competition.opportunitiesPerParticipant; opportunityNumber += 1) {
+      const cell = element("td");
+      const opportunity = opportunities.get(opportunityNumber);
+      cell.textContent = opportunity ? formatNumber(opportunity.officialPoints) : "—";
       row.append(cell);
     }
     const total = element("td");

@@ -6,7 +6,7 @@ import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult,
   prepareHistoricalReconciliationDryRunRequest
-} from "../js/core/historicalReconciliationDryRun.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "../js/core/historicalReconciliationDryRun.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const input = Object.freeze({
   tournamentId: "torneo_mtj3fikk_2llw7v",

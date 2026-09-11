@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

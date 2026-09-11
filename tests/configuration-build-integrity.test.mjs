@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import configurationEngine from "../functions/configurationEngine.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 import { loadConfigurationBootstrap } from "../js/core/configurationBootstrap.js";
-import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { bootstrapCharroProClient, buildVersionedUrl } from "../js/core/clientBootstrap.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const BUILD = String(configuration.values.system.appVersion || "");

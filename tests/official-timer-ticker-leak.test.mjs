@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 let nextId = 0;
 const pending = new Map();

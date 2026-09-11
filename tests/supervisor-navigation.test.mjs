@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

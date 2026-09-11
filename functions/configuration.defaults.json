@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260910-portal-v2-individual-competition-presentation-001-v1",
+      "appVersion": "20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -138,6 +138,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "d0024c5c9082216526d6c0447ae7660720623134a8007ffb8771a5f7df63ae73",
-  "fingerprint": "d0024c5c9082216526d6c0447ae7660720623134a8007ffb8771a5f7df63ae73"
+  "checksum": "20ff5a675ee3643d14108d0d2afb7e67dd30997ee8abc5d4f9dde7d664b2a0e7",
+  "fingerprint": "20ff5a675ee3643d14108d0d2afb7e67dd30997ee8abc5d4f9dde7d664b2a0e7"
 }

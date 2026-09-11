@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

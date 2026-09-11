@@ -483,14 +483,23 @@
             "competitions": {
               "$other": {
                 ".validate": "newData.hasChildren(['competitionId', 'rows']) && newData.child('competitionId').isString()",
+                "opportunitiesPerParticipant": {
+                  ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 20"
+                },
                 "rows": {
                   "$other": {
                     ".validate": "newData.hasChildren(['resultId', 'total', 'columns']) && newData.child('resultId').isString() && (newData.child('teamId').isString() || newData.child('participantId').isString()) && newData.child('total').isNumber()",
                     "columns": { "$other": { ".validate": "newData.isNumber()" } },
-                    "$other": { ".validate": "($other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName') && newData.isString() || ($other === 'total' && newData.isNumber()) || $other === 'columns'" }
+                    "opportunities": {
+                      "$opportunityId": {
+                        ".validate": "newData.hasChildren(['opportunityNumber', 'officialPoints', 'status']) && newData.child('opportunityNumber').isNumber() && newData.child('opportunityNumber').val() >= 1 && newData.child('opportunityNumber').val() <= 20 && newData.child('officialPoints').isNumber() && newData.child('status').isString() && newData.child('status').val().length <= 80",
+                        "$field": { ".validate": "(($field === 'opportunityNumber' || $field === 'officialPoints') && newData.isNumber()) || ($field === 'status' && newData.isString())" }
+                      }
+                    },
+                    "$other": { ".validate": "($other === 'resultId' || $other === 'teamId' || $other === 'teamName' || $other === 'participantId' || $other === 'participantName' || $other === 'horseId' || $other === 'horseName') && newData.isString() || ($other === 'total' && newData.isNumber()) || $other === 'columns' || $other === 'opportunities'" }
                   }
                 },
-                "$other": { ".validate": "($other === 'competitionId' || $other === 'name' || $other === 'charreadaId' || $other === 'charreadaName' || $other === 'phase' || $other === 'phaseName') && newData.isString() || $other === 'rows'" }
+                "$other": { ".validate": "($other === 'competitionId' || $other === 'name' || $other === 'charreadaId' || $other === 'charreadaName' || $other === 'phase' || $other === 'phaseName') && newData.isString() || $other === 'rows' || $other === 'opportunitiesPerParticipant'" }
               }
             },
             "$other": { ".validate": "$other === 'competitions'" }

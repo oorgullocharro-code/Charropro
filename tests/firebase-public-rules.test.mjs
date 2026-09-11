@@ -63,8 +63,15 @@ assert.match(publicRules.results.teams.$other.$other[".validate"], /horseId/);
 assert.match(publicRules.results.teams.$other.$other[".validate"], /horseName/);
 assert.match(publicRules.standings.items.$other.$other[".validate"], /horseId/);
 assert.match(publicRules.standings.items.$other.$other[".validate"], /horseName/);
-assert.match(publicRules.sheet.competitions.$other.rows.$other.$other[".validate"], /horseId/);
-assert.match(publicRules.sheet.competitions.$other.rows.$other.$other[".validate"], /horseName/);
+const sheetCompetitionRules = publicRules.sheet.competitions.$other;
+const sheetRowRules = sheetCompetitionRules.rows.$other;
+assert.match(sheetRowRules.$other[".validate"], /horseId/);
+assert.match(sheetRowRules.$other[".validate"], /horseName/);
+assert.match(sheetCompetitionRules.$other[".validate"], /opportunitiesPerParticipant/);
+assert.match(sheetRowRules.$other[".validate"], /opportunities/);
+assert.match(sheetRowRules.opportunities.$opportunityId[".validate"], /opportunityNumber/);
+assert.match(sheetRowRules.opportunities.$opportunityId[".validate"], /officialPoints/);
+assert.match(sheetRowRules.opportunities.$opportunityId[".validate"], /status/);
 
 assert.equal(liveRules[".read"], true, "operational live read remains unchanged from deployed rules");
 

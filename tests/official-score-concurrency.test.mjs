@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const {
   OFFICIAL_SCORE_LEDGER_VERSION,

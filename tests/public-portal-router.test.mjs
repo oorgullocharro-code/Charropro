@@ -6,7 +6,7 @@ import {
   sanitizePortalDay,
   sanitizePortalId,
   sanitizePortalView
-} from "../js/publicPortal/portalRouter.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "../js/publicPortal/portalRouter.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const initial = parsePublicPortalRoute(
   "https://example.test/torneo-publico.html?tournamentId=torneo_1&view=resultados&competitionId=charro-libre&charreadaId=final-1"

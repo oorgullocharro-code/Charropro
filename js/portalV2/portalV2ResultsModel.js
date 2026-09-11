@@ -95,7 +95,8 @@ function displaySheetCompetition(competition, resultIdentityById) {
     resultId: text(row.resultId),
     ...displayIdentity({ ...row, ...(resultIdentityById.get(text(row.resultId)) || {}) }),
     total: directNumber(row.total),
-    columns: displayColumns(row.columns)
+    columns: displayColumns(row.columns),
+    opportunities: displayOpportunities(row.opportunities)
   })));
   const columns = [];
   const seen = new Set();
@@ -113,6 +114,11 @@ function displaySheetCompetition(competition, resultIdentityById) {
     charreadaName: text(competition.charreadaName),
     phaseId: text(competition.phase),
     phaseName: text(competition.phaseName),
+    opportunitiesPerParticipant: positiveInteger(competition.opportunitiesPerParticipant),
+    isColeaderoOpportunitySheet: text(competition.competitionId) === "coleadero"
+      && positiveInteger(competition.opportunitiesPerParticipant) > 0
+      && rows.length > 0
+      && rows.every((row) => row.participantScope === "individual"),
     columns: Object.freeze(columns),
     rows
   });
@@ -146,6 +152,14 @@ function displayColumns(columns) {
     label: PORTAL_V2_RESULT_COLUMN_LABELS[key] || humanizeColumn(key),
     value: directNumber(value)
   })));
+}
+
+function displayOpportunities(opportunities) {
+  return Object.freeze((opportunities || []).map((opportunity) => Object.freeze({
+    opportunityNumber: positiveInteger(opportunity.opportunityNumber),
+    officialPoints: directNumber(opportunity.officialPoints),
+    status: text(opportunity.status)
+  })).filter((opportunity) => opportunity.opportunityNumber && opportunity.status));
 }
 
 function groupResults(results) {
@@ -221,6 +235,11 @@ function humanizeColumn(key) {
 
 function directNumber(value) {
   return finite(value) ? Number(value) : null;
+}
+
+function positiveInteger(value) {
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number > 0 ? number : 0;
 }
 
 function finite(value) {

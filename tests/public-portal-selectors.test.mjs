@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

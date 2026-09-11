@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

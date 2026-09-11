@@ -2,8 +2,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-portal-v2-individual-competition-presentation-001-v1";
+} from "./canonicalOfficialResults.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 
@@ -18,7 +19,8 @@ export function buildCanonicalTournamentResults(source = {}, options = {}) {
   const participants = normalizeParticipants(source.participants, tournamentId);
   const horses = normalizeHorses(source.horses, tournamentId);
   const records = canonical.currentRecords.slice().sort(compareRecordIdentity);
-  const results = buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, participants, horses, source });
+  const coleaderoOpportunitySlots = resolveColeaderoOpportunitySlots(tournament);
+  const results = buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, participants, horses, source, coleaderoOpportunitySlots });
   const standings = buildStandings(results.items);
   const sheet = buildSheet(results.items);
   const sourceRevision = Math.max(1, integer(source.sourceRevision || options.sourceRevision || maxRevision(records)));
@@ -173,6 +175,7 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
       charreadaName: competition.charreadaName,
       phase: competition.phaseId,
       phaseName: competition.phaseName,
+      ...(positiveInteger(competition.opportunitiesPerParticipant) ? { opportunitiesPerParticipant: competition.opportunitiesPerParticipant } : {}),
       rows: competition.rows
     })) },
     timeline: { items: collection(input.timeline?.items) },
@@ -194,7 +197,7 @@ function resolveCanonicalOfficialResults(source, tournamentId) {
   });
 }
 
-function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, participants, horses, source }) {
+function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, participants, horses, source, coleaderoOpportunitySlots }) {
   const rows = new Map();
   for (const item of records) {
     const identity = recordIdentity(item, tournamentId);
@@ -203,13 +206,18 @@ function buildTeamCharreadaResults({ tournamentId, records, charreadas, teams, p
     const key = [identity.competitionId || charreada.competitionId || "competition", identity.phaseId || charreada.phaseId || "single", identity.charreadaId, identity.participantScope, identity.entityId].join("|");
     if (!rows.has(key)) rows.set(key, createResultRow(identity, charreada, teams, participants, horses));
     const row = rows.get(key);
-    const sport = row.suertes[identity.suerteId] || createSportResult(identity.suerteId);
+    const opportunitySlots = isIndividualColeadero(identity, charreada) ? coleaderoOpportunitySlots : 0;
+    const sport = row.suertes[identity.suerteId] || createSportResult(identity.suerteId, opportunitySlots);
     const officialValue = getOfficialRecordValue(item);
     sport.total += officialValue;
     sport.recordIds.push(id(item.id));
     sport.attemptCount += 1;
     sport.status = "OFFICIAL";
     sport.penalties += recordBadPoints(item);
+    if (opportunitySlots) {
+      const opportunity = officialColeaderoOpportunity(item);
+      if (opportunity) sport.opportunities.push(opportunity);
+    }
     row.suertes[identity.suerteId] = sport;
     row.sourceRevision = Math.max(row.sourceRevision, integer(item.revision));
     row.recordIds.push(id(item.id));
@@ -249,11 +257,24 @@ function createResultRow(identity, charreada, teams, participants, horses) {
   };
 }
 
-function createSportResult(suerteId) {
-  return { suerteId, total: 0, penalties: 0, attemptCount: 0, recordIds: [], status: "NOT_STARTED" };
+function createSportResult(suerteId, opportunitySlots = 0) {
+  return {
+    suerteId,
+    total: 0,
+    penalties: 0,
+    attemptCount: 0,
+    recordIds: [],
+    status: "NOT_STARTED",
+    ...(positiveInteger(opportunitySlots) ? { opportunitySlots, opportunities: [] } : {})
+  };
 }
 
 function finalizeResultRow(row, currentRecords, source) {
+  for (const sport of Object.values(row.suertes)) {
+    if (Array.isArray(sport.opportunities)) {
+      sport.opportunities.sort((left, right) => left.opportunityNumber - right.opportunityNumber);
+    }
+  }
   row.suertes = Object.fromEntries(Object.entries(row.suertes).sort(([left], [right]) => left.localeCompare(right)));
   row.subtotal = Object.values(row.suertes).reduce((sum, sport) => sum + sport.total, 0);
   row.penalties = Object.values(row.suertes).reduce((sum, sport) => sum + sport.penalties, 0);
@@ -309,9 +330,29 @@ function buildSheet(resultRows) {
       phaseName: row.phaseName || "",
       rows: []
     });
-    groups.get(key).rows.push({ resultId: row.resultId, teamId: row.teamId, teamName: row.teamName, participantId: row.participantId, participantName: row.participantName, horseId: row.horseId, horseName: row.horseName, total: row.total, columns: toSheetColumns(row.suertes) });
+    const group = groups.get(key);
+    const colas = record(row.suertes.colas);
+    const opportunitySlots = row.participantScope === "individual" && positiveInteger(colas.opportunitySlots);
+    if (opportunitySlots && !group.opportunitiesPerParticipant) group.opportunitiesPerParticipant = opportunitySlots;
+    group.rows.push({
+      resultId: row.resultId,
+      teamId: row.teamId,
+      teamName: row.teamName,
+      participantId: row.participantId,
+      participantName: row.participantName,
+      horseId: row.horseId,
+      horseName: row.horseName,
+      total: row.total,
+      columns: toSheetColumns(row.suertes),
+      ...(opportunitySlots ? { opportunities: collection(colas.opportunities).map(copyOpportunity) } : {})
+    });
   }
-  return { status: groups.size ? "READY" : "EMPTY", competitions: [...groups.values()].map((entry) => ({ ...entry, rows: entry.rows.sort(compareResultRows) })).sort((a, b) => `${a.competitionId}|${a.phaseId}|${a.charreadaId}`.localeCompare(`${b.competitionId}|${b.phaseId}|${b.charreadaId}`)) };
+  return {
+    status: groups.size ? "READY" : "EMPTY",
+    competitions: [...groups.values()]
+      .map((entry) => ({ ...entry, rows: entry.rows.sort(compareResultRows) }))
+      .sort((a, b) => `${a.competitionId}|${a.phaseId}|${a.charreadaId}`.localeCompare(`${b.competitionId}|${b.phaseId}|${b.charreadaId}`))
+  };
 }
 
 function buildTournamentTeams(resultRows, teams) {
@@ -354,6 +395,8 @@ function normalizeCharreadas(value, tournamentId) {
   return collection(value).map((entry) => ({
     charreadaId: id(entry.id || entry.charreadaId), tournamentId: id(entry.tournamentId || tournamentId),
     competitionId: id(entry.competitionId) || "competition", competitionName: text(entry.competitionName || entry.competition || ""),
+    competitionScope: text(entry.competitionScope || entry.participantScope || entry.scope).toLowerCase(),
+    competitionType: id(entry.competitionType || entry.type),
     phaseId: id(entry.phaseId), phaseName: text(entry.phaseName || entry.phase || ""), name: text(entry.name)
   })).filter((entry) => entry.charreadaId).sort((a, b) => a.charreadaId.localeCompare(b.charreadaId));
 }
@@ -399,6 +442,40 @@ function recordBadPoints(item) {
     + finiteNumber(scoring.teamBadPoints ?? item.breakdown?.teamBadPoints ?? item.teamPenalty);
 }
 
+function resolveColeaderoOpportunitySlots(tournament) {
+  const resolution = resolveTournamentRules(tournament);
+  if (!resolution.valid || resolution.blocked || !resolution.profile?.profileId) return 0;
+  const colas = collection(resolution.suertes).find((suerte) => suerte?.id === "colas");
+  return positiveInteger(colas?.ruleMetadata?.opportunitiesPerParticipant);
+}
+
+function isIndividualColeadero(identity, charreada) {
+  const competitionId = id(identity.competitionId || charreada.competitionId).toLowerCase();
+  const competitionType = id(charreada.competitionType).toLowerCase();
+  const competitionScope = text(charreada.competitionScope).toLowerCase();
+  return identity.participantScope === "individual"
+    && identity.suerteId === "colas"
+    && (competitionId === "coleadero" || competitionType === "coleadero")
+    && (!competitionScope || competitionScope === "individual");
+}
+
+function officialColeaderoOpportunity(item) {
+  const identity = record(item.breakdown?.attemptV2?.identity);
+  const sportState = record(item.breakdown?.attemptV2?.sportState);
+  const opportunityNumber = positiveInteger(identity.opportunityNumber);
+  const status = text(sportState.status).toUpperCase();
+  if (!opportunityNumber || !status) return null;
+  return { opportunityNumber, officialPoints: getOfficialRecordValue(item), status };
+}
+
+function copyOpportunity(value) {
+  return {
+    opportunityNumber: positiveInteger(value?.opportunityNumber),
+    officialPoints: finiteNumber(value?.officialPoints),
+    status: text(value?.status).toUpperCase()
+  };
+}
+
 function resolveAdjustment(charreadas, charreadaId, teamId) {
   const charreada = collection(charreadas).find((entry) => id(entry.id || entry.charreadaId) === charreadaId);
   return finiteNumber(charreada?.restas?.[teamId]);
@@ -419,4 +496,5 @@ function text(value) { return value === null || value === undefined ? "" : Strin
 function integer(value) { const number = Number(value); return Number.isSafeInteger(number) ? number : 0; }
 function finiteNumber(value) { const number = Number(value); return Number.isFinite(number) ? number : 0; }
 function finite(value) { return Number.isFinite(Number(value)); }
+function positiveInteger(value) { const number = Number(value); return Number.isSafeInteger(number) && number > 0 ? number : 0; }
 function iso(value) { const clean = text(value); return Number.isFinite(Date.parse(clean)) ? clean : ""; }
