@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { getTeam, state } from "./state.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { getTeam, state } from "./state.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);

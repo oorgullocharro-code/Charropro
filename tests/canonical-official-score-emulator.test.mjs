@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const {
   applyOfficialScoreTransaction,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const definitions = buildOfficialTimerDefinitionsFromContext({
   tournament: {

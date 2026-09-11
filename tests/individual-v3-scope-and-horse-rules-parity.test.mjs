@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const NOW_MS = Date.parse("2026-09-10T00:00:00.000Z");
 

@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

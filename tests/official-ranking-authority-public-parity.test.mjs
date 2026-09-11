@@ -3,21 +3,21 @@ import { readFileSync } from "node:fs";
 import {
   buildPublicProjection,
   reconcilePublicProjection
-} from "../js/public/publicProjection.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/public/publicProjection.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 import {
   validatePublicProjection,
   validatePublicProjectionForRead
-} from "../js/public/publicProjectionSchema.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { applyPublicPortalSnapshot } from "../js/public/publicPortalClient.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/public/publicProjectionSchema.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { applyPublicPortalSnapshot } from "../js/public/publicPortalClient.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 import {
   buildPublicPortalModel,
   getPortalViewDependencies
-} from "../js/publicPortal/portalSelectors.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 import {
   buildOfficialRankingItems,
   compareOfficialRankingRows
-} from "../js/core/officialRanking.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/core/officialRanking.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const NOW = Date.parse("2026-08-31T18:00:00.000Z");
 

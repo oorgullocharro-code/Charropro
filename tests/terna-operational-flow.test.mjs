@@ -10,7 +10,7 @@ import {
   normalizeFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const identity = {
   tournamentId: "demo-local-fmch-2026",

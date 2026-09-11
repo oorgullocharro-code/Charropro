@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

@@ -1,10 +1,10 @@
-import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 import {
   buildCanonicalOfficialResults,
   getCanonicalSportingOpportunityKey
-} from "./canonicalOfficialResults.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { state } from "./state.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "./canonicalOfficialResults.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { state } from "./state.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const COLEADERO_COMPETITION_ID = "coleadero";
 

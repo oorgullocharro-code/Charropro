@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1");
+const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1");
 
 const tournament = assignedTournament("global-team");
 const charreada = { id: "charreada-team", tournamentId: tournament.id, competitionType: "Competencia por equipos", teamIds: ["team-a"] };

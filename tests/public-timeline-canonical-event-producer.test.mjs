@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import timelineProducer from "../functions/canonicalPublicTimelineEvent.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import timelineProducer from "../functions/canonicalPublicTimelineEvent.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 import { fixture as historicalFixture, withLegacyStateAsymmetry } from "./fixtures/historicalReconciliationFixture.mjs?v=20260910-recovery-skip-redundant-pending-reset-001-v1";
 
 const { applyOfficialScoreTransaction, buildOfficialScoreFanoutUpdates, prepareOfficialScoreRequest } = officialScoreConcurrency;

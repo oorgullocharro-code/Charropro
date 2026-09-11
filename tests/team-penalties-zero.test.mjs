@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/core/scoring.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

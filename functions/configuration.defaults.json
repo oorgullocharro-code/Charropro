@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-coleadero-graphics-access-separation-and-width-fix-001-v1",
+      "appVersion": "20260911-portal-v2-premium-public-design-foundation-and-home-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -101,11 +101,31 @@
       "defaultModules": {
         "policyVersion": "1.0.0",
         "modules": [
-          { "type": "live", "enabled": true, "order": 10 },
-          { "type": "program", "enabled": true, "order": 20 },
-          { "type": "results", "enabled": true, "order": 30 },
-          { "type": "standings", "enabled": true, "order": 40 },
-          { "type": "sheet", "enabled": true, "order": 50 }
+          {
+            "type": "live",
+            "enabled": true,
+            "order": 10
+          },
+          {
+            "type": "program",
+            "enabled": true,
+            "order": 20
+          },
+          {
+            "type": "results",
+            "enabled": true,
+            "order": 30
+          },
+          {
+            "type": "standings",
+            "enabled": true,
+            "order": 40
+          },
+          {
+            "type": "sheet",
+            "enabled": true,
+            "order": 50
+          }
         ]
       },
       "branding": {},
@@ -138,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "4ea366586ee92a490f4bfb57c6f9545422960352c6b1535fd01a9c5a31bbc90f",
-  "fingerprint": "4ea366586ee92a490f4bfb57c6f9545422960352c6b1535fd01a9c5a31bbc90f"
+  "checksum": "30b732ba84d080173f31a67ab5083821052483da5e104fda9fd858f6f3798fba",
+  "fingerprint": "30b732ba84d080173f31a67ab5083821052483da5e104fda9fd858f6f3798fba"
 }

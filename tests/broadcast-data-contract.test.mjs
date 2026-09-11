@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

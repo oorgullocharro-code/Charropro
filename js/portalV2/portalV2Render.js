@@ -9,6 +9,7 @@ export function createPortalV2Shell(root) {
 
 export function renderPortalV2(shell, model, options = {}) {
   shell.shell.replaceChildren(
+    renderPortalHeader(model),
     renderHero(model),
     renderNavigation(model),
     renderConnection(model),
@@ -18,6 +19,23 @@ export function renderPortalV2(shell, model, options = {}) {
   );
   applyBranding(shell.root, model.branding);
   shell.liveRegion.textContent = announcement(model, options);
+}
+
+function renderPortalHeader(model) {
+  const header = element("header", "portal-v2-header");
+  const content = element("div", "portal-v2-header__content");
+  const brand = element("div", "portal-v2-header__brand");
+  const name = element("strong");
+  name.textContent = "CharroPro";
+  const byline = element("span");
+  byline.textContent = "Orgullo Charro";
+  brand.append(name, byline);
+
+  const state = element("span", `portal-v2-header__state portal-v2-header__state--${model.lifecycle.status.toLowerCase()}`);
+  state.textContent = model.lifecycle.label;
+  content.append(brand, state);
+  header.append(content);
+  return header;
 }
 
 function renderHero(model) {
@@ -31,6 +49,8 @@ function renderHero(model) {
   }
   const lifecycle = element("p", "portal-v2-eyebrow");
   lifecycle.textContent = model.lifecycle.label;
+  const state = element("span", `portal-v2-hero__status portal-v2-hero__status--${model.lifecycle.status.toLowerCase()}`);
+  state.textContent = model.lifecycle.label;
   const title = element("h1", "portal-v2-title");
   title.textContent = model.tournament.name;
   const detail = element("p", "portal-v2-hero__detail");
@@ -43,7 +63,11 @@ function renderHero(model) {
     model.tournament.state,
     model.tournament.organization
   ].filter(Boolean).join(" · ") || model.lifecycle.detail;
-  identity.append(lifecycle, title, detail);
+  const heading = element("div", "portal-v2-hero__heading");
+  heading.append(lifecycle, state);
+  identity.append(heading, title, detail);
+  const action = heroAction(model);
+  if (action) identity.append(action);
   hero.append(identity);
   if (model.branding.heroImageUrl || model.branding.coverImageUrl) {
     const image = element("img", "portal-v2-hero__image");
@@ -56,17 +80,58 @@ function renderHero(model) {
 }
 
 function renderNavigation(model) {
+  const wrapper = element("div", "portal-v2-navigation");
   const nav = element("nav", "portal-v2-nav");
   nav.setAttribute("aria-label", "Secciones del portal");
   for (const item of model.navigation) {
-    const button = element("button", "portal-v2-nav__item");
-    button.type = "button";
-    button.dataset.portalV2View = item.view;
-    button.textContent = item.label;
-    if (item.view === model.view) button.setAttribute("aria-current", "page");
-    nav.append(button);
+    nav.append(navigationButton(item, model, "portal-v2-nav__item"));
+  }
+  wrapper.append(nav, renderMobileNavigation(model));
+  return wrapper;
+}
+
+function renderMobileNavigation(model) {
+  const nav = element("nav", "portal-v2-mobile-nav");
+  nav.setAttribute("aria-label", "Navegación compacta del portal");
+  const priority = new Set(["inicio", "en-vivo", "programa", "resultados"]);
+  for (const item of model.navigation.filter((item) => priority.has(item.view))) {
+    nav.append(navigationButton(item, model, "portal-v2-mobile-nav__item"));
+  }
+  const extra = model.navigation.filter((item) => !priority.has(item.view));
+  if (extra.length) {
+    const more = element("details", "portal-v2-mobile-nav__more");
+    const summary = element("summary");
+    summary.textContent = "Más";
+    const menu = element("div", "portal-v2-mobile-nav__menu");
+    for (const item of extra) menu.append(navigationButton(item, model, "portal-v2-mobile-nav__item"));
+    more.append(summary, menu);
+    nav.append(more);
   }
   return nav;
+}
+
+function navigationButton(item, model, className) {
+  const button = element("button", className);
+  button.type = "button";
+  button.dataset.portalV2View = item.view;
+  button.textContent = item.label;
+  if (item.view === model.view) button.setAttribute("aria-current", "page");
+  return button;
+}
+
+function heroAction(model) {
+  const targetView = {
+    PRE_EVENT: "programa",
+    LIVE: "en-vivo",
+    PAUSED: "en-vivo",
+    FINALIZED: "resultados",
+    ARCHIVED: "resultados"
+  }[model.lifecycle.status];
+  const item = model.navigation.find((candidate) => candidate.view === targetView);
+  if (!item) return null;
+  const button = navigationButton(item, model, "portal-v2-hero__action");
+  button.textContent = model.lifecycle.status === "LIVE" ? "Ver en vivo" : item.label;
+  return button;
 }
 
 function renderConnection(model) {
@@ -96,9 +161,12 @@ function renderContent(model) {
     main.append(state);
     return main;
   }
-  const heading = element("h2", "portal-v2-section-title");
-  heading.textContent = navigationLabel(model);
-  main.append(heading, renderContextFilters(model), renderView(model));
+  if (model.view !== "inicio") {
+    const heading = element("h2", "portal-v2-section-title");
+    heading.textContent = navigationLabel(model);
+    main.append(heading);
+  }
+  main.append(renderContextFilters(model), renderView(model));
   return main;
 }
 
@@ -138,31 +206,122 @@ function renderView(model) {
 
 function renderHome(model) {
   const home = element("div", "portal-v2-home");
-  const summary = element("section", "portal-v2-home__summary");
-  const lifecycle = element("p", "portal-v2-eyebrow");
-  lifecycle.textContent = model.lifecycle.label;
-  const title = element("h3");
-  title.textContent = model.tournament.name;
+  const overview = element("section", "portal-v2-home__overview");
+  const title = element("h2");
+  title.textContent = homeTitle(model);
   const detail = element("p", "portal-v2-view__copy");
   detail.textContent = [model.tournament.venue, model.tournament.city, model.tournament.startDate, model.tournament.endDate].filter(Boolean).join(" · ") || model.lifecycle.detail;
-  summary.append(lifecycle, title, detail);
-  const actions = element("div", "portal-v2-home__actions");
-  for (const item of model.navigation.filter((item) => ["en-vivo", "programa", "resultados", "posiciones"].includes(item.view))) {
-    const button = element("button", "portal-v2-home__action");
-    button.type = "button";
-    button.dataset.portalV2View = item.view;
-    button.textContent = item.label;
-    actions.append(button);
-  }
-  home.append(summary, actions);
+  overview.append(title, detail);
+  home.append(overview);
+
+  const dashboard = element("div", "portal-v2-home__dashboard");
+  dashboard.append(renderHomeLivePanel(model), renderHomeStandings(model));
+  home.append(dashboard);
+
+  const previews = element("div", "portal-v2-home__previews");
   if (model.context.program.length) {
     const preview = element("section", "portal-v2-home__program");
     const title = element("h3", "portal-v2-group-title");
     title.textContent = "Programa publicado";
-    preview.append(title, renderProgramList(model.context.program.slice(0, 3)));
-    home.append(preview);
+    preview.append(title, renderProgramList(model.context.program.slice(0, 3)), homeLink(model, "programa", "Ver programa"));
+    previews.append(preview);
+  } else {
+    previews.append(renderHomeEmpty("Programa", "El programa oficial aparecerá cuando sea publicado."));
   }
+  previews.append(renderHomeResults(model));
+  home.append(previews);
   return home;
+}
+
+function renderHomeLivePanel(model) {
+  const panel = element("section", "portal-v2-home__live");
+  panel.append(renderLiveCenter(model));
+  const link = homeLink(model, "en-vivo", "Abrir seguimiento en vivo");
+  if (link) panel.append(link);
+  return panel;
+}
+
+function renderHomeStandings(model) {
+  const panel = element("section", "portal-v2-home__standings");
+  const title = element("h3", "portal-v2-group-title");
+  title.textContent = "Posiciones";
+  panel.append(title);
+  if (!model.context.standings.length) {
+    const detail = element("p", "portal-v2-group-detail");
+    detail.textContent = "Las posiciones oficiales aparecerán cuando estén disponibles.";
+    panel.append(detail);
+  } else {
+    const list = element("ol", "portal-v2-home-ranking");
+    for (const standing of model.context.standings.slice(0, 5)) {
+      const row = element("li");
+      const position = element("span", "portal-v2-home-ranking__position");
+      position.textContent = `${formatNumber(standing.position)}°`;
+      const name = element("span", "portal-v2-home-ranking__name");
+      name.textContent = standing.displayName;
+      const total = element("strong");
+      total.textContent = `${formatNumber(standing.total)} pts`;
+      row.append(position, name, total);
+      list.append(row);
+    }
+    panel.append(list);
+  }
+  const link = homeLink(model, "posiciones", "Ver posiciones");
+  if (link) panel.append(link);
+  return panel;
+}
+
+function renderHomeResults(model) {
+  const panel = element("section", "portal-v2-home__results");
+  const title = element("h3", "portal-v2-group-title");
+  title.textContent = "Resultados recientes";
+  panel.append(title);
+  if (!model.context.results.length) {
+    const detail = element("p", "portal-v2-group-detail");
+    detail.textContent = "Los resultados oficiales aparecerán cuando sean publicados.";
+    panel.append(detail);
+  } else {
+    const list = element("ul", "portal-v2-home-results");
+    for (const result of model.context.results.slice(0, 3)) {
+      const row = element("li");
+      const name = element("span");
+      name.textContent = result.participantScope === "individual" && result.horseName
+        ? `${result.displayName} · Caballo: ${result.horseName}`
+        : result.displayName;
+      const total = element("strong");
+      total.textContent = `${formatNumber(result.total)} pts`;
+      row.append(name, total);
+      list.append(row);
+    }
+    panel.append(list);
+  }
+  const link = homeLink(model, "resultados", "Ver resultados");
+  if (link) panel.append(link);
+  return panel;
+}
+
+function renderHomeEmpty(titleText, detailText) {
+  const panel = element("section", "portal-v2-home__program");
+  const title = element("h3", "portal-v2-group-title");
+  title.textContent = titleText;
+  const detail = element("p", "portal-v2-group-detail");
+  detail.textContent = detailText;
+  panel.append(title, detail);
+  return panel;
+}
+
+function homeLink(model, view, label) {
+  const item = model.navigation.find((candidate) => candidate.view === view);
+  return item ? navigationButton(item, model, "portal-v2-home__action") : null;
+}
+
+function homeTitle(model) {
+  return {
+    PRE_EVENT: "Todo listo para la próxima jornada",
+    LIVE: "La charreada está en vivo",
+    PAUSED: "La actividad está en pausa",
+    FINALIZED: "Resultados oficiales publicados",
+    ARCHIVED: "Consulta histórica oficial"
+  }[model.lifecycle.status] || model.lifecycle.label;
 }
 
 function renderContextFilters(model) {
@@ -776,9 +935,13 @@ function renderSponsors(model) {
 
 function renderFooter(model) {
   const footer = element("footer", "portal-v2-footer");
-  footer.textContent = model.availability === "ready"
+  const brand = element("strong");
+  brand.textContent = "CharroPro · Orgullo Charro";
+  const detail = element("span");
+  detail.textContent = model.availability === "ready"
     ? `Datos públicos oficiales · revisión ${model.projectionRevision}`
     : "Portal Público CharroPro";
+  footer.append(brand, detail);
   return footer;
 }
 

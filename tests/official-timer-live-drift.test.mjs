@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 const T0 = Date.parse("2026-08-25T12:00:00.000Z");
 for (const seconds of [10, 30, 60, 300]) {

@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

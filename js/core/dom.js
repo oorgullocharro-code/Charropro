@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 logCharroProVersion("runtime");
 

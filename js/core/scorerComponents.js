@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

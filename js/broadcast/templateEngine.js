@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260911-coleadero-graphics-access-separation-and-width-fix-001-v1";
+} from "./componentLibrary.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 
