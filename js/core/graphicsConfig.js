@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

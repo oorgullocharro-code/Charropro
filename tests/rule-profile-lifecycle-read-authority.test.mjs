@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
-import service from "../functions/ruleProfileLifecycleService.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import service from "../functions/ruleProfileLifecycleService.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 const {
   RuleProfileLifecycleError,

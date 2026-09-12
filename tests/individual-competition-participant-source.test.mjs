@@ -7,9 +7,9 @@ import {
   getTournamentParticipants,
   getTournamentTeams,
   state
-} from "../js/core/state.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+} from "../js/core/state.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 const previous = structuredClone({
   activeTournamentId: state.activeTournamentId,

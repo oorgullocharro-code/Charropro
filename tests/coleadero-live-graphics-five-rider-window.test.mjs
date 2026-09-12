@@ -5,8 +5,8 @@ import {
   buildIndividualColeaderoLiveData,
   isIndividualColeaderoLiveContext,
   selectColeaderoFiveRiderWindow
-} from "../js/core/coleaderoLiveGraphic.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
-import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+} from "../js/core/coleaderoLiveGraphic.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 const tournament = {
   id: "coleadero-live",

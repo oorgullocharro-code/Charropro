@@ -1,5 +1,5 @@
-import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
-import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 export const PUBLIC_LIVE_FEED_FILTERS = Object.freeze(["all", "score", "turn", "penalty", "timer"]);
 export const PUBLIC_LIVE_FEED_RENDER_LIMIT = 50;

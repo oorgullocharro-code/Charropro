@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-portal-v2-premium-public-design-foundation-and-home-001-v1",
+      "appVersion": "20260911-admin-page-vertical-scroll-restore-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "30b732ba84d080173f31a67ab5083821052483da5e104fda9fd858f6f3798fba",
-  "fingerprint": "30b732ba84d080173f31a67ab5083821052483da5e104fda9fd858f6f3798fba"
+  "checksum": "3430f8d4300bd4bdfc7d12bc8a94fa2e1c844717db10101657969fa63e615ca3",
+  "fingerprint": "3430f8d4300bd4bdfc7d12bc8a94fa2e1c844717db10101657969fa63e615ca3"
 }

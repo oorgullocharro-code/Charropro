@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
-import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 import {
   buildPublicLiveFeedModel,
   sanitizePublicLiveFeedFilter
-} from "../js/publicPortal/liveFeedModel.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+} from "../js/publicPortal/liveFeedModel.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 const labels = {
   teamName: "Rancho Norte",

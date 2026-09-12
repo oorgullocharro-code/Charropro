@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+} from "./broadcastState.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+} from "./dataContract.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

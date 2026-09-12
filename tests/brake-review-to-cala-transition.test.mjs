@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_STAGES } from "../js/core/brakeReviewPhase.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_STAGES } from "../js/core/brakeReviewPhase.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = command(freshReview(), BRAKE_REVIEW_ACTIONS.AUTHORIZE).review;

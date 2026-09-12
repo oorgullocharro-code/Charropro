@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { makeAccessSession } from "../js/core/roles.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { makeAccessSession } from "../js/core/roles.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 const user = Object.freeze({ uid: "user-1", email: "user@example.test", displayName: "User" });
 

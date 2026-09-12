@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260911-portal-v2-premium-public-design-foundation-and-home-001-v1";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",
