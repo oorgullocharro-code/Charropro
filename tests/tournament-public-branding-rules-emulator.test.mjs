@@ -8,6 +8,7 @@ assert.match(infoRules.publicBranding[".write"], /role'\)\.val\(\) === 'supervis
 assert.match(infoRules.publicSponsors[".write"], /role'\)\.val\(\) === 'supervisor'/);
 assert.match(infoRules.publicSponsors.$sponsorId[".validate"], /sponsorId'\)\.val\(\) === \$sponsorId/);
 assert.match(infoRules.publicBranding.$field[".validate"], /charropro%2Ftournaments%2F/);
+assert.match(infoRules.publicBranding.$field[".validate"], /liveCoverImageUrl/);
 
 if (process.env.CHARROPRO_RUN_FIREBASE_EMULATOR === "1") await runRulesMatrix();
 console.log("tournament-public-branding-rules-emulator.test.mjs: ok");
@@ -26,10 +27,13 @@ async function runRulesMatrix() {
     await ownerPut(databaseHost, namespace, `charropro/users/${operator.uid}`, userProfile("operador"));
     await ownerPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info`, { id: tournamentId, name: "Branding rules" });
     const coverUrl = assetUrl(tournamentId, "branding/cover/asset.png");
+    const liveCoverUrl = assetUrl(tournamentId, "branding/live-cover/asset.png");
     const brandingWrite = await clientPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info/publicBranding`, supervisor.token, { coverImageUrl: coverUrl });
     assert.equal(brandingWrite.status, 200, `supervisor may write an allowed editorial reference: ${brandingWrite.body}`);
+    assert.equal((await clientPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info/publicBranding/liveCoverImageUrl`, supervisor.token, liveCoverUrl)).status, 200, "supervisor may write a dedicated live cover reference");
     assertDenied(await clientPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info/publicBranding`, operator.token, { coverImageUrl: coverUrl }), "operator editorial write");
     assertDenied(await clientPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info/publicBranding`, supervisor.token, { coverImageUrl: "https://example.test/cover.png" }), "foreign asset URL");
+    assertDenied(await clientPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info/publicBranding/liveCoverImageUrl`, supervisor.token, coverUrl), "live cover may not point at a tournament cover namespace");
     const sponsor = { sponsorId: "sponsor-a", name: "Patrocinador A", enabled: true, sortOrder: 1, tier: "oro", placement: "hero", logoUrl: assetUrl(tournamentId, "sponsors/sponsor-a/logo.png") };
     assert.equal((await clientPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info/publicSponsors/sponsor-a`, supervisor.token, sponsor)).status, 200, "supervisor may write a matching sponsor identity");
     assertDenied(await clientPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info/publicSponsors/other-key`, supervisor.token, sponsor), "sponsor identity mismatch");

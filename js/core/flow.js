@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./state.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

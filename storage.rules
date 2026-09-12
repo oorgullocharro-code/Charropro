@@ -3,7 +3,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /charropro/tournaments/{tournamentId}/public/branding/{assetKind}/{assetName} {
-      allow read: if assetKind == 'cover' || assetKind == 'logo';
+      allow read: if assetKind == 'cover' || assetKind == 'logo' || assetKind == 'live-cover';
       allow write: if false;
     }
     match /charropro/tournaments/{tournamentId}/public/sponsors/{sponsorId}/{assetName} {

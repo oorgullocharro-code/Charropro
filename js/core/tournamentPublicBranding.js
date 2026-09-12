@@ -4,6 +4,7 @@ export const TOURNAMENT_PUBLIC_ASSET_MIME_TYPES = Object.freeze([
 
 export const TOURNAMENT_PUBLIC_ASSET_LIMITS = Object.freeze({
   cover: 5 * 1024 * 1024,
+  liveCover: 5 * 1024 * 1024,
   logo: 2 * 1024 * 1024,
   sponsor: 2 * 1024 * 1024
 });
@@ -16,7 +17,8 @@ const PLACEMENTS = new Set(["hero", "header", "results", "timeline", "footer"]);
 export function normalizeTournamentPublicBranding(value = {}) {
   return compact({
     logoUrl: publicAssetUrl(value.logoUrl),
-    coverImageUrl: publicAssetUrl(value.coverImageUrl)
+    coverImageUrl: publicAssetUrl(value.coverImageUrl),
+    liveCoverImageUrl: publicAssetUrl(value.liveCoverImageUrl)
   });
 }
 

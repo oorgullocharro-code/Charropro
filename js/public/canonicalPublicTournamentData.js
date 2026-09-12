@@ -182,7 +182,7 @@ function normalizeTournament(value = {}, tournamentId = "") {
 }
 
 function normalizeBranding(value = {}) {
-  const output = pick(value, ["theme", "primaryColor", "secondaryColor", "accentColor", "backgroundColor", "textColor", "logoUrl", "coverImageUrl", "heroImageUrl", "organizerLogoUrl"]);
+  const output = pick(value, ["theme", "primaryColor", "secondaryColor", "accentColor", "backgroundColor", "textColor", "logoUrl", "coverImageUrl", "liveCoverImageUrl", "heroImageUrl", "organizerLogoUrl"]);
   for (const key of Object.keys(output)) if (!output[key]) delete output[key];
   return output;
 }

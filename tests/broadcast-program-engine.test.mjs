@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as programApi from "../js/broadcast/programEngine.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import * as programApi from "../js/broadcast/programEngine.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   PROGRAM_ENGINE_VERSION,
   BroadcastProgramError,
@@ -20,7 +20,7 @@ import {
   updateProgram,
   updateProgramLiveData,
   validateProgram
-} from "../js/broadcast/programEngine.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/broadcast/programEngine.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const T0 = "2026-07-15T16:00:00.000Z";
 const T1 = "2026-07-15T16:01:00.000Z";

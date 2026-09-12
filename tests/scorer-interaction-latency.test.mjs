@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

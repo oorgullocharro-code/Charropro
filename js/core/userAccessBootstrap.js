@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

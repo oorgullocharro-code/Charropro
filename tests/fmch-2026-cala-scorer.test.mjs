@@ -9,23 +9,23 @@ import {
   FMCH_2026_CALA_TEAM_PENALTY_RULES,
   applyFmch2026CalaPartideroTiming,
   calculatePuntaBreakdown
-} from "../js/data/calaRules.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/data/calaRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/data/ruleProfiles.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/core/scoringAttempt.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   applyPuntaCalculation,
   calculateAttemptPointSummary,
   calculateAttemptTotal
-} from "../js/core/scoring.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/core/scoring.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const runtimeConfiguration = JSON.parse(readFileSync(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const RELEASE_ID = String(runtimeConfiguration?.values?.system?.appVersion || "");

@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -15,7 +15,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./data/calaRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -28,7 +28,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -38,7 +38,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -55,7 +55,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./data/fmch2026TernaRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -75,33 +75,33 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/scorerContextResolution.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   getTernaParticipantName,
   isCanonicalTernaParticipant
-} from "./core/ternaParticipantIdentity.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/ternaParticipantIdentity.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -109,23 +109,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/timerRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/officialTimerOrchestration.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -139,9 +139,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/brakeReviewPhase.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -154,32 +154,32 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/scoring.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "./core/canonicalOfficialResults.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/canonicalOfficialResults.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/scoringAttempt.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/scorerComponents.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/scorerSaveLatency.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/scorerInteractionLatency.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -189,7 +189,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/sync.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -234,18 +234,18 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/firebaseSync.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   createTournamentPublicSponsor,
   normalizeTournamentPublicBranding,
   normalizeTournamentPublicSponsors,
   tournamentPublicSponsorsRecord,
   validateTournamentPublicAssetFile
-} from "./core/tournamentPublicBranding.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/tournamentPublicBranding.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult
-} from "./core/historicalReconciliationDryRun.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/historicalReconciliationDryRun.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -258,19 +258,19 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/pendingScoreReview.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/tournamentContext.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   buildPortalV2PublicPath,
   buildPortalV2PublicUrl
-} from "./portalV2/portalV2Router.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./portalV2/portalV2Router.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -280,8 +280,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/supervisorNavigation.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -320,7 +320,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./core/state.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -7275,6 +7275,7 @@ function renderPublicBranding() {
         <div class="card-body public-branding-grid">
           ${renderPublicBrandingAssetCard("Portada del torneo", "cover", branding.coverImageUrl)}
           ${renderPublicBrandingAssetCard("Logo del torneo", "logo", branding.logoUrl)}
+          ${renderPublicBrandingAssetCard("Portada En Vivo", "liveCover", branding.liveCoverImageUrl)}
         </div>
       </article>
       <article class="card">
@@ -7306,7 +7307,7 @@ function renderPublicSponsorRow(sponsor) {
 }
 
 function showPublicAssetUploadModal(kind, sponsorId = "") {
-  const labels = { cover: "Portada", logo: "Logo", sponsor: "Logo de patrocinador" };
+  const labels = { cover: "Portada", liveCover: "Portada En Vivo", logo: "Logo", sponsor: "Logo de patrocinador" };
   if (!labels[kind]) return;
   showModal({ title: `Cargar ${labels[kind]}`, body: html`<div class="grid"><p class="card-subtitle">JPG, PNG o WEBP. El archivo se publica bajo una ruta versionada del torneo.</p><input id="public-branding-file" type="file" accept="image/jpeg,image/png,image/webp"></div>`, actions: html`<button class="button" data-action="close-modal">Cancelar</button><button class="button primary" data-action="upload-public-branding-asset" data-kind="${kind}" data-id="${escapeHTML(sponsorId)}">Cargar</button>` });
 }
@@ -7319,8 +7320,8 @@ async function uploadPublicBrandingAsset(kind, sponsorId = "") {
   const contentBase64 = await readFileAsBase64(file);
   const result = await uploadFirebaseTournamentPublicAsset({ tournamentId: tournament.id, kind, sponsorId, mimeType: validation.mimeType, contentBase64 });
   if (!result.ok || !result.url) { showToast("No se pudo cargar la imagen pública."); return; }
-  if (kind === "cover" || kind === "logo") {
-    tournament.publicBranding = normalizeTournamentPublicBranding({ ...tournamentPublicBranding(tournament), [kind === "cover" ? "coverImageUrl" : "logoUrl"]: result.url });
+  if (publicBrandingAssetField(kind)) {
+    tournament.publicBranding = normalizeTournamentPublicBranding({ ...tournamentPublicBranding(tournament), [publicBrandingAssetField(kind)]: result.url });
   } else {
     tournament.publicSponsors = tournamentPublicSponsorsRecord(tournamentPublicSponsors(tournament).map((item) => item.sponsorId === sponsorId ? { ...item, logoUrl: result.url } : item));
   }
@@ -7365,9 +7366,14 @@ async function savePublicSponsor(sponsorId) {
 
 async function removePublicBrandingAsset(kind) {
   const tournament = getActiveTournament();
-  if (!tournament) return;
-  tournament.publicBranding = normalizeTournamentPublicBranding({ ...tournamentPublicBranding(tournament), [kind === "cover" ? "coverImageUrl" : "logoUrl"]: "" });
+  const field = publicBrandingAssetField(kind);
+  if (!tournament || !field) return;
+  tournament.publicBranding = normalizeTournamentPublicBranding({ ...tournamentPublicBranding(tournament), [field]: "" });
   await persistPublicBranding();
+}
+
+function publicBrandingAssetField(kind) {
+  return ({ cover: "coverImageUrl", liveCover: "liveCoverImageUrl", logo: "logoUrl" })[kind] || "";
 }
 
 async function deletePublicSponsor(sponsorId) {

@@ -7,7 +7,7 @@ const MIME_TYPES = new Map([
   ["image/png", "png"],
   ["image/webp", "webp"]
 ]);
-const LIMITS = Object.freeze({ cover: 5 * 1024 * 1024, logo: 2 * 1024 * 1024, sponsor: 2 * 1024 * 1024 });
+const LIMITS = Object.freeze({ cover: 5 * 1024 * 1024, liveCover: 5 * 1024 * 1024, logo: 2 * 1024 * 1024, sponsor: 2 * 1024 * 1024 });
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,180}$/;
 
 class TournamentPublicBrandingAssetError extends Error {
@@ -16,7 +16,8 @@ class TournamentPublicBrandingAssetError extends Error {
 
 function prepareTournamentPublicBrandingAssetUpload(input = {}, options = {}) {
   const tournamentId = cleanId(input.tournamentId);
-  const kind = String(input.kind || "").trim().toLowerCase();
+  const requestedKind = String(input.kind || "").trim().toLowerCase();
+  const kind = requestedKind === "livecover" || requestedKind === "live-cover" ? "liveCover" : requestedKind;
   const sponsorId = kind === "sponsor" ? cleanId(input.sponsorId) : "";
   const mimeType = String(input.mimeType || "").trim().toLowerCase();
   if (!tournamentId || !LIMITS[kind] || (kind === "sponsor" && !sponsorId) || !MIME_TYPES.has(mimeType)) {
@@ -27,7 +28,7 @@ function prepareTournamentPublicBrandingAssetUpload(input = {}, options = {}) {
     throw new TournamentPublicBrandingAssetError("public-branding-asset-content-invalid");
   }
   const version = `${Date.now()}-${crypto.randomBytes(8).toString("hex")}`;
-  const folder = kind === "sponsor" ? `sponsors/${sponsorId}` : `branding/${kind}`;
+  const folder = kind === "sponsor" ? `sponsors/${sponsorId}` : `branding/${kind === "liveCover" ? "live-cover" : kind}`;
   const objectPath = `charropro/tournaments/${tournamentId}/public/${folder}/${version}.${MIME_TYPES.get(mimeType)}`;
   return Object.freeze({ tournamentId, kind, sponsorId, mimeType, content, objectPath });
 }

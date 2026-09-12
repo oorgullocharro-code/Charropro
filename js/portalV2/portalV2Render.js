@@ -48,32 +48,6 @@ function renderPortalHeader(model) {
 
 function renderHero(model) {
   const hero = element("header", "portal-v2-hero");
-  const identity = element("div", "portal-v2-hero__identity");
-  if (model.branding.logoUrl) {
-    const logo = element("img", "portal-v2-hero__logo");
-    logo.src = model.branding.logoUrl;
-    logo.alt = model.tournament.shortName || model.tournament.name;
-    identity.append(logo);
-  }
-  const lifecycle = element("p", "portal-v2-eyebrow");
-  lifecycle.textContent = model.lifecycle.status === "LIVE" ? "Seguimiento oficial" : model.lifecycle.label;
-  const title = element("h1", "portal-v2-title");
-  title.textContent = model.tournament.name;
-  const detail = element("p", "portal-v2-hero__detail");
-  detail.textContent = [
-    model.tournament.shortName,
-    model.tournament.edition,
-    model.tournament.startDate,
-    model.tournament.venue,
-    model.tournament.city,
-    model.tournament.state,
-    model.tournament.organization
-  ].filter(Boolean).join(" · ") || model.lifecycle.detail;
-  const heading = element("div", "portal-v2-hero__heading");
-  heading.append(lifecycle);
-  identity.append(heading, title, detail);
-  const action = heroAction(model);
-  if (action) identity.append(action);
   if (model.branding.heroImageUrl || model.branding.coverImageUrl) {
     const image = element("img", "portal-v2-hero__image");
     image.src = model.branding.heroImageUrl || model.branding.coverImageUrl;
@@ -81,8 +55,47 @@ function renderHero(model) {
     image.loading = "eager";
     hero.append(image);
   }
-  hero.append(identity);
+  const editorial = element("div", "portal-v2-hero__editorial");
+  if (model.branding.logoUrl) {
+    const logo = element("img", "portal-v2-hero__logo");
+    logo.src = model.branding.logoUrl;
+    logo.alt = model.tournament.shortName || model.tournament.name;
+    editorial.append(logo);
+  }
+  const title = element("h1", "portal-v2-title");
+  title.textContent = model.tournament.name;
+  editorial.append(title);
+  const facts = renderHeroFacts(model.tournament);
+  if (facts) editorial.append(facts);
+  if (model.lifecycle.status === "LIVE") {
+    const status = element("span", "portal-v2-hero__status portal-v2-hero__status--live");
+    status.textContent = model.lifecycle.label;
+    editorial.append(status);
+  }
+  const action = heroAction(model);
+  if (action) editorial.append(action);
+  hero.append(editorial);
   return hero;
+}
+
+function renderHeroFacts(tournament) {
+  const facts = [];
+  const date = formatHeroDateRange(tournament.startDate, tournament.endDate);
+  const venue = [tournament.venue, tournament.city, tournament.state].filter(Boolean).join(", ");
+  if (date) facts.push(["Fecha", date]);
+  if (venue) facts.push(["Sede", venue]);
+  if (!facts.length) return null;
+  const list = element("dl", "portal-v2-hero__facts");
+  for (const [label, value] of facts) {
+    const row = element("div", "portal-v2-hero__fact");
+    const term = element("dt");
+    term.textContent = label;
+    const detail = element("dd");
+    detail.textContent = value;
+    row.append(term, detail);
+    list.append(row);
+  }
+  return list;
 }
 
 function renderSectionContext(model) {
@@ -223,9 +236,18 @@ function renderHome(model) {
 
 function renderHomeLivePanel(model) {
   const panel = element("section", "portal-v2-home__live");
-  panel.append(renderLiveCenter(model));
+  const content = element("div", "portal-v2-home__live-content");
+  content.append(renderLiveCenter(model));
   const link = homeLink(model, "en-vivo", "Abrir seguimiento en vivo");
-  if (link) panel.append(link);
+  if (link) content.append(link);
+  panel.append(content);
+  if (model.branding.liveCoverImageUrl) {
+    const image = element("img", "portal-v2-home__live-cover");
+    image.src = model.branding.liveCoverImageUrl;
+    image.alt = `Portada En Vivo de ${model.tournament.shortName || model.tournament.name}`;
+    image.loading = "lazy";
+    panel.append(image);
+  }
   return panel;
 }
 
@@ -1005,6 +1027,21 @@ function formatProgramDate(value) {
   const date = new Date(`${value}T12:00:00`);
   if (!Number.isFinite(date.getTime())) return value;
   return new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", month: "long" }).format(date);
+}
+
+function formatHeroDateRange(startDate, endDate) {
+  const start = formatHeroDate(startDate);
+  const end = formatHeroDate(endDate);
+  if (!start) return end;
+  return end && end !== start ? `${start} - ${end}` : start;
+}
+
+function formatHeroDate(value) {
+  if (!value) return "";
+  const source = String(value);
+  const date = new Date(source.includes("T") ? source : `${source}T12:00:00`);
+  if (!Number.isFinite(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "long", year: "numeric" }).format(date);
 }
 
 function element(tagName, className = "") {

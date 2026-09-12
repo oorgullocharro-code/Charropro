@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260912-portal-v2-home-physical-review-corrections-004-v1",
+      "appVersion": "20260912-portal-v2-home-reference-composition-live-cover-005-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "aaf48ea40979abbd54f660e32b729761ea526afbc6a74f13ef67651620509a4f",
-  "fingerprint": "aaf48ea40979abbd54f660e32b729761ea526afbc6a74f13ef67651620509a4f"
+  "checksum": "9cbe12aaa29b916fbe748255441315ca0fea1ee5c3480b2757bfef6535cd30dd",
+  "fingerprint": "9cbe12aaa29b916fbe748255441315ca0fea1ee5c3480b2757bfef6535cd30dd"
 }

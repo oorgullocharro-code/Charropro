@@ -5,9 +5,9 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

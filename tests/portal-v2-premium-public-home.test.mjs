@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 class FakeNode {
   constructor(tagName) {
@@ -28,8 +28,8 @@ function fixture(overrides = {}) {
     projectionRevision: 12,
     generatedAt: "2026-09-11T18:00:00.000Z",
     lifecycle: { status: "LIVE" },
-    tournament: { id: "portal-v2-premium-fixture", name: "Charreada de diseño", venue: "Lienzo Charro", city: "Tequila" },
-    branding: { coverImageUrl: "https://example.test/cover.jpg", logoUrl: "https://example.test/logo.png" },
+    tournament: { id: "portal-v2-premium-fixture", name: "Charreada de diseño", startDate: "2026-09-11", endDate: "2026-09-13", venue: "Lienzo Charro", city: "Tequila" },
+    branding: { coverImageUrl: "https://example.test/cover.jpg", logoUrl: "https://example.test/logo.png", liveCoverImageUrl: "https://example.test/live-cover.jpg" },
     modules: [
       { type: "live", enabled: true, order: 10 },
       { type: "program", enabled: true, order: 20 },
@@ -96,12 +96,15 @@ test("premium Home uses published data, keeps missing content neutral, and rende
   assert.equal(collect(published, (node) => node.className === "portal-v2-sponsors__track").length, 2);
   assert.equal(collect(published, (node) => node.attributes?.["aria-hidden"] === "true").length, 1);
   assert.equal(collect(published, (node) => node.className === "portal-v2-hero__image").length, 1);
-  assert.equal(collect(published, (node) => node.className === "portal-v2-home__live" && node.children.some((child) => child.tagName === "img")).length, 0, "Home En Vivo does not repurpose Hero branding as a card image");
+  assert.equal(collect(published, (node) => node.className === "portal-v2-hero__editorial").length, 1, "Hero has an editorial block that owns local contrast");
+  assert.equal(collect(published, (node) => node.className === "portal-v2-home__live-cover").length, 1, "Home En Vivo uses only the dedicated live cover");
+  assert.equal(collect(published, (node) => node.textContent === "Seguimiento oficial").length, 0, "Home Hero favors published event facts over generic editorial copy");
 
-  const withoutSponsor = fixture({ modules: fixture().modules.filter((module) => module.type !== "sponsors"), sponsors: [] });
+  const withoutSponsor = fixture({ branding: { coverImageUrl: "https://example.test/cover.jpg", logoUrl: "https://example.test/logo.png" }, modules: fixture().modules.filter((module) => module.type !== "sponsors"), sponsors: [] });
   const neutral = render(createPortalV2Model(withoutSponsor, { availability: "ready", view: "inicio", connection: "online" }));
   assert.equal(collect(neutral, (node) => node.textContent === "Patrocinador publicado").length, 0);
   assert.equal(collect(neutral, (node) => node.textContent === "Los resultados oficiales aparecerán cuando sean publicados.").length, 0);
+  assert.equal(collect(neutral, (node) => node.className === "portal-v2-home__live-cover").length, 0, "Home En Vivo remains clean without a dedicated live cover");
 });
 
 test("premium hero and sponsor band belong only to Inicio while every other route leads with its own context", () => {
@@ -148,13 +151,14 @@ test("premium Portal V2 stylesheet keeps the Home hero photo-led and sponsors ac
   for (const token of ["--portal-bg", "--portal-surface", "--portal-blue", "--portal-silver", "--portal-live"]) assert.match(css, new RegExp(token));
   assert.match(css, /\.portal-v2-body\s*\{[^}]*overflow-x:\s*hidden;/s);
   assert.match(css, /@media \(max-width: 780px\)/);
-  assert.match(css, /\.portal-v2-hero::before[\s\S]*linear-gradient\(90deg/);
-  assert.match(css, /\.portal-v2-hero, \.portal-v2-hero__identity\s*\{\s*min-height:\s*0;/);
-  assert.match(css, /\.portal-v2-hero__logo\s*\{[^}]*max-block-size:\s*13rem;/);
-  assert.match(css, /\.portal-v2-hero::before\s*\{[^}]*\.7\)[\s\S]*\.46\)[\s\S]*transparent 64%/);
-  assert.match(css, /\.portal-v2-hero::after\s*\{[^}]*transparent 62%[\s\S]*\.28\)/);
-  assert.match(css, /\.portal-v2-hero__image\s*\{[^}]*filter:\s*brightness\(\.9\) saturate\(\.98\)/);
-  assert.match(css, /\.portal-v2-title\s*\{[^}]*font-size:\s*3rem;[^}]*font-weight:\s*700;/);
+  assert.match(css, /\.portal-v2-hero__editorial::before\s*\{[^}]*inset:\s*-1\.35rem -3rem;/);
+  assert.match(css, /\.portal-v2-hero__editorial\s*\{[^}]*max-inline-size:\s*min\(34rem, calc\(100% - 2\.5rem\)\)/);
+  assert.match(css, /\.portal-v2-hero__logo\s*\{[^}]*max-block-size:\s*clamp\(8\.5rem, 18vw, 15rem\)/);
+  assert.match(css, /\.portal-v2-title\s*\{[^}]*font-size:\s*clamp\(1\.4rem, 2\.35vw, 2\.15rem\);[^}]*font-weight:\s*650;/);
+  assert.match(css, /\.portal-v2-hero__image\s*\{[^}]*filter:\s*saturate\(1\.02\)/);
+  assert.match(css, /\.portal-v2-hero::after\s*\{[^}]*block-size:\s*clamp\(1\.75rem, 4vw, 3\.25rem\)/);
+  assert.match(css, /\.portal-v2-home__live\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) minmax\(12rem, \.72fr\)/);
+  assert.match(css, /\.portal-v2-home__live-cover\s*\{[^}]*object-fit:\s*cover;/);
   assert.match(css, /\.portal-v2-sponsors__list\s*\{[^}]*animation:\s*portal-v2-sponsor-loop/);
   assert.match(css, /@keyframes portal-v2-sponsor-loop\s*\{\s*from\s*\{\s*transform:\s*translateX\(0\);\s*\}\s*to\s*\{\s*transform:\s*translateX\(-50%\);/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*\.portal-v2-sponsors__list\s*\{[^}]*animation:\s*none;/);

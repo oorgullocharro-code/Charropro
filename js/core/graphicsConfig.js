@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./officialTimerLiveDisplay.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

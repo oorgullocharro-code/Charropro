@@ -1,10 +1,10 @@
 import {
   PREVIEW_ENGINE_VERSION,
   validatePreview
-} from "./previewEngine.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./previewEngine.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   applyLiveBindingsToProjection
-} from "./liveBindings.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "./liveBindings.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 

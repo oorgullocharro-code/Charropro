@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
@@ -97,7 +97,7 @@ function publicTournament(tournament, tournamentId) {
 function publicBranding(tournament) {
   const info = object(tournament.info || tournament);
   const branding = object(info.publicBranding || tournament.publicBranding);
-  return pick(branding, ["theme", "primaryColor", "secondaryColor", "accentColor", "backgroundColor", "textColor", "logoUrl", "coverImageUrl", "heroImageUrl", "organizerLogoUrl"]);
+  return pick(branding, ["theme", "primaryColor", "secondaryColor", "accentColor", "backgroundColor", "textColor", "logoUrl", "coverImageUrl", "liveCoverImageUrl", "heroImageUrl", "organizerLogoUrl"]);
 }
 
 function publicModules(tournament) {

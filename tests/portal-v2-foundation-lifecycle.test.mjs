@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { createPortalV2Model, isCanonicalPublicV3 } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { createPublicPortalClientState, evaluatePublicPortalStale } from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { createPortalV2Model, isCanonicalPublicV3 } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { createPublicPortalClientState, evaluatePublicPortalStale } from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 function fixture(overrides = {}) {
   return createCanonicalPublicTournamentData({
@@ -109,7 +109,7 @@ test("Portal V2 remains isolated from legacy/raw scoring paths and has a safe en
   assert.match(html, /data-charropro-entry="\.\/js\/views\/portal-v2\.js"/);
   assert.match(css, /@media \(max-width: 780px\)/);
   assert.doesNotMatch(css, /text-overflow:\s*ellipsis/);
-  assert.match(css, /\.portal-v2-hero::before\s*\{[^}]*linear-gradient\(90deg/s);
+  assert.match(css, /\.portal-v2-hero__editorial::before\s*\{[^}]*linear-gradient\(90deg/s);
   assert.doesNotMatch(css, /radial-gradient/);
 });
 

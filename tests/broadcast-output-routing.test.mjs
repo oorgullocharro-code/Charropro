@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as routingApi from "../js/broadcast/outputRouting.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import * as routingApi from "../js/broadcast/outputRouting.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   OUTPUT_ROUTING_VERSION,
   OUTPUT_ROUTE_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   updateOutputRoute,
   validateOutputRoute,
   validateOutputRoutingSnapshot
-} from "../js/broadcast/outputRouting.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/broadcast/outputRouting.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const T0 = "2026-07-15T18:00:00.000Z";
 const T1 = "2026-07-15T18:00:01.000Z";

@@ -1,4 +1,4 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.

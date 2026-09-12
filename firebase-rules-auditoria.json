@@ -32,7 +32,7 @@
             "publicBranding": {
               ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor'",
               "$field": {
-                ".validate": "($field === 'logoUrl' || $field === 'coverImageUrl') && newData.isString() && newData.val().length <= 1000 && newData.val().matches(/^https:\\/\\/firebasestorage\\.googleapis\\.com\\/v0\\/b\\/charropro-e8a68\\.firebasestorage\\.app\\/o\\/charropro%2Ftournaments%2F[A-Za-z0-9_-]+%2Fpublic%2F.*$/)"
+                ".validate": "newData.isString() && newData.val().length <= 1000 && (($field === 'logoUrl' && newData.val().matches(/^https:\\/\\/firebasestorage\\.googleapis\\.com\\/v0\\/b\\/charropro-e8a68\\.firebasestorage\\.app\\/o\\/charropro%2Ftournaments%2F[A-Za-z0-9_-]+%2Fpublic%2Fbranding%2Flogo%2F.*$/)) || ($field === 'coverImageUrl' && newData.val().matches(/^https:\\/\\/firebasestorage\\.googleapis\\.com\\/v0\\/b\\/charropro-e8a68\\.firebasestorage\\.app\\/o\\/charropro%2Ftournaments%2F[A-Za-z0-9_-]+%2Fpublic%2Fbranding%2Fcover%2F.*$/)) || ($field === 'liveCoverImageUrl' && newData.val().matches(/^https:\\/\\/firebasestorage\\.googleapis\\.com\\/v0\\/b\\/charropro-e8a68\\.firebasestorage\\.app\\/o\\/charropro%2Ftournaments%2F[A-Za-z0-9_-]+%2Fpublic%2Fbranding%2Flive-cover%2F.*$/)))"
               }
             },
             "publicSponsors": {

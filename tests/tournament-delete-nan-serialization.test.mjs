@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",

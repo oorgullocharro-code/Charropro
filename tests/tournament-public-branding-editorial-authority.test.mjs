@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 import {
   createTournamentPublicSponsor,
   normalizeTournamentPublicBranding,
   normalizeTournamentPublicSponsors,
   tournamentPublicSponsorsRecord,
   validateTournamentPublicAssetFile
-} from "../js/core/tournamentPublicBranding.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/core/tournamentPublicBranding.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 const require = createRequire(import.meta.url);
 const {
@@ -21,11 +21,14 @@ const {
 
 const coverUrl = assetUrl("brand-editorial", "branding/cover/cover-1.png");
 const logoUrl = assetUrl("brand-editorial", "branding/logo/logo-1.webp");
+const liveCoverUrl = assetUrl("brand-editorial", "branding/live-cover/live-cover-1.webp");
 const sponsorUrl = assetUrl("brand-editorial", "sponsors/sponsor-c/sponsor-1.jpg");
 
-assert.deepEqual(normalizeTournamentPublicBranding({ coverImageUrl: coverUrl, logoUrl, ignored: "x" }), { coverImageUrl: coverUrl, logoUrl });
+assert.deepEqual(normalizeTournamentPublicBranding({ coverImageUrl: coverUrl, logoUrl, liveCoverImageUrl: liveCoverUrl, ignored: "x" }), { coverImageUrl: coverUrl, logoUrl, liveCoverImageUrl: liveCoverUrl });
 assert.deepEqual(normalizeTournamentPublicBranding({ coverImageUrl: "https://example.test/not-authoritative.png" }), {});
+assert.deepEqual(normalizeTournamentPublicBranding({ logoUrl, liveCoverImageUrl: "" }), { logoUrl }, "removing the live cover leaves no broken public URL");
 assert.equal(validateTournamentPublicAssetFile({ type: "image/png", size: 100 }, "cover").ok, true);
+assert.equal(validateTournamentPublicAssetFile({ type: "image/webp", size: 100 }, "liveCover").ok, true);
 assert.equal(validateTournamentPublicAssetFile({ type: "image/svg+xml", size: 100 }, "cover").ok, false);
 assert.equal(validateTournamentPublicAssetFile({ type: "image/png", size: 6 * 1024 * 1024 }, "cover").ok, false);
 
@@ -44,7 +47,7 @@ const source = {
       nombre: "Torneo Editorial",
       type: "equipos_completo",
       status: "en_vivo",
-      publicBranding: { coverImageUrl: coverUrl, logoUrl },
+      publicBranding: { coverImageUrl: coverUrl, logoUrl, liveCoverImageUrl: liveCoverUrl },
       publicSponsors: sponsors
     },
     teams: [], participants: [], horses: [], charreadas: [], publishedScores: {}, officialScoreLedger: {}
@@ -56,11 +59,13 @@ const functionProjection = buildFunctionProjection(source, options);
 assert.deepEqual(functionProjection, browserProjection, "browser and Functions retain editorial V3 parity");
 assert.equal(browserProjection.branding.coverImageUrl, coverUrl);
 assert.equal(browserProjection.branding.logoUrl, logoUrl);
+assert.equal(browserProjection.branding.liveCoverImageUrl, liveCoverUrl);
 assert.deepEqual(browserProjection.sponsors.map((item) => item.id), ["sponsor-c", "sponsor-b"], "only active sponsors are published in canonical order");
 assert.equal(browserProjection.sponsors.some((item) => item.id === "sponsor-a"), false);
 
 const portal = createPortalV2Model(browserProjection, { availability: "ready", view: "inicio" });
 assert.equal(portal.branding.coverImageUrl, coverUrl, "Portal uses the canonical cover image");
+assert.equal(portal.branding.liveCoverImageUrl, liveCoverUrl, "Portal keeps the dedicated published live cover");
 assert.deepEqual(portal.sponsors.map((item) => item.name), ["C", "B"], "Portal banner derives from active public sponsors, not a navigation module");
 
 const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]);
@@ -73,6 +78,13 @@ const prepared = prepareTournamentPublicBrandingAssetUpload({
 });
 assert.match(prepared.objectPath, /^charropro\/tournaments\/brand-editorial\/public\/sponsors\/sponsor-c\/\d+-[a-f0-9]{16}\.png$/);
 assert.match(buildTournamentPublicBrandingAssetUrl("charropro-e8a68.firebasestorage.app", prepared.objectPath), /charropro%2Ftournaments%2Fbrand-editorial%2Fpublic%2Fsponsors%2Fsponsor-c%2F/);
+const liveCoverUpload = prepareTournamentPublicBrandingAssetUpload({
+  tournamentId: "brand-editorial",
+  kind: "liveCover",
+  mimeType: "image/png",
+  contentBase64: png.toString("base64")
+});
+assert.match(liveCoverUpload.objectPath, /^charropro\/tournaments\/brand-editorial\/public\/branding\/live-cover\/\d+-[a-f0-9]{16}\.png$/);
 assert.throws(() => prepareTournamentPublicBrandingAssetUpload({ tournamentId: "brand-editorial", kind: "cover", mimeType: "image/svg+xml", contentBase64: png.toString("base64") }), TournamentPublicBrandingAssetError);
 assert.throws(() => prepareTournamentPublicBrandingAssetUpload({ tournamentId: "brand-editorial", kind: "logo", mimeType: "image/png", contentBase64: Buffer.from("not-an-image").toString("base64") }), TournamentPublicBrandingAssetError);
 
@@ -84,13 +96,17 @@ const [appSource, functionsSource, rtdbRules, storageRules] = await Promise.all(
 ]);
 assert.match(appSource, /\["publicBranding", "Portal público", "image"\]/);
 assert.match(appSource, /view === "publicBranding"\) return role === ROLES\.SUPERVISOR/);
+assert.match(appSource, /renderPublicBrandingAssetCard\("Portada En Vivo", "liveCover", branding\.liveCoverImageUrl\)/);
+assert.match(appSource, /publicBrandingAssetField\(kind\)/);
 assert.match(appSource, /uploadFirebaseTournamentPublicAsset/);
 assert.match(functionsSource, /exports\.uploadCharroProTournamentPublicAsset = onCall/);
 assert.match(functionsSource, /requireTournamentPublicBrandingEditor/);
 assert.match(rtdbRules, /"publicBranding"/);
+assert.match(rtdbRules, /liveCoverImageUrl/);
 assert.match(rtdbRules, /"publicSponsors"/);
 assert.match(rtdbRules, /\$other !== 'publicBranding'/);
 assert.match(storageRules, /match \/charropro\/tournaments\/\{tournamentId\}\/public\/branding/);
+assert.match(storageRules, /assetKind == 'live-cover'/);
 assert.match(storageRules, /allow write: if false;/);
 
 if (process.env.CHARROPRO_RUN_FIREBASE_EMULATOR === "1") await runCallableMatrix();
@@ -106,9 +122,11 @@ async function runCallableMatrix() {
   const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST || "127.0.0.1:9099";
   const databaseHost = process.env.FIREBASE_DATABASE_EMULATOR_HOST || "127.0.0.1:9000";
   const functionsHost = process.env.FIREBASE_FUNCTIONS_EMULATOR_HOST || "127.0.0.1:5001";
+  const storageHost = process.env.FIREBASE_STORAGE_EMULATOR_HOST || "127.0.0.1:9199";
   const namespaces = [...new Set([`${projectId}-default-rtdb`, projectId])];
   const suffix = `${Date.now()}-${process.pid}`;
   const tournamentId = `branding-callable-${suffix}`;
+  const foreignTournamentId = `branding-callable-foreign-${suffix}`;
   const supervisor = await createUser(authHost, `branding-callable-supervisor-${suffix}`);
   const operator = await createUser(authHost, `branding-callable-operator-${suffix}`);
   try {
@@ -116,16 +134,29 @@ async function runCallableMatrix() {
       await ownerPut(databaseHost, namespace, `charropro/users/${supervisor.uid}`, { active: true, role: "supervisor", tournamentAccess: "all", tournamentIds: [] });
       await ownerPut(databaseHost, namespace, `charropro/users/${operator.uid}`, { active: true, role: "operador", tournamentAccess: "all", tournamentIds: [] });
       await ownerPut(databaseHost, namespace, `charropro/tournaments/${tournamentId}/info`, { id: tournamentId, name: "Editorial callable" });
+      await ownerPut(databaseHost, namespace, `charropro/tournaments/${foreignTournamentId}/info`, { id: foreignTournamentId, name: "Editorial foreign" });
     }
     const response = await call(functionsHost, projectId, supervisor.token, {
       tournamentId,
-      kind: "cover",
+      kind: "liveCover",
       mimeType: "image/png",
       contentBase64: Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]).toString("base64")
     });
     assert.equal(response.status, 200, response.body);
     assert.equal(response.value?.result?.ok, true);
-    assert.match(response.value.result.objectPath, new RegExp(`^charropro/tournaments/${tournamentId}/public/branding/cover/`));
+    assert.match(response.value.result.objectPath, new RegExp(`^charropro/tournaments/${tournamentId}/public/branding/live-cover/`));
+    const directStorageWrite = await writeStorageObject(storageHost, projectId, supervisor.token, `charropro/tournaments/${tournamentId}/public/branding/live-cover/direct.png`);
+    assert.ok([401, 403].includes(directStorageWrite.status), `direct client Storage writes remain denied: ${directStorageWrite.body}`);
+    for (const namespace of namespaces) {
+      await ownerPut(databaseHost, namespace, `charropro/users/${supervisor.uid}`, { active: true, role: "supervisor", tournamentAccess: "selected", tournamentIds: [tournamentId] });
+    }
+    const crossTournamentDenied = await call(functionsHost, projectId, supervisor.token, {
+      tournamentId: foreignTournamentId,
+      kind: "liveCover",
+      mimeType: "image/png",
+      contentBase64: Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]).toString("base64")
+    });
+    assert.equal(crossTournamentDenied.status, 403, crossTournamentDenied.body);
     const denied = await call(functionsHost, projectId, operator.token, {
       tournamentId,
       kind: "logo",
@@ -133,9 +164,17 @@ async function runCallableMatrix() {
       contentBase64: Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]).toString("base64")
     });
     assert.equal(denied.status, 403, denied.body);
+    const unauthenticated = await call(functionsHost, projectId, "", {
+      tournamentId,
+      kind: "liveCover",
+      mimeType: "image/png",
+      contentBase64: Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]).toString("base64")
+    });
+    assert.equal(unauthenticated.status, 401, unauthenticated.body);
   } finally {
     for (const namespace of namespaces) {
       await ownerDelete(databaseHost, namespace, `charropro/tournaments/${tournamentId}`);
+      await ownerDelete(databaseHost, namespace, `charropro/tournaments/${foreignTournamentId}`);
       await ownerDelete(databaseHost, namespace, `charropro/users/${supervisor.uid}`);
       await ownerDelete(databaseHost, namespace, `charropro/users/${operator.uid}`);
     }
@@ -147,11 +186,20 @@ async function runCallableMatrix() {
 async function call(host, projectId, token, data) {
   const response = await fetch(`http://${host}/${projectId}/us-central1/uploadCharroProTournamentPublicAsset`, {
     method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+    headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ data })
   });
   const body = await response.text();
   return { status: response.status, body, value: body ? JSON.parse(body) : null };
+}
+
+async function writeStorageObject(host, projectId, token, objectPath) {
+  const response = await fetch(`http://${host}/v0/b/${encodeURIComponent(`${projectId}.appspot.com`)}/o?name=${encodeURIComponent(objectPath)}`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "image/png" },
+    body: Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
+  });
+  return { status: response.status, body: await response.text() };
 }
 
 async function createUser(host, label) {

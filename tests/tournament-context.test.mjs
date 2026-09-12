@@ -5,7 +5,7 @@ import {
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "../js/core/tournamentContext.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+} from "../js/core/tournamentContext.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 assert.equal(getTournamentIdFromUrl("?id=torneo_a"), "torneo_a");
 assert.equal(getTournamentIdFromUrl("?tournamentId=torneo_b"), "torneo_b");

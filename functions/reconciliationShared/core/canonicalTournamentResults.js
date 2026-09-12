@@ -2,9 +2,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260910-portal-v2-coleadero-sheet-opportunity-detail-001-v1";
+} from "./canonicalOfficialResults.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 
