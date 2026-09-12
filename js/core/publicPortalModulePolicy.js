@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

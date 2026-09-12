@@ -3,7 +3,7 @@ import {
   compareOfficialTimerSnapshots,
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "../js/core/officialTimerLiveDisplay.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../js/core/officialTimerLiveDisplay.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const T0 = Date.parse("2026-08-25T12:00:00.000Z");
 const base = { timerId: "timer-1", durationMs: 60000, officialElapsedMs: 10000, sourceRevision: 1 };

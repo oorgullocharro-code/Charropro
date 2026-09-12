@@ -1,4 +1,4 @@
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const TOURNAMENT_ID = "portal-v2-local-preview";
 

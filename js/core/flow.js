@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./state.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

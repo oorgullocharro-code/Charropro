@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
@@ -107,9 +107,19 @@ function publicModules(tournament) {
 }
 
 function publicSponsors(tournament) {
-  return collection(tournament.publicSponsors || tournament.info?.publicSponsors)
-    .map((item) => pick(item, ["id", "name", "logoUrl", "url", "tier", "placement", "order"]))
-    .filter((item) => item.id && item.name);
+  const info = object(tournament.info || tournament);
+  return collection(info.publicSponsors || tournament.publicSponsors)
+    .filter((item) => item?.enabled !== false)
+    .map((item) => ({
+      id: text(item.sponsorId || item.id),
+      name: text(item.name),
+      logoUrl: text(item.logoUrl),
+      tier: text(item.tier) || "colaborador",
+      placement: text(item.placement) || "hero",
+      order: integer(item.sortOrder ?? item.order)
+    }))
+    .filter((item) => item.id && item.name)
+    .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id));
 }
 
 function publicProgram(charreadas, teams, participants, horses) {

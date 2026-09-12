@@ -6,7 +6,7 @@ import {
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../js/core/timerRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const now = Date.parse("2026-08-25T18:00:00.000Z");
 const context = (suerteId, extra = {}) => ({

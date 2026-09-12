@@ -52,6 +52,11 @@ const {
   createRuleProfileLifecycleRuntime
 } = require("./ruleProfileLifecycleService");
 const { createFirebaseRestCas } = require("./firebaseRestCas");
+const {
+  TournamentPublicBrandingAssetError,
+  buildTournamentPublicBrandingAssetUrl,
+  prepareTournamentPublicBrandingAssetUpload
+} = require("./tournamentPublicBrandingAsset");
 
 admin.initializeApp();
 
@@ -490,6 +495,53 @@ exports.assignCharroProTournamentRuleProfile = onCall({
   }
 });
 
+exports.uploadCharroProTournamentPublicAsset = onCall({
+  region: FUNCTIONS_REGION,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds,
+  memory: "512MiB"
+}, async (request) => {
+  const callerUid = request.auth?.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "Inicia sesion para cargar una imagen publica.");
+  let upload;
+  try {
+    upload = prepareTournamentPublicBrandingAssetUpload(request.data || {});
+  } catch (error) {
+    throw toTournamentPublicBrandingAssetHttpsError(error);
+  }
+  await requireTournamentPublicBrandingEditor(callerUid, upload.tournamentId);
+  try {
+    const bucket = admin.storage().bucket(FIREBASE_CLIENT_CONFIG.storageBucket);
+    await bucket.file(upload.objectPath).save(upload.content, {
+      resumable: false,
+      contentType: upload.mimeType,
+      metadata: {
+        cacheControl: "public,max-age=31536000,immutable",
+        metadata: {
+          charroproAssetScope: "tournament-public-branding",
+          tournamentId: upload.tournamentId,
+          kind: upload.kind
+        }
+      },
+      preconditionOpts: { ifGenerationMatch: 0 }
+    });
+    return {
+      ok: true,
+      tournamentId: upload.tournamentId,
+      kind: upload.kind,
+      sponsorId: upload.sponsorId || "",
+      objectPath: upload.objectPath,
+      url: buildTournamentPublicBrandingAssetUrl(FIREBASE_CLIENT_CONFIG.storageBucket, upload.objectPath)
+    };
+  } catch (error) {
+    console.error("[public-branding] asset upload failed", {
+      tournamentId: upload.tournamentId,
+      kind: upload.kind,
+      code: String(error?.code || error?.message || "storage-write-failed").slice(0, 120)
+    });
+    throw new HttpsError("internal", "No se pudo cargar la imagen publica.", { reason: "public-branding-asset-storage-failed" });
+  }
+});
+
 exports.deleteCharroProTournament = onCall({
   region: FUNCTIONS_REGION,
   timeoutSeconds: APPLICATION_CONFIG.timeouts.callableSeconds
@@ -613,6 +665,33 @@ async function requireOfficialScoreActor(uid, tournamentId) {
     tenantId: String(profile.tenantId || "").slice(0, 128),
     organizationId: String(profile.organizationId || "").slice(0, 128)
   };
+}
+
+async function requireTournamentPublicBrandingEditor(uid, tournamentId) {
+  const [profileSnapshot, selectedAccessSnapshot, tournamentSnapshot] = await Promise.all([
+    admin.database().ref(`${USERS_PATH}/${uid}`).get(),
+    admin.database().ref(`${USER_TOURNAMENT_ACCESS_PATH}/${uid}/${tournamentId}`).get(),
+    admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/info`).get()
+  ]);
+  const profile = profileSnapshot.val() || {};
+  const ids = Array.isArray(profile.tournamentIds) ? profile.tournamentIds : Object.values(profile.tournamentIds || {});
+  const hasAccess = profile.tournamentAccess !== "selected" || selectedAccessSnapshot.val() === true || ids.map(String).includes(tournamentId);
+  if (!tournamentSnapshot.exists()) {
+    throw new HttpsError("not-found", "El torneo no existe.", { reason: "public-branding-asset-tournament-not-found" });
+  }
+  if (profile.active !== true || profile.role !== "supervisor" || !hasAccess) {
+    throw new HttpsError("permission-denied", "Solo un supervisor autorizado puede cargar imagenes del torneo.", {
+      reason: "public-branding-asset-access-denied"
+    });
+  }
+}
+
+function toTournamentPublicBrandingAssetHttpsError(error) {
+  if (error instanceof HttpsError) return error;
+  const known = error instanceof TournamentPublicBrandingAssetError;
+  return new HttpsError("invalid-argument", "La imagen publica no cumple el contrato.", {
+    reason: known ? error.code : "public-branding-asset-request-invalid"
+  });
 }
 
 async function requireTournamentDeletionActor(uid, tournamentId) {

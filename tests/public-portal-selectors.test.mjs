@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

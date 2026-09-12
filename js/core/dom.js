@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 logCharroProVersion("runtime");
 

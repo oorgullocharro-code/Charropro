@@ -1,5 +1,5 @@
-import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 export const SCORER_CONTEXT_RESOLUTION_VERSION = "1.0.0";
 

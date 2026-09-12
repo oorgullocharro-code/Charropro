@@ -15,9 +15,9 @@ const options = { manifest, repositoryExports, requestedTargets: [added] };
 const check = extra => validateProductionFunctionsContract({ ...options, ...extra });
 const block = fn => assert.throws(fn, error => error instanceof ProductionFunctionsDeployError);
 
-test("BASELINE 11 AUTHORIZED = PASS", () => {
+test("BASELINE 12 AUTHORIZED = PASS", () => {
   const result = check({ productionFunctions: production });
-  assert.equal(result.authorized.length, 11); assert.equal(result.exported.length, 18); assert.equal(result.excluded.length, 7);
+  assert.equal(result.authorized.length, 12); assert.equal(result.exported.length, 19); assert.equal(result.excluded.length, 7);
 });
 test("TARGET SINGLE AUTHORIZED = PASS", () => assert.deepEqual(parseRequestedTargets([`functions:${added}`], manifest.authorizedFunctions), [added]));
 test("TARGET MULTIPLE AUTHORIZED = PASS", () => assert.equal(check({ requestedTargets: [added, manifest.authorizedFunctions[0]] }).targets.length, 2));
@@ -36,17 +36,17 @@ test("INVALID ALLOWLIST = BLOCK", () => {
     { ...manifest, expectedProduction: { ...manifest.expectedProduction, runtime: "nodejs20" } },
     { ...manifest, allowedInitialCreates: ["unknown"] }, { ...manifest, projectId: "other" }]) block(() => validateAllowlist(bad));
 });
-test("TARGETED DEPLOY DOES NOT INCLUDE OTHER 10 OR 7 EXCLUDED = PASS", () => {
+test("TARGETED DEPLOY DOES NOT INCLUDE OTHER 11 OR 7 EXCLUDED = PASS", () => {
   const args = firebaseDeployArguments({ projectId: manifest.projectId, targets: [added], manifest });
   assert.deepEqual(args, ["deploy", "--only", `functions:${added}`, "--project", manifest.projectId, "--non-interactive"]);
   for (const name of [...manifest.authorizedFunctions.filter(name => name !== added), ...manifest.excludedRepositoryExports]) assert.equal(args.includes(`functions:${name}`), false);
   block(() => firebaseDeployArguments({ projectId: manifest.projectId, targets: [], manifest }));
   block(() => firebaseDeployArguments({ projectId: manifest.projectId, targets: manifest.excludedRepositoryExports, manifest }));
 });
-test("INITIAL CREATE: exact 10 before / exact 11 after = PASS; new already exists = BLOCK", () => {
+test("INITIAL CREATE: exact 11 before / exact 12 after = PASS; new already exists = BLOCK", () => {
   const result = check({ productionFunctions: before, expectedCreates: [added] });
   assert.deepEqual(result.expectedCreates, [added]); assert.deepEqual(result.expectedDeletes, []);
-  assert.equal(check({ productionFunctions: production, expectedCreates: [added], phase: "after" }).production.length, 11);
+  assert.equal(check({ productionFunctions: production, expectedCreates: [added], phase: "after" }).production.length, 12);
   block(() => check({ productionFunctions: production, expectedCreates: [added] }));
   block(() => check({ productionFunctions: before }));
   block(() => check({ productionFunctions: before, expectedCreates: [manifest.authorizedFunctions[0]] }));

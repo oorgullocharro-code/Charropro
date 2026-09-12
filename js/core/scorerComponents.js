@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

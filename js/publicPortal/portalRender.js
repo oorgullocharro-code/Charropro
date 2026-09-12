@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

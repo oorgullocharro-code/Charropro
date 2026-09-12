@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

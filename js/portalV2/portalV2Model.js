@@ -3,10 +3,10 @@ import {
   CANONICAL_PUBLIC_TOURNAMENT_DATA_SCHEMA_VERSION,
   PUBLIC_TOURNAMENT_LIFECYCLE_STATUSES,
   validateCanonicalPublicTournamentData
-} from "../public/canonicalPublicTournamentData.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 export const PORTAL_V2_NAVIGATION = Object.freeze([
   { view: "inicio", module: "", label: "Inicio" },
@@ -85,7 +85,7 @@ export function createPortalV2Model(snapshot, options = {}) {
     }) : null,
     publicData,
     liveTimeline,
-    sponsors: modules.some((module) => module.type === "sponsors") ? visibleSponsors(snapshot.sponsors) : Object.freeze([]),
+    sponsors: visibleSponsors(snapshot.sponsors),
     connection
   });
 }

@@ -29,8 +29,23 @@
             "ruleProfileContentFingerprint": { ".write": false },
             "ruleProfileAssignmentRevision": { ".write": false },
             "ruleProfileAssignment": { ".write": false },
+            "publicBranding": {
+              ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor'",
+              "$field": {
+                ".validate": "($field === 'logoUrl' || $field === 'coverImageUrl') && newData.isString() && newData.val().length <= 1000 && newData.val().matches(/^https:\\/\\/firebasestorage\\.googleapis\\.com\\/v0\\/b\\/charropro-e8a68\\.firebasestorage\\.app\\/o\\/charropro%2Ftournaments%2F[A-Za-z0-9_-]+%2Fpublic%2F.*$/)"
+              }
+            },
+            "publicSponsors": {
+              ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor'",
+              "$sponsorId": {
+                ".validate": "newData.hasChildren(['sponsorId', 'name', 'enabled', 'sortOrder', 'tier', 'placement']) && newData.child('sponsorId').val() === $sponsorId && newData.child('sponsorId').isString() && newData.child('sponsorId').val().length > 0 && newData.child('sponsorId').val().length <= 180 && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 120 && newData.child('enabled').isBoolean() && newData.child('sortOrder').isNumber() && newData.child('sortOrder').val() >= 0 && newData.child('tier').isString() && (newData.child('tier').val() === 'principal' || newData.child('tier').val() === 'presentador' || newData.child('tier').val() === 'oro' || newData.child('tier').val() === 'plata' || newData.child('tier').val() === 'colaborador') && newData.child('placement').isString() && (newData.child('placement').val() === 'hero' || newData.child('placement').val() === 'header' || newData.child('placement').val() === 'results' || newData.child('placement').val() === 'timeline' || newData.child('placement').val() === 'footer') && (!newData.child('logoUrl').exists() || (newData.child('logoUrl').isString() && newData.child('logoUrl').val().length <= 1000 && newData.child('logoUrl').val().matches(/^https:\\/\\/firebasestorage\\.googleapis\\.com\\/v0\\/b\\/charropro-e8a68\\.firebasestorage\\.app\\/o\\/charropro%2Ftournaments%2F[A-Za-z0-9_-]+%2Fpublic%2Fsponsors%2F[A-Za-z0-9_-]+%2F.*$/)))",
+                "$field": {
+                  ".validate": "($field === 'sponsorId' || $field === 'name' || $field === 'logoUrl' || $field === 'tier' || $field === 'placement') && newData.isString() || $field === 'enabled' && newData.isBoolean() || $field === 'sortOrder' && newData.isNumber()"
+                }
+              }
+            },
             "$other": {
-              ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador') && $other !== 'ruleProfileId' && $other !== 'ruleProfileVersion' && $other !== 'ruleProfileStatus' && $other !== 'ruleProfileContentFingerprint' && $other !== 'ruleProfileAssignmentRevision' && $other !== 'ruleProfileAssignment'"
+              ".write": "auth != null && root.child('charropro/users/' + auth.uid + '/active').val() === true && (root.child('charropro/users/' + auth.uid + '/role').val() === 'supervisor' || root.child('charropro/users/' + auth.uid + '/role').val() === 'operador') && $other !== 'ruleProfileId' && $other !== 'ruleProfileVersion' && $other !== 'ruleProfileStatus' && $other !== 'ruleProfileContentFingerprint' && $other !== 'ruleProfileAssignmentRevision' && $other !== 'ruleProfileAssignment' && $other !== 'publicBranding' && $other !== 'publicSponsors'"
             }
           },
           "teams": {

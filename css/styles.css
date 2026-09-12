@@ -475,6 +475,19 @@ label {
   scrollbar-gutter: stable;
 }
 
+.public-branding-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.public-branding-asset-card { border: 1px solid var(--border); display: grid; gap: .75rem; min-width: 0; padding: 1rem; }
+.public-branding-asset-card h3 { font-size: 1rem; margin: 0; }
+.public-branding-asset-preview, .public-branding-asset-empty { aspect-ratio: 16 / 8; background: var(--panel); border: 1px solid var(--border); display: grid; max-height: 13rem; object-fit: cover; place-items: center; width: 100%; }
+.public-branding-asset-empty, .public-sponsor-logo--empty { color: var(--muted); }
+.public-sponsor-list { display: grid; gap: .75rem; }
+.public-sponsor-row { align-items: end; border-bottom: 1px solid var(--border); display: grid; gap: .75rem; grid-template-columns: 5rem minmax(10rem, 1fr) 6rem auto auto; padding-bottom: .75rem; }
+.public-sponsor-row label { display: grid; font-size: .78rem; gap: .3rem; }
+.public-sponsor-logo { aspect-ratio: 1; border: 1px solid var(--border); object-fit: contain; padding: .25rem; width: 4.5rem; }
+.public-sponsor-logo--empty { display: grid; font-size: .7rem; place-items: center; }
+.public-sponsor-enabled { white-space: nowrap; }
+@media (max-width: 760px) { .public-branding-grid, .public-sponsor-row { grid-template-columns: 1fr; } .public-sponsor-row { align-items: stretch; } }
+
 .nav-section {
   display: grid;
   gap: 6px;

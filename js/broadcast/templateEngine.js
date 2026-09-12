@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./componentLibrary.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

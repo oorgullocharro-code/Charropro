@@ -107,9 +107,19 @@ function publicModules(tournament) {
 }
 
 function publicSponsors(tournament) {
-  return collection(tournament.publicSponsors || tournament.info?.publicSponsors)
-    .map((item) => pick(item, ["id", "name", "logoUrl", "url", "tier", "placement", "order"]))
-    .filter((item) => item.id && item.name);
+  const info = object(tournament.info || tournament);
+  return collection(info.publicSponsors || tournament.publicSponsors)
+    .filter((item) => item?.enabled !== false)
+    .map((item) => ({
+      id: text(item.sponsorId || item.id),
+      name: text(item.name),
+      logoUrl: text(item.logoUrl),
+      tier: text(item.tier) || "colaborador",
+      placement: text(item.placement) || "hero",
+      order: integer(item.sortOrder ?? item.order)
+    }))
+    .filter((item) => item.id && item.name)
+    .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id));
 }
 
 function publicProgram(charreadas, teams, participants, horses) {

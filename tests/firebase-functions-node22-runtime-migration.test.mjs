@@ -32,6 +32,7 @@ const expectedExports = [
   "transitionCharroProRuleProfileLifecycle",
   "getCharroProRuleProfileLifecycle",
   "assignCharroProTournamentRuleProfile",
+  "uploadCharroProTournamentPublicAsset",
   "deleteCharroProTournament"
 ];
 

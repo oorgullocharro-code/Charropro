@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -15,7 +15,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./data/calaRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -28,7 +28,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -38,7 +38,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -55,7 +55,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
@@ -75,33 +75,33 @@ import {
   setFmch2026ManganaResult,
   shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/scorerContextResolution.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   getTernaParticipantName,
   isCanonicalTernaParticipant
-} from "./core/ternaParticipantIdentity.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/ternaParticipantIdentity.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -109,23 +109,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/timerRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/officialTimerOrchestration.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -139,9 +139,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/brakeReviewPhase.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -154,32 +154,32 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/scoring.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "./core/canonicalOfficialResults.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/canonicalOfficialResults.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/scoringAttempt.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/scorerComponents.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -189,7 +189,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/sync.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -206,6 +206,7 @@ import {
   publishFirebaseScoringButtonLayouts,
   publishFirebaseStatHistory,
   publishFirebaseTournamentState,
+  uploadFirebaseTournamentPublicAsset,
   readFirebaseConfiguration,
   readFirebasePreparationSnapshot,
   readFirebasePublicProjectionOutbox,
@@ -233,11 +234,18 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/firebaseSync.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import {
+  createTournamentPublicSponsor,
+  normalizeTournamentPublicBranding,
+  normalizeTournamentPublicSponsors,
+  tournamentPublicSponsorsRecord,
+  validateTournamentPublicAssetFile
+} from "./core/tournamentPublicBranding.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult
-} from "./core/historicalReconciliationDryRun.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/historicalReconciliationDryRun.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -250,19 +258,19 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/pendingScoreReview.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/tournamentContext.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   buildPortalV2PublicPath,
   buildPortalV2PublicUrl
-} from "./portalV2/portalV2Router.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./portalV2/portalV2Router.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -272,8 +280,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/supervisorNavigation.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -312,7 +320,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "./core/state.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -655,10 +663,11 @@ const routeMeta = {
   graphicsAccess: ["Graficos", "Links y pantallas para OBS."],
   production: ["Producción", "Centro de producción y gráficos en vivo."],
   rules: ["Botoneras", "Reglamento y botones por torneo."],
+  publicBranding: ["Portal público", "Imagen e identidad editorial del torneo."],
   rulesAdmin: ["Botoneras generales", "Reglamento base oculto del sistema."],
   settings: ["Conexion", "Google Sheets, OBS y respaldos."]
 };
-const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "officialProgram", "program", "results", "stats", "recovery", "graphicsAccess", "production", "rules", "settings"]);
+const TOURNAMENT_VIEWS = new Set(["dashboard", "teams", "officialProgram", "program", "results", "stats", "recovery", "graphicsAccess", "production", "rules", "publicBranding", "settings"]);
 
 function isIndividualTournament(tournament = getActiveTournament()) {
   return INDIVIDUAL_TOURNAMENT_TYPES.includes(tournament?.type);
@@ -1554,6 +1563,7 @@ function getVisibleTournamentNavItems(labels) {
     ["graphicsAccess", "Graficos", "monitor"],
     [PRODUCTION_NAV_VIEW, "Producción", "monitor"],
     ["rules", "Botoneras", "sliders"],
+    ["publicBranding", "Portal público", "image"],
     ["settings", "Conexion", "link"]
   ];
 
@@ -1567,6 +1577,7 @@ function canShowNavView(view) {
   const role = firebaseAccess.role;
   if (view === SUPERVISOR_OVERVIEW_VIEW) return !IS_TOURNAMENT_APP && role === ROLES.SUPERVISOR;
   if (view === PRODUCTION_NAV_VIEW) return canAccessProductionRole(role);
+  if (view === "publicBranding") return role === ROLES.SUPERVISOR;
   if (IS_TOURNAMENT_APP) {
     if (role === ROLES.SUPERVISOR || role === ROLES.OPERADOR) return true;
     if (ROLE_MENU_VIEWS[role]) return ROLE_MENU_VIEWS[role].includes(view);
@@ -3718,6 +3729,7 @@ function renderCurrentView() {
   if (state.view === "stats") return renderTournamentStatsCenter();
   if (state.view === "recovery") return renderRecoveryCenter();
   if (state.view === "rules") return renderRules();
+  if (state.view === "publicBranding") return renderPublicBranding();
   if (state.view === "settings") return renderSettings();
   return renderDashboard();
 }
@@ -3744,6 +3756,7 @@ function renderTournamentAppView() {
   if (state.view === "stats") return renderTournamentStatsCenter();
   if (state.view === "recovery") return renderRecoveryCenter();
   if (state.view === "rules") return renderRules();
+  if (state.view === "publicBranding") return renderPublicBranding();
   if (state.view === "settings") return renderSettings();
   return renderDashboard();
 }
@@ -7249,6 +7262,132 @@ function renderRecoveryBackupHistoryItem(record = {}) {
       </div>
     </article>
   `;
+}
+
+function renderPublicBranding() {
+  const tournament = getActiveTournament();
+  const branding = tournamentPublicBranding(tournament);
+  const sponsors = tournamentPublicSponsors(tournament);
+  return html`
+    <section class="content public-branding-page">
+      <article class="card">
+        <div class="card-header"><div><h2 class="card-title">Portal público</h2><p class="card-subtitle">Identidad editorial visible únicamente en el Portal Público V2.</p></div></div>
+        <div class="card-body public-branding-grid">
+          ${renderPublicBrandingAssetCard("Portada del torneo", "cover", branding.coverImageUrl)}
+          ${renderPublicBrandingAssetCard("Logo del torneo", "logo", branding.logoUrl)}
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-header"><div><h2 class="card-title">Patrocinadores</h2><p class="card-subtitle">El Portal publica únicamente los registros activos, en el orden indicado.</p></div><button class="button primary small" data-action="new-public-sponsor">Agregar patrocinador</button></div>
+        <div class="card-body public-sponsor-list">
+          ${sponsors.length ? sponsors.map(renderPublicSponsorRow).join("") : html`<p class="card-subtitle">Aún no hay patrocinadores configurados.</p>`}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function renderPublicBrandingAssetCard(label, kind, url) {
+  return html`<article class="public-branding-asset-card">
+    <h3>${escapeHTML(label)}</h3>
+    ${url ? html`<img class="public-branding-asset-preview" src="${escapeHTML(url)}" alt="${escapeHTML(label)}">` : html`<div class="public-branding-asset-empty">Sin imagen</div>`}
+    <div class="topbar-actions"><button class="button small" data-action="show-public-asset-upload" data-kind="${kind}">${url ? "Reemplazar" : "Cargar"}</button>${url ? html`<button class="button small red" data-action="remove-public-branding-asset" data-kind="${kind}">Eliminar</button>` : ""}</div>
+  </article>`;
+}
+
+function renderPublicSponsorRow(sponsor) {
+  return html`<article class="public-sponsor-row" data-sponsor-id="${escapeHTML(sponsor.sponsorId)}">
+    ${sponsor.logoUrl ? html`<img class="public-sponsor-logo" src="${escapeHTML(sponsor.logoUrl)}" alt="${escapeHTML(sponsor.name)}">` : html`<div class="public-sponsor-logo public-sponsor-logo--empty">Sin logo</div>`}
+    <label>Nombre<input data-public-sponsor-field="name" value="${escapeHTML(sponsor.name)}"></label>
+    <label>Orden<input data-public-sponsor-field="sortOrder" type="number" min="0" value="${sponsor.sortOrder}"></label>
+    <label class="public-sponsor-enabled"><input data-public-sponsor-field="enabled" type="checkbox" ${sponsor.enabled ? "checked" : ""}> Activo</label>
+    <div class="topbar-actions"><button class="button small" data-action="save-public-sponsor" data-id="${escapeHTML(sponsor.sponsorId)}">Guardar</button><button class="button small" data-action="show-public-asset-upload" data-kind="sponsor" data-id="${escapeHTML(sponsor.sponsorId)}">Logo</button><button class="button small red" data-action="delete-public-sponsor" data-id="${escapeHTML(sponsor.sponsorId)}">Eliminar</button></div>
+  </article>`;
+}
+
+function showPublicAssetUploadModal(kind, sponsorId = "") {
+  const labels = { cover: "Portada", logo: "Logo", sponsor: "Logo de patrocinador" };
+  if (!labels[kind]) return;
+  showModal({ title: `Cargar ${labels[kind]}`, body: html`<div class="grid"><p class="card-subtitle">JPG, PNG o WEBP. El archivo se publica bajo una ruta versionada del torneo.</p><input id="public-branding-file" type="file" accept="image/jpeg,image/png,image/webp"></div>`, actions: html`<button class="button" data-action="close-modal">Cancelar</button><button class="button primary" data-action="upload-public-branding-asset" data-kind="${kind}" data-id="${escapeHTML(sponsorId)}">Cargar</button>` });
+}
+
+async function uploadPublicBrandingAsset(kind, sponsorId = "") {
+  const tournament = getActiveTournament();
+  const file = document.getElementById("public-branding-file")?.files?.[0];
+  const validation = validateTournamentPublicAssetFile(file, kind);
+  if (!tournament?.id || !validation.ok) { showToast("Selecciona una imagen JPG, PNG o WEBP dentro del límite permitido."); return; }
+  const contentBase64 = await readFileAsBase64(file);
+  const result = await uploadFirebaseTournamentPublicAsset({ tournamentId: tournament.id, kind, sponsorId, mimeType: validation.mimeType, contentBase64 });
+  if (!result.ok || !result.url) { showToast("No se pudo cargar la imagen pública."); return; }
+  if (kind === "cover" || kind === "logo") {
+    tournament.publicBranding = normalizeTournamentPublicBranding({ ...tournamentPublicBranding(tournament), [kind === "cover" ? "coverImageUrl" : "logoUrl"]: result.url });
+  } else {
+    tournament.publicSponsors = tournamentPublicSponsorsRecord(tournamentPublicSponsors(tournament).map((item) => item.sponsorId === sponsorId ? { ...item, logoUrl: result.url } : item));
+  }
+  await persistPublicBranding();
+  closeModal();
+}
+
+async function persistPublicBranding() {
+  const tournament = getActiveTournament();
+  if (!tournament) return;
+  saveState({ silent: true });
+  if (!isFirebaseLiveConfigured()) { render(); return; }
+  const result = await publishFirebaseTournamentState(tournament.id, state, getAccessActor());
+  if (!result.ok) { showToast("La imagen se cargó, pero no se pudo publicar la configuración editorial."); return; }
+  setLocalTournamentVersion(tournament.id, result.version);
+  showToast("Configuración editorial publicada.");
+  render();
+}
+
+function showPublicSponsorModal() {
+  showModal({ title: "Agregar patrocinador", body: html`<div class="grid"><label>Nombre<input id="public-sponsor-name" required maxlength="120"></label><label>Orden<input id="public-sponsor-order" type="number" min="0" value="${tournamentPublicSponsors(getActiveTournament()).length + 1}"></label></div>`, actions: html`<button class="button" data-action="close-modal">Cancelar</button><button class="button primary" data-action="create-public-sponsor">Agregar</button>` });
+}
+
+async function createPublicSponsor() {
+  const tournament = getActiveTournament();
+  const sponsor = createTournamentPublicSponsor({ name: document.getElementById("public-sponsor-name")?.value, enabled: true, sortOrder: document.getElementById("public-sponsor-order")?.value }, { sponsorId: uid("sponsor") });
+  if (!tournament || !sponsor) { showToast("Escribe un nombre válido para el patrocinador."); return; }
+  tournament.publicSponsors = tournamentPublicSponsorsRecord([...tournamentPublicSponsors(tournament), sponsor]);
+  closeModal();
+  await persistPublicBranding();
+}
+
+async function savePublicSponsor(sponsorId) {
+  const tournament = getActiveTournament();
+  const row = document.querySelector(`[data-sponsor-id="${CSS.escape(sponsorId)}"]`);
+  if (!tournament || !row) return;
+  const next = createTournamentPublicSponsor({ sponsorId, name: row.querySelector('[data-public-sponsor-field="name"]')?.value, enabled: row.querySelector('[data-public-sponsor-field="enabled"]')?.checked, sortOrder: row.querySelector('[data-public-sponsor-field="sortOrder"]')?.value, logoUrl: tournamentPublicSponsors(tournament).find((item) => item.sponsorId === sponsorId)?.logoUrl });
+  if (!next) { showToast("El patrocinador requiere un nombre válido."); return; }
+  tournament.publicSponsors = tournamentPublicSponsorsRecord(tournamentPublicSponsors(tournament).map((item) => item.sponsorId === sponsorId ? next : item));
+  await persistPublicBranding();
+}
+
+async function removePublicBrandingAsset(kind) {
+  const tournament = getActiveTournament();
+  if (!tournament) return;
+  tournament.publicBranding = normalizeTournamentPublicBranding({ ...tournamentPublicBranding(tournament), [kind === "cover" ? "coverImageUrl" : "logoUrl"]: "" });
+  await persistPublicBranding();
+}
+
+async function deletePublicSponsor(sponsorId) {
+  const tournament = getActiveTournament();
+  if (!tournament) return;
+  tournament.publicSponsors = tournamentPublicSponsorsRecord(tournamentPublicSponsors(tournament).filter((item) => item.sponsorId !== sponsorId));
+  await persistPublicBranding();
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result || "").split(",").pop()); reader.onerror = () => reject(reader.error); reader.readAsDataURL(file); });
+}
+
+// The active client model hydrates `tournament` from the RTDB record's `info` node.
+function tournamentPublicBranding(tournament = {}) {
+  return normalizeTournamentPublicBranding(tournament.publicBranding || {});
+}
+
+function tournamentPublicSponsors(tournament = {}) {
+  return normalizeTournamentPublicSponsors(tournament.publicSponsors || {});
 }
 
 function renderSettings() {
@@ -12260,6 +12399,13 @@ function handleAction(action, target) {
     "save-scoring-button-layout": () => saveScoringButtonLayout(target.dataset.scope),
     "reset-scoring-button-layout": () => resetScoringButtonLayout(target.dataset.scope),
     "save-settings": saveSettings,
+    "show-public-asset-upload": () => showPublicAssetUploadModal(target.dataset.kind, target.dataset.id),
+    "upload-public-branding-asset": () => uploadPublicBrandingAsset(target.dataset.kind, target.dataset.id),
+    "remove-public-branding-asset": () => removePublicBrandingAsset(target.dataset.kind),
+    "new-public-sponsor": showPublicSponsorModal,
+    "create-public-sponsor": createPublicSponsor,
+    "save-public-sponsor": () => savePublicSponsor(target.dataset.id),
+    "delete-public-sponsor": () => deletePublicSponsor(target.dataset.id),
     "new-user-profile": () => showUserProfileModal(),
     "edit-user-profile": () => showUserProfileModal(target.dataset.uid),
     "save-user-profile": saveUserProfile,

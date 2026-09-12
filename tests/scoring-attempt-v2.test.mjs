@@ -17,8 +17,8 @@ import {
   setScoringAttemptDq,
   updateScoringAttemptClassification,
   validateScoringAttemptV2
-} from "../js/core/scoringAttempt.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const publishedAt = "2026-08-08T12:00:00.000Z";
 const actor = { id: "judge_1", name: "Juez Sintetico", role: "Juez" };

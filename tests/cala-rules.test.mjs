@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260911-admin-page-vertical-scroll-restore-001-v1";
+} from "../js/data/calaRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

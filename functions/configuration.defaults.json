@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260911-admin-page-vertical-scroll-restore-001-v1",
+      "appVersion": "20260911-tournament-public-branding-editorial-authority-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "3430f8d4300bd4bdfc7d12bc8a94fa2e1c844717db10101657969fa63e615ca3",
-  "fingerprint": "3430f8d4300bd4bdfc7d12bc8a94fa2e1c844717db10101657969fa63e615ca3"
+  "checksum": "3d2598595fe0c8befc8cf67b62ff28dc944365854a22b3025693187792c9e492",
+  "fingerprint": "3d2598595fe0c8befc8cf67b62ff28dc944365854a22b3025693187792c9e492"
 }

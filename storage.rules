@@ -2,9 +2,15 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+    match /charropro/tournaments/{tournamentId}/public/branding/{assetKind}/{assetName} {
+      allow read: if assetKind == 'cover' || assetKind == 'logo';
+      allow write: if false;
+    }
+    match /charropro/tournaments/{tournamentId}/public/sponsors/{sponsorId}/{assetName} {
+      allow read: if true;
+      allow write: if false;
+    }
     match /{allPaths=**} {
-      // The local laboratory starts closed. Storage permissions are deliberately
-      // not inferred from product rules or production configuration.
       allow read, write: if false;
     }
   }
