@@ -310,16 +310,23 @@
 .portal-v2-header__actions { align-items: center; display: flex; flex: 0 0 auto; gap: .65rem; }
 .portal-v2-mobile-nav { display: none; }
 
-.portal-v2-hero { background: #0b1220; display: block; isolation: isolate; min-height: clamp(28rem, 45vw, 38rem); position: relative; }
+.portal-v2-hero { background: #0b1220; display: block; isolation: isolate; min-height: clamp(22rem, 30vw, 28rem); position: relative; }
 .portal-v2-hero::before, .portal-v2-hero::after { content: ""; inset: 0; pointer-events: none; position: absolute; }
-.portal-v2-hero::before { background: linear-gradient(90deg, rgba(5, 10, 18, .98) 0%, rgba(5, 10, 18, .9) 31%, rgba(5, 10, 18, .48) 62%, rgba(5, 10, 18, .2) 100%); z-index: 1; }
-.portal-v2-hero::after { background: linear-gradient(180deg, rgba(5, 10, 18, .28) 0%, transparent 24%, rgba(5, 10, 18, .92) 100%); z-index: 1; }
+.portal-v2-hero::before { background: linear-gradient(90deg, rgba(5, 10, 18, .96) 0%, rgba(5, 10, 18, .82) 35%, rgba(5, 10, 18, .38) 64%, rgba(5, 10, 18, .12) 100%); z-index: 1; }
+.portal-v2-hero::after { background: linear-gradient(180deg, rgba(5, 10, 18, .24) 0%, transparent 38%, rgba(5, 10, 18, .5) 100%); z-index: 1; }
 .portal-v2-hero__image { block-size: 100%; filter: brightness(.78) saturate(.92); inline-size: 100%; inset: 0; min-height: 0; object-fit: cover; position: absolute; z-index: 0; }
-.portal-v2-hero__identity { box-sizing: border-box; max-width: 96rem; min-height: clamp(28rem, 45vw, 38rem); padding: clamp(3rem, 7vw, 6.5rem) max(1.25rem, calc((100vw - 96rem) / 2)); position: relative; width: 100%; z-index: 2; }
+.portal-v2-hero__identity { box-sizing: border-box; max-width: 96rem; min-height: clamp(22rem, 30vw, 28rem); padding: clamp(2.5rem, 5vw, 4.75rem) max(1.25rem, calc((100vw - 96rem) / 2)); position: relative; width: 100%; z-index: 2; }
+.portal-v2-hero__logo { margin-bottom: 1.2rem; max-block-size: clamp(5.5rem, 10vw, 9rem); max-inline-size: min(22rem, 60vw); }
 .portal-v2-hero__heading .portal-v2-eyebrow { color: var(--portal-blue-bright); font-size: .78rem; }
-.portal-v2-title { font-size: clamp(2.35rem, 5vw, 5rem); line-height: 1.02; margin-top: 1rem; max-inline-size: min(17ch, 100%); }
+.portal-v2-title { font-size: clamp(2.2rem, 4.25vw, 4.4rem); line-height: 1.02; margin-top: 1rem; max-inline-size: min(17ch, 100%); }
 .portal-v2-hero__detail { font-size: clamp(.98rem, 1.3vw, 1.12rem); margin-top: 1rem; max-inline-size: 46rem; }
 .portal-v2-hero__action { margin-top: 1.5rem; }
+
+.portal-v2-section-context { background: #0b1220; border-bottom: 1px solid var(--portal-border); }
+.portal-v2-section-context__content { margin: 0 auto; max-width: 96rem; padding: 1.15rem max(1.25rem, calc((100vw - 96rem) / 2)) 1.05rem; }
+.portal-v2-section-context .portal-v2-eyebrow { color: var(--portal-blue-bright); margin-bottom: .3rem; }
+.portal-v2-section-context h1 { color: #fff; font-size: clamp(1.45rem, 2.4vw, 2.05rem); line-height: 1.1; margin: 0; }
+.portal-v2-section-context p:last-child { color: var(--portal-silver); font-size: .92rem; margin: .35rem 0 0; }
 
 .portal-v2-main { max-width: 96rem; padding-block: 2.25rem 4rem; }
 .portal-v2-home { gap: 1.5rem; }
@@ -329,11 +336,18 @@
 .portal-v2-home__program, .portal-v2-home__results { border-radius: 6px; padding: 1.35rem; }
 .portal-v2-home__program { grid-column: auto; }
 
-.portal-v2-sponsors { background: transparent; border-block: 1px solid var(--portal-border); border-inline: 0; box-sizing: border-box; margin: 0 auto; max-width: 96rem; padding: 1.2rem max(1.25rem, calc((100vw - 96rem) / 2)); }
-.portal-v2-sponsors .portal-v2-eyebrow { color: var(--portal-text-muted); margin-bottom: .75rem; }
-.portal-v2-sponsors__list { flex-wrap: nowrap; gap: clamp(1.25rem, 3vw, 3.5rem); min-block-size: 4.6rem; overflow: visible; }
-.portal-v2-sponsor { align-items: center; display: flex; flex: 0 0 auto; justify-content: center; min-block-size: 4.6rem; min-inline-size: 8rem; }
-.portal-v2-sponsor img { background: transparent; border-radius: 0; display: block; max-block-size: clamp(3.1rem, 4vw, 4.35rem); max-inline-size: min(13rem, 18vw); object-fit: contain; padding: 0; }
+.portal-v2-sponsors { background: transparent; border-block: 1px solid var(--portal-border); border-inline: 0; box-sizing: border-box; margin: 0 auto; max-width: 96rem; overflow: hidden; padding: .7rem 0; }
+.portal-v2-sponsors__viewport { overflow: hidden; }
+.portal-v2-sponsors__list { align-items: center; animation: portal-v2-sponsor-loop var(--portal-v2-sponsor-loop-duration, 36s) linear infinite; display: flex; flex-wrap: nowrap; min-block-size: 3.65rem; overflow: visible; width: max-content; }
+.portal-v2-sponsors__track { align-items: center; display: flex; flex: 0 0 auto; gap: clamp(1.1rem, 2.5vw, 2.75rem); padding-inline: clamp(1.1rem, 2.5vw, 2.75rem); }
+.portal-v2-sponsor { align-items: center; display: flex; flex: 0 0 auto; justify-content: center; min-block-size: 3.65rem; min-inline-size: 6.5rem; }
+.portal-v2-sponsor img { background: transparent; border-radius: 0; display: block; max-block-size: clamp(2.55rem, 3.1vw, 3.45rem); max-inline-size: min(10.5rem, 16vw); object-fit: contain; padding: 0; }
+.portal-v2-sponsors:hover .portal-v2-sponsors__list, .portal-v2-sponsors:focus-within .portal-v2-sponsors__list { animation-play-state: paused; }
+
+@keyframes portal-v2-sponsor-loop {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
 
 @media (max-width: 780px) {
   .portal-v2-header__content { display: grid; gap: .65rem; grid-template-columns: minmax(0, 1fr) auto; justify-content: normal; min-height: 3.8rem; }
@@ -347,21 +361,29 @@
   .portal-v2-mobile-nav:not([open]) .portal-v2-mobile-nav__menu { display: none; }
   .portal-v2-mobile-nav__item { background: transparent; border: 0; border-radius: 4px; color: var(--portal-text-muted); cursor: pointer; font: inherit; font-size: .9rem; font-weight: 750; min-block-size: 2.45rem; padding: .45rem .65rem; text-align: left; }
   .portal-v2-mobile-nav__item[aria-current="page"], .portal-v2-mobile-nav__item:hover, .portal-v2-mobile-nav__item:focus-visible { background: var(--portal-blue); color: #fff; outline: none; }
-  .portal-v2-hero, .portal-v2-hero__identity { min-height: clamp(27rem, 110vw, 34rem); }
+  .portal-v2-hero, .portal-v2-hero__identity { min-height: 0; }
   .portal-v2-hero::before { background: linear-gradient(90deg, rgba(5, 10, 18, .94), rgba(5, 10, 18, .52)); }
-  .portal-v2-hero__identity { padding: 3rem 1rem 2.5rem; }
+  .portal-v2-hero::after { background: linear-gradient(180deg, rgba(5, 10, 18, .2), transparent 42%, rgba(5, 10, 18, .48) 100%); }
+  .portal-v2-hero__identity { padding: 2.25rem 1rem 1.75rem; }
+  .portal-v2-hero__logo { margin-bottom: 1rem; max-block-size: clamp(5.5rem, 24vw, 7rem); max-inline-size: min(18rem, 78vw); }
   .portal-v2-title { font-size: clamp(2rem, 10vw, 3.35rem); max-inline-size: 14ch; }
   .portal-v2-home__dashboard, .portal-v2-home__previews { grid-template-columns: 1fr; }
-  .portal-v2-sponsors { padding: 1rem; }
-  .portal-v2-sponsors__list { overflow-x: auto; overscroll-behavior-inline: contain; padding-bottom: .2rem; scroll-snap-type: inline mandatory; }
-  .portal-v2-sponsor { scroll-snap-align: start; }
-  .portal-v2-sponsor img { max-block-size: 4rem; max-inline-size: 11rem; }
+  .portal-v2-sponsors { padding: .55rem 0; }
+  .portal-v2-sponsors__list { min-block-size: 3.2rem; }
+  .portal-v2-sponsors__track { gap: 1.1rem; padding-inline: 1.1rem; }
+  .portal-v2-sponsor { min-block-size: 3.2rem; min-inline-size: 5.5rem; }
+  .portal-v2-sponsor img { max-block-size: 2.85rem; max-inline-size: 9rem; }
+  .portal-v2-section-context__content { padding: 1rem; }
 }
 
 @media (max-width: 520px) {
   .portal-v2-header__brand span { display: none; }
   .portal-v2-header__state { font-size: .62rem; padding: .28rem .42rem; }
-  .portal-v2-hero, .portal-v2-hero__identity { min-height: clamp(26rem, 130vw, 32rem); }
   .portal-v2-title { font-size: clamp(1.95rem, 11vw, 2.8rem); }
   .portal-v2-hero__detail { font-size: .95rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-v2-sponsors__viewport { overflow-x: auto; overscroll-behavior-inline: contain; }
+  .portal-v2-sponsors__list { animation: none; min-inline-size: 100%; }
 }

@@ -6,7 +6,7 @@ import {
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "../js/core/timerRules.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 const now = Date.parse("2026-08-25T18:00:00.000Z");
 const context = (suerteId, extra = {}) => ({

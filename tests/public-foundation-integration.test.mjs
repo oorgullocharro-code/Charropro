@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 import {
   applyPublicPortalConnection,
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 const qa = {
   tournament: {

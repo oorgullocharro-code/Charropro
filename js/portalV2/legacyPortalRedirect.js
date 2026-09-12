@@ -1,4 +1,4 @@
-import { PORTAL_V2_VIEWS, sanitizePortalV2Id, sanitizePortalV2View } from "./portalV2Router.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { PORTAL_V2_VIEWS, sanitizePortalV2Id, sanitizePortalV2View } from "./portalV2Router.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 const TOURNAMENT_ALIASES = Object.freeze([
   "tournamentId", "canal", "channel", "id", "torneo", "tournament", "evento", "event"

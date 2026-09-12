@@ -3,10 +3,10 @@ import {
   CANONICAL_PUBLIC_TOURNAMENT_DATA_SCHEMA_VERSION,
   PUBLIC_TOURNAMENT_LIFECYCLE_STATUSES,
   validateCanonicalPublicTournamentData
-} from "../public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 export const PORTAL_V2_NAVIGATION = Object.freeze([
   { view: "inicio", module: "", label: "Inicio" },

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 class FakeNode {
   constructor(tagName) {
@@ -88,16 +88,34 @@ test("premium hero CTA follows only the canonical lifecycle and published module
   }
 });
 
-test("premium Home uses published data, keeps missing content neutral, and shows sponsors only from the public source", () => {
+test("premium Home uses published data, keeps missing content neutral, and renders sponsors only from the public source", () => {
   const published = render(createPortalV2Model(fixture(), { availability: "ready", view: "inicio", connection: "online" }));
   assert.equal(collect(published, (node) => node.textContent === "Rancho Los Laureles").length > 0, true);
-  assert.equal(collect(published, (node) => node.textContent === "Patrocinador publicado").length, 1);
+  assert.equal(collect(published, (node) => node.textContent === "Patrocinador publicado").length, 2);
+  assert.equal(collect(published, (node) => node.textContent === "Patrocinadores").length, 0);
+  assert.equal(collect(published, (node) => node.className === "portal-v2-sponsors__track").length, 2);
+  assert.equal(collect(published, (node) => node.attributes?.["aria-hidden"] === "true").length, 1);
   assert.equal(collect(published, (node) => node.className === "portal-v2-hero__image").length, 1);
 
   const withoutSponsor = fixture({ modules: fixture().modules.filter((module) => module.type !== "sponsors"), sponsors: [] });
   const neutral = render(createPortalV2Model(withoutSponsor, { availability: "ready", view: "inicio", connection: "online" }));
   assert.equal(collect(neutral, (node) => node.textContent === "Patrocinador publicado").length, 0);
   assert.equal(collect(neutral, (node) => node.textContent === "Los resultados oficiales aparecerán cuando sean publicados.").length, 0);
+});
+
+test("premium hero and sponsor band belong only to Inicio while every other route leads with its own context", () => {
+  const home = render(createPortalV2Model(fixture(), { availability: "ready", view: "inicio", connection: "online" }));
+  assert.equal(collect(home, (node) => node.className === "portal-v2-hero").length, 1);
+  assert.equal(collect(home, (node) => node.className === "portal-v2-section-context").length, 0);
+
+  for (const [view, label] of [["en-vivo", "En vivo"], ["programa", "Programa"], ["resultados", "Resultados"], ["posiciones", "Posiciones"], ["sabana", "Sábana"]]) {
+    const root = render(createPortalV2Model(fixture(), { availability: "ready", view, connection: "online" }));
+    assert.equal(collect(root, (node) => node.className === "portal-v2-hero").length, 0, `${view} does not retain Inicio hero`);
+    assert.equal(collect(root, (node) => node.className === "portal-v2-sponsors").length, 0, `${view} does not retain Inicio sponsors`);
+    assert.equal(collect(root, (node) => node.className === "portal-v2-section-context").length, 1, `${view} leads with its section context`);
+    assert.equal(collect(root, (node) => node.textContent === label).length > 0, true, `${view} identifies its own section`);
+    assert.equal(collect(root, (node) => node.dataset?.portalV2View === view && node.attributes?.["aria-current"] === "page").length > 0, true, `${view} keeps active navigation`);
+  }
 });
 
 test("premium Home keeps individual participant and horse identity without applying team semantics", () => {
@@ -121,16 +139,24 @@ test("premium Home keeps individual participant and horse identity without apply
   assert.equal(collect(root, (node) => node.textContent === "Equipo").length, 0);
 });
 
-test("premium Portal V2 stylesheet provides a full-bleed hero and transparent responsive sponsor band", async () => {
-  const css = await readFile(new URL("../css/portal-v2.css", import.meta.url), "utf8");
+test("premium Portal V2 stylesheet keeps the Home hero compact and sponsors accessible in a reduced-motion loop", async () => {
+  const [css, app] = await Promise.all([
+    readFile(new URL("../css/portal-v2.css", import.meta.url), "utf8"),
+    readFile(new URL("../js/portalV2/portalV2App.js", import.meta.url), "utf8")
+  ]);
   for (const token of ["--portal-bg", "--portal-surface", "--portal-blue", "--portal-silver", "--portal-live"]) assert.match(css, new RegExp(token));
   assert.match(css, /\.portal-v2-body\s*\{[^}]*overflow-x:\s*hidden;/s);
   assert.match(css, /@media \(max-width: 780px\)/);
   assert.match(css, /\.portal-v2-hero::before[\s\S]*linear-gradient\(90deg/);
   assert.match(css, /\.portal-v2-title\s*\{[\s\S]*font-size:\s*clamp\(/);
-  assert.match(css, /\.portal-v2-sponsors__list\s*\{[\s\S]*overflow-x:\s*auto;/);
+  assert.match(css, /\.portal-v2-hero, \.portal-v2-hero__identity\s*\{\s*min-height:\s*0;/);
+  assert.match(css, /\.portal-v2-hero__logo\s*\{[^}]*max-block-size:\s*clamp\(/);
+  assert.match(css, /\.portal-v2-sponsors__list\s*\{[^}]*animation:\s*portal-v2-sponsor-loop/);
+  assert.match(css, /@keyframes portal-v2-sponsor-loop/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*\.portal-v2-sponsors__list\s*\{[^}]*animation:\s*none;/);
   assert.match(css, /@media \(max-width: 780px\)\s*\{[\s\S]*\.portal-v2-header__content\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto;/);
   assert.match(css, /\.portal-v2-home__action\s*\{[^}]*justify-self:\s*start;/);
+  assert.match(app, /isViewChange[\s\S]*environment\.scrollTo\(\{ top: 0, left: 0, behavior: "auto" \}\)/);
   const sponsorImageRules = [...css.matchAll(/\.portal-v2-sponsor img\s*\{([^}]*)\}/g)];
   assert.equal(sponsorImageRules.some((match) => /background:\s*transparent;/.test(match[1])), true);
   assert.doesNotMatch(css, /text-overflow:\s*ellipsis/);

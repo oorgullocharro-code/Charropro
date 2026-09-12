@@ -2,13 +2,13 @@ import {
   applyPublicPortalConnection,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2Model } from "./portalV2Model.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { applyPortalV2Snapshot } from "./portalV2ProjectionState.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { buildPortalV2Url, parsePortalV2Route } from "./portalV2Router.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2Shell, renderPortalV2 } from "./portalV2Render.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { getPortalV2PreviewSnapshot } from "../../fixtures/portalV2PreviewFixtures.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "../public/publicPortalClient.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2Model } from "./portalV2Model.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { applyPortalV2Snapshot } from "./portalV2ProjectionState.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "./portalV2Router.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2Shell, renderPortalV2 } from "./portalV2Render.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { getPortalV2PreviewSnapshot } from "../../fixtures/portalV2PreviewFixtures.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 export const PORTAL_V2_FOUNDATION_VERSION = "1.0.0";
 
@@ -81,6 +81,7 @@ export function createPortalV2App(options = {}) {
     const button = event.target.closest("button[data-portal-v2-view], button[data-portal-v2-competition], button[data-portal-v2-phase]");
     if (!button || !root.contains(button)) return;
     const patch = {};
+    const isViewChange = Boolean(button.dataset.portalV2View && button.dataset.portalV2View !== runtime.route.view);
     if (button.dataset.portalV2View) patch.view = button.dataset.portalV2View;
     if (Object.hasOwn(button.dataset, "portalV2Competition")) patch.competitionId = button.dataset.portalV2Competition;
     if (Object.hasOwn(button.dataset, "portalV2Phase")) patch.phaseId = button.dataset.portalV2Phase;
@@ -88,6 +89,7 @@ export function createPortalV2App(options = {}) {
     environment.history.pushState({ portalV2: true }, "", url);
     runtime.route = parsePortalV2Route(environment.location.href, { tournamentId: runtime.route.tournamentId });
     render();
+    if (isViewChange && typeof environment.scrollTo === "function") environment.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }
 
   function handlePopState() {

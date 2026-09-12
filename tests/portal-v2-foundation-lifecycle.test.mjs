@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPortalV2Model, isCanonicalPublicV3 } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { createPublicPortalClientState, evaluatePublicPortalStale } from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPortalV2Model, isCanonicalPublicV3 } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { buildPortalV2Url, parsePortalV2Route } from "../js/portalV2/portalV2Router.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createPublicPortalClientState, evaluatePublicPortalStale } from "../js/public/publicPortalClient.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 function fixture(overrides = {}) {
   return createCanonicalPublicTournamentData({

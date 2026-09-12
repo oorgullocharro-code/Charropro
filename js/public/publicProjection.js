@@ -8,25 +8,25 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "./publicProjectionSchema.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "./publicLiveFeed.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260912-portal-v2-home-visual-composition-002-v1";
-import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "../data/competitionTypes.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals
-} from "../core/canonicalOfficialResults.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "../core/canonicalOfficialResults.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 import {
   buildCanonicalPublicProjectionV3,
   getCanonicalPublicProjectionSignature,
   reconcileCanonicalPublicProjectionV3
-} from "./canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "./canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 export const PUBLIC_PROJECTION_VERSION = "3.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({

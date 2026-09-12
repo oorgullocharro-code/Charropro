@@ -10,8 +10,8 @@ export function createPortalV2Shell(root) {
 export function renderPortalV2(shell, model, options = {}) {
   const sections = [
     renderPortalHeader(model),
-    renderHero(model),
-    renderSponsors(model),
+    model.view === "inicio" ? renderHero(model) : renderSectionContext(model),
+    model.view === "inicio" ? renderSponsors(model) : null,
     model.view === "inicio" ? null : renderConnection(model),
     renderContent(model),
     renderFooter(model)
@@ -85,6 +85,20 @@ function renderHero(model) {
   return hero;
 }
 
+function renderSectionContext(model) {
+  const context = element("header", "portal-v2-section-context");
+  const content = element("div", "portal-v2-section-context__content");
+  const label = element("p", "portal-v2-eyebrow");
+  label.textContent = model.lifecycle.status === "LIVE" ? "Seguimiento oficial" : model.lifecycle.label;
+  const title = element("h1");
+  title.textContent = navigationLabel(model);
+  const detail = element("p");
+  detail.textContent = viewCopy(model.view, model.lifecycle.status);
+  content.append(label, title, detail);
+  context.append(content);
+  return context;
+}
+
 function renderMobileNavigation(model) {
   const menu = element("details", "portal-v2-mobile-nav");
   const summary = element("summary", "portal-v2-mobile-nav__toggle");
@@ -147,11 +161,6 @@ function renderContent(model) {
     state.append(title, detail);
     main.append(state);
     return main;
-  }
-  if (model.view !== "inicio") {
-    const heading = element("h2", "portal-v2-section-title");
-    heading.textContent = navigationLabel(model);
-    main.append(heading);
   }
   main.append(renderContextFilters(model), renderView(model));
   return main;
@@ -879,13 +888,23 @@ function renderResolvedHighlight(model) {
 function renderSponsors(model) {
   if (!model.sponsors.length) return element("div", "portal-v2-sponsors portal-v2-sponsors--empty");
   const section = element("section", "portal-v2-sponsors");
-  const title = element("p", "portal-v2-eyebrow");
-  title.textContent = "Patrocinadores";
-  section.append(title);
+  section.setAttribute("aria-label", "Patrocinadores");
+  const viewport = element("div", "portal-v2-sponsors__viewport");
   const list = element("div", "portal-v2-sponsors__list");
-  for (const sponsor of model.sponsors) {
-    const item = sponsor.url ? element("a", "portal-v2-sponsor") : element("span", "portal-v2-sponsor");
-    if (sponsor.url) {
+  list.style.setProperty("--portal-v2-sponsor-loop-duration", `${Math.max(30, model.sponsors.length * 12)}s`);
+  appendSponsorTrack(list, model.sponsors);
+  appendSponsorTrack(list, model.sponsors, { decorative: true });
+  viewport.append(list);
+  section.append(viewport);
+  return section;
+}
+
+function appendSponsorTrack(list, sponsors, options = {}) {
+  const track = element("div", "portal-v2-sponsors__track");
+  if (options.decorative) track.setAttribute("aria-hidden", "true");
+  for (const sponsor of sponsors) {
+    const item = !options.decorative && sponsor.url ? element("a", "portal-v2-sponsor") : element("span", "portal-v2-sponsor");
+    if (!options.decorative && sponsor.url) {
       item.href = sponsor.url;
       item.target = "_blank";
       item.rel = "noopener noreferrer";
@@ -896,10 +915,9 @@ function renderSponsors(model) {
       image.alt = sponsor.name;
       item.append(image);
     } else item.textContent = sponsor.name;
-    list.append(item);
+    track.append(item);
   }
-  section.append(list);
-  return section;
+  list.append(track);
 }
 
 function renderFooter(model) {

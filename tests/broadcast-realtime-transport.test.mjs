@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

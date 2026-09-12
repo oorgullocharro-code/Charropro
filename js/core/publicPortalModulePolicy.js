@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

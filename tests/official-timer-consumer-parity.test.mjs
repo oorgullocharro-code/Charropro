@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
 
 const now = Date.parse("2026-08-25T12:00:12.300Z");
 const snapshot = {
