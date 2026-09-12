@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 test("Portal V2 presents one competition ranking per team without collapsing distinct scopes upstream", () => {
   const model = createPortalV2Model(fixture(), { availability: "ready", view: "posiciones" });

@@ -8,15 +8,15 @@ export function createPortalV2Shell(root) {
 }
 
 export function renderPortalV2(shell, model, options = {}) {
-  shell.shell.replaceChildren(
+  const sections = [
     renderPortalHeader(model),
     renderHero(model),
-    renderNavigation(model),
-    renderConnection(model),
-    renderContent(model),
     renderSponsors(model),
+    model.view === "inicio" ? null : renderConnection(model),
+    renderContent(model),
     renderFooter(model)
-  );
+  ].filter(Boolean);
+  shell.shell.replaceChildren(...sections);
   applyBranding(shell.root, model.branding);
   shell.liveRegion.textContent = announcement(model, options);
 }
@@ -31,9 +31,17 @@ function renderPortalHeader(model) {
   byline.textContent = "Orgullo Charro";
   brand.append(name, byline);
 
+  const nav = element("nav", "portal-v2-nav");
+  nav.setAttribute("aria-label", "Secciones del portal");
+  for (const item of model.navigation) {
+    nav.append(navigationButton(item, model, "portal-v2-nav__item"));
+  }
+
+  const actions = element("div", "portal-v2-header__actions");
   const state = element("span", `portal-v2-header__state portal-v2-header__state--${model.lifecycle.status.toLowerCase()}`);
   state.textContent = model.lifecycle.label;
-  content.append(brand, state);
+  actions.append(state, renderMobileNavigation(model));
+  content.append(brand, nav, actions);
   header.append(content);
   return header;
 }
@@ -48,9 +56,7 @@ function renderHero(model) {
     identity.append(logo);
   }
   const lifecycle = element("p", "portal-v2-eyebrow");
-  lifecycle.textContent = model.lifecycle.label;
-  const state = element("span", `portal-v2-hero__status portal-v2-hero__status--${model.lifecycle.status.toLowerCase()}`);
-  state.textContent = model.lifecycle.label;
+  lifecycle.textContent = model.lifecycle.status === "LIVE" ? "Seguimiento oficial" : model.lifecycle.label;
   const title = element("h1", "portal-v2-title");
   title.textContent = model.tournament.name;
   const detail = element("p", "portal-v2-hero__detail");
@@ -64,11 +70,10 @@ function renderHero(model) {
     model.tournament.organization
   ].filter(Boolean).join(" · ") || model.lifecycle.detail;
   const heading = element("div", "portal-v2-hero__heading");
-  heading.append(lifecycle, state);
+  heading.append(lifecycle);
   identity.append(heading, title, detail);
   const action = heroAction(model);
   if (action) identity.append(action);
-  hero.append(identity);
   if (model.branding.heroImageUrl || model.branding.coverImageUrl) {
     const image = element("img", "portal-v2-hero__image");
     image.src = model.branding.heroImageUrl || model.branding.coverImageUrl;
@@ -76,38 +81,20 @@ function renderHero(model) {
     image.loading = "eager";
     hero.append(image);
   }
+  hero.append(identity);
   return hero;
 }
 
-function renderNavigation(model) {
-  const wrapper = element("div", "portal-v2-navigation");
-  const nav = element("nav", "portal-v2-nav");
-  nav.setAttribute("aria-label", "Secciones del portal");
-  for (const item of model.navigation) {
-    nav.append(navigationButton(item, model, "portal-v2-nav__item"));
-  }
-  wrapper.append(nav, renderMobileNavigation(model));
-  return wrapper;
-}
-
 function renderMobileNavigation(model) {
-  const nav = element("nav", "portal-v2-mobile-nav");
-  nav.setAttribute("aria-label", "Navegación compacta del portal");
-  const priority = new Set(["inicio", "en-vivo", "programa", "resultados"]);
-  for (const item of model.navigation.filter((item) => priority.has(item.view))) {
-    nav.append(navigationButton(item, model, "portal-v2-mobile-nav__item"));
-  }
-  const extra = model.navigation.filter((item) => !priority.has(item.view));
-  if (extra.length) {
-    const more = element("details", "portal-v2-mobile-nav__more");
-    const summary = element("summary");
-    summary.textContent = "Más";
-    const menu = element("div", "portal-v2-mobile-nav__menu");
-    for (const item of extra) menu.append(navigationButton(item, model, "portal-v2-mobile-nav__item"));
-    more.append(summary, menu);
-    nav.append(more);
-  }
-  return nav;
+  const menu = element("details", "portal-v2-mobile-nav");
+  const summary = element("summary", "portal-v2-mobile-nav__toggle");
+  summary.textContent = "☰";
+  summary.setAttribute("aria-label", "Abrir navegación del portal");
+  const list = element("div", "portal-v2-mobile-nav__menu");
+  list.setAttribute("aria-label", "Navegación del portal");
+  for (const item of model.navigation) list.append(navigationButton(item, model, "portal-v2-mobile-nav__item"));
+  menu.append(summary, list);
+  return menu;
 }
 
 function navigationButton(item, model, className) {
@@ -206,14 +193,6 @@ function renderView(model) {
 
 function renderHome(model) {
   const home = element("div", "portal-v2-home");
-  const overview = element("section", "portal-v2-home__overview");
-  const title = element("h2");
-  title.textContent = homeTitle(model);
-  const detail = element("p", "portal-v2-view__copy");
-  detail.textContent = [model.tournament.venue, model.tournament.city, model.tournament.startDate, model.tournament.endDate].filter(Boolean).join(" · ") || model.lifecycle.detail;
-  overview.append(title, detail);
-  home.append(overview);
-
   const dashboard = element("div", "portal-v2-home__dashboard");
   dashboard.append(renderHomeLivePanel(model), renderHomeStandings(model));
   home.append(dashboard);
@@ -312,16 +291,6 @@ function renderHomeEmpty(titleText, detailText) {
 function homeLink(model, view, label) {
   const item = model.navigation.find((candidate) => candidate.view === view);
   return item ? navigationButton(item, model, "portal-v2-home__action") : null;
-}
-
-function homeTitle(model) {
-  return {
-    PRE_EVENT: "Todo listo para la próxima jornada",
-    LIVE: "La charreada está en vivo",
-    PAUSED: "La actividad está en pausa",
-    FINALIZED: "Resultados oficiales publicados",
-    ARCHIVED: "Consulta histórica oficial"
-  }[model.lifecycle.status] || model.lifecycle.label;
 }
 
 function renderContextFilters(model) {

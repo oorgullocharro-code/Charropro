@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "./broadcastState.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "./dataContract.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

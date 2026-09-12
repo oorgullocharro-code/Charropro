@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 const dqRules = new Map(FMCH_2026_LIBRE_PROFILE_0_6_1.rules
   .filter((rule) => rule.suerteId === "cala" && rule.category === "desc")

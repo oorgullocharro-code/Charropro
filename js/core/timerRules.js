@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

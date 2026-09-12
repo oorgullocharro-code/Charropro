@@ -10,7 +10,7 @@ import {
   normalizeFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 const identity = {
   tournamentId: "demo-local-fmch-2026",

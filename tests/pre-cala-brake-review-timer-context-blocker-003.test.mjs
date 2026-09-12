@@ -6,9 +6,9 @@ import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../js/core/timerRules.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 const T0 = Date.parse("2026-08-27T12:00:00.000Z");
 const tournament = {

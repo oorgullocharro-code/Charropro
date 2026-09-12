@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 import {
   createTournamentPublicSponsor,
   normalizeTournamentPublicBranding,
   normalizeTournamentPublicSponsors,
   tournamentPublicSponsorsRecord,
   validateTournamentPublicAssetFile
-} from "../js/core/tournamentPublicBranding.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../js/core/tournamentPublicBranding.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 const require = createRequire(import.meta.url);
 const {

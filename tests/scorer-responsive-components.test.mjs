@@ -9,12 +9,12 @@ import {
   buildScorerRemateHistory,
   SCORER_COMPONENT_SYSTEM_VERSION,
   SCORER_RESPONSIVE_BREAKPOINTS
-} from "../js/core/scorerComponents.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../js/core/scorerComponents.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 import {
   normalizeScoringAttemptV2,
   setScoringAttemptDq,
   updateScoringAttemptClassification
-} from "../js/core/scoringAttempt.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 const runtimeConfiguration = JSON.parse(readFileSync(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const RELEASE_ID = String(runtimeConfiguration?.values?.system?.appVersion || "");

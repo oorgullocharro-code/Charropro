@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

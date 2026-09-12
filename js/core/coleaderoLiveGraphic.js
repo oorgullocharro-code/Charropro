@@ -1,5 +1,5 @@
-import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 export const COLEADERO_LIVE_WINDOW_SIZE = 5;
 

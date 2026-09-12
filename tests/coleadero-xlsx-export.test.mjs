@@ -7,7 +7,7 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../js/core/coleaderoXlsx.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);

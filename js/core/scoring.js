@@ -1,14 +1,14 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { compareOfficialRankingRows } from "./officialRanking.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "./state.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { compareOfficialRankingRows } from "./officialRanking.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;

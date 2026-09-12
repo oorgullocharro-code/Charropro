@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260911-tournament-public-branding-editorial-authority-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-composition-002-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260912-portal-v2-home-visual-composition-002-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
