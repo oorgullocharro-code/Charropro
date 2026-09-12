@@ -1,5 +1,5 @@
-import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
-import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 export const SCORER_CONTEXT_RESOLUTION_VERSION = "1.0.0";
 

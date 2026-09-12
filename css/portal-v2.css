@@ -312,13 +312,13 @@
 
 .portal-v2-hero { background: #0b1220; display: block; isolation: isolate; min-height: clamp(22rem, 30vw, 28rem); position: relative; }
 .portal-v2-hero::before, .portal-v2-hero::after { content: ""; inset: 0; pointer-events: none; position: absolute; }
-.portal-v2-hero::before { background: linear-gradient(90deg, rgba(5, 10, 18, .96) 0%, rgba(5, 10, 18, .82) 35%, rgba(5, 10, 18, .38) 64%, rgba(5, 10, 18, .12) 100%); z-index: 1; }
-.portal-v2-hero::after { background: linear-gradient(180deg, rgba(5, 10, 18, .24) 0%, transparent 38%, rgba(5, 10, 18, .5) 100%); z-index: 1; }
-.portal-v2-hero__image { block-size: 100%; filter: brightness(.78) saturate(.92); inline-size: 100%; inset: 0; min-height: 0; object-fit: cover; position: absolute; z-index: 0; }
+.portal-v2-hero::before { background: linear-gradient(90deg, rgba(5, 10, 18, .7) 0%, rgba(5, 10, 18, .46) 24%, rgba(5, 10, 18, .14) 46%, transparent 64%); z-index: 1; }
+.portal-v2-hero::after { background: linear-gradient(180deg, rgba(5, 10, 18, .08) 0%, transparent 62%, rgba(5, 10, 18, .28) 100%); z-index: 1; }
+.portal-v2-hero__image { block-size: 100%; filter: brightness(.9) saturate(.98); inline-size: 100%; inset: 0; min-height: 0; object-fit: cover; position: absolute; z-index: 0; }
 .portal-v2-hero__identity { box-sizing: border-box; max-width: 96rem; min-height: clamp(22rem, 30vw, 28rem); padding: clamp(2.5rem, 5vw, 4.75rem) max(1.25rem, calc((100vw - 96rem) / 2)); position: relative; width: 100%; z-index: 2; }
-.portal-v2-hero__logo { margin-bottom: 1.2rem; max-block-size: clamp(5.5rem, 10vw, 9rem); max-inline-size: min(22rem, 60vw); }
+.portal-v2-hero__logo { margin-bottom: 1.15rem; max-block-size: 13rem; max-inline-size: min(28rem, 64vw); }
 .portal-v2-hero__heading .portal-v2-eyebrow { color: var(--portal-blue-bright); font-size: .78rem; }
-.portal-v2-title { font-size: clamp(2.2rem, 4.25vw, 4.4rem); line-height: 1.02; margin-top: 1rem; max-inline-size: min(17ch, 100%); }
+.portal-v2-title { font-size: 3rem; font-weight: 700; line-height: 1.08; margin-top: .8rem; max-inline-size: min(19ch, 100%); }
 .portal-v2-hero__detail { font-size: clamp(.98rem, 1.3vw, 1.12rem); margin-top: 1rem; max-inline-size: 46rem; }
 .portal-v2-hero__action { margin-top: 1.5rem; }
 
@@ -345,8 +345,8 @@
 .portal-v2-sponsors:hover .portal-v2-sponsors__list, .portal-v2-sponsors:focus-within .portal-v2-sponsors__list { animation-play-state: paused; }
 
 @keyframes portal-v2-sponsor-loop {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @media (max-width: 780px) {
@@ -362,11 +362,11 @@
   .portal-v2-mobile-nav__item { background: transparent; border: 0; border-radius: 4px; color: var(--portal-text-muted); cursor: pointer; font: inherit; font-size: .9rem; font-weight: 750; min-block-size: 2.45rem; padding: .45rem .65rem; text-align: left; }
   .portal-v2-mobile-nav__item[aria-current="page"], .portal-v2-mobile-nav__item:hover, .portal-v2-mobile-nav__item:focus-visible { background: var(--portal-blue); color: #fff; outline: none; }
   .portal-v2-hero, .portal-v2-hero__identity { min-height: 0; }
-  .portal-v2-hero::before { background: linear-gradient(90deg, rgba(5, 10, 18, .94), rgba(5, 10, 18, .52)); }
-  .portal-v2-hero::after { background: linear-gradient(180deg, rgba(5, 10, 18, .2), transparent 42%, rgba(5, 10, 18, .48) 100%); }
+  .portal-v2-hero::before { background: linear-gradient(90deg, rgba(5, 10, 18, .68), rgba(5, 10, 18, .18) 72%, transparent); }
+  .portal-v2-hero::after { background: linear-gradient(180deg, rgba(5, 10, 18, .06), transparent 66%, rgba(5, 10, 18, .24) 100%); }
   .portal-v2-hero__identity { padding: 2.25rem 1rem 1.75rem; }
-  .portal-v2-hero__logo { margin-bottom: 1rem; max-block-size: clamp(5.5rem, 24vw, 7rem); max-inline-size: min(18rem, 78vw); }
-  .portal-v2-title { font-size: clamp(2rem, 10vw, 3.35rem); max-inline-size: 14ch; }
+  .portal-v2-hero__logo { margin-bottom: 1rem; max-block-size: 8rem; max-inline-size: min(20rem, 84vw); }
+  .portal-v2-title { font-size: 2.1rem; max-inline-size: 18ch; }
   .portal-v2-home__dashboard, .portal-v2-home__previews { grid-template-columns: 1fr; }
   .portal-v2-sponsors { padding: .55rem 0; }
   .portal-v2-sponsors__list { min-block-size: 3.2rem; }
@@ -379,7 +379,7 @@
 @media (max-width: 520px) {
   .portal-v2-header__brand span { display: none; }
   .portal-v2-header__state { font-size: .62rem; padding: .28rem .42rem; }
-  .portal-v2-title { font-size: clamp(1.95rem, 11vw, 2.8rem); }
+  .portal-v2-title { font-size: 1.85rem; }
   .portal-v2-hero__detail { font-size: .95rem; }
 }
 

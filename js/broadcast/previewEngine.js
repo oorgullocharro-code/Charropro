@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+} from "./themeTemplateIntegration.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+} from "./liveBindings.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

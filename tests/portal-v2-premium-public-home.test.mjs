@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
-import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 class FakeNode {
   constructor(tagName) {
@@ -96,6 +96,7 @@ test("premium Home uses published data, keeps missing content neutral, and rende
   assert.equal(collect(published, (node) => node.className === "portal-v2-sponsors__track").length, 2);
   assert.equal(collect(published, (node) => node.attributes?.["aria-hidden"] === "true").length, 1);
   assert.equal(collect(published, (node) => node.className === "portal-v2-hero__image").length, 1);
+  assert.equal(collect(published, (node) => node.className === "portal-v2-home__live" && node.children.some((child) => child.tagName === "img")).length, 0, "Home En Vivo does not repurpose Hero branding as a card image");
 
   const withoutSponsor = fixture({ modules: fixture().modules.filter((module) => module.type !== "sponsors"), sponsors: [] });
   const neutral = render(createPortalV2Model(withoutSponsor, { availability: "ready", view: "inicio", connection: "online" }));
@@ -139,7 +140,7 @@ test("premium Home keeps individual participant and horse identity without apply
   assert.equal(collect(root, (node) => node.textContent === "Equipo").length, 0);
 });
 
-test("premium Portal V2 stylesheet keeps the Home hero compact and sponsors accessible in a reduced-motion loop", async () => {
+test("premium Portal V2 stylesheet keeps the Home hero photo-led and sponsors accessible in a right-to-left reduced-motion loop", async () => {
   const [css, app] = await Promise.all([
     readFile(new URL("../css/portal-v2.css", import.meta.url), "utf8"),
     readFile(new URL("../js/portalV2/portalV2App.js", import.meta.url), "utf8")
@@ -148,11 +149,14 @@ test("premium Portal V2 stylesheet keeps the Home hero compact and sponsors acce
   assert.match(css, /\.portal-v2-body\s*\{[^}]*overflow-x:\s*hidden;/s);
   assert.match(css, /@media \(max-width: 780px\)/);
   assert.match(css, /\.portal-v2-hero::before[\s\S]*linear-gradient\(90deg/);
-  assert.match(css, /\.portal-v2-title\s*\{[\s\S]*font-size:\s*clamp\(/);
   assert.match(css, /\.portal-v2-hero, \.portal-v2-hero__identity\s*\{\s*min-height:\s*0;/);
-  assert.match(css, /\.portal-v2-hero__logo\s*\{[^}]*max-block-size:\s*clamp\(/);
+  assert.match(css, /\.portal-v2-hero__logo\s*\{[^}]*max-block-size:\s*13rem;/);
+  assert.match(css, /\.portal-v2-hero::before\s*\{[^}]*\.7\)[\s\S]*\.46\)[\s\S]*transparent 64%/);
+  assert.match(css, /\.portal-v2-hero::after\s*\{[^}]*transparent 62%[\s\S]*\.28\)/);
+  assert.match(css, /\.portal-v2-hero__image\s*\{[^}]*filter:\s*brightness\(\.9\) saturate\(\.98\)/);
+  assert.match(css, /\.portal-v2-title\s*\{[^}]*font-size:\s*3rem;[^}]*font-weight:\s*700;/);
   assert.match(css, /\.portal-v2-sponsors__list\s*\{[^}]*animation:\s*portal-v2-sponsor-loop/);
-  assert.match(css, /@keyframes portal-v2-sponsor-loop/);
+  assert.match(css, /@keyframes portal-v2-sponsor-loop\s*\{\s*from\s*\{\s*transform:\s*translateX\(0\);\s*\}\s*to\s*\{\s*transform:\s*translateX\(-50%\);/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*\.portal-v2-sponsors__list\s*\{[^}]*animation:\s*none;/);
   assert.match(css, /@media \(max-width: 780px\)\s*\{[\s\S]*\.portal-v2-header__content\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto;/);
   assert.match(css, /\.portal-v2-home__action\s*\{[^}]*justify-self:\s*start;/);

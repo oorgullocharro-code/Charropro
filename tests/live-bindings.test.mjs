@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

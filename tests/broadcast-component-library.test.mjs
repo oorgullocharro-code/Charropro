@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

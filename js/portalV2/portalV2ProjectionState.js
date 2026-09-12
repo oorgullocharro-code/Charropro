@@ -1,5 +1,5 @@
-import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
-import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 export function applyPortalV2Snapshot(state, snapshot, options = {}) {
   if (!isCanonicalPublicV3(snapshot)) {

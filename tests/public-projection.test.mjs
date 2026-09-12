@@ -3,15 +3,15 @@ import {
   buildLegacyPublicProjectionV2 as buildPublicProjection,
   getLegacyPublicProjectionSignature as getPublicProjectionSignature,
   reconcileLegacyPublicProjectionV2 as reconcilePublicProjection
-} from "../js/public/publicProjection.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+} from "../js/public/publicProjection.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "../js/public/publicProjectionSchema.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+} from "../js/public/publicProjectionSchema.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 const baseSource = buildSource();
 const candidate = buildPublicProjection(baseSource, {

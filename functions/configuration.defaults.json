@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260912-portal-v2-home-visual-adjustments-003-v1",
+      "appVersion": "20260912-portal-v2-home-physical-review-corrections-004-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "d06bb06f188dd615c36900817faa91fdcd296171758ab66ef7e16a6c3e8bb0ab",
-  "fingerprint": "d06bb06f188dd615c36900817faa91fdcd296171758ab66ef7e16a6c3e8bb0ab"
+  "checksum": "aaf48ea40979abbd54f660e32b729761ea526afbc6a74f13ef67651620509a4f",
+  "fingerprint": "aaf48ea40979abbd54f660e32b729761ea526afbc6a74f13ef67651620509a4f"
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

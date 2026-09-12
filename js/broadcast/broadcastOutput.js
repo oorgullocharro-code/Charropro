@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+} from "./broadcastState.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260912-portal-v2-home-visual-adjustments-003-v1";
+} from "./dataContract.js?v=20260912-portal-v2-home-physical-review-corrections-004-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 
