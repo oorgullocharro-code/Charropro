@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260912-portal-v2-home-reference-composition-live-cover-005-v1",
+      "appVersion": "20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "9cbe12aaa29b916fbe748255441315ca0fea1ee5c3480b2757bfef6535cd30dd",
-  "fingerprint": "9cbe12aaa29b916fbe748255441315ca0fea1ee5c3480b2757bfef6535cd30dd"
+  "checksum": "9f09d2e6bb403ceaf3deb290eb6aa8d14da19380852c6344861cbbec065c664e",
+  "fingerprint": "9f09d2e6bb403ceaf3deb290eb6aa8d14da19380852c6344861cbbec065c664e"
 }

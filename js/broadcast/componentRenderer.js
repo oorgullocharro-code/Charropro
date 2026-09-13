@@ -1,7 +1,7 @@
 import {
   COMPONENT_VISIBILITY,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 
 export const COMPONENT_RENDERER_VERSION = "1.0.0";
 

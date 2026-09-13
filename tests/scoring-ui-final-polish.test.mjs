@@ -17,7 +17,8 @@ const manual = sourceBetween("function renderCustomScoreSection(", "function get
 assert.match(mangana, /<div class="cp-manganas-dashboard">[\s\S]*?cp-mangana-attempt[\s\S]*?cp-mangana-result[\s\S]*?cp-mangana-floreo[\s\S]*?cp-mangana-pulls/);
 assert.match(mangana, /cp-mangana-result[\s\S]*?<span>Resultado<\/span>[\s\S]*?data-result="ACHIEVED"[\s\S]*?data-result="NOT_ACHIEVED"/);
 assert.match(mangana, /Intento<\/span>[\s\S]*?de \$\{context\.suerte\.attempts\}[\s\S]*?pts/);
-assert.match(mangana, /cp-mangana-remates[\s\S]*?data-action="set-mangana-remate"/);
+assert.match(mangana, /cp-mangana-technical-remate[\s\S]*?data-action="save-mangana-remate"/);
+assert.match(mangana, /data-action="set-mangana-placed"/);
 assert.match(mangana, /cp-mangana-floreo-detail[\s\S]*?selectedDetail\.size/);
 assert.match(mangana, /cp-mangana-history[\s\S]*?data-action="select-attempt"/);
 assert.doesNotMatch(mangana, /manganasHistory|temporaryAttempts|attemptHistoryV3/);

@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -15,7 +15,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -28,7 +28,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -38,7 +38,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -55,13 +55,11 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
-  FMCH_2026_MANGANAS_DURATION_MS,
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
   FMCH_2026_PASO_DISMOUNT_DURATION_MS,
   FMCH_2026_PASO_EXIT_DURATION_MS,
-  applyFmch2026ManganaTiming,
   applyFmch2026PasoTiming,
   buildFmch2026ManganaRemateHistory,
   getFmch2026ManganaFloreoRules,
@@ -69,39 +67,49 @@ import {
   isFmch2026PasoSuerte,
   reconcileFmch2026ManganaAttempt,
   reconcileFmch2026PasoAttempt,
-  setFmch2026ManganaFloreoTotal,
   setFmch2026ManganaPullCount,
-  setFmch2026ManganaRemate,
   setFmch2026ManganaResult,
-  shouldDisqualifyRepeatedManganaRemate,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import {
+  FMCH_2026_MANGANA_SCORING_CONTRACT_VERSION,
+  applyFmch2026ManganaAttemptTiming,
+  applyFmch2026ManganaTechnicalRemate,
+  getFmch2026ManganaFaenaTimeSettlement,
+  normalizeFmch2026ManganaRemateIdentity,
+  recordFmch2026ManganaEventEvidence,
+  setFmch2026ManganaManualAdditionalTotal,
+  settleFmch2026ManganaFaenaTime,
+  validateFmch2026ManganaOfficialCollection,
+  validateFmch2026ManganaRemateIdentity,
+  validateFmch2026ManganaRemateUniqueness
+} from "./core/manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/scorerContextResolution.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   getTernaParticipantName,
   isCanonicalTernaParticipant
-} from "./core/ternaParticipantIdentity.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -109,23 +117,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -139,9 +147,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -154,32 +162,32 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "./core/canonicalOfficialResults.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/scorerComponents.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/scorerSaveLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/scorerInteractionLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -189,7 +197,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/sync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -234,18 +242,18 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   createTournamentPublicSponsor,
   normalizeTournamentPublicBranding,
   normalizeTournamentPublicSponsors,
   tournamentPublicSponsorsRecord,
   validateTournamentPublicAssetFile
-} from "./core/tournamentPublicBranding.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/tournamentPublicBranding.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult
-} from "./core/historicalReconciliationDryRun.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/historicalReconciliationDryRun.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -258,19 +266,19 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/tournamentContext.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   buildPortalV2PublicPath,
   buildPortalV2PublicUrl
-} from "./portalV2/portalV2Router.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./portalV2/portalV2Router.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -280,8 +288,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/supervisorNavigation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -320,7 +328,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -522,8 +530,9 @@ const ACTION_CAPABILITIES = {
   "toggle-mangana-floreo-detail": "score",
   "adjust-mangana-pulls": "score",
   "set-mangana-result": "score",
+  "set-mangana-placed": "score",
   "set-paso-result": "score",
-  "set-mangana-remate": "score",
+  "save-mangana-remate": "score",
   "apply-sport-timing": "score",
   "sport-timer-command": "timer",
   "brake-review-timer-command": "timer",
@@ -615,8 +624,9 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "toggle-mangana-floreo-detail",
   "adjust-mangana-pulls",
   "set-mangana-result",
+  "set-mangana-placed",
   "set-paso-result",
-  "set-mangana-remate",
+  "save-mangana-remate",
   "finish-terna-session",
   "apply-sport-timing",
   "sport-timer-command",
@@ -9690,10 +9700,13 @@ function renderAttemptMainPanel(context) {
 function renderManganasMainPanel(context) {
   const attempts = getAttemptsForContext(context);
   const attempt = reconcileFmch2026ManganaAttempt(context.attempt, context.suerte);
+  const technicalRemate = normalizeFmch2026ManganaRemateIdentity(attempt.manganaRemate);
+  const timeSettlement = getFmch2026ManganaFaenaTimeSettlement(attempts);
   const detailRules = getFmch2026ManganaFloreoRules(context.suerte.id);
   const selectedDetail = new Set((attempt.floreoDetail || []).map((item) => item.selectedRuleId));
   const isPie = context.suerte.id === "manganas_pie";
-  const remates = isPie
+  const manualAdditionalTotal = Number(attempt.manganaManualAdditionalTotal ?? attempt.floreoTotal ?? 0);
+  const remateScoringEffects = isPie
     ? (context.suerte.catalog.adic || []).filter((item) => item.metadata?.remate)
     : context.suerte.catalog.base || [];
   return html`
@@ -9713,17 +9726,18 @@ function renderManganasMainPanel(context) {
         </article>
         <div class="cp-mangana-result" role="group" aria-label="Resultado deportivo de la oportunidad">
           <span>Resultado</span>
+          <button type="button" class="button ${attempt.manganaPlacedAt ? "active" : ""}" data-action="set-mangana-placed">Mangana puesta</button>
           <button type="button" class="button green ${attempt.manganaResult === "ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="ACHIEVED">Lograda</button>
           <button type="button" class="button red ${attempt.manganaResult === "NOT_ACHIEVED" ? "active" : ""}" data-action="set-mangana-result" data-result="NOT_ACHIEVED">No lograda</button>
         </div>
         <article class="cp-mangana-floreo" data-source="FMCH_2026">
-          <span>Floreo total</span>
+          <span>Adicionales</span>
           <div class="cp-sport-stepper">
-            <button type="button" data-action="adjust-mangana-floreo" data-delta="-1" aria-label="Restar un punto de floreo">−</button>
-            <strong>${moneylessNumber(attempt.floreoTotal)}</strong>
-            <button type="button" data-action="adjust-mangana-floreo" data-delta="1" aria-label="Sumar un punto de floreo">+</button>
+            <button type="button" data-action="adjust-mangana-floreo" data-delta="-1" aria-label="Restar un punto adicional">−</button>
+            <strong>${moneylessNumber(manualAdditionalTotal)}</strong>
+            <button type="button" data-action="adjust-mangana-floreo" data-delta="1" aria-label="Sumar un punto adicional">+</button>
           </div>
-          <em>${attempt.floreoScoredTotal === attempt.floreoTotal ? "FMCH 2026" : "Centenario: floreo no puntuable"}</em>
+          <em>${attempt.floreoScoredTotal === manualAdditionalTotal ? "Captura rápida autorizada" : "Centenario: adicionales no puntuables"}</em>
         </article>
         <article class="cp-mangana-pulls">
           <span>Tirones</span>
@@ -9734,12 +9748,43 @@ function renderManganasMainPanel(context) {
           </div>
           <em>${attempt.pullCount >= 3 ? "Malos acumulados: -4" : attempt.pullCount === 2 ? "Malos acumulados: -2" : "Sin ajuste por tirón"}</em>
         </article>
+        <article class="cp-mangana-time-settlement">
+          <span>Adicional por tiempo de la faena</span>
+          <strong>${timeSettlement ? `+${moneylessNumber(timeSettlement.points)}` : "Sin liquidar"}</strong>
+          <em>${timeSettlement ? "Liquidación única del cronómetro oficial" : "Se aplica una sola vez para las tres oportunidades"}</em>
+        </article>
       </div>
+      <section class="cp-mangana-remates cp-mangana-technical-remate">
+        <span>Remate</span>
+        ${isPie ? html`
+          <div class="cp-mangana-remate-form">
+            <label>Efecto final<input id="mangana-remate-effect" maxlength="120" value="${escapeHTML(technicalRemate?.effectFinal || "")}" placeholder="Ej. Rodada"></label>
+            <label>Orientación
+              <select id="mangana-remate-orientation">
+                <option value="">Seleccionar</option>
+                <option value="MASK" ${technicalRemate?.orientation === "MASK" ? "selected" : ""}>Máscara</option>
+                <option value="COUNTER_MASK" ${technicalRemate?.orientation === "COUNTER_MASK" ? "selected" : ""}>Contra máscara</option>
+              </select>
+            </label>
+            <label>Sentido de vueltas
+              <select id="mangana-remate-turn-direction">
+                <option value="">Seleccionar</option>
+                <option value="SAME" ${technicalRemate?.turnDirection === "SAME" ? "selected" : ""}>Mismo sentido</option>
+                <option value="OPPOSITE" ${technicalRemate?.turnDirection === "OPPOSITE" ? "selected" : ""}>Sentido contrario</option>
+              </select>
+            </label>
+            <label>Posición o movimiento final, opcional<input id="mangana-remate-body-finish" maxlength="120" value="${escapeHTML(technicalRemate?.bodyFinish || "")}" placeholder="Detalle breve"></label>
+            <button type="button" class="button primary" data-action="save-mangana-remate">Guardar remate</button>
+          </div>
+        ` : html`
+          <p>${technicalRemate ? `${escapeHTML(technicalRemate.name)} · identidad ${escapeHTML(technicalRemate.signature)}` : "Selecciona la base reglamentaria para identificar el remate."}</p>
+        `}
+      </section>
       ${isPie ? html`
-        <section class="cp-mangana-remates">
-          <span>Remate</span>
+        <section class="cp-mangana-remates cp-mangana-remate-effects">
+          <span>Adicionales al rematar</span>
           <div>
-            ${remates.map((remate) => html`<button type="button" class="button ${attempt.remateId === remate.id ? "primary" : ""}" data-action="set-mangana-remate" data-id="${escapeHTML(remate.id)}">${escapeHTML(remate.label)} +${moneylessNumber(remate.pts)}</button>`).join("")}
+            ${remateScoringEffects.map((effect) => html`<button type="button" class="button ${attempt.applied?.includes(effect.id) ? "primary" : ""}" data-action="toggle-rule" data-type="adic" data-id="${escapeHTML(effect.id)}">${escapeHTML(effect.label)} +${moneylessNumber(effect.pts)}</button>`).join("")}
           </div>
         </section>
       ` : ""}
@@ -9778,6 +9823,8 @@ function formatManganaHistoryStatus(attempt = {}, active = false) {
 function formatManganaHistoryDetail(attempt = {}, suerte = {}) {
   if (!hasAttemptVisibleResult(attempt)) return "Sin remate";
   if (attempt.desc) return "Descalificada";
+  const technicalRemate = normalizeFmch2026ManganaRemateIdentity(attempt.manganaRemate);
+  if (technicalRemate) return technicalRemate.name;
   const remate = (suerte.catalog?.adic || []).find((item) => item.id === attempt.remateId);
   return remate?.label || `✓ ${moneylessNumber(calculateAttemptTotal(attempt))} pts`;
 }
@@ -11060,7 +11107,7 @@ function hasAttemptScoringActivity(attempt = {}) {
     Number(attempt.adic || 0) ||
     Number(attempt.infr || 0) ||
     Number(attempt.puntaPts || 0) ||
-    Number(attempt.floreoTotal || 0) ||
+    Number(attempt.manganaManualAdditionalTotal ?? attempt.floreoTotal ?? 0) ||
     Number(attempt.pullCount || 0) ||
     attempt.manganaResult === "ACHIEVED" ||
     attempt.pasoResult === "ACHIEVED" ||
@@ -12373,8 +12420,9 @@ function handleAction(action, target) {
     "toggle-mangana-floreo-detail": () => toggleManganaFloreoDetail(target.dataset.id),
     "adjust-mangana-pulls": () => adjustManganaPulls(Number(target.dataset.delta || 0)),
     "set-mangana-result": () => applyManganaResult(target.dataset.result),
+    "set-mangana-placed": captureManganaPlaced,
     "set-paso-result": () => applyPasoResult(target.dataset.result),
-    "set-mangana-remate": () => applyManganaRemate(target.dataset.id),
+    "save-mangana-remate": saveManganaTechnicalRemate,
     "sport-timer-command": () => applyFmchSportTimerCommand(target.dataset.timerKind, target.dataset.command),
     "brake-review-timer-command": () => applyBrakeReviewTimerCommand(target.dataset.command),
     "brake-review-rule": () => applyBrakeReviewAuthorityCommand(BRAKE_REVIEW_ACTIONS.TOGGLE_RULE, target.dataset.id),
@@ -14059,7 +14107,13 @@ function reconcileManganaRemateConstraint(context) {
   if (!isFmch2026ManganaSuerte(context.suerte?.id) || !context.attempt?.remateId) return;
   const attempts = getAttemptsForContext(context);
   const ruleId = `${context.suerte.id}_desc_repetir_remate`;
-  const repeated = shouldDisqualifyRepeatedManganaRemate(attempts, context.attemptIndex, context.attempt.remateId);
+  const currentRemate = normalizeFmch2026ManganaRemateIdentity(context.attempt.manganaRemate);
+  const repeated = currentRemate
+    ? attempts.slice(0, context.attemptIndex).some((attempt) => (
+        normalizeFmch2026ManganaRemateIdentity(attempt?.manganaRemate)?.signature === currentRemate.signature
+      ))
+    : buildFmch2026ManganaRemateHistory(attempts.slice(0, context.attemptIndex))
+        .some((item) => item.remateId === context.attempt.remateId);
   if (repeated) {
     context.attempt.desc = (context.suerte.catalog.desc || []).find((item) => item.id === ruleId)?.label || "Repetir remate";
     context.attempt.descRuleId = ruleId;
@@ -14173,7 +14227,9 @@ function toggleRule(type, ruleId) {
         context.attempt.remateLabel = rule.label;
         context.attempt.remateMetadata = { source: rule.source || "RULE_PROFILE" };
       } else if (context.suerte.id === "manganas_caballo") {
-        Object.assign(context.attempt, setFmch2026ManganaRemate(context.attempt, context.suerte, rule.id));
+        Object.assign(context.attempt, applyFmch2026ManganaTechnicalRemate(context.attempt, context.suerte, {
+          shortcutId: rule.id
+        }));
       } else if (context.suerte.id === "paso") {
         context.attempt.pasoVuelta = Number(rule.metadata?.vuelta || 1);
       }
@@ -14181,6 +14237,7 @@ function toggleRule(type, ruleId) {
       context.attempt.remateId = null;
       context.attempt.remateLabel = null;
       context.attempt.remateMetadata = null;
+      if (context.suerte.id === "manganas_caballo") context.attempt.manganaRemate = null;
     }
   } else {
     const active = context.attempt.applied.includes(ruleId);
@@ -14269,6 +14326,33 @@ function markAttemptZeroIfBlank(attempt = {}) {
   attempt.notAchieved = true;
 }
 
+function buildManganaFaenaIdentity(context, runtime) {
+  const individual = Boolean(context.competitionContext?.isIndividualCompetition);
+  return {
+    tournamentId: context.tournament?.id || "",
+    competitionId: context.charreada?.competitionId || context.competitionContext?.competitionId || "equipos_completo",
+    charreadaId: context.charreada?.id || "",
+    teamId: individual ? "" : context.team?.id || "",
+    participantId: individual ? context.participant?.id || context.team?.id || "" : "",
+    suerteId: context.suerte?.id || "",
+    timerId: runtime?.timer?.timerId || ""
+  };
+}
+
+function settleCurrentManganaFaena(context, runtime) {
+  const result = settleFmch2026ManganaFaenaTime(getAttemptsForContext(context), context.suerte, {
+    ...buildManganaFaenaIdentity(context, runtime),
+    officialElapsedMs: runtime.view.officialElapsedMs,
+    wallElapsedMs: runtime.view.wallElapsedMs,
+    status: runtime.view.status,
+    legacyText: runtime.view.formattedRemaining
+  });
+  const key = scoreKey(context.charreada.id, context.team.id, context.suerte.id);
+  state.scores[key] = result.attempts;
+  context.attempt = result.attempts[context.attemptIndex] || context.attempt;
+  return result;
+}
+
 function freezeCurrentFmchSportAttempt(context) {
   if (!context?.attempt) return;
   const runtimes = getFmch2026SportTimerRuntimes(context);
@@ -14318,22 +14402,21 @@ function freezeCurrentFmchSportAttempt(context) {
     }
     const runtime = runtimes[0];
     if (runtime) {
-      const attempts = getAttemptsForContext(context);
-      const currentAchieved = context.attempt.manganaResult === "ACHIEVED";
-      const hasConsumed = currentAchieved || attempts.some((attempt) => attempt?.manganaResult === "ACHIEVED");
-      Object.assign(context.attempt, applyFmch2026ManganaTiming(context.attempt, context.suerte, {
-        timerId: runtime.timer.timerId,
-        officialElapsedMs: runtime.view.officialElapsedMs,
-        wallElapsedMs: runtime.view.wallElapsedMs,
-        status: runtime.view.status,
-        legacyText: runtime.view.formattedRemaining,
-        hasConsumed,
-        sequenceComplete: context.attemptIndex >= FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT - 1
-          || runtime.view.status === "FINISHED",
-        placedInMinuteSeven: currentAchieved
-          && runtime.view.officialElapsedMs >= 6 * 60 * 1000
-          && runtime.view.officialElapsedMs <= FMCH_2026_MANGANAS_DURATION_MS
-      }));
+      const sequenceComplete = context.attemptIndex >= FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT - 1
+        || runtime.view.status === "FINISHED";
+      if (sequenceComplete) {
+        settleCurrentManganaFaena(context, runtime);
+      } else {
+        Object.assign(context.attempt, applyFmch2026ManganaAttemptTiming(context.attempt, context.suerte, {
+          timerId: runtime.timer.timerId,
+          officialElapsedMs: runtime.view.officialElapsedMs,
+          wallElapsedMs: runtime.view.wallElapsedMs,
+          status: runtime.view.status,
+          legacyText: runtime.view.formattedRemaining,
+          hasConsumed: false,
+          sequenceComplete: false
+        }));
+      }
       context.attempt.timing.startedAt = runtime.timer.wallStartedAt;
       context.attempt.timing.endedAt = runtime.timer.wallFinishedAt;
     }
@@ -14775,7 +14858,11 @@ function adjustManganaFloreo(delta) {
   if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
   Object.assign(
     context.attempt,
-    setFmch2026ManganaFloreoTotal(context.attempt, context.suerte, Number(context.attempt.floreoTotal || 0) + Number(delta || 0))
+    setFmch2026ManganaManualAdditionalTotal(
+      context.attempt,
+      context.suerte,
+      Number(context.attempt.manganaManualAdditionalTotal ?? context.attempt.floreoTotal ?? 0) + Number(delta || 0)
+    )
   );
   persistScoreChange();
 }
@@ -14804,6 +14891,32 @@ function applyManganaResult(result) {
   const context = getCurrentContext();
   if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
   Object.assign(context.attempt, setFmch2026ManganaResult(context.attempt, context.suerte, result));
+  context.attempt.manganaScoringContractVersion = FMCH_2026_MANGANA_SCORING_CONTRACT_VERSION;
+  if (result === "ACHIEVED") {
+    const runtime = getFmch2026SportTimerRuntimes(context)[0];
+    if (runtime) {
+      Object.assign(context.attempt, recordFmch2026ManganaEventEvidence(context.attempt, "DOWN", {
+        timerId: runtime.timer.timerId,
+        officialElapsedMs: runtime.view.officialElapsedMs
+      }));
+    }
+  }
+  persistScoreChange();
+}
+
+function captureManganaPlaced() {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
+  const runtime = getFmch2026SportTimerRuntimes(context)[0];
+  if (!runtime) {
+    showToast("El cronómetro oficial de la faena no está disponible.");
+    return;
+  }
+  Object.assign(context.attempt, recordFmch2026ManganaEventEvidence(context.attempt, "PLACED", {
+    timerId: runtime.timer.timerId,
+    officialElapsedMs: runtime.view.officialElapsedMs
+  }));
   persistScoreChange();
 }
 
@@ -14818,11 +14931,24 @@ function applyPasoResult(result) {
   persistScoreChange();
 }
 
-function applyManganaRemate(remateId) {
+function saveManganaTechnicalRemate() {
   if (!guardUnlockedCharreada()) return;
   const context = getCurrentContext();
-  if (!context?.attempt || !isFmch2026ManganaSuerte(context.suerte?.id)) return;
-  Object.assign(context.attempt, setFmch2026ManganaRemate(context.attempt, context.suerte, remateId));
+  if (!context?.attempt || context.suerte?.id !== "manganas_pie") return;
+  const input = {
+    name: document.getElementById("mangana-remate-effect")?.value || "",
+    effectFinal: document.getElementById("mangana-remate-effect")?.value || "",
+    orientation: document.getElementById("mangana-remate-orientation")?.value || "",
+    turnDirection: document.getElementById("mangana-remate-turn-direction")?.value || "",
+    bodyFinish: document.getElementById("mangana-remate-body-finish")?.value || ""
+  };
+  const next = applyFmch2026ManganaTechnicalRemate(context.attempt, context.suerte, input);
+  const validation = validateFmch2026ManganaRemateIdentity(next.manganaRemate);
+  if (!validation.valid) {
+    showToast("Completa efecto final, orientación y sentido de vueltas del remate.");
+    return;
+  }
+  Object.assign(context.attempt, next);
   reconcileManganaRemateConstraint(context);
   persistScoreChange();
 }
@@ -14987,16 +15113,22 @@ function applyCurrentFmchSportTiming() {
   if (isFmch2026ManganaSuerte(context.suerte?.id)) {
     const runtime = runtimes[0];
     if (!runtime) return;
-    const attempts = getAttemptsForContext(context);
-    const hasConsumed = attempts.some((attempt) => attempt?.manganaResult === "ACHIEVED") || context.attempt.manganaResult === "ACHIEVED";
-    Object.assign(context.attempt, applyFmch2026ManganaTiming(context.attempt, context.suerte, {
-      timerId: runtime.timer.timerId,
-      officialElapsedMs: runtime.view.officialElapsedMs,
-      wallElapsedMs: runtime.view.wallElapsedMs,
-      status: runtime.view.status,
-      legacyText: runtime.view.formattedRemaining,
-      hasConsumed
-    }));
+    const sequenceComplete = context.attemptIndex >= FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT - 1
+      || runtime.view.status === "FINISHED";
+    if (sequenceComplete) {
+      settleCurrentManganaFaena(context, runtime);
+    } else {
+      Object.assign(context.attempt, applyFmch2026ManganaAttemptTiming(context.attempt, context.suerte, {
+        timerId: runtime.timer.timerId,
+        officialElapsedMs: runtime.view.officialElapsedMs,
+        wallElapsedMs: runtime.view.wallElapsedMs,
+        status: runtime.view.status,
+        legacyText: runtime.view.formattedRemaining,
+        hasConsumed: false,
+        sequenceComplete: false
+      }));
+      showToast("El adicional por tiempo se liquidará al cerrar la faena.");
+    }
   } else if (isFmch2026PasoSuerte(context.suerte?.id)) {
     const exit = runtimes.find((item) => item.kind === "paso_exit");
     const dismount = runtimes.find((item) => item.kind === "paso_dismount");
@@ -15270,6 +15402,26 @@ function getOfficialPublishExceptionDiagnostic(error = {}) {
 }
 
 async function publishOfficialScoreForContext(context, options = {}) {
+  if (isFmch2026ManganaSuerte(context?.suerte?.id)) {
+    const collectionGuard = validateFmch2026ManganaOfficialCollection(
+      getAttemptsForContext(context),
+      context.suerte,
+      buildManganaFaenaIdentity(context, null)
+    );
+    if (!collectionGuard.valid) {
+      const detail = collectionGuard.errors.join(", ");
+      setLastFirebaseError("manganas-official-collection-invalid", detail);
+      setScoreSaveStatus({
+        state: "error",
+        label: "Publicación bloqueada",
+        detail,
+        savedAtMs: 0,
+        scoreId: scoreKey(context.charreada.id, context.team.id, context.suerte.id)
+      });
+      showToast("La liquidación oficial de Manganas no es válida. Revisa tiempo y remates.");
+      return { ok: false, reason: "manganas-official-collection-invalid", errors: collectionGuard.errors };
+    }
+  }
   const scoreNode = getScoreNodeForContext(context, options);
   if (!scoreNode?.ok) {
     const missing = scoreNode?.missing || ["score"];
@@ -16121,6 +16273,16 @@ async function nextScore() {
   if (isFmch2026ManganaSuerte(context.suerte?.id) && (context.attempt.manganaResult || "NOT_STARTED") === "NOT_STARTED") {
     showToast("Indica si la mangana fue lograda o no lograda antes de publicar.");
     finalizeScorerSaveLatency(latencyTrace, "failed", { reason: "mangana-result-required" });
+    return;
+  }
+  if (
+    isFmch2026ManganaSuerte(context.suerte?.id)
+    && context.attempt.manganaScoringContractVersion === FMCH_2026_MANGANA_SCORING_CONTRACT_VERSION
+    && context.attempt.manganaResult === "ACHIEVED"
+    && !validateFmch2026ManganaRemateIdentity(context.attempt.manganaRemate).valid
+  ) {
+    showToast("Registra la identidad técnica del remate antes de publicar la mangana lograda.");
+    finalizeScorerSaveLatency(latencyTrace, "failed", { reason: "mangana-remate-required" });
     return;
   }
   if (isFmch2026PasoSuerte(context.suerte?.id) && (context.attempt.pasoResult || "NOT_STARTED") === "NOT_STARTED") {

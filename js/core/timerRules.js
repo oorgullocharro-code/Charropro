@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "./officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

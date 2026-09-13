@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 
 const {
   TournamentDeletionError,

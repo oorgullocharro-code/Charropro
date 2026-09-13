@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { createPortalV2Shell, renderPortalV2 } from "../js/portalV2/portalV2Render.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 
 class FakeNode {
   constructor(tagName) {

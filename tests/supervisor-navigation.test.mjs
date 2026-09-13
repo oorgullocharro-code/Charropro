@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "../js/core/supervisorNavigation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

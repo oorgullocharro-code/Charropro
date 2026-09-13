@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "../js/broadcast/componentRenderer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

@@ -6959,7 +6959,8 @@ th.num {
     grid-template-columns: minmax(156px, .72fr) repeat(2, minmax(180px, 1fr));
     grid-template-areas:
       "attempt attempt attempt"
-      "result floreo pulls";
+      "result floreo pulls"
+      "time time time";
     gap: 8px;
   }
 
@@ -7024,6 +7025,10 @@ th.num {
 
   .scoring-shell-classic .cp-mangana-pulls {
     grid-area: pulls;
+  }
+
+  .scoring-shell-classic .cp-mangana-time-settlement {
+    grid-area: time;
   }
 
   .scoring-shell-classic .cp-mangana-remates {
@@ -11061,9 +11066,12 @@ html.graphic-page #graphic-root[data-view="timer"] {
 }
 
 .cp-sport-timer,
+.cp-mangana-attempt,
+.cp-mangana-result,
 .cp-mangana-total,
 .cp-mangana-floreo,
 .cp-mangana-pulls,
+.cp-mangana-time-settlement,
 .cp-paso-summary {
   min-width: 0;
   border: 1px solid var(--line);
@@ -11080,9 +11088,12 @@ html.graphic-page #graphic-root[data-view="timer"] {
 }
 
 .cp-sport-timer > span,
+.cp-mangana-attempt > span,
+.cp-mangana-result > span,
 .cp-mangana-total > span,
 .cp-mangana-floreo > span,
 .cp-mangana-pulls > span,
+.cp-mangana-time-settlement > span,
 .cp-paso-summary > span {
   color: var(--muted);
   font-size: 12px;
@@ -11091,7 +11102,9 @@ html.graphic-page #graphic-root[data-view="timer"] {
 }
 
 .cp-sport-timer > strong,
+.cp-mangana-attempt > strong,
 .cp-mangana-total > strong,
+.cp-mangana-time-settlement > strong,
 .cp-paso-summary > strong {
   font-size: clamp(22px, 3cqi, 32px);
   line-height: 1.05;
@@ -11099,9 +11112,11 @@ html.graphic-page #graphic-root[data-view="timer"] {
 
 .cp-sport-timer > em,
 .cp-sport-timer > small,
+.cp-mangana-attempt > em,
 .cp-mangana-total > em,
 .cp-mangana-floreo > em,
 .cp-mangana-pulls > em,
+.cp-mangana-time-settlement > em,
 .cp-paso-summary > em {
   color: var(--muted);
   font-size: 12px;
@@ -11163,6 +11178,32 @@ html.graphic-page #graphic-root[data-view="timer"] {
   font-weight: 800;
 }
 
+.cp-mangana-remate-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  align-items: end;
+}
+
+.cp-mangana-remate-form label {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.cp-mangana-remate-form input,
+.cp-mangana-remate-form select {
+  width: 100%;
+  min-width: 0;
+}
+
+.cp-mangana-result .button.active {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+
 .cp-mangana-floreo-detail > summary {
   cursor: pointer;
 }
@@ -11207,6 +11248,10 @@ html.graphic-page #graphic-root[data-view="timer"] {
   .cp-paso-dashboard {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .cp-mangana-remate-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 700px) {
@@ -11216,6 +11261,10 @@ html.graphic-page #graphic-root[data-view="timer"] {
   }
 
   .cp-mangana-history {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-mangana-remate-form {
     grid-template-columns: minmax(0, 1fr);
   }
 

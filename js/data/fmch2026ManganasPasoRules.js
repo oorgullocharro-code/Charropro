@@ -305,7 +305,16 @@ export function reconcileFmch2026ManganaAttempt(attempt = {}, suerte = {}) {
   if (next.pullCount >= 3) setRuleQuantity(next, `${prefix}_infr_segundo_tiron`, 0);
   const selectedBase = (suerte.catalog?.base || []).find((item) => next.applied.includes(item.id));
   const blocksFloreo = selectedBase?.metadata?.blocksFloreo === true;
-  next.floreoScoredTotal = blocksFloreo ? 0 : next.floreoTotal;
+  const hasSeparatedManualAdditional = next.manganaManualAdditionalTotal !== null
+    && next.manganaManualAdditionalTotal !== undefined
+    && Number.isFinite(Number(next.manganaManualAdditionalTotal));
+  if (hasSeparatedManualAdditional) {
+    next.manganaManualAdditionalTotal = Math.min(99, nonNegativeInteger(next.manganaManualAdditionalTotal));
+  }
+  const practicalAdditionalTotal = hasSeparatedManualAdditional
+    ? next.manganaManualAdditionalTotal
+    : next.floreoTotal;
+  next.floreoScoredTotal = blocksFloreo ? 0 : practicalAdditionalTotal;
   next.adic = catalogTotal(next, suerte.catalog?.adic) + next.floreoScoredTotal + manualTotal(next.customAdic);
   next.infr = catalogTotal(next, suerte.catalog?.infr) + manualTotal(next.customInfr);
   return next;

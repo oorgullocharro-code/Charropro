@@ -1,3 +1,10 @@
+import {
+  normalizeFmch2026ManganaEventEvidence,
+  normalizeFmch2026ManganaFaenaTimeSettlement,
+  normalizeFmch2026ManganaRemateIdentity,
+  validateFmch2026ManganaAttemptForOfficial
+} from "./manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+
 export const SCORING_ATTEMPT_SCHEMA_VERSION = 2;
 export const SCORING_ATTEMPT_CONTRACT_VERSION = "2.0.0";
 export const SCORING_ATTEMPT_WRITE_MODE = "official_snapshot_only";
@@ -125,11 +132,16 @@ export function adaptLegacyAttemptToV2(legacyAttempt = {}, context = {}, options
         sharedOpportunityId: nullableId(legacy.sharedOpportunityId || context.sharedOpportunityId),
         sharedSequenceNumber: nullablePositiveInteger(legacy.sharedSequenceNumber || context.sharedSequenceNumber)
       },
-      remate: normalizeRemate(legacy.remate || {
+      remate: normalizeRemate(legacy.manganaRemate || legacy.remate || {
         remateId: legacy.remateId,
         remateLabel: legacy.remateLabel,
         remateMetadata: legacy.remateMetadata
       }),
+      manganaScoringContractVersion: normalizeText(legacy.manganaScoringContractVersion, 40) || null,
+      manganaFaenaTimeSettlement: normalizeFmch2026ManganaFaenaTimeSettlement(legacy.manganaFaenaTimeSettlement),
+      manganaPlacedAt: normalizeFmch2026ManganaEventEvidence(legacy.manganaPlacedAt),
+      manganaDownAt: normalizeFmch2026ManganaEventEvidence(legacy.manganaDownAt),
+      manganaManualAdditionalTotal: nullableNonNegativeInteger(legacy.manganaManualAdditionalTotal),
       result: normalizeExecutionResult(legacy.manganaResult || legacy.pasoResult, sportStatus),
       floreo: normalizeFloreo({
         total: legacy.floreoTotal,
@@ -204,6 +216,11 @@ export function normalizeScoringAttemptV2(attempt = {}) {
       classification: normalizeClassification(sportState.classification),
       opportunity: normalizeOpportunity(sportState.opportunity, identity.opportunityNumber),
       remate: normalizeRemate(sportState.remate),
+      manganaScoringContractVersion: normalizeText(sportState.manganaScoringContractVersion, 40) || null,
+      manganaFaenaTimeSettlement: normalizeFmch2026ManganaFaenaTimeSettlement(sportState.manganaFaenaTimeSettlement),
+      manganaPlacedAt: normalizeFmch2026ManganaEventEvidence(sportState.manganaPlacedAt),
+      manganaDownAt: normalizeFmch2026ManganaEventEvidence(sportState.manganaDownAt),
+      manganaManualAdditionalTotal: nullableNonNegativeInteger(sportState.manganaManualAdditionalTotal),
       result: normalizeExecutionResult(sportState.result, sportState.status),
       floreo: normalizeFloreo(sportState.floreo),
       pullCount: nonNegativeInteger(sportState.pullCount, 0),
@@ -375,6 +392,7 @@ export function validateScoringAttemptV2(attempt, options = {}) {
   if (options.requireOfficial) {
     if (source.publication?.state !== "OFFICIAL" || source.publication?.frozen !== true) errors.push("attempt-official-freeze-required");
     if (!normalizeIso(source.publication?.publishedAt)) errors.push("attempt-published-at-required");
+    errors.push(...validateFmch2026ManganaAttemptForOfficial(source).errors);
   }
   return {
     valid: errors.length === 0,
@@ -494,19 +512,25 @@ function buildLegacySelections(attempt, catalogRules, manualItems, category, agg
 
 function buildLegacySportAdditionalSelections(attempt = {}, suerteId = "") {
   if (!["manganas_pie", "manganas_caballo"].includes(suerteId)) return [];
-  const resolvedValue = Math.max(0, finiteNumber(attempt.floreoScoredTotal ?? attempt.floreoTotal, 0));
+  const separated = attempt.manganaManualAdditionalTotal !== null
+    && attempt.manganaManualAdditionalTotal !== undefined
+    && Number.isFinite(Number(attempt.manganaManualAdditionalTotal));
+  const resolvedValue = Math.max(0, finiteNumber(
+    separated ? attempt.manganaManualAdditionalTotal : attempt.floreoScoredTotal ?? attempt.floreoTotal,
+    0
+  ));
   if (!resolvedValue && !attempt.floreoSource && !(attempt.floreoDetail || []).length) return [];
   return [{
-    id: `${suerteId}_floreo_total`,
-    selectedRuleId: `${suerteId}_floreo_total`,
-    label: "Floreo total",
+    id: `${suerteId}_${separated ? "manual_additional_total" : "floreo_total"}`,
+    selectedRuleId: `${suerteId}_${separated ? "manual_additional_total" : "floreo_total"}`,
+    label: separated ? "Adicional manual" : "Floreo total",
     resolvedValue,
     value: resolvedValue,
     quantity: 1,
     source: attempt.floreoSource || "FMCH_2026",
     metadata: {
       source: attempt.floreoSource || "FMCH_2026",
-      identity: "floreoTotal",
+      identity: separated ? "manganaManualAdditionalTotal" : "floreoTotal",
       detailOptional: true
     }
   }];
@@ -679,6 +703,8 @@ function normalizeOpportunityStatus(value, sportStatus) {
 }
 
 function normalizeRemate(value = {}) {
+  const technical = normalizeFmch2026ManganaRemateIdentity(value);
+  if (technical) return technical;
   const remateId = nullableId(value?.remateId || value?.id);
   const remateLabel = normalizeText(value?.remateLabel || value?.label, 240) || null;
   if (!remateId && !remateLabel && !value?.remateMetadata && !value?.metadata) return null;
