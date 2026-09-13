@@ -327,7 +327,7 @@
             "$other": { ".validate": "($other === 'id' || $other === 'slug' || $other === 'name' || $other === 'shortName' || $other === 'edition' || $other === 'season' || $other === 'status' || $other === 'startDate' || $other === 'endDate' || $other === 'venue' || $other === 'city' || $other === 'state' || $other === 'organization' || $other === 'competitionType') && newData.isString()" }
           },
           "branding": {
-            "$other": { ".validate": "($other === 'theme' || $other === 'primaryColor' || $other === 'secondaryColor' || $other === 'accentColor' || $other === 'backgroundColor' || $other === 'textColor' || $other === 'logoUrl' || $other === 'coverImageUrl' || $other === 'heroImageUrl' || $other === 'organizerLogoUrl') && newData.isString()" }
+            "$other": { ".validate": "($other === 'theme' || $other === 'primaryColor' || $other === 'secondaryColor' || $other === 'accentColor' || $other === 'backgroundColor' || $other === 'textColor' || $other === 'logoUrl' || $other === 'coverImageUrl' || $other === 'liveCoverImageUrl' || $other === 'heroImageUrl' || $other === 'organizerLogoUrl') && newData.isString()" }
           },
           "modules": {
             "$other": {

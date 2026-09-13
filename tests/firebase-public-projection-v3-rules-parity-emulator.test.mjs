@@ -45,10 +45,10 @@ async function runProjectionV3RulesParityEmulator() {
     });
     await database.ref(`charropro/userTournamentAccess/${uid}/${tournamentId}`).set(true);
     const token = await signIn(authHost, email, password);
-    const candidate = buildCandidate(tournamentId);
+    const candidate = buildCandidate(tournamentId, { liveCover: true });
     assert.equal(validateCanonicalPublicTournamentData(candidate).valid, true);
 
-    const unauthorized = await writeProjection(databaseHost, databaseNamespace, `${tournamentId}-unauthorized`, candidate, "");
+    const unauthorized = await writeProjection(databaseHost, databaseNamespace, tournamentId, candidate, "");
     assert.equal(unauthorized.ok, false, "unauthenticated public projection write remains denied");
 
     const allowed = await writeProjection(databaseHost, databaseNamespace, tournamentId, candidate, token);
@@ -56,10 +56,16 @@ async function runProjectionV3RulesParityEmulator() {
     const stored = (await database.ref(`charropro/publicTournaments/${tournamentId}`).get()).val();
     const roundTripped = normalizeCanonicalPublicTournamentData(stored);
     assert.equal(validateCanonicalPublicTournamentData(roundTripped).valid, true);
+    assert.equal(roundTripped.branding.liveCoverImageUrl, "https://example.test/live-cover.jpg");
     assert.equal(roundTripped.results.teams.length, 3);
     assert.equal(roundTripped.standings.items.length, 9);
     assert.equal(roundTripped.sheet.competitions.length, 1);
     assert.equal(roundTripped.timeline.items.length, 3);
+
+    const teamWithoutLiveCoverId = `${tournamentId}-team-without-live-cover`;
+    await assertAllowed("team-without-live-cover", buildCandidate(teamWithoutLiveCoverId), token);
+    const teamWithLiveCoverId = `${tournamentId}-team-with-live-cover`;
+    await assertAllowed("team-with-live-cover", buildCandidate(teamWithLiveCoverId, { liveCover: true }), token);
 
     const individualVariants = [
       ["individual-base", {}],
@@ -84,6 +90,10 @@ async function runProjectionV3RulesParityEmulator() {
     assert.equal(individual.live.participantScope, "individual");
     assert.equal(individual.live.currentHorseId, "horse-moro");
     assert.equal(individual.live.currentHorseName, "Moro");
+    const individualWithoutLiveCoverId = `${tournamentId}-individual-without-live-cover`;
+    await assertAllowed("individual-without-live-cover", buildIndividualCandidate(individualWithoutLiveCoverId), token);
+    const individualWithLiveCoverId = `${tournamentId}-individual-with-live-cover`;
+    await assertAllowed("individual-with-live-cover", buildIndividualCandidate(individualWithLiveCoverId, { liveCover: true }), token);
     const noAccessId = `${tournamentId}-no-access`;
     const noAccess = await writeProjection(databaseHost, databaseNamespace, noAccessId, buildIndividualCandidate(noAccessId, { program: true, live: true, results: true, standings: true, sheet: true }), token);
     assert.equal(noAccess.ok, false, "a judge without selected tournament access remains denied");
@@ -140,6 +150,12 @@ async function runProjectionV3RulesParityEmulator() {
     await assertRejected("timeline-malformed", candidate, token, (projection) => {
       projection.timeline.items[0].publishedAt = 7;
     });
+    await assertRejected("live-cover-wrong-type", candidate, token, (projection) => {
+      projection.branding.liveCoverImageUrl = 7;
+    });
+    await assertRejected("branding-unknown-field", candidate, token, (projection) => {
+      projection.branding.unapprovedEditorialField = "not-allowlisted";
+    });
   } finally {
     await database.ref(`charropro/publicTournaments/${tournamentId}`).remove();
     await database.ref(`charropro/userTournamentAccess/${uid}`).remove();
@@ -169,7 +185,7 @@ async function runProjectionV3RulesParityEmulator() {
   }
 }
 
-function buildCandidate(tournamentId) {
+function buildCandidate(tournamentId, options = {}) {
   const teams = [
     ["team-1", "Equipo Uno", 32],
     ["team-2", "Equipo Dos", 29],
@@ -219,6 +235,7 @@ function buildCandidate(tournamentId) {
     generatedAt: "2026-09-09T00:01:00.000Z",
     lifecycle: { status: "LIVE" },
     tournament: { id: tournamentId, name: "Projection V3 Rules QA", status: "live" },
+    branding: options.liveCover === true ? { liveCoverImageUrl: "https://example.test/live-cover.jpg" } : {},
     program: {
       items: [{
         id: "jornada-1",
@@ -367,6 +384,7 @@ function buildIndividualCandidate(tournamentId, fields = {}) {
     generatedAt: "2026-09-10T00:01:00.000Z",
     lifecycle: { status: "LIVE" },
     tournament: { id: tournamentId, name: "Projection V3 Individual QA", status: "live" },
+    branding: fields.liveCover === true ? { liveCoverImageUrl: "https://example.test/live-cover.jpg" } : {},
     program: { items: [programItem] },
     live: {
       status: "LIVE", currentCharreada: "Coleadero", currentParticipant: "Gustavo Mares", updatedAt: "2026-09-10T00:01:00.000Z",
