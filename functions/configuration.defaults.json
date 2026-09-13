@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1",
+      "appVersion": "20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "9f09d2e6bb403ceaf3deb290eb6aa8d14da19380852c6344861cbbec065c664e",
-  "fingerprint": "9f09d2e6bb403ceaf3deb290eb6aa8d14da19380852c6344861cbbec065c664e"
+  "checksum": "baa261e5ccd6d296784e492b3c9e0406d722b7d2df9591359370f1e31437967c",
+  "fingerprint": "baa261e5ccd6d296784e492b3c9e0406d722b7d2df9591359370f1e31437967c"
 }

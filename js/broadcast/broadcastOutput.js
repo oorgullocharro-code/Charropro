@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./broadcastState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./dataContract.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

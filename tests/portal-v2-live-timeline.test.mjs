@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { createPublicPortalClientState } from "../js/public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { applyPortalV2Snapshot } from "../js/portalV2/portalV2ProjectionState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { createPublicPortalClientState } from "../js/public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 test("Live Center presents the supplied current action and direct scoped summaries", () => {
   const model = portalModel("live");

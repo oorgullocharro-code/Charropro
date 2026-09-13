@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_RESULTS } from "../js/core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_RESULTS } from "../js/core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const manualIds = [

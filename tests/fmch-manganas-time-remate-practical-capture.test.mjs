@@ -11,15 +11,15 @@ import {
   validateFmch2026ManganaOfficialCollection,
   validateFmch2026ManganaRemateIdentity,
   validateFmch2026ManganaRemateUniqueness
-} from "../js/core/manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { resolveEffectiveRules, getRuleProfile } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { calculateAttemptTotal, calculateCollectionTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/core/manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { resolveEffectiveRules, getRuleProfile } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { calculateAttemptTotal, calculateCollectionTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { emptyAttempt } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const profile = getRuleProfile("FMCH_2026_LIBRE", "0.6.1");
 const pie = resolveEffectiveRules({
@@ -221,6 +221,19 @@ const appSource = readFileSync(new URL("../js/app.js", import.meta.url), "utf8")
 assert.match(appSource, /Adicionales/);
 assert.match(appSource, /Detalle de floreo opcional/);
 assert.match(appSource, /Adicional por tiempo de la faena/);
+assert.match(appSource, /Identidad técnica del remate/);
+assert.match(appSource, /Rodada/);
+assert.match(appSource, /Bigotona/);
+assert.match(appSource, /Contra rodada/);
+assert.match(appSource, /Otro \/ captura técnica/);
+assert.match(appSource, /data-action="select-mangana-remate-shortcut"/);
+assert.match(appSource, /isManganaRemateShortcutSelected\(technicalRemate, shortcut\)/);
 assert.match(appSource, /data-action="save-mangana-remate"/);
+
+const stylesSource = readFileSync(new URL("../css/styles.css", import.meta.url), "utf8");
+assert.match(stylesSource, /"technical history"\s+"effects history"/);
+assert.match(stylesSource, /\.cp-mangana-technical-remate\s*\{\s*grid-area:\s*technical/);
+assert.match(stylesSource, /\.cp-mangana-remate-effects\s*\{\s*grid-area:\s*effects/);
+assert.doesNotMatch(stylesSource, /\.scoring-shell-classic \.cp-mangana-remates\s*\{\s*grid-area:\s*remates/);
 
 console.log("fmch-manganas-time-remate-practical-capture: PASS");

@@ -9,6 +9,8 @@
 - `js/app.js`: practical scorer capture, single faena settlement, publication guard, and remate validation.
 - `css/styles.css`: responsive Manganas-only controls.
 
+The post-deploy visibility correction remains limited to `js/app.js`, `css/styles.css`, the directed Manganas test, ticket evidence, and mechanical build propagation. It separates technical remate capture from scoring effects and adds quick documentary capture without changing points.
+
 ## Tests
 
 - `tests/fmch-manganas-time-remate-practical-capture.test.mjs`

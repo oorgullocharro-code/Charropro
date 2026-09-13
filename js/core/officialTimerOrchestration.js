@@ -1,10 +1,10 @@
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildOfficialTimerDefinitionsFromContext,
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const OFFICIAL_CURRENT_TIMER_CONTEXT_VERSION = "1.0.0";
 export const TORO_TO_TERNA_HANDOFF = "TORO_TO_TERNA_READY";

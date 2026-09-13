@@ -1,5 +1,5 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

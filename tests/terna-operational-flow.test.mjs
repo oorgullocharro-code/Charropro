@@ -10,7 +10,7 @@ import {
   normalizeFmch2026TernaSession,
   reserveFmch2026TernaOpportunity,
   resolveFmch2026TernaNextSuerteId
-} from "../js/data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const identity = {
   tournamentId: "demo-local-fmch-2026",

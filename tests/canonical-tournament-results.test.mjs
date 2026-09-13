@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults,
   buildCanonicalTournamentResultsHash,
   validateCanonicalTournamentResults
-} from "../js/core/canonicalTournamentResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/core/canonicalTournamentResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const TOURNAMENT_ID = "tournament-results";
 const CHARREADA_ID = "charreada-results";

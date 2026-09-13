@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const definitions = buildOfficialTimerDefinitionsFromContext({
   tournament: {

@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

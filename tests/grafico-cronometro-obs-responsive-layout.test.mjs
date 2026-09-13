@@ -4,7 +4,7 @@ import {
   buildGraphicTimerPresentation,
   formatGraphicTimerMs,
   readGraphicTimerPresentationOptions
-} from "../js/views/graficoTimerPresentation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/views/graficoTimerPresentation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 assert.equal(formatGraphicTimerMs(12_100, { showMinutes: false }), "12.1");
 assert.equal(formatGraphicTimerMs(-12_100, { showMinutes: false }), "-12.1");

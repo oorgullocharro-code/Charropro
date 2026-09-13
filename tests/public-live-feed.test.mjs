@@ -7,9 +7,9 @@ import {
   mergePublicLiveFeeds,
   normalizePublicLiveFeedEvent,
   validatePublicLiveFeed
-} from "../js/public/publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/public/publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const source = {
   publishedScores: {

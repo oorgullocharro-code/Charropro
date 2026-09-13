@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { buildOfficialTimerDefinitionsFromContext } from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { resolveFmch2026PialesPreviousOpportunityTimerResolution } from "../js/data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getOrCreateOfficialTimer, state } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 function context(suerteId, extra = {}) {
   return {

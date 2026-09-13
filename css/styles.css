@@ -6943,7 +6943,8 @@ th.num {
     grid-template-columns: minmax(0, 1fr) minmax(220px, .32fr);
     grid-template-areas:
       "dashboard history"
-      "remates history"
+      "technical history"
+      "effects history"
       "detail history";
     align-content: start;
     column-gap: 10px;
@@ -7031,8 +7032,12 @@ th.num {
     grid-area: time;
   }
 
-  .scoring-shell-classic .cp-mangana-remates {
-    grid-area: remates;
+  .scoring-shell-classic .cp-mangana-technical-remate {
+    grid-area: technical;
+  }
+
+  .scoring-shell-classic .cp-mangana-remate-effects {
+    grid-area: effects;
   }
 
   .scoring-shell-classic .cp-mangana-floreo-detail {
@@ -7128,6 +7133,12 @@ th.num {
   .scoring-shell-classic .cp-manganas-panel {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "dashboard"
+      "technical"
+      "effects"
+      "detail"
+      "history";
     gap: 8px;
   }
 
@@ -7163,7 +7174,8 @@ th.num {
       "attempt"
       "result"
       "floreo"
-      "pulls";
+      "pulls"
+      "time";
   }
 
   .scoring-shell-classic .cp-mangana-result .button {
@@ -11178,7 +11190,17 @@ html.graphic-page #graphic-root[data-view="timer"] {
   font-weight: 800;
 }
 
-.cp-mangana-remate-form {
+.cp-mangana-remate-status {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cp-mangana-remate-shortcuts {
+  margin-bottom: 10px;
+}
+
+.cp-mangana-remates > .cp-mangana-remate-form {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
   align-items: end;
@@ -11249,7 +11271,7 @@ html.graphic-page #graphic-root[data-view="timer"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .cp-mangana-remate-form {
+  .cp-mangana-remates > .cp-mangana-remate-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -11264,7 +11286,7 @@ html.graphic-page #graphic-root[data-view="timer"] {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .cp-mangana-remate-form {
+  .cp-mangana-remates > .cp-mangana-remate-form {
     grid-template-columns: minmax(0, 1fr);
   }
 

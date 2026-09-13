@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

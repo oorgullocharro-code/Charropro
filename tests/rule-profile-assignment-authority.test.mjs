@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const {
   RULE_PROFILE_ASSIGNMENT_AUTHORITY_VERSION,

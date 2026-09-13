@@ -23,7 +23,7 @@ import {
   resolveFmch2026TernaTimeAdditional,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   validateFmch2026TernaSession
-} from "../js/data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   FMCH_2026_LIBRE_PROFILE,
   FMCH_2026_LIBRE_PROFILE_0_4_0,
@@ -31,21 +31,21 @@ import {
   getRuleProfile,
   resolveEffectiveRules,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   applyOfficialTimerCommand,
   createOfficialTimerContext,
   getOfficialTimerContextView,
   validateOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { emptyAttempt, normalizeScoreCollectionForSuerte } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { emptyAttempt, normalizeScoreCollectionForSuerte } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const identity = {
   tournamentId: "tournament_fmch_2026",

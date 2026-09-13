@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

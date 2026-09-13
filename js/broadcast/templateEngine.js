@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

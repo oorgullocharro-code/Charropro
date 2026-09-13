@@ -1,5 +1,5 @@
-import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export function applyPortalV2Snapshot(state, snapshot, options = {}) {
   if (!isCanonicalPublicV3(snapshot)) {

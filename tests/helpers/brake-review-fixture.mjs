@@ -1,12 +1,12 @@
 import {
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   getRuleProfileRulesByPhase
-} from "../../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   createBrakeReviewState
-} from "../../js/core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../../js/core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const actor = Object.freeze({ uid: "judge-fixture", role: "juez", active: true, clientId: "test-client" });
 export const context = Object.freeze({

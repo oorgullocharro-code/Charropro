@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -15,7 +15,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -28,7 +28,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -38,7 +38,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -55,7 +55,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
   FMCH_2026_PASO_DISMOUNT_DURATION_MS,
@@ -70,7 +70,7 @@ import {
   setFmch2026ManganaPullCount,
   setFmch2026ManganaResult,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   FMCH_2026_MANGANA_SCORING_CONTRACT_VERSION,
   applyFmch2026ManganaAttemptTiming,
@@ -83,33 +83,33 @@ import {
   validateFmch2026ManganaOfficialCollection,
   validateFmch2026ManganaRemateIdentity,
   validateFmch2026ManganaRemateUniqueness
-} from "./core/manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/scorerContextResolution.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   getTernaParticipantName,
   isCanonicalTernaParticipant
-} from "./core/ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -117,23 +117,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -147,9 +147,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -162,32 +162,32 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "./core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/scorerComponents.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -197,7 +197,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/sync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -242,18 +242,18 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   createTournamentPublicSponsor,
   normalizeTournamentPublicBranding,
   normalizeTournamentPublicSponsors,
   tournamentPublicSponsorsRecord,
   validateTournamentPublicAssetFile
-} from "./core/tournamentPublicBranding.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/tournamentPublicBranding.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult
-} from "./core/historicalReconciliationDryRun.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/historicalReconciliationDryRun.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -266,19 +266,19 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/tournamentContext.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   buildPortalV2PublicPath,
   buildPortalV2PublicUrl
-} from "./portalV2/portalV2Router.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./portalV2/portalV2Router.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -288,8 +288,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/supervisorNavigation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 import {
   createRoster,
   emptyAttempt,
@@ -328,7 +328,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -532,6 +532,8 @@ const ACTION_CAPABILITIES = {
   "set-mangana-result": "score",
   "set-mangana-placed": "score",
   "set-paso-result": "score",
+  "select-mangana-remate-shortcut": "score",
+  "focus-mangana-remate-custom": "score",
   "save-mangana-remate": "score",
   "apply-sport-timing": "score",
   "sport-timer-command": "timer",
@@ -626,6 +628,8 @@ const PREPARATION_REQUIRED_ACTIONS = new Set([
   "set-mangana-result",
   "set-mangana-placed",
   "set-paso-result",
+  "select-mangana-remate-shortcut",
+  "focus-mangana-remate-custom",
   "save-mangana-remate",
   "finish-terna-session",
   "apply-sport-timing",
@@ -9755,8 +9759,22 @@ function renderManganasMainPanel(context) {
         </article>
       </div>
       <section class="cp-mangana-remates cp-mangana-technical-remate">
-        <span>Remate</span>
+        <span>Identidad técnica del remate</span>
         ${isPie ? html`
+          <p class="cp-mangana-remate-status">${technicalRemate
+            ? `Registrado: ${escapeHTML(technicalRemate.name)}`
+            : "Selecciona un atajo o usa la captura técnica. Puede registrar 0 puntos adicionales."}</p>
+          <div class="cp-mangana-remate-shortcuts" role="group" aria-label="Atajos de identidad técnica del remate">
+            ${MANGANAS_PIE_REMATE_CAPTURE_SHORTCUTS.map((shortcut) => html`
+              <button
+                type="button"
+                class="button ${isManganaRemateShortcutSelected(technicalRemate, shortcut) ? "primary" : ""}"
+                data-action="select-mangana-remate-shortcut"
+                data-id="${escapeHTML(shortcut.id)}"
+              >${escapeHTML(shortcut.label)}</button>
+            `).join("")}
+            <button type="button" class="button" data-action="focus-mangana-remate-custom">Otro / captura técnica</button>
+          </div>
           <div class="cp-mangana-remate-form">
             <label>Efecto final<input id="mangana-remate-effect" maxlength="120" value="${escapeHTML(technicalRemate?.effectFinal || "")}" placeholder="Ej. Rodada"></label>
             <label>Orientación
@@ -12422,6 +12440,8 @@ function handleAction(action, target) {
     "set-mangana-result": () => applyManganaResult(target.dataset.result),
     "set-mangana-placed": captureManganaPlaced,
     "set-paso-result": () => applyPasoResult(target.dataset.result),
+    "select-mangana-remate-shortcut": () => selectManganaRemateShortcut(target.dataset.id),
+    "focus-mangana-remate-custom": focusManganaRemateCustom,
     "save-mangana-remate": saveManganaTechnicalRemate,
     "sport-timer-command": () => applyFmchSportTimerCommand(target.dataset.timerKind, target.dataset.command),
     "brake-review-timer-command": () => applyBrakeReviewTimerCommand(target.dataset.command),
@@ -14951,6 +14971,40 @@ function saveManganaTechnicalRemate() {
   Object.assign(context.attempt, next);
   reconcileManganaRemateConstraint(context);
   persistScoreChange();
+}
+
+const MANGANAS_PIE_REMATE_CAPTURE_SHORTCUTS = Object.freeze([
+  Object.freeze({ id: "capture_rodada", label: "Rodada", effectFinal: "Rodada", orientation: "MASK", turnDirection: "SAME" }),
+  Object.freeze({ id: "capture_bigotona", label: "Bigotona", effectFinal: "Bigotona", orientation: "MASK", turnDirection: "SAME" }),
+  Object.freeze({ id: "capture_contra_rodada", label: "Contra rodada", effectFinal: "Rodada", orientation: "COUNTER_MASK", turnDirection: "OPPOSITE" })
+]);
+
+function isManganaRemateShortcutSelected(remate, shortcut) {
+  return Boolean(remate
+    && shortcut
+    && remate.effectFinal === shortcut.effectFinal
+    && remate.orientation === shortcut.orientation
+    && remate.turnDirection === shortcut.turnDirection);
+}
+
+function selectManganaRemateShortcut(shortcutId) {
+  if (!guardUnlockedCharreada()) return;
+  const context = getCurrentContext();
+  if (!context?.attempt || context.suerte?.id !== "manganas_pie") return;
+  const shortcut = MANGANAS_PIE_REMATE_CAPTURE_SHORTCUTS.find((item) => item.id === shortcutId);
+  if (!shortcut) return;
+  Object.assign(context.attempt, applyFmch2026ManganaTechnicalRemate(context.attempt, context.suerte, {
+    name: shortcut.label,
+    effectFinal: shortcut.effectFinal,
+    orientation: shortcut.orientation,
+    turnDirection: shortcut.turnDirection
+  }));
+  reconcileManganaRemateConstraint(context);
+  persistScoreChange();
+}
+
+function focusManganaRemateCustom() {
+  document.getElementById("mangana-remate-effect")?.focus();
 }
 
 async function applyFmchSportTimerCommand(timerKind, command) {

@@ -10,6 +10,7 @@ Base: `129d66f84f60d1c3abbbcc19942119f70c737d54`
 - New Official Score records reject malformed or duplicated time settlements.
 - A successful new-schema opportunity requires a structured technical remate identity, even when it adds zero points.
 - Documentary floreo detail and the practical manual additional total are separate authorities and are not summed twice.
+- The scorer exposes the technical remate as its own visible block. Pie provides quick documentary shortcuts plus an open custom technical capture path; neither path replaces Desden, Contra desden, Encontrada, floreo, manual additions, or time.
 - Legacy Attempts remain readable as frozen historical evidence. No backfill, recalculation, Recovery, or reproject was performed.
 
 ## Certified example
@@ -25,3 +26,5 @@ The existing official timer remains unchanged. The scorer now stores distinct `P
 ## Scope
 
 Client scoring/domain code and tests only. Public V3, Portal V2, Graphics, ranking, sheets, RTDB Rules, Functions runtime, profiles, fingerprints, lifecycle, and every non-Manganas suerte remain unchanged.
+
+The first physical review found that the technical remate and scoring-effects sections occupied the same classic-layout grid area. The later section visually covered the former. The closeout corrects the layout ownership and adds a regression that requires distinct `technical` and `effects` areas.

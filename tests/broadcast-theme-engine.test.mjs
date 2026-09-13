@@ -21,8 +21,8 @@ import {
   resolveBroadcastTheme,
   updateBroadcastTheme,
   validateBroadcastTheme
-} from "../js/broadcast/themeEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { PRODUCTION_CONSOLE_THEME_DEFINITIONS } from "../js/broadcast/productionConsole.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/broadcast/themeEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { PRODUCTION_CONSOLE_THEME_DEFINITIONS } from "../js/broadcast/productionConsole.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const T0 = "2026-07-14T12:00:00.000Z";
 const T1 = "2026-07-14T12:01:00.000Z";

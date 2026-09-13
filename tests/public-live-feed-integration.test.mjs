@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

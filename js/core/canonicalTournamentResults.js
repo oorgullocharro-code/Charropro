@@ -2,9 +2,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "./canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 

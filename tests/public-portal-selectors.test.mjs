@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

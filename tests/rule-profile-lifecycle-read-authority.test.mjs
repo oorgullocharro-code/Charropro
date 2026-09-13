@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
-import service from "../functions/ruleProfileLifecycleService.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v1";
+import engine from "../functions/ruleProfileLifecycleEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import service from "../functions/ruleProfileLifecycleService.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
 
 const {
   RuleProfileLifecycleError,
