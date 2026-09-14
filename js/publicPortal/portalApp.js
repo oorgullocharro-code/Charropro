@@ -3,19 +3,19 @@ import {
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
-} from "./portalRouter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./portalRouter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./portalRender.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const PUBLIC_PORTAL_CORE_VERSION = "2.0.0";
 

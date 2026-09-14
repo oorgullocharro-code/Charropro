@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import {
   applyDefaultPublicPortalModules,
   resolveDefaultPublicPortalModules
-} from "../js/core/publicPortalModulePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/publicPortalModulePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const tournamentId = "public-portal-default-modules-creation";
 const expectedTypes = ["live", "program", "results", "standings", "sheet"];

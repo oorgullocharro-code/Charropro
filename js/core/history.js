@@ -1,4 +1,4 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
@@ -9,9 +9,9 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getTeam, scoreKey, state, uid } from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getTeam, scoreKey, state, uid } from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export function buildStatisticalHistorySnapshot(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

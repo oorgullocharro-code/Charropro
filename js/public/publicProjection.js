@@ -8,25 +8,25 @@ import {
   sanitizePublicProjectionValue,
   sanitizePublicString,
   validatePublicProjection
-} from "./publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildPublicLiveFeed,
   mergePublicLiveFeeds
-} from "./publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildOfficialRankingItems } from "../core/officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals
-} from "../core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildCanonicalPublicProjectionV3,
   getCanonicalPublicProjectionSignature,
   reconcileCanonicalPublicProjectionV3
-} from "./canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const PUBLIC_PROJECTION_VERSION = "3.0.0";
 export const PUBLIC_SCORE_COLUMNS = Object.freeze({

@@ -5,7 +5,7 @@ import {
   listBroadcastThemes,
   resolveBroadcastTheme,
   validateBroadcastTheme
-} from "./themeEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./themeEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildTemplateRenderSnapshot,
   clearTemplateRendererIntegration,
@@ -14,18 +14,18 @@ import {
   removeTemplateRender,
   renderTemplateInstance,
   updateTemplateRender
-} from "./templateRendererIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./templateRendererIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   cloneComponentInstance,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   getBroadcastAsset,
   resolveBroadcastAsset
-} from "./assetManager.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./assetManager.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   applyLiveBindingsToPreparation
-} from "./liveBindings.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./liveBindings.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const THEME_TEMPLATE_INTEGRATION_VERSION = "1.0.0";
 

@@ -22,7 +22,7 @@ import {
   setPreviewState,
   setProgramState,
   validateBroadcastState
-} from "../js/broadcast/broadcastState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/broadcastState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const T0 = "2026-07-13T12:00:00.000Z";
 const T1 = "2026-07-13T12:00:01.000Z";

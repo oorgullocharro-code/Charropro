@@ -20,14 +20,14 @@ import {
   updateBroadcastComponentRender,
   validateComponentRenderSnapshot,
   validateComponentRenderTarget
-} from "../js/broadcast/componentRenderer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/componentRenderer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   COMPONENT_RENDERER_FIXTURE_TYPES,
   COMPONENT_RENDERER_OUTPUTS,
   buildComponentRendererFixture,
   getComponentRendererOutput
-} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/fixtures/componentRendererFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildComponentInstance, createBroadcastComponent } from "../js/broadcast/componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 class MockElement {
   constructor(tagName, ownerDocument) {

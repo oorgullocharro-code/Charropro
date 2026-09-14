@@ -3,10 +3,10 @@ import {
   CANONICAL_PUBLIC_TOURNAMENT_DATA_SCHEMA_VERSION,
   PUBLIC_TOURNAMENT_LIFECYCLE_STATUSES,
   validateCanonicalPublicTournamentData
-} from "../public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createPortalV2LiveTimelineModel } from "./portalV2LiveTimelineModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createPortalV2ContextModel } from "./portalV2ContextModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const PORTAL_V2_NAVIGATION = Object.freeze([
   { view: "inicio", module: "", label: "Inicio" },

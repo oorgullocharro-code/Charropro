@@ -7,7 +7,7 @@ import {
   mountBrowserOutput,
   setBrowserOutputViewport,
   validateBrowserOutputProjection
-} from "./browserOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./browserOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const ANNOUNCER_MONITOR_VERSION = "1.0.0";
 
@@ -1815,9 +1815,9 @@ export async function connectAnnouncerMonitorRealtime(instance, options = {}) {
     : new URLSearchParams(options.search ?? globalThis.location?.search ?? "");
   const requestContext = options.context || announcerRealtimeContextFromParams(params);
   assertNoAnnouncerExternalIdentity(requestContext);
-  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2");
+  const transportApi = options.transportApi || await import("./broadcastRealtimeTransport.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
   const accessId = params.get("access") || options.accessId || null;
-  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2") : null);
+  const firebaseApi = options.firebaseApi || (!options.adapter ? await import("../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3") : null);
   if (options.authorizedContext && !options.adapter) throw monitorError("announcer-monitor-authorized-context-injection-forbidden");
   if (options.temporaryAccess && !options.adapter) throw monitorError("announcer-monitor-temporary-access-injection-forbidden");
   const temporaryAccess = accessId

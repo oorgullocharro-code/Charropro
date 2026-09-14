@@ -11,15 +11,15 @@ import {
   validateFmch2026ManganaOfficialCollection,
   validateFmch2026ManganaRemateIdentity,
   validateFmch2026ManganaRemateUniqueness
-} from "../js/core/manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { resolveEffectiveRules, getRuleProfile } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { calculateAttemptTotal, calculateCollectionTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { emptyAttempt } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { resolveEffectiveRules, getRuleProfile } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { calculateAttemptTotal, calculateCollectionTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { emptyAttempt } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const profile = getRuleProfile("FMCH_2026_LIBRE", "0.6.1");
 const pie = resolveEffectiveRules({
@@ -101,6 +101,53 @@ const officialGuard = validateFmch2026ManganaOfficialCollection(duplicateOfficia
 assert.equal(officialGuard.valid, false);
 assert.ok(officialGuard.errors.includes("manganas-faena-time-settlement-duplicate"));
 
+// A UI-created NOT_ACHIEVED opportunity may legitimately omit optional scoring collections.
+// Faena settlement must normalize that sparse draft before Attempt V2 publication.
+const physicalMixedAttempts = [
+  applyFmch2026ManganaTechnicalRemate(achievedPieAttempt(), pie, {
+    name: "Rodada",
+    effectFinal: "rodada",
+    orientation: "MASK",
+    turnDirection: "SAME"
+  }),
+  applyFmch2026ManganaTechnicalRemate(achievedPieAttempt(), pie, {
+    name: "Bigotona",
+    effectFinal: "bigotona",
+    orientation: "MASK",
+    turnDirection: "SAME"
+  }),
+  {
+    attempted: true,
+    notAchieved: true,
+    manganaResult: "NOT_ACHIEVED",
+    base: 0,
+    adic: 0,
+    infr: 0
+  }
+];
+const physicalMixedSettlement = settle(physicalMixedAttempts);
+assert.equal(physicalMixedSettlement.settlement.points, 3);
+assert.equal(validateFmch2026ManganaOfficialCollection(physicalMixedSettlement.attempts, pie, identity).valid, true);
+assert.deepEqual(
+  physicalMixedSettlement.attempts.map((attempt) => attempt.ruleQuantities.manganas_pie_adic_tiempo_no_usado || 0),
+  [0, 0, 3]
+);
+assert.equal(physicalMixedSettlement.attempts[2].manganaRemate, undefined);
+
+for (const successes of [0, 1]) {
+  const sparseAttempts = Array.from({ length: 3 }, (_, index) => index < successes
+    ? applyFmch2026ManganaTechnicalRemate(achievedPieAttempt(), pie, {
+        name: `Remate ${index + 1}`,
+        effectFinal: `remate ${index + 1}`,
+        orientation: "MASK",
+        turnDirection: "SAME"
+      })
+    : { attempted: true, notAchieved: true, manganaResult: "NOT_ACHIEVED", base: 0, adic: 0, infr: 0 });
+  const sparseSettlement = settle(sparseAttempts);
+  assert.equal(sparseSettlement.settlement.points, successes ? 3 : 0);
+  assert.equal(validateFmch2026ManganaOfficialCollection(sparseSettlement.attempts, pie, identity).valid, true);
+}
+
 const officialContext = {
   ...identity,
   competitionScope: "team",
@@ -125,6 +172,19 @@ const frozenOwner = buildOfficialScoringAttemptSnapshot(officialOwner, {
 assert.equal(frozenOwner.sportState.manganaFaenaTimeSettlement.points, 3);
 assert.equal(frozenOwner.identity.opportunityNumber, 3);
 assert.equal(frozenOwner.sportState.remate.remateSignature, frozenOwner.sportState.remate.signature);
+
+const physicalNotAchievedOwner = adaptLegacyAttemptToV2(
+  physicalMixedSettlement.attempts[2],
+  officialContext
+);
+const frozenPhysicalNotAchievedOwner = buildOfficialScoringAttemptSnapshot(physicalNotAchievedOwner, {
+  publishedAt: "2026-09-13T12:00:00.000Z",
+  officialRevision: 1,
+  actor: { id: "judge_fixture", name: "Juez fixture", role: "juez" }
+});
+assert.equal(frozenPhysicalNotAchievedOwner.sportState.result, "NOT_ACHIEVED");
+assert.equal(frozenPhysicalNotAchievedOwner.sportState.remate, null);
+assert.equal(frozenPhysicalNotAchievedOwner.sportState.manganaFaenaTimeSettlement.points, 3);
 
 // REMATE-01..03: technical identity is independent from scoring points.
 const rodada = applyFmch2026ManganaTechnicalRemate(achievedPieAttempt(), pie, {

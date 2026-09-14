@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const {
   OFFICIAL_SCORE_LEDGER_VERSION,

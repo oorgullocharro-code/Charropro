@@ -1,4 +1,4 @@
-import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2';
+import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3';
 
 export const tid = 'test-reconciliation-fixture';
 export const cid = 'charreada-fixture';

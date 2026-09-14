@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { withLegacyStateAsymmetry, tid, input as template, uid, cid, teamId, legacyRecordId } from './fixtures/historicalReconciliationFixture.mjs';
 import { signature, databaseSignature } from '../functions/historicalReconciliation.mjs';
-import { getCanonicalOfficialTeamTotals } from '../js/core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2';
+import { getCanonicalOfficialTeamTotals } from '../js/core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3';
 
 test('Auth + Storage + RTDB + callable: backup/verify/execute/reload/reproject/idempotency/isolation', {skip: process.env.CHARROPRO_RUN_RECONCILIATION_EMULATOR !== '1'}, async()=>{
   assert.equal(process.env.FIREBASE_PROJECT_ID,'demo-charropro-local');

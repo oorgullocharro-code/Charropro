@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const source = buildSource();
 let projection = buildPublicProjection(source, {

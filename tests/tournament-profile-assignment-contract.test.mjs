@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2");
-const { getCharreadaScoringSuertes, getCharreadaCompetitionContext } = await import("../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2");
+const { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
+const { getCharreadaScoringSuertes, getCharreadaCompetitionContext } = await import("../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 const tournament = applyProductiveRuleProfilePolicy({ id: "assignment-contract", category: "Libre", type: "completo" });

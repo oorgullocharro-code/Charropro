@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 test("Portal V2 presents one competition ranking per team without collapsing distinct scopes upstream", () => {
   const model = createPortalV2Model(fixture(), { availability: "ready", view: "posiciones" });

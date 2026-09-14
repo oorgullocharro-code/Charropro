@@ -6,9 +6,9 @@ import {
   buildOfficialTimerDefinitionsFromContext,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { updateOfficialTimerDomDisplays } from "../js/core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildOfficialCurrentTimerContext } from "../js/core/officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const T0 = Date.parse("2026-08-27T12:00:00.000Z");
 const tournament = {

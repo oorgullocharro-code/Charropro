@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

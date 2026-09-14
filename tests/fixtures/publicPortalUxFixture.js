@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../../js/publicPortal/portalRender.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../../js/publicPortal/portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const NOW_MS = Date.parse("2026-09-10T00:00:00.000Z");
 

@@ -5,9 +5,9 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const candidate = buildPublicProjection({
   tournament: {

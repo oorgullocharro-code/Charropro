@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildPublicLiveFeedModel,
   sanitizePublicLiveFeedFilter
-} from "../js/publicPortal/liveFeedModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/publicPortal/liveFeedModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const labels = {
   teamName: "Rancho Norte",

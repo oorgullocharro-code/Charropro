@@ -1,12 +1,12 @@
-import { escapeHTML, html, showToast } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { escapeHTML, html, showToast } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   DEFAULT_GRAPHICS_CONFIG,
   applyGraphicsConfig,
   normalizeGraphicsConfig,
   readLocalGraphicsConfig,
   writeLocalGraphicsConfig
-} from "../core/graphicsConfig.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { loadState, saveState, state } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../core/graphicsConfig.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { loadState, saveState, state } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   getLiveChannelFromUrl,
   publishFirebaseGraphicsConfig,
@@ -14,9 +14,9 @@ import {
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLiveCurrent
-} from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { CHARROPRO_APP_VERSION } from "../core/version.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const root = document.getElementById("graphics-control-root");
 let liveChannel = "";

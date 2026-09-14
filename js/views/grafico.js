@@ -1,20 +1,20 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getTimerView } from "../core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getTimerView } from "../core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildGraphicTimerPresentation,
   readGraphicTimerPresentationOptions
-} from "./graficoTimerPresentation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./graficoTimerPresentation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";

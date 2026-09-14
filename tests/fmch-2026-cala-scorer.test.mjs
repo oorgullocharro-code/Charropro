@@ -9,23 +9,23 @@ import {
   FMCH_2026_CALA_TEAM_PENALTY_RULES,
   applyFmch2026CalaPartideroTiming,
   calculatePuntaBreakdown
-} from "../js/data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   FMCH_2026_LIBRE_PROFILE,
   resolveEffectiveRules,
   resolveRuleProfileSelection
-} from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   applyPuntaCalculation,
   calculateAttemptPointSummary,
   calculateAttemptTotal
-} from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const runtimeConfiguration = JSON.parse(readFileSync(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const RELEASE_ID = String(runtimeConfiguration?.values?.system?.appVersion || "");

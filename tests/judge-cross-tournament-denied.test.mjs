@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import { createBootstrapHarness, executeBootstrap, profile, TOURNAMENT_A, TOURNAMENT_B, tournamentIndex, tournamentRecord } from "./helpers/userAccessBootstrapTestHarness.mjs";
 
 const { result, reads } = await executeBootstrap(

@@ -5,7 +5,7 @@ import {
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "../js/core/tournamentContext.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/tournamentContext.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 assert.equal(getTournamentIdFromUrl("?id=torneo_a"), "torneo_a");
 assert.equal(getTournamentIdFromUrl("?tournamentId=torneo_b"), "torneo_b");

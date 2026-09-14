@@ -21,16 +21,16 @@ import {
   resolveFmch2026PialesTiming,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "../js/data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/data/fmch2026PialesColeaderoRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { FMCH_2026_LIBRE_PROFILE, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { createScoreCollection, emptyAttempt } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createScoreCollection, emptyAttempt } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const publishedAt = "2026-08-08T20:00:00.000Z";
 const productPiales = SUERTES.find((suerte) => suerte.id === "piales");

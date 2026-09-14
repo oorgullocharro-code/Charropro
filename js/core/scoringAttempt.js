@@ -3,7 +3,7 @@ import {
   normalizeFmch2026ManganaFaenaTimeSettlement,
   normalizeFmch2026ManganaRemateIdentity,
   validateFmch2026ManganaAttemptForOfficial
-} from "./manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./manganasFaenaScoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const SCORING_ATTEMPT_SCHEMA_VERSION = 2;
 export const SCORING_ATTEMPT_CONTRACT_VERSION = "2.0.0";

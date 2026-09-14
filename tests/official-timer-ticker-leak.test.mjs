@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 let nextId = 0;
 const pending = new Map();

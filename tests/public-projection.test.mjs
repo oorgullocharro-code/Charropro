@@ -3,15 +3,15 @@ import {
   buildLegacyPublicProjectionV2 as buildPublicProjection,
   getLegacyPublicProjectionSignature as getPublicProjectionSignature,
   reconcileLegacyPublicProjectionV2 as reconcilePublicProjection
-} from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjection
-} from "../js/public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { adaptPublicProjectionToLegacy } from "../js/public/publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const baseSource = buildSource();
 const candidate = buildPublicProjection(baseSource, {

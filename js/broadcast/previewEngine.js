@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./themeTemplateIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./liveBindings.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

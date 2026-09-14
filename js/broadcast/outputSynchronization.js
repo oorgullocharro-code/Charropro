@@ -2,22 +2,22 @@ import {
   getOutputRoute,
   routeAnnouncerMonitor,
   routeProgramToOutput
-} from "./outputRouting.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getProgramSnapshot } from "./programEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./outputRouting.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getProgramSnapshot } from "./programEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   applyProgramMainProjection,
   buildProgramMainOutputSnapshot,
   clearProgramMainOutput,
   getProgramMainOutputStatus,
   validateProgramMainProjection
-} from "./programMainOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./programMainOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   clearAnnouncerMonitor,
   getAnnouncerSnapshot,
   getAnnouncerStatus,
   updateAnnouncerMonitor,
   validateAnnouncerProjection
-} from "./announcerMonitor.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./announcerMonitor.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const OUTPUT_SYNCHRONIZATION_VERSION = "1.0.0";
 

@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

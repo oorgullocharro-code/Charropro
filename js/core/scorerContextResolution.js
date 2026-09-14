@@ -1,5 +1,5 @@
-import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { resolveRuleProfileSelection } from "../data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { resolveProductiveRuleProfileDefault } from "./productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const SCORER_CONTEXT_RESOLUTION_VERSION = "1.0.0";
 

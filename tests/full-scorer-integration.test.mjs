@@ -14,13 +14,13 @@ const {
   getCharreadaScoringSuertes,
   getCurrentContext,
   state
-} = await import("../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2");
-const { advanceScoringPointer } = await import("../js/core/flow.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2");
+} = await import("../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
+const { advanceScoringPointer } = await import("../js/core/flow.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
 const {
   createPendingScoreReview,
   listPendingScoreReviews,
   putPendingScoreReview
-} = await import("../js/core/pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2");
+} = await import("../js/core/pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
 
 const tournamentId = "demo-local-fmch-2026";
 const charreadaId = "demo-local-fmch-jornada-1";

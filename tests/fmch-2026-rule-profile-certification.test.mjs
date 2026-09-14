@@ -4,10 +4,10 @@ import {
   FMCH_2026_LIBRE_PROFILE,
   resolveEffectiveRules,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildEffectiveRulesFingerprint } from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildEffectiveRulesFingerprint } from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const recordUrl = new URL(
   "../CHARROPRO-FMCH-2026-RULE-PROFILE-SPORTING-BLOCKERS-CERTIFICATION-001/CERTIFICATION_RECORD.json",

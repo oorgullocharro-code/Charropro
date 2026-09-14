@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
   buildTournamentTeamStandings,
   calculateAttemptTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { scoreKey, state } from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { scoreKey, state } from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export function buildCharroProStatsCenter(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

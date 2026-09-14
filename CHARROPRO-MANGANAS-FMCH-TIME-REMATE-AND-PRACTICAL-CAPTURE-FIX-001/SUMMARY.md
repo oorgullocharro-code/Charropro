@@ -28,3 +28,5 @@ The existing official timer remains unchanged. The scorer now stores distinct `P
 Client scoring/domain code and tests only. Public V3, Portal V2, Graphics, ranking, sheets, RTDB Rules, Functions runtime, profiles, fingerprints, lifecycle, and every non-Manganas suerte remain unchanged.
 
 The first physical review found that the technical remate and scoring-effects sections occupied the same classic-layout grid area. The later section visually covered the former. The closeout corrects the layout ownership and adds a regression that requires distinct `technical` and `effects` areas.
+
+The next physical review reached publication but exposed a sparse-draft normalization defect: a not-achieved opportunity may omit optional `applied` and `ruleQuantities` collections, while faena settlement assumed both existed. The owner boundary now normalizes those collections before removing a previous settlement. The exact Rodada + Bigotona + not-achieved flow publishes and advances Pie to Caballo locally; no remate is invented for the not-achieved opportunity.

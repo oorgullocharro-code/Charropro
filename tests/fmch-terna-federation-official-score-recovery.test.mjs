@@ -1,27 +1,27 @@
 import assert from "node:assert/strict";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/officialFormatSnapshot.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildOfficialTeamSheet,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/officialFormat.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { renderOfficialFormatSheetHtml } from "../js/core/officialFormatHtml.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   isCanonicalTernaParticipant
-} from "../js/core/ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getRuleProfile, resolveEffectiveRules } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { SUERTES } from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const {
   applyOfficialScoreTransaction,

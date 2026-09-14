@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import * as browserOutputApi from "../js/broadcast/browserOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   BROWSER_OUTPUT_DISPLAY_MODES,
   BROWSER_OUTPUT_ERROR_CODES,
@@ -28,7 +28,7 @@ import {
   validateBrowserOutputConfig,
   validateBrowserOutputProjection,
   validateBrowserOutputSnapshot
-} from "../js/broadcast/browserOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/browserOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 class MockStyle {
   constructor() {

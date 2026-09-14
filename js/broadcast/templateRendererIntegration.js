@@ -1,7 +1,7 @@
 import {
   instantiateBroadcastTemplate,
   cloneTemplateResult
-} from "./templateEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./templateEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   RENDERABLE_COMPONENT_TYPES,
   cloneComponentRenderResult,
@@ -12,11 +12,11 @@ import {
   renderBroadcastComponent,
   updateBroadcastComponentRender,
   validateComponentRenderTarget
-} from "./componentRenderer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./componentRenderer.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   cloneComponentInstance,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const TEMPLATE_RENDERER_INTEGRATION_VERSION = "1.0.0";
 

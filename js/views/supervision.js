@@ -1,12 +1,12 @@
-import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { loadState, state } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { loadState, state } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   signInAuditUser,
   signOutAuditUser,
   subscribeAuditAuth,
   subscribeFirebaseAuditScores
-} from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getRoleLabel, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const root = document.getElementById("supervision-root");
 

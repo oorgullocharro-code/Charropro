@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { logCharroProVersion } from "./version.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 logCharroProVersion("runtime");
 

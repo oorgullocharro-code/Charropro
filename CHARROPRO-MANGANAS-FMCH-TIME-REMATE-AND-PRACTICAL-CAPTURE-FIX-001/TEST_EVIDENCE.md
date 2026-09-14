@@ -12,6 +12,10 @@ The directed fixture covers duplicate time input, idempotent settlement, reopeni
 
 The physical closeout exposed a presentation regression: the technical remate block and the scoring-effects block shared the same classic scorer grid area. Directed source/layout assertions now require independent `technical` and `effects` grid ownership, visible quick-capture actions, and the open custom technical path.
 
+A later physical run exposed `official-publish-exception` with Rodada, Bigotona, and a third `NOT_ACHIEVED` opportunity. The exact exception was `TypeError: Cannot read properties of undefined (reading 'filter')` in `removeTimeSettlement()`: sparse UI drafts legitimately omitted optional `applied` and `ruleQuantities` collections. The regression now exercises that exact sparse payload, zero and one achieved sparse faenas, collection validation, and Attempt V2 / Official Score freeze without requiring remate identity on the not-achieved opportunity.
+
+The corrected DOM flow published the third opportunity, stored one time settlement on opportunity 3, and advanced from Manganas a Pie to Manganas a Caballo without refresh.
+
 ## Full regression
 
 The coordinated Auth, RTDB, Functions, and Storage Emulator suite completed with:

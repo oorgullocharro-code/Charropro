@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   formatOfficialFieldTimerMs,
   getOfficialFieldTimerFormat
-} from "../js/core/officialFieldTimerDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/officialFieldTimerDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const cases = new Map([
   [14_400, "14.4"],

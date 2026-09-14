@@ -7,9 +7,9 @@ import {
   getFmchOfficialTemporalPolicy,
   resolveFmchOfficialTemporalContracts,
   validateFmchOfficialTemporalPolicy
-} from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { FMCH_2026_LIBRE_PROFILE } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const PROFILE_CONTEXT = Object.freeze({
   profileId: "FMCH_2026_LIBRE",

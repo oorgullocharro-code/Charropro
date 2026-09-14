@@ -4,9 +4,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "../js/core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const tournamentId = "tournament-canonical";
 const charreadaId = "charreada-canonical";

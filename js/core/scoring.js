@@ -1,14 +1,14 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { calculatePuntaBreakdown, sumTeamPenalties } from "../data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   getCharreadaScoringEntries,
   getCharreadaScoringSuertes,
   getTeam,
   scoreKey,
   state
-} from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { compareOfficialRankingRows } from "./officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { compareOfficialRankingRows } from "./officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export function calculateAttemptTotal(attempt) {
   return calculateAttemptPointSummary(attempt).netAttemptPoints;

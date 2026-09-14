@@ -5,8 +5,8 @@ import {
   buildPortalV2PublicPath,
   buildPortalV2PublicUrl,
   buildPortalV2Url
-} from "../js/portalV2/portalV2Router.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildLegacyPortalV2RedirectPath } from "../js/portalV2/legacyPortalRedirect.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/portalV2/portalV2Router.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildLegacyPortalV2RedirectPath } from "../js/portalV2/legacyPortalRedirect.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const tournamentA = "torneo_mtvjrydx_26jzkk";
 const tournamentB = "torneo_mtvjrydx_otro";

@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/scorerInteractionLatency.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

@@ -1,10 +1,10 @@
 import {
   PREVIEW_ENGINE_VERSION,
   validatePreview
-} from "./previewEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./previewEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   applyLiveBindingsToProjection
-} from "./liveBindings.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./liveBindings.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 

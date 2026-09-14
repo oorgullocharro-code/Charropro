@@ -4,19 +4,19 @@ import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot,
   setScoringAttemptDq
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { applyPuntaCalculation } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "../js/core/officialFormatSnapshot.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/officialFormatSnapshot.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildOfficialPackage,
   buildOfficialWorkbook,
   createOfficialFormatXlsxBlob
-} from "../js/core/officialFormat.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildCanonicalTernaRoster, getTernaParticipantName } from "../js/core/ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/officialFormat.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { renderOfficialFormatStandaloneHtml } from "../js/core/officialFormatHtml.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildCanonicalTernaRoster, getTernaParticipantName } from "../js/core/ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const TOURNAMENT_ID = "semantic-fmch-2024-2028";
 const CHARREADA_ID = "semantic-charreada-1";

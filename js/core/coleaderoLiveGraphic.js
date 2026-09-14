@@ -1,5 +1,5 @@
-import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const COLEADERO_LIVE_WINDOW_SIZE = 5;
 

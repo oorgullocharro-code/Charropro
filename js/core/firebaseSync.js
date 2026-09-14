@@ -6,22 +6,22 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./firebaseRuntime.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./userAccessBootstrap.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -29,20 +29,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../public/publicProjection.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../public/publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -58,11 +58,11 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./publicProjectionOutbox.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
@@ -70,14 +70,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer,
   isBrakeReviewProfile
-} from "./brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({

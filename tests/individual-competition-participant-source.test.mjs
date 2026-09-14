@@ -7,9 +7,9 @@ import {
   getTournamentParticipants,
   getTournamentTeams,
   state
-} from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const previous = structuredClone({
   activeTournamentId: state.activeTournamentId,

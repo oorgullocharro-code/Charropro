@@ -13,7 +13,7 @@ import {
   setOutputState,
   setPreviewState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./broadcastState.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   assignLayersToOutput,
   assignThemeToOutput,
@@ -22,16 +22,16 @@ import {
   setBroadcastOutputStatus,
   updateBroadcastOutput,
   updateBroadcastOutputHeartbeat
-} from "./broadcastOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getBroadcastAsset } from "./assetManager.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { validateBroadcastDataContract } from "./dataContract.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./broadcastOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getBroadcastAsset } from "./assetManager.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { validateBroadcastDataContract } from "./dataContract.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   expireProductionVariable,
   registerProductionVariable,
   resetProductionVariableValue,
   setProductionVariableValue,
   updateProductionVariable
-} from "./productionVariables.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./productionVariables.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const BROADCAST_ACTION_ENGINE_VERSION = "1.1.0";
 

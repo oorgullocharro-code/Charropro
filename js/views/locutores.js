@@ -1,20 +1,20 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getCharroName } from "../core/sync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { escapeHTML, html, moneylessNumber, showToast } from "../core/dom.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getCharroName } from "../core/sync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   calculateAttemptTotal,
   getTeamCharreadaTotal,
   getTeamSuerteTotal
-} from "../core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   getLiveChannelFromUrl,
   signInFirebaseUser,
   signOutFirebaseUser,
   subscribeFirebaseAuthSession,
   subscribeFirebaseLiveCurrent
-} from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { ROLES, getRoleLabel, hasTournamentAccess, isActiveAccessSession, roleCan } from "../core/roles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const root = document.getElementById("locutores-root");
 const liveChannel = getLiveChannelFromUrl();

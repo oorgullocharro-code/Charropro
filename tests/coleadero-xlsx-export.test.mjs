@@ -7,7 +7,7 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/core/coleaderoXlsx.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);

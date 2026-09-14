@@ -22,25 +22,25 @@ import {
   updateThemedTemplateRender,
   validateThemeTemplateIntegrationContext,
   validateThemeTemplateSnapshot
-} from "../js/broadcast/themeTemplateIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/themeTemplateIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   createProductionConsoleModel
-} from "../js/broadcast/productionConsole.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/productionConsole.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   createBroadcastTheme,
   getBroadcastTheme,
   publishBroadcastTheme,
   resolveBroadcastTheme
-} from "../js/broadcast/themeEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/themeEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   createTemplateRendererIntegration,
   destroyTemplateRendererIntegration,
   prepareTemplateRender
-} from "../js/broadcast/templateRendererIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../js/broadcast/templateRendererIntegration.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   TEMPLATE_ENGINE_FIXTURE_TYPES,
   buildTemplateEngineFixture
-} from "../fixtures/templateEngineFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../fixtures/templateEngineFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 class MockClassList {
   constructor(element) { this.element = element; }

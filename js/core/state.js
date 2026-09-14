@@ -1,21 +1,21 @@
-import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+import { getTournamentSuertes, normalizeTournamentType } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getCompetitionType, getCompetitionTypeFromTournamentType, validateCompetitionType } from "../data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { migrateCalaAttempt, normalizeCalaRuleOverrideCatalog } from "../data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   buildFmch2026TernaSessionId,
   createFmch2026TernaSession,
   isFmch2026TernaSuerte,
   normalizeFmch2026TernaSession
-} from "../data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "../data/fmch2026TernaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   createOfficialTimerContext,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getCanonicalTernaRoster } from "./ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
-import { getCanonicalSportingOpportunityKey } from "./canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./timerRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { normalizePendingScoreReviewRegistry } from "./pendingScoreReview.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { DEFAULT_GRAPHICS_CONFIG, normalizeGraphicsConfig } from "./graphicsConfig.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getCanonicalTernaRoster } from "./ternaParticipantIdentity.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getCanonicalSportingOpportunityKey } from "./canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 import {
   LEGACY_GLOBAL_RULES_STORAGE_KEY,
   LEGACY_GRAPHICS_CONFIG_KEY,
@@ -28,7 +28,7 @@ import {
   normalizeTournamentCacheId,
   removeLegacyCacheKeys,
   setActiveTournamentCacheId
-} from "./localCache.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v2";
+} from "./localCache.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
 
 export const LIVE_CHANNEL = "charropro_live_channel";
 export let STORAGE_KEY = getTournamentStateStorageKey(getActiveTournamentCacheId());

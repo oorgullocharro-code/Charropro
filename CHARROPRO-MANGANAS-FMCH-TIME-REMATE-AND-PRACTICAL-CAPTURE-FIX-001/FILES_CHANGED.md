@@ -11,6 +11,8 @@
 
 The post-deploy visibility correction remains limited to `js/app.js`, `css/styles.css`, the directed Manganas test, ticket evidence, and mechanical build propagation. It separates technical remate capture from scoring effects and adds quick documentary capture without changing points.
 
+The later publication correction changes only `js/core/manganasFaenaScoring.js` functionally: `removeTimeSettlement()` now normalizes optional `applied` and `ruleQuantities` collections before settlement cleanup. The directed test preserves the physical sparse third-opportunity payload and its Official Score result.
+
 ## Tests
 
 - `tests/fmch-manganas-time-remate-practical-capture.test.mjs`
