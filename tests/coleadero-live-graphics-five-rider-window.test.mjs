@@ -5,8 +5,8 @@ import {
   buildIndividualColeaderoLiveData,
   isIndividualColeaderoLiveContext,
   selectColeaderoFiveRiderWindow
-} from "../js/core/coleaderoLiveGraphic.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/core/coleaderoLiveGraphic.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const tournament = {
   id: "coleadero-live",

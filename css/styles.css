@@ -6705,6 +6705,56 @@ th.num {
   text-transform: uppercase;
 }
 
+.cp-cala-medios-lados-additional {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.cp-cala-medio-lado-side {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(53, 201, 111, .28);
+  border-radius: 8px;
+  background: rgba(8, 48, 28, .2);
+}
+
+.cp-cala-medio-lado-side h4 {
+  margin: 0;
+  color: var(--cp-muted);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.cp-cala-medio-lado-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.cp-cala-medio-lado-actions .cp-scoring-action-button {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 78px;
+  touch-action: manipulation;
+}
+
+.cp-cala-medio-lado-actions .cp-scoring-action-button strong,
+.cp-cala-medio-lado-actions .cp-scoring-action-button b {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  .cp-cala-medios-lados-additional {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .cp-disabled-reason {
   grid-column: 1 / -1;
   color: #ffd780;

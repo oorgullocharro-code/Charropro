@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {
   policyVersion: "1.0.0",
-  policyId: "fmch-2026-libre-productive-default-v2",
+  policyId: "fmch-2026-libre-productive-default-v3",
   profileId: "FMCH_2026_LIBRE",
-  version: "0.6.1",
+  version: "0.6.2",
   enabled: true
 });
 assert.equal(resolveProductiveRuleProfileDefault("Juvenil"), null);
@@ -28,7 +28,7 @@ const assigned = {
     profileId: policy.profileId,
     version: policy.version,
     status: "active",
-    contentFingerprint: "rptp_10e596046446e850",
+    contentFingerprint: "rptp_faaf4360de95f84c",
     revision: 1
   }
 };
@@ -56,6 +56,24 @@ const preserved060 = resolveRuleProfileSelection({
 });
 assert.equal(preserved060.valid, true);
 assert.equal(preserved060.profile.version, "0.6.0", "existing explicit 0.6.0 assignments remain pinned");
+
+const preserved061 = resolveRuleProfileSelection({
+  id: "existing-tournament-061",
+  category: "Libre",
+  ruleProfileId: "FMCH_2026_LIBRE",
+  ruleProfileVersion: "0.6.1",
+  ruleProfileAssignment: {
+    authorityVersion: "1.0.0",
+    tournamentId: "existing-tournament-061",
+    profileId: "FMCH_2026_LIBRE",
+    version: "0.6.1",
+    status: "active",
+    contentFingerprint: "rptp_10e596046446e850",
+    revision: 1
+  }
+});
+assert.equal(preserved061.valid, true);
+assert.equal(preserved061.profile.version, "0.6.1", "existing explicit 0.6.1 assignments remain pinned");
 
 const tampered = structuredClone(assigned);
 tampered.ruleProfileAssignment.contentFingerprint = "rptp_1111111111111111";

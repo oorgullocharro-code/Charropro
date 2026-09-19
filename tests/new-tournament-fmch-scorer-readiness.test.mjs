@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 installStorage();
-const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
-const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
+const { applyProductiveRuleProfilePolicy } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1");
+const { SCORER_CONTEXT_STATUSES, resolveScorerContextState } = await import("../js/core/scorerContextResolution.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1");
 
 const tournament = applyProductiveRuleProfilePolicy({
   id: "new-libre-tournament",
@@ -62,12 +62,12 @@ function assignmentFields(tournamentId) {
     authorityVersion: "1.0.0",
     tournamentId,
     profileId: "FMCH_2026_LIBRE",
-    version: "0.6.1",
+    version: "0.6.2",
     status: "active",
-    contentFingerprint: "rptp_10e596046446e850",
+    contentFingerprint: "rptp_faaf4360de95f84c",
     revision: 1,
     source: "productive-default",
-    policyId: "fmch-2026-libre-productive-default-v2"
+    policyId: "fmch-2026-libre-productive-default-v3"
   };
   return {
     ruleProfileId: assignment.profileId,

@@ -1,4 +1,4 @@
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const TOURNAMENT_ID = "portal-v2-local-preview";
 

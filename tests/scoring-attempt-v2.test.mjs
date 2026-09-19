@@ -17,8 +17,8 @@ import {
   setScoringAttemptDq,
   updateScoringAttemptClassification,
   validateScoringAttemptV2
-} from "../js/core/scoringAttempt.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/core/scoringAttempt.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { calculateAttemptPointSummary, calculateAttemptTotal } from "../js/core/scoring.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const publishedAt = "2026-08-08T12:00:00.000Z";
 const actor = { id: "judge_1", name: "Juez Sintetico", role: "Juez" };

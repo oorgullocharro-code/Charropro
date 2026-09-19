@@ -1,5 +1,5 @@
-import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { listPublicLiveFeedEvents } from "../public/publicLiveFeed.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { buildPublicLiveFeedMessage } from "./liveFeedTemplates.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const PUBLIC_LIVE_FEED_FILTERS = Object.freeze(["all", "score", "turn", "penalty", "timer"]);
 export const PUBLIC_LIVE_FEED_RENDER_LIMIT = 50;

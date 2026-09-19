@@ -3,7 +3,11 @@ import {
   FMCH_2026_CALA_BASE_RULES,
   FMCH_2026_CALA_DESC_RULES,
   FMCH_2026_CALA_DISABLED_LEGACY_RULES,
+  FMCH_2026_CALA_GRANULAR_MEDIOS_LADOS_RULES,
   FMCH_2026_CALA_INFR_RULES,
+  FMCH_2026_CALA_LEGACY_GRANULARITY,
+  FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS,
+  FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS,
   FMCH_2026_CALA_SOURCE,
   FMCH_2026_CALA_TEAM_PENALTY_RULES
 } from "./calaRules.js?v=20260912-portal-v2-home-reference-composition-live-cover-005-v1";
@@ -768,11 +772,100 @@ export const FMCH_2026_LIBRE_PROFILE_0_6_1 = deepFreeze({
   }
 });
 
+function buildFmch2026GranularMediosLadosProfileRules(rules = []) {
+  const legacyRuleIds = new Set(Object.values(FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS));
+  const inheritedRules = rules.map((rule) => {
+    if (rule.suerteId !== "cala" || rule.category !== RULE_CATEGORIES.ADDITIONAL || !legacyRuleIds.has(rule.ruleId)) {
+      return rule;
+    }
+    return {
+      ...rule,
+      enabled: false,
+      metadata: {
+        ...(rule.metadata || {}),
+        sourceStatus: "LEGACY_PRESERVED_DISABLED",
+        legacyGranularity: FMCH_2026_CALA_LEGACY_GRANULARITY,
+        reason: "Preserved for historical read only; new 0.6.2 capture uses granular movement identities"
+      }
+    };
+  });
+  const granularRules = FMCH_2026_CALA_GRANULAR_MEDIOS_LADOS_RULES.map((rule, index) => ({
+    ...buildFmchCalaProfileRule(rule, RULE_CATEGORIES.ADDITIONAL, 100 + index),
+    metadata: {
+      ...(rule.metadata || {}),
+      implementationTicket: "CHARROPRO-CALA-MEDIOS-LADOS-PLUS-ONE-CONTROLS-FIX-001"
+    }
+  }));
+  return [...inheritedRules, ...granularRules];
+}
+
+function buildFmch2026GranularMedioLadoFieldMapping(mapping, ruleIds, legacyRuleId) {
+  const preservedMapping = { ...(mapping || {}) };
+  delete preservedMapping.ruleId;
+  return {
+    ...preservedMapping,
+    ruleIds,
+    legacyRuleId,
+    aggregation: "SUM_GRANULAR_OR_LEGACY_AGGREGATE"
+  };
+}
+
+export const FMCH_2026_LIBRE_PROFILE_0_6_2 = deepFreeze({
+  ...FMCH_2026_LIBRE_PROFILE_0_6_1,
+  version: "0.6.2",
+  status: "draft",
+  rules: buildFmch2026GranularMediosLadosProfileRules(FMCH_2026_LIBRE_PROFILE_0_6_1.rules),
+  suerteMetadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_6_1.suerteMetadata,
+    cala: {
+      ...FMCH_2026_LIBRE_PROFILE_0_6_1.suerteMetadata.cala,
+      fieldIdMappings: {
+        ...FMCH_2026_LIBRE_PROFILE_0_6_1.suerteMetadata.cala.fieldIdMappings,
+        "FMCH.TEAM_SHEET.CALA.MD": buildFmch2026GranularMedioLadoFieldMapping(
+          FMCH_2026_LIBRE_PROFILE_0_6_1.suerteMetadata.cala.fieldIdMappings["FMCH.TEAM_SHEET.CALA.MD"],
+          [
+            FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.RIGHT_OUTBOUND,
+            FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.RIGHT_RETURN
+          ],
+          FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS.RIGHT
+        ),
+        "FMCH.TEAM_SHEET.CALA.MI": buildFmch2026GranularMedioLadoFieldMapping(
+          FMCH_2026_LIBRE_PROFILE_0_6_1.suerteMetadata.cala.fieldIdMappings["FMCH.TEAM_SHEET.CALA.MI"],
+          [
+            FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.LEFT_OUTBOUND,
+            FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.LEFT_RETURN
+          ],
+          FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS.LEFT
+        )
+      },
+      mediosLados: {
+        implementationStatus: "DRAFT_CERTIFICATION",
+        contractVersion: "1.0.0",
+        maxCombinedAdditionalPoints: 4,
+        granularRuleIds: Object.values(FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS),
+        legacyRuleIds: Object.values(FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS),
+        legacyGranularity: FMCH_2026_CALA_LEGACY_GRANULARITY,
+        ca5Ca8GranularMappingRecoverable: false
+      }
+    }
+  },
+  metadata: {
+    ...FMCH_2026_LIBRE_PROFILE_0_6_1.metadata,
+    implementationStatus: "cala_medios_lados_granular_identities_draft_certified",
+    activationReady: false,
+    activationReadyEligibility: true,
+    certificationTicket: "CHARROPRO-CALA-MEDIOS-LADOS-PLUS-ONE-CONTROLS-FIX-001",
+    derivedFromVersion: "0.6.1",
+    activationBlockReason: "Lifecycle transition and production deployment require separate authorization"
+  }
+});
+
 export const RULE_PROFILES = deepFreeze([
   FMCH_2026_LIBRE_PROFILE_0_4_0,
   FMCH_2026_LIBRE_PROFILE_0_5_0,
   FMCH_2026_LIBRE_PROFILE_0_6_0,
-  FMCH_2026_LIBRE_PROFILE_0_6_1
+  FMCH_2026_LIBRE_PROFILE_0_6_1,
+  FMCH_2026_LIBRE_PROFILE_0_6_2
 ]);
 
 export function buildRuleIdentity(suerteId, category, ruleId) {

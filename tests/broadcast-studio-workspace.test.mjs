@@ -8,7 +8,7 @@ import {
   createBroadcastStudioContextBridge,
   createBroadcastStudioController,
   filterBroadcastStudioGraphics
-} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/broadcast/broadcastStudioWorkspace.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const configuration = JSON.parse(await readFile(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const BUILD = String(configuration?.values?.system?.appVersion || "");

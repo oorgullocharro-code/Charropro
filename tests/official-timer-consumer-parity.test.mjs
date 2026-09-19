@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const now = Date.parse("2026-08-25T12:00:12.300Z");
 const snapshot = {

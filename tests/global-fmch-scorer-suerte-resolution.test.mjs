@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
+const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1");
 
 const tournament = assignedTournament("global-team");
 const charreada = { id: "charreada-team", tournamentId: tournament.id, competitionType: "Competencia por equipos", teamIds: ["team-a"] };
@@ -30,7 +30,7 @@ function assignedTournament(id) {
       profileId: policy.profileId,
       version: policy.version,
       status: "active",
-      contentFingerprint: "rptp_10e596046446e850",
+      contentFingerprint: "rptp_faaf4360de95f84c",
       revision: 1
     }
   };

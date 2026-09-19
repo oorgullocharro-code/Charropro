@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/data/ruleProfiles.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/data/suertes.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

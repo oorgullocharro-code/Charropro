@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",

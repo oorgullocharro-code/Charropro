@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../core/canonicalTournamentResults.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./canonicalPublicTournamentData.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 

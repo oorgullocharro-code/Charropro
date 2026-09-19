@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { buildPortalV2Url } from "../js/portalV2/portalV2Router.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getPortalV2PreviewSnapshot } from "../fixtures/portalV2PreviewFixtures.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { buildPortalV2Url } from "../js/portalV2/portalV2Router.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 test("results, standings, and sheet present the same resolved PR 21 / total 193", () => {
   const model = portalModel("live", "resultados");

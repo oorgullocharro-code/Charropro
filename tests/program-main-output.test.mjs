@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import * as api from "../js/broadcast/programMainOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import * as api from "../js/broadcast/programMainOutput.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import * as realtimeApi from "../js/broadcast/broadcastRealtimeTransport.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   BroadcastProgramMainOutputError,
   PROGRAM_MAIN_OUTPUT_DISPLAY_MODES,
@@ -28,7 +28,7 @@ import {
   validateProgramMainOutputConfig,
   validateProgramMainOutputSnapshot,
   validateProgramMainProjection
-} from "../js/broadcast/programMainOutput.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/broadcast/programMainOutput.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 class MockStyle {
   constructor() {

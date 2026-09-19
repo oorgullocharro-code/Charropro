@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/broadcast/dataContract.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

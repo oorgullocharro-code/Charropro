@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import backupService from "../functions/backupService.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import backupFoundation from "../functions/backupFoundation.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import backupService from "../functions/backupService.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const {
   BACKUP_FOUNDATION_VERSION,

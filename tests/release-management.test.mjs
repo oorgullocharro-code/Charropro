@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
-import releaseEngine from "../tools/release/releaseEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import releaseEngine from "../tools/release/releaseEngine.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const {
   RELEASE_ENGINE_VERSION,

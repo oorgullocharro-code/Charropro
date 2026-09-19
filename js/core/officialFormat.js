@@ -1,8 +1,8 @@
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "./officialFormatSnapshot.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./officialFormatSnapshot.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   OFFICIAL_FORMAT_COLUMN_ROLES,
   OFFICIAL_FORMAT_COLUMN_WIDTHS,
@@ -11,9 +11,13 @@ import {
   OFFICIAL_FORMAT_TEXT_POLICY,
   OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
   buildOfficialFormatRowGeometry
-} from "./officialFormatDocumentModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { state } from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { createXlsxBlob } from "./xlsx.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./officialFormatDocumentModel.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { state } from "./state.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import {
+  FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS,
+  FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS
+} from "../data/calaRules.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
 export { OFFICIAL_FORMAT_PAPER };
@@ -627,16 +631,38 @@ function calaDistanceHeading(attempt) {
 function calaScoreValues(attempt) {
   if (!attempt) return Array(8).fill("");
   const cala = attempt.documentalEvidence?.cala;
+  const mediosLados = resolveCalaMediosLadosPresentation(attempt.additionalSelections);
   return [
     finiteOrBlank(attempt.baseSelection?.total),
     finiteOrBlank(cala?.puntaDistancePoints),
     finiteOrBlank(cala?.puntaTimePoints),
     selectionTotalOrZero(attempt.additionalSelections, /lado_derecho/),
     selectionTotalOrZero(attempt.additionalSelections, /lado_izquierdo/),
-    selectionTotalOrZero(attempt.additionalSelections, /medio_derecho/),
-    selectionTotalOrZero(attempt.additionalSelections, /medio_izquierdo/),
+    mediosLados.right,
+    mediosLados.left,
     selectionTotalOrZero(attempt.additionalSelections, /cambio_rectangulo/)
   ];
+}
+
+export function resolveCalaMediosLadosPresentation(selections = []) {
+  return {
+    right: resolveCalaMedioLadoSide(selections, [
+      FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.RIGHT_OUTBOUND,
+      FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.RIGHT_RETURN
+    ], FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS.RIGHT),
+    left: resolveCalaMedioLadoSide(selections, [
+      FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.LEFT_OUTBOUND,
+      FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.LEFT_RETURN
+    ], FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS.LEFT)
+  };
+}
+
+function resolveCalaMedioLadoSide(selections, granularRuleIds, legacyRuleId) {
+  const granular = (selections || []).filter((selection) => granularRuleIds.includes(selectionId(selection)));
+  if (granular.length) return granular.reduce((sum, selection) => sum + selectionPoints(selection), 0);
+  return (selections || [])
+    .filter((selection) => selectionId(selection) === legacyRuleId)
+    .reduce((sum, selection) => sum + selectionPoints(selection), 0);
 }
 
 function jineteoScoreValues(attempt, kind) {

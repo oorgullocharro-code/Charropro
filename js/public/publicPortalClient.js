@@ -4,9 +4,9 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjectionForRead
-} from "./publicProjectionSchema.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./publicProjectionSchema.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

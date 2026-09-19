@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/broadcast/componentLibrary.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./officialTimerLiveDisplay.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

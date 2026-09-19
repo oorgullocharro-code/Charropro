@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(59_999), []);
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(60_000), []);

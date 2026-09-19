@@ -1,10 +1,10 @@
-import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   buildCanonicalOfficialResults,
   getCanonicalSportingOpportunityKey
-} from "./canonicalOfficialResults.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { createXlsxBlob } from "./xlsx.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { state } from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./canonicalOfficialResults.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { state } from "./state.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const COLEADERO_COMPETITION_ID = "coleadero";
 

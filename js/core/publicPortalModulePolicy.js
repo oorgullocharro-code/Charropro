@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../public/canonicalPublicTournamentData.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

@@ -1,7 +1,7 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { selectOfficialRanking } from "../core/officialRanking.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

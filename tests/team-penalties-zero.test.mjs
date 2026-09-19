@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/core/scoring.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

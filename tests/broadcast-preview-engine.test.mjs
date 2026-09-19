@@ -17,7 +17,7 @@ import {
   updatePreview,
   updatePreviewLiveData,
   validatePreview
-} from "../js/broadcast/previewEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/broadcast/previewEngine.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const T0 = "2026-07-15T12:00:00.000Z";
 const T1 = "2026-07-15T12:01:00.000Z";

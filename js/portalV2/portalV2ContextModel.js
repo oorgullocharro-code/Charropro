@@ -1,4 +1,4 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.

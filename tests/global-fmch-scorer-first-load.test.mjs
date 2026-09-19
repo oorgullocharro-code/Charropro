@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 
 const storage = new Map();
 globalThis.localStorage = { getItem: (key) => storage.get(String(key)) ?? null, setItem: (key, value) => storage.set(String(key), String(value)), removeItem: (key) => storage.delete(String(key)) };
-const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
-const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3");
+const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1");
+const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1");
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 const tournament = {
@@ -24,7 +24,7 @@ tournament.ruleProfileAssignment = {
   profileId: policy.profileId,
   version: policy.version,
   status: "active",
-  contentFingerprint: "rptp_10e596046446e850",
+  contentFingerprint: "rptp_faaf4360de95f84c",
   revision: 1
 };
 assert.equal(getCharreadaScoringSuertes(charreada, tournament).length, 10, "the same runtime object must recover after assignment arrives");

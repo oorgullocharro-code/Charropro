@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import configurationEngine from "../functions/configurationEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import configurationService from "../functions/configurationService.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import configurationEngine from "../functions/configurationEngine.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import configurationService from "../functions/configurationService.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

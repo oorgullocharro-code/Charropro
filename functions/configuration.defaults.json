@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3",
+      "appVersion": "20260919-cala-medios-lados-plus-one-controls-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -147,9 +147,9 @@
         "productiveRuleProfileDefaults": {
           "Libre": {
             "policyVersion": "1.0.0",
-            "policyId": "fmch-2026-libre-productive-default-v2",
+            "policyId": "fmch-2026-libre-productive-default-v3",
             "profileId": "FMCH_2026_LIBRE",
-            "version": "0.6.1",
+            "version": "0.6.2",
             "enabled": true
           }
         }
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "47f175333ff26ea1dacee2b0b1399300d3da309e1aaefbf8a9f803dbb0e35123",
-  "fingerprint": "47f175333ff26ea1dacee2b0b1399300d3da309e1aaefbf8a9f803dbb0e35123"
+  "checksum": "e67e1ea4ea88db4751d66001da42172bd561ace408002583ae5d7af5d23d494c",
+  "fingerprint": "e67e1ea4ea88db4751d66001da42172bd561ace408002583ae5d7af5d23d494c"
 }

@@ -3,19 +3,19 @@ import {
   applyPublicPortalSnapshot,
   createPublicPortalClientState,
   evaluatePublicPortalStale
-} from "../public/publicPortalClient.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../public/publicPortalClient.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { subscribePublicTournamentSnapshot } from "../core/firebaseSync.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   buildPublicPortalUrl,
   parsePublicPortalRoute
-} from "./portalRouter.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { buildPublicPortalModel } from "./portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./portalRouter.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { buildPublicPortalModel } from "./portalSelectors.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   announcePublicPortalChange,
   createPublicPortalShell,
   renderPublicPortal,
   renderPublicPortalConnection
-} from "./portalRender.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./portalRender.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const PUBLIC_PORTAL_CORE_VERSION = "2.0.0";
 

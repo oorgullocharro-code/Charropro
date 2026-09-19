@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../../js/core/userAccessBootstrap.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

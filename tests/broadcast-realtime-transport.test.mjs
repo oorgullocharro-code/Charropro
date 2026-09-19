@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

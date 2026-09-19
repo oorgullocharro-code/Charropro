@@ -1,6 +1,19 @@
 export const CALA_RULEBOOK_VERSION = "cala_base_reglamento_2026_06";
 export const FMCH_2026_CALA_RULEBOOK_VERSION = "fmch_2026_cala_0.2.0";
 export const FMCH_2026_CALA_SOURCE = "CHARROPRO-FMCH-2026-SCORING-SPECIFICATION-001";
+export const FMCH_2026_CALA_MEDIOS_LADOS_CONTRACT_VERSION = "1.0.0";
+export const FMCH_2026_CALA_LEGACY_GRANULARITY = "LEGACY_AGGREGATE_GRANULARITY_UNKNOWN";
+export const FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS = Object.freeze({
+  RIGHT_OUTBOUND: "cala_medio_derecho_ida",
+  RIGHT_RETURN: "cala_medio_derecho_vuelta",
+  LEFT_OUTBOUND: "cala_medio_izquierdo_ida",
+  LEFT_RETURN: "cala_medio_izquierdo_vuelta"
+});
+export const FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS = Object.freeze({
+  RIGHT: "cala_medio_derecho",
+  LEFT: "cala_medio_izquierdo"
+});
+export const FMCH_2026_CALA_CA5_CA8_IDA_VUELTA_MAPPING_RECOVERABLE = false;
 
 export const CALA_BASE_RULES = [
   { id: "cala_base_completa", pts: 20, label: "Base Cala" }
@@ -70,6 +83,25 @@ const confirmedRule = (rule, metadata = {}) => ({
     ...metadata
   }
 });
+
+export const FMCH_2026_CALA_GRANULAR_MEDIOS_LADOS_RULES = [
+  confirmedRule(
+    { id: FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.RIGHT_OUTBOUND, pts: 1, label: "Medio lado derecho: ida" },
+    { contractVersion: FMCH_2026_CALA_MEDIOS_LADOS_CONTRACT_VERSION, groupId: "ML", side: "RIGHT", movement: "OUTBOUND", maxQuantity: 1 }
+  ),
+  confirmedRule(
+    { id: FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.RIGHT_RETURN, pts: 1, label: "Medio lado derecho: vuelta" },
+    { contractVersion: FMCH_2026_CALA_MEDIOS_LADOS_CONTRACT_VERSION, groupId: "ML", side: "RIGHT", movement: "RETURN", maxQuantity: 1 }
+  ),
+  confirmedRule(
+    { id: FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.LEFT_OUTBOUND, pts: 1, label: "Medio lado izquierdo: ida" },
+    { contractVersion: FMCH_2026_CALA_MEDIOS_LADOS_CONTRACT_VERSION, groupId: "ML", side: "LEFT", movement: "OUTBOUND", maxQuantity: 1 }
+  ),
+  confirmedRule(
+    { id: FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS.LEFT_RETURN, pts: 1, label: "Medio lado izquierdo: vuelta" },
+    { contractVersion: FMCH_2026_CALA_MEDIOS_LADOS_CONTRACT_VERSION, groupId: "ML", side: "LEFT", movement: "RETURN", maxQuantity: 1 }
+  )
+];
 
 export const FMCH_2026_CALA_BASE_RULES = [
   confirmedRule({ id: "cala_base_completa", pts: 20, label: "Cala completa" })
@@ -195,7 +227,11 @@ export const CALA_ADIC_SECTIONS = [
   {
     code: "ML",
     label: "Medios lados",
-    ids: ["cala_medio_derecho", "cala_medio_izquierdo"]
+    ids: [
+      "cala_medio_derecho",
+      "cala_medio_izquierdo",
+      ...Object.values(FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS)
+    ]
   },
   {
     code: "CR",

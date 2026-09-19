@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import backupService from "../functions/backupService.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import backupService from "../functions/backupService.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const bucketNames = [];
 const files = new Map();

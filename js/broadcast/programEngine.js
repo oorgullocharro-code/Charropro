@@ -1,10 +1,10 @@
 import {
   PREVIEW_ENGINE_VERSION,
   validatePreview
-} from "./previewEngine.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./previewEngine.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 import {
   applyLiveBindingsToProjection
-} from "./liveBindings.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "./liveBindings.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 

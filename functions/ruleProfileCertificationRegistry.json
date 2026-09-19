@@ -42,6 +42,27 @@
         "recordId": "CHARROPRO-FMCH-2026-LIBRE-0.6.1-BRAKE-REVIEW-RULE-RECONCILIATION-001",
         "resolutionTicketId": "CHARROPRO-FMCH-2026-LIBRE-0.6.1-BRAKE-REVIEW-RULE-RECONCILIATION-001"
       }
+    },
+    "FMCH_2026_LIBRE@0.6.2": {
+      "profileId": "FMCH_2026_LIBRE",
+      "version": "0.6.2",
+      "definitionStatus": "draft",
+      "scope": {
+        "type": "system",
+        "tenantId": "",
+        "organizationId": ""
+      },
+      "profileValid": true,
+      "contentFingerprint": "rptp_faaf4360de95f84c",
+      "catalogRuleCount": 738,
+      "suerteCount": 10,
+      "certification": {
+        "verdict": "PASS",
+        "remainingP0": 0,
+        "activationReadyEligibility": true,
+        "recordId": "CHARROPRO-CALA-MEDIOS-LADOS-PLUS-ONE-CONTROLS-FIX-001",
+        "resolutionTicketId": "CHARROPRO-CALA-MEDIOS-LADOS-PLUS-ONE-CONTROLS-FIX-001"
+      }
     }
   }
 }

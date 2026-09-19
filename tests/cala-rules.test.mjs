@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+} from "../js/data/calaRules.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

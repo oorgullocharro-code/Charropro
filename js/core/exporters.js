@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
-import { getTeam, state } from "./state.js?v=20260913-manganas-fmch-time-remate-practical-capture-fix-001-v3";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { getTeam, state } from "./state.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);
