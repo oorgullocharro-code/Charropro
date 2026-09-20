@@ -1,4 +1,4 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.

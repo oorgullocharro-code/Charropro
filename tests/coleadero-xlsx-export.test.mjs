@@ -7,7 +7,7 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+} from "../js/core/coleaderoXlsx.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);

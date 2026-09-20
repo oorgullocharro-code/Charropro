@@ -7,7 +7,7 @@ import {
   createCanonicalPublicTournamentData,
   normalizeCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "../js/public/canonicalPublicTournamentData.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+} from "../js/public/canonicalPublicTournamentData.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 const tournamentId = "test-reconciliation-fixture";
 const resultId = "result-casa-1";

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",

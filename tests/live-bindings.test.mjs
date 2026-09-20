@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [

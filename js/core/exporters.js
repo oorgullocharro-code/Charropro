@@ -1,6 +1,6 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
-import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
-import { getTeam, state } from "./state.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { getTeamCharreadaResta, getTeamCharreadaTotal, getTeamSuerteTotal } from "./scoring.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { getTeam, state } from "./state.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 export function exportCurrentTournamentCsv(tournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 const { applyOfficialScoreTransaction, prepareOfficialScoreRequest } = officialScoreConcurrency;
 const tournamentId = "tournament-write-merge";

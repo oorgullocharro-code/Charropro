@@ -1,5 +1,5 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

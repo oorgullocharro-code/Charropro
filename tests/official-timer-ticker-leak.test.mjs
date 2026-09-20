@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { createOfficialTimerTicker } from "../js/core/officialTimerLiveDisplay.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 let nextId = 0;
 const pending = new Map();

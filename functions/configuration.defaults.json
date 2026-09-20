@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260920-sabana-tournament-wide-deploy-001-v1",
+      "appVersion": "20260920-sabana-compact-columns-ux-deploy-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "fbf076218bf1b650ab879e7d0fb48ee260c681da940d7d12df5c235badb39e43",
-  "fingerprint": "fbf076218bf1b650ab879e7d0fb48ee260c681da940d7d12df5c235badb39e43"
+  "checksum": "2fb2fa5d59973158bb8d8f5801a8f3b1fe302dd5643a5b9beaab24dac4c48162",
+  "fingerprint": "2fb2fa5d59973158bb8d8f5801a8f3b1fe302dd5643a5b9beaab24dac4c48162"
 }

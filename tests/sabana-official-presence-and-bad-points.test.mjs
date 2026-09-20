@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   aggregateCanonicalOfficialTeamTotals,
   getCanonicalOfficialSuerteTotals,
   getCanonicalOfficialTeamTotals
-} from "../js/core/canonicalOfficialResults.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
-import { getTournamentTeams, state } from "../js/core/state.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+} from "../js/core/canonicalOfficialResults.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { getTournamentTeams, state } from "../js/core/state.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 const tournamentId = "tournament-sabana";
 const charreadaId = "charreada-sabana";
+const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
 
 test("official score sheet preserves positive and zero values while marking an absent suerte pending", () => {
   const totals = getCanonicalOfficialTeamTotals({
@@ -131,6 +133,41 @@ test("tournament-wide totals aggregate only each team's canonical scores from it
   assert.equal(teamD.badPoints, 2);
   assert.deepEqual(getCanonicalOfficialSuerteTotals(teamB, "cala"), { hasOfficialResult: false, total: null, badPoints: null });
   assert.equal(teamB.hasOfficialRecords, false);
+});
+
+test("the tournament-wide sheet presents compact point-only suerte columns and one canonical infraction total", () => {
+  const source = {
+    publishedScores: [
+      official("cala-18", "team-a", "cala", 18, { individualBadPoints: 2 }),
+      official("piales-0", "team-a", "piales", 0, { teamBadPoints: 1 })
+    ]
+  };
+  const totals = getCanonicalOfficialTeamTotals(source, scope("team-a"));
+  const tournamentWideRenderer = appSource.slice(
+    appSource.indexOf("function renderTournamentWideScoreSheet"),
+    appSource.indexOf("function renderPhaseSummaryScoreSheet")
+  );
+
+  assert.deepEqual(getCanonicalOfficialSuerteTotals(totals, "cala"), {
+    hasOfficialResult: true,
+    total: 18,
+    badPoints: 2
+  });
+  assert.deepEqual(getCanonicalOfficialSuerteTotals(totals, "piales"), {
+    hasOfficialResult: true,
+    total: 0,
+    badPoints: 1
+  });
+  assert.equal(getCanonicalOfficialSuerteTotals(totals, "toro").hasOfficialResult, false);
+  assert.equal(totals.badPoints, 3);
+  assert.match(tournamentWideRenderer, /getCompactScoreSheetSuerteLabel/);
+  assert.match(tournamentWideRenderer, /<th class="num">Total<\/th>/);
+  assert.match(tournamentWideRenderer, /Infracciones totales">Inf T/);
+  assert.match(tournamentWideRenderer, /includeInfractions: false/);
+  assert.doesNotMatch(tournamentWideRenderer, /Puntos malos|Restas|score-sheet-bad-points/);
+  for (const label of ["C", "P", "T", "LC", "PR", "Y", "MC", "MP", "PM"]) {
+    assert.match(appSource, new RegExp(`: "${label}"`));
+  }
 });
 
 function scope(teamId) {

@@ -3,7 +3,7 @@ import {
   cloneComponentInstance,
   resolveComponentBindings,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+} from "./componentLibrary.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 export const TEMPLATE_ENGINE_VERSION = "1.0.0";
 

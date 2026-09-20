@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

@@ -1,4 +1,4 @@
-import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { normalizeScoringAttemptV2 } from "./scoringAttempt.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 export const SCORER_COMPONENT_SYSTEM_VERSION = "1.0.0";
 

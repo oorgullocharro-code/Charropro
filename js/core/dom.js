@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
 
 logCharroProVersion("runtime");
 
