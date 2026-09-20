@@ -1,8 +1,8 @@
 import {
   createOfficialFormatSnapshot,
   validateOfficialFormatSnapshot
-} from "./officialFormatSnapshot.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "./officialFormatSnapshot.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { OFFICIAL_FORMAT_DOCUMENT_ASSET_BASE64 } from "./officialFormatDocumentAssets.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 import {
   OFFICIAL_FORMAT_COLUMN_ROLES,
   OFFICIAL_FORMAT_COLUMN_WIDTHS,
@@ -11,13 +11,13 @@ import {
   OFFICIAL_FORMAT_TEXT_POLICY,
   OFFICIAL_FORMAT_WEB_DOCUMENT_WIDTH_PX,
   buildOfficialFormatRowGeometry
-} from "./officialFormatDocumentModel.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { state } from "./state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "./officialFormatDocumentModel.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { state } from "./state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 import {
   FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS,
   FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS
-} from "../data/calaRules.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../data/calaRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 export const OFFICIAL_FORMAT_NAME = "HOJA-CALIFICACION-EQUIPO-CHARROS-2024-2028";
 export { OFFICIAL_FORMAT_PAPER };

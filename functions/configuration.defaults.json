@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260920-general-scoreboard-v3-live-totals-fix-002-v1",
+      "appVersion": "20260920-coleadero-explicit-official-result-zero-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "f6262edc2ddc212391b163a836c530d2bb17d5d125be153fc37bc7b908b39c69",
-  "fingerprint": "f6262edc2ddc212391b163a836c530d2bb17d5d125be153fc37bc7b908b39c69"
+  "checksum": "328638f2f61276c786d4d6292ac498ffabd326bdafe654409df1a6a421af5f1a",
+  "fingerprint": "328638f2f61276c786d4d6292ac498ffabd326bdafe654409df1a6a421af5f1a"
 }

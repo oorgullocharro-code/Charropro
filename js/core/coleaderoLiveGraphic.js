@@ -1,5 +1,5 @@
-import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 export const COLEADERO_LIVE_WINDOW_SIZE = 5;
 
@@ -38,6 +38,51 @@ export function selectColeaderoFiveRiderWindow(rows = [], currentParticipantId =
   const before = Math.floor(size / 2);
   const start = Math.max(0, Math.min(currentIndex - before, orderedRows.length - size));
   return orderedRows.slice(start, start + size);
+}
+
+export function indexTraditionalColeaderoOfficialAttempts(records = [], scope = {}) {
+  const index = new Map();
+  for (const record of records) {
+    const identity = record?.breakdown?.attemptV2?.identity || {};
+    const sportState = record?.breakdown?.attemptV2?.sportState || {};
+    const tournamentId = String(record?.tournament?.id || record?.tournamentId || identity.tournamentId || "");
+    const charreadaId = String(record?.charreada?.id || record?.charreadaId || identity.charreadaId || "");
+    const teamId = String(record?.team?.id || record?.teamId || identity.teamId || "");
+    const suerteId = String(record?.suerte?.id || record?.suerteId || identity.suerteId || "");
+    if (tournamentId !== scope.tournamentId || charreadaId !== scope.charreadaId || teamId !== scope.teamId || suerteId !== "colas") continue;
+
+    const coordinates = resolveTraditionalColeaderoCoordinates(record, identity, sportState);
+    if (!coordinates) continue;
+    index.set(`${coordinates.coleadorIndex}:${coordinates.attemptIndex}`, record);
+  }
+  return index;
+}
+
+export function getTraditionalColeaderoOfficialAttempt(officialRecord = null) {
+  if (!officialRecord) return { total: 0, hasOfficialResult: false };
+  return {
+    total: getOfficialRecordValue(officialRecord),
+    hasOfficialResult: true
+  };
+}
+
+function resolveTraditionalColeaderoCoordinates(record = {}, identity = {}, sportState = {}) {
+  const explicitColeadorIndex = Number(record.coleadorIndex ?? identity.coleadorIndex);
+  const participantSlot = Number(identity.participantSlot ?? record.participantSlot);
+  const coleadorIndex = Number.isSafeInteger(explicitColeadorIndex) && explicitColeadorIndex >= 0
+    ? explicitColeadorIndex
+    : Number.isSafeInteger(participantSlot) && participantSlot >= 0
+      ? (participantSlot > 0 ? participantSlot - 1 : 0)
+      : NaN;
+  const explicitAttemptIndex = Number(record.attemptIndex);
+  const opportunityNumber = Number(identity.opportunityNumber ?? sportState?.opportunity?.number);
+  const attemptIndex = Number.isSafeInteger(explicitAttemptIndex) && explicitAttemptIndex >= 0
+    ? explicitAttemptIndex
+    : Number.isSafeInteger(opportunityNumber) && opportunityNumber > 0
+      ? opportunityNumber - 1
+      : NaN;
+  if (!Number.isSafeInteger(coleadorIndex) || !Number.isSafeInteger(attemptIndex)) return null;
+  return { coleadorIndex, attemptIndex };
 }
 
 export function buildIndividualColeaderoLiveData({

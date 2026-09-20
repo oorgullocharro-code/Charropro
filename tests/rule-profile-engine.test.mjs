@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/data/ruleProfiles.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/data/suertes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

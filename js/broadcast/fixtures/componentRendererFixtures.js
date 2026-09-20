@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../componentLibrary.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

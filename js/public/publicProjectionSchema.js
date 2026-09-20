@@ -1,5 +1,5 @@
-import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { validatePublicLiveFeed } from "./publicLiveFeed.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 export const PUBLIC_PROJECTION_SCHEMA_VERSION = 2;
 export const PUBLIC_PROJECTION_SECTIONS = Object.freeze([

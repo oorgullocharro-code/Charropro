@@ -7,8 +7,8 @@ import {
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "../js/core/scorerInteractionLatency.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { getCharreadaScoringSuertes } from "../js/core/state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 let clock = 1000;
 const guard = createScorerDuplicateActionGuard({ now: () => clock });

@@ -1,25 +1,25 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildTournamentStandingColumns, calculateAttemptTotal } from "./scoring.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildPublicProjection } from "../public/publicProjection.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { getActiveCharreada, getActiveTournament, getCharreadaScoringEntries, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildIndividualColeaderoLiveData, isIndividualColeaderoLiveContext } from "./coleaderoLiveGraphic.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildTournamentStandingColumns, calculateAttemptTotal } from "./scoring.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildPublicProjection } from "../public/publicProjection.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { getActiveCharreada, getActiveTournament, getCharreadaScoringEntries, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildIndividualColeaderoLiveData, getTraditionalColeaderoOfficialAttempt, indexTraditionalColeaderoOfficialAttempts, isIndividualColeaderoLiveContext } from "./coleaderoLiveGraphic.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 import {
   buildOfficialTimerProjectionFromCurrentContext,
   resolveOfficialCurrentTimerContext,
   resolvePreviousPialesOpportunity
-} from "./officialTimerOrchestration.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { resolveCanonicalTournamentLifecycle } from "./canonicalTournamentLifecycle.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { selectActiveCharreadaScoreboard, selectPublicProjectionStandingRows } from "./generalScoreboard.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "./officialTimerOrchestration.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "./canonicalTournamentLifecycle.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { selectActiveCharreadaScoreboard, selectPublicProjectionStandingRows } from "./generalScoreboard.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -843,6 +843,16 @@ function buildColeaderoGraphicData(charreada, context, options = {}) {
   if (!colas || !team) return null;
 
   const collection = state.scores[scoreKey(charreada.id, team.id, "colas")] || [];
+  const canonicalOfficialResults = buildCanonicalOfficialResults({
+    publishedScores: state.publishedScores,
+    officialScoreLedger: state.officialScoreLedgers?.[tournament?.id] || {},
+    tournamentId: tournament?.id || ""
+  });
+  const officialAttempts = indexTraditionalColeaderoOfficialAttempts(canonicalOfficialResults.currentRecords, {
+    tournamentId: tournament?.id || "",
+    charreadaId: charreada.id || "",
+    teamId: team.id || ""
+  });
   const activeColeadorIndex = isColeaderoTurn ? Number(context.coleadorIndex || 0) : -1;
   const activeAttemptIndex = isColeaderoTurn ? Number(context.attemptIndex || 0) : -1;
   const rowCount = team.participantName ? 1 : 3;
@@ -851,14 +861,17 @@ function buildColeaderoGraphicData(charreada, context, options = {}) {
     const attempts = Array.from({ length: colas.attempts || 3 }, (_, attemptIndex) => {
       const attempt = options.includeDraftColeadero === false ? {} : (collection[coleadorIndex]?.[attemptIndex] || {});
       const hasActivity = hasGraphicAttemptActivity(attempt);
+      const officialRecord = officialAttempts.get(`${coleadorIndex}:${attemptIndex}`) || null;
+      const officialAttempt = getTraditionalColeaderoOfficialAttempt(officialRecord);
       return {
         index: attemptIndex,
-        total: calculateAttemptTotal(attempt),
+        total: officialAttempt.hasOfficialResult ? officialAttempt.total : calculateAttemptTotal(attempt),
         base: Number(attempt.base || 0),
         adic: Number(attempt.adic || 0),
         infr: Number(attempt.infr || 0),
         desc: attempt.desc || null,
         hasActivity,
+        hasOfficialResult: officialAttempt.hasOfficialResult,
         active: isColeaderoTurn && coleadorIndex === activeColeadorIndex && attemptIndex === activeAttemptIndex
       };
     });

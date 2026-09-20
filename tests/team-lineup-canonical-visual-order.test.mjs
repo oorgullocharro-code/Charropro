@@ -4,7 +4,7 @@ import {
   TEAM_LINEUP_POSITIONS,
   getTeamLineupEntryValue,
   resolveTeamLineupEntries
-} from "../js/core/teamLineup.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/core/teamLineup.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 const fullSuerteIds = ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua", "manganas_pie", "manganas_caballo", "paso"];
 const roster = {

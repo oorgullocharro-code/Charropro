@@ -4,9 +4,9 @@ import {
   sanitizePublicProjectionValue,
   stablePublicStringify,
   validatePublicProjectionForRead
-} from "./publicProjectionSchema.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "./publicProjectionSchema.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { adaptPublicProjectionToLegacy } from "./publicProjectionLegacyAdapter.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { validateCanonicalPublicTournamentData } from "./canonicalPublicTournamentData.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 export const PUBLIC_PORTAL_STALE_THRESHOLD_MS = 120000;
 export const PUBLIC_PORTAL_CONNECTION_STATES = Object.freeze([

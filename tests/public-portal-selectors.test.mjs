@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

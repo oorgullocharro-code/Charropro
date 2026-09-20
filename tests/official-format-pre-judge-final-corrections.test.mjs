@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   OFFICIAL_FORMAT_DOCUMENT_PROFILE
-} from "../js/core/officialFormatSnapshot.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/core/officialFormatSnapshot.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 import {
   OFFICIAL_FORMAT_PAPER
-} from "../js/core/officialFormat.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/core/officialFormat.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 const viewSource = readFileSync(new URL("../js/views/formato-federacion.js", import.meta.url), "utf8");
 const htmlRendererSource = readFileSync(new URL("../js/core/officialFormatHtml.js", import.meta.url), "utf8");

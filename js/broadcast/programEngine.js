@@ -1,10 +1,10 @@
 import {
   PREVIEW_ENGINE_VERSION,
   validatePreview
-} from "./previewEngine.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "./previewEngine.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 import {
   applyLiveBindingsToProjection
-} from "./liveBindings.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "./liveBindings.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 export const PROGRAM_ENGINE_VERSION = "1.0.0";
 

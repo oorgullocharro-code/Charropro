@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildPublicPortalModel } from "../js/publicPortal/portalSelectors.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 const source = buildSource();
 let projection = buildPublicProjection(source, {

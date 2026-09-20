@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import {
   selectActiveCharreadaScoreboard,
   selectPublicProjectionStandingRows
-} from "../js/core/generalScoreboard.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/core/generalScoreboard.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 function teams(...entries) {
   return entries.map(([id, name]) => ({ id, name }));

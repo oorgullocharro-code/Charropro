@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 
 const storage = new Map();
 globalThis.localStorage = { getItem: (key) => storage.get(String(key)) ?? null, setItem: (key, value) => storage.set(String(key), String(value)), removeItem: (key) => storage.delete(String(key)) };
-const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1");
+const { getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1");
 
 const tournament = {
   id: "latency-cache",

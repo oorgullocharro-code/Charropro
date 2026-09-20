@@ -2,9 +2,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "./canonicalOfficialResults.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 

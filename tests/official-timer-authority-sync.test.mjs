@@ -11,12 +11,12 @@ import {
   getOfficialTimerControlView,
   normalizeOfficialTimerContext,
   validateOfficialTimerContext
-} from "../js/core/timerRules.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/core/timerRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 import {
   createOutputRoute,
   createOutputRoutingEngine,
   routeTimerDisplay
-} from "../js/broadcast/outputRouting.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+} from "../js/broadcast/outputRouting.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 const T0 = Date.parse("2026-08-11T12:00:00.000Z");
 const definition = {

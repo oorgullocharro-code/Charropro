@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import restoreEngine from "../functions/restoreEngine.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import restoreService from "../functions/restoreService.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import restoreEngine from "../functions/restoreEngine.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import restoreService from "../functions/restoreService.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 const {
   buildBackupArchive,

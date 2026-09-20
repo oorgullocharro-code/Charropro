@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/liveBindings.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import * as api from "../js/broadcast/liveBindings.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
 
 assert.equal(api.LIVE_BINDINGS_VERSION, "1.0.0");
 [
