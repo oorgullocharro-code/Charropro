@@ -39,6 +39,29 @@ export function selectActiveCharreadaScoreboard({ charreada, teams, leaderboard,
   };
 }
 
+// Public Projection V3 owns standings. This adapter preserves its official totals
+// while selecting the scopes required by the live-output consumers.
+export function selectPublicProjectionStandingRows(projection = {}, { activeCharreada, competitionId, categoryId } = {}) {
+  const activeCharreadaId = string(activeCharreada?.id);
+  const resolvedCompetitionId = string(competitionId) || string(activeCharreada?.competitionId);
+  const resolvedCategoryId = string(categoryId) || string(activeCharreada?.categoryId);
+  const items = collection(projection?.standings?.items);
+  const inActiveCompetition = (item) => !resolvedCompetitionId || item?.competitionId === resolvedCompetitionId;
+  const inActiveCategory = (item) => !resolvedCategoryId || !item?.categoryId || item.categoryId === resolvedCategoryId;
+  const byPosition = (left, right) => Number(left?.position || 0) - Number(right?.position || 0);
+
+  return {
+    competitionRows: items
+      .filter((item) => item?.scopeType === "competition")
+      .filter(inActiveCompetition)
+      .filter(inActiveCategory)
+      .sort(byPosition),
+    charreadaRows: items
+      .filter((item) => item?.scopeType === "charreada" && item.charreadaId === activeCharreadaId)
+      .sort(byPosition)
+  };
+}
+
 function selectLegacyScoreboardRows({ officialByTeamId, activeTeamId, activeCharro, turn }) {
   const rows = [...officialByTeamId.values()].map((official) => {
     const id = string(official?.team?.id);

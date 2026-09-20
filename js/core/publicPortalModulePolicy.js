@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

@@ -1,5 +1,5 @@
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../data/ruleProfiles.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildRuleProfileContentFingerprint } from "../data/ruleProfileTemporalPolicy.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../data/ruleProfiles.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildRuleProfileContentFingerprint } from "../data/ruleProfileTemporalPolicy.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

@@ -1,25 +1,25 @@
-import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildOfficialPackage } from "./officialFormat.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildTournamentStandingColumns, calculateAttemptTotal } from "./scoring.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildPublicProjection } from "../public/publicProjection.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { getActiveCharreada, getActiveTournament, getCharreadaScoringEntries, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildIndividualColeaderoLiveData, isIndividualColeaderoLiveContext } from "./coleaderoLiveGraphic.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { SUERTES, getTournamentSuertes } from "../data/suertes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildBroadcastDataContract } from "../broadcast/dataContract.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { createInitialBroadcastState } from "../broadcast/broadcastState.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { normalizeGraphicsConfig, readLocalGraphicsConfig } from "./graphicsConfig.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildOfficialPackage } from "./officialFormat.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildTournamentStandingColumns, calculateAttemptTotal } from "./scoring.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildPublicProjection } from "../public/publicProjection.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { getActiveCharreada, getActiveTournament, getCharreadaScoringEntries, getCurrentContext, getScopedLocalStorageKey, getTeam, getTournamentCharreadas, LIVE_TIMER_KEY, scoreKey, state } from "./state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildIndividualColeaderoLiveData, isIndividualColeaderoLiveContext } from "./coleaderoLiveGraphic.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { getLiveChannelFromUrl, getTournamentLiveChannel, isFirebaseLiveConfigured, publishFirebaseLive, publishFirebaseTurn } from "./firebaseSync.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildOfficialTimerProjection, getTimerScopeKey, getTimerView, selectOfficialTimerForContext } from "./timerRules.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 import {
   buildOfficialTimerProjectionFromCurrentContext,
   resolveOfficialCurrentTimerContext,
   resolvePreviousPialesOpportunity
-} from "./officialTimerOrchestration.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { CHARROPRO_APP_VERSION } from "./version.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "./canonicalTournamentLifecycle.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { selectActiveCharreadaScoreboard } from "./generalScoreboard.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "./officialTimerOrchestration.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { CHARROPRO_APP_VERSION } from "./version.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { getTernaParticipant } from "./ternaParticipantIdentity.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { resolveCanonicalTournamentLifecycle } from "./canonicalTournamentLifecycle.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { selectActiveCharreadaScoreboard, selectPublicProjectionStandingRows } from "./generalScoreboard.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 let syncTimer = null;
 let firebaseSyncTimer = null;
@@ -197,14 +197,11 @@ function buildOfficialOutputRanking(tournament, activeCharreada) {
   }, { tournamentId });
   const competitionId = activeCharreada?.competitionId || projection.competitions?.items?.[0]?.competitionId || "";
   const categoryId = activeCharreada?.categoryId || "";
-  const competitionRows = (projection.rankings?.items || [])
-    .filter((item) => item.scopeType === "competition")
-    .filter((item) => !competitionId || item.competitionId === competitionId)
-    .filter((item) => !categoryId || !item.categoryId || item.categoryId === categoryId)
-    .sort((left, right) => left.position - right.position);
-  const charreadaRows = (projection.rankings?.items || [])
-    .filter((item) => item.scopeType === "charreada" && item.charreadaId === activeCharreada?.id)
-    .sort((left, right) => left.position - right.position);
+  const { competitionRows, charreadaRows } = selectPublicProjectionStandingRows(projection, {
+    activeCharreada,
+    competitionId,
+    categoryId
+  });
   const resultById = new Map((projection.results?.items || []).map((item) => [item.resultId, item]));
   const columns = buildTournamentStandingColumns(tournamentId).map((item, index) => ({
     id: item.id,

@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "./themeTemplateIntegration.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "./liveBindings.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   formatOfficialFieldTimerMs,
   getOfficialFieldTimerFormat
-} from "../js/core/officialFieldTimerDisplay.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "../js/core/officialFieldTimerDisplay.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const cases = new Map([
   [14_400, "14.4"],

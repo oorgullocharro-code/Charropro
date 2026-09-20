@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

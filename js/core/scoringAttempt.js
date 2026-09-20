@@ -3,7 +3,7 @@ import {
   normalizeFmch2026ManganaFaenaTimeSettlement,
   normalizeFmch2026ManganaRemateIdentity,
   validateFmch2026ManganaAttemptForOfficial
-} from "./manganasFaenaScoring.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "./manganasFaenaScoring.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export const SCORING_ATTEMPT_SCHEMA_VERSION = 2;
 export const SCORING_ATTEMPT_CONTRACT_VERSION = "2.0.0";

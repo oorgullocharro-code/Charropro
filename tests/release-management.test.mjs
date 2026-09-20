@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
-import releaseEngine from "../tools/release/releaseEngine.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import releaseEngine from "../tools/release/releaseEngine.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const {
   RELEASE_ENGINE_VERSION,

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1",
+      "appVersion": "20260920-general-scoreboard-v3-live-totals-fix-002-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "20d26fa20136b046c42fb58c9ca3f2ca33a05f780e1150dfcb2ad62710660fc7",
-  "fingerprint": "20d26fa20136b046c42fb58c9ca3f2ca33a05f780e1150dfcb2ad62710660fc7"
+  "checksum": "f6262edc2ddc212391b163a836c530d2bb17d5d125be153fc37bc7b908b39c69",
+  "fingerprint": "f6262edc2ddc212391b163a836c530d2bb17d5d125be153fc37bc7b908b39c69"
 }

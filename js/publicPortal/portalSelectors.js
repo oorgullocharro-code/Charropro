@@ -1,7 +1,7 @@
-import { getCompetitionType } from "../data/competitionTypes.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { selectOfficialRanking } from "../core/officialRanking.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { getCompetitionType } from "../data/competitionTypes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildPublicLiveFeedModel } from "./liveFeedModel.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { selectOfficialRanking } from "../core/officialRanking.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../public/publicProjectionLegacyAdapter.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   { id: "CC", suerteId: "cala", label: "Cala", group: "Suertes" },

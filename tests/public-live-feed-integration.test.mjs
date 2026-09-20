@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire, registerHooks } from "node:module";
-import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { listPublicLiveFeedEvents, validatePublicLiveFeed } from "../js/public/publicLiveFeed.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

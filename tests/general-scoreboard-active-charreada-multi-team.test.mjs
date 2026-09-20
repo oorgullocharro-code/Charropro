@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { selectActiveCharreadaScoreboard } from "../js/core/generalScoreboard.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import {
+  selectActiveCharreadaScoreboard,
+  selectPublicProjectionStandingRows
+} from "../js/core/generalScoreboard.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 function teams(...entries) {
   return entries.map(([id, name]) => ({ id, name }));
@@ -51,6 +54,49 @@ assert.deepEqual(corrected.rows.map((row) => row.id), result.rows.map((row) => r
 assert.equal(corrected.rows[2].total, 118);
 assert.equal(corrected.rows[2].currentCharro, "Roberto");
 
+const v3Standings = {
+  standings: {
+    items: [
+      { scopeType: "competition", competitionId: "equipos_completo", teamId: "team-a", teamName: "A", total: 53, position: 1 },
+      { scopeType: "charreada", charreadaId: "charreada-v3", competitionId: "equipos_completo", teamId: "team-a", teamName: "A", total: 53, position: 1 },
+      { scopeType: "charreada", charreadaId: "charreada-v3", competitionId: "equipos_completo", teamId: "team-b", teamName: "B", total: 27, position: 4 },
+      { scopeType: "charreada", charreadaId: "charreada-v3", competitionId: "equipos_completo", teamId: "team-c", teamName: "C", total: 42, position: 2 },
+      { scopeType: "charreada", charreadaId: "charreada-v3", competitionId: "equipos_completo", teamId: "team-d", teamName: "D", total: 32, position: 3 },
+      { scopeType: "charreada", charreadaId: "other-charreada", competitionId: "equipos_completo", teamId: "team-x", teamName: "X", total: 99, position: 1 }
+    ]
+  }
+};
+const v3Rows = selectPublicProjectionStandingRows(v3Standings, {
+  activeCharreada: { id: "charreada-v3", competitionId: "equipos_completo" }
+});
+assert.deepEqual(v3Rows.charreadaRows.map((row) => [row.teamId, row.total]), [
+  ["team-a", 53], ["team-c", 42], ["team-d", 32], ["team-b", 27]
+]);
+const v3Scoreboard = selectActiveCharreadaScoreboard({
+  charreada: { teamIds: ["team-a", "team-b", "team-c", "team-d", "team-e"] },
+  teams: teams(["team-a", "A"], ["team-b", "B"], ["team-c", "C"], ["team-d", "D"], ["team-e", "E"]),
+  leaderboard: v3Rows.charreadaRows.map((row) => ({ team: { id: row.teamId, name: row.teamName }, total: row.total })),
+  turn: { team: { id: "team-c" }, charro: "Patricia" }
+});
+assert.deepEqual(v3Scoreboard.rows.map((row) => [row.id, row.total, row.status]), [
+  ["team-a", 53, "OFFICIAL"],
+  ["team-b", 27, "OFFICIAL"],
+  ["team-c", 42, "OFFICIAL"],
+  ["team-d", 32, "OFFICIAL"],
+  ["team-e", 0, "NOT_STARTED"]
+]);
+assert.equal(v3Scoreboard.rows[2].currentCharro, "Patricia");
+
+const officialZero = selectActiveCharreadaScoreboard({
+  charreada: { teamIds: ["team-zero", "team-pending"] },
+  teams: teams(["team-zero", "Cero"], ["team-pending", "Pendiente"]),
+  leaderboard: [official("team-zero", "Cero", 0)],
+  turn: null
+});
+assert.deepEqual(officialZero.rows.map((row) => [row.total, row.status, row.hasOfficialScore]), [
+  [0, "OFFICIAL", true], [0, "NOT_STARTED", false]
+]);
+
 const nextCharreada = selectActiveCharreadaScoreboard({
   charreada: { teamIds: ["team-x", "team-y", "team-z"] },
   teams: teams(["team-x", "X"], ["team-y", "Y"], ["team-z", "Z"]),
@@ -72,5 +118,10 @@ assert.equal(normalizeGraphicsConfig().maxTeams, 3, "The global graphics default
 const graphicSource = readFileSync(new URL("../js/views/grafico.js", import.meta.url), "utf8");
 assert.match(graphicSource, /scoreboard\.source === "active-charreada" \? scoreboard\.rows : scoreboard\.rows\.slice\(0, config\.maxTeams\)/);
 assert.match(graphicSource, /graphic-team-current/);
+assert.match(graphicSource, /moneylessNumber\(team\.total\)/);
+
+const syncSource = readFileSync(new URL("../js/core/sync.js", import.meta.url), "utf8");
+assert.match(syncSource, /selectPublicProjectionStandingRows\(projection/);
+assert.doesNotMatch(syncSource, /projection\.rankings\?\.items/);
 
 console.log("GENERAL_SCOREBOARD_ACTIVE_CHARREADA_MULTI_TEAM: PASS");

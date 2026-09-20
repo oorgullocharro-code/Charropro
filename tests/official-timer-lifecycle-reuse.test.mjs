@@ -6,7 +6,7 @@ import {
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "../js/core/timerRules.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const now = Date.parse("2026-08-25T18:00:00.000Z");
 const context = (suerteId, extra = {}) => ({

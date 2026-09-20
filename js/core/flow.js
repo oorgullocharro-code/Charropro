@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "./state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

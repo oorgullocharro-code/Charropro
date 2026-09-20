@@ -1,12 +1,12 @@
-import { getTournamentSuertes } from "../data/suertes.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { getTournamentSuertes } from "../data/suertes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 import {
   buildCharreadaLeaderboard,
   buildIndividualAwards,
   buildTournamentTeamStandings,
   calculateAttemptTotal,
   hasAttemptActivity
-} from "./scoring.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { scoreKey, state } from "./state.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "./scoring.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { scoreKey, state } from "./state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export function buildCharroProStatsCenter(tournamentId = state.activeTournamentId) {
   const tournament = state.tournaments.find((item) => item.id === tournamentId) || null;

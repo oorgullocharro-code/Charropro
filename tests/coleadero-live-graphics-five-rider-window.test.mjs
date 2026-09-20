@@ -5,8 +5,8 @@ import {
   buildIndividualColeaderoLiveData,
   isIndividualColeaderoLiveContext,
   selectColeaderoFiveRiderWindow
-} from "../js/core/coleaderoLiveGraphic.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "../js/core/coleaderoLiveGraphic.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { buildCanonicalOfficialResults } from "../js/core/canonicalOfficialResults.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const tournament = {
   id: "coleadero-live",

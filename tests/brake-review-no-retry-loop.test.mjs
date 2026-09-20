@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { createBrakeReviewAutomaticCommandGuard } from "../js/core/brakeReviewPhase.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const guard = createBrakeReviewAutomaticCommandGuard();
 const key = "timer-a:review-0:minute-1";

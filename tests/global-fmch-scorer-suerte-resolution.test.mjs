@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 installStorage();
-const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1");
-const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1");
+const { resolveProductiveRuleProfileDefault } = await import("../js/core/productiveRuleProfilePolicy.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1");
+const { getCharreadaCompetitionContext, getCharreadaScoringSuertes } = await import("../js/core/state.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1");
 
 const tournament = assignedTournament("global-team");
 const charreada = { id: "charreada-team", tournamentId: tournament.id, competitionType: "Competencia por equipos", teamIds: ["team-a"] };

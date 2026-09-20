@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { applyProductiveRuleProfilePolicy, resolveProductiveRuleProfileDefault } from "../js/core/productiveRuleProfilePolicy.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { resolveRuleProfileSelection } from "../js/data/ruleProfiles.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const policy = resolveProductiveRuleProfileDefault("Libre");
 assert.deepEqual(policy, {

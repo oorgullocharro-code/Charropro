@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

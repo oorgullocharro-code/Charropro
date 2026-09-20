@@ -1,7 +1,7 @@
 import {
   PROGRAM_ENGINE_VERSION,
   validateProgram
-} from "./programEngine.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+} from "./programEngine.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export const OUTPUT_ROUTING_VERSION = "1.0.0";
 

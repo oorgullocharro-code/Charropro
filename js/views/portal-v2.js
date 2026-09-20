@@ -1,3 +1,3 @@
-import { bootstrapPortalV2 } from "../portalV2/portalV2App.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { bootstrapPortalV2 } from "../portalV2/portalV2App.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 bootstrapPortalV2();

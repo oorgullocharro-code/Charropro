@@ -1,5 +1,5 @@
-import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260920-general-scoreboard-v3-live-totals-fix-002-v1";
 
 export const COLEADERO_LIVE_WINDOW_SIZE = 5;
 
