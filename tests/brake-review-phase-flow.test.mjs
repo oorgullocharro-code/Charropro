@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

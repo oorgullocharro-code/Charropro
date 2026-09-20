@@ -1,5 +1,5 @@
-import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 export const COLEADERO_LIVE_WINDOW_SIZE = 5;
 

@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 logCharroProVersion("runtime");
 

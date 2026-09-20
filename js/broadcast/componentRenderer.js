@@ -1,7 +1,7 @@
 import {
   COMPONENT_VISIBILITY,
   validateComponentInstance
-} from "./componentLibrary.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./componentLibrary.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 export const COMPONENT_RENDERER_VERSION = "1.0.0";
 

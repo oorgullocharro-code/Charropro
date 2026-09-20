@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./state.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

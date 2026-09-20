@@ -3,7 +3,7 @@ import {
   FMCH_OFFICIAL_TEMPORAL_POLICY,
   buildOfficialTimerDefinitionsFromContext,
   resolveFmchOfficialTemporalRuntimePolicy
-} from "../js/core/timerRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/core/timerRules.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const certified = {
   profileId: "FMCH_2026_LIBRE",

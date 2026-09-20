@@ -11,15 +11,15 @@ import {
   validateFmch2026ManganaOfficialCollection,
   validateFmch2026ManganaRemateIdentity,
   validateFmch2026ManganaRemateUniqueness
-} from "../js/core/manganasFaenaScoring.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { resolveEffectiveRules, getRuleProfile } from "../js/data/ruleProfiles.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { calculateAttemptTotal, calculateCollectionTotal } from "../js/core/scoring.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { emptyAttempt } from "../js/core/state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/core/manganasFaenaScoring.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { resolveEffectiveRules, getRuleProfile } from "../js/data/ruleProfiles.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { calculateAttemptTotal, calculateCollectionTotal } from "../js/core/scoring.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { emptyAttempt } from "../js/core/state.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const profile = getRuleProfile("FMCH_2026_LIBRE", "0.6.1");
 const pie = resolveEffectiveRules({

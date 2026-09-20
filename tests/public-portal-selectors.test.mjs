@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

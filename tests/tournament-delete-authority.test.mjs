@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const {
   TournamentDeletionError,

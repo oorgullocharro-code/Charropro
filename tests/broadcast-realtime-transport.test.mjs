@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import * as api from "../js/broadcast/broadcastRealtimeTransport.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const CONTEXT = Object.freeze({
   tenantId: "tenant-a",

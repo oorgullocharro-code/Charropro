@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

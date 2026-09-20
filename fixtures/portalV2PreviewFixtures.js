@@ -1,4 +1,4 @@
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const TOURNAMENT_ID = "portal-v2-local-preview";
 

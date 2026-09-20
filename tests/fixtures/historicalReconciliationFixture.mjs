@@ -1,4 +1,4 @@
-import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1';
+import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260920-sabana-tournament-wide-deploy-001-v1';
 
 export const tid = 'test-reconciliation-fixture';
 export const cid = 'charreada-fixture';

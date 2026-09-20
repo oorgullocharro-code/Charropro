@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { PUBLIC_LIVE_FEED_EVENT_TYPES } from "../js/public/publicLiveFeed.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { buildPublicLiveFeedMessage } from "../js/publicPortal/liveFeedTemplates.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildPublicLiveFeedModel,
   sanitizePublicLiveFeedFilter
-} from "../js/publicPortal/liveFeedModel.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/publicPortal/liveFeedModel.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const labels = {
   teamName: "Rancho Norte",

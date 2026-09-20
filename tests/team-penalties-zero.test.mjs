@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/core/scoring.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

@@ -1,11 +1,11 @@
-import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { SUERTES, TOURNAMENT_TYPES, getTournamentSuertes, getTournamentTypeConfig } from "./data/suertes.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { COMPETITION_TYPES, getCompetitionType, getCompetitionTypeFromTournamentType } from "./data/competitionTypes.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { CHARROPRO_APP_VERSION } from "./core/version.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   SCORING_BUTTON_GROUPS,
   normalizeScoringButtonGroup,
   normalizeScoringButtonLayouts
-} from "./data/defaultScoringButtonLayouts.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./data/defaultScoringButtonLayouts.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   CALA_ADIC_SECTIONS,
   CALA_RULEBOOK_VERSION,
@@ -16,7 +16,7 @@ import {
   calculatePuntaBreakdown,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "./data/calaRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./data/calaRules.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   FMCH_2026_COLEADERO_RULEBOOK_VERSION,
   FMCH_2026_PIALES_DISTANCE_RULE_ID,
@@ -29,7 +29,7 @@ import {
   resolveFmch2026PialesPreviousOpportunityTimerResolution,
   resolveConditionalBasePoints,
   shouldDisqualifyRepeatedThirdPialesRemate
-} from "./data/fmch2026PialesColeaderoRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./data/fmch2026PialesColeaderoRules.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   FMCH_2026_TORO_RULEBOOK_VERSION,
   FMCH_2026_YEGUA_RULEBOOK_VERSION,
@@ -39,7 +39,7 @@ import {
   resolveFmch2026JineteoTiming,
   resolveJineteoRuleValue,
   setFmch2026JineteoClassification
-} from "./data/fmch2026JineteosRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./data/fmch2026JineteosRules.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   FMCH_2026_TERNA_DURATION_MS,
   FMCH_2026_TERNA_OPPORTUNITY_LIMIT,
@@ -56,7 +56,7 @@ import {
   resolveFmch2026TernaNextSuerteId,
   shouldDisqualifyRepeatedFmch2026TernaRemate,
   resolveFmch2026TernaTimeAdditional
-} from "./data/fmch2026TernaRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./data/fmch2026TernaRules.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   FMCH_2026_MANGANAS_OPPORTUNITY_LIMIT,
   FMCH_2026_PASO_DISMOUNT_DURATION_MS,
@@ -71,7 +71,7 @@ import {
   setFmch2026ManganaPullCount,
   setFmch2026ManganaResult,
   toggleFmch2026ManganaFloreoDetail
-} from "./data/fmch2026ManganasPasoRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./data/fmch2026ManganasPasoRules.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   FMCH_2026_MANGANA_SCORING_CONTRACT_VERSION,
   applyFmch2026ManganaAttemptTiming,
@@ -84,37 +84,37 @@ import {
   validateFmch2026ManganaOfficialCollection,
   validateFmch2026ManganaRemateIdentity,
   validateFmch2026ManganaRemateUniqueness
-} from "./core/manganasFaenaScoring.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/manganasFaenaScoring.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { closeModal, escapeHTML, html, moneylessNumber, showModal, showToast } from "./core/dom.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { applyLocalFmch2026RuleProfileDefault } from "./core/localRuleProfileDefaults.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   applyProductiveRuleProfilePolicy,
   resolveProductiveRuleProfileDefault
-} from "./core/productiveRuleProfilePolicy.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/productiveRuleProfilePolicy.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { applyDefaultPublicPortalModules } from "./core/publicPortalModulePolicy.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { applyReleaseClassificationToNewTournament } from "./core/releasePolicy.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { getRuleProfile, getRuleProfileRulesByPhase } from "./data/ruleProfiles.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   SCORER_CONTEXT_STATUSES,
   isScorerContextReady,
   resolveScorerContextState
-} from "./core/scorerContextResolution.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/scorerContextResolution.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { EVENT_TYPES, buildEvent, registerEvent } from "./core/events.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { exportBackupJson, exportCurrentTournamentCsv } from "./core/exporters.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { downloadColeaderoXlsx, isColeaderoXlsxExport } from "./core/coleaderoXlsx.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { advanceAfterCompletedTernaSession, advanceScoringPointer, previousScoringPointer, resetScoringPointer } from "./core/flow.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { downloadOfficialFormatXlsx } from "./core/officialFormat.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildCanonicalTernaRoster,
   getCanonicalTernaRoster,
   getTernaParticipant,
   getTernaParticipantName,
   isCanonicalTernaParticipant
-} from "./core/ternaParticipantIdentity.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/ternaParticipantIdentity.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   getTeamLineupEntryValue,
   resolveTeamLineupEntries
-} from "./core/teamLineup.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/teamLineup.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildOfficialTimerDefinitionsFromContext,
   formatTimerMs,
@@ -122,23 +122,23 @@ import {
   getOfficialTimerControlView,
   getTimerScopeKey,
   getTimerView
-} from "./core/timerRules.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/timerRules.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerDisplayStateLabel,
   officialTimerTicker,
   updateOfficialTimerDomDisplays
-} from "./core/officialTimerLiveDisplay.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/officialTimerLiveDisplay.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   TORO_TO_TERNA_HANDOFF,
   buildOfficialCurrentTimerContext,
   buildToroToTernaReadyDefinition,
   resolveOfficialCurrentTimerContext
-} from "./core/officialTimerOrchestration.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/officialTimerOrchestration.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   createScorerOfficialTimerConsumer,
   subscribeScorerOfficialTimerCurrent
-} from "./core/scorerOfficialTimerConsumer.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/scorerOfficialTimerConsumer.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   BRAKE_REVIEW_RESULTS,
@@ -152,9 +152,9 @@ import {
   hasPendingBrakeReviewTemporalConsequences,
   isCompletedBrakeReview,
   isBrakeReviewProfile
-} from "./core/brakeReviewPhase.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/brakeReviewPhase.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { buildStatisticalHistorySnapshot } from "./core/history.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { buildCharroProStatsCenter } from "./core/statistics.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   applyPuntaCalculation,
   buildGlobalColeaderoLeader,
@@ -167,32 +167,34 @@ import {
   getTeamInfrTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "./core/scoring.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/scoring.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { compareOfficialRankingRows } from "./core/officialRanking.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
+  aggregateCanonicalOfficialTeamTotals,
   getCanonicalOfficialTeamTotals,
+  getCanonicalOfficialSuerteTotals,
   getCanonicalSportingOpportunityKey
-} from "./core/canonicalOfficialResults.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/canonicalOfficialResults.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "./core/scoringAttempt.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/scoringAttempt.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildScorerAttemptViewModel,
   buildScorerClassificationModel,
   buildScorerRuleButtonModel
-} from "./core/scorerComponents.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/scorerComponents.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   createScorerSaveLatencyTrace,
   summarizeScorerSaveLatency
-} from "./core/scorerSaveLatency.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/scorerSaveLatency.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildScorerInteractionKey,
   createAfterPaintTaskQueue,
   createScorerDuplicateActionGuard,
   createScorerInteractionTrace,
   isScorerInteractionAction
-} from "./core/scorerInteractionLatency.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/scorerInteractionLatency.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   claimGoogleSyncControl,
   buildLivePayload,
@@ -202,7 +204,7 @@ import {
   sendToFirebaseLive,
   sendToFirebaseTurn,
   sendToGoogleSheets
-} from "./core/sync.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/sync.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   applyFirebaseBrakeReviewAuthority,
   applyFirebaseOfficialTimerAuthority,
@@ -247,18 +249,18 @@ import {
   transitionFirebaseRuleProfileLifecycle,
   verifyFirebasePublicProjectionJob,
   writeFirebasePendingScoreReview
-} from "./core/firebaseSync.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/firebaseSync.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   createTournamentPublicSponsor,
   normalizeTournamentPublicBranding,
   normalizeTournamentPublicSponsors,
   tournamentPublicSponsorsRecord,
   validateTournamentPublicAssetFile
-} from "./core/tournamentPublicBranding.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/tournamentPublicBranding.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult
-} from "./core/historicalReconciliationDryRun.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/historicalReconciliationDryRun.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   PENDING_SCORE_REVIEW_STATUSES,
   buildScorerReturnContext,
@@ -271,19 +273,19 @@ import {
   reconcilePendingScoreReviewRegistries,
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft
-} from "./core/pendingScoreReview.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/pendingScoreReview.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { ROLES, ROLE_OPTIONS, getRoleLabel, hasTournamentAccess, isActiveAccessSession, normalizeTournamentAccess, roleCan } from "./core/roles.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildTournamentUrl,
   clearTournamentContext,
   getTournamentContext,
   getTournamentIdFromUrl,
   setTournamentContext
-} from "./core/tournamentContext.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/tournamentContext.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   buildPortalV2PublicPath,
   buildPortalV2PublicUrl
-} from "./portalV2/portalV2Router.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./portalV2/portalV2Router.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   SUPERVISOR_OVERVIEW_VIEW,
   SUPERVISOR_TOURNAMENTS_VIEW,
@@ -293,8 +295,8 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "./core/supervisorNavigation.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/supervisorNavigation.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { clearTournamentSandboxStorage } from "./core/localCache.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 import {
   createRoster,
   emptyAttempt,
@@ -333,7 +335,7 @@ import {
   STORAGE_KEY,
   state,
   uid
-} from "./core/state.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "./core/state.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const app = document.getElementById("app");
 const OBS_PAGE_VERSION = CHARROPRO_APP_VERSION;
@@ -5536,11 +5538,11 @@ function renderResults() {
       <article class="card">
         <div class="card-header">
           <div>
-            <h2 class="card-title">${selectedPhase ? `Sabana - ${escapeHTML(selectedPhase.label)}` : "Sabana - Resumen general por fases"}</h2>
+            <h2 class="card-title">${selectedPhase ? `Sabana - ${escapeHTML(selectedPhase.label)}` : "Sabana general del torneo"}</h2>
 	            <p class="card-subtitle">
 	              ${selectedPhase
                   ? html`Desglose por charreada y suerte solo de ${escapeHTML(selectedPhase.label)}.`
-                  : html`Resumen general por fases y total del torneo.`}
+                  : html`Resultados oficiales acumulados por equipo en todo el torneo.`}
 	            </p>
           </div>
         </div>
@@ -5551,6 +5553,9 @@ function renderResults() {
             charreadas.length
               ? renderResultsScoreSheet({
                   selectedPhase,
+                  tournament,
+                  tournamentCharreadas,
+                  competitionScope: selectedCompetition?.scope || "team",
                   phaseColumns,
                   standings: visibleStandings,
                   visibleTeamIds,
@@ -5688,11 +5693,13 @@ function buildResultsCompetitionStandings(tournament = getActiveTournament(), co
       const phaseCharreadas = (competition.charreadas || []).filter((charreada) => column.charreadaIds.includes(charreada.id));
       const participatedCharreadas = phaseCharreadas.filter((charreada) => hasCompetitionEntryInCharreada(charreada, entry.id));
       const participated = participatedCharreadas.length > 0;
+      const canonicalTotals = participatedCharreadas.map((charreada) => getCanonicalResultsTeamTotals(charreada.id, entry.id));
+      const hasOfficialResults = canonicalTotals.some(hasOfficialScoreSheetData);
       const total = participated
-        ? participatedCharreadas.reduce((sum, charreada) => sum + getCanonicalResultsTeamTotals(charreada.id, entry.id).total, 0)
+        ? canonicalTotals.reduce((sum, totals) => sum + totals.total, 0)
         : null;
       const infr = participated
-        ? participatedCharreadas.reduce((sum, charreada) => sum + getCanonicalResultsTeamTotals(charreada.id, entry.id).badPoints, 0)
+        ? canonicalTotals.reduce((sum, totals) => sum + totals.badPoints, 0)
         : 0;
       return {
         charreada: {
@@ -5701,11 +5708,13 @@ function buildResultsCompetitionStandings(tournament = getActiveTournament(), co
           charreadaIds: column.charreadaIds || []
         },
         participated,
+        hasOfficialResults,
         total,
         infr
       };
     });
     const played = results.filter((result) => result.participated);
+    const hasOfficialResults = results.some((result) => result.hasOfficialResults);
     const total = played.reduce((sum, result) => sum + Number(result.total || 0), 0);
     const infr = played.reduce((sum, result) => sum + Number(result.infr || 0), 0);
     const average = played.length ? total / played.length : 0;
@@ -5716,6 +5725,7 @@ function buildResultsCompetitionStandings(tournament = getActiveTournament(), co
     return {
       team: entry,
       results,
+      hasOfficialResults,
       total,
       average,
       charreadasCount: played.length,
@@ -6715,7 +6725,11 @@ function getStandingPhaseResult(row = {}, column = {}) {
     const total = participatedRows.reduce((sum, result) => (
       sum + (Number.isFinite(Number(result.total)) ? Number(result.total) : 0)
     ), 0);
-    return { participated: true, total };
+    return {
+      participated: true,
+      hasOfficialResults: participatedRows.some((result) => result.hasOfficialResults),
+      total
+    };
   }
 
   const phaseCharreadas = (column.sourceCharreadas || []).filter((charreada) =>
@@ -6728,11 +6742,14 @@ function getStandingPhaseResult(row = {}, column = {}) {
     return { participated: false, total: null };
   }
 
-  const total = phaseCharreadas.reduce((sum, charreada) => (
-    sum + Number(getCanonicalResultsTeamTotals(charreada.id, teamId).total || 0)
-  ), 0);
+  const canonicalTotals = phaseCharreadas.map((charreada) => getCanonicalResultsTeamTotals(charreada.id, teamId));
+  const total = canonicalTotals.reduce((sum, totals) => sum + Number(totals.total || 0), 0);
 
-  return { participated: true, total };
+  return {
+    participated: true,
+    hasOfficialResults: canonicalTotals.some(hasOfficialScoreSheetData),
+    total
+  };
 }
 
 function getStandingResultsForPhase(row = {}, column = {}) {
@@ -6775,9 +6792,62 @@ function renderScoreSheet(charreadas) {
   return renderDetailedScoreSheet(charreadas);
 }
 
-function renderResultsScoreSheet({ selectedPhase = null, phaseColumns = [], standings = [], visibleTeamIds = new Set(), labels = getEntityLabels() } = {}) {
+function renderResultsScoreSheet({
+  selectedPhase = null,
+  tournament = getActiveTournament(),
+  tournamentCharreadas = [],
+  competitionScope = "team",
+  phaseColumns = [],
+  standings = [],
+  visibleTeamIds = new Set(),
+  labels = getEntityLabels()
+} = {}) {
+  if (!selectedPhase && competitionScope === "team") {
+    return renderTournamentWideScoreSheet(tournament, tournamentCharreadas, { labels });
+  }
   if (!selectedPhase) return renderPhaseSummaryScoreSheet(phaseColumns, standings, { labels });
   return renderDetailedScoreSheet(selectedPhase.sourceCharreadas || [], { visibleTeamIds, labels });
+}
+
+function renderTournamentWideScoreSheet(tournament = {}, charreadas = [], options = {}) {
+  const labels = options.labels || getEntityLabels(tournament);
+  const suertes = buildResultsSuerteColumns(charreadas);
+  const teams = getTournamentScoreSheetTeams(tournament.id);
+  const showRestas = charreadas.some((charreada) =>
+    Object.values(charreada.restas || {}).some((value) => Number(value || 0) !== 0)
+  );
+
+  if (!teams.length) return html`<div class="empty">Sin ${escapeHTML(labels.plural)} registrados en este torneo.</div>`;
+
+  return html`
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>${escapeHTML(labels.nameHeader)}</th>
+            ${suertes.map((suerte) => html`<th class="num">${escapeHTML(suerte.name)}</th>`).join("")}
+            <th class="num">Puntos malos</th>
+            ${showRestas ? html`<th class="num">Restas</th>` : ""}
+            <th class="num">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${teams.map((team) => {
+            const canonicalTotals = getTournamentWideScoreSheetTotals(charreadas, team.id);
+            return html`
+              <tr>
+                <td><strong>${escapeHTML(getEntryDisplayName(team))}</strong></td>
+                ${suertes.map((suerte) => renderScoreSheetSuerteCell(canonicalTotals, suerte.id)).join("")}
+                <td class="num">${hasOfficialScoreSheetData(canonicalTotals) ? moneylessNumber(canonicalTotals.badPoints) : "—"}</td>
+                ${showRestas ? html`<td class="num">${moneylessNumber(canonicalTotals.adjustment)}</td>` : ""}
+                <td class="num"><strong>${hasOfficialScoreSheetData(canonicalTotals) ? moneylessNumber(canonicalTotals.total) : "—"}</strong></td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 function renderPhaseSummaryScoreSheet(columns = [], standings = [], options = {}) {
@@ -6789,6 +6859,7 @@ function renderPhaseSummaryScoreSheet(columns = [], standings = [], options = {}
           <tr>
             <th>${escapeHTML(labels.nameHeader)}</th>
             ${columns.map((column) => html`<th class="num">${escapeHTML(column.label)}</th>`).join("")}
+            <th class="num">Puntos malos</th>
             <th class="num">Total</th>
           </tr>
         </thead>
@@ -6798,9 +6869,10 @@ function renderPhaseSummaryScoreSheet(columns = [], standings = [], options = {}
               <td><strong>${escapeHTML(getEntryDisplayName(row.team))}</strong></td>
               ${columns.map((column) => {
                 const result = getStandingPhaseResult(row, column);
-                return html`<td class="num">${result.participated ? moneylessNumber(result.total) : "-"}</td>`;
+                return html`<td class="num">${result.hasOfficialResults ? moneylessNumber(result.total) : "—"}</td>`;
               }).join("")}
-              <td class="num"><strong>${moneylessNumber(row.total)}</strong></td>
+              <td class="num">${row.hasOfficialResults ? moneylessNumber(row.infr) : "—"}</td>
+              <td class="num"><strong>${row.hasOfficialResults ? moneylessNumber(row.total) : "—"}</strong></td>
             </tr>
           `).join("")}
         </tbody>
@@ -6827,9 +6899,10 @@ function renderDetailedScoreSheet(charreadas, options = {}) {
       <table>
         <thead>
 	          <tr>
-	            <th>Charreada</th>
-	            <th>${escapeHTML(labels.nameHeader)}</th>
+            <th>Charreada</th>
+            <th>${escapeHTML(labels.nameHeader)}</th>
             ${suertes.map((suerte) => html`<th class="num">${escapeHTML(suerte.name)}</th>`).join("")}
+            <th class="num">Puntos malos</th>
             ${showRestas ? html`<th class="num">Restas</th>` : ""}
             <th class="num">Total</th>
           </tr>
@@ -6842,9 +6915,10 @@ function renderDetailedScoreSheet(charreadas, options = {}) {
                   <tr>
                     <td>${escapeHTML(charreada.name)}</td>
 	                    <td><strong>${escapeHTML(entry ? getEntryDisplayName(entry) : "")}</strong></td>
-                    ${suertes.map((suerte) => html`<td class="num">${moneylessNumber(canonicalTotals.suerteTotals[suerte.id] || 0)}</td>`).join("")}
+                    ${suertes.map((suerte) => renderScoreSheetSuerteCell(canonicalTotals, suerte.id)).join("")}
+                    <td class="num">${hasOfficialScoreSheetData(canonicalTotals) ? moneylessNumber(canonicalTotals.badPoints) : "—"}</td>
                     ${showRestas ? html`<td class="num">${moneylessNumber(canonicalTotals.adjustment)}</td>` : ""}
-                    <td class="num"><strong>${moneylessNumber(canonicalTotals.total)}</strong></td>
+                    <td class="num"><strong>${hasOfficialScoreSheetData(canonicalTotals) ? moneylessNumber(canonicalTotals.total) : "—"}</strong></td>
                   </tr>
                 `;
               })
@@ -6853,6 +6927,21 @@ function renderDetailedScoreSheet(charreadas, options = {}) {
       </table>
     </div>
   `;
+}
+
+function renderScoreSheetSuerteCell(canonicalTotals = {}, suerteId = "") {
+  const official = getCanonicalOfficialSuerteTotals(canonicalTotals, suerteId);
+  if (!official.hasOfficialResult) return html`<td class="num">—</td>`;
+  return html`
+    <td class="num">
+      <div>${moneylessNumber(official.total)}</div>
+      <small class="score-sheet-bad-points">Malos: ${moneylessNumber(official.badPoints)}</small>
+    </td>
+  `;
+}
+
+function hasOfficialScoreSheetData(canonicalTotals = {}) {
+  return canonicalTotals.hasOfficialRecords === true || Number(canonicalTotals.adjustment || 0) !== 0;
 }
 
 function getCanonicalResultsTeamTotals(charreadaId = "", teamId = "") {
@@ -6865,6 +6954,20 @@ function getCanonicalResultsTeamTotals(charreadaId = "", teamId = "") {
     officialScoreLedger: state.officialScoreLedgers?.[tournamentId] || {},
     charreadas: state.charreadas.filter((item) => item.tournamentId === tournamentId)
   }, { tournamentId, charreadaId, teamId });
+}
+
+function getTournamentWideScoreSheetTotals(charreadas = [], teamId = "") {
+  return aggregateCanonicalOfficialTeamTotals(
+    charreadas.map((charreada) => getCanonicalResultsTeamTotals(charreada.id, teamId))
+  );
+}
+
+function getTournamentScoreSheetTeams(tournamentId = "") {
+  const teams = new Map();
+  getTournamentTeams(tournamentId).forEach((team) => {
+    if (team?.id && !teams.has(team.id)) teams.set(team.id, team);
+  });
+  return [...teams.values()];
 }
 
 function getScoreSheetTeamIds(charreada = {}, visibleTeamIds = null) {

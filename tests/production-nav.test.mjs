@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { ROLES, roleCan } from "../js/core/roles.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { CHARROPRO_APP_VERSION } from "../js/core/version.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { ROLES, roleCan } from "../js/core/roles.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { CHARROPRO_APP_VERSION } from "../js/core/version.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
 const cssSource = await readFile(new URL("../css/styles.css", import.meta.url), "utf8");

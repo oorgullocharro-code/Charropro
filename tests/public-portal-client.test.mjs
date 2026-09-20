@@ -5,9 +5,9 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

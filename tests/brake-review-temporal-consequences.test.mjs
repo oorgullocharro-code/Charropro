@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260920-coleadero-explicit-official-result-zero-fix-001-v1";
+import { resolveBrakeReviewTemporalRuleIds } from "../js/core/brakeReviewPhase.js?v=20260920-sabana-tournament-wide-deploy-001-v1";
 
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(59_999), []);
 assert.deepEqual(resolveBrakeReviewTemporalRuleIds(60_000), []);
