@@ -6,10 +6,11 @@ const {
   resolveTournamentDataClassification
 } = require("./releasePolicy");
 
-const DELETION_AUTHORITY_VERSION = "1.1.0";
+const DELETION_AUTHORITY_VERSION = "1.2.0";
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,180}$/;
 const IDEMPOTENCY_PATTERN = /^[A-Za-z0-9._:@/-]{12,180}$/;
 const DELETION_AUDIT_ROOT = "audit/tournamentDeletions";
+const DELETION_LOCK_LEASE_MS = 120_000;
 
 class TournamentDeletionError extends Error {
   constructor(code, details = {}) {
@@ -189,6 +190,74 @@ function buildDeletionSuccess(record = {}, idempotentReplay = false) {
   };
 }
 
+function reserveTournamentDeletionAuthorityLock(currentValue = {}, request = {}, actor = {}, options = {}) {
+  const current = plainRecord(currentValue);
+  const nowMs = positiveTimestamp(options.nowMs || Date.now());
+  const leaseMs = positiveTimestamp(options.leaseMs || DELETION_LOCK_LEASE_MS);
+  const requestId = String(request.requestId || "");
+  if (!requestId) return { next: current, outcome: { ok: false, code: "tournament-delete-lock-invalid" } };
+
+  if (!current.requestId) {
+    const lock = buildTournamentDeletionAuthorityLock(request, actor, nowMs, leaseMs);
+    return { next: lock, lock, outcome: { ok: true, idempotent: false, recovered: false } };
+  }
+  if (current.requestId === requestId) {
+    return { next: current, lock: current, outcome: { ok: true, idempotent: true, recovered: false } };
+  }
+  if (!isTournamentDeletionAuthorityExpired(current, nowMs, leaseMs)) {
+    return { next: current, outcome: { ok: false, code: "tournament-delete-in-progress" } };
+  }
+
+  const lock = {
+    ...buildTournamentDeletionAuthorityLock(request, actor, nowMs, leaseMs),
+    recoveredFromRequestId: String(current.requestId || ""),
+    recoveredAt: new Date(nowMs).toISOString(),
+    recoveredAtMs: nowMs
+  };
+  return { next: lock, lock, outcome: { ok: true, idempotent: false, recovered: true } };
+}
+
+function markTournamentDeletionBackupRequested(currentValue = {}, requestId = "", backup = {}, options = {}) {
+  const current = plainRecord(currentValue);
+  if (String(current.requestId || "") !== String(requestId || "")) {
+    return { next: current, outcome: { ok: false, code: "tournament-delete-lock-lost" } };
+  }
+  const nowMs = positiveTimestamp(options.nowMs || Date.now());
+  const next = {
+    ...current,
+    state: "BACKUP_REQUESTED",
+    backupId: String(backup.backupId || ""),
+    backupScopeKey: String(backup.scopeKey || ""),
+    updatedAt: new Date(nowMs).toISOString(),
+    updatedAtMs: nowMs
+  };
+  return { next, outcome: { ok: true } };
+}
+
+function releaseTournamentDeletionAuthorityLock(currentValue = {}, requestId = "") {
+  const current = plainRecord(currentValue);
+  if (String(current.requestId || "") !== String(requestId || "")) {
+    return { next: current, released: false };
+  }
+  return { next: null, released: true };
+}
+
+function buildTournamentDeletionBackupContext(tournament = {}) {
+  const info = plainRecord(tournament.info);
+  const meta = plainRecord(tournament.meta);
+  return {
+    info: {
+      id: String(info.id || ""),
+      tenantId: String(info.tenantId || ""),
+      organizationId: String(info.organizationId || "")
+    },
+    meta: {
+      tenantId: String(meta.tenantId || ""),
+      organizationId: String(meta.organizationId || "")
+    }
+  };
+}
+
 function assertDeletionActor(actor = {}, tournament = {}) {
   if (!actor.uid) throw new TournamentDeletionError("tournament-delete-auth-required");
   if (actor.active !== true) throw new TournamentDeletionError("tournament-delete-user-inactive");
@@ -206,6 +275,36 @@ function assertDeletionActor(actor = {}, tournament = {}) {
 function tournamentRevision(tournament = {}) {
   const revision = Number(tournament?.meta?.version ?? tournament?.version ?? 0);
   return Number.isSafeInteger(revision) && revision >= 0 ? revision : null;
+}
+
+function buildTournamentDeletionAuthorityLock(request = {}, actor = {}, nowMs, leaseMs) {
+  return {
+    authorityVersion: DELETION_AUTHORITY_VERSION,
+    requestId: String(request.requestId || ""),
+    idempotencyKey: String(request.idempotencyKey || ""),
+    expectedRevision: Number(request.expectedRevision),
+    state: "RESERVED",
+    requestedAt: new Date(nowMs).toISOString(),
+    requestedAtMs: nowMs,
+    leaseExpiresAt: new Date(nowMs + leaseMs).toISOString(),
+    leaseExpiresAtMs: nowMs + leaseMs,
+    requestedBy: {
+      uid: String(actor.uid || ""),
+      role: String(actor.role || "")
+    }
+  };
+}
+
+function isTournamentDeletionAuthorityExpired(lock = {}, nowMs, leaseMs) {
+  const expiresAtMs = positiveTimestamp(lock.leaseExpiresAtMs);
+  if (expiresAtMs) return expiresAtMs <= nowMs;
+  const requestedAtMs = Date.parse(String(lock.requestedAt || ""));
+  return Number.isSafeInteger(requestedAtMs) && requestedAtMs + leaseMs <= nowMs;
+}
+
+function positiveTimestamp(value) {
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number > 0 ? number : 0;
 }
 
 function tournamentIdsForProfile(profile = {}) {
@@ -230,13 +329,18 @@ function sha256(value) {
 
 module.exports = {
   DELETION_AUTHORITY_VERSION,
+  DELETION_LOCK_LEASE_MS,
   DELETION_AUDIT_ROOT,
   TournamentDeletionError,
   assertDeletionActor,
+  buildTournamentDeletionBackupContext,
   buildDeletionSuccess,
   buildTournamentDeletionPlan,
   buildTournamentDeletionPreflight,
+  markTournamentDeletionBackupRequested,
   prepareTournamentDeletionRequest,
+  releaseTournamentDeletionAuthorityLock,
+  reserveTournamentDeletionAuthorityLock,
   tournamentIdsForProfile,
   tournamentRevision
 };

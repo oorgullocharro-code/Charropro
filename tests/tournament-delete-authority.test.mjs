@@ -1,13 +1,18 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const {
   TournamentDeletionError,
   assertDeletionActor,
+  buildTournamentDeletionBackupContext,
   buildDeletionSuccess,
   buildTournamentDeletionPlan,
   buildTournamentDeletionPreflight,
-  prepareTournamentDeletionRequest
+  markTournamentDeletionBackupRequested,
+  prepareTournamentDeletionRequest,
+  releaseTournamentDeletionAuthorityLock,
+  reserveTournamentDeletionAuthorityLock
 } = deletionAuthority;
 
 const tournamentId = "tournament-delete-test";
@@ -20,6 +25,53 @@ const request = prepareTournamentDeletionRequest({
 });
 assert.equal(request.valid, true);
 assert.match(request.request.requestId, /^delete_[a-f0-9]{40}$/);
+
+const largeTournament = source().tournament;
+largeTournament.officialScoreFanout = Object.fromEntries(Array.from({ length: 85 }, (_, index) => [
+  `fanout_${index}`,
+  { payload: "x".repeat(70_000) }
+]));
+assert.ok(Buffer.byteLength(JSON.stringify(largeTournament)) > 5_800_000, "large fixture matches the production failure class");
+const lockAtMs = 1_700_000_000_000;
+const boundedLock = reserveTournamentDeletionAuthorityLock(null, request.request, actor(), { nowMs: lockAtMs });
+assert.equal(boundedLock.outcome.ok, true);
+assert.equal(boundedLock.outcome.recovered, false);
+assert.equal(boundedLock.lock.expectedRevision, 7);
+assert.equal(boundedLock.lock.state, "RESERVED");
+assert.equal("officialScoreFanout" in boundedLock.lock, false, "the lock contract cannot rematerialize tournament payloads");
+const sameRequest = reserveTournamentDeletionAuthorityLock(boundedLock.lock, request.request, actor(), { nowMs: lockAtMs + 1 });
+assert.equal(sameRequest.outcome.ok, true);
+assert.equal(sameRequest.outcome.idempotent, true);
+const concurrentRequest = prepareTournamentDeletionRequest({
+  tournamentId,
+  expectedRevision: 7,
+  idempotencyKey: "delete:tournament-delete-test:request-0002"
+}).request;
+const concurrentLock = reserveTournamentDeletionAuthorityLock(boundedLock.lock, concurrentRequest, actor(), { nowMs: lockAtMs + 1 });
+assert.deepEqual(concurrentLock.outcome, { ok: false, code: "tournament-delete-in-progress" });
+const legacyResidual = {
+  requestId: "delete_legacy_residual",
+  idempotencyKey: "delete:tournament-delete-test:legacy-residual",
+  requestedAt: new Date(lockAtMs - 120_001).toISOString(),
+  requestedBy: { uid: "supervisor-a", role: "supervisor" }
+};
+const recoveredLock = reserveTournamentDeletionAuthorityLock(legacyResidual, concurrentRequest, actor(), { nowMs: lockAtMs });
+assert.equal(recoveredLock.outcome.ok, true);
+assert.equal(recoveredLock.outcome.recovered, true);
+assert.equal(recoveredLock.lock.requestId, concurrentRequest.requestId);
+assert.equal(releaseTournamentDeletionAuthorityLock(recoveredLock.lock, "delete_other").released, false);
+assert.equal(releaseTournamentDeletionAuthorityLock(recoveredLock.lock, concurrentRequest.requestId).next, null);
+const backupMarkedLock = markTournamentDeletionBackupRequested(recoveredLock.lock, concurrentRequest.requestId, {
+  backupId: "backup_bounded_lock",
+  scopeKey: "scope_bounded_lock"
+}, { nowMs: lockAtMs + 2 });
+assert.equal(backupMarkedLock.outcome.ok, true);
+assert.equal(backupMarkedLock.next.state, "BACKUP_REQUESTED");
+assert.equal(backupMarkedLock.next.expectedRevision, 7);
+assert.deepEqual(buildTournamentDeletionBackupContext(largeTournament), {
+  info: { id: tournamentId, tenantId: "tenant-a", organizationId: "org-a" },
+  meta: { tenantId: "", organizationId: "" }
+});
 
 const cleanSource = source();
 const preflight = buildTournamentDeletionPreflight(cleanSource, tournamentId, precommercial);
@@ -95,6 +147,11 @@ assert.equal(replay.idempotentReplay, true);
 assert.equal(replay.backupId, "backup_delete_test");
 
 assert.equal(prepareTournamentDeletionRequest({ tournamentId, expectedRevision: -1, idempotencyKey: "short" }).valid, false);
+const functionSource = await readFile(new URL("../functions/index.js", import.meta.url), "utf8");
+const reserveSource = functionSource.slice(functionSource.indexOf("async function reserveTournamentDeletion"), functionSource.indexOf("async function waitForTournamentDeletionBackup"));
+assert.match(reserveSource, /\$\{TOURNAMENTS_PATH\}\/\$\{tournamentId\}\/deletionAuthority/);
+assert.doesNotMatch(reserveSource, /ref\(`\$\{TOURNAMENTS_PATH\}\/\$\{tournamentId\}`\)\.transaction/);
+assert.doesNotMatch(reserveSource, /snapshot\.val\(\)/);
 console.log("tournament deletion authority tests passed");
 
 function actor() {

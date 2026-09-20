@@ -41,10 +41,14 @@ const {
   DELETION_AUDIT_ROOT,
   TournamentDeletionError,
   assertDeletionActor,
+  buildTournamentDeletionBackupContext,
   buildDeletionSuccess,
   buildTournamentDeletionPlan,
   buildTournamentDeletionPreflight,
-  prepareTournamentDeletionRequest
+  markTournamentDeletionBackupRequested,
+  prepareTournamentDeletionRequest,
+  releaseTournamentDeletionAuthorityLock,
+  reserveTournamentDeletionAuthorityLock
 } = require("./tournamentDeletionAuthority");
 const { resolveGlobalReleaseAuthority } = require("./releasePolicy");
 const {
@@ -556,7 +560,7 @@ exports.deleteCharroProTournament = onCall({
     if (!new Set(["preflight", "delete"]).has(operation)) {
       throw new TournamentDeletionError("tournament-delete-operation-invalid");
     }
-    const source = await readTournamentDeletionSource(tournamentId);
+    let source = await readTournamentDeletionSource(tournamentId);
     assertDeletionActor(actor, source.tournament);
     const releaseAuthority = await readGlobalReleaseAuthority();
     const preflight = buildTournamentDeletionPreflight(source, tournamentId, releaseAuthority);
@@ -577,6 +581,8 @@ exports.deleteCharroProTournament = onCall({
       return { ok: false, code: "tournament-delete-stale-revision", preflight, expectedRevision: deletionRequest.expectedRevision, revision: preflight.revision };
     }
 
+    const backupTournament = buildTournamentDeletionBackupContext(source.tournament);
+    source = null;
     const lock = await reserveTournamentDeletion(tournamentId, deletionRequest, actor);
     if (!lock.ok) return { ok: false, code: lock.code, ...lock };
     let backup = null;
@@ -590,7 +596,9 @@ exports.deleteCharroProTournament = onCall({
         organizationId: actor.organizationId,
         idempotencyKey: `tournament-delete-backup:${deletionRequest.requestId}`,
         reason: "tournament-delete-authority"
-      }, actor, { tournament: lock.tournament, hasTournamentAccess: true });
+      }, actor, { tournament: backupTournament, hasTournamentAccess: true });
+      const backupLock = await markTournamentDeletionBackup(tournamentId, deletionRequest.requestId, backupRequest);
+      if (!backupLock.ok) throw new TournamentDeletionError(backupLock.code || "tournament-delete-lock-lost");
       backup = await waitForTournamentDeletionBackup(backupRequest.scopeKey, backupRequest.backupId);
       if (!backup.ok || backup.status !== "COMPLETED") {
         const backupCode = backup.failureStage === "OBJECT_READ" || backup.failureStage === "OBJECT_METADATA"
@@ -754,43 +762,29 @@ async function readGlobalReleaseAuthority() {
 
 async function reserveTournamentDeletion(tournamentId, deletionRequest, actor) {
   let outcome = null;
-  const result = await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}`).transaction((current) => {
-    const tournament = current || {};
-    if (!tournament.info?.id) {
-      outcome = { ok: false, code: "tournament-not-found" };
-      return current;
-    }
-    const currentRevision = Number(tournament.meta?.version ?? tournament.version ?? 0) || 0;
-    if (currentRevision !== deletionRequest.expectedRevision) {
-      outcome = { ok: false, code: "tournament-delete-stale-revision", revision: currentRevision };
-      return current;
-    }
-    const pending = tournament.deletionAuthority || {};
-    if (pending.requestId && pending.requestId !== deletionRequest.requestId) {
-      outcome = { ok: false, code: "tournament-delete-in-progress" };
-      return current;
-    }
-    outcome = { ok: true, tournament };
-    return {
-      ...tournament,
-      deletionAuthority: {
-        requestId: deletionRequest.requestId,
-        idempotencyKey: deletionRequest.idempotencyKey,
-        requestedAt: new Date().toISOString(),
-        requestedBy: { uid: actor.uid, role: actor.role }
-      }
-    };
+  const result = await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/deletionAuthority`).transaction((current) => {
+    const reservation = reserveTournamentDeletionAuthorityLock(current, deletionRequest, actor);
+    outcome = reservation.outcome;
+    return reservation.next;
   }, undefined, false);
   if (!result.committed || !outcome?.ok) return outcome || { ok: false, code: "tournament-delete-lock-aborted" };
-  return { ok: true, tournament: result.snapshot.val() || outcome.tournament };
+  return { ok: true, idempotent: outcome.idempotent === true, recovered: outcome.recovered === true };
+}
+
+async function markTournamentDeletionBackup(tournamentId, requestId, backup) {
+  let outcome = null;
+  const result = await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/deletionAuthority`).transaction((current) => {
+    const marked = markTournamentDeletionBackupRequested(current, requestId, backup);
+    outcome = marked.outcome;
+    return marked.next;
+  }, undefined, false);
+  if (!result.committed || !outcome?.ok) return outcome || { ok: false, code: "tournament-delete-lock-aborted" };
+  return { ok: true };
 }
 
 async function releaseTournamentDeletionLock(tournamentId, requestId) {
-  await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}`).transaction((current) => {
-    if (!current || current.deletionAuthority?.requestId !== requestId) return current;
-    const next = { ...current };
-    delete next.deletionAuthority;
-    return next;
+  await admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/deletionAuthority`).transaction((current) => {
+    return releaseTournamentDeletionAuthorityLock(current, requestId).next;
   }, undefined, false);
 }
 

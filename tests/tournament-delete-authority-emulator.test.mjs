@@ -8,6 +8,8 @@ const namespace = projectId;
 const suffix = `delete-${Date.now().toString(36)}`;
 const tournamentId = `tournament-${suffix}`;
 const historyTournamentId = `history-${suffix}`;
+const largeTournamentId = `large-${suffix}`;
+const residualLockTournamentId = `residual-lock-${suffix}`;
 const invalidRevisionTournamentId = `invalid-revision-${suffix}`;
 const untouchedTournamentId = `untouched-${suffix}`;
 const supervisor = await createUser(`supervisor-${suffix}@example.test`, "supervisor");
@@ -32,6 +34,23 @@ try {
   await ownerWrite(`charropro/broadcastStudio/sessions/session-${suffix}`, { context: { tournamentId } });
   await ownerWrite(`charropro/tournaments/${untouchedTournamentId}`, tournament(untouchedTournamentId, 2));
   await ownerWrite(`charropro/tournaments/${invalidRevisionTournamentId}`, tournament(invalidRevisionTournamentId, "NaN"));
+  const largeTournament = tournament(largeTournamentId, 6);
+  largeTournament.officialScoreFanout = largeRecords(85, 56_000);
+  largeTournament.publishedScores = largeRecords(85, 7_000);
+  largeTournament.officialScoreLedger = largeRecords(55, 8_000);
+  largeTournament.officialScoreAudit = largeRecords(85, 1_000);
+  assert.ok(Buffer.byteLength(JSON.stringify(largeTournament)) > 5_800_000, "large deletion fixture must reproduce the production data class");
+  await ownerWrite(`charropro/tournaments/${largeTournamentId}`, largeTournament);
+  await ownerWrite(`charropro/audit/publishedScores/${largeTournamentId}`, largeRecords(85, 7_000));
+  await ownerWrite(`charropro/tournaments/${residualLockTournamentId}`, {
+    ...tournament(residualLockTournamentId, 5),
+    deletionAuthority: {
+      requestId: "delete_legacy_residual",
+      idempotencyKey: `delete:${residualLockTournamentId}:legacy-residual`,
+      requestedAt: new Date(Date.now() - 180_000).toISOString(),
+      requestedBy: { uid: supervisor.localId, role: "supervisor" }
+    }
+  });
 
   const preflight = await call(supervisor.idToken, { operation: "preflight", tournamentId });
   assert.equal(preflight.ok, true, JSON.stringify(preflight.body));
@@ -92,6 +111,26 @@ try {
   assert.equal(historicalDeleted.body.result.deleted, true);
   assert.equal(await ownerRead(`charropro/tournaments/${historyTournamentId}`), null);
   assert.equal(await ownerRead(`charropro/audit/publishedScores/${historyTournamentId}`), null);
+  const largeDeleted = await call(supervisor.idToken, {
+    operation: "delete",
+    tournamentId: largeTournamentId,
+    expectedRevision: 6,
+    idempotencyKey: `delete:${largeTournamentId}:request-0001`
+  });
+  assert.equal(largeDeleted.ok, true, JSON.stringify(largeDeleted.body));
+  assert.equal(largeDeleted.body.result.deleted, true);
+  assert.ok(largeDeleted.body.result.backupId, "large deletion remains backup-gated");
+  assert.equal(await ownerRead(`charropro/tournaments/${largeTournamentId}`), null);
+  assert.equal(await ownerRead(`charropro/audit/publishedScores/${largeTournamentId}`), null);
+  const recoveredResidualLock = await call(supervisor.idToken, {
+    operation: "delete",
+    tournamentId: residualLockTournamentId,
+    expectedRevision: 5,
+    idempotencyKey: `delete:${residualLockTournamentId}:request-0001`
+  });
+  assert.equal(recoveredResidualLock.ok, true, JSON.stringify(recoveredResidualLock.body));
+  assert.equal(recoveredResidualLock.body.result.deleted, true);
+  assert.equal(await ownerRead(`charropro/tournaments/${residualLockTournamentId}`), null);
   const invalidRevision = await call(supervisor.idToken, { operation: "preflight", tournamentId: invalidRevisionTournamentId });
   assert.equal(invalidRevision.ok, true);
   assert.equal(invalidRevision.body.result.preflight.revision, null);
@@ -103,6 +142,8 @@ try {
 } finally {
   await ownerDelete(`charropro/tournaments/${tournamentId}`);
   await ownerDelete(`charropro/tournaments/${historyTournamentId}`);
+  await ownerDelete(`charropro/tournaments/${largeTournamentId}`);
+  await ownerDelete(`charropro/tournaments/${residualLockTournamentId}`);
   await ownerDelete(`charropro/tournaments/${invalidRevisionTournamentId}`);
   await ownerDelete(`charropro/tournaments/${untouchedTournamentId}`);
   await ownerDelete(`charropro/tournamentIndex/${tournamentId}`);
@@ -119,6 +160,7 @@ try {
   await ownerDelete(`charropro/judges/events/event-${suffix}`);
   await ownerDelete(`charropro/judges/sessions/judge-session-${suffix}`);
   await ownerDelete(`charropro/audit/publishedScores/${historyTournamentId}`);
+  await ownerDelete(`charropro/audit/publishedScores/${largeTournamentId}`);
   try { await deleteUser(supervisor.idToken); } catch {}
   try { await deleteUser(judge.idToken); } catch {}
   try { await deleteUser(operator.idToken); } catch {}
@@ -135,6 +177,13 @@ function tournament(id, version) {
 
 function request(expectedRevision) {
   return { operation: "delete", tournamentId, expectedRevision, idempotencyKey: `delete:${tournamentId}:request-0001` };
+}
+
+function largeRecords(count, payloadSize) {
+  return Object.fromEntries(Array.from({ length: count }, (_, index) => [
+    `record_${index}`,
+    { id: `record_${index}`, payload: "x".repeat(payloadSize) }
+  ]));
 }
 
 function assertNoNonFiniteNumber(value) {
