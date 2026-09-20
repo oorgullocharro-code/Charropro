@@ -7389,6 +7389,9 @@ html.graphic-page #graphic-root[data-view="timer"] {
 
 .graphic-team-name {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   color: var(--graphic-text, #fff7dc);
   font-family: var(--graphic-font, "Cinzel", Georgia, serif);
   font-size: 22px;
@@ -7399,6 +7402,20 @@ html.graphic-page #graphic-root[data-view="timer"] {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, .92);
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphic-team-current {
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--graphic-muted, #d7c79a);
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: none;
   white-space: nowrap;
 }
 

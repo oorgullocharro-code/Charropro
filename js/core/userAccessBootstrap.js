@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

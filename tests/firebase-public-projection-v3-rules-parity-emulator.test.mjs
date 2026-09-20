@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+import { createCanonicalPublicTournamentData, normalizeCanonicalPublicTournamentData, validateCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const requireFromFunctions = createRequire(new URL("../functions/package.json", import.meta.url));
 

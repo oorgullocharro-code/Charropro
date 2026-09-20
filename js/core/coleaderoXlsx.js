@@ -1,10 +1,10 @@
-import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+import { buildCanonicalTournamentResults } from "./canonicalTournamentResults.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   buildCanonicalOfficialResults,
   getCanonicalSportingOpportunityKey
-} from "./canonicalOfficialResults.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { createXlsxBlob } from "./xlsx.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { state } from "./state.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./canonicalOfficialResults.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { createXlsxBlob } from "./xlsx.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { state } from "./state.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const COLEADERO_COMPETITION_ID = "coleadero";
 

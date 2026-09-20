@@ -6,22 +6,22 @@ import {
   buildFirebaseEmulatorConnectionPlan,
   getFirebaseRuntimePublicDiagnostics,
   resolveFirebaseRuntime
-} from "./firebaseRuntime.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./firebaseRuntime.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { buildTournamentDeletionCallablePayload } from "./tournamentDeletionClient.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   COMPETITION_TYPES,
   getCompetitionType,
   getCompetitionTypeFromTournamentType
-} from "../data/competitionTypes.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../data/competitionTypes.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "./userAccessBootstrap.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./userAccessBootstrap.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { prepareHistoricalReconciliationDryRunRequest } from "./historicalReconciliationDryRun.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { normalizeScoringButtonLayouts } from "../data/defaultScoringButtonLayouts.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   BROADCAST_SINGLE_TENANT_SCOPE_ID,
   buildBroadcastAutomaticSessionId,
@@ -29,20 +29,20 @@ import {
   isBroadcastTemporaryAccessActive,
   revokeBroadcastTemporaryAccessDescriptor,
   validateBroadcastTemporaryAccessDescriptor
-} from "../broadcast/broadcastRealtimeTransport.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../broadcast/broadcastRealtimeTransport.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   buildPublicProjection,
   getPublicProjectionSignature,
   reconcilePublicProjection
-} from "../public/publicProjection.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../public/publicProjection.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   adaptPublicProjectionToLegacyLive
-} from "../public/publicProjectionLegacyAdapter.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../public/publicProjectionLegacyAdapter.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   diagnosePublicProjectionFirebaseCompatibility,
   normalizePublicProjectionForFirebase,
   validatePublicProjection
-} from "../public/publicProjectionSchema.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../public/publicProjectionSchema.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   PUBLIC_PROJECTION_LEASE_MS,
   PUBLIC_PROJECTION_MAX_ATTEMPTS,
@@ -58,11 +58,11 @@ import {
   sanitizeProjectionActor,
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage
-} from "./publicProjectionOutbox.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./publicProjectionOutbox.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   normalizePendingScoreReview,
   validatePendingScoreReview
-} from "./pendingScoreReview.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./pendingScoreReview.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
@@ -70,14 +70,14 @@ import {
   createOfficialTimerContext,
   getOfficialTimerContextView,
   normalizeOfficialTimerContext
-} from "./timerRules.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./timerRules.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { buildOfficialCurrentTimerContext } from "./officialTimerOrchestration.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   BRAKE_REVIEW_ACTIONS,
   applyBrakeReviewCommand,
   getBrakeReviewStateFromTimer,
   isBrakeReviewProfile
-} from "./brakeReviewPhase.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./brakeReviewPhase.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const CONFIGURATION_BOOTSTRAP = await loadConfigurationBootstrap();
 const FIREBASE_RUNTIME = resolveFirebaseRuntime({
@@ -2151,6 +2151,7 @@ export async function publishFirebaseTurn(payload, options = {}) {
       published: compactPublishedScore(payload.published)
     };
     if (Array.isArray(payload.leaderboard)) nextPayload.leaderboard = payload.leaderboard.map(compactLeaderboardItem);
+    if (payload.scoreboard) nextPayload.scoreboard = compactGeneralScoreboard(payload.scoreboard);
     if (payload.teamStandings) nextPayload.teamStandings = compactTeamStandings(payload.teamStandings);
     await writeLiveUpdate(buildLivePartialUpdate(nextPayload), liveChannel);
     const publicSnapshot = await publishPublicTournamentSnapshot(liveChannel, null, { source: "turn" });
@@ -5826,7 +5827,8 @@ function compactLivePayload(payload = {}) {
     currentTimerContext: compactCurrentTimerContext(payload.currentTimerContext),
     timer: compactTimer(payload.timer),
     graphicsConfig: payload.graphicsConfig || null,
-	    leaderboard: (payload.leaderboard || []).map(compactLeaderboardItem),
+    leaderboard: (payload.leaderboard || []).map(compactLeaderboardItem),
+    scoreboard: compactGeneralScoreboard(payload.scoreboard),
 	    coleadero: compactColeadero(payload.coleadero),
 		    teamStandings: compactTeamStandings(payload.teamStandings),
 		    published: compactPublishedScore(payload.published)
@@ -6384,6 +6386,23 @@ function compactLeaderboardItem(item) {
     team: compactTeam(item.team),
     total: Number(item.total || 0),
     infr: Number(item.infr || 0)
+  };
+}
+
+function compactGeneralScoreboard(value) {
+  if (!value || typeof value !== "object") return null;
+  const rows = Array.isArray(value.rows) ? value.rows : [];
+  return {
+    source: value.source === "active-charreada" ? "active-charreada" : "legacy",
+    rows: rows.map((row) => ({
+      id: String(row?.id || ""),
+      name: String(row?.name || ""),
+      total: Number(row?.total || 0),
+      status: String(row?.status || ""),
+      hasOfficialScore: row?.hasOfficialScore === true,
+      active: row?.active === true,
+      currentCharro: String(row?.currentCharro || "")
+    }))
   };
 }
 

@@ -7,9 +7,9 @@ import {
   mergePublicLiveFeeds,
   normalizePublicLiveFeedEvent,
   validatePublicLiveFeed
-} from "../js/public/publicLiveFeed.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../js/public/publicLiveFeed.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const source = {
   publishedScores: {

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260920-team-lineup-canonical-visual-order-001-v1",
+      "appVersion": "20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "3805ecbbe0b62bd205c3c7bfbb5b7b6e3db303188470376658b8a538f4ddb2b2",
-  "fingerprint": "3805ecbbe0b62bd205c3c7bfbb5b7b6e3db303188470376658b8a538f4ddb2b2"
+  "checksum": "20d26fa20136b046c42fb58c9ca3f2ca33a05f780e1150dfcb2ad62710660fc7",
+  "fingerprint": "20d26fa20136b046c42fb58c9ca3f2ca33a05f780e1150dfcb2ad62710660fc7"
 }

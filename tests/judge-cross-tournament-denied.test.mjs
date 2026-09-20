@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+import { buildUserAccessBootstrapPlan, readUserAccessBootstrapTournaments } from "../js/core/userAccessBootstrap.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import { createBootstrapHarness, executeBootstrap, profile, TOURNAMENT_A, TOURNAMENT_B, tournamentIndex, tournamentRecord } from "./helpers/userAccessBootstrapTestHarness.mjs";
 
 const { result, reads } = await executeBootstrap(

@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

@@ -12,7 +12,7 @@ import {
   resolvePendingScoreReview,
   updatePendingScoreReviewDraft,
   validatePendingScoreReview
-} from "../js/core/pendingScoreReview.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../js/core/pendingScoreReview.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const actor = Object.freeze({
   uid: "judge-local-1",

@@ -1,20 +1,21 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   buildGraphicTimerPresentation,
   readGraphicTimerPresentationOptions
-} from "./graficoTimerPresentation.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./graficoTimerPresentation.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { selectActiveCharreadaScoreboard } from "../core/generalScoreboard.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";
@@ -232,7 +233,8 @@ function getRenderConfig(payload) {
 }
 
 function renderScoreboardGraphic(payload, config) {
-  const teams = buildScoreboardTeamRows(payload, payload.turn).slice(0, config.maxTeams);
+  const scoreboard = buildScoreboardTeamRows(payload, payload.turn);
+  const teams = scoreboard.source === "active-charreada" ? scoreboard.rows : scoreboard.rows.slice(0, config.maxTeams);
   return html`
     <main class="graphic-stage">
       <section class="graphic-scoreboard graphic-widget">
@@ -246,7 +248,12 @@ function renderScoreboardGraphic(payload, config) {
 }
 
 function buildScoreboardTeamRows(payload, turn) {
-  return sortRowsByProgramOrder(buildTeamRows(payload, turn), payload);
+  if (Array.isArray(payload?.scoreboard?.rows)) return payload.scoreboard;
+  return selectActiveCharreadaScoreboard({
+    charreada: payload?.charreada,
+    leaderboard: payload?.leaderboard,
+    turn
+  });
 }
 
 function renderTimerGraphic(timer, payload) {
@@ -1014,7 +1021,10 @@ function sortRowsByProgramOrder(rows, payload) {
 function renderTeamRow(team) {
   return html`
     <div class="graphic-team-row ${team.active ? "active" : ""}">
-      <div class="graphic-team-name">${escapeHTML(team.name)}</div>
+      <div class="graphic-team-name">
+        <span>${escapeHTML(team.name)}</span>
+        ${team.active && team.currentCharro ? html`<small class="graphic-team-current">${escapeHTML(team.currentCharro)}</small>` : ""}
+      </div>
       <div class="graphic-team-score">${moneylessNumber(team.points)}</div>
     </div>
   `;

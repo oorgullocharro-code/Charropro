@@ -7,9 +7,9 @@ import {
   getTournamentParticipants,
   getTournamentTeams,
   state
-} from "../js/core/state.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../js/core/state.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 const previous = structuredClone({
   activeTournamentId: state.activeTournamentId,

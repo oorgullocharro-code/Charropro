@@ -1,12 +1,12 @@
 import {
   adaptCanonicalTournamentResultsToPublicV3,
   buildCanonicalTournamentResults
-} from "../core/canonicalTournamentResults.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "../core/canonicalTournamentResults.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 import {
   createCanonicalPublicTournamentData,
   validateCanonicalPublicTournamentData
-} from "./canonicalPublicTournamentData.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
-import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
+} from "./canonicalPublicTournamentData.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
+import { resolveCanonicalTournamentLifecycle } from "../core/canonicalTournamentLifecycle.js?v=20260920-general-scoreboard-active-charreada-multi-team-fix-001-v1";
 
 export const CANONICAL_PUBLIC_PROJECTION_VERSION = "3.0.0";
 
