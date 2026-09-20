@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import assignmentEngine from "../functions/ruleProfileAssignmentEngine.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 const {
   RULE_PROFILE_ASSIGNMENT_AUTHORITY_VERSION,

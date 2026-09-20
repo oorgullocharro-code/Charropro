@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

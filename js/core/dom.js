@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 logCharroProVersion("runtime");
 

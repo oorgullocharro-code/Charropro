@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

@@ -6,7 +6,7 @@ import {
   buildHistoricalReconciliationDryRunView,
   classifyHistoricalReconciliationDryRunResult,
   prepareHistoricalReconciliationDryRunRequest
-} from "../js/core/historicalReconciliationDryRun.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+} from "../js/core/historicalReconciliationDryRun.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 const input = Object.freeze({
   tournamentId: "torneo_mtj3fikk_2llw7v",

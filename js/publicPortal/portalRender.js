@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

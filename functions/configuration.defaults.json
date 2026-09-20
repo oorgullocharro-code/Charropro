@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260919-scoring-infractions-panel-persistence-001-v1",
+      "appVersion": "20260920-team-lineup-canonical-visual-order-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "db2f51d154f450e6d6e2dada2742b83739cb5993160e2371899b605aafded833",
-  "fingerprint": "db2f51d154f450e6d6e2dada2742b83739cb5993160e2371899b605aafded833"
+  "checksum": "3805ecbbe0b62bd205c3c7bfbb5b7b6e3db303188470376658b8a538f4ddb2b2",
+  "fingerprint": "3805ecbbe0b62bd205c3c7bfbb5b7b6e3db303188470376658b8a538f4ddb2b2"
 }

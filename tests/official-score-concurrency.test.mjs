@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 const {
   OFFICIAL_SCORE_LEDGER_VERSION,

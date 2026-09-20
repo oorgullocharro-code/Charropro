@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260920-team-lineup-canonical-visual-order-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 
