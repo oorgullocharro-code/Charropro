@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "./state.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

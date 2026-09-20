@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const {
   applyOfficialScoreTransaction,

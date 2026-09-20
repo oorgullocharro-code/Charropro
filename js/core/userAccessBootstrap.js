@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260920-sabana-compact-columns-ux-deploy-001-v1",
+      "appVersion": "20260920-sabana-phase-compact-visual-parity-deploy-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "2fb2fa5d59973158bb8d8f5801a8f3b1fe302dd5643a5b9beaab24dac4c48162",
-  "fingerprint": "2fb2fa5d59973158bb8d8f5801a8f3b1fe302dd5643a5b9beaab24dac4c48162"
+  "checksum": "7dba21b7b2cc0a53a5da0422193b5403f18fe39a6ae0ee5c08dc77ce666849b9",
+  "fingerprint": "7dba21b7b2cc0a53a5da0422193b5403f18fe39a6ae0ee5c08dc77ce666849b9"
 }

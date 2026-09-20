@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import backupService from "../functions/backupService.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import backupService from "../functions/backupService.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const bucketNames = [];
 const files = new Map();

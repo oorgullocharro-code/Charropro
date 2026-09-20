@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

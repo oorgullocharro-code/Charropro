@@ -1,4 +1,4 @@
-import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { LEGACY_GRAPHICS_CONFIG_KEY, getActiveTournamentCacheId, getTournamentScopedStorageKey } from "./localCache.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 export const GRAPHICS_CONFIG_KEY = "graphics_config_v1";
 

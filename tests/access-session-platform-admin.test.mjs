@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { makeAccessSession } from "../js/core/roles.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { makeAccessSession } from "../js/core/roles.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const user = Object.freeze({ uid: "user-1", email: "user@example.test", displayName: "User" });
 

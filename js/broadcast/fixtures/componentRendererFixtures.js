@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "../componentLibrary.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

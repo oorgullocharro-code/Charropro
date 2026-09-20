@@ -4,7 +4,7 @@ import {
   TEAM_LINEUP_POSITIONS,
   getTeamLineupEntryValue,
   resolveTeamLineupEntries
-} from "../js/core/teamLineup.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "../js/core/teamLineup.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const fullSuerteIds = ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua", "manganas_pie", "manganas_caballo", "paso"];
 const roster = {

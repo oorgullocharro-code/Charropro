@@ -5,8 +5,9 @@ import {
   aggregateCanonicalOfficialTeamTotals,
   getCanonicalOfficialSuerteTotals,
   getCanonicalOfficialTeamTotals
-} from "../js/core/canonicalOfficialResults.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
-import { getTournamentTeams, state } from "../js/core/state.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "../js/core/canonicalOfficialResults.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+import { getTournamentTeams, state } from "../js/core/state.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const tournamentId = "tournament-sabana";
 const charreadaId = "charreada-sabana";
@@ -168,6 +169,31 @@ test("the tournament-wide sheet presents compact point-only suerte columns and o
   for (const label of ["C", "P", "T", "LC", "PR", "Y", "MC", "MP", "PM"]) {
     assert.match(appSource, new RegExp(`: "${label}"`));
   }
+});
+
+test("the selected phase sheet matches the compact tournament sheet without changing its charreada scope", () => {
+  const phaseRenderer = appSource.slice(
+    appSource.indexOf("function renderDetailedScoreSheet"),
+    appSource.indexOf("function renderScoreSheetSuerteCell")
+  );
+  const compactLabels = ["C", "P", "C", "T", "LC", "PR", "Y", "MP", "MC", "PM"];
+
+  assert.match(phaseRenderer, /<th>Charreada<\/th>/);
+  assert.match(phaseRenderer, /getCompactScoreSheetSuerteLabel/);
+  assert.match(phaseRenderer, /includeInfractions: false/);
+  assert.match(phaseRenderer, /<th class="num">Total<\/th>/);
+  assert.match(phaseRenderer, /Infracciones totales">Inf T/);
+  assert.doesNotMatch(phaseRenderer, /Puntos malos|Restas|score-sheet-bad-points/);
+  assert.match(
+    appSource,
+    /return renderDetailedScoreSheet\(selectedPhase\.sourceCharreadas \|\| \[\], \{ visibleTeamIds, labels \}\);/
+  );
+  assert.ok(
+    SUERTES.findIndex((suerte) => suerte.id === "manganas_pie") <
+      SUERTES.findIndex((suerte) => suerte.id === "manganas_caballo"),
+    "Manganas a Pie must precede Manganas a Caballo in the compact sports order"
+  );
+  compactLabels.forEach((label) => assert.match(appSource, new RegExp(`: "${label}"`)));
 });
 
 function scope(teamId) {

@@ -1,4 +1,4 @@
-import { getPortalViewDependencies } from "./portalSelectors.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { getPortalViewDependencies } from "./portalSelectors.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const VIEW_LABELS = Object.freeze({
   inicio: "Inicio",

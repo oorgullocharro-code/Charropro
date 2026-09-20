@@ -6,7 +6,7 @@ import {
   migrateCalaAttempt,
   normalizeTeamPenalty,
   sumTeamPenalties
-} from "../js/data/calaRules.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "../js/data/calaRules.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const puntaCases = [
   [5, 1, 0],

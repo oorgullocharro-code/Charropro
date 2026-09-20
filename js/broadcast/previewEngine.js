@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "./themeTemplateIntegration.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "./liveBindings.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

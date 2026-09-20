@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
-import { getTraditionalColeaderoOfficialAttempt, indexTraditionalColeaderoOfficialAttempts } from "../js/core/coleaderoLiveGraphic.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+import { getTraditionalColeaderoOfficialAttempt, indexTraditionalColeaderoOfficialAttempts } from "../js/core/coleaderoLiveGraphic.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const tournamentId = "coleadero-zero-tournament";
 const charreadaId = "coleadero-zero-charreada";

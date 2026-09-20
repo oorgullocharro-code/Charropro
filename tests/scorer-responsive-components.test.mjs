@@ -9,12 +9,12 @@ import {
   buildScorerRemateHistory,
   SCORER_COMPONENT_SYSTEM_VERSION,
   SCORER_RESPONSIVE_BREAKPOINTS
-} from "../js/core/scorerComponents.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "../js/core/scorerComponents.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 import {
   normalizeScoringAttemptV2,
   setScoringAttemptDq,
   updateScoringAttemptClassification
-} from "../js/core/scoringAttempt.js?v=20260920-sabana-compact-columns-ux-deploy-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
 
 const runtimeConfiguration = JSON.parse(readFileSync(new URL("../functions/configuration.defaults.json", import.meta.url), "utf8"));
 const RELEASE_ID = String(runtimeConfiguration?.values?.system?.appVersion || "");
