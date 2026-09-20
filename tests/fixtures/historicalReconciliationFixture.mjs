@@ -1,4 +1,4 @@
-import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1';
+import { buildPublicProjection, reconcilePublicProjection } from '../../js/public/publicProjection.js?v=20260919-scoring-infractions-panel-persistence-001-v1';
 
 export const tid = 'test-reconciliation-fixture';
 export const cid = 'charreada-fixture';

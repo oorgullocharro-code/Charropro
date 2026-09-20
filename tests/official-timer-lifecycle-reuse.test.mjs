@@ -6,7 +6,7 @@ import {
   buildOfficialTimerProjection,
   createOfficialTimerContext,
   resolveOfficialTimerSelection
-} from "../js/core/timerRules.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../js/core/timerRules.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const now = Date.parse("2026-08-25T18:00:00.000Z");
 const context = (suerteId, extra = {}) => ({

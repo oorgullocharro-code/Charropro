@@ -1,11 +1,11 @@
 import {
   normalizeBroadcastState,
   validateBroadcastState
-} from "./broadcastState.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "./broadcastState.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 import {
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "./dataContract.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "./dataContract.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 export const BROADCAST_OUTPUT_VERSION = "1.0.0";
 

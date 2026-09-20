@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

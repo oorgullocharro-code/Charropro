@@ -5,11 +5,11 @@ import {
   updateThemedTemplateLiveData,
   updateThemedTemplateRender,
   validateThemeTemplateSnapshot
-} from "./themeTemplateIntegration.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "./themeTemplateIntegration.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 import {
   applyLiveBindingsToProjection,
   getLiveBindingTypeForContractPath
-} from "./liveBindings.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "./liveBindings.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 export const PREVIEW_ENGINE_VERSION = "1.0.0";
 

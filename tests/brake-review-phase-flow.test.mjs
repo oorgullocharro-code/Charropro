@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

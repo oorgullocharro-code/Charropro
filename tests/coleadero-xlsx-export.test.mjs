@@ -7,7 +7,7 @@ import {
   buildColeaderoXlsxWorkbook,
   createColeaderoXlsxBlob,
   isColeaderoXlsxExport
-} from "../js/core/coleaderoXlsx.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../js/core/coleaderoXlsx.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const fixture = buildFixture();
 const workbook = buildColeaderoXlsxWorkbook(fixture.input);

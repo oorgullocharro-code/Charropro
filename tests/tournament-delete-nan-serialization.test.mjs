@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { buildTournamentDeletionCallablePayload } from "../js/core/tournamentDeletionClient.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const formerPreflightPayload = {
   operation: "preflight",

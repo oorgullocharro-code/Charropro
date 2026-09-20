@@ -1,5 +1,5 @@
-import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../data/ruleProfiles.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import { buildRuleProfileContentFingerprint } from "../data/ruleProfileTemporalPolicy.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { FMCH_2026_LIBRE_PROFILE_0_6_1 } from "../data/ruleProfiles.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { buildRuleProfileContentFingerprint } from "../data/ruleProfileTemporalPolicy.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 export const LOCAL_RULE_PROFILE_DEFAULTS_VERSION = "1.0.0";
 export const LOCAL_RULE_PROFILE_ENVIRONMENT = "local-emulator";

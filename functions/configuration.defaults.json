@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260919-cala-medios-lados-plus-one-controls-fix-001-v1",
+      "appVersion": "20260919-scoring-infractions-panel-persistence-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "e67e1ea4ea88db4751d66001da42172bd561ace408002583ae5d7af5d23d494c",
-  "fingerprint": "e67e1ea4ea88db4751d66001da42172bd561ace408002583ae5d7af5d23d494c"
+  "checksum": "db2f51d154f450e6d6e2dada2742b83739cb5993160e2371899b605aafded833",
+  "fingerprint": "db2f51d154f450e6d6e2dada2742b83739cb5993160e2371899b605aafded833"
 }

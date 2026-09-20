@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const { applyOfficialScoreTransaction, prepareOfficialScoreRequest } = officialScoreConcurrency;
 const tournamentId = "tournament-write-merge";

@@ -7,9 +7,9 @@ import {
   mergePublicLiveFeeds,
   normalizePublicLiveFeedEvent,
   validatePublicLiveFeed
-} from "../js/public/publicLiveFeed.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../js/public/publicLiveFeed.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { validatePublicProjection } from "../js/public/publicProjectionSchema.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const source = {
   publishedScores: {

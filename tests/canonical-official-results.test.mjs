@@ -4,9 +4,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getCanonicalSportingOpportunityKey
-} from "../js/core/canonicalOfficialResults.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../js/core/canonicalOfficialResults.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { buildPublicProjection } from "../js/public/publicProjection.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { adaptCanonicalPublicV3ToLegacyPresentation } from "../js/public/publicProjectionLegacyAdapter.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const tournamentId = "tournament-canonical";
 const charreadaId = "charreada-canonical";

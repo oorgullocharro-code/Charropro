@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

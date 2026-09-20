@@ -1,5 +1,5 @@
-import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { getCanonicalOfficialTeamTotals, getOfficialRecordValue } from "./canonicalOfficialResults.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 export const COLEADERO_LIVE_WINDOW_SIZE = 5;
 

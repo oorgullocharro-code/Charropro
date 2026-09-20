@@ -1,5 +1,5 @@
-import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
-import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
+import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 export function applyPortalV2Snapshot(state, snapshot, options = {}) {
   if (!isCanonicalPublicV3(snapshot)) {

@@ -16,7 +16,7 @@ import {
   sanitizeProjectionErrorCode,
   sanitizeProjectionErrorMessage,
   validatePublicProjectionIntent
-} from "../js/core/publicProjectionOutbox.js?v=20260919-cala-medios-lados-plus-one-controls-fix-001-v1";
+} from "../js/core/publicProjectionOutbox.js?v=20260919-scoring-infractions-panel-persistence-001-v1";
 
 const T0 = Date.parse("2026-07-29T12:00:00.000Z");
 const base = {
