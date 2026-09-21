@@ -1,21 +1,21 @@
-import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { calculateAttemptTotal } from "../core/scoring.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { getTimerView } from "../core/timerRules.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { escapeHTML, html, moneylessNumber } from "../core/dom.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { applyGraphicsConfig, normalizeGraphicsConfig, readLocalGraphicsConfig } from "../core/graphicsConfig.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { calculateAttemptTotal } from "../core/scoring.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { buildLivePayload, getCharroName } from "../core/sync.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { LIVE_TIMER_KEY, STORAGE_KEY, loadState, state, subscribeToLiveUpdates } from "../core/state.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { getLiveChannelFromUrl, isFirebaseLiveConfigured, subscribeFirebaseLiveCurrent } from "../core/firebaseSync.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { getTimerView } from "../core/timerRules.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 import {
   deriveOfficialTimerLiveDisplay,
   officialTimerTicker
-} from "../core/officialTimerLiveDisplay.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+} from "../core/officialTimerLiveDisplay.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { buildOfficialTimerProjectionFromCurrentContext } from "../core/officialTimerOrchestration.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 import {
   buildGraphicTimerPresentation,
   readGraphicTimerPresentationOptions
-} from "./graficoTimerPresentation.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { selectActiveCharreadaScoreboard } from "../core/generalScoreboard.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+} from "./graficoTimerPresentation.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { selectColeaderoFiveRiderWindow } from "../core/coleaderoLiveGraphic.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { selectActiveCharreadaScoreboard } from "../core/generalScoreboard.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 const root = document.getElementById("graphic-root");
 const view = new URLSearchParams(window.location.search).get("view") || root.dataset.view || "scoreboard";

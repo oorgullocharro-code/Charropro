@@ -6,7 +6,7 @@ import {
   resolvePortalCompetitionId,
   selectPortalProgram,
   selectPortalResults
-} from "../js/publicPortal/portalSelectors.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+} from "../js/publicPortal/portalSelectors.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 const snapshot = buildSnapshot();
 const defaultModel = buildPublicPortalModel(snapshot);

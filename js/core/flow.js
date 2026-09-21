@@ -6,7 +6,7 @@ import {
   getCharreadaScoringSuertes,
   saveState,
   state
-} from "./state.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+} from "./state.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 export function resetScoringPointer() {
   state.scoringSuerteIdx = 0;

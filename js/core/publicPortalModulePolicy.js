@@ -1,6 +1,6 @@
 import {
   PUBLIC_TOURNAMENT_MODULE_TYPES
-} from "../public/canonicalPublicTournamentData.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+} from "../public/canonicalPublicTournamentData.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 import {
   getBootstrapConfigurationValue,
   loadConfigurationBootstrap

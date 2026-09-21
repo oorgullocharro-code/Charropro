@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 const {
   OFFICIAL_SCORE_LEDGER_VERSION,

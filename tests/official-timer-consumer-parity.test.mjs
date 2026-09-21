@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { deriveOfficialTimerLiveDisplay } from "../js/core/officialTimerLiveDisplay.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 const now = Date.parse("2026-08-25T12:00:12.300Z");
 const snapshot = {

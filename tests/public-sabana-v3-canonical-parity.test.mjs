@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { getPublicSheetTitle } from "../js/portalV2/portalV2Render.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 const TOURNAMENT_ID = "public-sheet-parity";
 const TEAM_COLUMNS = ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua", "manganas_pie", "manganas_caballo", "paso"];
@@ -66,6 +67,21 @@ test("phase filtering keeps the matching roster and results isolated", () => {
   assert.deepEqual(model.context.program.map((item) => item.charreadaId), ["charreada-two"]);
   assert.deepEqual(model.context.sheet.flatMap((item) => item.rows.map((row) => row.teamId)), ["team-c"]);
   assert.equal(model.context.sheet[0].rows[0].total, 20);
+});
+
+test("public sheet title uses the selected phase name without changing sheet data", () => {
+  const snapshot = buildBrowserProjection(fixture(), { tournamentId: TOURNAMENT_ID, nowMs: Date.parse("2026-09-20T12:00:00.000Z") });
+  const phaseOne = createPortalV2Model(snapshot, { availability: "ready", view: "sabana", phaseId: "phase-one" });
+  const phaseTwo = createPortalV2Model(snapshot, { availability: "ready", view: "sabana", phaseId: "phase-two" });
+  const general = createPortalV2Model(snapshot, { availability: "ready", view: "sabana" });
+
+  assert.equal(getPublicSheetTitle(phaseOne.context.sheet[0], phaseOne.context.selectedPhaseId), "Sábana — Fase 1");
+  assert.equal(getPublicSheetTitle(phaseTwo.context.sheet[0], phaseTwo.context.selectedPhaseId), "Sábana — Final");
+  assert.equal(getPublicSheetTitle({ phaseName: "Eliminatoria" }, "phase-eliminatoria"), "Sábana — Eliminatoria");
+  assert.equal(getPublicSheetTitle({ phaseName: "Semifinal" }, "phase-semifinal"), "Sábana — Semifinal");
+  assert.equal(getPublicSheetTitle({ phaseName: "Fase personalizada" }, "phase-custom"), "Sábana — Fase personalizada");
+  assert.equal(getPublicSheetTitle(general.context.sheet[0], general.context.selectedPhaseId), "Sábana General");
+  assert.equal(phaseOne.context.sheet[0].rows[0].total, 28, "title rendering does not alter official sporting data");
 });
 
 test("public sheet renderer keeps the empty logo slot structural and presentation-only", async () => {

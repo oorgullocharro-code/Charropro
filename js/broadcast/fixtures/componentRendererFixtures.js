@@ -1,7 +1,7 @@
 import {
   buildComponentInstance,
   createBroadcastComponent
-} from "../componentLibrary.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+} from "../componentLibrary.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 export const COMPONENT_RENDERER_FIXTURE_VERSION = "1.0.0";
 

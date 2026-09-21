@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 test("Portal V2 presents one competition ranking per team without collapsing distinct scopes upstream", () => {
   const model = createPortalV2Model(fixture(), { availability: "ready", view: "posiciones" });

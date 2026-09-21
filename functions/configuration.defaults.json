@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260920-public-sabana-v3-canonical-parity-deploy-001-v1",
+      "appVersion": "20260920-public-sabana-phase-title-ux-deploy-001-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "77217520ebe0732355b2deb0a09aeccbc636e8641068c6e0fc15c9f38bebdb76",
-  "fingerprint": "77217520ebe0732355b2deb0a09aeccbc636e8641068c6e0fc15c9f38bebdb76"
+  "checksum": "2e8242c5cd3f9a385211e1c1d9a6fb734bd8ae203bcd1cfef7a48ef9322fab60",
+  "fingerprint": "2e8242c5cd3f9a385211e1c1d9a6fb734bd8ae203bcd1cfef7a48ef9322fab60"
 }

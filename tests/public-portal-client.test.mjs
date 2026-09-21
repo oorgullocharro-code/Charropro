@@ -5,9 +5,9 @@ import {
   createPublicPortalClientState,
   evaluatePublicPortalStale,
   getPublicPortalViewSnapshot
-} from "../js/public/publicPortalClient.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+} from "../js/public/publicPortalClient.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { buildPublicProjection, reconcilePublicProjection } from "../js/public/publicProjection.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 const candidate = buildPublicProjection({
   tournament: {

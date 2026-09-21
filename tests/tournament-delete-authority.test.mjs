@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import deletionAuthority from "../functions/tournamentDeletionAuthority.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 const {
   TournamentDeletionError,
