@@ -62,6 +62,11 @@ async function runProjectionV3RulesParityEmulator() {
     assert.equal(roundTripped.sheet.competitions.length, 1);
     assert.equal(roundTripped.timeline.items.length, 3);
 
+    const populatedProjectionId = `${tournamentId}-populated-bad-points-status`;
+    await assertAllowed("populated-bad-points-status", buildCandidate(populatedProjectionId, { sheetStatus: "OFFICIAL" }), token);
+    const notStartedProjectionId = `${tournamentId}-not-started-sheet-status`;
+    await assertAllowed("not-started-sheet-status", buildCandidate(notStartedProjectionId, { sheetStatus: "NOT_STARTED" }), token);
+
     const teamWithoutLiveCoverId = `${tournamentId}-team-without-live-cover`;
     await assertAllowed("team-without-live-cover", buildCandidate(teamWithoutLiveCoverId), token);
     const teamWithLiveCoverId = `${tournamentId}-team-with-live-cover`;
@@ -98,6 +103,26 @@ async function runProjectionV3RulesParityEmulator() {
     const noAccess = await writeProjection(databaseHost, databaseNamespace, noAccessId, buildIndividualCandidate(noAccessId, { program: true, live: true, results: true, standings: true, sheet: true }), token);
     assert.equal(noAccess.ok, false, "a judge without selected tournament access remains denied");
 
+    const unauthorizedUid = `projection-v3-locutor-${suffix}`;
+    const unauthorizedEmail = `${unauthorizedUid}@example.test`;
+    const unauthorizedPassword = "LocalProjectionV3Only-2026!";
+    await auth.createUser({ uid: unauthorizedUid, email: unauthorizedEmail, password: unauthorizedPassword, emailVerified: true });
+    await database.ref(`charropro/users/${unauthorizedUid}`).set({
+      active: true,
+      role: "locutor",
+      tournamentAccess: "selected"
+    });
+    await database.ref(`charropro/userTournamentAccess/${unauthorizedUid}/${tournamentId}`).set(true);
+    const unauthorizedToken = await signIn(authHost, unauthorizedEmail, unauthorizedPassword);
+    const unauthorizedRole = await writeProjection(databaseHost, databaseNamespace, tournamentId, {
+      ...candidate,
+      projectionRevision: 2
+    }, unauthorizedToken);
+    assert.equal(unauthorizedRole.ok, false, "an active role outside the projection allowlist remains denied");
+    await database.ref(`charropro/userTournamentAccess/${unauthorizedUid}`).remove();
+    await database.ref(`charropro/users/${unauthorizedUid}`).remove();
+    await auth.deleteUser(unauthorizedUid);
+
     const individualSlots = buildIndividualCandidate(`${tournamentId}-individual-coleadero-opportunity-slots`, { program: true, live: true, results: true, standings: true, sheet: true, opportunitySlots: true });
     assert.equal(validateCanonicalPublicTournamentData(individualSlots).valid, true, "Coleadero opportunity slots are a valid V3 projection");
     await assertAllowed("individual-coleadero-opportunity-slots", individualSlots, token);
@@ -132,11 +157,32 @@ async function runProjectionV3RulesParityEmulator() {
     await assertRejected("result-malformed", candidate, token, (projection) => {
       projection.results.teams[0].total = "invalid";
     });
+    await assertRejected("result-bad-points-invalid", candidate, token, (projection) => {
+      projection.results.teams[0].badPoints = "invalid";
+    });
+    await assertRejected("result-unknown-field", candidate, token, (projection) => {
+      projection.results.teams[0].unapproved = "not-allowlisted";
+    });
     await assertRejected("standing-malformed", candidate, token, (projection) => {
       projection.standings.items[0].position = "invalid";
     });
+    await assertRejected("standing-bad-points-invalid", candidate, token, (projection) => {
+      projection.standings.items[0].badPoints = "invalid";
+    });
+    await assertRejected("standing-unknown-field", candidate, token, (projection) => {
+      projection.standings.items[0].unapproved = "not-allowlisted";
+    });
     await assertRejected("sheet-malformed", candidate, token, (projection) => {
       projection.sheet.competitions[0].phase = 7;
+    });
+    await assertRejected("sheet-bad-points-invalid", candidate, token, (projection) => {
+      projection.sheet.competitions[0].rows[0].badPoints = "invalid";
+    });
+    await assertRejected("sheet-status-invalid", candidate, token, (projection) => {
+      projection.sheet.competitions[0].rows[0].status = "PENDING_REVIEW";
+    });
+    await assertRejected("sheet-unknown-field", candidate, token, (projection) => {
+      projection.sheet.competitions[0].rows[0].unapproved = "not-allowlisted";
     });
     await assertRejected("sheet-opportunity-slot-invalid", individualOpportunities, token, (projection) => {
       projection.sheet.competitions[0].opportunitiesPerParticipant = 0;
@@ -155,6 +201,12 @@ async function runProjectionV3RulesParityEmulator() {
     });
     await assertRejected("branding-unknown-field", candidate, token, (projection) => {
       projection.branding.unapprovedEditorialField = "not-allowlisted";
+    });
+    const nonMonotonic = await writeProjection(databaseHost, databaseNamespace, tournamentId, candidate, token);
+    assert.equal(nonMonotonic.ok, false, "equal projection revisions remain denied");
+    await assertRejected("tournament-id-mismatch", candidate, token, (projection) => {
+      projection.tournamentId = "another-tournament";
+      projection.tournament.id = "another-tournament";
     });
   } finally {
     await database.ref(`charropro/publicTournaments/${tournamentId}`).remove();
@@ -204,6 +256,7 @@ function buildCandidate(tournamentId, options = {}) {
     phaseName: "Clasificatoria",
     columns: { cala: total },
     penalties: 0,
+    badPoints: index,
     subtotal: total,
     total,
     status: "official",
@@ -222,6 +275,7 @@ function buildCandidate(tournamentId, options = {}) {
     teamId: result.teamId,
     teamName: result.teamName,
     total: result.total,
+    badPoints: result.badPoints,
     classification: "official",
     status: "official",
     phase: result.phase,
@@ -270,7 +324,9 @@ function buildCandidate(tournamentId, options = {}) {
           resultId: result.resultId,
           teamId: result.teamId,
           teamName: result.teamName,
+          status: options.sheetStatus || "OFFICIAL",
           total: result.total,
+          badPoints: result.badPoints,
           columns: result.columns
         }))
       }]
