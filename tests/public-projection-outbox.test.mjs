@@ -206,6 +206,13 @@ const exhausted = buildPublicProjectionFailureState({
 });
 assert.equal(exhausted.status, PUBLIC_PROJECTION_STATUSES.DEAD_LETTER);
 assert.equal(exhausted.deadLetterReason, "network-error");
+assert.equal(
+  buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED, exhausted, {
+    clientConfirmedAt: new Date(T0 + 10).toISOString()
+  }, { nowMs: T0 + 10 }),
+  null,
+  "a DEAD_LETTER can never bypass PENDING, PROCESSING, and PROJECTED"
+);
 
 const unknownFailure = buildPublicProjectionFailureState({
   ...processing,

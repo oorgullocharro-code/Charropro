@@ -1423,6 +1423,40 @@ export async function retryFirebasePublicProjectionJob(tournamentId = "", projec
   }
   const path = getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId);
   if (!path) return { ok: false, reason: "invalid-projection-job" };
+  try {
+    const jobSnapshot = await get(ref(getFirebaseDatabase(), path));
+    const initialJob = normalizePublicProjectionJob(jobSnapshot.val() || {});
+    if (!initialJob) return { ok: false, reason: "invalid-projection-intent", projectionId };
+    const canConfirmConvergedDestination = [
+      PUBLIC_PROJECTION_STATUSES.DEAD_LETTER,
+      PUBLIC_PROJECTION_STATUSES.FAILED,
+      PUBLIC_PROJECTION_STATUSES.RETRY_WAIT
+    ].includes(initialJob.state.status);
+    if (canConfirmConvergedDestination) {
+      const verification = await verifyFirebasePublicProjectionJob(
+        tournamentId,
+        projectionId,
+        actorRecord,
+        options
+      );
+      if (verification.ok && verification.clientConfirmed) {
+        return confirmFirebaseConvergedProjectionJob(
+          tournamentId,
+          initialJob,
+          actorRecord,
+          verification,
+          options
+        );
+      }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      reason: normalizeFirebaseFailureReason(error),
+      errorMessage: sanitizeProjectionErrorMessage(error?.message),
+      projectionId
+    };
+  }
   const statePath = `${path}/state`;
   let resetState = null;
   let resetSkippedForPending = false;
@@ -1465,6 +1499,107 @@ export async function retryFirebasePublicProjectionJob(tournamentId = "", projec
       reason: normalizeFirebaseFailureReason(error),
       errorMessage: sanitizeProjectionErrorMessage(error?.message),
       projectionId
+    };
+  }
+}
+
+async function confirmFirebaseConvergedProjectionJob(tournamentId, initialJob, actor, verification, options = {}) {
+  const projectionId = initialJob.projectionId;
+  const statePath = `${getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId)}/state`;
+  let resetState = null;
+  try {
+    const reset = await runTransaction(ref(getFirebaseDatabase(), statePath), (current) => {
+      const state = normalizePublicProjectionState(current || {}, initialJob.intent);
+      if (state.status === PUBLIC_PROJECTION_STATUSES.PENDING) return undefined;
+      if ([
+        PUBLIC_PROJECTION_STATUSES.DEAD_LETTER,
+        PUBLIC_PROJECTION_STATUSES.FAILED,
+        PUBLIC_PROJECTION_STATUSES.RETRY_WAIT
+      ].includes(state.status) === false) {
+        return undefined;
+      }
+      resetState = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PENDING, state, {
+        nextRetryAt: "",
+        nextRetryAtMs: 0,
+        lastErrorCode: "",
+        lastErrorMessage: "",
+        deadLetterReason: "",
+        retriedBy: actor,
+        updatedBy: actor
+      }, { nowMs: options.nowMs, force: true });
+      return resetState || undefined;
+    }, { applyLocally: false });
+    if (!reset.committed || !resetState) {
+      return { ok: false, projectionId, status: initialJob.state.status, reason: "projection-retry-not-allowed" };
+    }
+
+    const rearmedSnapshot = await get(ref(getFirebaseDatabase(), getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId)));
+    const rearmedJob = normalizePublicProjectionJob(rearmedSnapshot.val() || {});
+    if (!rearmedJob || rearmedJob.state.status !== PUBLIC_PROJECTION_STATUSES.PENDING) {
+      return { ok: false, projectionId, status: rearmedJob?.state.status || initialJob.state.status, reason: "projection-rearm-not-persisted" };
+    }
+    const claimed = await claimFirebaseProjectionJob(tournamentId, rearmedJob, {
+      ...options,
+      manual: true,
+      workerId: buildProjectionWorkerId(actor),
+      actor
+    });
+    if (!claimed) {
+      return { ok: false, projectionId, status: rearmedJob.state.status, reason: "projection-claim-not-acquired" };
+    }
+
+    const now = new Date(Number(options.nowMs || Date.now())).toISOString();
+    const projectedState = await transitionFirebaseProjectionState(
+      tournamentId,
+      projectionId,
+      PUBLIC_PROJECTION_STATUSES.PROJECTED,
+      {
+        projectedAt: now,
+        targetRevision: verification.targetRevision,
+        targetFingerprint: verification.targetFingerprint
+      },
+      { ...options, actor, expectedRevision: rearmedJob.intent.sourceRevision }
+    );
+    if (!projectedState) {
+      return { ok: false, projectionId, status: claimed.status, reason: "projection-verification-state-conflict" };
+    }
+    const confirmedState = await transitionFirebaseProjectionState(
+      tournamentId,
+      projectionId,
+      PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED,
+      {
+        clientConfirmedAt: now,
+        targetRevision: verification.targetRevision,
+        targetFingerprint: verification.targetFingerprint
+      },
+      { ...options, actor, expectedRevision: rearmedJob.intent.sourceRevision }
+    );
+    if (!confirmedState) {
+      return { ok: false, projectionId, status: projectedState.status, reason: "projection-verification-state-conflict" };
+    }
+    return {
+      ok: true,
+      projectionId,
+      status: confirmedState.status,
+      reason: "projection-client-confirmed-from-converged-destination",
+      attempts: confirmedState.attempts,
+      publicSnapshot: {
+        ok: true,
+        skipped: true,
+        projected: false,
+        clientConfirmed: true,
+        verified: false,
+        reason: "client-readback-confirmed",
+        targetRevision: verification.targetRevision,
+        targetFingerprint: verification.targetFingerprint
+      }
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      projectionId,
+      reason: normalizeFirebaseFailureReason(error),
+      errorMessage: sanitizeProjectionErrorMessage(error?.message)
     };
   }
 }

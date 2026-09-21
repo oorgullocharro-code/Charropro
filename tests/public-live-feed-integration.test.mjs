@@ -418,6 +418,7 @@ assert.equal(unauthorizedRetry.reason, "projection-recovery-not-authorized");
 
 firebase.write(missingSourcePath, missingSourceRecord);
 firebase.outboxStateTransitions = [];
+firebase.publicSnapshotTransactions = 0;
 const repaired = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
   tournamentId,
   missingSource.projectionId,
@@ -434,6 +435,56 @@ assert.deepEqual(
   ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
   "DEAD_LETTER recovery rearms once before the canonical claim"
 );
+assert.equal(
+  firebase.publicSnapshotTransactions,
+  1,
+  "a restored but nonconvergent source follows the normal publication path"
+);
+
+firebase.write(`${missingSource.projectionOutboxPath}/state`, {
+  ...firebase.read(`${missingSource.projectionOutboxPath}/state`),
+  status: "DEAD_LETTER",
+  attempts: 5,
+  projectedAt: "",
+  clientConfirmedAt: "",
+  targetRevision: 0,
+  targetFingerprint: "",
+  deadLetterReason: "permission-denied",
+  lastErrorCode: "permission-denied",
+  lastErrorMessage: "Historical projection write was denied.",
+  nextRetryAt: "",
+  nextRetryAtMs: 0,
+  leaseOwner: "",
+  leaseExpiresAtMs: 0
+});
+firebase.outboxStateTransitions = [];
+firebase.publicSnapshotTransactions = 0;
+const convergedDeadLetter = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  missingSource.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:20.000Z"),
+    jitter: false
+  }
+);
+assert.equal(convergedDeadLetter.ok, true, "a converged DEAD_LETTER is closed without replaying publication");
+assert.equal(convergedDeadLetter.reason, "projection-client-confirmed-from-converged-destination");
+const convergedDeadState = firebase.read(`${missingSource.projectionOutboxPath}/state`);
+assert.equal(convergedDeadState.status, "CLIENT_CONFIRMED");
+assert.equal(convergedDeadState.attempts, 6, "the canonical claim increments attempts instead of resetting them");
+assert.ok(convergedDeadState.targetRevision > 0, "the current public revision replaces a historical blank target");
+assert.ok(convergedDeadState.targetFingerprint, "the current public fingerprint replaces a historical blank target");
+assert.deepEqual(
+  firebase.outboxStateTransitions,
+  ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
+  "convergence never bypasses the canonical state machine"
+);
+assert.equal(
+  firebase.publicSnapshotTransactions,
+  0,
+  "a converged DEAD_LETTER never writes publicTournaments again"
+);
 
 firebase.failPublicTransactions = true;
 const pendingManualRetry = await publishOfficial({
@@ -449,6 +500,7 @@ const pendingManualDeadLetter = firebase.read(pendingManualStatePath);
 assert.equal(pendingManualDeadLetter.status, "RETRY_WAIT");
 const pendingRetryActor = structuredClone(pendingManualDeadLetter.updatedBy);
 firebase.outboxStateTransitions = [];
+firebase.publicSnapshotTransactions = 0;
 const retryWaitRecovered = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
   tournamentId,
   pendingManualRetry.projectionId,
@@ -463,6 +515,11 @@ assert.deepEqual(
   firebase.outboxStateTransitions,
   ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
   "RETRY_WAIT recovery preserves its required reset"
+);
+assert.equal(
+  firebase.publicSnapshotTransactions,
+  1,
+  "a nonconvergent RETRY_WAIT cannot be client-confirmed without publishing"
 );
 firebase.write(pendingManualStatePath, {
   ...firebase.read(pendingManualStatePath),
@@ -483,6 +540,7 @@ firebase.write(pendingManualStatePath, {
   updatedBy: pendingRetryActor
 });
 firebase.outboxStateTransitions = [];
+firebase.publicSnapshotTransactions = 0;
 const failedRecovered = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
   tournamentId,
   pendingManualRetry.projectionId,
@@ -498,6 +556,44 @@ assert.deepEqual(
   ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"],
   "FAILED recovery preserves its required reset"
 );
+assert.equal(
+  firebase.publicSnapshotTransactions,
+  0,
+  "a converged FAILED job is confirmed without a new public write"
+);
+firebase.write(pendingManualStatePath, {
+  ...firebase.read(pendingManualStatePath),
+  status: "RETRY_WAIT",
+  attempts: 5,
+  clientConfirmedAt: "",
+  projectedAt: "",
+  targetRevision: 0,
+  targetFingerprint: "",
+  nextRetryAt: "",
+  nextRetryAtMs: 0,
+  lastErrorCode: "permission-denied",
+  lastErrorMessage: "Historical projection write was denied.",
+  deadLetterReason: "",
+  leaseOwner: "",
+  leaseExpiresAtMs: 0,
+  retriedBy: pendingRetryActor,
+  updatedBy: pendingRetryActor
+});
+firebase.outboxStateTransitions = [];
+firebase.publicSnapshotTransactions = 0;
+const convergedRetryWait = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  pendingManualRetry.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:43.000Z"),
+    jitter: false
+  }
+);
+assert.equal(convergedRetryWait.ok, true, "a converged RETRY_WAIT is closed through the canonical state machine");
+assert.equal(firebase.read(pendingManualStatePath).status, "CLIENT_CONFIRMED");
+assert.deepEqual(firebase.outboxStateTransitions, ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"]);
+assert.equal(firebase.publicSnapshotTransactions, 0, "a converged RETRY_WAIT never writes publicTournaments again");
 firebase.write(pendingManualStatePath, {
   ...firebase.read(pendingManualStatePath),
   status: "PENDING",
@@ -1227,6 +1323,7 @@ function createFirebaseTestAdapter() {
     freshOutboxStateReads: 0,
     outboxStateTransitions: [],
     outboxStateWrites: [],
+    publicSnapshotTransactions: 0,
     requireFreshOutboxTransition: false,
     failPublicTransactions: false,
     failAfterPublicCommitOnce: false,
@@ -1240,6 +1337,7 @@ function createFirebaseTestAdapter() {
       this.freshOutboxStateReads = 0;
       this.outboxStateTransitions = [];
       this.outboxStateWrites = [];
+      this.publicSnapshotTransactions = 0;
       this.requireFreshOutboxTransition = false;
       this.failPublicTransactions = false;
       this.failAfterPublicCommitOnce = false;
@@ -1333,6 +1431,9 @@ function createFirebaseTestAdapter() {
       }
       if (this.projectionGate && target.path.includes("/projectionOutbox/")) {
         await this.projectionGate;
+      }
+      if (target.path.includes("/publicTournaments/")) {
+        this.publicSnapshotTransactions += 1;
       }
       if (this.failPublicTransactions && target.path.includes("/publicTournaments/")) {
         const error = new Error("permission denied");
