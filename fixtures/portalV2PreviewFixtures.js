@@ -1,4 +1,4 @@
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 const TOURNAMENT_ID = "portal-v2-local-preview";
 

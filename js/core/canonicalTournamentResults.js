@@ -2,9 +2,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "./canonicalOfficialResults.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 
@@ -72,7 +72,7 @@ export function validateCanonicalTournamentResults(value = {}) {
   for (const row of results) {
     if (!id(row.resultId) || !id(row.charreadaId) || !id(row.competitionId)
       || (row.participantScope === "individual" ? !id(row.participantId) : !id(row.teamId))) errors.push("result-identity-invalid");
-    if (!finite(row.total) || !finite(row.subtotal) || !finite(row.penalties)) errors.push("result-total-invalid");
+    if (!finite(row.total) || !finite(row.subtotal) || !finite(row.penalties) || !finite(row.badPoints)) errors.push("result-total-invalid");
     if (!plain(row.suertes)) errors.push("result-suertes-invalid");
     if (!row.status) errors.push("result-status-invalid");
     const sportTotal = Object.values(record(row.suertes)).reduce((sum, sport) => sum + finiteNumber(sport.total), 0);
@@ -83,7 +83,9 @@ export function validateCanonicalTournamentResults(value = {}) {
   for (const row of collection(value.sheet?.competitions).flatMap((item) => collection(item.rows))) {
     const result = byId.get(row.resultId);
     if (!result) errors.push("sheet-result-reference-invalid");
-    else if (row.total !== result.total || stableStringify(row.columns) !== stableStringify(toSheetColumns(result.suertes))) errors.push("sheet-diverges-from-result");
+    else if (row.total !== result.total
+      || row.badPoints !== result.badPoints
+      || stableStringify(row.columns) !== stableStringify(toSheetColumns(result.suertes))) errors.push("sheet-diverges-from-result");
   }
   for (const standing of collection(value.standings?.items)) {
     for (const resultId of collection(standing.resultIds)) {
@@ -124,6 +126,7 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
     charreadaName: row.charreadaName,
     columns: toSheetColumns(row.suertes),
     penalties: row.penalties,
+    badPoints: row.badPoints,
     subtotal: row.subtotal,
     total: row.total,
     status: row.status,
@@ -147,6 +150,7 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
       horseId: item.horseId,
       horseName: item.horseName,
       total: item.total,
+      badPoints: item.badPoints,
       classification: item.totalStatus,
       status: item.positionStatus,
       phase: item.phaseId || "",
@@ -176,7 +180,20 @@ export function adaptCanonicalTournamentResultsToPublicV3(results = {}, input = 
       phase: competition.phaseId,
       phaseName: competition.phaseName,
       ...(positiveInteger(competition.opportunitiesPerParticipant) ? { opportunitiesPerParticipant: competition.opportunitiesPerParticipant } : {}),
-      rows: competition.rows
+      rows: collection(competition.rows).map((row) => ({
+        resultId: row.resultId,
+        teamId: row.teamId,
+        teamName: row.teamName,
+        participantId: row.participantId,
+        participantName: row.participantName,
+        horseId: row.horseId,
+        horseName: row.horseName,
+        status: row.status,
+        total: row.total,
+        badPoints: row.badPoints,
+        columns: row.columns,
+        ...(collection(row.opportunities).length ? { opportunities: row.opportunities } : {})
+      }))
     })) },
     timeline: { items: collection(input.timeline?.items) },
     statistics: { status: text(input.statistics?.status || "READY").toUpperCase(), items: collection(input.statistics?.items) }
@@ -249,6 +266,7 @@ function createResultRow(identity, charreada, teams, participants, horses) {
     suertes: {},
     subtotal: 0,
     penalties: 0,
+    badPoints: 0,
     adjustment: 0,
     total: 0,
     status: "NOT_STARTED",
@@ -278,18 +296,17 @@ function finalizeResultRow(row, currentRecords, source) {
   row.suertes = Object.fromEntries(Object.entries(row.suertes).sort(([left], [right]) => left.localeCompare(right)));
   row.subtotal = Object.values(row.suertes).reduce((sum, sport) => sum + sport.total, 0);
   row.penalties = Object.values(row.suertes).reduce((sum, sport) => sum + sport.penalties, 0);
-  const totals = row.participantScope === "team"
-    ? getCanonicalOfficialTeamTotals({ currentRecords, charreadas: source.charreadas }, {
-      tournamentId: row.tournamentId,
-      charreadaId: row.charreadaId,
-      teamId: row.teamId
-    })
-    : { hasOfficialRecords: false, total: row.subtotal };
+  const totals = getCanonicalOfficialTeamTotals({ currentRecords, charreadas: source.charreadas }, {
+    tournamentId: row.tournamentId,
+    charreadaId: row.charreadaId,
+    teamId: row.teamId || row.participantId
+  });
   const canonicalTotal = totals.hasOfficialRecords
-    ? totals.total
+    ? (row.participantScope === "team" ? totals.total : row.subtotal)
     : row.subtotal + (row.participantScope === "team" ? resolveAdjustment(source.charreadas, row.charreadaId, row.teamId) : 0);
   row.adjustment = canonicalTotal - row.subtotal;
   row.total = canonicalTotal;
+  row.badPoints = totals.hasOfficialRecords ? totals.badPoints : row.penalties;
   row.status = row.recordIds.length ? "OFFICIAL" : "NOT_STARTED";
   return row;
 }
@@ -309,12 +326,19 @@ function buildStandings(resultRows) {
     charreadaId: row.charreadaId,
     participantScope: row.participantScope,
     officialTotal: row.total,
+    badPoints: row.badPoints,
     totalStatus: row.status === "FINAL" ? "final" : "partial",
     resultStatus: row.status === "NOT_STARTED" ? "draft" : "published",
     sourceRevision: row.sourceRevision,
     publishedAt: ""
   }));
-  return { status: rankingRows.length ? "READY" : "EMPTY", items: buildOfficialRankingItems(rankingRows) };
+  const badPointsByResultId = new Map(resultRows.map((row) => [row.resultId, row.badPoints]));
+  const items = buildOfficialRankingItems(rankingRows).map((item) => {
+    let badPoints = 0;
+    for (const resultId of collection(item.resultIds)) badPoints += finiteNumber(badPointsByResultId.get(resultId));
+    return { ...item, badPoints };
+  });
+  return { status: rankingRows.length ? "READY" : "EMPTY", items };
 }
 
 function buildSheet(resultRows) {
@@ -343,6 +367,8 @@ function buildSheet(resultRows) {
       horseId: row.horseId,
       horseName: row.horseName,
       total: row.total,
+      badPoints: row.badPoints,
+      status: row.status,
       columns: toSheetColumns(row.suertes),
       ...(opportunitySlots ? { opportunities: collection(colas.opportunities).map(copyOpportunity) } : {})
     });

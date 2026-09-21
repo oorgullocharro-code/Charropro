@@ -129,7 +129,9 @@ function validateResolvedResults(value, errors) {
     for (const row of collection(competition.rows)) {
       const result = byId.get(row.resultId);
       if (!result) errors.push("sheet-result-reference-invalid");
-      else if (row.total !== result.total || stableStringify(row.columns) !== stableStringify(result.columns)) errors.push("sheet-diverges-from-result");
+      else if (row.total !== result.total
+        || (row.badPoints !== undefined && row.badPoints !== result.badPoints)
+        || stableStringify(row.columns) !== stableStringify(result.columns)) errors.push("sheet-diverges-from-result");
       const opportunities = collection(row.opportunities);
       if (opportunities.length && (!opportunitySlots || competition.competitionId !== "coleadero" || result?.participantScope !== "individual")) {
         errors.push("sheet-opportunities-context-invalid");
@@ -209,13 +211,13 @@ function normalizeLive(value = {}) {
 }
 
 function normalizeResult(value = {}) {
-  const result = pick(value, ["resultId", "teamId", "teamName", "participantScope", "participantId", "participantName", "horseId", "horseName", "charreadaId", "charreadaName", "competitionId", "competitionName", "phase", "phaseName", "columns", "penalties", "subtotal", "total", "status", "position"]);
+  const result = pick(value, ["resultId", "teamId", "teamName", "participantScope", "participantId", "participantName", "horseId", "horseName", "charreadaId", "charreadaName", "competitionId", "competitionName", "phase", "phaseName", "columns", "penalties", "badPoints", "subtotal", "total", "status", "position"]);
   result.columns = plain(value.columns) ? finiteRecord(value.columns) : {};
   return result.resultId ? result : null;
 }
 
 function normalizeStanding(value = {}) {
-  const item = pick(value, ["rankingId", "resultId", "resultIds", "position", "scopeType", "competitionId", "competitionName", "charreadaId", "participantScope", "teamId", "teamName", "participantId", "participantName", "horseId", "horseName", "total", "classification", "status", "phase", "phaseName", "tieBreakLabel"]);
+  const item = pick(value, ["rankingId", "resultId", "resultIds", "position", "scopeType", "competitionId", "competitionName", "charreadaId", "participantScope", "teamId", "teamName", "participantId", "participantName", "horseId", "horseName", "total", "badPoints", "classification", "status", "phase", "phaseName", "tieBreakLabel"]);
   return item.resultId || item.resultIds?.length ? item : null;
 }
 
@@ -223,7 +225,7 @@ function normalizeSheetCompetition(value = {}) {
   const competition = pick(value, ["competitionId", "name", "charreadaId", "charreadaName", "phase", "phaseName"]);
   if (positiveInteger(value.opportunitiesPerParticipant)) competition.opportunitiesPerParticipant = positiveInteger(value.opportunitiesPerParticipant);
   competition.rows = collection(value.rows).map((row) => ({
-    ...pick(row, ["resultId", "teamId", "teamName", "participantId", "participantName", "horseId", "horseName", "total"]),
+    ...pick(row, ["resultId", "teamId", "teamName", "participantId", "participantName", "horseId", "horseName", "status", "total", "badPoints"]),
     columns: plain(row.columns) ? finiteRecord(row.columns) : {},
     ...(collection(row.opportunities).length ? { opportunities: collection(row.opportunities).map(normalizeSheetOpportunity).filter(Boolean) } : {})
   })).filter((row) => row.resultId);

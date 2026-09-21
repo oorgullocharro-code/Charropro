@@ -5,9 +5,9 @@ import {
   aggregateCanonicalOfficialTeamTotals,
   getCanonicalOfficialSuerteTotals,
   getCanonicalOfficialTeamTotals
-} from "../js/core/canonicalOfficialResults.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { getTournamentTeams, state } from "../js/core/state.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/canonicalOfficialResults.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { getTournamentTeams, state } from "../js/core/state.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 const tournamentId = "tournament-sabana";
 const charreadaId = "charreada-sabana";

@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import {
   selectActiveCharreadaScoreboard,
   selectPublicProjectionStandingRows
-} from "../js/core/generalScoreboard.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/generalScoreboard.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 function teams(...entries) {
   return entries.map(([id, name]) => ({ id, name }));

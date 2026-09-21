@@ -1,5 +1,5 @@
-import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+import { applyPublicPortalSnapshot } from "../public/publicPortalClient.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { isCanonicalPublicV3 } from "./portalV2Model.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 export function applyPortalV2Snapshot(state, snapshot, options = {}) {
   if (!isCanonicalPublicV3(snapshot)) {

@@ -21,6 +21,19 @@ export const PORTAL_V2_RESULT_COLUMN_LABELS = Object.freeze({
   paso: "Paso de la muerte"
 });
 
+export const PORTAL_V2_PUBLIC_SHEET_TEAM_COLUMNS = Object.freeze([
+  Object.freeze({ key: "cala", label: "C" }),
+  Object.freeze({ key: "piales", label: "P" }),
+  Object.freeze({ key: "colas", label: "C" }),
+  Object.freeze({ key: "toro", label: "T" }),
+  Object.freeze({ key: "lazo", label: "LC" }),
+  Object.freeze({ key: "pial_ruedo", label: "PR" }),
+  Object.freeze({ key: "yegua", label: "Y" }),
+  Object.freeze({ key: "manganas_pie", label: "MP" }),
+  Object.freeze({ key: "manganas_caballo", label: "MC" }),
+  Object.freeze({ key: "paso", label: "PM" })
+]);
+
 export function createPortalV2ResultsModel(snapshot, lifecycleStatus) {
   const competitionNames = new Map((snapshot.sheet?.competitions || []).map((competition) => [competition.competitionId, text(competition.name)]));
   const results = Object.freeze((snapshot.results?.teams || []).map((result) => displayResult(result, competitionNames)));
@@ -62,6 +75,7 @@ function displayResult(result, competitionNames) {
     position: finite(result.position) ? result.position : null,
     subtotal: directNumber(result.subtotal),
     penalties: directNumber(result.penalties),
+    badPoints: directNumber(result.badPoints),
     total: directNumber(result.total),
     columns: displayColumns(result.columns)
   });
@@ -84,6 +98,7 @@ function displayStanding(standing, competitionNames) {
     phaseName: text(standing.phaseName),
     position: directNumber(standing.position),
     total: directNumber(standing.total),
+    badPoints: directNumber(standing.badPoints),
     classification: text(standing.classification),
     status: resultStatus(standing.status),
     tieBreakLabel: text(standing.tieBreakLabel)
@@ -95,6 +110,9 @@ function displaySheetCompetition(competition, resultIdentityById) {
     resultId: text(row.resultId),
     ...displayIdentity({ ...row, ...(resultIdentityById.get(text(row.resultId)) || {}) }),
     total: directNumber(row.total),
+    badPoints: directNumber(row.badPoints),
+    status: resultStatus(row.status || resultIdentityById.get(text(row.resultId))?.status?.value),
+    hasOfficialResult: true,
     columns: displayColumns(row.columns),
     opportunities: displayOpportunities(row.opportunities)
   })));
@@ -194,7 +212,10 @@ function validateDirectParity(results, standings, sheet) {
   for (const competition of sheet) {
     for (const row of competition.rows) {
       const result = resultsById.get(row.resultId);
-      if (!result || result.total !== row.total || !sameColumns(result.columns, row.columns)) {
+      if (!result
+        || result.total !== row.total
+        || result.badPoints !== row.badPoints
+        || !sameColumns(result.columns, row.columns)) {
         return Object.freeze({ valid: false, reason: "results-sheet-diverge" });
       }
     }

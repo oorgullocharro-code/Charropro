@@ -10,7 +10,7 @@ import {
   isLocalFirebaseRuntimeLocation,
   resolveFirebaseRuntime,
   resolveFirebaseRuntimeEnvironment
-} from "../js/core/firebaseRuntime.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/firebaseRuntime.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 const bootstrap = {
   sdkVersion: "12.7.0",

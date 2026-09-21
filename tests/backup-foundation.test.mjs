@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import backupService from "../functions/backupService.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import backupService from "../functions/backupService.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 const {
   BACKUP_FOUNDATION_VERSION,

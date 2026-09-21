@@ -1,4 +1,4 @@
-import { logCharroProVersion } from "./version.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+import { logCharroProVersion } from "./version.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 logCharroProVersion("runtime");
 

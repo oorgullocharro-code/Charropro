@@ -7,27 +7,27 @@ import {
   FMCH_2026_CALA_LEGACY_MEDIOS_LADOS_RULE_IDS,
   FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS,
   migrateCalaAttempt
-} from "../js/data/calaRules.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/data/calaRules.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 import {
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   FMCH_2026_LIBRE_PROFILE_0_6_2,
   resolveEffectiveRules
-} from "../js/data/ruleProfiles.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { SUERTES } from "../js/data/suertes.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { buildRuleProfileContentFingerprint } from "../js/data/ruleProfileTemporalPolicy.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { SUERTES } from "../js/data/suertes.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 import {
   adaptLegacyAttemptToV2,
   buildOfficialScoringAttemptSnapshot
-} from "../js/core/scoringAttempt.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
-import { createOfficialFormatSnapshot } from "../js/core/officialFormatSnapshot.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/scoringAttempt.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
+import { createOfficialFormatSnapshot } from "../js/core/officialFormatSnapshot.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 import {
   buildOfficialTeamSheet,
   resolveCalaMediosLadosPresentation
-} from "../js/core/officialFormat.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/officialFormat.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 import {
   SCORER_DUPLICATE_TAP_WINDOW_MS,
   createScorerDuplicateActionGuard
-} from "../js/core/scorerInteractionLatency.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/scorerInteractionLatency.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 const IDS = FMCH_2026_CALA_MEDIOS_LADOS_RULE_IDS;
 const ALL_GRANULAR = [IDS.RIGHT_OUTBOUND, IDS.RIGHT_RETURN, IDS.LEFT_OUTBOUND, IDS.LEFT_RETURN];

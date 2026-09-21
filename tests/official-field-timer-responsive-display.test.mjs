@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   formatOfficialFieldTimerMs,
   getOfficialFieldTimerFormat
-} from "../js/core/officialFieldTimerDisplay.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/officialFieldTimerDisplay.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 const cases = new Map([
   [14_400, "14.4"],

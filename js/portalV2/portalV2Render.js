@@ -745,7 +745,13 @@ function renderSheetTable(competition) {
   caption.textContent = `${competition.name}: puntuaciones publicadas por ${allIndividual ? "participante" : "equipo"}`;
   const head = element("thead");
   const headRow = element("tr");
-  for (const label of [allIndividual ? "Participante" : "Equipo", ...(showHorse ? ["Caballo"] : []), ...competition.columns.map((column) => column.label), "Total"]) {
+  for (const label of [
+    allIndividual ? "Participante" : "Equipo",
+    ...(showHorse ? ["Caballo"] : []),
+    ...competition.columns.map((column) => column.label),
+    "Total",
+    ...(competition.isPublicTeamSheet ? ["Inf T"] : [])
+  ]) {
     const cell = element("th");
     cell.scope = "col";
     cell.textContent = label;
@@ -755,10 +761,7 @@ function renderSheetTable(competition) {
   const body = element("tbody");
   for (const item of competition.rows) {
     const row = element("tr");
-    const team = element("th");
-    team.scope = "row";
-    team.textContent = item.displayName;
-    row.append(team);
+    row.append(renderSheetTeamCell(item));
     if (showHorse) {
       const horse = element("td");
       horse.textContent = item.participantScope === "individual" ? item.horseName || "—" : "—";
@@ -771,13 +774,29 @@ function renderSheetTable(competition) {
       row.append(cell);
     }
     const total = element("td");
-    total.textContent = formatNumber(item.total);
+    total.textContent = item.hasOfficialResult ? formatNumber(item.total) : "—";
     row.append(total);
+    if (competition.isPublicTeamSheet) {
+      const badPoints = element("td");
+      badPoints.textContent = item.hasOfficialResult ? formatNumber(item.badPoints) : "—";
+      row.append(badPoints);
+    }
     body.append(row);
   }
   table.append(caption, head, body);
   wrapper.append(table);
   return wrapper;
+}
+
+function renderSheetTeamCell(item) {
+  const team = element("th", "portal-v2-sheet-team-cell");
+  team.scope = "row";
+  const logoSlot = element("span", "portal-v2-sheet-team-cell__logo-slot");
+  logoSlot.setAttribute("aria-hidden", "true");
+  const name = element("span", "portal-v2-sheet-team-cell__name");
+  name.textContent = item.displayName;
+  team.append(logoSlot, name);
+  return team;
 }
 
 function renderColeaderoOpportunitySheetTable(competition) {

@@ -1,4 +1,7 @@
-import { createPortalV2ResultsModel } from "./portalV2ResultsModel.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+import {
+  createPortalV2ResultsModel,
+  PORTAL_V2_PUBLIC_SHEET_TEAM_COLUMNS
+} from "./portalV2ResultsModel.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.
@@ -20,12 +23,13 @@ export function createPortalV2ContextModel(snapshot, lifecycleStatus, route = {}
   const standings = Object.freeze(publicData.standings
     .filter(matches)
     .filter((item) => item.scopeType === standingScope));
-  const sheet = Object.freeze(publicData.sheet.filter(matches));
+  const scopedProgram = Object.freeze(program.filter(matches));
+  const sheet = createPublicSheetPresentation(publicData.sheet.filter(matches), scopedProgram);
   const filtered = createPresentationResultsModel(results, standings, sheet, lifecycleStatus, publicData.consistency);
 
   return Object.freeze({
     ...filtered,
-    program: Object.freeze(program.filter(matches)),
+    program: scopedProgram,
     programState: program.length ? "ready" : "no-program-yet",
     competitions,
     phases,
@@ -73,10 +77,70 @@ function displayProgram(items) {
     status: text(item.status),
     order: finiteInteger(item.order),
     participantScope: text(item.participantScope) === "individual" ? "individual" : "team",
-    teamNames: Object.freeze(collection(item.teamNames).map(text).filter(Boolean)),
+    teamIds: Object.freeze(collection(item.teamIds).map(text).filter(Boolean)),
+    teamNames: Object.freeze(collection(item.teamNames).map(text)),
     participantNames: Object.freeze(collection(item.participantNames).map(text).filter(Boolean)),
     horseNames: Object.freeze(collection(item.horseNames).map(text).filter(Boolean))
   })).filter((item) => item.id || item.charreadaId).sort((left, right) => left.order - right.order || left.scheduledDate.localeCompare(right.scheduledDate) || left.scheduledTime.localeCompare(right.scheduledTime) || left.name.localeCompare(right.name)));
+}
+
+function createPublicSheetPresentation(sheet, program) {
+  const programByCharreada = new Map(program.map((item) => [item.charreadaId, item]));
+  return Object.freeze(sheet.map((competition) => {
+    const scheduled = programByCharreada.get(competition.charreadaId);
+    if (!scheduled || scheduled.participantScope !== "team") return competition;
+    const roster = scheduled.teamIds.map((teamId, index) => Object.freeze({
+      teamId,
+      teamName: scheduled.teamNames[index] || ""
+    })).filter((team) => team.teamId);
+    if (!roster.length) return competition;
+
+    const rowsByTeamId = new Map(competition.rows
+      .filter((row) => row.participantScope === "team" && row.teamId)
+      .map((row) => [row.teamId, row]));
+    const rows = [];
+    const includedTeamIds = new Set();
+    for (const team of roster) {
+      const official = rowsByTeamId.get(team.teamId);
+      rows.push(official || pendingTeamSheetRow(team));
+      includedTeamIds.add(team.teamId);
+    }
+    for (const row of competition.rows) {
+      if (row.participantScope !== "team" || !row.teamId || !includedTeamIds.has(row.teamId)) rows.push(row);
+    }
+    return Object.freeze({
+      ...competition,
+      isPublicTeamSheet: true,
+      columns: publicTeamSheetColumns(competition.columns),
+      rows: Object.freeze(rows)
+    });
+  }));
+}
+
+function pendingTeamSheetRow(team) {
+  return Object.freeze({
+    resultId: "",
+    participantScope: "team",
+    teamId: team.teamId,
+    teamName: team.teamName || "Equipo",
+    participantId: "",
+    participantName: "",
+    horseId: "",
+    horseName: "",
+    displayName: team.teamName || "Equipo",
+    total: null,
+    badPoints: null,
+    status: Object.freeze({ value: "NOT_STARTED", label: "Sin resultado" }),
+    hasOfficialResult: false,
+    columns: Object.freeze([]),
+    opportunities: Object.freeze([])
+  });
+}
+
+function publicTeamSheetColumns(columns) {
+  const known = new Set(PORTAL_V2_PUBLIC_SHEET_TEAM_COLUMNS.map((column) => column.key));
+  const extras = collection(columns).filter((column) => !known.has(column.key));
+  return Object.freeze([...PORTAL_V2_PUBLIC_SHEET_TEAM_COLUMNS, ...extras]);
 }
 
 function collectCompetitions(publicData, program) {

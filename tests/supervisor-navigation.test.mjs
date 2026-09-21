@@ -7,7 +7,7 @@ import {
   readSupervisorNavigationRequest,
   resolveSupervisorEntryNavigation,
   shouldUseSupervisorPortalNavigation
-} from "../js/core/supervisorNavigation.js?v=20260920-sabana-phase-compact-visual-parity-deploy-001-v1";
+} from "../js/core/supervisorNavigation.js?v=20260920-public-sabana-v3-canonical-parity-deploy-001-v1";
 
 const overviewFor = (tournamentIds = [], lastTournamentId = "") => resolveSupervisorEntryNavigation({
   tournamentIds,

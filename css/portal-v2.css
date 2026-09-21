@@ -134,6 +134,8 @@
 .portal-v2-table tbody tr:nth-child(even) { background: #fff; }
 .portal-v2-table tbody th { font-weight: 700; overflow-wrap: anywhere; }
 .portal-v2-sheet-table { min-inline-size: 48rem; }
+.portal-v2-sheet-team-cell { align-items: center; display: flex; gap: .5rem; }
+.portal-v2-sheet-team-cell__logo-slot:empty { display: none; }
 .portal-v2-data-state { max-inline-size: 44rem; }
 .portal-v2-data-state h3 { margin: 0 0 .5rem; }
 .portal-v2-data-state p { line-height: 1.55; margin: 0; }
