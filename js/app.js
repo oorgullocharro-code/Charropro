@@ -3428,7 +3428,10 @@ function updateScoresListenerDiagnostics(payload = {}) {
 function shouldRenderForRemoteScores(tournamentId) {
   const currentTournamentId = getTournamentContext().tournamentId || state.activeTournamentId || "";
   if (currentTournamentId !== tournamentId) return false;
-  return ["dashboard", "results", "stats", "scoring", "settings"].includes(state.view);
+  // Results/Sabana renders Canonical Official Results, not the draft score
+  // collection delivered by this listener. Its canonical root listener owns
+  // the subsequent live refresh.
+  return ["dashboard", "stats", "scoring", "settings"].includes(state.view);
 }
 
 function applyRemoteTournamentIndex(tournaments = []) {
@@ -3489,9 +3492,17 @@ function applyRemoteTournamentState(payload = {}) {
   const tournamentId = remoteState?.tournament?.id || remoteState?.activeTournamentId || getTournamentContext().tournamentId;
   const updatedAtMs = Number(payload.updatedAtMs || Date.parse(payload.updatedAt || "") || 0);
   const updatedByClient = payload.updatedBy?.clientId || payload.clientId || "";
-  if (!remoteState || !tournamentId || updatedByClient === firebaseClientId) return;
-  if (updatedAtMs && updatedAtMs <= lastRemoteTournamentStateAt) return;
-  if (updatedAtMs && updatedAtMs <= lastTournamentStatePublishAt) return;
+  if (!remoteState || !tournamentId) return;
+  const canonicalOfficialUpdate = getCanonicalOfficialStateUpdate(tournamentId, remoteState);
+  if (canonicalOfficialUpdate.stale) return;
+  const timestampRejected = Boolean(
+    updatedAtMs && (
+      updatedAtMs <= lastRemoteTournamentStateAt ||
+      updatedAtMs <= lastTournamentStatePublishAt
+    )
+  );
+  if (updatedByClient === firebaseClientId && !canonicalOfficialUpdate.newer) return;
+  if (timestampRejected && !canonicalOfficialUpdate.newer) return;
 
   const localView = state.view;
   const localUi = {
@@ -3505,7 +3516,7 @@ function applyRemoteTournamentState(payload = {}) {
   };
 
   applyingRemoteAppState = true;
-  lastRemoteTournamentStateAt = updatedAtMs || Date.now();
+  lastRemoteTournamentStateAt = Math.max(lastRemoteTournamentStateAt, updatedAtMs || 0);
   const remoteActiveCharreadaId = getRemoteStateActiveCharreadaId(remoteState);
   rememberRemoteActiveCharreada(tournamentId, remoteActiveCharreadaId);
   upsertStateItem(state.tournaments, {
@@ -3545,8 +3556,88 @@ function applyRemoteTournamentState(payload = {}) {
   saveState({ silent: true });
   applyingRemoteAppState = false;
 
+  if (localView === "results" && canonicalOfficialUpdate.newer && refreshResultsLiveRegion()) {
+    logActiveCharreadaUiUpdated(tournamentId, state.activeCharreadaId);
+    return;
+  }
   render({ preserveScoringScroll: localView === "scoring" });
   logActiveCharreadaUiUpdated(tournamentId, state.activeCharreadaId);
+}
+
+function getCanonicalOfficialStateUpdate(tournamentId = "", remoteState = {}, localState = {}) {
+  const localPublishedScores = Array.isArray(localState.publishedScores)
+    ? localState.publishedScores
+    : state.publishedScores;
+  const localOfficialScoreLedger = Object.hasOwn(localState, "officialScoreLedger")
+    ? localState.officialScoreLedger
+    : state.officialScoreLedgers?.[tournamentId];
+  const current = buildCanonicalOfficialState(
+    tournamentId,
+    localPublishedScores,
+    localOfficialScoreLedger
+  );
+  const incoming = buildCanonicalOfficialState(
+    tournamentId,
+    remoteState.publishedScores,
+    remoteState.officialScoreLedger
+  );
+  if (current.signature === incoming.signature) return { changed: false, newer: false, stale: false };
+  if (isCanonicalOfficialStateOlder(current, incoming)) return { changed: true, newer: false, stale: true };
+  return { changed: true, newer: true, stale: false };
+}
+
+function buildCanonicalOfficialState(tournamentId = "", publishedScores = [], officialScoreLedger = {}) {
+  const recordEntries = (Array.isArray(publishedScores) ? publishedScores : [])
+    .filter((record) => (record?.tournament?.id || record?.tournamentId || "") === tournamentId)
+    .filter((record) => record?.id)
+    .map((record) => [record.id, canonicalOfficialRecordStamp(record)])
+    .sort(([left], [right]) => left.localeCompare(right));
+  const ledgerEntries = Object.entries(officialScoreLedger || {})
+    .filter(([, ledger]) => ledger && typeof ledger === "object")
+    .map(([attemptId, ledger]) => [attemptId, canonicalOfficialLedgerStamp(ledger)])
+    .sort(([left], [right]) => left.localeCompare(right));
+  const records = Object.fromEntries(recordEntries);
+  const ledgers = Object.fromEntries(ledgerEntries);
+  return { records, ledgers, signature: JSON.stringify({ records, ledgers }) };
+}
+
+function canonicalOfficialRecordStamp(record = {}) {
+  return JSON.stringify({
+    revision: Number(record.revision || 0),
+    status: record.status || "",
+    officialStatus: record.officialStatus || "",
+    superseded: record.superseded === true,
+    supersededBy: record.supersededBy || "",
+    timestampMs: Number(record.timestampMs || record.updatedAtMs || 0)
+  });
+}
+
+function canonicalOfficialLedgerStamp(ledger = {}) {
+  return JSON.stringify({
+    revision: Number(ledger.revision || 0),
+    activeRecordId: ledger.activeRecordId || "",
+    updatedAtMs: Number(ledger.updatedAtMs || 0)
+  });
+}
+
+function isCanonicalOfficialStateOlder(current = {}, incoming = {}) {
+  const incomingAddsRecord = Object.keys(incoming.records || {}).some((id) => !Object.hasOwn(current.records || {}, id));
+  const incomingAdvancesLedger = Object.keys(incoming.ledgers || {}).some((id) => {
+    const previous = current.ledgers?.[id];
+    if (!previous) return true;
+    return Number(JSON.parse(incoming.ledgers[id]).revision || 0) > Number(JSON.parse(previous).revision || 0);
+  });
+  const incomingAdvances = incomingAddsRecord || incomingAdvancesLedger;
+
+  for (const [id, stamp] of Object.entries(current.records || {})) {
+    if (!Object.hasOwn(incoming.records || {}, id)) return true;
+    if (incoming.records[id] !== stamp && !incomingAdvances) return true;
+  }
+  for (const [id, stamp] of Object.entries(current.ledgers || {})) {
+    if (!Object.hasOwn(incoming.ledgers || {}, id)) return true;
+    if (incoming.ledgers[id] !== stamp && !incomingAdvances) return true;
+  }
+  return false;
 }
 
 function applyPendingScoringLaunch() {
@@ -5409,6 +5500,10 @@ function getTournamentStatusClass(status) {
 }
 
 function renderResults() {
+  return html`<div data-results-live-region>${renderResultsContent()}</div>`;
+}
+
+function renderResultsContent() {
   const tournament = getActiveTournament();
   const tournamentCharreadas = getTournamentCharreadas();
   const competitions = buildResultsCompetitionOptions(tournament, tournamentCharreadas);
@@ -5585,6 +5680,26 @@ function renderResults() {
       </article>
     </section>
   `;
+}
+
+function refreshResultsLiveRegion() {
+  const region = app.querySelector("[data-results-live-region]");
+  const main = app.querySelector(".main");
+  if (!region || !main) return false;
+  const scrollTop = main.scrollTop;
+  const tableScrolls = [...region.querySelectorAll(".table-wrap")].map((table) => ({
+    left: table.scrollLeft,
+    top: table.scrollTop
+  }));
+  region.innerHTML = renderResultsContent();
+  main.scrollTop = scrollTop;
+  region.querySelectorAll(".table-wrap").forEach((table, index) => {
+    const previous = tableScrolls[index];
+    if (!previous) return;
+    table.scrollLeft = previous.left;
+    table.scrollTop = previous.top;
+  });
+  return true;
 }
 
 function buildResultsCompetitionOptions(tournament = getActiveTournament(), charreadas = getTournamentCharreadas()) {
