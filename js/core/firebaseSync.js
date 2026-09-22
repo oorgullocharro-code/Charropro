@@ -1506,19 +1506,29 @@ export async function retryFirebasePublicProjectionJob(tournamentId = "", projec
 async function confirmFirebaseConvergedProjectionJob(tournamentId, initialJob, actor, verification, options = {}) {
   const projectionId = initialJob.projectionId;
   const statePath = `${getFirebasePublicProjectionOutboxJobPath(tournamentId, projectionId)}/state`;
+  const stateRef = ref(getFirebaseDatabase(), statePath);
   let resetState = null;
+  let resetInput = null;
   try {
-    const reset = await runTransaction(ref(getFirebaseDatabase(), statePath), (current) => {
-      const state = normalizePublicProjectionState(current || {}, initialJob.intent);
-      if (state.status === PUBLIC_PROJECTION_STATUSES.PENDING) return undefined;
+    const beforeSnapshot = await get(stateRef);
+    const beforeState = normalizePublicProjectionState(beforeSnapshot.val() || {}, initialJob.intent);
+    const reset = await runTransaction(stateRef, (current) => {
+      const localState = normalizePublicProjectionState(current || {}, initialJob.intent);
+      // A cold client can enter the transaction with an empty cache, which
+      // normalizes to PENDING and would otherwise abort before RTDB evaluates
+      // the durable RETRY_WAIT state.
+      resetInput = beforeState.updatedAtMs > localState.updatedAtMs
+        ? beforeState
+        : localState;
+      if (resetInput.status === PUBLIC_PROJECTION_STATUSES.PENDING) return undefined;
       if ([
         PUBLIC_PROJECTION_STATUSES.DEAD_LETTER,
         PUBLIC_PROJECTION_STATUSES.FAILED,
         PUBLIC_PROJECTION_STATUSES.RETRY_WAIT
-      ].includes(state.status) === false) {
+      ].includes(resetInput.status) === false) {
         return undefined;
       }
-      resetState = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PENDING, state, {
+      resetState = buildPublicProjectionState(PUBLIC_PROJECTION_STATUSES.PENDING, resetInput, {
         nextRetryAt: "",
         nextRetryAtMs: 0,
         lastErrorCode: "",

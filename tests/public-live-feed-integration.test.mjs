@@ -596,6 +596,41 @@ assert.deepEqual(firebase.outboxStateTransitions, ["PENDING", "PROCESSING", "PRO
 assert.equal(firebase.publicSnapshotTransactions, 0, "a converged RETRY_WAIT never writes publicTournaments again");
 firebase.write(pendingManualStatePath, {
   ...firebase.read(pendingManualStatePath),
+  status: "RETRY_WAIT",
+  attempts: 5,
+  clientConfirmedAt: "",
+  projectedAt: "",
+  targetRevision: 0,
+  targetFingerprint: "",
+  nextRetryAt: "",
+  nextRetryAtMs: 0,
+  lastErrorCode: "permission-denied",
+  lastErrorMessage: "Historical projection write was denied.",
+  deadLetterReason: "",
+  leaseOwner: "",
+  leaseExpiresAtMs: 0,
+  retriedBy: { uid: "", name: "", role: "", clientId: "" },
+  updatedBy: pendingRetryActor
+});
+firebase.outboxStateTransitions = [];
+firebase.publicSnapshotTransactions = 0;
+firebase.coldOutboxStateTransactionOnce = true;
+const coldConvergedRetryWait = await restartedFirebaseSync.retryFirebasePublicProjectionJob(
+  tournamentId,
+  pendingManualRetry.projectionId,
+  { uid: "recovery-user", role: "supervisor" },
+  {
+    nowMs: Date.parse("2026-07-28T10:10:44.000Z"),
+    jitter: false
+  }
+);
+assert.equal(coldConvergedRetryWait.ok, true, "a cold RETRY_WAIT transaction still reaches the converged terminal state");
+assert.equal(firebase.read(pendingManualStatePath).status, "CLIENT_CONFIRMED");
+assert.equal(firebase.coldOutboxStateCallbackCount, 2, "the cold callback is followed by the durable CAS callback");
+assert.deepEqual(firebase.outboxStateTransitions, ["PENDING", "PROCESSING", "PROJECTED", "CLIENT_CONFIRMED"]);
+assert.equal(firebase.publicSnapshotTransactions, 0, "a cold converged RETRY_WAIT never republishes publicTournaments");
+firebase.write(pendingManualStatePath, {
+  ...firebase.read(pendingManualStatePath),
   status: "PENDING",
   attempts: 5,
   nextRetryAt: "",
@@ -1325,6 +1360,8 @@ function createFirebaseTestAdapter() {
     outboxStateWrites: [],
     publicSnapshotTransactions: 0,
     requireFreshOutboxTransition: false,
+    coldOutboxStateTransactionOnce: false,
+    coldOutboxStateCallbackCount: 0,
     failPublicTransactions: false,
     failAfterPublicCommitOnce: false,
     failOutboxTransactionsOnce: false,
@@ -1339,6 +1376,8 @@ function createFirebaseTestAdapter() {
       this.outboxStateWrites = [];
       this.publicSnapshotTransactions = 0;
       this.requireFreshOutboxTransition = false;
+      this.coldOutboxStateTransactionOnce = false;
+      this.coldOutboxStateCallbackCount = 0;
       this.failPublicTransactions = false;
       this.failAfterPublicCommitOnce = false;
       this.failOutboxTransactionsOnce = false;
@@ -1454,6 +1493,16 @@ function createFirebaseTestAdapter() {
         }
         : serverCurrent;
       this.lastFreshOutboxStatePath = "";
+      const coldOutboxStateTransaction = this.coldOutboxStateTransactionOnce
+        && target.path.includes("/projectionOutbox/")
+        && target.path.endsWith("/state");
+      if (coldOutboxStateTransaction) {
+        this.coldOutboxStateTransactionOnce = false;
+        this.coldOutboxStateCallbackCount += 1;
+        const coldNext = handler(null);
+        if (coldNext === undefined) return { committed: false, snapshot: snapshot(null) };
+      }
+      if (coldOutboxStateTransaction) this.coldOutboxStateCallbackCount += 1;
       const next = handler(current);
       if (next === undefined) {
         return { committed: false, snapshot: snapshot(current) };
