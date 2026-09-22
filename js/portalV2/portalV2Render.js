@@ -728,16 +728,16 @@ function renderSheet(model) {
     if (!competition.rows.length) continue;
     const section = element("section", "portal-v2-sheet__competition");
     const title = element("h3", "portal-v2-group-title");
-    title.textContent = getPublicSheetTitle(competition, model.context.selectedPhaseId);
+    title.textContent = getPublicSheetTitle(model.context.sheetPresentation);
     section.append(title, renderSheetTable(competition));
     container.append(section);
   }
   return container;
 }
 
-export function getPublicSheetTitle(competition = {}, selectedPhaseId = "") {
-  const phaseName = typeof competition.phaseName === "string" ? competition.phaseName.trim() : "";
-  return selectedPhaseId && phaseName ? `Sábana — ${phaseName}` : "Sábana General";
+export function getPublicSheetTitle(presentation = {}) {
+  const phaseName = typeof presentation.phaseName === "string" ? presentation.phaseName.trim() : "";
+  return presentation.scope === "phase" && phaseName ? `Sábana — ${phaseName}` : "Sábana General";
 }
 
 function renderSheetTable(competition) {

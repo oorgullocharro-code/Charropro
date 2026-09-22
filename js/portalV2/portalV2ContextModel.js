@@ -26,6 +26,12 @@ export function createPortalV2ContextModel(snapshot, lifecycleStatus, route = {}
   const scopedProgram = Object.freeze(program.filter(matches));
   const sheet = createPublicSheetPresentation(publicData.sheet.filter(matches), scopedProgram);
   const filtered = createPresentationResultsModel(results, standings, sheet, lifecycleStatus, publicData.consistency);
+  const selectedPhase = phases.find((item) => item.id === selectedPhaseId) || null;
+  const sheetPresentation = resolveSheetPresentationContext({
+    selectedCompetitionId,
+    selectedPhase,
+    sheet
+  });
 
   return Object.freeze({
     ...filtered,
@@ -36,12 +42,32 @@ export function createPortalV2ContextModel(snapshot, lifecycleStatus, route = {}
     selectedCompetitionId,
     selectedPhaseId,
     selectedCompetition: competitions.find((item) => item.id === selectedCompetitionId) || null,
-    selectedPhase: phases.find((item) => item.id === selectedPhaseId) || null,
+    selectedPhase,
+    sheetPresentation,
     hasInvalidSelection,
     phaseContextAvailable: phases.length > 0,
-    currentPhase: null
+    currentPhase: sheetPresentation.scope === "phase" ? sheetPresentation : null
   });
 }
+
+function resolveSheetPresentationContext({ selectedCompetitionId, selectedPhase, sheet }) {
+  if (selectedPhase?.id && selectedPhase.name) {
+    return Object.freeze({ scope: "phase", phaseId: selectedPhase.id, phaseName: selectedPhase.name });
+  }
+  if (!selectedCompetitionId) return GENERAL_SHEET_PRESENTATION;
+
+  const phases = new Map();
+  for (const competition of sheet) {
+    const phaseId = text(competition.phaseId);
+    const phaseName = text(competition.phaseName);
+    if (phaseId && phaseName && !phases.has(phaseId)) phases.set(phaseId, phaseName);
+  }
+  if (phases.size !== 1) return GENERAL_SHEET_PRESENTATION;
+  const [[phaseId, phaseName]] = phases;
+  return Object.freeze({ scope: "phase", phaseId, phaseName });
+}
+
+const GENERAL_SHEET_PRESENTATION = Object.freeze({ scope: "general", phaseId: "", phaseName: "" });
 
 function createPresentationResultsModel(results, standings, sheet, lifecycleStatus, consistency) {
   const resultGroups = groupResults(results);

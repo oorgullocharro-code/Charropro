@@ -69,18 +69,31 @@ test("phase filtering keeps the matching roster and results isolated", () => {
   assert.equal(model.context.sheet[0].rows[0].total, 20);
 });
 
-test("public sheet title uses the selected phase name without changing sheet data", () => {
+test("public sheet title uses resolved presentation context without changing sheet data", () => {
   const snapshot = buildBrowserProjection(fixture(), { tournamentId: TOURNAMENT_ID, nowMs: Date.parse("2026-09-20T12:00:00.000Z") });
   const phaseOne = createPortalV2Model(snapshot, { availability: "ready", view: "sabana", phaseId: "phase-one" });
   const phaseTwo = createPortalV2Model(snapshot, { availability: "ready", view: "sabana", phaseId: "phase-two" });
   const general = createPortalV2Model(snapshot, { availability: "ready", view: "sabana" });
 
-  assert.equal(getPublicSheetTitle(phaseOne.context.sheet[0], phaseOne.context.selectedPhaseId), "Sábana — Fase 1");
-  assert.equal(getPublicSheetTitle(phaseTwo.context.sheet[0], phaseTwo.context.selectedPhaseId), "Sábana — Final");
-  assert.equal(getPublicSheetTitle({ phaseName: "Eliminatoria" }, "phase-eliminatoria"), "Sábana — Eliminatoria");
-  assert.equal(getPublicSheetTitle({ phaseName: "Semifinal" }, "phase-semifinal"), "Sábana — Semifinal");
-  assert.equal(getPublicSheetTitle({ phaseName: "Fase personalizada" }, "phase-custom"), "Sábana — Fase personalizada");
-  assert.equal(getPublicSheetTitle(general.context.sheet[0], general.context.selectedPhaseId), "Sábana General");
+  assert.equal(getPublicSheetTitle(phaseOne.context.sheetPresentation), "Sábana — Fase 1");
+  assert.equal(getPublicSheetTitle(phaseTwo.context.sheetPresentation), "Sábana — Final");
+  assert.equal(getPublicSheetTitle(general.context.sheetPresentation), "Sábana General");
+
+  const customSource = fixture();
+  const finalCharreada = customSource.tournament.charreadas.find((item) => item.id === "charreada-two");
+  finalCharreada.competitionId = "equipos-final";
+  finalCharreada.phaseName = "Eliminatoria A";
+  customSource.tournament.publishedScores.find((item) => item.id === "final-cala").competitionId = "equipos-final";
+  const customSnapshot = buildBrowserProjection(customSource, { tournamentId: TOURNAMENT_ID, nowMs: Date.parse("2026-09-20T12:00:00.000Z") });
+  const competitionScoped = createPortalV2Model(customSnapshot, { availability: "ready", view: "sabana", competitionId: "equipos-final" });
+  assert.equal(competitionScoped.context.selectedPhaseId, "", "the presentation context does not require a raw phase route");
+  assert.deepEqual(competitionScoped.context.sheetPresentation, { scope: "phase", phaseId: "phase-two", phaseName: "Eliminatoria A" });
+  assert.equal(getPublicSheetTitle(competitionScoped.context.sheetPresentation), "Sábana — Eliminatoria A");
+
+  finalCharreada.phaseName = "Semifinal";
+  const liveSnapshot = buildBrowserProjection(customSource, { tournamentId: TOURNAMENT_ID, nowMs: Date.parse("2026-09-20T12:01:00.000Z") });
+  const afterLiveUpdate = createPortalV2Model(liveSnapshot, { availability: "ready", view: "sabana", competitionId: "equipos-final" });
+  assert.equal(getPublicSheetTitle(afterLiveUpdate.context.sheetPresentation), "Sábana — Semifinal");
   assert.equal(phaseOne.context.sheet[0].rows[0].total, 28, "title rendering does not alter official sporting data");
 });
 
