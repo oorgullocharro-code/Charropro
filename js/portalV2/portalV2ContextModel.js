@@ -25,13 +25,14 @@ export function createPortalV2ContextModel(snapshot, lifecycleStatus, route = {}
     .filter((item) => item.scopeType === standingScope));
   const scopedProgram = Object.freeze(program.filter(matches));
   const sheet = createPublicSheetPresentation(publicData.sheet.filter(matches), scopedProgram);
-  const filtered = createPresentationResultsModel(results, standings, sheet, lifecycleStatus, publicData.consistency);
   const selectedPhase = phases.find((item) => item.id === selectedPhaseId) || null;
   const sheetPresentation = resolveSheetPresentationContext({
     selectedCompetitionId,
     selectedPhase,
     sheet
   });
+  const presentedSheet = applySheetPresentationContext(sheet, sheetPresentation);
+  const filtered = createPresentationResultsModel(results, standings, presentedSheet, lifecycleStatus, publicData.consistency);
 
   return Object.freeze({
     ...filtered,
@@ -68,6 +69,25 @@ function resolveSheetPresentationContext({ selectedCompetitionId, selectedPhase,
 }
 
 const GENERAL_SHEET_PRESENTATION = Object.freeze({ scope: "general", phaseId: "", phaseName: "" });
+
+function applySheetPresentationContext(sheet, pagePresentation) {
+  return Object.freeze(sheet.map((competition) => Object.freeze({
+    ...competition,
+    sheetPresentation: resolveSheetCompetitionPresentation(competition, pagePresentation)
+  })));
+}
+
+function resolveSheetCompetitionPresentation(competition, pagePresentation) {
+  const phaseName = text(competition.phaseName);
+  if (phaseName) {
+    return Object.freeze({
+      scope: "phase",
+      phaseId: text(competition.phaseId),
+      phaseName
+    });
+  }
+  return pagePresentation.scope === "phase" ? pagePresentation : GENERAL_SHEET_PRESENTATION;
+}
 
 function createPresentationResultsModel(results, standings, sheet, lifecycleStatus, consistency) {
   const resultGroups = groupResults(results);

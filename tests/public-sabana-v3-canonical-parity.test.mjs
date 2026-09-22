@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 import { getPublicSheetTitle } from "../js/portalV2/portalV2Render.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
@@ -73,11 +74,25 @@ test("public sheet title uses resolved presentation context without changing she
   const snapshot = buildBrowserProjection(fixture(), { tournamentId: TOURNAMENT_ID, nowMs: Date.parse("2026-09-20T12:00:00.000Z") });
   const phaseOne = createPortalV2Model(snapshot, { availability: "ready", view: "sabana", phaseId: "phase-one" });
   const phaseTwo = createPortalV2Model(snapshot, { availability: "ready", view: "sabana", phaseId: "phase-two" });
-  const general = createPortalV2Model(snapshot, { availability: "ready", view: "sabana" });
 
-  assert.equal(getPublicSheetTitle(phaseOne.context.sheetPresentation), "Sábana — Fase 1");
-  assert.equal(getPublicSheetTitle(phaseTwo.context.sheetPresentation), "Sábana — Final");
-  assert.equal(getPublicSheetTitle(general.context.sheetPresentation), "Sábana General");
+  assert.equal(getPublicSheetTitle(phaseOne.context.sheet[0].sheetPresentation), "Sábana — Fase 1");
+  assert.equal(getPublicSheetTitle(phaseTwo.context.sheet[0].sheetPresentation), "Sábana — Final");
+
+  const productionShape = phaseNamesWithoutIds(snapshot, ["Fase 1", "Fase 2"]);
+  const general = createPortalV2Model(productionShape, { availability: "ready", view: "sabana" });
+  assert.equal(general.context.selectedPhaseId, "");
+  assert.deepEqual(general.context.sheet.map((competition) => competition.sheetPresentation), [
+    { scope: "phase", phaseId: "", phaseName: "Fase 1" },
+    { scope: "phase", phaseId: "", phaseName: "Fase 2" }
+  ]);
+  assert.deepEqual(general.context.sheet.map((competition) => getPublicSheetTitle(competition.sheetPresentation)), [
+    "Sábana — Fase 1",
+    "Sábana — Fase 2"
+  ]);
+
+  const trueGeneral = phaseNamesWithoutIds(snapshot, [""]);
+  const generalOnly = createPortalV2Model(trueGeneral, { availability: "ready", view: "sabana" });
+  assert.equal(getPublicSheetTitle(generalOnly.context.sheet[0].sheetPresentation), "Sábana General");
 
   const customSource = fixture();
   const finalCharreada = customSource.tournament.charreadas.find((item) => item.id === "charreada-two");
@@ -87,15 +102,25 @@ test("public sheet title uses resolved presentation context without changing she
   const customSnapshot = buildBrowserProjection(customSource, { tournamentId: TOURNAMENT_ID, nowMs: Date.parse("2026-09-20T12:00:00.000Z") });
   const competitionScoped = createPortalV2Model(customSnapshot, { availability: "ready", view: "sabana", competitionId: "equipos-final" });
   assert.equal(competitionScoped.context.selectedPhaseId, "", "the presentation context does not require a raw phase route");
-  assert.deepEqual(competitionScoped.context.sheetPresentation, { scope: "phase", phaseId: "phase-two", phaseName: "Eliminatoria A" });
-  assert.equal(getPublicSheetTitle(competitionScoped.context.sheetPresentation), "Sábana — Eliminatoria A");
+  assert.deepEqual(competitionScoped.context.sheet[0].sheetPresentation, { scope: "phase", phaseId: "phase-two", phaseName: "Eliminatoria A" });
+  assert.equal(getPublicSheetTitle(competitionScoped.context.sheet[0].sheetPresentation), "Sábana — Eliminatoria A");
 
   finalCharreada.phaseName = "Semifinal";
   const liveSnapshot = buildBrowserProjection(customSource, { tournamentId: TOURNAMENT_ID, nowMs: Date.parse("2026-09-20T12:01:00.000Z") });
   const afterLiveUpdate = createPortalV2Model(liveSnapshot, { availability: "ready", view: "sabana", competitionId: "equipos-final" });
-  assert.equal(getPublicSheetTitle(afterLiveUpdate.context.sheetPresentation), "Sábana — Semifinal");
+  assert.equal(getPublicSheetTitle(afterLiveUpdate.context.sheet[0].sheetPresentation), "Sábana — Semifinal");
   assert.equal(phaseOne.context.sheet[0].rows[0].total, 28, "title rendering does not alter official sporting data");
 });
+
+function phaseNamesWithoutIds(snapshot, phaseNames) {
+  const next = structuredClone(snapshot);
+  for (const [index, competition] of next.sheet.competitions.entries()) {
+    competition.phase = "";
+    competition.phaseName = phaseNames[index] || "";
+  }
+  next.sheet.competitions = next.sheet.competitions.slice(0, phaseNames.length);
+  return createCanonicalPublicTournamentData(next);
+}
 
 test("public sheet renderer keeps the empty logo slot structural and presentation-only", async () => {
   const [contextSource, rendererSource, css] = await Promise.all([

@@ -728,7 +728,7 @@ function renderSheet(model) {
     if (!competition.rows.length) continue;
     const section = element("section", "portal-v2-sheet__competition");
     const title = element("h3", "portal-v2-group-title");
-    title.textContent = getPublicSheetTitle(model.context.sheetPresentation);
+    title.textContent = getPublicSheetTitle(competition.sheetPresentation);
     section.append(title, renderSheetTable(competition));
     container.append(section);
   }
