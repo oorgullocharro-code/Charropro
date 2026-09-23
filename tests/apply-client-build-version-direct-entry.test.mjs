@@ -9,15 +9,16 @@ const releaseRoot = join(temp, "release");
 const entrypoint = join(temp, "applyClientBuildVersion.mjs");
 const sourceEntrypoint = fileURLToPath(new URL("../tools/release/applyClientBuildVersion.mjs", import.meta.url));
 const build = "TEST_RELEASE_BUILD";
+const staleImport = (specifier) => ["import", ` \"${specifier}?v=`, "OLD_BUILD", '\";'].join("");
 
 try {
   mkdirSync(join(releaseRoot, "functions"), { recursive: true });
   mkdirSync(join(releaseRoot, "js", "core"), { recursive: true });
   mkdirSync(join(releaseRoot, "js", "views"), { recursive: true });
   writeFileSync(join(releaseRoot, "functions", "configuration.defaults.json"), JSON.stringify({ values: { system: { appVersion: build } } }));
-  writeFileSync(join(releaseRoot, "js", "views", "cronometro-control.js"), 'import "../core/firebaseSync.js?v=OLD_BUILD";');
-  writeFileSync(join(releaseRoot, "js", "core", "firebaseSync.js"), 'import "./timerRules.js?v=OLD_BUILD";');
-  writeFileSync(join(releaseRoot, "js", "core", "timerRules.js"), 'import "./officialTimerOrchestration.js?v=OLD_BUILD";');
+  writeFileSync(join(releaseRoot, "js", "views", "cronometro-control.js"), staleImport("../core/firebaseSync.js"));
+  writeFileSync(join(releaseRoot, "js", "core", "firebaseSync.js"), staleImport("./timerRules.js"));
+  writeFileSync(join(releaseRoot, "js", "core", "timerRules.js"), staleImport("./officialTimerOrchestration.js"));
   writeFileSync(join(releaseRoot, "js", "core", "officialTimerOrchestration.js"), "export const timerOrchestration = true;");
   symlinkSync(sourceEntrypoint, entrypoint);
 

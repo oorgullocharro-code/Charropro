@@ -10,6 +10,7 @@ const scripts = new URL("../scripts/hostinger/", import.meta.url);
 const temp = mkdtempSync(join(tmpdir(), "charropro-hostinger-test-"));
 const build = "TEST_BUILD_1";
 const checksum = "a".repeat(64);
+const staleModuleImport = ["import", ' "./core.js?v=', "OLD_BUILD", '"; export const ok = true;'].join("");
 
 for (const name of ["verify-package.sh", "deploy-client.sh", "rollback-client.sh", "smoke-client.sh", "lib.sh"]) {
   const source = readFileSync(new URL(name, scripts), "utf8");
@@ -42,7 +43,7 @@ const staleModuleBuild = makePackage("stale-module-build", {
   "index.html": "index",
   "functions/configuration.defaults.json": JSON.stringify({ values: { system: { appVersion: build } }, checksum }),
   "assets/asset.txt": "asset",
-  "js/app.js": 'import "./core.js?v=OLD_BUILD"; export const ok = true;',
+  "js/app.js": staleModuleImport,
   "js/core.js": "export const core = true;"
 });
 const staleModuleVerification = run("verify-package.sh", ["--package", staleModuleBuild, "--expected-build", build, "--expected-sha256", sha(staleModuleBuild)]);
