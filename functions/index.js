@@ -1063,6 +1063,10 @@ async function deliverOfficialScoreFanout(tournamentId, recordId, job) {
   const updates = buildOfficialScoreFanoutUpdates(tournamentId, job);
   if (!updates) throw new Error("official-score-fanout-invalid");
   await admin.database().ref(CHARROPRO_ROOT_PATH).update(updates);
+  const projection = await deliverPublicProjectionFromFunction(tournamentId, job.projectionIntent);
+  if (!projection.ok) {
+    throw new Error(`official-score-public-projection-${projection.reason || "pending"}`);
+  }
   const jobRef = admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/officialScoreFanout/${recordId}`);
   await jobRef.transaction((current) => {
     if (!current || current.status === "DELIVERED") return current;
@@ -1072,6 +1076,57 @@ async function deliverOfficialScoreFanout(tournamentId, recordId, job) {
     );
   }, undefined, false);
 }
+
+let publicProjectionDeliveryRuntimePromise = null;
+
+async function getPublicProjectionDeliveryRuntime() {
+  if (!publicProjectionDeliveryRuntimePromise) {
+    publicProjectionDeliveryRuntimePromise = import("./publicProjectionServerDelivery.mjs")
+      .then(({ createPublicProjectionServerDelivery }) => createPublicProjectionServerDelivery({
+        read: async (path) => (await admin.database().ref(path).get()).val() || null,
+        transaction: async (path, updater) => {
+          const transaction = await admin.database().ref(path).transaction((current) => updater(current), undefined, false);
+          return { committed: transaction.committed, value: transaction.snapshot.val() || null };
+        }
+      }));
+  }
+  return publicProjectionDeliveryRuntimePromise;
+}
+
+async function deliverPublicProjectionFromFunction(tournamentId, intent) {
+  const runtime = await getPublicProjectionDeliveryRuntime();
+  return runtime.deliver(tournamentId, intent);
+}
+
+// This bounded server recovery closes historical or retried intents even when
+// no browser, Recovery Center, or privileged user is connected.
+exports.reconcileCharroProPublicProjectionOutbox = onSchedule({
+  schedule: "every 5 minutes",
+  timeZone: FUNCTIONS_CONFIG.backupTimeZone,
+  region: FUNCTIONS_REGION,
+  memory: FUNCTIONS_CONFIG.scheduleMemory,
+  timeoutSeconds: APPLICATION_CONFIG.timeouts.workerSeconds
+}, async () => {
+  const snapshot = await admin.database().ref(PROJECTION_OUTBOX_PATH).get();
+  const outbox = snapshot.val() || {};
+  const candidates = [];
+  for (const [tournamentId, jobs] of Object.entries(outbox)) {
+    for (const job of Object.values(jobs || {})) {
+      if (job?.intent?.projectionId) candidates.push({ tournamentId, intent: job.intent });
+      if (candidates.length >= 100) break;
+    }
+    if (candidates.length >= 100) break;
+  }
+  const results = [];
+  for (const candidate of candidates) {
+    results.push(await deliverPublicProjectionFromFunction(candidate.tournamentId, candidate.intent));
+  }
+  return {
+    scanned: candidates.length,
+    confirmed: results.filter((result) => result.ok).length,
+    pending: results.filter((result) => !result.ok).length
+  };
+});
 
 async function markFanoutFailure(tournamentId, recordId, error) {
   const jobRef = admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/officialScoreFanout/${recordId}`);

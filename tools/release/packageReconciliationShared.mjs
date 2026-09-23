@@ -29,7 +29,11 @@ function visit(file) {
     visit(resolve(dirname(file), match[1].split('?')[0]));
   }
 }
+// The worker and the browser must share both the V3 builder and the durable
+// outbox state machine. Keeping both entries here makes drift a packaging
+// failure instead of a runtime authorization difference.
 visit(resolve(root, 'js/public/publicProjection.js'));
+visit(resolve(root, 'js/core/publicProjectionOutbox.js'));
 emit('package.json', JSON.stringify({ type: 'module', private: true }, null, 2) + '\n');
 emit('manifest.json', JSON.stringify(manifest, null, 2) + '\n');
 console.log(`RECONCILIATION_SHARED=${check ? 'VERIFIED' : 'PACKAGED'} FILES=${Object.keys(manifest).length}`);

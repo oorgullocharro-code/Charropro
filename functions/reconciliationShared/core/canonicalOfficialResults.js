@@ -105,15 +105,18 @@ export function getCanonicalOfficialTeamTotals(source = {}, scope = {}) {
       && (!teamId || identity.teamId === teamId || identity.participantId === teamId);
   });
   const suerteTotals = {};
+  const suerteBadPoints = {};
   let scoreTotal = 0;
   let badPoints = 0;
 
   for (const item of currentRecords) {
     const identity = getOfficialRecordIdentity(item);
     const value = getOfficialRecordValue(item);
+    const recordBadPoints = getOfficialRecordBadPoints(item);
     suerteTotals[identity.suerteId] = (suerteTotals[identity.suerteId] || 0) + value;
+    suerteBadPoints[identity.suerteId] = (suerteBadPoints[identity.suerteId] || 0) + recordBadPoints;
     scoreTotal += value;
-    badPoints += getOfficialRecordBadPoints(item);
+    badPoints += recordBadPoints;
   }
 
   const adjustment = getCharreadaAdjustment(source.charreadas, charreadaId, teamId);
@@ -123,9 +126,62 @@ export function getCanonicalOfficialTeamTotals(source = {}, scope = {}) {
     hasOfficialRecords: currentRecords.length > 0,
     currentRecords,
     suerteTotals,
+    suerteBadPoints,
     scoreTotal,
     adjustment,
     total: scoreTotal + adjustment,
+    badPoints
+  };
+}
+
+export function getCanonicalOfficialSuerteTotals(teamTotals = {}, suerteId = "") {
+  const id = cleanId(suerteId);
+  const totals = record(teamTotals.suerteTotals);
+  const badPoints = record(teamTotals.suerteBadPoints);
+  const hasOfficialResult = Boolean(id) && Object.prototype.hasOwnProperty.call(totals, id);
+  return {
+    hasOfficialResult,
+    total: hasOfficialResult ? firstFinite([totals[id]], 0) : null,
+    badPoints: hasOfficialResult ? firstFinite([badPoints[id]], 0) : null
+  };
+}
+
+export function aggregateCanonicalOfficialTeamTotals(values = []) {
+  const suerteTotals = {};
+  const suerteBadPoints = {};
+  let hasOfficialRecords = false;
+  let scoreTotal = 0;
+  let adjustment = 0;
+  let total = 0;
+  let badPoints = 0;
+
+  for (const value of Array.isArray(values) ? values : []) {
+    const totals = record(value);
+    hasOfficialRecords ||= totals.hasOfficialRecords === true;
+    scoreTotal += firstFinite([totals.scoreTotal], 0);
+    adjustment += firstFinite([totals.adjustment], 0);
+    total += firstFinite([totals.total], 0);
+    badPoints += firstFinite([totals.badPoints], 0);
+    for (const [suerteId, score] of Object.entries(record(totals.suerteTotals))) {
+      const id = cleanId(suerteId);
+      if (!id) continue;
+      suerteTotals[id] = (suerteTotals[id] || 0) + firstFinite([score], 0);
+    }
+    for (const [suerteId, points] of Object.entries(record(totals.suerteBadPoints))) {
+      const id = cleanId(suerteId);
+      if (!id) continue;
+      suerteBadPoints[id] = (suerteBadPoints[id] || 0) + firstFinite([points], 0);
+    }
+  }
+
+  return {
+    contractVersion: CANONICAL_OFFICIAL_RESULTS_VERSION,
+    hasOfficialRecords,
+    suerteTotals,
+    suerteBadPoints,
+    scoreTotal,
+    adjustment,
+    total,
     badPoints
   };
 }
