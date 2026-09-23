@@ -21,19 +21,33 @@ const validPackage = makePackage("valid", {
   "index.html": '<script type="module" src="./js/core/clientBootstrap.js" data-charropro-entry="./js/app.js"></script>',
   "functions/configuration.defaults.json": JSON.stringify({ values: { system: { appVersion: build } }, checksum }),
   "assets/asset.txt": "asset",
-  "js/app.js": "export const ok = true;"
+  "js/app.js": `import "./core.js?v=${build}"; export const ok = true;`,
+  "js/core.js": "export const core = true;"
 }, { explicitDirectories: true });
 const validSha = sha(validPackage);
 const validVerification = run("verify-package.sh", ["--package", validPackage, "--expected-build", build, "--expected-sha256", validSha, "--expected-checksum", checksum]);
 assert.equal(validVerification.status, 0, validVerification.stderr);
-assert.match(validVerification.stdout, /ZIP_TOTAL_ENTRIES=7/);
-assert.match(validVerification.stdout, /ZIP_FILE_COUNT=4/);
+assert.match(validVerification.stdout, /CLIENT_MODULE_VERSION_GATE=PASS/);
+assert.match(validVerification.stdout, /CLIENT_MODULE_VERSIONED_IMPORTS=1/);
+assert.match(validVerification.stdout, /ZIP_TOTAL_ENTRIES=8/);
+assert.match(validVerification.stdout, /ZIP_FILE_COUNT=5/);
 assert.match(validVerification.stdout, /ZIP_DIRECTORY_COUNT=3/);
 assert.match(validVerification.stdout, /ZIP_FILE_INVENTORY_SHA256=[a-f0-9]{64}/);
-assert.match(validVerification.stdout, /PACKAGE_FILES=4/);
+assert.match(validVerification.stdout, /PACKAGE_FILES=5/);
 assert.equal(run("verify-package.sh", ["--package", validPackage, "--expected-build", build, "--expected-sha256", validSha, "--expected-checksum", checksum]).stdout, validVerification.stdout, "repeated verification is deterministic");
 assert.notEqual(run("verify-package.sh", ["--package", validPackage, "--expected-build", build, "--expected-sha256", "b".repeat(64)]).status, 0, "SHA mismatch is rejected");
 assert.notEqual(run("verify-package.sh", ["--package", validPackage, "--expected-build", "OTHER_BUILD", "--expected-sha256", validSha]).status, 0, "build mismatch is rejected");
+
+const staleModuleBuild = makePackage("stale-module-build", {
+  "index.html": "index",
+  "functions/configuration.defaults.json": JSON.stringify({ values: { system: { appVersion: build } }, checksum }),
+  "assets/asset.txt": "asset",
+  "js/app.js": 'import "./core.js?v=OLD_BUILD"; export const ok = true;',
+  "js/core.js": "export const core = true;"
+});
+const staleModuleVerification = run("verify-package.sh", ["--package", staleModuleBuild, "--expected-build", build, "--expected-sha256", sha(staleModuleBuild)]);
+assert.notEqual(staleModuleVerification.status, 0, "a stale module cache version is rejected");
+assert.match(staleModuleVerification.stderr, /package-stale-module-build:js\/app\.js:OLD_BUILD/);
 
 const missingIndex = makePackage("missing-index", {
   "functions/configuration.defaults.json": JSON.stringify({ values: { system: { appVersion: build } }, checksum }),
@@ -79,14 +93,14 @@ mkdirSync(extracted, { recursive: true });
 execFileSync("unzip", ["-q", validPackage, "-d", extracted]);
 const extractedVerification = run("verify-package.sh", ["--package", validPackage, "--expected-build", build, "--expected-sha256", validSha, "--expected-checksum", checksum, "--extracted-dir", extracted]);
 assert.equal(extractedVerification.status, 0, extractedVerification.stderr);
-assert.match(extractedVerification.stdout, /EXTRACTED_FILE_COUNT=4/);
+assert.match(extractedVerification.stdout, /EXTRACTED_FILE_COUNT=5/);
 assert.match(extractedVerification.stdout, /ZIP_FILE_INVENTORY=PASS/);
 
 rmSync(join(extracted, "js", "app.js"));
 assert.notEqual(run("verify-package.sh", ["--package", validPackage, "--expected-build", build, "--expected-sha256", validSha, "--extracted-dir", extracted]).status, 0, "missing extracted file is rejected");
 writeFileSync(join(extracted, "js", "replacement.js"), "export const replacement = true;");
 assert.notEqual(run("verify-package.sh", ["--package", validPackage, "--expected-build", build, "--expected-sha256", validSha, "--extracted-dir", extracted]).status, 0, "same count with a different path is rejected");
-writeFileSync(join(extracted, "js", "app.js"), "export const ok = true;");
+writeFileSync(join(extracted, "js", "app.js"), `import "./core.js?v=${build}"; export const ok = true;`);
 writeFileSync(join(extracted, "extra.js"), "export const extra = true;");
 assert.notEqual(run("verify-package.sh", ["--package", validPackage, "--expected-build", build, "--expected-sha256", validSha, "--extracted-dir", extracted]).status, 0, "extra extracted file is rejected");
 rmSync(join(extracted, "extra.js"));

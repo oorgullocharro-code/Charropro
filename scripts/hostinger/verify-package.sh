@@ -82,6 +82,19 @@ if [[ -n "$expected_checksum" ]]; then
   [[ "$package_checksum" == "$expected_checksum" ]] || die "package-checksum-mismatch"
 fi
 
+versioned_client_import_count=0
+for entry in "${file_entries[@]}"; do
+  [[ "$entry" =~ ^js/.*\.(js|mjs)$ ]] || continue
+  versioned_imports="$(unzip -p "$package" "$entry" | grep -oE '\?v=[A-Za-z0-9._-]+' || true)"
+  [[ -n "$versioned_imports" ]] || continue
+  while IFS= read -r versioned_import; do
+    [[ -n "$versioned_import" ]] || continue
+    versioned_build="${versioned_import#\?v=}"
+    [[ "$versioned_build" == "$expected_build" ]] || die "package-stale-module-build:${entry}:${versioned_build}"
+    versioned_client_import_count=$((versioned_client_import_count + 1))
+  done <<< "$versioned_imports"
+done
+
 if [[ -n "$extracted_dir" ]]; then
   [[ -d "$extracted_dir" ]] || die "extracted-directory-not-found"
   extracted_symlink="$(find "$extracted_dir" -type l -print -quit)"
@@ -103,6 +116,8 @@ printf 'PACKAGE=%s\n' "$package"
 printf 'PACKAGE_SHA256=%s\n' "$actual_sha256"
 printf 'PACKAGE_BUILD=%s\n' "$package_build"
 printf 'PACKAGE_CHECKSUM=%s\n' "$package_checksum"
+printf 'CLIENT_MODULE_VERSION_GATE=PASS\n'
+printf 'CLIENT_MODULE_VERSIONED_IMPORTS=%s\n' "$versioned_client_import_count"
 printf 'ZIP_TOTAL_ENTRIES=%s\n' "${#entries[@]}"
 printf 'ZIP_FILE_COUNT=%s\n' "${#file_entries[@]}"
 printf 'ZIP_DIRECTORY_COUNT=%s\n' "${#directory_entries[@]}"

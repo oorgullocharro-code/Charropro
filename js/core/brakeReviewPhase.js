@@ -5,6 +5,10 @@ export const BRAKE_REVIEW_PROFILE = Object.freeze({
   profileVersion: "0.6.1",
   profileFingerprint: "rptp_10e596046446e850"
 });
+export const BRAKE_REVIEW_PROFILE_COMPATIBILITY = Object.freeze({
+  "FMCH_2026_LIBRE@0.6.1": "rptp_10e596046446e850",
+  "FMCH_2026_LIBRE@0.6.2": "rptp_faaf4360de95f84c"
+});
 export const BRAKE_REVIEW_TEMPORAL_POLICY = Object.freeze({
   policyId: "FMCH_2026_LIBRE_OFFICIAL_TEMPORAL_RULES",
   policyVersion: "1.0.0",
@@ -86,6 +90,11 @@ export function createBrakeReviewAutomaticCommandGuard() {
 }
 
 export function isBrakeReviewProfile(context = {}) {
+  const profile = resolveBrakeReviewProfile(context);
+  return Boolean(profile);
+}
+
+function resolveBrakeReviewProfile(context = {}) {
   const source = context.tournament || context;
   const profileId = clean(source.ruleProfileId || source.profileId);
   const profileVersion = clean(source.ruleProfileVersion || source.profileVersion);
@@ -95,9 +104,8 @@ export function isBrakeReviewProfile(context = {}) {
       || source.ruleProfileFingerprint
       || source.profileFingerprint
   );
-  return profileId === BRAKE_REVIEW_PROFILE.profileId
-    && profileVersion === BRAKE_REVIEW_PROFILE.profileVersion
-    && profileFingerprint === BRAKE_REVIEW_PROFILE.profileFingerprint;
+  if (BRAKE_REVIEW_PROFILE_COMPATIBILITY[`${profileId}@${profileVersion}`] !== profileFingerprint) return null;
+  return { profileId, profileVersion, profileFingerprint };
 }
 
 export function canOperateBrakeReview(actor = {}) {
@@ -128,6 +136,7 @@ export function getBrakeReviewRuleConsequence(rule = {}) {
 
 export function createBrakeReviewState(context = {}, options = {}) {
   const now = iso(options.now);
+  const profile = resolveBrakeReviewProfile(context) || BRAKE_REVIEW_PROFILE;
   return normalizeBrakeReviewState({
     contractVersion: BRAKE_REVIEW_CONTRACT_VERSION,
     phaseId: BRAKE_REVIEW_PHASE_ID,
@@ -141,9 +150,9 @@ export function createBrakeReviewState(context = {}, options = {}) {
     horseId: context.horseId,
     presenterName: context.presenterName || context.participantName,
     horseName: context.horseName,
-    ruleProfileId: BRAKE_REVIEW_PROFILE.profileId,
-    ruleProfileVersion: BRAKE_REVIEW_PROFILE.profileVersion,
-    ruleProfileFingerprint: BRAKE_REVIEW_PROFILE.profileFingerprint,
+    ruleProfileId: profile.profileId,
+    ruleProfileVersion: profile.profileVersion,
+    ruleProfileFingerprint: profile.profileFingerprint,
     temporalPolicyId: BRAKE_REVIEW_TEMPORAL_POLICY.policyId,
     temporalPolicyVersion: BRAKE_REVIEW_TEMPORAL_POLICY.policyVersion,
     temporalPolicyFingerprint: BRAKE_REVIEW_TEMPORAL_POLICY.policyFingerprint,
@@ -177,15 +186,16 @@ export function normalizeBrakeReviewState(value = {}, context = {}) {
   const result = Object.values(BRAKE_REVIEW_RESULTS).includes(base.result)
     ? base.result
     : BRAKE_REVIEW_RESULTS.PENDING;
+  const profile = resolveBrakeReviewProfile(value) || resolveBrakeReviewProfile(context) || BRAKE_REVIEW_PROFILE;
   return {
     ...base,
     contractVersion: BRAKE_REVIEW_CONTRACT_VERSION,
     phaseId: BRAKE_REVIEW_PHASE_ID,
     stage,
     result,
-    ruleProfileId: BRAKE_REVIEW_PROFILE.profileId,
-    ruleProfileVersion: BRAKE_REVIEW_PROFILE.profileVersion,
-    ruleProfileFingerprint: BRAKE_REVIEW_PROFILE.profileFingerprint,
+    ruleProfileId: profile.profileId,
+    ruleProfileVersion: profile.profileVersion,
+    ruleProfileFingerprint: profile.profileFingerprint,
     temporalPolicyId: BRAKE_REVIEW_TEMPORAL_POLICY.policyId,
     temporalPolicyVersion: BRAKE_REVIEW_TEMPORAL_POLICY.policyVersion,
     temporalPolicyFingerprint: BRAKE_REVIEW_TEMPORAL_POLICY.policyFingerprint,
@@ -204,9 +214,15 @@ export function normalizeBrakeReviewState(value = {}, context = {}) {
 }
 
 export function getBrakeReviewStateFromTimer(timer = {}, context = {}) {
+  const profileContext = {
+    ...context,
+    ruleProfileId: context.ruleProfileId || timer.ruleProfileId,
+    ruleProfileVersion: context.ruleProfileVersion || timer.ruleProfileVersion,
+    ruleProfileFingerprint: context.ruleProfileFingerprint || timer.ruleProfileFingerprint
+  };
   return timer.brakeReview
-    ? normalizeBrakeReviewState(timer.brakeReview, context)
-    : createBrakeReviewState({ ...context, timerId: timer.timerId, timerRevision: timer.revision });
+    ? normalizeBrakeReviewState(timer.brakeReview, profileContext)
+    : createBrakeReviewState({ ...profileContext, timerId: timer.timerId, timerRevision: timer.revision });
 }
 
 export function buildBrakeReviewBatchState(presentations = []) {
@@ -461,6 +477,7 @@ export function buildBrakeReviewSnapshot(review = {}) {
 
 function createBrakeReviewStateUnsafe(context = {}, timestamp = null) {
   const now = iso(timestamp);
+  const profile = resolveBrakeReviewProfile(context) || BRAKE_REVIEW_PROFILE;
   return {
     contractVersion: BRAKE_REVIEW_CONTRACT_VERSION,
     phaseId: BRAKE_REVIEW_PHASE_ID,
@@ -474,9 +491,9 @@ function createBrakeReviewStateUnsafe(context = {}, timestamp = null) {
     horseId: clean(context.horseId) || null,
     presenterName: clean(context.presenterName || context.participantName) || null,
     horseName: clean(context.horseName) || null,
-    ruleProfileId: BRAKE_REVIEW_PROFILE.profileId,
-    ruleProfileVersion: BRAKE_REVIEW_PROFILE.profileVersion,
-    ruleProfileFingerprint: BRAKE_REVIEW_PROFILE.profileFingerprint,
+    ruleProfileId: profile.profileId,
+    ruleProfileVersion: profile.profileVersion,
+    ruleProfileFingerprint: profile.profileFingerprint,
     temporalPolicyId: BRAKE_REVIEW_TEMPORAL_POLICY.policyId,
     temporalPolicyVersion: BRAKE_REVIEW_TEMPORAL_POLICY.policyVersion,
     temporalPolicyFingerprint: BRAKE_REVIEW_TEMPORAL_POLICY.policyFingerprint,

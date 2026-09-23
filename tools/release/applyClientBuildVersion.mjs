@@ -50,8 +50,17 @@ function collectFiles(root, directories) {
   return output.sort();
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (isDirectExecution()) {
   const root = path.resolve(process.argv[2] || ".");
   const result = applyCanonicalBuild(root);
   console.log(JSON.stringify(result, null, 2));
+}
+
+function isDirectExecution() {
+  if (!process.argv[1]) return false;
+  return resolvePhysicalPath(process.argv[1]) === resolvePhysicalPath(fileURLToPath(import.meta.url));
+}
+
+function resolvePhysicalPath(target) {
+  return fs.realpathSync(path.resolve(target));
 }

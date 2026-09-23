@@ -15,6 +15,16 @@ assert.equal(isBrakeReviewProfile({
 }), true);
 assert.equal(isBrakeReviewProfile({
   ruleProfileId: "FMCH_2026_LIBRE",
+  ruleProfileVersion: "0.6.2",
+  ruleProfileContentFingerprint: "rptp_faaf4360de95f84c"
+}), true);
+assert.equal(isBrakeReviewProfile({
+  ruleProfileId: "FMCH_2026_LIBRE",
+  ruleProfileVersion: "0.6.2",
+  ruleProfileContentFingerprint: "rptp_10e596046446e850"
+}), false);
+assert.equal(isBrakeReviewProfile({
+  ruleProfileId: "FMCH_2026_LIBRE",
   ruleProfileVersion: "0.6.0",
   ruleProfileContentFingerprint: "rptp_0f90f7a3944a82d7"
 }), false);
