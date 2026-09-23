@@ -24,7 +24,7 @@ async function runProjectionV3RulesParityEmulator() {
   const { getAuth } = requireFromFunctions("firebase-admin/auth");
   const { getDatabase } = requireFromFunctions("firebase-admin/database");
   const suffix = `${Date.now()}-${process.pid}`;
-  const uid = `projection-v3-judge-${suffix}`;
+  const uid = `projection-v3-operator-${suffix}`;
   // This is the production diagnosis identity, exercised only in a clean demo Emulator.
   const tournamentId = "torneo_mtut0u78_ojpwf6";
   const email = `${uid}@example.test`;
@@ -40,7 +40,7 @@ async function runProjectionV3RulesParityEmulator() {
     await auth.createUser({ uid, email, password, emailVerified: true });
     await database.ref(`charropro/users/${uid}`).set({
       active: true,
-      role: "juez",
+      role: "operador",
       tournamentAccess: "selected"
     });
     await database.ref(`charropro/userTournamentAccess/${uid}/${tournamentId}`).set(true);
@@ -101,7 +101,27 @@ async function runProjectionV3RulesParityEmulator() {
     await assertAllowed("individual-with-live-cover", buildIndividualCandidate(individualWithLiveCoverId, { liveCover: true }), token);
     const noAccessId = `${tournamentId}-no-access`;
     const noAccess = await writeProjection(databaseHost, databaseNamespace, noAccessId, buildIndividualCandidate(noAccessId, { program: true, live: true, results: true, standings: true, sheet: true }), token);
-    assert.equal(noAccess.ok, false, "a judge without selected tournament access remains denied");
+    assert.equal(noAccess.ok, false, "an operator without selected tournament access remains denied");
+
+    const judgeUid = `projection-v3-judge-${suffix}`;
+    const judgeEmail = `${judgeUid}@example.test`;
+    const judgePassword = "LocalProjectionV3Only-2026!";
+    await auth.createUser({ uid: judgeUid, email: judgeEmail, password: judgePassword, emailVerified: true });
+    await database.ref(`charropro/users/${judgeUid}`).set({
+      active: true,
+      role: "juez",
+      tournamentAccess: "selected"
+    });
+    await database.ref(`charropro/userTournamentAccess/${judgeUid}/${tournamentId}`).set(true);
+    const judgeToken = await signIn(authHost, judgeEmail, judgePassword);
+    const judgeProjection = buildCandidate(tournamentId, { liveCover: true });
+    judgeProjection.projectionRevision = 2;
+    judgeProjection.sourceRevision = 2;
+    const judgeWrite = await writeProjection(databaseHost, databaseNamespace, tournamentId, judgeProjection, judgeToken);
+    assert.equal(judgeWrite.ok, false, "a selected judge cannot write the public projection directly");
+    await database.ref(`charropro/userTournamentAccess/${judgeUid}`).remove();
+    await database.ref(`charropro/users/${judgeUid}`).remove();
+    await auth.deleteUser(judgeUid);
 
     const unauthorizedUid = `projection-v3-locutor-${suffix}`;
     const unauthorizedEmail = `${unauthorizedUid}@example.test`;

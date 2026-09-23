@@ -8392,7 +8392,13 @@ async function copyProductionTargetUrl(targetId = "") {
 
 function renderGraphicsAccess() {
   const liveScreenGroups = getLiveScreenGroups();
-  const groups = liveScreenGroups.filter((group) => group.key === "obs" || group.key === "control");
+  const groups = liveScreenGroups
+    .filter((group) => group.key === "obs" || group.key === "control")
+    .map((group) => ({
+      ...group,
+      screens: group.screens.filter((screen) => canAccessGraphicsLiveScreen(screen, firebaseAccess.role))
+    }))
+    .filter((group) => group.screens.length);
 
   return html`
     <section class="content">
@@ -8412,6 +8418,10 @@ function renderGraphicsAccess() {
       </article>
     </section>
   `;
+}
+
+function canAccessGraphicsLiveScreen(screen = {}, role = firebaseAccess.role) {
+  return screen.fileName !== "cronometro.html" || roleCan(role, "timer");
 }
 
 function showUserProfileModal(uid = "") {
