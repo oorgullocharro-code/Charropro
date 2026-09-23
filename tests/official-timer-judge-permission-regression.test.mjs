@@ -17,6 +17,7 @@ assert.match(timerRule, /officialElapsedMs'\)\.val\(\) >= 0/);
 assert.match(timerRule, /newData\.child\('revision'\)\.val\(\) === data\.child\('revision'\)\.val\(\) \+ 1/);
 assert.match(timerRule, /newData\.child\('controllerUid'\)\.val\(\) === auth\.uid/);
 assert.match(timerRule, /userTournamentAccess/);
+assert.match(timerRule, /lastOperation'\)\.val\(\) === 'RESET'/);
 
 if (process.env.CHARROPRO_RUN_FIREBASE_EMULATOR === "1") {
   await runRulesMatrix();
@@ -69,6 +70,13 @@ async function runRulesMatrix() {
     assert.equal(await putTimer(databaseHost, namespace, beforePath, judge.token, beforeTimer, judge.uid), 200, "RESUME before zero");
     beforeTimer = transition(beforeTimer, before, "FINISH", judgeActor, judgeController, T0 + 10_000, "before-finish");
     assert.equal(await putTimer(databaseHost, namespace, beforePath, judge.token, beforeTimer, judge.uid), 200, "FINISH before zero");
+    const finishedBeforeReset = clone(beforeTimer);
+    beforeTimer = transition(beforeTimer, before, "RESET", judgeActor, judgeController, T0 + 11_000, "before-reset");
+    assert.equal(beforeTimer.status, "READY");
+    assert.equal(beforeTimer.officialElapsedMs, 0);
+    assert.equal(await putTimer(databaseHost, namespace, beforePath, judge.token, beforeTimer, judge.uid), 200, "authorized RESET");
+    const staleReset = transition(finishedBeforeReset, before, "RESET", judgeActor, judgeController, T0 + 12_000, "stale-reset");
+    assertDenied(await clientPut(databaseHost, namespace, beforePath, judge.token, payload(staleReset, judge.uid)), "stale RESET revision");
 
     const overtime = definition(tournamentId, `overtime-${suffix}`, 20_000);
     const overtimePath = timerPath(tournamentId, overtime.timerId);
@@ -106,6 +114,17 @@ async function runRulesMatrix() {
       updatedAt: new Date(T0 + 27_000).toISOString()
     }, intruder.uid);
     assertDenied(await clientPut(databaseHost, namespace, overtimePath, intruder.token, forgedController), "invalid controller");
+
+    const unauthorizedReset = payload({
+      ...beforeTimer,
+      revision: beforeTimer.revision + 1,
+      controllerId: "intruder-controller",
+      controllerUid: intruder.uid,
+      actor: actor(intruder.uid),
+      lastOperation: "RESET",
+      updatedAt: new Date(T0 + 27_000).toISOString()
+    }, intruder.uid);
+    assertDenied(await clientPut(databaseHost, namespace, beforePath, intruder.token, unauthorizedReset), "unauthorized RESET");
 
     const alteredDuration = payload({
       ...overtimeTimer,

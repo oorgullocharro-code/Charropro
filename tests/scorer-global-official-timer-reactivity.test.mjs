@@ -113,7 +113,8 @@ for (const [label, resolveDefinition] of matrix) {
     ["START", 100, "RUNNING"],
     ["PAUSE", 200, "PAUSED"],
     ["RESUME", 300, "RUNNING"],
-    ["FINISH", 400, "FINISHED"]
+    ["FINISH", 400, "FINISHED"],
+    ["RESET", 500, "READY"]
   ];
   for (const [operation, offset, status] of expected) {
     if (operation) timer = command(timer, definition, operation, now + offset);
@@ -124,6 +125,7 @@ for (const [label, resolveDefinition] of matrix) {
     eventCount += 1;
     assert.equal(state.currentTimerContext.status, status, `${label} reacts to remote ${operation || "READY"}`);
     assert.equal(state.currentTimerContext.timerId, definition.timerId, `${label} replaces the prior timer immediately`);
+    if (operation === "RESET") assert.equal(state.currentTimerContext.elapsedMs, 0, `${label} clears elapsed time after RESET`);
   }
   now += 1000;
 }

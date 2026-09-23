@@ -85,6 +85,7 @@ root.addEventListener("click", (event) => {
   const action = target.dataset.action;
   if (action === "timer-primary") sendPrimaryTimerCommand();
   if (action === "timer-secondary") sendSecondaryTimerCommand();
+  if (action === "timer-reset") resetSelectedTimer();
   if (action === "claim-timer-control") claimSelectedTimerControl();
   if (action === "set-pause-reason") updatePauseReason(target.dataset.reason);
   if (action === "timer-login-open") showTimerLogin();
@@ -182,6 +183,15 @@ function render() {
                 type="button"
                 ${pendingAction ? "disabled" : ""}
               >${escapeHTML(getSecondaryLabel(view.status))}</button>
+            ` : ""}
+
+            ${control.isOwner ? html`
+              <button
+                class="button timer-control-secondary-command"
+                data-action="timer-reset"
+                type="button"
+                ${pendingAction ? "disabled" : ""}
+              >REINICIAR</button>
             ` : ""}
 
             ${control.hasController && !control.isOwner ? html`
@@ -350,6 +360,22 @@ async function sendSecondaryTimerCommand() {
     reason: type === "PAUSE" ? "Pausa autorizada" : "",
     source: "field_remote"
   }, getPendingLabel(type));
+}
+
+async function resetSelectedTimer() {
+  if (!requireTimerAccess() || pendingAction) return;
+  const timer = getSelectedTimer();
+  const definition = getSelectedDefinition();
+  if (!timer || !definition) return;
+  const control = getOfficialTimerControlView(timer, getRemoteController());
+  if (!control.isOwner) {
+    showToast(`${control.controllerLabel} conserva el control.`);
+    return;
+  }
+  await executeAuthorityRequest(definition, timer, {
+    type: "RESET",
+    source: "field_remote"
+  }, "REINICIANDO...");
 }
 
 async function claimSelectedTimerControl() {
@@ -591,6 +617,7 @@ function getSecondaryLabel(status) {
 function getPendingLabel(type) {
   if (type === "PAUSE") return "PAUSANDO...";
   if (type === "RESUME") return "CONTINUANDO...";
+  if (type === "RESET") return "REINICIANDO...";
   if (type === "FINISH") return "FINALIZANDO...";
   return "INICIANDO...";
 }

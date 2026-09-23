@@ -14,6 +14,14 @@ assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "RUNNING", runnin
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "PAUSED" }, T0 + 50000).elapsedMs, 10000);
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "RUNNING", runningSince: T0 + 20000 }, T0 + 25000).elapsedMs, 15000, "resume uses the new official anchor");
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "FINISHED", officialElapsedMs: 42000 }, T0 + 50000).elapsedMs, 42000);
+const reset = deriveOfficialTimerLiveDisplay({
+  ...base,
+  status: "READY",
+  officialElapsedMs: 0,
+  runningSince: null
+}, T0 + 50000);
+assert.equal(reset.elapsedMs, 0, "RESET remains at zero without interpolation");
+assert.equal(reset.status, "READY");
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "STALE" }, T0).stateLabel, "DESACTUALIZADO");
 assert.equal(deriveOfficialTimerLiveDisplay({ ...base, status: "OFFLINE" }, T0).stateLabel, "SIN CONEXION");
 

@@ -625,6 +625,7 @@ export const OFFICIAL_TIMER_COMMANDS = Object.freeze([
   "START",
   "PAUSE",
   "RESUME",
+  "RESET",
   "FINISH"
 ]);
 export const OFFICIAL_TIMER_CONTROL_OPERATIONS = Object.freeze([
@@ -916,6 +917,25 @@ export function applyOfficialTimerCommand(timer = {}, command = {}, options = {}
     next.pausedAt = null;
     next.pauseReason = null;
     next.pauses = pauses;
+  }
+  if (type === "RESET") {
+    const alreadyReady = current.status === "READY"
+      && current.officialElapsedMs === 0
+      && !current.runningSince
+      && !current.wallStartedAt
+      && !current.wallFinishedAt
+      && !current.pausedAt
+      && !current.pauseReason
+      && current.pauses.length === 0;
+    if (alreadyReady) return { ok: true, idempotent: true, timer: current };
+    next.status = "READY";
+    next.officialElapsedMs = 0;
+    next.runningSince = null;
+    next.wallStartedAt = null;
+    next.wallFinishedAt = null;
+    next.pausedAt = null;
+    next.pauseReason = null;
+    next.pauses = [];
   }
   if (type === "FINISH") {
     if (current.status === "FINISHED") return { ok: true, idempotent: true, timer: current };

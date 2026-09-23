@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   OFFICIAL_TIMER_CONTROLLER_TYPES,
+  OFFICIAL_TIMER_COMMANDS,
   applyOfficialTimerCommand,
   applyOfficialTimerControlOperation,
   buildOfficialTimerDefinitionsFromContext,
@@ -211,11 +212,50 @@ timer = finished.timer;
 assert.equal(timer.status, "FINISHED");
 assert.equal(timer.timerId, definition.timerId);
 
-const reload = normalizeOfficialTimerContext(structuredClone(timer), definition);
-assert.deepEqual(reload, timer, "reload and reconnect preserve the same durable timer");
-const mutatedReload = structuredClone(reload);
-mutatedReload.pauses[0].reason = "changed outside";
-assert.equal(timer.pauses[0].reason, "Limpieza de ruedo", "consumer snapshots do not mutate authority state");
+const resetFinished = command(timer, "RESET", remoteA, actorA, "reset_finished", T0 + 201000);
+assert.equal(resetFinished.ok, true, "FINISHED resets through Timer Authority");
+timer = resetFinished.timer;
+assert.equal(timer.status, "READY");
+assert.equal(timer.officialElapsedMs, 0);
+assert.equal(timer.runningSince, null);
+assert.equal(timer.wallStartedAt, null);
+assert.equal(timer.wallFinishedAt, null);
+assert.equal(timer.pausedAt, null);
+assert.equal(timer.pauseReason, null);
+assert.deepEqual(timer.pauses, []);
+assert.equal(timer.timerId, definition.timerId, "RESET preserves canonical identity");
+
+const resetReady = command(timer, "RESET", remoteA, actorA, "reset_ready", T0 + 202000);
+assert.equal(resetReady.ok, true);
+assert.equal(resetReady.idempotent, true, "a canonical READY timer resets idempotently");
+assert.equal(resetReady.timer.revision, timer.revision);
+
+const restarted = command(timer, "START", remoteA, actorA, "start_after_reset", T0 + 203000);
+assert.equal(restarted.ok, true, "RESET leaves the same authority ready for a new START");
+assert.equal(restarted.timer.status, "RUNNING");
+assert.equal(getOfficialTimerContextView(restarted.timer, { now: T0 + 204000 }).officialElapsedMs, 1000);
+
+const resetRunning = command(restarted.timer, "RESET", remoteA, actorA, "reset_running", T0 + 205000);
+assert.equal(resetRunning.ok, true, "RUNNING resets through Timer Authority");
+assert.equal(resetRunning.timer.status, "READY");
+assert.equal(resetRunning.timer.officialElapsedMs, 0);
+
+const runningBeforePausedReset = command(resetRunning.timer, "START", remoteA, actorA, "start_before_paused_reset", T0 + 206000);
+const pausedForReset = command(runningBeforePausedReset.timer, "PAUSE", remoteA, actorA, "pause_before_reset", T0 + 207000);
+assert.equal(pausedForReset.ok, true);
+const resetPaused = command(pausedForReset.timer, "RESET", remoteA, actorA, "reset_paused", T0 + 208000);
+assert.equal(resetPaused.ok, true, "PAUSED resets through Timer Authority");
+assert.equal(resetPaused.timer.status, "READY");
+assert.equal(resetPaused.timer.officialElapsedMs, 0);
+
+const staleReset = command(resetPaused.timer, "RESET", remoteA, actorA, "stale_reset", T0 + 209000, resetPaused.timer.revision - 1);
+assert.equal(staleReset.ok, false);
+assert.equal(staleReset.reason, "official-timer-revision-conflict");
+
+const reload = normalizeOfficialTimerContext(structuredClone(resetPaused.timer), definition);
+assert.deepEqual(reload, resetPaused.timer, "reload and reconnect preserve the reset timer");
+assert.equal(reload.officialElapsedMs, 0);
+assert.deepEqual(reload.pauses, []);
 
 let doubleTapTimer = createOfficialTimerContext(definition, { now: T0 });
 doubleTapTimer = command(doubleTapTimer, "START", remoteA, actorA, "double_start", T0 + 1000).timer;
@@ -300,6 +340,7 @@ const officialTimerRulesSource = JSON.stringify(JSON.parse(rulesSource).rules.ch
 const firebaseSyncSource = readFileSync(new URL("../js/core/firebaseSync.js", import.meta.url), "utf8");
 assert.match(remoteSource, /pendingAction/);
 assert.match(remoteSource, /applyFirebaseOfficialTimerAuthority/);
+assert.match(remoteSource, /resetSelectedTimer/);
 assert.doesNotMatch(remoteSource, /Rev\. \$\{/);
 assert.match(scorerSource, /subscribeFirebaseOfficialTimers/);
 assert.match(scorerSource, /Tomar control de respaldo/);
@@ -312,6 +353,8 @@ assert.match(cssSource, /width:\s*clamp\(190px,\s*60vw,\s*340px\)/);
 assert.match(rulesSource, /controllerUid/);
 assert.match(rulesSource, /data\.child\('status'\)\.val\(\) === 'PAUSED'[\s\S]*newData\.child\('status'\)\.val\(\) === 'RUNNING'/);
 assert.match(rulesSource, /data\.child\('status'\)\.val\(\) === 'PAUSED'[\s\S]*newData\.child\('status'\)\.val\(\) === 'FINISHED'/);
+assert.match(officialTimerRulesSource, /lastOperation'\)\.val\(\) === 'RESET'/);
+assert.equal(OFFICIAL_TIMER_COMMANDS.includes("RESET"), true);
 assert.doesNotMatch(officialTimerRulesSource, /newData\.val\(\) === data\.val\(\)/, "idempotent retries are resolved before Rules rather than rewritten");
 assert.match(firebaseSyncSource, /transition\.idempotent[\s\S]*conflictTimer = current;[\s\S]*return;/);
 assert.match(firebaseSyncSource, /projectionResult:\s*\{ ok: true, skipped: true \}/);
