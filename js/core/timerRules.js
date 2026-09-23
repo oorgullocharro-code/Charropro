@@ -446,7 +446,8 @@ const FMCH_TEMPORAL_SUERTE_ALIASES = Object.freeze({
 
 const FMCH_TEMPORAL_PROFILE_COMPATIBILITY = Object.freeze({
   "FMCH_2026_LIBRE@0.6.0": "rptp_0f90f7a3944a82d7",
-  "FMCH_2026_LIBRE@0.6.1": "rptp_10e596046446e850"
+  "FMCH_2026_LIBRE@0.6.1": "rptp_10e596046446e850",
+  "FMCH_2026_LIBRE@0.6.2": "rptp_faaf4360de95f84c"
 });
 
 export function getFmchOfficialTemporalPolicy() {
