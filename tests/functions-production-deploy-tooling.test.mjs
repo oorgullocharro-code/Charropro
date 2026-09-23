@@ -5,14 +5,17 @@ import { readFileSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from "nod
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { runInNewContext } from "node:vm";
 import { loadProductionFunctionsAllowlist, validateProductionFunctionsContract, discoverRepositoryFunctionExports } from "../tools/release/productionFunctionsDeploy.mjs";
 import { inspectFirebaseCli, validateFirebasePlan, installPlanGuards } from "../tools/release/productionFunctionsFirebaseGuard.mjs";
 const manifest = loadProductionFunctionsAllowlist();
-const added = "reconcileCharroProHistoricalResults";
+const added = "reconcileCharroProPublicProjectionOutbox";
 const repositoryExports = discoverRepositoryFunctionExports(readFileSync(new URL("../functions/index.js", import.meta.url), "utf8"));
 const contract = validateProductionFunctionsContract({ manifest, repositoryExports, requestedTargets: [added], expectedCreates: [added] });
-const endpoint = id => ({ id, project: manifest.projectId, codebase: "default", region: "us-central1", platform: "gcfv2", runtime: "nodejs22", state: "ACTIVE", availableMemoryMb: 1024, timeoutSeconds: 540, callableTrigger: {}, targetedByOnly: true, labels: { "deployment-tool": "cli-firebase" } });
+const endpoint = id => ({ id, project: manifest.projectId, codebase: "default", region: "us-central1", platform: "gcfv2", runtime: "nodejs22", state: "ACTIVE", targetedByOnly: true, labels: { "deployment-tool": "cli-firebase" },
+  ...(id === added
+    ? { availableMemoryMb: 512, timeoutSeconds: 540, scheduleTrigger: { schedule: "every 5 minutes", timeZone: "America/Mexico_City" } }
+    : { availableMemoryMb: 1024, timeoutSeconds: 540, callableTrigger: {} })
+});
 const blank = () => ({ endpointsToCreate: [], endpointsToUpdate: [], endpointsToDelete: [], endpointsToSkip: [] });
 const validPlan = () => ({ "default-us-central1-1024": { ...blank(), endpointsToCreate: [endpoint(added)] } });
 const block = fn => assert.throws(fn, /firebase-plan-blocked:/);
@@ -31,8 +34,11 @@ test("Firebase proposes another create / deletion / update / implicit replacemen
     p => { p.endpointsToCreate[0].region = "europe-west1"; },
     p => { p.endpointsToCreate[0].project = "other-project"; },
     p => { p.endpointsToCreate[0].secretEnvironmentVariables = [{ secret: "newSecret" }]; },
-    p => { p.endpointsToCreate[0].availableMemoryMb = 512; },
-    p => { p.endpointsToCreate[0].timeoutSeconds = 60; }
+    p => { p.endpointsToCreate[0].availableMemoryMb = 1024; },
+    p => { p.endpointsToCreate[0].timeoutSeconds = 60; },
+    p => { p.endpointsToCreate[0].scheduleTrigger.schedule = "every minute"; },
+    p => { p.endpointsToCreate[0].scheduleTrigger.timeZone = "UTC"; },
+    p => { p.endpointsToCreate[0].callableTrigger = {}; }
   ];
   for (const mutate of mutations) { const p = validPlan(); mutate(Object.values(p)[0]); block(() => validateFirebasePlan(p, contract, manifest)); }
 });
@@ -107,17 +113,15 @@ test("Productive wrapper with no targets exits before any Firebase process; loca
   const local = spawnSync(process.execPath, [wrapper.pathname, 'dry-run', '--targets', added, '--expect-create', added], { encoding: 'utf8', env: { ...process.env, PATH: '/nonexistent' } });
   assert.equal(local.status, 0, local.stderr); assert.match(local.stdout, new RegExp(`REQUESTED_TARGETS=functions:${added}\\n`)); assert.match(local.stdout, /PRODUCTION_INVENTORY=NOT_CHECKED/);
 });
-test("Callable config: Gen2 us-central1 node22 1GiB 540s no secrets (metadata only; never invoked)", () => {
-  const require = createRequire(new URL('../functions/package.json', import.meta.url));
+test("Scheduled projection recovery config is bounded and explicit (metadata only; never invoked)", () => {
   const source = readFileSync(new URL('../functions/index.js', import.meta.url), 'utf8');
-  const registration = source.slice(source.indexOf(`exports.${added} =`), source.indexOf('const baselineValidation'));
-  const scope = { exports: {}, onCall: require('firebase-functions/v2/https').onCall };
-  runInNewContext(registration, scope); // Register metadata only; callback and Admin SDK are never invoked.
-  const fn = scope.exports[added];
-  assert.equal(fn.__endpoint.platform, 'gcfv2');
-  assert.deepEqual(Array.from(fn.__endpoint.region), ['us-central1']);
-  assert.equal(fn.__endpoint.availableMemoryMb, 1024); assert.equal(fn.__endpoint.timeoutSeconds, 540);
-  assert.ok(fn.__endpoint.callableTrigger); assert.equal(fn.__endpoint.secretEnvironmentVariables?.length || 0, 0);
+  const registration = source.slice(source.indexOf(`exports.${added} =`), source.indexOf('async function markFanoutFailure'));
+  assert.match(registration, /onSchedule\(\{[\s\S]*schedule:\s*"every 5 minutes"/);
+  assert.match(registration, /region:\s*FUNCTIONS_REGION/);
+  assert.match(registration, /memory:\s*FUNCTIONS_CONFIG\.scheduleMemory/);
+  assert.match(registration, /timeoutSeconds:\s*APPLICATION_CONFIG\.timeouts\.workerSeconds/);
+  assert.match(registration, /if \(candidates\.length >= 100\) break/);
+  assert.match(registration, /deliverPublicProjectionFromFunction/);
   const pkg = JSON.parse(readFileSync(new URL('../functions/package.json', import.meta.url)));
   assert.equal(pkg.engines.node, '22');
 });

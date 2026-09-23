@@ -35,6 +35,11 @@ export function validateFirebasePlan(plan, contract, manifest) {
     if (e.id === "reconcileCharroProHistoricalResults" &&
         (e.availableMemoryMb !== 1024 || e.timeoutSeconds !== 540 || !e.callableTrigger ||
          (e.secretEnvironmentVariables?.length || 0) !== 0)) fail("reconciliation-config-drift");
+    if (e.id === "reconcileCharroProPublicProjectionOutbox" &&
+        (e.availableMemoryMb !== 512 || e.timeoutSeconds !== 540 || e.callableTrigger || e.eventTrigger ||
+         e.scheduleTrigger?.schedule !== "every 5 minutes" ||
+         e.scheduleTrigger?.timeZone !== "America/Mexico_City" ||
+         (e.secretEnvironmentVariables?.length || 0) !== 0)) fail("public-projection-scheduler-config-drift");
     seen.add(e.id);
     ({ create: created, update: updated, skip: skipped })[kind].push(e.id);
   };

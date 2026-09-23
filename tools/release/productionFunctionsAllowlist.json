@@ -12,6 +12,7 @@
     "publishCharroProConfiguration",
     "publishCharroProOfficialScore",
     "reconcileCharroProHistoricalResults",
+    "reconcileCharroProPublicProjectionOutbox",
     "transitionCharroProRuleProfileLifecycle",
     "uploadCharroProTournamentPublicAsset",
     "upsertCharroProUser"
@@ -26,7 +27,7 @@
     "validateCharroProRestore"
   ],
   "expectedProduction": {
-    "count": 12,
+    "count": 13,
     "generation": "gcfv2",
     "region": "us-central1",
     "runtime": "nodejs22",
@@ -34,6 +35,7 @@
   },
   "allowedInitialCreates": [
     "reconcileCharroProHistoricalResults",
+    "reconcileCharroProPublicProjectionOutbox",
     "uploadCharroProTournamentPublicAsset"
   ]
 }
