@@ -13,7 +13,7 @@ import {
   getCompetitionType,
   getCompetitionTypeFromTournamentType
 } from "../data/competitionTypes.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { TOURNAMENT_ACCESS, canUseGlobalTournamentAccess, makeAccessSession, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 import {
   USER_ACCESS_BOOTSTRAP_ERROR,
   buildUserAccessBootstrapPlan,
@@ -2340,14 +2340,14 @@ function normalizeErrorDetail(detail = {}) {
 function resolveVisibleTournamentIds(profile = {}, accessProfile = {}, userTournamentAccess = {}, indexById = {}) {
   const profileAccess = normalizeTournamentAccess(profile || {});
   const fallbackAccess = normalizeTournamentAccess(accessProfile || {});
-  const role = normalizeRole(profile.role || accessProfile.role);
-  if (role === "supervisor" || profileAccess.tournamentAccess !== "selected") {
+  const effectiveAccess = Object.keys(profile || {}).length ? profileAccess : fallbackAccess;
+  if (effectiveAccess.tournamentAccess === TOURNAMENT_ACCESS.NONE) return new Set();
+  if (effectiveAccess.tournamentAccess === TOURNAMENT_ACCESS.ALL) {
     return new Set(Object.keys(indexById || {}).filter(Boolean));
   }
 
   const ids = new Set([
-    ...(profileAccess.tournamentIds || []),
-    ...(fallbackAccess.tournamentIds || []),
+    ...(effectiveAccess.tournamentIds || []),
     ...Object.entries(userTournamentAccess || {})
       .filter(([, enabled]) => enabled !== false)
       .map(([id]) => id)
@@ -5361,8 +5361,7 @@ export function subscribeFirebaseTournamentIndex(callback, accessProfile = {}) {
 
   try {
     const access = normalizeTournamentAccess(accessProfile || {});
-    const role = normalizeRole(accessProfile?.role);
-    if (role !== "supervisor" && access.tournamentAccess === "selected") {
+    if (!canUseGlobalTournamentAccess(accessProfile) && access.tournamentAccess === TOURNAMENT_ACCESS.SELECTED) {
       const records = new Map();
       const ids = access.tournamentIds || [];
       if (!ids.length) {
@@ -5381,6 +5380,10 @@ export function subscribeFirebaseTournamentIndex(callback, accessProfile = {}) {
         })
       );
       return () => unsubscribers.forEach((unsubscribe) => unsubscribe?.());
+    }
+    if (!canUseGlobalTournamentAccess(accessProfile)) {
+      callback([]);
+      return () => {};
     }
 
     return onValue(ref(getFirebaseDatabase(), TOURNAMENT_INDEX_PATH), (snapshot) => {
@@ -5660,13 +5663,17 @@ function firebaseBroadcastContextStatusFromError(error) {
 }
 
 async function readFirebaseBroadcastTournamentAssignment(profile, uid, tournamentId) {
-  if (profile?.tournamentAccess !== "selected") return true;
+  const access = normalizeTournamentAccess(profile);
+  if (access.tournamentAccess === TOURNAMENT_ACCESS.ALL) return true;
+  if (access.tournamentAccess !== TOURNAMENT_ACCESS.SELECTED) return false;
   const snapshot = await get(ref(getFirebaseDatabase(), `charropro/userTournamentAccess/${uid}/${tournamentId}`));
   return snapshot.val() === true;
 }
 
 function firebaseProfileHasTournamentAccess(profile, tournamentId, tournamentAssigned = false) {
-  if (profile.tournamentAccess !== "selected") return true;
+  const access = normalizeTournamentAccess(profile);
+  if (access.tournamentAccess === TOURNAMENT_ACCESS.ALL) return true;
+  if (access.tournamentAccess !== TOURNAMENT_ACCESS.SELECTED) return false;
   if (tournamentAssigned === true) return true;
   const ids = Array.isArray(profile.tournamentIds)
     ? profile.tournamentIds

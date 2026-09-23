@@ -9,6 +9,12 @@ export const ROLES = {
   SIN_ACCESO: "sin_acceso"
 };
 
+export const TOURNAMENT_ACCESS = {
+  ALL: "all",
+  SELECTED: "selected",
+  NONE: "none"
+};
+
 export const ROLE_LABELS = {
   [ROLES.GRAFICOS]: "Graficos",
   [ROLES.LOCUTOR]: "Locutor",
@@ -109,7 +115,14 @@ export function roleCan(role, capability) {
 }
 
 export function normalizeTournamentAccess(profile = {}) {
-  const mode = profile.tournamentAccess === "selected" ? "selected" : "all";
+  const rawMode = typeof profile.tournamentAccess === "string"
+    ? profile.tournamentAccess.trim().toLowerCase()
+    : "";
+  const mode = rawMode === TOURNAMENT_ACCESS.SELECTED
+    ? TOURNAMENT_ACCESS.SELECTED
+    : canUseGlobalTournamentAccess(profile)
+      ? TOURNAMENT_ACCESS.ALL
+      : TOURNAMENT_ACCESS.NONE;
   const ids = Array.isArray(profile.tournamentIds)
     ? profile.tournamentIds
     : Array.isArray(profile.assignedTournamentIds)
@@ -122,13 +135,17 @@ export function normalizeTournamentAccess(profile = {}) {
   };
 }
 
+export function canUseGlobalTournamentAccess(profile = {}) {
+  return normalizeRole(profile.role) === ROLES.SUPERVISOR
+    && profile.tournamentAccess === TOURNAMENT_ACCESS.ALL;
+}
+
 export function hasTournamentAccess(session = {}, tournamentId = "") {
   if (!isActiveAccessSession(session)) return false;
   const role = normalizeRole(session.role);
-  if (role === ROLES.SUPERVISOR) return true;
-
   const access = normalizeTournamentAccess(session);
-  if (access.tournamentAccess !== "selected") return true;
+  if (access.tournamentAccess === TOURNAMENT_ACCESS.ALL) return true;
+  if (access.tournamentAccess !== TOURNAMENT_ACCESS.SELECTED) return false;
   if (!tournamentId) return false;
   return access.tournamentIds.includes(String(tournamentId));
 }

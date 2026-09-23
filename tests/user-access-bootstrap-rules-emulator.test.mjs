@@ -7,11 +7,13 @@ const rootRead = rules.tournamentIndex[".read"];
 const childRead = rules.tournamentIndex.$tournamentId[".read"];
 
 assert.match(rootRead, /tournamentAccess/);
-assert.match(rootRead, /!== 'selected'/);
+assert.match(rootRead, /=== 'all'/);
+assert.doesNotMatch(JSON.stringify(rules), /!== 'selected'/);
 assert.match(childRead, /userTournamentAccess/);
 assert.match(childRead, /\$tournamentId/);
 assert.match(rules.userTournamentAccess.$uid[".read"], /auth\.uid === \$uid/);
 assert.match(rules.tournaments.$tournamentId[".read"], /userTournamentAccess/);
+assert.equal(findUngatedSelectedAssignments(rules).length, 0, "selected assignments must never authorize missing or invalid access modes");
 
 if (process.env.CHARROPRO_RUN_FIREBASE_EMULATOR === "1") {
   await runRulesChecks();
@@ -43,12 +45,6 @@ async function runRulesChecks() {
       profile: { active: true, role: "juez", tournamentAccess: "selected", tournamentIds: [tournamentA] },
       grants: { [tournamentA]: true }
     },
-    empty: {
-      uid: `judge-empty-${suffix}`,
-      email: `judge-empty-${suffix}@example.test`,
-      profile: { active: true, role: "juez", tournamentAccess: "selected", tournamentIds: [] },
-      grants: {}
-    },
     inactive: {
       uid: `judge-inactive-${suffix}`,
       email: `judge-inactive-${suffix}@example.test`,
@@ -59,6 +55,54 @@ async function runRulesChecks() {
       uid: `supervisor-${suffix}`,
       email: `supervisor-${suffix}@example.test`,
       profile: { active: true, role: "supervisor", tournamentAccess: "all", tournamentIds: [] },
+      grants: {}
+    },
+    scopedSupervisor: {
+      uid: `supervisor-scoped-${suffix}`,
+      email: `supervisor-scoped-${suffix}@example.test`,
+      profile: { active: true, role: "supervisor", tournamentAccess: "selected", tournamentIds: [tournamentA] },
+      grants: { [tournamentA]: true }
+    },
+    operator: {
+      uid: `operator-${suffix}`,
+      email: `operator-${suffix}@example.test`,
+      profile: { active: true, role: "operador", tournamentAccess: "selected", tournamentIds: [tournamentA] },
+      grants: { [tournamentA]: true }
+    },
+    missing: {
+      uid: `judge-missing-${suffix}`,
+      email: `judge-missing-${suffix}@example.test`,
+      profile: { active: true, role: "juez", tournamentIds: [tournamentA] },
+      grants: { [tournamentA]: true }
+    },
+    invalid: {
+      uid: `judge-invalid-${suffix}`,
+      email: `judge-invalid-${suffix}@example.test`,
+      profile: { active: true, role: "juez", tournamentAccess: "invalid", tournamentIds: [tournamentA] },
+      grants: { [tournamentA]: true }
+    },
+    nullAccess: {
+      uid: `judge-null-${suffix}`,
+      email: `judge-null-${suffix}@example.test`,
+      profile: { active: true, role: "juez", tournamentAccess: null, tournamentIds: [tournamentA] },
+      grants: { [tournamentA]: true }
+    },
+    malformedAccess: {
+      uid: `judge-malformed-${suffix}`,
+      email: `judge-malformed-${suffix}@example.test`,
+      profile: { active: true, role: "juez", tournamentAccess: { mode: "selected" }, tournamentIds: [tournamentA] },
+      grants: { [tournamentA]: true }
+    },
+    empty: {
+      uid: `judge-empty-selected-${suffix}`,
+      email: `judge-empty-selected-${suffix}@example.test`,
+      profile: { active: true, role: "juez", tournamentAccess: "selected", tournamentIds: [] },
+      grants: {}
+    },
+    globalJudge: {
+      uid: `judge-global-${suffix}`,
+      email: `judge-global-${suffix}@example.test`,
+      profile: { active: true, role: "juez", tournamentAccess: "all", tournamentIds: [] },
       grants: {}
     }
   };
@@ -96,6 +140,17 @@ async function runRulesChecks() {
     await expectRead(databaseHost, namespace, `charropro/tournamentIndex/${tournamentA}`, users.inactive.token, false);
     await expectRead(databaseHost, namespace, "charropro/tournamentIndex", users.supervisor.token, true);
     await expectRead(databaseHost, namespace, "charropro/users", users.supervisor.token, true);
+    await expectRead(databaseHost, namespace, `charropro/tournamentIndex/${tournamentA}`, users.scopedSupervisor.token, true);
+    await expectRead(databaseHost, namespace, `charropro/tournamentIndex/${tournamentB}`, users.scopedSupervisor.token, false);
+    for (const name of ["missing", "invalid", "nullAccess", "malformedAccess", "empty", "globalJudge"]) {
+      await expectRead(databaseHost, namespace, `charropro/tournamentIndex/${tournamentA}`, users[name].token, false);
+    }
+
+    await expectWrite(databaseHost, namespace, `charropro/tournaments/${tournamentA}/scores/access-check`, users.selected.token, { total: 1 }, true);
+    await expectWrite(databaseHost, namespace, `charropro/tournaments/${tournamentB}/scores/access-check`, users.selected.token, { total: 1 }, false);
+    await expectWrite(databaseHost, namespace, `charropro/tournaments/${tournamentA}/scores/access-check`, users.operator.token, { total: 1 }, true);
+    await expectWrite(databaseHost, namespace, `charropro/tournaments/${tournamentB}/scores/access-check`, users.operator.token, { total: 1 }, false);
+    await expectWrite(databaseHost, namespace, `charropro/tournaments/${tournamentA}/scores/access-check`, users.inactive.token, { total: 1 }, false);
   } finally {
     for (const user of Object.values(users)) {
       await ownerDelete(databaseHost, namespace, `charropro/users/${user.uid}`);
@@ -127,6 +182,16 @@ async function expectRead(databaseHost, namespace, path, token, allowed) {
   if (!allowed) assert.ok([401, 403].includes(response.status));
 }
 
+async function expectWrite(databaseHost, namespace, path, token, value, allowed) {
+  const response = await fetch(`http://${databaseHost}/${path}.json?ns=${encodeURIComponent(namespace)}&auth=${encodeURIComponent(token)}`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(value)
+  });
+  assert.equal(response.ok, allowed, `${path}: expected ${allowed ? "ALLOW" : "DENY"}, got ${response.status}`);
+  if (!allowed) assert.ok([401, 403].includes(response.status));
+}
+
 async function ownerWrite(databaseHost, namespace, path, value) {
   const response = await fetch(`http://${databaseHost}/${path}.json?ns=${encodeURIComponent(namespace)}`, {
     method: "PUT",
@@ -142,4 +207,18 @@ async function ownerDelete(databaseHost, namespace, path) {
     headers: { authorization: "Bearer owner" }
   });
   assert.equal(response.ok, true, await response.text());
+}
+
+function findUngatedSelectedAssignments(node, path = []) {
+  if (!node || typeof node !== "object") return [];
+  return Object.entries(node).flatMap(([key, value]) => {
+    const currentPath = [...path, key];
+    if (typeof value === "string") {
+      const hasGlobal = value.includes("tournamentAccess').val() === 'all'");
+      const hasAssignment = value.includes("userTournamentAccess/");
+      const hasSelectedGate = value.includes("tournamentAccess').val() === 'selected'");
+      return hasGlobal && hasAssignment && !hasSelectedGate ? [currentPath.join("/")] : [];
+    }
+    return findUngatedSelectedAssignments(value, currentPath);
+  });
 }

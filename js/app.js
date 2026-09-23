@@ -8018,7 +8018,8 @@ function buildRecoveryTournamentUsers(tournamentId = "") {
   return (firebaseUsers || [])
     .filter((user) => {
       const access = normalizeTournamentAccess(user);
-      return access.tournamentAccess !== "selected" || access.tournamentIds.includes(tournamentId);
+      return access.tournamentAccess === "all"
+        || access.tournamentAccess === "selected" && access.tournamentIds.includes(tournamentId);
     })
     .map((user) => ({
       uid: user.uid || "",
@@ -8233,7 +8234,8 @@ function renderUsersTable() {
 
 function renderUserTournamentAccess(user) {
   const access = normalizeTournamentAccess(user);
-  if (access.tournamentAccess !== "selected") return html`<span class="pill green">Todos activos</span>`;
+  if (access.tournamentAccess === "all") return html`<span class="pill green">Todos activos</span>`;
+  if (access.tournamentAccess !== "selected") return html`<span class="pill red">Acceso no configurado</span>`;
   if (!access.tournamentIds.length) return html`<span class="pill red">Sin torneos</span>`;
   const operationalIds = access.tournamentIds.filter((id) => {
     const tournament = state.tournaments.find((item) => item.id === id);
@@ -8471,7 +8473,7 @@ function renderTournamentAssignmentFields(user = null) {
   return html`
     <div class="wide tournament-assignment-box">
       <label class="checkbox-row">
-        <input type="checkbox" name="allTournaments" ${access.tournamentAccess === "selected" ? "" : "checked"}>
+        <input type="checkbox" name="allTournaments" ${access.tournamentAccess === "all" ? "checked" : ""}>
         Acceso a todos los torneos activos o programados
       </label>
       <p class="card-subtitle">Si lo desmarcas, este usuario solo vera y operara los torneos seleccionados.</p>

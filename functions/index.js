@@ -61,6 +61,10 @@ const {
   buildTournamentPublicBrandingAssetUrl,
   prepareTournamentPublicBrandingAssetUpload
 } = require("./tournamentPublicBrandingAsset");
+const {
+  hasExplicitTournamentAccess,
+  normalizeTournamentAccessForWrite
+} = require("./tournamentAccess");
 
 admin.initializeApp();
 
@@ -652,13 +656,7 @@ async function requireOfficialScoreActor(uid, tournamentId) {
       reason: "official-score-role-denied"
     });
   }
-  const profileTournamentIds = Array.isArray(profile.tournamentIds)
-    ? profile.tournamentIds
-    : Object.values(profile.tournamentIds || {});
-  const hasAccess = role === "supervisor"
-    || profile.tournamentAccess !== "selected"
-    || selectedAccessSnapshot.val() === true
-    || profileTournamentIds.map(String).includes(cleanTournamentId);
+  const hasAccess = hasExplicitTournamentAccess(profile, cleanTournamentId, selectedAccessSnapshot.val());
   if (!hasAccess) {
     throw new HttpsError("permission-denied", "El usuario no tiene acceso al torneo.", {
       reason: "official-score-tournament-access-denied"
@@ -682,8 +680,7 @@ async function requireTournamentPublicBrandingEditor(uid, tournamentId) {
     admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}/info`).get()
   ]);
   const profile = profileSnapshot.val() || {};
-  const ids = Array.isArray(profile.tournamentIds) ? profile.tournamentIds : Object.values(profile.tournamentIds || {});
-  const hasAccess = profile.tournamentAccess !== "selected" || selectedAccessSnapshot.val() === true || ids.map(String).includes(tournamentId);
+  const hasAccess = hasExplicitTournamentAccess(profile, tournamentId, selectedAccessSnapshot.val());
   if (!tournamentSnapshot.exists()) {
     throw new HttpsError("not-found", "El torneo no existe.", { reason: "public-branding-asset-tournament-not-found" });
   }
@@ -835,20 +832,14 @@ async function requireBackupActor(uid, data = {}, options = {}) {
   }
 
   let tournament = null;
-  let hasTournamentAccess = role === "supervisor";
+  let hasTournamentAccess = false;
   if (!options.cancellation && scopeType === "tournament") {
     const [tournamentSnapshot, selectedAccessSnapshot] = await Promise.all([
       admin.database().ref(`${TOURNAMENTS_PATH}/${tournamentId}`).get(),
       admin.database().ref(`${USER_TOURNAMENT_ACCESS_PATH}/${uid}/${tournamentId}`).get()
     ]);
     tournament = tournamentSnapshot.val();
-    const profileTournamentIds = Array.isArray(profile.tournamentIds)
-      ? profile.tournamentIds
-      : Object.values(profile.tournamentIds || {});
-    hasTournamentAccess = role === "supervisor"
-      || profile.tournamentAccess !== "selected"
-      || selectedAccessSnapshot.val() === true
-      || profileTournamentIds.map(String).includes(tournamentId);
+    hasTournamentAccess = hasExplicitTournamentAccess(profile, tournamentId, selectedAccessSnapshot.val());
   }
   const tournamentTenantId = String(tournament?.info?.tenantId || tournament?.meta?.tenantId || "").slice(0, 180);
   const tournamentOrganizationId = String(tournament?.info?.organizationId || tournament?.meta?.organizationId || "").slice(0, 180);
@@ -936,13 +927,7 @@ async function requireConfigurationActor(uid, data = {}, operation = "read") {
   const tournamentId = normalizeOptionalKey(data.tournamentId || data.scope?.tournamentId);
   if (tournamentId) {
     const selectedAccess = await admin.database().ref(`${USER_TOURNAMENT_ACCESS_PATH}/${uid}/${tournamentId}`).get();
-    const profileTournamentIds = Array.isArray(profile.tournamentIds)
-      ? profile.tournamentIds
-      : Object.values(profile.tournamentIds || {});
-    const hasAccess = role === "supervisor"
-      || profile.tournamentAccess !== "selected"
-      || selectedAccess.val() === true
-      || profileTournamentIds.map(String).includes(tournamentId);
+    const hasAccess = hasExplicitTournamentAccess(profile, tournamentId, selectedAccess.val());
     if (!hasAccess) throw new ConfigurationEngineError("configuration-tournament-denied");
   }
   if (operation === "write" && role !== "supervisor" && profile.platformAdmin !== true) {
@@ -1126,7 +1111,7 @@ function normalizePayload(data) {
     password: String(data.password || ""),
     role: String(data.role || "").trim().toLowerCase(),
     active: data.active !== false,
-    tournamentAccess: data.tournamentAccess === "selected" ? "selected" : "all",
+    tournamentAccess: normalizeTournamentAccessForWrite(data.tournamentAccess, data.role),
     tournamentIds: Array.isArray(data.tournamentIds)
       ? [...new Set(data.tournamentIds.map((id) => String(id || "").trim()).filter(Boolean))]
       : []
@@ -1144,6 +1129,14 @@ function validatePayload(data) {
 
   if (!VALID_ROLES.has(data.role)) {
     throw new HttpsError("invalid-argument", "Rol invalido.");
+  }
+
+  if (!new Set(["selected", "all"]).has(data.tournamentAccess)) {
+    throw new HttpsError("invalid-argument", "Alcance de torneo invalido.");
+  }
+
+  if (data.tournamentAccess === "all" && data.role !== "supervisor") {
+    throw new HttpsError("invalid-argument", "Solo Supervisor puede tener acceso global a torneos.");
   }
 
   if (!data.uid && data.password.length < 6) {

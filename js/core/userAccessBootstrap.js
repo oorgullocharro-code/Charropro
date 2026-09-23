@@ -1,4 +1,4 @@
-import { ROLES, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { ROLES, TOURNAMENT_ACCESS, canUseGlobalTournamentAccess, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",
@@ -44,6 +44,7 @@ export function validateUserAccessBootstrapProfile(profile = {}) {
 
 export function resolveUserAuthorizedTournamentIds(profile = {}, userTournamentAccess = {}) {
   const profileAccess = normalizeTournamentAccess(profile);
+  if (profileAccess.tournamentAccess !== TOURNAMENT_ACCESS.SELECTED) return [];
   return [...new Set([
     ...(profileAccess.tournamentIds || []),
     ...Object.entries(userTournamentAccess || {})
@@ -57,7 +58,7 @@ export function buildUserAccessBootstrapPlan(profile = {}, userTournamentAccess 
   if (!validation.ok) return validation;
 
   const access = normalizeTournamentAccess(profile);
-  const globalIndexRead = validation.role === ROLES.SUPERVISOR || access.tournamentAccess !== "selected";
+  const globalIndexRead = canUseGlobalTournamentAccess(profile);
   const tournamentIds = globalIndexRead
     ? []
     : resolveUserAuthorizedTournamentIds(profile, userTournamentAccess);
