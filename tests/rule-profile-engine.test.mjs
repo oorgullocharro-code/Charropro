@@ -9,13 +9,13 @@ import {
   resolveEffectiveRules,
   resolveRuleProfileSelection,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 import {
   SUERTES,
   getTournamentSuertes,
   resolveTournamentRules
-} from "../js/data/suertes.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/data/suertes.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { calculateAttemptTotal } from "../js/core/scoring.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 function profile(rules = [], overrides = {}) {
   return {

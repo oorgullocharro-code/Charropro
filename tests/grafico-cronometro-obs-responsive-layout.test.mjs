@@ -4,7 +4,7 @@ import {
   buildGraphicTimerPresentation,
   formatGraphicTimerMs,
   readGraphicTimerPresentationOptions
-} from "../js/views/graficoTimerPresentation.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/views/graficoTimerPresentation.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 assert.equal(formatGraphicTimerMs(12_100, { showMinutes: false }), "12.1");
 assert.equal(formatGraphicTimerMs(-12_100, { showMinutes: false }), "-12.1");

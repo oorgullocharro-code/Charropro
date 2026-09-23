@@ -1,7 +1,7 @@
 import {
   createPortalV2ResultsModel,
   PORTAL_V2_PUBLIC_SHEET_TEAM_COLUMNS
-} from "./portalV2ResultsModel.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "./portalV2ResultsModel.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 // Presentation-only context. Every option and every filtered row comes from
 // the resolved V3 snapshot; this module never decides a sporting phase.

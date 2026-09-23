@@ -5,7 +5,7 @@ import test from "node:test";
 import {
   getCanonicalOfficialSuerteTotals,
   getCanonicalOfficialTeamTotals
-} from "../js/core/canonicalOfficialResults.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/core/canonicalOfficialResults.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const appSource = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
 const canonicalHelpers = loadCanonicalHelpers(appSource);

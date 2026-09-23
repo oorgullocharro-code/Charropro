@@ -4,7 +4,7 @@ import {
   isFmch2026ManganaSuerte,
   reconcileFmch2026ManganaAttempt,
   resolveFmch2026ManganaTiming
-} from "../data/fmch2026ManganasPasoRules.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../data/fmch2026ManganasPasoRules.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 export const FMCH_2026_MANGANA_REMATE_SCHEMA_VERSION = "1.0.0";
 export const FMCH_2026_MANGANA_TIME_SETTLEMENT_VERSION = "1.0.0";

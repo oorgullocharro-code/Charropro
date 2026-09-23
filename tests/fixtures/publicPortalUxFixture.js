@@ -1,10 +1,10 @@
 import {
   createPublicPortalShell,
   renderPublicPortal
-} from "../../js/publicPortal/portalRender.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../../js/publicPortal/portalRender.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 import {
   buildPublicPortalModel
-} from "../../js/publicPortal/portalSelectors.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../../js/publicPortal/portalSelectors.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 export const PUBLIC_PORTAL_UX_FIXTURE = Object.freeze({
   schemaVersion: 2,

@@ -2,7 +2,7 @@ import {
   buildUserAccessBootstrapPlan,
   diagnoseUserAccessBootstrap,
   readUserAccessBootstrapTournaments
-} from "../../js/core/userAccessBootstrap.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../../js/core/userAccessBootstrap.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 export const TOURNAMENT_A = "tournament-a";
 export const TOURNAMENT_B = "tournament-b";

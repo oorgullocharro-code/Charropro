@@ -1,7 +1,7 @@
 import {
   deriveOfficialTimerLiveDisplay,
   formatOfficialTimerMs
-} from "./officialTimerLiveDisplay.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "./officialTimerLiveDisplay.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const DEFAULT_TIMER_RULE = {
   mode: "elapsed",

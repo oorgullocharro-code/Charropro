@@ -5,8 +5,8 @@ import {
   getTeamCharreadaTotal,
   getTeamSuerteTotal,
   hasAttemptActivity
-} from "../js/core/scoring.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/core/scoring.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { emptyAttempt, scoreKey, state } from "../js/core/state.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const penalizedAttempt = {
   ...emptyAttempt(),

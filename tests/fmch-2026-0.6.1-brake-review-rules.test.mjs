@@ -4,11 +4,11 @@ import {
   FMCH_2026_LIBRE_PROFILE_0_6_1,
   getRuleProfileRulesByPhase,
   validateRuleProfile
-} from "../js/data/ruleProfiles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/data/ruleProfiles.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 import {
   FMCH_2026_BRAKE_REVIEW_PHASE_ID,
   FMCH_2026_BRAKE_REVIEW_RECONCILIATION
-} from "../js/data/fmch2026BrakeReviewRules.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/data/fmch2026BrakeReviewRules.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const ruleMap = new Map(FMCH_2026_LIBRE_PROFILE_0_6_1.rules.map((rule) => [rule.ruleId, rule]));
 const phaseRules = getRuleProfileRulesByPhase(FMCH_2026_LIBRE_PROFILE_0_6_1, FMCH_2026_BRAKE_REVIEW_PHASE_ID);

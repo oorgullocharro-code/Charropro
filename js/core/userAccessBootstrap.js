@@ -1,4 +1,4 @@
-import { ROLES, TOURNAMENT_ACCESS, canUseGlobalTournamentAccess, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { ROLES, TOURNAMENT_ACCESS, canUseGlobalTournamentAccess, normalizeRole, normalizeTournamentAccess } from "./roles.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 export const USER_ACCESS_BOOTSTRAP_STATUS = Object.freeze({
   READY: "READY",

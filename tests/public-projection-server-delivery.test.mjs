@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { buildPublicProjectionIntent } from "../js/core/publicProjectionOutbox.js";
-import { buildPublicProjection } from "../functions/reconciliationShared/public/publicProjection.js";
+import { buildPublicProjectionIntent } from "../js/core/publicProjectionOutbox.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { buildPublicProjection } from "../functions/reconciliationShared/public/publicProjection.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 import { createPublicProjectionServerDelivery } from "../functions/publicProjectionServerDelivery.mjs";
 
 const tournamentId = "torneo_mubf2gr9_cp5z2m";

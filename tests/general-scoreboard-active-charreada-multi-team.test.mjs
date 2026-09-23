@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import {
   selectActiveCharreadaScoreboard,
   selectPublicProjectionStandingRows
-} from "../js/core/generalScoreboard.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/core/generalScoreboard.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { normalizeGraphicsConfig } from "../js/core/graphicsConfig.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 function teams(...entries) {
   return entries.map(([id, name]) => ({ id, name }));

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import backupFoundation from "../functions/backupFoundation.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import restoreEngine from "../functions/restoreEngine.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import restoreService from "../functions/restoreService.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import backupFoundation from "../functions/backupFoundation.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import restoreEngine from "../functions/restoreEngine.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import restoreService from "../functions/restoreService.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import officialScoreConcurrency from "../functions/officialScoreConcurrency.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const {
   buildBackupArchive,

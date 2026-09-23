@@ -28,7 +28,7 @@
   },
   "values": {
     "system": {
-      "appVersion": "20260920-public-sabana-phase-title-ux-deploy-001-v1",
+      "appVersion": "20260923-client-cache-version-recovery-fix-010-v1",
       "environment": "production",
       "releaseStatus": "precommercial",
       "production": true,
@@ -158,6 +158,6 @@
   },
   "migration": null,
   "previousChecksum": null,
-  "checksum": "2e8242c5cd3f9a385211e1c1d9a6fb734bd8ae203bcd1cfef7a48ef9322fab60",
-  "fingerprint": "2e8242c5cd3f9a385211e1c1d9a6fb734bd8ae203bcd1cfef7a48ef9322fab60"
+  "checksum": "704b25682074632683c673bdcb12c3ca644e5a33b93e013a44d24952fa26132d",
+  "fingerprint": "704b25682074632683c673bdcb12c3ca644e5a33b93e013a44d24952fa26132d"
 }

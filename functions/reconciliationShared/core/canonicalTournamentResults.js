@@ -2,9 +2,9 @@ import {
   buildCanonicalOfficialResults,
   getCanonicalOfficialTeamTotals,
   getOfficialRecordValue
-} from "./canonicalOfficialResults.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { buildOfficialRankingItems } from "./officialRanking.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { resolveTournamentRules } from "../data/suertes.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "./canonicalOfficialResults.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { buildOfficialRankingItems } from "./officialRanking.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { resolveTournamentRules } from "../data/suertes.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 export const CANONICAL_TOURNAMENT_RESULTS_SCHEMA_VERSION = "1.0.0";
 

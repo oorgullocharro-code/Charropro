@@ -1,4 +1,4 @@
-import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { PUBLIC_SCORE_COLUMNS } from "./publicProjection.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const ALL_COLUMNS = ["CC", "P", "C", "JT", "LC", "PR", "JY", "MP", "MC", "PM", "TOTAL"];
 

@@ -8,7 +8,7 @@ import {
   listAvailableBroadcastFields,
   sanitizeBroadcastDataContract,
   validateBroadcastDataContract
-} from "../js/broadcast/dataContract.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/broadcast/dataContract.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const NOW = "2026-07-12T18:00:00.000Z";
 

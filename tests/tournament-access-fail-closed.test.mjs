@@ -6,8 +6,8 @@ import {
   TOURNAMENT_ACCESS,
   hasTournamentAccess,
   normalizeTournamentAccess
-} from "../js/core/roles.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { buildUserAccessBootstrapPlan } from "../js/core/userAccessBootstrap.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/core/roles.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { buildUserAccessBootstrapPlan } from "../js/core/userAccessBootstrap.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const require = createRequire(import.meta.url);
 const { hasExplicitTournamentAccess, normalizeTournamentAccessForWrite } = require("../functions/tournamentAccess.js");

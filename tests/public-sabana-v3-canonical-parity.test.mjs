@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { getPublicSheetTitle } from "../js/portalV2/portalV2Render.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { buildCanonicalPublicProjectionV3 as buildBrowserProjection } from "../js/public/canonicalPublicProjectionV3.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { createCanonicalPublicTournamentData } from "../js/public/canonicalPublicTournamentData.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { createPortalV2Model } from "../js/portalV2/portalV2Model.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { getPublicSheetTitle } from "../js/portalV2/portalV2Render.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { buildCanonicalPublicProjectionV3 as buildFunctionProjection } from "../functions/reconciliationShared/public/canonicalPublicProjectionV3.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const TOURNAMENT_ID = "public-sheet-parity";
 const TEAM_COLUMNS = ["cala", "piales", "colas", "toro", "lazo", "pial_ruedo", "yegua", "manganas_pie", "manganas_caballo", "paso"];

@@ -23,7 +23,7 @@ import {
   validateBroadcastComponent,
   validateComponentInstance,
   validateComponentSnapshot
-} from "../js/broadcast/componentLibrary.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/broadcast/componentLibrary.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 const T0 = "2026-07-13T22:00:00.000Z";
 const T1 = "2026-07-13T22:01:00.000Z";

@@ -4,7 +4,7 @@ import {
   BRAKE_REVIEW_RESULTS,
   BRAKE_REVIEW_STAGES,
   isBrakeReviewProfile
-} from "../js/core/brakeReviewPhase.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "../js/core/brakeReviewPhase.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 let review = freshReview();

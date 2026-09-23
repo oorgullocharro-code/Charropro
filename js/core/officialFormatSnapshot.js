@@ -1,10 +1,10 @@
-import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { validateScoringAttemptV2 } from "./scoringAttempt.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { FMCH_2026_CALA_INFR_RULES } from "../data/calaRules.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 import {
   DOCUMENTED_CALA_BAD_POINT_CODES,
   buildCalaDocumentAbbreviationMatrix
-} from "./officialFormatDocumentModel.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
-import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+} from "./officialFormatDocumentModel.js?v=20260923-client-cache-version-recovery-fix-010-v1";
+import { buildCanonicalOfficialResults } from "./canonicalOfficialResults.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 
 export const OFFICIAL_FORMAT_SNAPSHOT_VERSION = "1.2.0";
 

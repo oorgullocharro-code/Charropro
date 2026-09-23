@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { synchronizeSharedAuthorities } from "./packageReconciliationShared.mjs";
 
 export const STABLE_BOOTSTRAP_MODULES = Object.freeze([
   "configurationBootstrap.js"
@@ -33,7 +34,14 @@ export function applyCanonicalBuild(root, options = {}) {
     fs.writeFileSync(file, after);
     changed.push(path.relative(root, file));
   }
-  return Object.freeze({ build, changed: Object.freeze(changed) });
+  const sharedAuthority = fs.existsSync(path.join(root, "functions/reconciliationShared"))
+    ? synchronizeSharedAuthorities(root)
+    : null;
+  return Object.freeze({
+    build,
+    changed: Object.freeze(changed),
+    sharedAuthorityFiles: Object.freeze(sharedAuthority?.files || [])
+  });
 }
 
 function collectFiles(root, directories) {

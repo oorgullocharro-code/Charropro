@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_RESULTS } from "../js/core/brakeReviewPhase.js?v=20260920-public-sabana-phase-title-ux-deploy-001-v1";
+import { BRAKE_REVIEW_ACTIONS, BRAKE_REVIEW_RESULTS } from "../js/core/brakeReviewPhase.js?v=20260923-client-cache-version-recovery-fix-010-v1";
 import { command, freshReview } from "./helpers/brake-review-fixture.mjs";
 
 const manualIds = [
