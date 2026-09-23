@@ -11,6 +11,9 @@ const manifest = loadProductionFunctionsAllowlist();
 const added = "reconcileCharroProPublicProjectionOutbox";
 const repositoryExports = discoverRepositoryFunctionExports(readFileSync(new URL("../functions/index.js", import.meta.url), "utf8"));
 const contract = validateProductionFunctionsContract({ manifest, repositoryExports, requestedTargets: [added], expectedCreates: [added] });
+const rollbackContract = validateProductionFunctionsContract({ manifest, repositoryExports, requestedTargets: [added], expectedDeletes: [added],
+  mode: "rollback", rollbackFrom: manifest.explicitFunctionLifecycle.rollback.fromCommit,
+  rollbackTo: manifest.explicitFunctionLifecycle.rollback.toCommit });
 const endpoint = id => ({ id, project: manifest.projectId, codebase: "default", region: "us-central1", platform: "gcfv2", runtime: "nodejs22", state: "ACTIVE", targetedByOnly: true, labels: { "deployment-tool": "cli-firebase" },
   ...(id === added
     ? { availableMemoryMb: 512, timeoutSeconds: 540, scheduleTrigger: { schedule: "every 5 minutes", timeZone: "America/Mexico_City" } }
@@ -18,9 +21,13 @@ const endpoint = id => ({ id, project: manifest.projectId, codebase: "default", 
 });
 const blank = () => ({ endpointsToCreate: [], endpointsToUpdate: [], endpointsToDelete: [], endpointsToSkip: [] });
 const validPlan = () => ({ "default-us-central1-1024": { ...blank(), endpointsToCreate: [endpoint(added)] } });
+const validRollbackPlan = () => ({ "default-us-central1-512": { ...blank(), endpointsToDelete: [endpoint(added)] } });
 const block = fn => assert.throws(fn, /firebase-plan-blocked:/);
 
 test("Actual-plan CREATE EXPECTED=single new Function, DELETE EXPECTED=0", () => assert.deepEqual(validateFirebasePlan(validPlan(), contract, manifest).created, [added]));
+test("Actual-plan explicit rollback DELETE=single projection worker, CREATE EXPECTED=0", () => {
+  assert.deepEqual(validateFirebasePlan(validRollbackPlan(), rollbackContract, manifest), { created: [], updated: [], skipped: [], deleted: [added] });
+});
 test("Firebase proposes another create / deletion / update / implicit replacement: BLOCK", () => {
   const mutations = [
     p => p.endpointsToCreate.push(endpoint(manifest.authorizedFunctions[0])),
@@ -41,6 +48,17 @@ test("Firebase proposes another create / deletion / update / implicit replacemen
     p => { p.endpointsToCreate[0].callableTrigger = {}; }
   ];
   for (const mutate of mutations) { const p = validPlan(); mutate(Object.values(p)[0]); block(() => validateFirebasePlan(p, contract, manifest)); }
+});
+test("Rollback plan blocks normal-mode delete, other delete, multiple delete, wildcard, and create", () => {
+  const other = manifest.authorizedFunctions.find(name => name !== added);
+  const mutations = [
+    () => validateFirebasePlan(validRollbackPlan(), contract, manifest),
+    () => { const p = validRollbackPlan(); Object.values(p)[0].endpointsToDelete[0] = endpoint(other); return validateFirebasePlan(p, rollbackContract, manifest); },
+    () => { const p = validRollbackPlan(); Object.values(p)[0].endpointsToDelete.push(endpoint(other)); return validateFirebasePlan(p, rollbackContract, manifest); },
+    () => { const p = validRollbackPlan(); Object.values(p)[0].endpointsToDelete[0].id = "*"; return validateFirebasePlan(p, rollbackContract, manifest); },
+    () => { const p = validRollbackPlan(); Object.values(p)[0].endpointsToCreate.push(endpoint(added)); return validateFirebasePlan(p, rollbackContract, manifest); }
+  ];
+  for (const validate of mutations) block(validate);
 });
 test("Guard refuses mutation without planner / revalidates aggregate immediately before Fabricator", async () => {
   let writes = 0, inventoryChecks = 0;

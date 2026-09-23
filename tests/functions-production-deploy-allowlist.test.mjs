@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFileSync } from "node:fs";
 import {
-  ProductionFunctionsDeployError, discoverRepositoryFunctionExports, firebaseDeployArguments,
+  ProductionFunctionsDeployError, discoverRepositoryFunctionExports, firebaseDeployArguments, firebaseRollbackArguments,
   loadProductionFunctionsAllowlist, parseRequestedTargets, validateProductionFunctionsContract,
   validateAllowlist, parseCliArguments
 } from "../tools/release/productionFunctionsDeploy.mjs";
@@ -14,6 +14,12 @@ const before = production.filter(item => item.id !== added);
 const options = { manifest, repositoryExports, requestedTargets: [added] };
 const check = extra => validateProductionFunctionsContract({ ...options, ...extra });
 const block = fn => assert.throws(fn, error => error instanceof ProductionFunctionsDeployError);
+const rollback = Object.freeze({
+  mode: "rollback",
+  expectedDeletes: [added],
+  rollbackFrom: manifest.explicitFunctionLifecycle.rollback.fromCommit,
+  rollbackTo: manifest.explicitFunctionLifecycle.rollback.toCommit
+});
 
 test("CURRENT 13 AUTHORIZED, INCLUDING THE EXPLICIT PROJECTION RECOVERY WORKER = PASS", () => {
   const result = check({ productionFunctions: production });
@@ -53,6 +59,27 @@ test("INITIAL CREATE: exact 12 before / exact 13 after = PASS; new already exist
   block(() => check({ productionFunctions: before, expectedCreates: [manifest.authorizedFunctions[0]] }));
   block(() => check({ expectedCreates: [added], requestedTargets: [manifest.authorizedFunctions[0]] }));
 });
+test("EXPLICIT ROLLBACK: exact 13 before / exact 12 after deletes only the projection worker = PASS", () => {
+  const result = check({ ...rollback, productionFunctions: production });
+  assert.deepEqual(result.expectedCreates, []);
+  assert.deepEqual(result.expectedDeletes, [added]);
+  assert.equal(check({ ...rollback, phase: "after", productionFunctions: before }).production.length, 12);
+  assert.deepEqual(firebaseRollbackArguments({ projectId: manifest.projectId, targets: [added], manifest }), [
+    "functions:delete", added, "--region", "us-central1", "--project", manifest.projectId, "--force", "--non-interactive"
+  ]);
+});
+test("NORMAL DELETE, OTHER DELETE, MULTIPLE DELETE, WILDCARD, AND WRONG RELEASE ROLLBACK = BLOCK", () => {
+  const other = manifest.authorizedFunctions.find(name => name !== added);
+  for (const extra of [
+    { expectedDeletes: [added] },
+    { ...rollback, requestedTargets: [other], expectedDeletes: [other] },
+    { ...rollback, requestedTargets: [added, other], expectedDeletes: [added, other] },
+    { ...rollback, requestedTargets: ["*"], expectedDeletes: ["*"] },
+    { ...rollback, rollbackTo: "f".repeat(40) },
+    { ...rollback, productionFunctions: production.filter(item => item.id !== added && item.id !== other) },
+    { expectedCreates: [added], productionFunctions: [...before, { ...production[0], id: "unexpected" }] }
+  ]) block(() => check(extra));
+});
 test("NO DELETE OF EXISTING AUTHORIZED FUNCTIONS / INVENTORY DRIFT = BLOCK", () => {
   for (const inventory of [before.slice(1), [...before, { ...production[0], id: "unexpected" }],
     [...before, before[0]], before.map((item, i) => i ? item : { ...item, runtime: "nodejs20" }),
@@ -65,5 +92,9 @@ test("NO DELETE OF EXISTING AUTHORIZED FUNCTIONS / INVENTORY DRIFT = BLOCK", () 
 test("CLI requires explicit targets, explicit execute, rejects repeated flags and force", () => {
   const args = ["deploy", "--targets", added, "--expect-create", added, "--execute"];
   assert.deepEqual(parseCliArguments(args).requestedTargets, [added]);
-  for (const bad of [["deploy", "--targets", added], [...args, "--targets", added], [...args, "--force"], ["preflight", "--targets", added, "--execute"]]) block(() => parseCliArguments(bad));
+  const rollbackArgs = ["rollback-dry-run", "--targets", added, "--expect-delete", added,
+    "--rollback-from", rollback.rollbackFrom, "--rollback-to", rollback.rollbackTo];
+  assert.equal(parseCliArguments(rollbackArgs).command, "rollback-dry-run");
+  for (const bad of [["deploy", "--targets", added], [...args, "--targets", added], [...args, "--force"], ["preflight", "--targets", added, "--execute"],
+    ["rollback-dry-run", "--targets", added, "--expect-delete", added], ["dry-run", "--targets", added, "--expect-delete", added]]) block(() => parseCliArguments(bad));
 });

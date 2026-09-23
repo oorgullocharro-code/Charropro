@@ -37,5 +37,25 @@
     "reconcileCharroProHistoricalResults",
     "reconcileCharroProPublicProjectionOutbox",
     "uploadCharroProTournamentPublicAsset"
-  ]
+  ],
+  "explicitFunctionLifecycle": {
+    "schemaVersion": "charropro-production-function-lifecycle/1",
+    "functionId": "reconcileCharroProPublicProjectionOutbox",
+    "forward": {
+      "fromCommit": "0ff2b4aa09f3b228038084be145c7c1e7d9a001c",
+      "toCommit": "25e6e5cb41ccca93d6e3a72ce48524dee2db5723",
+      "preCount": 12,
+      "postCount": 13,
+      "creates": ["reconcileCharroProPublicProjectionOutbox"],
+      "deletes": []
+    },
+    "rollback": {
+      "fromCommit": "25e6e5cb41ccca93d6e3a72ce48524dee2db5723",
+      "toCommit": "0ff2b4aa09f3b228038084be145c7c1e7d9a001c",
+      "preCount": 13,
+      "postCount": 12,
+      "creates": [],
+      "deletes": ["reconcileCharroProPublicProjectionOutbox"]
+    }
+  }
 }

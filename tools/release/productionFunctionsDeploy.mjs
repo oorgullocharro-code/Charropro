@@ -44,12 +44,45 @@ export function validateAllowlist(value) {
       value.projectId !== DEFAULT_PROJECT_ID || value.codebase !== "default") {
     throw new ProductionFunctionsDeployError("allowlist-production-contract-invalid");
   }
+  const lifecycle = validateExplicitFunctionLifecycle(value.explicitFunctionLifecycle, authorized);
   return Object.freeze({ ...value,
     authorizedFunctions: Object.freeze([...authorized].sort()),
     excludedRepositoryExports: Object.freeze([...excluded].sort()),
     allowedInitialCreates: Object.freeze([...creates].sort()),
-    expectedProduction: Object.freeze({ ...expected })
+    expectedProduction: Object.freeze({ ...expected }),
+    explicitFunctionLifecycle: lifecycle
   });
+}
+
+function validateExplicitFunctionLifecycle(value, authorized) {
+  if (!isPlainObject(value) || value.schemaVersion !== "charropro-production-function-lifecycle/1") {
+    throw new ProductionFunctionsDeployError("function-lifecycle-schema-invalid");
+  }
+  const functionId = normalizedString(value.functionId, "function-lifecycle-function-invalid");
+  if (!authorized.includes(functionId)) throw new ProductionFunctionsDeployError("function-lifecycle-function-not-authorized");
+  const forward = normalizeLifecycleTransition(value.forward, "forward", functionId);
+  const rollback = normalizeLifecycleTransition(value.rollback, "rollback", functionId);
+  if (forward.preCount !== 12 || forward.postCount !== 13 || rollback.preCount !== 13 || rollback.postCount !== 12 ||
+      !sameNames(forward.creates, [functionId]) || forward.deletes.length || rollback.creates.length ||
+      !sameNames(rollback.deletes, [functionId]) || forward.fromCommit !== rollback.toCommit ||
+      forward.toCommit !== rollback.fromCommit) {
+    throw new ProductionFunctionsDeployError("function-lifecycle-transition-invalid");
+  }
+  return Object.freeze({ schemaVersion: value.schemaVersion, functionId,
+    forward: Object.freeze(forward), rollback: Object.freeze(rollback) });
+}
+
+function normalizeLifecycleTransition(value, mode, functionId) {
+  if (!isPlainObject(value) || !isCommitId(value.fromCommit) || !isCommitId(value.toCommit) ||
+      !Number.isInteger(value.preCount) || !Number.isInteger(value.postCount)) {
+    throw new ProductionFunctionsDeployError("function-lifecycle-transition-invalid", { mode });
+  }
+  const creates = normalizedUniqueNames(value.creates, "function-lifecycle-transition-invalid").sort();
+  const deletes = normalizedUniqueNames(value.deletes, "function-lifecycle-transition-invalid").sort();
+  if ([...creates, ...deletes].some(name => name !== functionId)) {
+    throw new ProductionFunctionsDeployError("function-lifecycle-transition-invalid", { mode });
+  }
+  return { fromCommit: value.fromCommit, toCommit: value.toCommit, preCount: value.preCount, postCount: value.postCount, creates, deletes };
 }
 
 export function discoverRepositoryFunctionExports(source) {
@@ -65,7 +98,8 @@ export function buildProductionFunctionTargets(authorizedFunctions) {
 }
 
 export function validateProductionFunctionsContract({ repositoryExports, manifest, productionFunctions = null,
-  requestedTargets, expectedCreates = [], phase = "before" }) {
+  requestedTargets, expectedCreates = [], expectedDeletes = [], phase = "before", mode = "normal",
+  rollbackFrom = "", rollbackTo = "" }) {
   manifest = validateAllowlist(manifest);
   const exported = normalizedUniqueNames(repositoryExports, "repository-exports-invalid").sort();
   const authorized = manifest.authorizedFunctions;
@@ -77,16 +111,30 @@ export function validateProductionFunctionsContract({ repositoryExports, manifes
   }
   const requested = parseRequestedTargets(requestedTargets, authorized);
   const creates = normalizedUniqueNames(expectedCreates, "expected-creates-invalid").sort();
+  const deletes = normalizedUniqueNames(expectedDeletes, "expected-deletes-invalid").sort();
+  if (!["normal", "rollback"].includes(mode)) throw new ProductionFunctionsDeployError("invalid-function-lifecycle-mode");
   if (creates.some(name => !manifest.allowedInitialCreates.includes(name) || !requested.includes(name))) {
     throw new ProductionFunctionsDeployError("unexpected-create-requested");
   }
+  if (mode === "normal" && deletes.length) throw new ProductionFunctionsDeployError("delete-without-rollback-mode");
+  if (mode === "rollback") {
+    const transition = manifest.explicitFunctionLifecycle.rollback;
+    if (creates.length || !sameNames(requested, transition.deletes) || !sameNames(deletes, transition.deletes) ||
+        rollbackFrom !== transition.fromCommit || rollbackTo !== transition.toCommit) {
+      throw new ProductionFunctionsDeployError("rollback-lifecycle-not-authorized");
+    }
+  }
   if (!["before", "after"].includes(phase)) throw new ProductionFunctionsDeployError("invalid-inventory-phase");
   const result = { exported, authorized, excluded, requested, targets: buildProductionFunctionTargets(requested),
-    expectedCreates: creates, expectedDeletes: [], production: null, phase };
+    expectedCreates: creates, expectedDeletes: deletes, production: null, phase, mode,
+    rollbackFrom, rollbackTo };
   if (productionFunctions !== null) {
     const production = normalizeProductionInventory(productionFunctions);
     const expected = manifest.expectedProduction;
-    const expectedNames = authorized.filter(name => phase === "after" || !creates.includes(name));
+    const expectedNames = authorized.filter(name => {
+      if (phase === "before") return !creates.includes(name);
+      return !deletes.includes(name);
+    });
     const names = production.map(item => item.id).sort();
     const violations = production.filter(item => item.platform !== expected.generation || item.region !== expected.region ||
       item.runtime !== expected.runtime || item.state !== expected.status);
@@ -116,6 +164,17 @@ export function firebaseDeployArguments({ projectId, targets, manifest }) {
   const project = normalizedProjectId(projectId);
   const normalizedTargets = buildProductionFunctionTargets(targets);
   return Object.freeze(["deploy", "--only", normalizedTargets.join(","), "--project", project, "--non-interactive"]);
+}
+
+export function firebaseRollbackArguments({ projectId, targets, manifest }) {
+  manifest = validateAllowlist(manifest);
+  targets = parseRequestedTargets(targets, manifest.authorizedFunctions);
+  const transition = manifest.explicitFunctionLifecycle.rollback;
+  if (projectId !== manifest.projectId || !sameNames(targets, transition.deletes)) {
+    throw new ProductionFunctionsDeployError("rollback-lifecycle-not-authorized");
+  }
+  return Object.freeze(["functions:delete", manifest.explicitFunctionLifecycle.functionId, "--region", manifest.expectedProduction.region,
+    "--project", projectId, "--force", "--non-interactive"]);
 }
 
 function readRepositoryExports(root) {
@@ -196,14 +255,15 @@ function printPreflight(result) {
   console.log(`OTHER_AUTHORIZED_FUNCTIONS_TARGETED=${result.authorized.filter(name => !result.requested.includes(name)).filter(name => result.targets.includes(`functions:${name}`)).length}`);
   console.log("EXCLUDED_EXPORTS_TARGETED=0");
   console.log(`CREATE_EXPECTED=${result.expectedCreates.join(",") || "NONE"}`);
-  console.log("DELETE_EXPECTED=NONE");
+  console.log(`DELETE_EXPECTED=${result.expectedDeletes.join(",") || "NONE"}`);
+  console.log(`LIFECYCLE_MODE=${result.mode}`);
   if (result.production) console.log(`PRODUCTION_DEPLOYED_COUNT=${result.production.length}`);
   console.log(result.production ? "PREFLIGHT=PASS" : "LOCAL_CONTRACT=PASS; PRODUCTION_INVENTORY=NOT_CHECKED");
 }
 
 export function parseCliArguments(argv) {
   const [command = "preflight", ...rest] = argv;
-  const options = { command, projectId: "", execute: false, requestedTargets: [], expectedCreates: [] };
+  const options = { command, projectId: "", execute: false, requestedTargets: [], expectedCreates: [], expectedDeletes: [], rollbackFrom: "", rollbackTo: "" };
   const seen = new Set();
   while (rest.length) {
     const value = rest.shift();
@@ -212,12 +272,22 @@ export function parseCliArguments(argv) {
     if (value === "--project") options.projectId = rest.shift() || "";
     else if (value === "--targets") options.requestedTargets = (rest.shift() || "").split(",");
     else if (value === "--expect-create") options.expectedCreates = (rest.shift() || "").split(",");
+    else if (value === "--expect-delete") options.expectedDeletes = (rest.shift() || "").split(",");
+    else if (value === "--rollback-from") options.rollbackFrom = rest.shift() || "";
+    else if (value === "--rollback-to") options.rollbackTo = rest.shift() || "";
     else if (value === "--execute") options.execute = true;
     else throw new ProductionFunctionsDeployError("unknown-cli-argument", { value });
   }
-  if (!["preflight", "postflight", "dry-run", "deploy"].includes(command)) throw new ProductionFunctionsDeployError("unknown-command");
-  if (command === "deploy" && !options.execute) throw new ProductionFunctionsDeployError("deploy-requires-explicit-execute");
-  if (command !== "deploy" && options.execute) throw new ProductionFunctionsDeployError("unexpected-execute");
+  if (!["preflight", "postflight", "dry-run", "deploy", "rollback-dry-run", "rollback"].includes(command)) throw new ProductionFunctionsDeployError("unknown-command");
+  if (["deploy", "rollback"].includes(command) && !options.execute) throw new ProductionFunctionsDeployError("deploy-requires-explicit-execute");
+  if (!["deploy", "rollback"].includes(command) && options.execute) throw new ProductionFunctionsDeployError("unexpected-execute");
+  const rollback = ["rollback-dry-run", "rollback"].includes(command);
+  if (rollback && (!isCommitId(options.rollbackFrom) || !isCommitId(options.rollbackTo) || !options.expectedDeletes.length || options.expectedCreates.length)) {
+    throw new ProductionFunctionsDeployError("rollback-lifecycle-arguments-invalid");
+  }
+  if (!rollback && (options.expectedDeletes.length || options.rollbackFrom || options.rollbackTo)) {
+    throw new ProductionFunctionsDeployError("delete-without-rollback-mode");
+  }
   if (!options.requestedTargets.length) throw new ProductionFunctionsDeployError("empty-target-set");
   return options;
 }
@@ -242,10 +312,13 @@ function main(argv) {
   validateFirebaseConfiguration(root);
   const request = { repositoryExports: readRepositoryExports(root), manifest,
     requestedTargets: options.requestedTargets, expectedCreates: options.expectedCreates,
+    expectedDeletes: options.expectedDeletes,
+    mode: ["rollback-dry-run", "rollback"].includes(options.command) ? "rollback" : "normal",
+    rollbackFrom: options.rollbackFrom, rollbackTo: options.rollbackTo,
     phase: options.command === "postflight" ? "after" : "before" };
   // Reject invalid local input before any network request.
   let result = validateProductionFunctionsContract(request);
-  if (options.command === "dry-run") { printPreflight(result); return; }
+  if (["dry-run", "rollback-dry-run"].includes(options.command)) { printPreflight(result); return; }
   const cli = inspectFirebaseCli();
   result = validateProductionFunctionsContract({ ...request, productionFunctions: readProductionInventory(projectId, cli) });
   printPreflight(result);
@@ -254,8 +327,17 @@ function main(argv) {
     console.log(`FIREBASE_COMMAND=firebase ${args.join(" ")}`);
     // The child checks the actual Firebase planner AND Fabricator plan before function mutations.
     execFileSync(process.execPath, [path.join(MODULE_DIRECTORY, "productionFunctionsFirebaseGuard.mjs"),
-      JSON.stringify({ cli, request: { requestedTargets: result.requested, expectedCreates: result.expectedCreates }, args })],
+      JSON.stringify({ cli, request: { requestedTargets: result.requested, expectedCreates: result.expectedCreates, expectedDeletes: result.expectedDeletes,
+        mode: result.mode, rollbackFrom: result.rollbackFrom, rollbackTo: result.rollbackTo }, args })],
       { cwd: root, stdio: "inherit" });
+    validateProductionFunctionsContract({ ...request, phase: "after", productionFunctions: readProductionInventory(projectId, cli) });
+    console.log("POSTFLIGHT=PASS");
+  }
+  if (options.command === "rollback") {
+    const args = firebaseRollbackArguments({ projectId, targets: result.requested, manifest });
+    console.log(`FIREBASE_COMMAND=firebase ${args.join(" ")}`);
+    validateProductionFunctionsContract({ ...request, productionFunctions: readProductionInventory(projectId, cli) });
+    execFileSync(process.execPath, [cli, ...args], { cwd: root, stdio: "inherit" });
     validateProductionFunctionsContract({ ...request, phase: "after", productionFunctions: readProductionInventory(projectId, cli) });
     console.log("POSTFLIGHT=PASS");
   }
@@ -297,6 +379,14 @@ function normalizedString(value, code) {
 
 function isFunctionName(value) {
   return typeof value === "string" && /^[A-Za-z][A-Za-z0-9_-]{0,127}$/.test(value.trim());
+}
+
+function isCommitId(value) {
+  return typeof value === "string" && /^[0-9a-f]{40}$/.test(value);
+}
+
+function sameNames(left, right) {
+  return JSON.stringify([...left].sort()) === JSON.stringify([...right].sort());
 }
 
 function isPlainObject(value) {

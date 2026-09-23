@@ -26,7 +26,7 @@ export function inspectFirebaseCli(candidate) {
 
 export function validateFirebasePlan(plan, contract, manifest) {
   if (!plan || typeof plan !== "object" || Array.isArray(plan)) fail("malformed-plan");
-  const created = [], updated = [], skipped = [], seen = new Set();
+  const created = [], updated = [], skipped = [], deleted = [], seen = new Set();
   const endpoint = (e, kind) => {
     if (!e || !contract.requested.includes(e.id) || seen.has(e.id) ||
         e.project !== manifest.projectId || e.region !== manifest.expectedProduction.region ||
@@ -41,22 +41,23 @@ export function validateFirebasePlan(plan, contract, manifest) {
          e.scheduleTrigger?.timeZone !== "America/Mexico_City" ||
          (e.secretEnvironmentVariables?.length || 0) !== 0)) fail("public-projection-scheduler-config-drift");
     seen.add(e.id);
-    ({ create: created, update: updated, skip: skipped })[kind].push(e.id);
+    ({ create: created, update: updated, skip: skipped, delete: deleted })[kind].push(e.id);
   };
   for (const changes of Object.values(plan)) {
     const keys = ["endpointsToCreate", "endpointsToUpdate", "endpointsToDelete", "endpointsToSkip"];
     if (!changes || !equal(Object.keys(changes), keys) || keys.some(key => !Array.isArray(changes[key]))) fail("unknown-plan-shape");
-    if (changes.endpointsToDelete.length) fail("delete-proposed");
     for (const e of changes.endpointsToCreate) endpoint(e, "create");
     for (const update of changes.endpointsToUpdate) {
       if (!update || update.deleteAndRecreate || update.unsafe || Object.keys(update).some(key => !["endpoint", "unsafe"].includes(key))) fail("replacement-or-unsafe-update");
       endpoint(update.endpoint, "update");
     }
+    for (const e of changes.endpointsToDelete) endpoint(e, "delete");
     for (const e of changes.endpointsToSkip) endpoint(e, "skip");
   }
-  if (!equal(created, contract.expectedCreates) || !equal([...seen], contract.requested) ||
-      [...updated, ...skipped].some(name => contract.expectedCreates.includes(name))) fail("operations-mismatch");
-  return { created, updated, skipped, deleted: [] };
+  if (!equal(created, contract.expectedCreates) || !equal(deleted, contract.expectedDeletes) ||
+      !equal([...seen], contract.requested) || [...updated, ...skipped].some(name =>
+        contract.expectedCreates.includes(name) || contract.expectedDeletes.includes(name))) fail("operations-mismatch");
+  return { created, updated, skipped, deleted };
 }
 
 export function installPlanGuards({ planner, Fabricator, contract, manifest, validateInventory }) {
