@@ -36,16 +36,16 @@ assert.deepEqual(
 );
 assert.equal(JSON.stringify(fanoutUpdates[`projectionPendingIndex/${fanoutIntent.projectionId}`]).includes("total"), false);
 
-const emptyCalls = { list: 0, jobs: 0, deliver: 0, writes: 0, removes: 0 };
+const emptyCalls = { list: 0, jobs: 0, deliver: 0, writes: 0, removes: 0, batchLimit: 0 };
 const empty = await reconcileProjectionPendingWork({
-  async listDueEntries() { emptyCalls.list += 1; return {}; },
+  async listDueEntries({ batchLimit }) { emptyCalls.list += 1; emptyCalls.batchLimit = batchLimit; return {}; },
   async readJob() { emptyCalls.jobs += 1; return null; },
   async deliver() { emptyCalls.deliver += 1; return { ok: false }; },
   async writeEntry() { emptyCalls.writes += 1; },
   async removeEntry() { emptyCalls.removes += 1; }
 }, { nowMs });
 assert.deepEqual(empty, { scanned: 0, candidates: 0, stale: 0, confirmed: 0, pending: 0, results: [] });
-assert.deepEqual(emptyCalls, { list: 1, jobs: 0, deliver: 0, writes: 0, removes: 0 }, "an empty run reads only the bounded index query");
+assert.deepEqual(emptyCalls, { list: 1, jobs: 0, deliver: 0, writes: 0, removes: 0, batchLimit: 100 }, "an empty run reads only the bounded index query");
 
 const terminalOutbox = Object.fromEntries(Array.from({ length: 59 }, (_, index) => {
   const status = index < 55 ? PUBLIC_PROJECTION_STATUSES.CLIENT_CONFIRMED : PUBLIC_PROJECTION_STATUSES.SUPERSEDED;
@@ -147,7 +147,9 @@ assert.match(functionSource, /PROJECTION_PENDING_INDEX_PATH/);
 assert.match(functionSource, /orderByChild\("nextEligibleAtMs"\)\.endAt\(nowMs\)\.limitToFirst\(batchLimit\)/);
 
 const rules = require("../firebase-rules-auditoria.json").rules.charropro;
-assert.equal(Object.hasOwn(rules, "projectionPendingIndex"), false, "the pending index has no client Rules grant");
+assert.deepEqual(rules.projectionPendingIndex, { ".indexOn": "nextEligibleAtMs" }, "the due-entry query has exactly its required RTDB index");
+assert.equal(rules.projectionPendingIndex[".read"], undefined, "the query index does not grant client reads");
+assert.equal(rules.projectionPendingIndex[".write"], undefined, "the query index does not grant client writes");
 assert.equal(rules[".write"], false, "the root Rules default remains server-only");
 
 console.log("function13-pending-work-index.test.mjs: ok");
