@@ -143,6 +143,7 @@ const USER_TOURNAMENT_ACCESS_PATH = FIREBASE_PATHS.userTournamentAccess;
 const TOURNAMENTS_PATH = FIREBASE_PATHS.tournaments;
 const AUDIT_PUBLISHED_SCORES_PATH = FIREBASE_PATHS.auditPublishedScores;
 const PROJECTION_OUTBOX_PATH = FIREBASE_PATHS.projectionOutbox;
+const PROJECTION_PENDING_INDEX_PATH = `${CHARROPRO_ROOT_PATH}/projectionPendingIndex`;
 const VALID_ROLES = new Set([
   "supervisor",
   "operador",
@@ -1078,6 +1079,7 @@ async function deliverOfficialScoreFanout(tournamentId, recordId, job) {
 }
 
 let publicProjectionDeliveryRuntimePromise = null;
+let projectionPendingWorkRuntimePromise = null;
 
 async function getPublicProjectionDeliveryRuntime() {
   if (!publicProjectionDeliveryRuntimePromise) {
@@ -1095,7 +1097,30 @@ async function getPublicProjectionDeliveryRuntime() {
 
 async function deliverPublicProjectionFromFunction(tournamentId, intent) {
   const runtime = await getPublicProjectionDeliveryRuntime();
-  return runtime.deliver(tournamentId, intent);
+  const result = await runtime.deliver(tournamentId, intent);
+  await syncProjectionPendingWorkIndex(tournamentId, intent);
+  return result;
+}
+
+async function getProjectionPendingWorkRuntime() {
+  if (!projectionPendingWorkRuntimePromise) {
+    projectionPendingWorkRuntimePromise = import("./projectionPendingWork.mjs");
+  }
+  return projectionPendingWorkRuntimePromise;
+}
+
+async function syncProjectionPendingWorkIndex(tournamentId, rawIntent, rawJob) {
+  const pendingWork = await getProjectionPendingWorkRuntime();
+  const job = rawJob === undefined
+    ? (await admin.database().ref(`${PROJECTION_OUTBOX_PATH}/${tournamentId}/${rawIntent?.projectionId || ""}`).get()).val()
+    : rawJob;
+  const intent = job?.intent || rawIntent;
+  const entry = job?.intent
+    ? pendingWork.buildProjectionPendingIndexEntry(tournamentId, intent, job.state || {}, Date.now())
+    : null;
+  const indexRef = admin.database().ref(`${PROJECTION_PENDING_INDEX_PATH}/${rawIntent?.projectionId || intent?.projectionId || ""}`);
+  if (entry) await indexRef.set(entry);
+  else await indexRef.remove();
 }
 
 // This bounded server recovery closes historical or retried intents even when
@@ -1107,24 +1132,28 @@ exports.reconcileCharroProPublicProjectionOutbox = onSchedule({
   memory: FUNCTIONS_CONFIG.scheduleMemory,
   timeoutSeconds: APPLICATION_CONFIG.timeouts.workerSeconds
 }, async () => {
-  const snapshot = await admin.database().ref(PROJECTION_OUTBOX_PATH).get();
-  const outbox = snapshot.val() || {};
-  const candidates = [];
-  for (const [tournamentId, jobs] of Object.entries(outbox)) {
-    for (const job of Object.values(jobs || {})) {
-      if (job?.intent?.projectionId) candidates.push({ tournamentId, intent: job.intent });
-      if (candidates.length >= 100) break;
-    }
-    if (candidates.length >= 100) break;
-  }
-  const results = [];
-  for (const candidate of candidates) {
-    results.push(await deliverPublicProjectionFromFunction(candidate.tournamentId, candidate.intent));
-  }
+  const pendingWork = await getProjectionPendingWorkRuntime();
+  const indexRef = admin.database().ref(PROJECTION_PENDING_INDEX_PATH);
+  const deliveryRuntime = await getPublicProjectionDeliveryRuntime();
+  const results = await pendingWork.reconcileProjectionPendingWork({
+    listDueEntries: async ({ nowMs, batchLimit }) => {
+      const snapshot = await indexRef.orderByChild("nextEligibleAtMs").endAt(nowMs).limitToFirst(batchLimit).get();
+      return snapshot.val() || {};
+    },
+    readJob: async (tournamentId, projectionId) => (
+      await admin.database().ref(`${PROJECTION_OUTBOX_PATH}/${tournamentId}/${projectionId}`).get()
+    ).val() || null,
+    writeEntry: async (entry) => indexRef.child(entry.projectionId).set(entry),
+    removeEntry: async (projectionId) => indexRef.child(projectionId).remove(),
+    deliver: (tournamentId, intent) => deliveryRuntime.deliver(tournamentId, intent)
+  }, {
+    nowMs: Date.now(),
+    batchLimit: pendingWork.PROJECTION_PENDING_WORK_BATCH_LIMIT
+  });
   return {
-    scanned: candidates.length,
-    confirmed: results.filter((result) => result.ok).length,
-    pending: results.filter((result) => !result.ok).length
+    scanned: results.scanned,
+    confirmed: results.confirmed,
+    pending: results.pending
   };
 });
 

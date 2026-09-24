@@ -138,8 +138,10 @@ test("Scheduled projection recovery config is bounded and explicit (metadata onl
   assert.match(registration, /region:\s*FUNCTIONS_REGION/);
   assert.match(registration, /memory:\s*FUNCTIONS_CONFIG\.scheduleMemory/);
   assert.match(registration, /timeoutSeconds:\s*APPLICATION_CONFIG\.timeouts\.workerSeconds/);
-  assert.match(registration, /if \(candidates\.length >= 100\) break/);
-  assert.match(registration, /deliverPublicProjectionFromFunction/);
+  assert.match(registration, /PROJECTION_PENDING_INDEX_PATH/);
+  assert.match(registration, /orderByChild\("nextEligibleAtMs"\)\.endAt\(nowMs\)\.limitToFirst\(batchLimit\)/);
+  assert.doesNotMatch(registration, /ref\(PROJECTION_OUTBOX_PATH\)\.get\(\)/);
+  assert.match(registration, /reconcileProjectionPendingWork/);
   const pkg = JSON.parse(readFileSync(new URL('../functions/package.json', import.meta.url)));
   assert.equal(pkg.engines.node, '22');
 });

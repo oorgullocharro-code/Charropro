@@ -80,11 +80,14 @@ async function runRulesMatrix() {
     await assertDenied(databaseHost, namespace, `charropro/tournaments/${tournamentB}/scores/draft`, judge.token, { total: 1 }, "judge cross-tournament score");
     await assertDenied(databaseHost, namespace, `charropro/tournaments/${tournamentA}/history/event`, judge.token, { event: "blocked" }, "judge history");
     await assertDenied(databaseHost, namespace, `charropro/projectionOutbox/${tournamentA}/job/intent`, judge.token, projectionIntent(tournamentA, judge.uid, "juez"), "judge projection intent");
+    await assertDenied(databaseHost, namespace, `charropro/projectionPendingIndex/job`, judge.token, { tournamentId: tournamentA }, "judge pending index");
     await assertAllowed(databaseHost, namespace, `charropro/projectionOutbox/${tournamentA}/job/intent`, operator.token, projectionIntent(tournamentA, operator.uid, "operador"), "operator projection intent");
     await assertAllowed(databaseHost, namespace, `charropro/live/${tournamentA}/graphicsConfig`, graphics.token, { theme: "broadcast" }, "graphics editor");
     await assertDenied(databaseHost, namespace, `charropro/live/${tournamentB}/graphicsConfig`, graphics.token, { theme: "blocked" }, "graphics cross-tournament editor");
     await assertDenied(databaseHost, namespace, `charropro/tournaments/${tournamentA}/scores/graphic`, graphics.token, { total: 2 }, "graphics score write");
     await assertDenied(databaseHost, namespace, `charropro/tournaments/${tournamentA}/officialTimers/timer`, graphics.token, { revision: 1 }, "graphics timer control");
+    await assertDenied(databaseHost, namespace, `charropro/projectionPendingIndex/job`, graphics.token, { tournamentId: tournamentA }, "graphics pending index");
+    await assertDenied(databaseHost, namespace, `charropro/projectionPendingIndex/job`, "", { tournamentId: tournamentA }, "public pending index");
   } finally {
     for (const tournamentId of [tournamentA, tournamentB]) {
       await ownerDelete(databaseHost, namespace, `charropro/tournaments/${tournamentId}`);

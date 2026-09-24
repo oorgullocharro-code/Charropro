@@ -246,6 +246,12 @@ const fanoutJob = retryStore.read().officialScoreFanout[corrected.outcome.record
 const fanoutUpdates = buildOfficialScoreFanoutUpdates(tournamentId, fanoutJob);
 assert.equal(fanoutUpdates[`audit/publishedScores/${tournamentId}/${corrected.outcome.recordId}`].id, corrected.outcome.recordId);
 assert.equal(fanoutUpdates[`projectionOutbox/${tournamentId}/${fanoutJob.projectionIntent.projectionId}/intent`].sourceRevision, 2);
+assert.deepEqual(fanoutUpdates[`projectionPendingIndex/${fanoutJob.projectionIntent.projectionId}`], {
+  projectionId: fanoutJob.projectionIntent.projectionId,
+  tournamentId,
+  createdAtMs: fanoutJob.projectionIntent.createdAtMs,
+  nextEligibleAtMs: fanoutJob.projectionIntent.createdAtMs
+});
 assert.equal(fanoutUpdates[`live/${tournamentId}/current`].published.revision, 2);
 assert.equal(fanoutUpdates[`live/${tournamentId}/current`].published.id, corrected.outcome.recordId);
 

@@ -239,9 +239,12 @@ function buildOfficialScoreFanoutUpdates(tournamentId, job = {}) {
   const record = plainRecord(job.record);
   const intent = plainRecord(job.projectionIntent);
   if (!PATH_ID_PATTERN.test(tournamentId) || !record.id || !intent.projectionId) return null;
+  const pendingIndexEntry = buildProjectionPendingIndexEntry(tournamentId, intent);
+  if (!pendingIndexEntry) return null;
   const updates = {
     [`audit/publishedScores/${tournamentId}/${record.id}`]: record,
-    [`projectionOutbox/${tournamentId}/${intent.projectionId}/intent`]: intent
+    [`projectionOutbox/${tournamentId}/${intent.projectionId}/intent`]: intent,
+    [`projectionPendingIndex/${intent.projectionId}`]: pendingIndexEntry
   };
   // Only jobs created after the canonical producer was introduced carry this
   // event. Old pending jobs therefore never become an implicit backfill.
@@ -250,6 +253,19 @@ function buildOfficialScoreFanoutUpdates(tournamentId, job = {}) {
   if (timelinePath) updates[timelinePath] = timelineEvent;
   if (job.livePayload) updates[`live/${tournamentId}/current`] = job.livePayload;
   return updates;
+}
+
+function buildProjectionPendingIndexEntry(tournamentId, intent = {}) {
+  const projectionId = normalizePathId(intent.projectionId);
+  const intentTournamentId = normalizePathId(intent.tournamentId);
+  const createdAtMs = positiveTimestamp(intent.createdAtMs || intent.createdAt);
+  if (!projectionId || intentTournamentId !== tournamentId || !createdAtMs) return null;
+  return {
+    projectionId,
+    tournamentId,
+    createdAtMs,
+    nextEligibleAtMs: createdAtMs
+  };
 }
 
 function markOfficialScoreFanoutDelivered(tournament = {}, recordId = "", nowMs = Date.now()) {
