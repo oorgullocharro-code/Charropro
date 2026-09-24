@@ -892,8 +892,11 @@ export async function publishFirebaseOfficialScoreAtomic(tournamentId, scoreId, 
         reason: authorityResult.fanout?.reason || "official-score-fanout-pending",
         jobs: []
       });
+    const shouldRunClientProjectionReconciliation = (
+      options.deferPublicProjection === true && normalizeRole(actorRecord.role) !== "juez"
+    );
     if (options.deferPublicProjection === true) {
-      void reconcileProjection()
+      if (shouldRunClientProjectionReconciliation) void reconcileProjection()
         .then((recovery) => {
           const settlement = buildOfficialScoreProjectionSettlement(recovery, projectionId);
           notifyOfficialScoreTiming(options, "T12", {
@@ -2131,7 +2134,7 @@ function compareProjectionSourceRecords(left, right) {
 }
 
 function isAuthorizedProjectionRecoveryActor(actor = {}) {
-  return ["supervisor", "operador", "juez"].includes(normalizeRole(actor.role));
+  return ["supervisor", "operador"].includes(normalizeRole(actor.role));
 }
 
 function buildProjectionWorkerId(actor = {}) {

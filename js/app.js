@@ -2149,6 +2149,24 @@ function isJudgeAccess() {
   return isActiveAccessSession(firebaseAccess) && firebaseAccess.role === ROLES.JUEZ;
 }
 
+function getJudgeFooterConnectivity() {
+  const connected = Boolean(navigator.onLine && isFirebaseLiveConfigured() && firebaseAccess.ready);
+  return {
+    state: connected ? "connected" : "disconnected",
+    label: connected ? "Conectado" : "Desconectado",
+    detail: ""
+  };
+}
+
+function getScoringFooterStatus() {
+  if (isJudgeAccess()) return getJudgeFooterConnectivity();
+  return {
+    state: lastScoreSaveStatus.state || "connected",
+    label: lastScoreSaveStatus.label || "Conectado",
+    detail: lastScoreSaveStatus.detail || ""
+  };
+}
+
 function logJudgeScore(message, detail) {
   if (!isJudgeAccess()) return;
   if (detail === undefined) console.info(`[score][juez] ${message}`);
@@ -2169,12 +2187,13 @@ function setScoreSaveStatus(next = {}) {
 function updateScoreSaveStatusDom() {
   const container = document.querySelector(".cp-bottom-sync");
   if (!container) return;
+  const footerStatus = getScoringFooterStatus();
   container.classList.remove("connected", "saving", "syncing", "saved", "warning", "error");
-  container.classList.add(lastScoreSaveStatus.state || "connected");
+  container.classList.add(footerStatus.state);
   const label = container.querySelector("strong");
   const detail = container.querySelector("em");
-  if (label) label.textContent = lastScoreSaveStatus.label || "Conectado";
-  if (detail) detail.textContent = lastScoreSaveStatus.detail || "";
+  if (label) label.textContent = footerStatus.label;
+  if (detail) detail.textContent = footerStatus.detail;
 }
 
 function setOfficialPublishButtonBusy(isBusy) {
@@ -2185,6 +2204,7 @@ function setOfficialPublishButtonBusy(isBusy) {
 }
 
 function settleOfficialScoreBackgroundPublication(settlement = {}, scoreId = "") {
+  if (isJudgeAccess()) return;
   const sameScore = !lastScoreSaveStatus.scoreId || lastScoreSaveStatus.scoreId === scoreId;
   if (settlement.ok) {
     if (sameScore && lastScoreSaveStatus.state !== "saving") {
@@ -2254,9 +2274,17 @@ function getPublicProjectionRecoveryTournamentId() {
     : state.activeTournamentId || "";
 }
 
+function canRunPublicProjectionRecovery() {
+  return (
+    isActiveAccessSession(firebaseAccess) &&
+    [ROLES.SUPERVISOR, ROLES.OPERADOR].includes(firebaseAccess.role) &&
+    roleCan(firebaseAccess.role, "sync")
+  );
+}
+
 function configurePublicProjectionRecovery() {
   const tournamentId = getPublicProjectionRecoveryTournamentId();
-  if (!isActiveAccessSession(firebaseAccess) || !tournamentId) {
+  if (!canRunPublicProjectionRecovery() || !tournamentId) {
     stopPublicProjectionRecovery();
     return;
   }
@@ -2269,7 +2297,6 @@ function configurePublicProjectionRecovery() {
   stopPublicProjectionRecovery();
   publicProjectionRecoveryTournamentId = tournamentId;
   void refreshPublicProjectionRecoverySnapshot({ renderAfter: state.view === "recovery" });
-  if (!roleCan(firebaseAccess.role, "sync")) return;
   schedulePublicProjectionRecovery(250);
   publicProjectionRecoveryTimer = window.setInterval(() => {
     void runPublicProjectionRecovery({ source: "interval" });
@@ -2286,7 +2313,7 @@ function stopPublicProjectionRecovery() {
 }
 
 function schedulePublicProjectionRecovery(delay = 1000) {
-  if (!roleCan(firebaseAccess.role, "sync")) return;
+  if (!canRunPublicProjectionRecovery()) return;
   if (publicProjectionRecoveryTimeout) window.clearTimeout(publicProjectionRecoveryTimeout);
   publicProjectionRecoveryTimeout = window.setTimeout(() => {
     publicProjectionRecoveryTimeout = null;
@@ -2315,8 +2342,7 @@ async function runPublicProjectionRecovery(options = {}) {
   if (
     publicProjectionRecoveryInFlight ||
     !tournamentId ||
-    !isActiveAccessSession(firebaseAccess) ||
-    !roleCan(firebaseAccess.role, "sync")
+    !canRunPublicProjectionRecovery()
   ) {
     return { ok: false, reason: "projection-recovery-not-ready" };
   }
@@ -11268,12 +11294,12 @@ function renderScoringBottomBar(context) {
   const canEditLayout = canEditScoringButtonLayout();
   const zeroActive = isAttemptZeroMarked(context.attempt);
   const zeroDisabled = !zeroActive && hasAttemptScoringActivity(context.attempt);
-  const syncLabel = lastScoreSaveStatus.label || "Conectado";
-  const syncDetail =
-    lastScoreSaveStatus.detail ||
-    (lastScoreSaveStatus.state === "saved" && lastScoreSaveStatus.savedAtMs
+  const footerStatus = getScoringFooterStatus();
+  const syncLabel = footerStatus.label;
+  const syncDetail = footerStatus.detail ||
+    (!isJudgeAccess() && lastScoreSaveStatus.state === "saved" && lastScoreSaveStatus.savedAtMs
       ? `Ultimo guardado ${formatScoreSaveTime(lastScoreSaveStatus.savedAtMs)}`
-      : `Turno ${context.teamIndex + 1} / oportunidad ${context.attemptIndex + 1}`);
+      : isJudgeAccess() ? "" : `Turno ${context.teamIndex + 1} / oportunidad ${context.attemptIndex + 1}`);
   const pendingCount = getActivePendingScoreReviews().length;
   const resolvingPending = Boolean(activePendingResolutionId);
   const saveLabel = getScoringSaveButtonLabel(context);
@@ -11282,7 +11308,7 @@ function renderScoringBottomBar(context) {
       <div class="cp-bottom-actions cp-bottom-actions--settings muted">
         <button class="button" data-action="show-scoring-button-settings" type="button" ${canEditLayout ? "" : "disabled"}>${renderCpIcon("settings")} Ajustar botonera</button>
       </div>
-      <div class="cp-bottom-sync ${escapeHTML(lastScoreSaveStatus.state || "connected")}">
+      <div class="cp-bottom-sync ${escapeHTML(footerStatus.state)}">
         <span class="cp-sync-dot"></span>
         <strong>${escapeHTML(syncLabel)}</strong>
         <em>${escapeHTML(syncDetail)}</em>
@@ -12416,7 +12442,9 @@ function wireGlobalEvents() {
   window.addEventListener("online", () => {
     configurePublicProjectionRecovery();
     schedulePublicProjectionRecovery(250);
+    updateScoreSaveStatusDom();
   });
+  window.addEventListener("offline", updateScoreSaveStatusDom);
   window.addEventListener("pagehide", () => scorerAfterPaintQueue.flushAll());
 
   document.addEventListener("submit", (event) => {

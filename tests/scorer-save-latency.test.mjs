@@ -71,6 +71,39 @@ assert.match(firebaseSource, /if \(options\.deferPublicProjection === true\) \{/
 assert.match(firebaseSource, /backgroundPending: true/);
 assert.match(firebaseSource, /void reconcileProjection\(\)/);
 assert.match(firebaseSource, /notifyOfficialScoreBackgroundSettlement/);
+assert.match(firebaseSource, /normalizeRole\(actorRecord\.role\) !== "juez"/);
+assert.doesNotMatch(
+  firebaseSource.slice(
+    firebaseSource.indexOf("function isAuthorizedProjectionRecoveryActor"),
+    firebaseSource.indexOf("function buildProjectionWorkerId")
+  ),
+  /"juez"/,
+  "Judge cannot claim or transition public projection jobs from the browser"
+);
+const judgeFooterSource = appSource.slice(
+  appSource.indexOf("function getJudgeFooterConnectivity"),
+  appSource.indexOf("function setOfficialPublishButtonBusy")
+);
+assert.match(judgeFooterSource, /navigator\.onLine/);
+assert.match(judgeFooterSource, /label: connected \? "Conectado" : "Desconectado"/);
+assert.doesNotMatch(judgeFooterSource, /Pendiente de sincronizar|Recovery reintentará|Sincronización remota|Guardado ✓|CLIENT_CONFIRMED|VERIFIED/);
+const recoverySetupSource = appSource.slice(
+  appSource.indexOf("function canRunPublicProjectionRecovery"),
+  appSource.indexOf("function stopPublicProjectionRecovery")
+);
+assert.match(recoverySetupSource, /ROLES\.SUPERVISOR, ROLES\.OPERADOR/);
+assert.doesNotMatch(recoverySetupSource, /ROLES\.JUEZ/);
+const footerRendererSource = appSource.slice(
+  appSource.indexOf("function renderScoringBottomBar"),
+  appSource.indexOf("function getScoringSaveButtonLabel")
+);
+assert.match(footerRendererSource, /getScoringFooterStatus\(\)/);
+assert.doesNotMatch(footerRendererSource, /Pendiente de sincronizar|Recovery reintentará|Sincronización remota|CLIENT_CONFIRMED|VERIFIED/);
+const officialPublishSource = appSource.slice(
+  appSource.indexOf("async function publishOfficialScoreForContext"),
+  appSource.indexOf("function reconcileCommittedOfficialScore")
+);
+assert.match(officialPublishSource, /if \(!result\.ok\)[\s\S]*?showToast\(/, "durable official-score failures remain actionable");
 assert.doesNotMatch(appSource, /readFirebaseActiveCharreadaSnapshot/);
 assert.match(
   authoritySource,

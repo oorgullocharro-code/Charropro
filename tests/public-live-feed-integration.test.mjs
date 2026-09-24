@@ -918,6 +918,30 @@ assert.equal(
   "the background path reaches the same durable terminal state"
 );
 
+const judgeDeferredSettlements = [];
+const judgeOutboxTransitionsBefore = firebase.outboxStateTransitions.length;
+const judgePublicTransactionsBefore = firebase.publicSnapshotTransactions;
+const judgeDeferred = await publishOfficial({
+  publishedId: "published-latency-deferred-judge",
+  scoreId: "score-latency-deferred-judge",
+  suerteId: "latency_probe_judge",
+  total: 45,
+  publishedAt: "2026-07-28T10:21:00.000Z",
+  attemptKey: `${tournamentId}__${charreadaId}__${teamId}__latency_probe_judge__0__0`
+}, {
+  deferPublicProjection: true,
+  actorRole: "juez",
+  onBackgroundSettled(settlement) {
+    judgeDeferredSettlements.push(settlement);
+  }
+});
+assert.equal(judgeDeferred.ok, true);
+assert.equal(judgeDeferred.backgroundPending, true);
+await new Promise((resolve) => setTimeout(resolve, 0));
+assert.equal(judgeDeferredSettlements.length, 0, "Judge publication does not start browser reconciliation");
+assert.equal(firebase.outboxStateTransitions.length, judgeOutboxTransitionsBefore, "Judge does not claim the projection outbox");
+assert.equal(firebase.publicSnapshotTransactions, judgePublicTransactionsBefore, "Judge does not write public projection data");
+
 const sharedTournamentId = "tournament-shared-score-guard";
 const sharedCharreadaId = "charreada-shared-score-guard";
 const sharedTeamId = "team-shared-score-guard";
@@ -1160,7 +1184,7 @@ async function publishOfficial({
       attempt: { total },
       total
     },
-    { uid: actorUid, role: "supervisor" },
+    { uid: actorUid, role: runtimeOptions.actorRole || "supervisor" },
     {
       nowMs: Date.parse(publishedAt),
       jitter: false,
